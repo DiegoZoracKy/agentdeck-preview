@@ -29,12 +29,6 @@ classifiers = [
 dependencies = [
     # Config/utilities
     "pyyaml>=6.0",
-
-    # Research stack (CORE mission - statistical analysis)
-    "numpy>=1.21.0",
-    "scipy>=1.9.0",
-    "statsmodels>=0.13.0",
-    "matplotlib>=3.5.0",
 ]
 
 [project.optional-dependencies]
@@ -43,9 +37,18 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     # Code quality tools
-    "black>=22.0",
-    "pylint>=2.15",
-    "mypy>=0.990",
+    "black>=23.0",
+    "pylint>=2.17",
+    "mypy>=1.8",
+    # Research stack (for dev/test tooling)
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "statsmodels>=0.14.0",
+    "matplotlib>=3.7.0",
+    # Provider SDKs (used in mocks and integration tests)
+    "openai>=1.0",
+    "anthropic>=0.5",
+    "google-cloud-aiplatform>=1.70.0",
 ]
 openai = [
     "openai>=1.0",
@@ -61,12 +64,32 @@ providers = [
     "anthropic>=0.5",
     "google-cloud-aiplatform>=1.70.0",
 ]
+research = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "statsmodels>=0.14.0",
+    "matplotlib>=3.7.0",
+]
+all = [
+    "openai>=1.0",
+    "anthropic>=0.5",
+    "google-cloud-aiplatform>=1.70.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "statsmodels>=0.14.0",
+    "matplotlib>=3.7.0",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "pylint>=2.17",
+    "mypy>=1.8",
+]
 
 [project.urls]
-Homepage = "https://github.com/agentdeck/agentdeck"
-Documentation = "https://agentdeck.readthedocs.io"
-Repository = "https://github.com/agentdeck/agentdeck.git"
-Issues = "https://github.com/agentdeck/agentdeck/issues"
+Homepage = "https://github.com/DiegoZoracKy/agentdeck-preview"
+Documentation = "https://github.com/DiegoZoracKy/agentdeck-preview#readme"
+Repository = "https://github.com/DiegoZoracKy/agentdeck-preview.git"
+Issues = "https://github.com/DiegoZoracKy/agentdeck-preview/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -75,7 +98,7 @@ where = ["src"]
 version = {attr = "agentdeck.__version__"}
 
 [tool.setuptools.package-data]
-agentdeck = ["py.typed", "config/pricing.yaml"]
+agentdeck = ["py.typed", "config/*.yaml"]
 
 [tool.black]
 line-length = 100

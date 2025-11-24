@@ -12,7 +12,7 @@ Usage:
 What This Demonstrates:
     ✓ Zero template configuration (smart defaults used)
     ✓ Zero extras needed (baseline experiment)
-    ✓ Minimal player setup (just action_controller required)
+    ✓ Minimal player setup (just controller required)
     ✓ Out-of-the-box three-phase lifecycle (handshake → turn → conclusion)
     ✓ Real-time progress monitoring with spectators
     ✓ Automatic cost tracking
@@ -45,7 +45,7 @@ def main():
     """
     Run FixedDamageGame with absolute minimal configuration.
 
-    This is the simplest possible setup - just game + players + action_controller.
+    This is the simplest possible setup - just game + players + controller.
     Everything else uses smart defaults. No custom templates, no extras.
     """
 
@@ -84,7 +84,7 @@ def main():
         # log_file_levels defaults to None (creates both info.log and debug.log)
     )
 
-    # Minimal players - only required: name, model, action_controller
+    # Minimal players - only required: name, model, controller
     # All other components use smart defaults:
     # - handshake_controller: HandshakeController()
     # - renderer: TextRenderer()

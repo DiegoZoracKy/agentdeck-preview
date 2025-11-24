@@ -25,7 +25,7 @@ python examples/mock_demo.py
 **Purpose**: Demonstrate the simplest possible setup for running LLM agent experiments.
 
 **What You'll Learn**:
-- Minimal player configuration (only `name`, `model`, `action_controller` required)
+- Minimal player configuration (only `name`, `model`, `controller` required)
 - Smart defaults for templates, renderers, and controllers
 - Real-time progress monitoring with spectators
 - Token usage and cost tracking
@@ -130,7 +130,7 @@ player = GPTPlayer(
     name="Alice",
     model="gpt-4o-mini",  # or "gpt-4", "gpt-3.5-turbo"
     temperature=0.7,
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
 )
 ```
 
@@ -142,7 +142,7 @@ player = ClaudePlayer(
     name="Bob",
     model="claude-3-5-sonnet-20241022",
     temperature=0.7,
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
 )
 ```
 
@@ -153,8 +153,10 @@ from agentdeck.players.google_player import GeminiPlayer
 player = GeminiPlayer(
     name="Charlie",
     model="gemini-1.5-flash",
+    project_id="your-gcp-project-id",
+    location="us-central1",
     temperature=0.7,
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
 )
 ```
 
@@ -306,8 +308,9 @@ export OPENAI_API_KEY="sk-..."
 # Anthropic
 export ANTHROPIC_API_KEY="sk-ant-..."
 
-# Google
-export GOOGLE_API_KEY="..."
+# Google Vertex AI (Gemini)
+export VERTEX_PROJECT_ID="your-gcp-project-id"
+export VERTEX_LOCATION="us-central1"
 ```
 
 ---
@@ -323,6 +326,6 @@ export GOOGLE_API_KEY="..."
 
 ## Questions?
 
-- GitHub Issues: https://github.com/anthropics/agentdeck-wip/issues
+- GitHub Issues: https://github.com/DiegoZoracKy/agentdeck-preview/issues
 - Documentation: See `docs/` directory
 - Examples: This directory (`examples/`)

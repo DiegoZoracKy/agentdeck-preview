@@ -25,6 +25,7 @@ from .core.types import (
 
 # Base classes for extension
 from .core.base import Game, Player, Renderer, Controller, Spectator
+from .core.mechanics import TurnBasedGame
 
 # Player implementations
 from .players import MockPlayer, GPTPlayer, ClaudePlayer, GeminiPlayer
@@ -61,6 +62,7 @@ __all__ = [
     "Renderer",
     "Controller",
     "Spectator",
+    "TurnBasedGame",
     # Types
     "ActionResult",
     "GameStatus",

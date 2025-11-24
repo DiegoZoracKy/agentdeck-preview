@@ -14,7 +14,7 @@ class GeminiPlayer(LLMPlayer):
     """Google Gemini player backed by Vertex AI."""
 
     PROVIDER = "google"
-    default_model = "gemini-pro"
+    default_model = None
     api_key_env_var = None  # Vertex AI uses ADC/Project configuration instead of API keys
 
     _vertex_initialized: bool = False
@@ -50,7 +50,7 @@ class GeminiPlayer(LLMPlayer):
         except ImportError as exc:
             raise ImportError(
                 "google-cloud-aiplatform is not installed. "
-                "Install it with: pip install google-cloud-aiplatform"
+                "Install it via the optional extra: pip install \"agentdeck-ai[google]\""
             ) from exc
 
         if not GeminiPlayer._vertex_initialized:
