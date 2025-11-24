@@ -50,7 +50,7 @@ This roadmap tracks work needed for the first public release (v0.1.0) in the fre
 - Zero-dependency mock demo works out of the box
 
 ### Known Gaps (must address before public tag)
-- Fresh CI evidence: rerun suite under strict gates to publish current test counts/coverage with updated thresholds
+- Fresh CI evidence: local pytest run passing (314 tests, 75%); publish via CI with updated badges
 - Release polish (post-P0): publish doc site/automation (PyPI, API docs) after initial tag
 
 ---
@@ -108,9 +108,9 @@ This roadmap tracks work needed for the first public release (v0.1.0) in the fre
 ---
 
 ## Validation & Evidence (to refresh after P0/P1)
-- Re-run CI after quality gates are strict.
+- Local test run: `python3 -m pytest` (314 passed, 75% coverage threshold enforced)
+- Re-run CI to publish coverage badge with strict gates.
 - Re-run minimal provider-backed experiment once explicit models are required.
-- Update test counts/coverage in README and validation docs after fixes land.
 
 ---
 
