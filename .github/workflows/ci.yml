@@ -30,7 +30,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest tests/ -v --tb=short --cov=src/agentdeck --cov-report=xml --cov-report=term --cov-fail-under=70
+          pytest tests/ -v --tb=short --cov=src/agentdeck --cov-report=xml --cov-report=term --cov-fail-under=75
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'
@@ -63,11 +63,11 @@ jobs:
 
       - name: Run Pylint
         run: |
-          pylint src/agentdeck --exit-zero
+          pylint src/agentdeck
 
       - name: Run mypy (type check)
         run: |
-          mypy src/agentdeck --no-error-summary --no-pretty || true
+          mypy src/agentdeck --no-error-summary --no-pretty
 
   dependency-check:
     name: Dependency Audit

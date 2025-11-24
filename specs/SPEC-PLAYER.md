@@ -7,7 +7,7 @@
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Game authors, LLM player implementers, research engineers
 >
-> **Changes in v1.2.0**: Updated to single-controller architecture (SPEC-CONTROLLER v1.3.0). Players now accept single `controller` parameter instead of `handshake_controller` + `action_controller`. Default handshake validation built into Controller base class.
+> **Changes in v1.2.0**: Updated to single-controller architecture (SPEC-CONTROLLER v1.3.0). Players now accept single `controller` parameter instead of separate `handshake_controller` + turn controller. Default handshake validation built into Controller base class.
 
 ## 1. Purpose
 - Define the contract every player must satisfy across the three lifecycle phases: **handshake**, **turn decisions**, and **conclusion**.
@@ -30,7 +30,7 @@
 
 ## 4. Public API
 - `Player(name, *, controller, renderer=None, prompt=None, handshake_template=None, turn_template=None, conclusion_template=None, model="gpt-4", **config)`
-  - **v1.2.0 change**: Single `controller` parameter (required) replaces `handshake_controller` + `action_controller`. Controller handles all lifecycle phases per SPEC-CONTROLLER v1.3.0.
+  - **v1.2.0 change**: Single `controller` parameter (required) replaces `handshake_controller` plus a separate turn controller. Controller handles all lifecycle phases per SPEC-CONTROLLER v1.3.0.
   - Defaults: `renderer` defaults to `TextRenderer()`.
   - Default templates:
     - `handshake_template`: `"You are playing {game_name}.\n\n{game_instructions}\n\n{player_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"` (front-loads all instructions)

@@ -11,7 +11,7 @@ Usage:
 
 What This Demonstrates:
     ✓ Zero template configuration (smart defaults used)
-    ✓ Minimal player setup (just action_controller required)
+    ✓ Minimal player setup (just controller required)
     ✓ Out-of-the-box three-phase lifecycle (handshake → turn → conclusion)
     ✓ Parallel execution with real-time progress monitoring (SPEC-MONITOR v1.0.0)
     ✓ Auto-attached ProgressMonitor when concurrency > 1

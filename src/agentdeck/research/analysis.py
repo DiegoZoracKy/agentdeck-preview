@@ -143,7 +143,7 @@ class ResultsAnalyzer:
                 row = {
                     "match_id": i + 1,
                     "winner": match.winner or "draw",
-                    "turns": len([e for e in match.events if e.type == "turn"]),
+                    "turns": len([e for e in match.events if e.type == "gameplay"]),
                     "duration": match.metadata.get("duration", 0) if match.metadata else 0,
                     "seed": match.seed,
                 }

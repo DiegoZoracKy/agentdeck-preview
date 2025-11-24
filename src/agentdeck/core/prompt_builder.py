@@ -284,7 +284,7 @@ class PromptBuilder:
             bundle = builder.compose(
                 phase=LifecyclePhase.TURN,
                 render_result=text_renderer.render(view, player),
-                controller_format=action_controller.get_format_instructions(),
+                controller_format=controller.get_format_instructions(),
                 turn_context=turn_ctx,
                 extras={"strategy": "Prioritize corners"},
             )

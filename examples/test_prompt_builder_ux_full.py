@@ -13,12 +13,12 @@ What This Demonstrates:
     ✓ Custom handshake/turn/conclusion templates (inline strings)
     ✓ Template loading from files (Path objects) - see commented alternative
     ✓ Custom player instructions (coaching, cognitive styles)
-    ✓ Custom action controllers (ActionOnlyController vs ReasoningController)
+    ✓ Custom controllers (ActionOnlyController vs ReasoningController)
     ✓ A/B testing setup (different strategies per player)
     ✓ Full observability (MatchNarrator, metadata, stats, token tracking)
 
 Comparison with Minimal Example:
-    - Minimal: Just action_controller (uses all smart defaults)
+    - Minimal: Just controller (uses all smart defaults)
     - Full: Every parameter customized (demonstrates flexibility)
 
 Controllers (SPEC-CONTROLLER v1.1.0):
