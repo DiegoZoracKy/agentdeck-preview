@@ -267,7 +267,7 @@ class LLMPlayer(Player, ABC):
 
     def reset_conversation(self):
         """Reset conversation history for a new match."""
-        self._local_history = []
+        super().reset_conversation()
 
     def _history_source(self) -> List[Dict[str, str]]:
         if self.conversation_manager:

@@ -19,6 +19,7 @@ from agentdeck.core.types import (
     RenderResult,
     TurnContext,
 )
+from agentdeck.core.conversation import ConversationManager
 from agentdeck.players import GPTPlayer, ClaudePlayer, GeminiPlayer
 
 
@@ -178,3 +179,23 @@ def test_provider_players_require_explicit_model():
             project_id="proj",
             location="us-central1",
         )
+
+
+def test_reset_conversation_clears_conversation_manager():
+    """reset_conversation should clear both local and bound conversation history."""
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+    )
+
+    player._local_history.append({"role": "user", "content": "hi"})
+    manager = ConversationManager(player_name=player.name)
+    manager.append("user", "Hello")
+    manager.append("assistant", "World")
+    player.bind_conversation_manager(manager)
+
+    player.reset_conversation()
+
+    assert player._local_history == []
+    assert manager.history() == []
