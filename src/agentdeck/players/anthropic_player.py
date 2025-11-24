@@ -19,7 +19,7 @@ class ClaudePlayer(LLMPlayer):
         except ImportError as exc:
             raise ImportError(
                 "Anthropic client library is not installed. "
-                "Install it via the optional extra: pip install \"agentdeck-ai[anthropic]\""
+                'Install it via the optional extra: pip install "agentdeck-ai[anthropic]"'
             ) from exc
 
         self.client = Anthropic(api_key=self.api_key)

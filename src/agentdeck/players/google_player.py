@@ -50,7 +50,7 @@ class GeminiPlayer(LLMPlayer):
         except ImportError as exc:
             raise ImportError(
                 "google-cloud-aiplatform is not installed. "
-                "Install it via the optional extra: pip install \"agentdeck-ai[google]\""
+                'Install it via the optional extra: pip install "agentdeck-ai[google]"'
             ) from exc
 
         if not GeminiPlayer._vertex_initialized:

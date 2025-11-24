@@ -19,7 +19,7 @@ class GPTPlayer(LLMPlayer):
         except ImportError as exc:
             raise ImportError(
                 "OpenAI client library is not installed. "
-                "Install it via the optional extra: pip install \"agentdeck-ai[openai]\""
+                'Install it via the optional extra: pip install "agentdeck-ai[openai]"'
             ) from exc
 
         self.client = OpenAI(api_key=self.api_key)
