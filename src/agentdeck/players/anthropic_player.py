@@ -9,17 +9,18 @@ class ClaudePlayer(LLMPlayer):
     """Anthropic Claude player - CORE COMPONENT."""
 
     PROVIDER = "anthropic"
-    default_model = "claude-3-opus-20240229"
+    default_model = None
     api_key_env_var = "ANTHROPIC_API_KEY"
 
     def _initialize_client(self):
         """Initialize Anthropic client."""
         try:
             from anthropic import Anthropic
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
-                "Anthropic library not installed. " "Please install it with: pip install anthropic"
-            )
+                "Anthropic client library is not installed. "
+                'Install it via the optional extra: pip install "agentdeck-ai[anthropic]"'
+            ) from exc
 
         self.client = Anthropic(api_key=self.api_key)
 

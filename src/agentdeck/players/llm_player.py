@@ -59,8 +59,8 @@ class LLMPlayer(Player, ABC):
         resolved_model = model or self.default_model
         if not resolved_model:
             raise ValueError(
-                f"{self.__class__.__name__} requires a model. "
-                f"Either set default_model class attribute or pass model= parameter."
+                f"{self.__class__.__name__} requires an explicit model name. "
+                f"Pass model= when constructing the player (no built-in default)."
             )
 
         super().__init__(
@@ -267,7 +267,7 @@ class LLMPlayer(Player, ABC):
 
     def reset_conversation(self):
         """Reset conversation history for a new match."""
-        self._local_history = []
+        super().reset_conversation()
 
     def _history_source(self) -> List[Dict[str, str]]:
         if self.conversation_manager:

@@ -3,7 +3,7 @@
 **A research platform for studying AI behavior through game scenarios**
 
 > **Status**: v0.1.0 (Pre-release) - Core functionality complete, polish in progress
-> **Test Coverage**: 311 tests passing, ~75% coverage
+> **Test Coverage**: 300+ tests, CI gate at 75% coverage
 > **Note**: This is a work-in-progress repository. The first public release in the fresh repository will be tagged v0.1.0.
 
 ---
@@ -109,13 +109,15 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 
 ## 🚀 Quick Start
 
+> Requires Python 3.8+ (CI covers 3.8–3.11).
+
 ### Installation
 
 **Source install (recommended for v0.1.0):**
 ```bash
 # Clone repository
-git clone https://github.com/agentdeck/agentdeck.git
-cd agentdeck
+git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
+cd agentdeck-preview
 
 # Install with dependencies
 pip install -e .
@@ -128,6 +130,9 @@ pip install -e ".[openai]"      # OpenAI SDK
 pip install -e ".[anthropic]"   # Anthropic SDK
 pip install -e ".[google]"      # Google Vertex SDK
 pip install -e ".[providers]"   # All provider SDKs
+
+# Research stack (optional statistics/plotting utilities)
+pip install -e ".[research]"
 
 # Minimal replay-only install (no providers)
 pip install -e .
@@ -163,6 +168,8 @@ players = [
     ),
 ]
 
+# Models must be provided explicitly for every provider-backed player.
+
 # 3. Run experiment
 with AgentDeck(game=game) as deck:
     results = deck.play(
@@ -175,13 +182,20 @@ with AgentDeck(game=game) as deck:
 print(f"Win rates: {results.win_rates}")
 ```
 
-> ℹ️ **API keys required**  
-> The built-in LLM players expect environment variables (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`). Set the ones you use before running the example.
+> 🔒 **Models are explicit**  
+> Provider-backed players never fall back to defaults; pass `model=` for every GPT/Claude/Gemini player.
+>
+> ℹ️ **Provider credentials**  
+> Set the provider-specific environment variables before running examples (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and `VERTEX_PROJECT_ID`/`VERTEX_LOCATION` for Gemini).
 
 ### Try AgentDeck Without API Keys
 - Run `python examples/mock_demo.py`
 - Uses `MockPlayer` (deterministic) so no LLM providers are needed
 - Shows live commentary + progress + stats, and saves recordings under `agentdeck_runs/mock_demo/<session>/records/`
+
+### Walkthroughs & Docs
+- Build your first game + replay tour: `docs/first_game_walkthrough.md` (runs `examples/first_game_walkthrough.py`)
+- Documentation index: `docs/README.md`
 
 ### What You’ll See (Artifacts & Output)
 - **Live progress** (ProgressDisplay):
@@ -355,7 +369,7 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 - **Replay**: ReplayEngine with full lifecycle parity (R1 guarantee)
 - **Prompt Composition**: PromptBuilder with template system
 - **Reproducibility**: Deterministic seeding and exact replay (validated in production)
-- **Test Suite**: 167 tests passing (66% coverage)
+- **Test Suite**: Hundreds of tests with CI coverage gate at 75%
 
 ### 🚧 Coming Soon (See [ROADMAP.md](ROADMAP.md))
 - **Research Module**: Statistical comparison tools (Phase 2)
@@ -371,7 +385,7 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 - ✅ Worker-based parallel execution with deterministic replay parity (SPEC-PARALLEL v1.0.0)
 - ✅ Monitor system for real-time progress tracking (SPEC-MONITOR v1.0.0)
 - ✅ Production validation: 4 experiments, 40× faster than estimated
-- ✅ 167/167 tests passing, 66% coverage
+- ✅ CI suite passing with coverage gate at 75%
 - ✅ Validated with OpenAI GPT-4o-mini and GPT-4o
 
 **Next**: Pre-release polish (packaging, docs, validation) → Public v0.1.0 in fresh repository
@@ -417,7 +431,7 @@ agentdeck/
 │   ├── renderers/            # Text renderer
 │   ├── spectators/           # Narrator, Progress, TokenUsage, Stats
 │   └── games/examples/       # FixedDamageGame
-├── tests/                    # 116 tests (unit + integration)
+├── tests/                    # Unit + integration suites (CI-gated coverage)
 ├── examples/                 # Working examples
 └── specs/                    # Component specifications
 ```

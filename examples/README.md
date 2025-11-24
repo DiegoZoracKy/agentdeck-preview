@@ -20,12 +20,28 @@ python examples/mock_demo.py
 
 ---
 
-### 1. Minimal Configuration (`minimal_experiment.py`)
+### 1. Build Your First Game (`first_game_walkthrough.py`)
+
+**Purpose**: Author a tiny turn-based game, run it with deterministic mock players, and replay the recording.
+
+**What You'll Learn**:
+- How to subclass `TurnBasedGame` and define `setup()`, `get_view()`, `update()`, `status()`
+- Running without API keys using `MockPlayer`
+- Recording and replaying with `Recorder` + `ReplayEngine`
+
+**Usage**:
+```bash
+python examples/first_game_walkthrough.py
+```
+
+---
+
+### 2. Minimal Configuration (`minimal_experiment.py`)
 
 **Purpose**: Demonstrate the simplest possible setup for running LLM agent experiments.
 
 **What You'll Learn**:
-- Minimal player configuration (only `name`, `model`, `action_controller` required)
+- Minimal player configuration (only `name`, `model`, `controller` required)
 - Smart defaults for templates, renderers, and controllers
 - Real-time progress monitoring with spectators
 - Token usage and cost tracking
@@ -44,7 +60,7 @@ python examples/minimal_experiment.py
 
 ---
 
-### 2. Spectator Monitoring (`spectator_example.py`)
+### 3. Spectator Monitoring (`spectator_example.py`)
 
 **Purpose**: Show how to use spectators for experiment monitoring and analysis.
 
@@ -66,7 +82,7 @@ python examples/spectator_example.py
 
 ---
 
-### 3. Parallel Execution (`test_parallel_execution.py`)
+### 4. Parallel Execution (`test_parallel_execution.py`)
 
 **Purpose**: Demonstrate parallel match execution with configurable concurrency.
 
@@ -91,7 +107,7 @@ python examples/test_parallel_execution.py
 
 ---
 
-### 4. Replay Engine (`replay_minimal.py`)
+### 5. Replay Engine (`replay_minimal.py`)
 
 **Purpose**: Replay a previously recorded match with full lifecycle observation.
 
@@ -130,7 +146,7 @@ player = GPTPlayer(
     name="Alice",
     model="gpt-4o-mini",  # or "gpt-4", "gpt-3.5-turbo"
     temperature=0.7,
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
 )
 ```
 
@@ -142,7 +158,7 @@ player = ClaudePlayer(
     name="Bob",
     model="claude-3-5-sonnet-20241022",
     temperature=0.7,
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
 )
 ```
 
@@ -153,8 +169,10 @@ from agentdeck.players.google_player import GeminiPlayer
 player = GeminiPlayer(
     name="Charlie",
     model="gemini-1.5-flash",
+    project_id="your-gcp-project-id",
+    location="us-central1",
     temperature=0.7,
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
 )
 ```
 
@@ -306,8 +324,9 @@ export OPENAI_API_KEY="sk-..."
 # Anthropic
 export ANTHROPIC_API_KEY="sk-ant-..."
 
-# Google
-export GOOGLE_API_KEY="..."
+# Google Vertex AI (Gemini)
+export VERTEX_PROJECT_ID="your-gcp-project-id"
+export VERTEX_LOCATION="us-central1"
 ```
 
 ---
@@ -323,6 +342,6 @@ export GOOGLE_API_KEY="..."
 
 ## Questions?
 
-- GitHub Issues: https://github.com/anthropics/agentdeck-wip/issues
+- GitHub Issues: https://github.com/DiegoZoracKy/agentdeck-preview/issues
 - Documentation: See `docs/` directory
 - Examples: This directory (`examples/`)

@@ -132,7 +132,7 @@ Render prompt for given phase by substituting template placeholders and capturin
 bundle = builder.compose(
     phase=LifecyclePhase.TURN,
     render_result=text_renderer.render(view, player),
-    controller_format=action_controller.get_format_instructions(),
+    controller_format=controller.get_format_instructions(),
     turn_context=turn_ctx,
     extras={"strategy": "Prioritize corners"},
 )
@@ -347,7 +347,7 @@ You are playing FixedDamageGame.
 handshake_bundle = builder.compose(
     phase=LifecyclePhase.HANDSHAKE,
     render_result=RenderResult(text=""),  # No game state yet
-    controller_format=action_controller.get_format_instructions(),
+    controller_format=controller.get_format_instructions(),
     handshake_controller_format=handshake_controller.get_format_instructions(),
     extras={
         "game_instructions": game.instructions,

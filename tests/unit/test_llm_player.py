@@ -7,6 +7,8 @@ per SPEC-PLAYER v1.2.0.
 
 from dataclasses import dataclass
 
+import pytest
+
 from agentdeck.players.llm_player import LLMPlayer
 from agentdeck.controllers.action_only import ActionOnlyController
 from agentdeck.renderers.text_renderer import TextRenderer
@@ -17,6 +19,8 @@ from agentdeck.core.types import (
     RenderResult,
     TurnContext,
 )
+from agentdeck.core.conversation import ConversationManager
+from agentdeck.players import GPTPlayer, ClaudePlayer, GeminiPlayer
 
 
 class DummyLLMPlayer(LLMPlayer):
@@ -158,3 +162,40 @@ def test_llmplayer_describe():
     assert "controller" in desc
     assert "renderer" in desc
     assert "templates" in desc  # prompt_builder is rendered as templates
+
+
+def test_provider_players_require_explicit_model():
+    """Provider-backed players must be constructed with an explicit model name."""
+    with pytest.raises(ValueError):
+        GPTPlayer(name="Alice", controller=ActionOnlyController(), api_key="dummy")
+
+    with pytest.raises(ValueError):
+        ClaudePlayer(name="Bob", controller=ActionOnlyController(), api_key="dummy")
+
+    with pytest.raises(ValueError):
+        GeminiPlayer(
+            name="Charlie",
+            controller=ActionOnlyController(),
+            project_id="proj",
+            location="us-central1",
+        )
+
+
+def test_reset_conversation_clears_conversation_manager():
+    """reset_conversation should clear both local and bound conversation history."""
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+    )
+
+    player._local_history.append({"role": "user", "content": "hi"})
+    manager = ConversationManager(player_name=player.name)
+    manager.append("user", "Hello")
+    manager.append("assistant", "World")
+    player.bind_conversation_manager(manager)
+
+    player.reset_conversation()
+
+    assert player._local_history == []
+    assert manager.history() == []

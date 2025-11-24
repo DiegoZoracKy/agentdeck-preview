@@ -560,7 +560,7 @@ def test_action_only_controller_success():
 
 #### Test 5: ActionOnlyController raises on failure (VF2)
 ```python
-def test_action_controller_raises_on_failure():
+def test_controller_raises_on_failure():
     controller = ActionOnlyController()
     game = MockGame(allowed_actions=["ATTACK"])
     controller.bind_game(game)
@@ -594,10 +594,10 @@ def test_action_controller_raises_on_failure():
 ### Why Single-Controller Architecture (v1.3.0)?
 
 **Problem with dual-controller pattern (v1.2.0 and earlier)**:
-- ✅ Two separate objects: `handshake_controller=AcceptOKHandshakeController()` + `action_controller=ReasoningController()`
+- ✅ Legacy dual objects: `handshake_controller=AcceptOKHandshakeController()` + turn-phase controller (e.g., `ReasoningController()`)
 - ❌ Mental model complexity: "Why do I need two controllers for one player?"
 - ❌ API verbosity: Two imports, two parameters for 99% of use cases
-- ❌ Semantic confusion: `action_controller=ReasoningController()` sounds like it controls actions, not parsing
+- ❌ Semantic confusion: Separate turn controllers sounded like they controlled actions rather than parsing responses
 - ❌ Asymmetric importance: Handshake rarely customized (default OK/READY/YES), turn parsing is core
 
 **Benefits of single-controller pattern**:
@@ -621,11 +621,11 @@ def test_action_controller_raises_on_failure():
 
 ### v1.3.0 (Draft - 2025-11-17): Unified Single-Controller Architecture
 
-**Motivation**: Dual-controller pattern (handshake_controller + action_controller) created unnecessary complexity. Single controller with lifecycle methods simplifies API and mental model.
+**Motivation**: Dual-controller pattern (separate handshake controller + turn controller) created unnecessary complexity. Single controller with lifecycle methods simplifies API and mental model.
 
 **Breaking Changes**:
 1. Removed `HandshakeController` abstract class. Handshake validation is now a lifecycle method on `Controller`.
-2. Player constructor now accepts single `controller` parameter instead of `handshake_controller` + `action_controller`.
+2. Player constructor now accepts single `controller` parameter instead of `handshake_controller` plus a separate turn controller.
 3. Default handshake implementation built into `Controller.validate_handshake()` (accepts OK/READY/YES).
 4. Controllers override `validate_handshake()` for custom handshake logic instead of creating separate handshake controller.
 
@@ -672,8 +672,8 @@ from agentdeck.controllers import AcceptOKHandshakeController, ReasoningControll
 
 player = GPTPlayer(
     name="Alice",
-    handshake_controller=AcceptOKHandshakeController(),  # Separate object
-    action_controller=ReasoningController(),              # Separate object
+    handshake_controller=AcceptOKHandshakeController(),  # Legacy extra controller
+    controller=ReasoningController(),                    # Turn/conclusion controller
     renderer=TextRenderer()
 )
 ```
@@ -702,7 +702,7 @@ class StrictHandshakeController(HandshakeController):
 player = GPTPlayer(
     name="Alice",
     handshake_controller=StrictHandshakeController(),
-    action_controller=ReasoningController(),
+    controller=ReasoningController(),
     ...
 )
 ```
@@ -735,7 +735,7 @@ player = GPTPlayer(
 # v1.2.0
 player = GPTPlayer(
     handshake_controller=AcceptOKHandshakeController(),  # Explicit default
-    action_controller=ActionOnlyController(),
+    controller=ActionOnlyController(),
     ...
 )
 

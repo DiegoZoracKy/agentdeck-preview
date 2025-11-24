@@ -490,8 +490,8 @@ from agentdeck.controllers import ActionOnlyController
 config = AgentDeckConfig(seed=42, concurrency=5)
 
 players = [
-    GPTPlayer("Alice", action_controller=ActionOnlyController()),
-    GPTPlayer("Bob", action_controller=ActionOnlyController())
+    GPTPlayer("Alice", controller=ActionOnlyController()),
+    GPTPlayer("Bob", controller=ActionOnlyController())
 ]
 
 with AgentDeck(game=FixedDamageGame(), session=config) as deck:

@@ -9,17 +9,18 @@ class GPTPlayer(LLMPlayer):
     """OpenAI GPT player - CORE COMPONENT."""
 
     PROVIDER = "openai"
-    default_model = "gpt-4"
+    default_model = None
     api_key_env_var = "OPENAI_API_KEY"
 
     def _initialize_client(self):
         """Initialize OpenAI client."""
         try:
             from openai import OpenAI
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
-                "OpenAI library not installed. " "Please install it with: pip install openai"
-            )
+                "OpenAI client library is not installed. "
+                'Install it via the optional extra: pip install "agentdeck-ai[openai]"'
+            ) from exc
 
         self.client = OpenAI(api_key=self.api_key)
 
