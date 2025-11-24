@@ -1,0 +1,364 @@
+# File: pricing.yaml
+# Pricing per 1 million tokens (Input/Output) in USD
+# Source: Updated 2025-10-31 with latest OpenAI pricing
+# IMPORTANT: CHECK OFFICIAL PRICING PAGES FOR UPDATED DATA!
+
+# Provider-based structure for multi-LLM support
+openai:
+  # --- GPT-5 Series ---
+  gpt-5-nano: &gpt5nanoprice
+    input_cost_per_million: 0.05
+    output_cost_per_million: 0.40
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  gpt-5-mini: &gpt5miniprice
+    input_cost_per_million: 0.25
+    output_cost_per_million: 2.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  gpt-5: &gpt5price
+    input_cost_per_million: 1.25
+    output_cost_per_million: 10.00
+    last_updated: "2025-10-31"
+    tier: "standard"
+  gpt-5-chat-latest: *gpt5price
+  gpt-5-codex: *gpt5price
+  gpt-5-search-api: *gpt5price
+
+  gpt-5-pro: &gpt5proprice
+    input_cost_per_million: 15.00
+    output_cost_per_million: 120.00
+    last_updated: "2025-10-31"
+    tier: "premium"
+
+  # --- GPT-4.1 Series ---
+  gpt-4.1-nano: &gpt41nanoprice
+    input_cost_per_million: 0.10
+    output_cost_per_million: 0.40
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  gpt-4.1-mini: &gpt41miniprice
+    input_cost_per_million: 0.40
+    output_cost_per_million: 1.60
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  gpt-4.1: &gpt41price
+    input_cost_per_million: 2.00
+    output_cost_per_million: 8.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  # --- GPT-4o Series ---
+  gpt-4o: &gpt4oprice
+    input_cost_per_million: 2.50
+    output_cost_per_million: 10.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+  gpt-4o-audio-preview: *gpt4oprice
+  gpt-4o-search-preview: *gpt4oprice
+  gpt-4o-2024-05-13: &gpt4o20240513price
+    input_cost_per_million: 5.00
+    output_cost_per_million: 15.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+  gpt-4o-realtime-preview: &gpt4orealtimeprice
+    input_cost_per_million: 5.00
+    output_cost_per_million: 20.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  # --- GPT-4o Mini Series ---
+  gpt-4o-mini: &gpt4ominiprice
+    input_cost_per_million: 0.15
+    output_cost_per_million: 0.60
+    last_updated: "2025-08-19"
+    tier: "standard"
+  gpt-4o-mini-audio-preview: *gpt4ominiprice
+  gpt-4o-mini-search-preview: *gpt4ominiprice
+  gpt-4o-mini-realtime-preview: &gpt4ominirealtimeprice
+    input_cost_per_million: 0.60
+    output_cost_per_million: 2.40
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  # --- GPT Realtime Series ---
+  gpt-realtime: &gptrealtimeprice
+    input_cost_per_million: 4.00
+    output_cost_per_million: 16.00
+    last_updated: "2025-10-31"
+    tier: "realtime"
+
+  gpt-realtime-mini: &gptrealtimeminiprice
+    input_cost_per_million: 0.60
+    output_cost_per_million: 2.40
+    last_updated: "2025-10-31"
+    tier: "realtime"
+
+  # --- GPT Audio Series ---
+  gpt-audio: &gptaudioprice
+    input_cost_per_million: 2.50
+    output_cost_per_million: 10.00
+    last_updated: "2025-10-31"
+    tier: "audio"
+
+  gpt-audio-mini: &gptaudiominiprice
+    input_cost_per_million: 0.60
+    output_cost_per_million: 2.40
+    last_updated: "2025-10-31"
+    tier: "audio"
+
+  # --- GPT Image Series ---
+  gpt-image-1: &gptimage1price
+    input_cost_per_million: 5.00
+    output_cost_per_million: 0.00  # No output tokens for image generation
+    last_updated: "2025-10-31"
+    tier: "image"
+    notes: "Image generation model - no output token cost"
+
+  gpt-image-1-mini: &gptimage1miniprice
+    input_cost_per_million: 2.00
+    output_cost_per_million: 0.00  # No output tokens for image generation
+    last_updated: "2025-10-31"
+    tier: "image"
+    notes: "Image generation model - no output token cost"
+
+  # --- O Series (Reasoning Models) ---
+  o1: &o1price
+    input_cost_per_million: 15.00
+    output_cost_per_million: 60.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  o1-pro: &o1proprice
+    input_cost_per_million: 150.00
+    output_cost_per_million: 600.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  o1-mini: &o1miniprice
+    input_cost_per_million: 1.10
+    output_cost_per_million: 4.40
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  o3: &o3price
+    input_cost_per_million: 2.00
+    output_cost_per_million: 8.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  o3-mini: &o3miniprice
+    input_cost_per_million: 1.10
+    output_cost_per_million: 4.40
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  o3-deep-research: &o3deepresearchprice
+    input_cost_per_million: 10.00
+    output_cost_per_million: 40.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  o3-pro: &o3proprice
+    input_cost_per_million: 20.00
+    output_cost_per_million: 80.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  o4-mini: &o4miniprice
+    input_cost_per_million: 1.10
+    output_cost_per_million: 4.40
+    last_updated: "2025-08-19"
+    tier: "standard"
+  
+  o4-mini-deep-research: &o4minideepresearchprice
+    input_cost_per_million: 2.00
+    output_cost_per_million: 8.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  # --- Codex Series ---
+  codex-mini-latest: &codexminiprice
+    input_cost_per_million: 1.50
+    output_cost_per_million: 6.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  # --- Computer Use ---
+  computer-use-preview: &computeruseprice
+    input_cost_per_million: 3.00
+    output_cost_per_million: 12.00
+    last_updated: "2025-08-19"
+    tier: "standard"
+
+  # --- Legacy GPT-4 Series ---
+  gpt-4: &gpt4price
+    input_cost_per_million: 30.00
+    output_cost_per_million: 60.00
+    last_updated: "2025-04-09"
+    tier: "legacy"
+  gpt-4-turbo: &gpt4turboprice
+    input_cost_per_million: 10.00
+    output_cost_per_million: 30.00
+    last_updated: "2025-04-09"
+    tier: "legacy"
+  gpt-4-0613: *gpt4price
+  gpt-4-0314: *gpt4price
+
+  # --- GPT-3.5 Series ---
+  gpt-3.5-turbo: &gpt35price
+    input_cost_per_million: 0.50
+    output_cost_per_million: 1.50
+    last_updated: "2025-04-09"
+    tier: "legacy-budget"
+  gpt-3.5-turbo-0125: *gpt35price
+
+  # --- Unknown/Experimental Models Fallback ---
+  # Used as default for any model not listed above
+  _default: &defaultprice
+    input_cost_per_million: 0.15
+    output_cost_per_million: 0.60
+    last_updated: "2025-04-09"
+    tier: "unknown"
+    notes: "Fallback pricing for unknown models"
+
+# --- Google Vertex AI ---
+google:
+  # --- Gemini 1.5 Family ---
+  gemini-1.5-flash: &gemini15flashprice
+    input_cost_per_million: 0.075
+    output_cost_per_million: 0.30
+    last_updated: "2025-04-09"
+    tier: "fast"
+  gemini-1.5-flash-001: *gemini15flashprice
+  gemini-1.5-flash-002: *gemini15flashprice
+
+  gemini-1.5-pro: &gemini15proprice
+    input_cost_per_million: 1.25
+    output_cost_per_million: 5.00
+    last_updated: "2025-04-09"
+    tier: "standard"
+  gemini-1.5-pro-001: *gemini15proprice
+  gemini-1.5-pro-002: *gemini15proprice
+
+  # --- Gemini 2.5 Family (Vertex AI 2025-11 pricing) ---
+  gemini-2.5-pro: &gemini25proprice
+    input_cost_per_million: 1.25
+    output_cost_per_million: 10.00
+    last_updated: "2025-11-19"
+    tier: "standard"
+  gemini-2.5-pro-preview: *gemini25proprice
+
+  gemini-2.5-flash: &gemini25flashprice
+    input_cost_per_million: 0.30
+    output_cost_per_million: 2.50
+    last_updated: "2025-11-19"
+    tier: "fast"
+  gemini-2.5-flash-live: &gemini25flashliveprice
+    input_cost_per_million: 0.50
+    output_cost_per_million: 2.00
+    last_updated: "2025-11-19"
+    tier: "live"
+  gemini-2.5-flash-lite: &gemini25flashliteprice
+    input_cost_per_million: 0.10
+    output_cost_per_million: 0.40
+    last_updated: "2025-11-19"
+    tier: "budget"
+
+  # --- Gemini 3 Family ---
+  gemini-3-pro-preview: &gemini3proprice
+    input_cost_per_million: 2.00
+    output_cost_per_million: 12.00
+    last_updated: "2025-11-19"
+    tier: "premium"
+
+  # --- Gemini 1.0 Pro ---
+  gemini-pro: &geminiproprice
+    input_cost_per_million: 0.50
+    output_cost_per_million: 1.50
+    last_updated: "2025-04-09"
+    tier: "standard"
+  gemini-1.0-pro: *geminiproprice
+
+# --- Anthropic Claude ---
+anthropic:
+  # --- Claude 3.5 ---
+  claude-3.5-sonnet: &claude35sonnetprice
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2025-04-09"
+    tier: "standard"
+  claude-3.5-sonnet-20241022: *claude35sonnetprice
+
+  # --- Claude 3 Opus ---
+  claude-3-opus: &claude3opusprice
+    input_cost_per_million: 15.00
+    output_cost_per_million: 75.00
+    last_updated: "2025-04-09"
+    tier: "premium"
+  claude-3-opus-20240229: *claude3opusprice
+
+  # --- Claude 3 Sonnet ---
+  claude-3-sonnet: &claude3sonnetprice
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2025-04-09"
+    tier: "standard"
+  claude-3-sonnet-20240229: *claude3sonnetprice
+
+  # --- Claude 3 Haiku ---
+  claude-3-haiku: &claude3haikuprice
+    input_cost_per_million: 0.25
+    output_cost_per_million: 1.25
+    last_updated: "2025-04-09"
+    tier: "budget"
+  claude-3-haiku-20240307: *claude3haikuprice
+
+# --- Ollama Local Models (Zero Cost) ---
+ollama:
+  # All Ollama models run locally and have no API costs
+  _default: &ollamaprice
+    input_cost_per_million: 0.00
+    output_cost_per_million: 0.00
+    last_updated: "2025-07-01"
+    tier: "local"
+    notes: "Local model - no API costs"
+  llama3.2: *ollamaprice
+  llama3.1: *ollamaprice
+  llama3.1:70b: *ollamaprice
+  llama3.1:8b: *ollamaprice
+  llama3: *ollamaprice
+  llama2: *ollamaprice
+  mistral: *ollamaprice
+  mixtral: *ollamaprice
+  mixtral:8x7b: *ollamaprice
+  codellama: *ollamaprice
+  gemma: *ollamaprice
+  gemma:2b: *ollamaprice
+  gemma:7b: *ollamaprice
+  phi3: *ollamaprice
+  qwen: *ollamaprice
+  qwen:32b: *ollamaprice
+  deepseek-coder: *ollamaprice
+  # Any unspecified Ollama model will use _default (zero cost)
+
+# --- Configuration metadata ---
+metadata:
+  version: "1.2"
+  last_global_update: "2025-10-31"
+  currency: "USD"
+  unit: "per_million_tokens"
+  source: "Official provider pricing pages"
+  warning: "CHECK OFFICIAL PRICING PAGES FOR UPDATED DATA!"
+
+# --- Notes ---
+# Updated 2025-10-31 with latest OpenAI pricing including:
+# - gpt-5-pro, gpt-5-codex, gpt-5-search-api
+# - gpt-realtime, gpt-realtime-mini
+# - gpt-audio, gpt-audio-mini
+# - gpt-image-1, gpt-image-1-mini
+# All pricing verified against latest OpenAI documentation.

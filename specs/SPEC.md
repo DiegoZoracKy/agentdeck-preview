@@ -1,0 +1,391 @@
+# AgentDeck Implementation Specification
+
+**Version**: 2.0 (Lean Navigation)
+**Status**: Active
+**Last Updated**: 2025-01-27
+**Purpose**: Navigation hub for AgentDeck architecture and component specifications
+
+> This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
+
+---
+
+## 1. Purpose & Vision
+
+AgentDeck is a **research platform for studying AI behavior through game scenarios**. It enables researchers to run controlled experiments where AI agents interact in well-defined environments, providing comprehensive data collection for analysis of prompting strategies, decision-making patterns, and model capabilities.
+
+### 1.1 Why Games?
+
+Most LLM benchmarks measure **knowledge** (answering static questions). But real-world utility requires **agency**: maintaining state, forming strategies, and adapting over time.
+
+Games are the perfect "behavioral wind tunnel" for testing these capabilities:
+
+- **Constrained environments** – Isolate specific variables (e.g., "Does the model understand resource scarcity?")
+- **Iterative decision making** – Agents live with consequences, testing long-term planning
+- **Social dynamics** – Multiplayer games reveal cooperation, betrayal, and negotiation patterns
+- **Measurable outcomes** – Win/lose provides clear signal for cost/quality trade-offs
+
+### 1.2 The Console Metaphor
+
+AgentDeck is architected like a video game console to keep experiments modular and clean:
+
+- 🎮 **Console (AgentDeck)** – The engine that orchestrates sessions, manages seeding, and enforces rules
+- 💾 **Game (Cartridge)** – Pure logic defining rules and state transitions; swap games without changing agents
+- 🤖 **Player** – The AI agent (GPT-4, Claude, Gemini) that "holds the controller"
+- 🕹️ **Controller** – Translates the AI's text response into valid game actions
+- 📺 **Renderer** – "Draws" the game state into text the AI can understand
+- 👁️ **Spectator** – The audience watching the live stream (stats, narration, cost tracking)
+- 📹 **Recorder** – The "DVR" capturing every event for perfect replay and analysis
+
+By separating these concerns, AgentDeck ensures your research is **reproducible, observable, and easy to modify**.
+
+### 1.3 Core Capabilities
+- Rapid experimentation (games in ~15 lines, experiments in ~3 lines)
+- Comprehensive data collection (every decision, timing, reasoning captured)
+- Flexible observation (spectators can analyze live or replay)
+- Reproducible research (deterministic experiments via seeded randomness)
+
+**Success Criteria:**
+1. Researchers can create a working game in <20 lines of code
+2. Running 100 matches takes <5 lines of code
+3. All match data is automatically persisted
+4. Experiments are fully reproducible via seed parameter
+
+---
+
+## 2. Architecture Overview
+
+### 2.1 System Design
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    AgentDeck (Facade)                    │
+│  - Stable public API                                     │
+│  - Engine selection & configuration                      │
+│  - Result aggregation                                    │
+└─────────────────────┬───────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────┐
+│             Console (Execution Engine)                  │
+│  - Session lifecycle                                    │
+│  - Match execution                                      │
+│  - Event bus management                                 │
+│  - Player coordination & logging                        │
+└──────┬───────────────────────────────────────┬──────────┘
+       │                                       │
+┌──────▼──────┐                         ┌─────▼──────┐
+│    Game     │                         │  EventBus  │
+│ - Rules     │                         │ - Events   │
+│ - Flow      │                         │ - Routing  │
+└──────┬──────┘                         └─────┬──────┘
+       │                                       │
+┌──────▼──────────────────────┐         ┌─────▼──────────┐
+│         Players              │         │   Spectators   │
+│ - Renderer (state→view)      │         │ - Observation  │
+│ - Controller (response→action)│         │ - Recording    │
+└──────────────────────────────┘         └────────────────┘
+```
+
+### 2.2 Event-Driven Architecture
+
+The system uses an event-driven architecture where:
+- **Console** owns session lifecycle, orchestrates match execution, and emits events
+- **EventBus** distributes events to all registered spectators
+- **Spectators** observe without affecting game flow
+- **Games** focus only on game logic, not infrastructure
+
+**Event hierarchy:**
+```
+session_start
+  └── batch_start
+      └── match_start
+          ├── player_handshake_start     # per player, before gameplay (mandatory)
+          ├── player_handshake_complete  # per player, on acceptance
+          ├── player_handshake_abort     # per player, on rejection
+          ├── gameplay                   # mechanic-agnostic phase event
+          ├── player_action_parse_failed # optional, emitted before policy handling
+          ├── <custom domain events>     # snake_case strings from games
+          ├── player_conclusion          # optional per-player reflection
+          └── match_end
+      └── batch_end
+  └── session_end
+```
+
+**Critical ordering** (per [SPEC-CONSOLE](SPEC-CONSOLE.md) §6.6 E1): Handshake events MUST precede MATCH_START. Conclusion events occur after final gameplay turn but before MATCH_END.
+
+### 2.3 Three-Phase Player Lifecycle
+
+Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.1.0:
+
+1. **Handshake Phase** (Mandatory, before gameplay):
+   - Console → Player.handshake() → Raw response
+   - Console → HandshakeController.parse() → HandshakeResult
+   - Console emits PLAYER_HANDSHAKE_START → COMPLETE/ABORT
+
+2. **Turn Phase** (Gameplay loop):
+   - Game.get_view() → player_view (includes narrative)
+   - PromptBuilder.compose() → Prompt
+   - Player.decide() → ActionResult
+   - Game.update() → New State
+   - Console emits GAMEPLAY (with prompt payload)
+
+3. **Conclusion Phase** (Optional, post-match reflection):
+   - Console → Player.conclude() → Optional reflection
+   - Console emits PLAYER_CONCLUSION
+
+### 2.4 Reproducibility Architecture
+
+**Critical for Research**: AgentDeck ensures full reproducibility through deterministic seeding:
+
+1. **AgentDeck configuration seed**: Provided by researchers via facade and passed to the console to control session randomness
+2. **Match-level seed**: Optional override for specific match control
+3. **Random state management**: Deterministic `RandomGenerator` helper cascades per match/turn
+4. **LLM determinism**: When supported by models (e.g., temperature=0)
+
+**Seed propagation (canonical API):**
+```
+config = AgentDeckConfig(seed=42)
+deck = AgentDeck(game=MyGame(), session=config)
+  └── Console(seed=42)
+      ├── Match 1 (seed=42 + match_index)
+      ├── Match 2 (seed=43)
+      └── Match N (seed=42 + N-1)
+```
+
+---
+
+## 3. Core Design Principles
+
+### 3.1 Simplicity First
+- Games require only 4 methods: `setup()`, `get_view()`, `update()`, `status()`
+- State is just Python dictionaries, not complex objects
+- Direct instantiation, no registration or string IDs required
+
+### 3.2 Clean Separation of Concerns
+- **Games** only handle game logic
+- **Console** handles all orchestration
+- **Renderers** only format state (no instructions)
+- **Controllers** provide format instructions AND parsing
+- **Spectators** observe without interfering
+
+### 3.3 Research Flexibility
+- Each player can have different renderer/controller
+- Spectators work identically for live and replay
+- All data automatically recorded for analysis
+
+### 3.4 Event-Driven Observation
+- Spectators subscribe to events via EventBus
+- Games don't know about spectators
+- Multiple spectators can run simultaneously
+
+---
+
+## 4. Component Specifications
+
+All component specifications follow the lean spec format with numbered invariants, examples, and testing strategies. For implementation details, consult the individual specs.
+
+### 4.1 Core Components
+
+| Component | Version | Status | Description |
+|-----------|---------|--------|-------------|
+| [AgentDeck](SPEC-AGENTDECK.md) | 1.0.0 | Final | Public API facade for the framework |
+| [Console](SPEC-CONSOLE.md) | 0.4.0 | Final | Execution engine for session/match lifecycle |
+| [EventBus](SPEC-OBSERVABILITY.md) | 1.1.0 | Final | Event distribution and spectator routing |
+| [Game](SPEC-GAME.md) | 0.5.0 | Final | Game author contract (rules, state, narrative) |
+| [Player](SPEC-PLAYER.md) | 1.1.0 | Draft | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Controller](SPEC-CONTROLLER.md) | 1.1.0 | Final | Handshake & action parsing contract |
+| [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
+| [Spectator](SPEC-SPECTATOR.md) | 1.0.0 | Final | Observation and analysis interface |
+
+### 4.2 Infrastructure Components
+
+| Component | Version | Status | Description |
+|-----------|---------|--------|-------------|
+| [Recorder](SPEC-RECORDER.md) | 1.3.0 | Draft | Match persistence with enriched prompt payloads |
+| [ReplayEngine](SPEC-REPLAY.md) | 1.1.0 | Draft | Exact replay with enriched event prompt payloads |
+| [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
+| [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Draft | TurnBasedGame + TurnLoop helper using MatchRuntime |
+| [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.0.0 | Draft | Per-match infrastructure context (`runtime`) |
+| [Pricing](SPEC-PRICING.md) | 1.0.0 | Final | Cost tracking system for LLM usage |
+| [LLM](SPEC-LLM.md) | 1.0.0 | Draft | LLM provider integration contract |
+| [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
+| [Monitor](SPEC-MONITOR.md) | 1.0.0 | Final | Console-level observation and progress reporting |
+
+### 4.3 Research Tools
+
+| Component | Version | Status | Description |
+|-----------|---------|--------|-------------|
+| [Research](SPEC-RESEARCH.md) | 1.1.0 | Draft | Statistical analysis, model comparison, and post-hoc analysis from recordings |
+
+---
+
+## 5. Quick Start Example
+
+```python
+from agentdeck import AgentDeck, TurnBasedGame, GPTPlayer, ActionOnlyController
+
+# 1. Define game (~15 lines)
+class FixedDamageGame(TurnBasedGame):
+    @property
+    def instructions(self):
+        return "ATTACK deals 20 damage. First to 0 health loses."
+
+    def setup(self, players):
+        return {"health": {p: 100 for p in players}}
+
+    def update(self, state, player, action, *, rng):
+        opponent = [p for p in state["health"] if p != player][0]
+        if action.action == "ATTACK":
+            state["health"][opponent] -= 20
+        return state
+
+    def status(self, state):
+        for player, health in state["health"].items():
+            if health <= 0:
+                winner = [p for p in state["health"] if p != player][0]
+                return GameStatus(is_over=True, winner=winner)
+        return GameStatus(is_over=False)
+
+# 2. Run experiment (~3 lines)
+deck = AgentDeck()
+players = [GPTPlayer("Alice"), GPTPlayer("Bob")]
+results = deck.play(game=FixedDamageGame(), players=players, matches=100)
+
+# 3. Analyze results
+print(f"Win rates: {results.win_rates}")
+print(f"Alice won {results.win_rates['Alice']:.1%} of matches")
+```
+
+---
+
+## 6. File Structure
+
+```
+agentdeck/
+├── pyproject.toml
+├── README.md
+├── src/
+│   └── agentdeck/
+│       ├── core/
+│       │   ├── agentdeck.py           # Public API facade
+│       │   ├── console.py             # Match orchestrator
+│       │   ├── event_bus.py           # Event distribution
+│       │   ├── event_factory.py       # Standardised gameplay payloads
+│       │   ├── game_event_emitter.py  # Domain event helper
+│       │   ├── prompt_builder.py      # Prompt composition
+│       │   ├── recorder.py            # Match recorder spectator
+│       │   ├── replay.py              # Replay engine
+│       │   ├── turn_loop.py           # Turn-based execution helper
+│       │   ├── types.py               # Shared dataclasses & enums
+│       │   └── base/…                 # Game/player/controller/spectator bases
+│       ├── games/
+│       │   ├── __init__.py
+│       │   └── examples/              # Sample games (e.g., fixed_damage.py)
+│       ├── players/                   # Mock player, LLM integrations
+│       ├── controllers/               # ActionOnly, Reasoning controllers
+│       ├── renderers/                 # Text renderer, helpers
+│       ├── spectators/                # Stats tracker, logger
+│       └── research/                  # Analysis utilities
+├── tests/                             # Pytest suite
+└── docs/
+    └── specs/                         # Component specifications
+        ├── SPEC.md                    # This file (navigation hub)
+        ├── SPEC-AGENTDECK.md
+        ├── SPEC-CONSOLE.md
+        ├── SPEC-GAME.md
+        ├── SPEC-PLAYER.md
+        ├── SPEC-CONTROLLER.md
+        ├── SPEC-RENDERER.md
+        ├── SPEC-SPECTATOR.md
+        ├── SPEC-RECORDER.md
+        ├── SPEC-REPLAY.md
+        ├── SPEC-PROMPT-BUILDER.md
+        ├── SPEC-GAME-MECHANIC-TURN-BASED.md
+        ├── SPEC-PRICING.md
+        ├── SPEC-OBSERVABILITY.md
+        ├── SPEC-LLM.md
+        ├── SPEC-RESEARCH.md
+        └── archive/
+            └── SPEC-FULL-v1.md        # Archived full spec
+```
+
+---
+
+## 7. Design Philosophy & Guidelines
+
+For detailed authoring guidelines, design patterns, and architectural decisions, see:
+- [GUIDELINES.md](GUIDELINES.md) - Spec authoring best practices
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guide, design principles, and workflow
+- [RESEARCH_WORKFLOW.md](../RESEARCH_WORKFLOW.md) - Research experiment patterns
+
+---
+
+## 8. Public API
+
+```python
+# Everything users need is in the top-level import
+from agentdeck import (
+    # Main
+    AgentDeck,
+
+    # Base classes for extension
+    Game, TurnBasedGame,
+    Player, Renderer, Controller, Spectator,
+
+    # Types
+    ActionResult, GameStatus, MatchResult, MatchResults,
+    Event, LogLevel,
+
+    # LLM Players (CORE COMPONENTS!)
+    GPTPlayer,           # OpenAI integration (MANDATORY)
+    ClaudePlayer,        # Anthropic integration (CORE)
+    GeminiPlayer,        # Google integration (CORE)
+
+    # Built-in implementations
+    MockPlayer, TextRenderer, ActionOnlyController
+)
+
+# Research module for statistical rigor (Kaggle-inspired)
+from agentdeck.research import (
+    compare_models,          # The 80% use case - rigorous model comparison
+    progressive_comparison,  # Early stopping to save API costs
+    parameter_sweep,         # Hyperparameter optimization
+    EloLeague,              # ELO rating system for ongoing competitions
+    Benchmark,              # Standardized benchmarks with exact reproducibility
+    statistical_significance # P-values, confidence intervals, effect sizes
+)
+```
+
+---
+
+## 9. Version History
+
+### v2.0 (2025-01-27) - Lean Navigation
+- **Breaking Change**: Restructured as navigation hub to component specs
+- Archived detailed content to `archive/SPEC-FULL-v1.md`
+- Added component specification table with versions and status
+- Added quick start example and file structure
+- Reduced from 1360 lines to ~250 lines (navigation-only)
+- **Rationale**: Component specs ([SPEC-GAME.md](SPEC-GAME.md), [SPEC-PLAYER.md](SPEC-PLAYER.md), etc.) are source of truth. This document now provides high-level orientation and navigation, preventing sync issues.
+
+### v1.0 (2025-01-24) - Full Specification
+- Comprehensive implementation specification (archived)
+- Detailed component contracts, data flows, and examples
+- See `archive/SPEC-FULL-v1.md` for historical reference
+
+---
+
+## 10. References
+
+### External Documentation
+- [README.md](../../README.md) - Project overview and getting started
+- [Contributing Guide](../../CONTRIBUTING.md) - Development workflow
+- [API Reference](../../docs/api/) - Generated API documentation
+
+### Related Specifications
+- All component specs linked in Section 4
+- [GUIDELINES.md](GUIDELINES.md) - Spec authoring patterns
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Development workflow and design philosophy
+
+---
+
+**Note**: This is the lean navigation version (v2.0). For the full implementation specification from v1.0, see [archive/SPEC-FULL-v1.md](archive/SPEC-FULL-v1.md).

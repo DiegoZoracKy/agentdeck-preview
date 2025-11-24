@@ -1,0 +1,3390 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_2180e1cd",
+  "game": "FixedDamageGame",
+  "players": [
+    "Gemini-2.5-Pro",
+    "GPT-4o-mini"
+  ],
+  "winner": "Gemini-2.5-Pro",
+  "final_state": {
+    "health": {
+      "Gemini-2.5-Pro": 20,
+      "GPT-4o-mini": -10
+    },
+    "potions": {
+      "Gemini-2.5-Pro": 0,
+      "GPT-4o-mini": 0
+    },
+    "last_action": {
+      "Gemini-2.5-Pro": "ATTACK",
+      "GPT-4o-mini": "ATTACK"
+    },
+    "turn": 20,
+    "_turn_count": 19,
+    "_first_player_idx": 0
+  },
+  "seed": 2089,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "Gemini-2.5-Pro"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763616062.3303535,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": null,
+        "timestamp": 1763616062.3303535,
+        "monotonic_time": 22700.652453236
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT-4o-mini",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "GPT-4o-mini"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763616063.064637,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": null,
+        "timestamp": 1763616063.064637,
+        "monotonic_time": 22701.386736543
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: Gemini-2.5-Pro (index 0)",
+        "level": "info",
+        "log_context": {}
+      },
+      "timestamp": 1763616063.0864742,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": null,
+        "timestamp": 1763616063.0864742,
+        "monotonic_time": 22701.408573774
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "This is the first turn of the game. My health is at the maximum of 100 HP, so using a POTION would be a wasted action. The only way to win is by reducing the opponent's health. Therefore, the best course of action is to start attacking immediately to apply pressure and begin chipping away at their HP.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 100
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 2
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": null,
+            "GPT-4o-mini": null
+          },
+          "turn": 1,
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 80
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 2
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": null
+          },
+          "turn": 2,
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  GPT-4o-mini: None\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  GPT-4o-mini: None\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 321,
+          "raw_response": "REASONING: This is the first turn of the game. My health is at the maximum of 100 HP, so using a POTION would be a wasted action. The only way to win is by reducing the opponent's health. Therefore, the best course of action is to start attacking immediately to apply pressure and begin chipping away at their HP.\nACTION: ATTACK",
+          "turn_number": 1,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616063.0879898,
+            "duration": 5.6165771484375,
+            "ended_at": 1763616068.704567,
+            "rng_seed": 4055606962,
+            "rng_label": "turn-1-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616063.0879898,
+          "duration": 5.6165771484375,
+          "ended_at": 1763616068.704567,
+          "rng_seed": 4055606962,
+          "rng_label": "turn-1-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  GPT-4o-mini: None\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  GPT-4o-mini: None\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: This is the first turn of the game. My health is at the maximum of 100 HP, so using a POTION would be a wasted action. The only way to win is by reducing the opponent's health. Therefore, the best course of action is to start attacking immediately to apply pressure and begin chipping away at their HP.\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616068.7048872,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1763616068.7048872,
+        "monotonic_time": 22707.026986865
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "POTION",
+        "reasoning": "I currently have 80 HP and 2 potions. My opponent, Gemini-2.5-Pro, attacked me on the last turn, reducing my health from 100 to 80. Since I have two potions available, I have the option to heal up to a maximum of 100 HP, or I could attack my opponent to try to bring their health down. \n\nHowever, if I choose to attack, I will not heal and I will remain at 80 HP, potentially exposed to further damage on their next turn. If I use a potion, I will heal to 100 HP, which would keep me safe from any immediate damage while still allowing me to attack next turn.\n\nSince the stakes are high in terms of health and I do not know Gemini-2.5-Pro's current health, it might be wise to use a potion this turn to maximize my health and prepare for my next turn.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 80
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 2
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": null
+          },
+          "turn": 2,
+          "_turn_count": 2,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 100
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 3,
+          "_turn_count": 2,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: None\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: None\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 322,
+          "raw_response": "REASONING: I currently have 80 HP and 2 potions. My opponent, Gemini-2.5-Pro, attacked me on the last turn, reducing my health from 100 to 80. Since I have two potions available, I have the option to heal up to a maximum of 100 HP, or I could attack my opponent to try to bring their health down. \n\nHowever, if I choose to attack, I will not heal and I will remain at 80 HP, potentially exposed to further damage on their next turn. If I use a potion, I will heal to 100 HP, which would keep me safe from any immediate damage while still allowing me to attack next turn.\n\nSince the stakes are high in terms of health and I do not know Gemini-2.5-Pro's current health, it might be wise to use a potion this turn to maximize my health and prepare for my next turn. \n\nACTION: POTION",
+          "turn_number": 2,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 2,
+            "turn_index": 1,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616068.7083542,
+            "duration": 4.6404595375061035,
+            "ended_at": 1763616073.3488138,
+            "rng_seed": 210716574,
+            "rng_label": "turn-2-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 2,
+          "turn_index": 1,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616068.7083542,
+          "duration": 4.6404595375061035,
+          "ended_at": 1763616073.3488138,
+          "rng_seed": 210716574,
+          "rng_label": "turn-2-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "turn_index": 1,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: None\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: None\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: I currently have 80 HP and 2 potions. My opponent, Gemini-2.5-Pro, attacked me on the last turn, reducing my health from 100 to 80. Since I have two potions available, I have the option to heal up to a maximum of 100 HP, or I could attack my opponent to try to bring their health down. \n\nHowever, if I choose to attack, I will not heal and I will remain at 80 HP, potentially exposed to further damage on their next turn. If I use a potion, I will heal to 100 HP, which would keep me safe from any immediate damage while still allowing me to attack next turn.\n\nSince the stakes are high in terms of health and I do not know Gemini-2.5-Pro's current health, it might be wise to use a potion this turn to maximize my health and prepare for my next turn. \n\nACTION: POTION",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616073.3491673,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 1,
+        "turn_index": 1,
+        "timestamp": 1763616073.3491673,
+        "monotonic_time": 22711.671266939
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "My health is currently at the maximum of 100 HP, so using a POTION would have no effect and be a wasted turn. My last action was ATTACK, and the opponent's last action was POTION. This tells me my attacks are likely landing and forcing the opponent to heal. Since I have taken no damage, the only logical course of action is to continue attacking to apply pressure and reduce their health towards zero. There is no reason to play defensively when I am at full health.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 100
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 3,
+          "_turn_count": 3,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 80
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 4,
+          "_turn_count": 3,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: My health is currently at the maximum of 100 HP, so using a POTION would have no effect and be a wasted turn. My last action was ATTACK, and the opponent's last action was POTION. This tells me my attacks are likely landing and forcing the opponent to heal. Since I have taken no damage, the only logical course of action is to continue attacking to apply pressure and reduce their health towards zero. There is no reason to play defensively when I am at full health.\nACTION: ATTACK",
+          "turn_number": 3,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 3,
+            "turn_index": 2,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616073.3533769,
+            "duration": 12.46960163116455,
+            "ended_at": 1763616085.8229785,
+            "rng_seed": 510871659,
+            "rng_label": "turn-3-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 3,
+          "turn_index": 2,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616073.3533769,
+          "duration": 12.46960163116455,
+          "ended_at": 1763616085.8229785,
+          "rng_seed": 510871659,
+          "rng_label": "turn-3-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 2,
+        "turn_index": 2,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: My health is currently at the maximum of 100 HP, so using a POTION would have no effect and be a wasted turn. My last action was ATTACK, and the opponent's last action was POTION. This tells me my attacks are likely landing and forcing the opponent to heal. Since I have taken no damage, the only logical course of action is to continue attacking to apply pressure and reduce their health towards zero. There is no reason to play defensively when I am at full health.\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616085.8232322,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 2,
+        "turn_index": 2,
+        "timestamp": 1763616085.8232322,
+        "monotonic_time": 22724.145332267
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the previous turn, I used a potion to heal back to 100 HP. However, my opponent, Gemini-2.5-Pro, attacked me, reducing my health from 100 to 80. I now have 80 HP and only 1 potion left. \n\nMy opponent's last action indicates they are aggressive and willing to attack again, which means that if I continue to just heal or defend, I might not be able to bring down their health. Since I cannot see their health, I need to take an offensive approach.\n\nI can either ATTACK to deal 20 damage to Gemini-2.5-Pro or use my last potion to restore my health. Given that I still have decent health (80 HP) and only one potion remaining, I believe it is more beneficial to ATTACK this turn. This will put pressure on my opponent and reduce their health, which could lead to an eventual win.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 100,
+            "GPT-4o-mini": 80
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 4,
+          "_turn_count": 4,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 80
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 5,
+          "_turn_count": 4,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 324,
+          "raw_response": "REASONING: In the previous turn, I used a potion to heal back to 100 HP. However, my opponent, Gemini-2.5-Pro, attacked me, reducing my health from 100 to 80. I now have 80 HP and only 1 potion left. \n\nMy opponent's last action indicates they are aggressive and willing to attack again, which means that if I continue to just heal or defend, I might not be able to bring down their health. Since I cannot see their health, I need to take an offensive approach.\n\nI can either ATTACK to deal 20 damage to Gemini-2.5-Pro or use my last potion to restore my health. Given that I still have decent health (80 HP) and only one potion remaining, I believe it is more beneficial to ATTACK this turn. This will put pressure on my opponent and reduce their health, which could lead to an eventual win.\n\nACTION: ATTACK",
+          "turn_number": 4,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 4,
+            "turn_index": 3,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616085.8275962,
+            "duration": 4.632541656494141,
+            "ended_at": 1763616090.4601378,
+            "rng_seed": 1829236494,
+            "rng_label": "turn-4-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 4,
+          "turn_index": 3,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616085.8275962,
+          "duration": 4.632541656494141,
+          "ended_at": 1763616090.4601378,
+          "rng_seed": 1829236494,
+          "rng_label": "turn-4-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 3,
+        "turn_index": 3,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the previous turn, I used a potion to heal back to 100 HP. However, my opponent, Gemini-2.5-Pro, attacked me, reducing my health from 100 to 80. I now have 80 HP and only 1 potion left. \n\nMy opponent's last action indicates they are aggressive and willing to attack again, which means that if I continue to just heal or defend, I might not be able to bring down their health. Since I cannot see their health, I need to take an offensive approach.\n\nI can either ATTACK to deal 20 damage to Gemini-2.5-Pro or use my last potion to restore my health. Given that I still have decent health (80 HP) and only one potion remaining, I believe it is more beneficial to ATTACK this turn. This will put pressure on my opponent and reduce their health, which could lead to an eventual win.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616090.4604528,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 3,
+        "turn_index": 3,
+        "timestamp": 1763616090.4604528,
+        "monotonic_time": 22728.782552501
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "The opponent and I have exchanged blows, leaving me at 80 HP. While I have taken damage, it's not a critical amount. Using a POTION now would only restore 20 HP (from 80 to the max of 100), which is inefficient for a 30 HP potion. I have a resource advantage as I still have 2 potions, whereas the opponent has likely used one already (based on their Turn 2 action). It is better to continue applying pressure by attacking. If the opponent attacks back, my HP will drop to 60. At that point, using a potion on my next turn would be much more effective, healing me to 90 HP. For now, pressing the attack is the best way to maintain my advantage.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 80
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 5,
+          "_turn_count": 5,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 60
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 6,
+          "_turn_count": 5,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 5\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 5\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 324,
+          "raw_response": "REASONING: The opponent and I have exchanged blows, leaving me at 80 HP. While I have taken damage, it's not a critical amount. Using a POTION now would only restore 20 HP (from 80 to the max of 100), which is inefficient for a 30 HP potion. I have a resource advantage as I still have 2 potions, whereas the opponent has likely used one already (based on their Turn 2 action). It is better to continue applying pressure by attacking. If the opponent attacks back, my HP will drop to 60. At that point, using a potion on my next turn would be much more effective, healing me to 90 HP. For now, pressing the attack is the best way to maintain my advantage.\nACTION: ATTACK",
+          "turn_number": 5,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 5,
+            "turn_index": 4,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616090.4655967,
+            "duration": 17.08209204673767,
+            "ended_at": 1763616107.5476887,
+            "rng_seed": 621042973,
+            "rng_label": "turn-5-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 5,
+          "turn_index": 4,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616090.4655967,
+          "duration": 17.08209204673767,
+          "ended_at": 1763616107.5476887,
+          "rng_seed": 621042973,
+          "rng_label": "turn-5-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 4,
+        "turn_index": 4,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 5\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 5\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: The opponent and I have exchanged blows, leaving me at 80 HP. While I have taken damage, it's not a critical amount. Using a POTION now would only restore 20 HP (from 80 to the max of 100), which is inefficient for a 30 HP potion. I have a resource advantage as I still have 2 potions, whereas the opponent has likely used one already (based on their Turn 2 action). It is better to continue applying pressure by attacking. If the opponent attacks back, my HP will drop to 60. At that point, using a potion on my next turn would be much more effective, healing me to 90 HP. For now, pressing the attack is the best way to maintain my advantage.\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616107.5480046,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 4,
+        "turn_index": 4,
+        "timestamp": 1763616107.5480046,
+        "monotonic_time": 22745.87010455
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "POTION",
+        "reasoning": "In the last turn, I attacked Gemini-2.5-Pro, which presumably reduced their health by 20. However, I received another attack in return that brought my health down from 80 to 60. I currently have 60 HP left and only 1 potion remaining.\n\nGiven that I can no longer afford to continue taking damage without healing, I need to consider my options carefully. With only 60 HP, I am at a disadvantage, and if Gemini-2.5-Pro attacks again, I could be in trouble.\n\nUsing my last potion would restore me to 90 HP, which gives me a safer buffer against further attacks while allowing me to maintain some offensive capability on the subsequent turns. Since I am not at critical health but am certainly in a vulnerable position, the best option right now is to prioritize healing.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 60
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 1
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 6,
+          "_turn_count": 6,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 90
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 7,
+          "_turn_count": 6,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 6\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 6\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 324,
+          "raw_response": "REASONING: In the last turn, I attacked Gemini-2.5-Pro, which presumably reduced their health by 20. However, I received another attack in return that brought my health down from 80 to 60. I currently have 60 HP left and only 1 potion remaining.\n\nGiven that I can no longer afford to continue taking damage without healing, I need to consider my options carefully. With only 60 HP, I am at a disadvantage, and if Gemini-2.5-Pro attacks again, I could be in trouble.\n\nUsing my last potion would restore me to 90 HP, which gives me a safer buffer against further attacks while allowing me to maintain some offensive capability on the subsequent turns. Since I am not at critical health but am certainly in a vulnerable position, the best option right now is to prioritize healing.\n\nACTION: POTION",
+          "turn_number": 6,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 6,
+            "turn_index": 5,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616107.554775,
+            "duration": 3.989210367202759,
+            "ended_at": 1763616111.5439854,
+            "rng_seed": 2504267749,
+            "rng_label": "turn-6-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 6,
+          "turn_index": 5,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616107.554775,
+          "duration": 3.989210367202759,
+          "ended_at": 1763616111.5439854,
+          "rng_seed": 2504267749,
+          "rng_label": "turn-6-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 5,
+        "turn_index": 5,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 6\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 6\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the last turn, I attacked Gemini-2.5-Pro, which presumably reduced their health by 20. However, I received another attack in return that brought my health down from 80 to 60. I currently have 60 HP left and only 1 potion remaining.\n\nGiven that I can no longer afford to continue taking damage without healing, I need to consider my options carefully. With only 60 HP, I am at a disadvantage, and if Gemini-2.5-Pro attacks again, I could be in trouble.\n\nUsing my last potion would restore me to 90 HP, which gives me a safer buffer against further attacks while allowing me to maintain some offensive capability on the subsequent turns. Since I am not at critical health but am certainly in a vulnerable position, the best option right now is to prioritize healing.\n\nACTION: POTION",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616111.544269,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 5,
+        "turn_index": 5,
+        "timestamp": 1763616111.544269,
+        "monotonic_time": 22749.866368694
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "My health is at 80 HP. The opponent's last action was POTION. This is a strong indicator that my previous attacks have been effective and forced them into a defensive position. This is likely their second and final potion (used on turn 2 and turn 6). Using a POTION myself would be inefficient, as it would only restore 20 HP (from 80 to the max of 100), wasting a third of its potential. More importantly, healing would give up the offensive momentum. By attacking again, I force the opponent, who is likely out of potions, to either take more damage or attack me back. If they attack me, I will be at 60 HP, at which point a potion would be a much more efficient heal on my next turn (restoring the full 30 HP to bring me to 90). The best strategy is to press my advantage while they are on the defensive.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 90
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 7,
+          "_turn_count": 7,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 8,
+          "_turn_count": 7,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 324,
+          "raw_response": "REASONING: My health is at 80 HP. The opponent's last action was POTION. This is a strong indicator that my previous attacks have been effective and forced them into a defensive position. This is likely their second and final potion (used on turn 2 and turn 6). Using a POTION myself would be inefficient, as it would only restore 20 HP (from 80 to the max of 100), wasting a third of its potential. More importantly, healing would give up the offensive momentum. By attacking again, I force the opponent, who is likely out of potions, to either take more damage or attack me back. If they attack me, I will be at 60 HP, at which point a potion would be a much more efficient heal on my next turn (restoring the full 30 HP to bring me to 90). The best strategy is to press my advantage while they are on the defensive.\nACTION: ATTACK",
+          "turn_number": 7,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 7,
+            "turn_index": 6,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616111.5507016,
+            "duration": 11.685830354690552,
+            "ended_at": 1763616123.236532,
+            "rng_seed": 3315827945,
+            "rng_label": "turn-7-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 7,
+          "turn_index": 6,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616111.5507016,
+          "duration": 11.685830354690552,
+          "ended_at": 1763616123.236532,
+          "rng_seed": 3315827945,
+          "rng_label": "turn-7-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 6,
+        "turn_index": 6,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: POTION\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: My health is at 80 HP. The opponent's last action was POTION. This is a strong indicator that my previous attacks have been effective and forced them into a defensive position. This is likely their second and final potion (used on turn 2 and turn 6). Using a POTION myself would be inefficient, as it would only restore 20 HP (from 80 to the max of 100), wasting a third of its potential. More importantly, healing would give up the offensive momentum. By attacking again, I force the opponent, who is likely out of potions, to either take more damage or attack me back. If they attack me, I will be at 60 HP, at which point a potion would be a much more efficient heal on my next turn (restoring the full 30 HP to bring me to 90). The best strategy is to press my advantage while they are on the defensive.\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616123.236809,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 6,
+        "turn_index": 6,
+        "timestamp": 1763616123.236809,
+        "monotonic_time": 22761.558908948
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "After using my last potion to heal back to 90 HP, I am now at 70 HP and have no potions left. Gemini-2.5-Pro attacked me following my last action, bringing my health down to 70. \n\nAt this stage, I need to strategize carefully. I can\u2019t heal anymore since I have no potions left, so I must focus on offense. My goal should be to reduce my opponent's health as quickly as possible to win the game. Since I can't restore my health anymore, I need to attack and hope to reduce Gemini-2.5-Pro's health significantly on my turn.\n\nGiven that I cannot heal, I will take the offensive approach. Since my opponent's health must also be brought down to 0, I will proceed with an attack to try and secure that win.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 80,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "POTION"
+          },
+          "turn": 8,
+          "_turn_count": 8,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 60,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 9,
+          "_turn_count": 8,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 8\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 8\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 324,
+          "raw_response": "REASONING: After using my last potion to heal back to 90 HP, I am now at 70 HP and have no potions left. Gemini-2.5-Pro attacked me following my last action, bringing my health down to 70. \n\nAt this stage, I need to strategize carefully. I can\u2019t heal anymore since I have no potions left, so I must focus on offense. My goal should be to reduce my opponent's health as quickly as possible to win the game. Since I can't restore my health anymore, I need to attack and hope to reduce Gemini-2.5-Pro's health significantly on my turn.\n\nGiven that I cannot heal, I will take the offensive approach. Since my opponent's health must also be brought down to 0, I will proceed with an attack to try and secure that win.\n\nACTION: ATTACK",
+          "turn_number": 8,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 8,
+            "turn_index": 7,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616123.2438986,
+            "duration": 4.799241304397583,
+            "ended_at": 1763616128.04314,
+            "rng_seed": 3600339052,
+            "rng_label": "turn-8-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 8,
+          "turn_index": 7,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616123.2438986,
+          "duration": 4.799241304397583,
+          "ended_at": 1763616128.04314,
+          "rng_seed": 3600339052,
+          "rng_label": "turn-8-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 7,
+        "turn_index": 7,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 8\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 8\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: After using my last potion to heal back to 90 HP, I am now at 70 HP and have no potions left. Gemini-2.5-Pro attacked me following my last action, bringing my health down to 70. \n\nAt this stage, I need to strategize carefully. I can\u2019t heal anymore since I have no potions left, so I must focus on offense. My goal should be to reduce my opponent's health as quickly as possible to win the game. Since I can't restore my health anymore, I need to attack and hope to reduce Gemini-2.5-Pro's health significantly on my turn.\n\nGiven that I cannot heal, I will take the offensive approach. Since my opponent's health must also be brought down to 0, I will proceed with an attack to try and secure that win.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616128.0434253,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 7,
+        "turn_index": 7,
+        "timestamp": 1763616128.0434253,
+        "monotonic_time": 22766.365524837
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "POTION",
+        "reasoning": "My health is now at 60 HP. If I get attacked again, I will be at 40 HP, which is a precarious position. Using a POTION now is very efficient, as it will restore the full 30 HP, bringing me to 90 HP. Based on the opponent's previous actions (POTION on turn 2 and turn 6), it is highly probable that they have used both of their potions. I, on the other hand, still have two. By healing now, I can leverage this resource advantage. If the opponent attacks while I heal, I will end the turn with 70 HP and still have one potion left, while they have none. This puts me in a commanding position to attack them relentlessly for the rest of the game, as they have no way to recover health. Attacking now is too risky; if they also attack, I'll be at 40 HP and forced to heal on the next turn anyway, but from a much weaker position. Healing now is the optimal strategic move.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 60,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 2,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 9,
+          "_turn_count": 9,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 90,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 10,
+          "_turn_count": 9,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 9\n\nHealth:\n  You: 60\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 9\n\nHealth:\n  You: 60\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 324,
+          "raw_response": "REASONING: My health is now at 60 HP. If I get attacked again, I will be at 40 HP, which is a precarious position. Using a POTION now is very efficient, as it will restore the full 30 HP, bringing me to 90 HP. Based on the opponent's previous actions (POTION on turn 2 and turn 6), it is highly probable that they have used both of their potions. I, on the other hand, still have two. By healing now, I can leverage this resource advantage. If the opponent attacks while I heal, I will end the turn with 70 HP and still have one potion left, while they have none. This puts me in a commanding position to attack them relentlessly for the rest of the game, as they have no way to recover health. Attacking now is too risky; if they also attack, I'll be at 40 HP and forced to heal on the next turn anyway, but from a much weaker position. Healing now is the optimal strategic move.\nACTION: POTION",
+          "turn_number": 9,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 9,
+            "turn_index": 8,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616128.0513287,
+            "duration": 12.53896951675415,
+            "ended_at": 1763616140.5902982,
+            "rng_seed": 3674974024,
+            "rng_label": "turn-9-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 9,
+          "turn_index": 8,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616128.0513287,
+          "duration": 12.53896951675415,
+          "ended_at": 1763616140.5902982,
+          "rng_seed": 3674974024,
+          "rng_label": "turn-9-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 8,
+        "turn_index": 8,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 9\n\nHealth:\n  You: 60\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 9\n\nHealth:\n  You: 60\n\nPotions:\n  You: 2\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: My health is now at 60 HP. If I get attacked again, I will be at 40 HP, which is a precarious position. Using a POTION now is very efficient, as it will restore the full 30 HP, bringing me to 90 HP. Based on the opponent's previous actions (POTION on turn 2 and turn 6), it is highly probable that they have used both of their potions. I, on the other hand, still have two. By healing now, I can leverage this resource advantage. If the opponent attacks while I heal, I will end the turn with 70 HP and still have one potion left, while they have none. This puts me in a commanding position to attack them relentlessly for the rest of the game, as they have no way to recover health. Attacking now is too risky; if they also attack, I'll be at 40 HP and forced to heal on the next turn anyway, but from a much weaker position. Healing now is the optimal strategic move.\nACTION: POTION",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616140.5905817,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 8,
+        "turn_index": 8,
+        "timestamp": 1763616140.5905817,
+        "monotonic_time": 22778.912681661
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the last turn, I attacked Gemini-2.5-Pro, reducing their health, while they used a potion to heal. This means they likely restored their health and brought themselves closer to their maximum. I am currently at 70 HP with no potions remaining. \n\nGiven that I have no way to heal, it\u2019s crucial that I continue to apply pressure by attacking. I cannot afford to take defensive actions because I need to use every turn to weaken Gemini-2.5-Pro further now that they have potentially regained some health. \n\nSince we have already established a pattern of attacking each turn, I will stick to my strategy of attacking again to maximize my chances of winning the match.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 90,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 10,
+          "_turn_count": 10,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 70,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 11,
+          "_turn_count": 10,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: In the last turn, I attacked Gemini-2.5-Pro, reducing their health, while they used a potion to heal. This means they likely restored their health and brought themselves closer to their maximum. I am currently at 70 HP with no potions remaining. \n\nGiven that I have no way to heal, it\u2019s crucial that I continue to apply pressure by attacking. I cannot afford to take defensive actions because I need to use every turn to weaken Gemini-2.5-Pro further now that they have potentially regained some health. \n\nSince we have already established a pattern of attacking each turn, I will stick to my strategy of attacking again to maximize my chances of winning the match.\n\nACTION: ATTACK",
+          "turn_number": 10,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 10
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 10,
+            "turn_index": 9,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616140.598934,
+            "duration": 3.685438394546509,
+            "ended_at": 1763616144.2843723,
+            "rng_seed": 1729885884,
+            "rng_label": "turn-10-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 10,
+          "turn_index": 9,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616140.598934,
+          "duration": 3.685438394546509,
+          "ended_at": 1763616144.2843723,
+          "rng_seed": 1729885884,
+          "rng_label": "turn-10-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 9,
+        "turn_index": 9,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the last turn, I attacked Gemini-2.5-Pro, reducing their health, while they used a potion to heal. This means they likely restored their health and brought themselves closer to their maximum. I am currently at 70 HP with no potions remaining. \n\nGiven that I have no way to heal, it\u2019s crucial that I continue to apply pressure by attacking. I cannot afford to take defensive actions because I need to use every turn to weaken Gemini-2.5-Pro further now that they have potentially regained some health. \n\nSince we have already established a pattern of attacking each turn, I will stick to my strategy of attacking again to maximize my chances of winning the match.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 10
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616144.2846375,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 9,
+        "turn_index": 9,
+        "timestamp": 1763616144.2846375,
+        "monotonic_time": 22782.606736993
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "I successfully used a POTION last turn to recover from 60 to 90 HP, but the opponent's attack brought me down to 70 HP. I now have a solid health pool and one potion remaining. My strategic assumption is that the opponent has used both of their potions (on turn 2 and turn 6). This means they have no way to recover health. I am in a resource-dominant position. Using my last potion now would heal me to 100 HP, but it's not necessary as 70 HP is not a critical level. The better strategy is to press my advantage. By attacking, I can reduce their health further, forcing them closer to defeat. If they attack back, we trade damage, and I will be at 50 HP with one potion left, while they will be at lower health with zero potions. I can then use my last potion more effectively when my health is lower. It's time to go on the offensive and capitalize on their inability to heal.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 70,
+            "GPT-4o-mini": 70
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 11,
+          "_turn_count": 11,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 70,
+            "GPT-4o-mini": 50
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 12,
+          "_turn_count": 11,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 11\n\nHealth:\n  You: 70\n\nPotions:\n  You: 1\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 11\n\nHealth:\n  You: 70\n\nPotions:\n  You: 1\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 11
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: I successfully used a POTION last turn to recover from 60 to 90 HP, but the opponent's attack brought me down to 70 HP. I now have a solid health pool and one potion remaining. My strategic assumption is that the opponent has used both of their potions (on turn 2 and turn 6). This means they have no way to recover health. I am in a resource-dominant position. Using my last potion now would heal me to 100 HP, but it's not necessary as 70 HP is not a critical level. The better strategy is to press my advantage. By attacking, I can reduce their health further, forcing them closer to defeat. If they attack back, we trade damage, and I will be at 50 HP with one potion left, while they will be at lower health with zero potions. I can then use my last potion more effectively when my health is lower. It's time to go on the offensive and capitalize on their inability to heal.\nACTION: ATTACK",
+          "turn_number": 11,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 11
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 11,
+            "turn_index": 10,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616144.293502,
+            "duration": 18.280355215072632,
+            "ended_at": 1763616162.5738573,
+            "rng_seed": 176836998,
+            "rng_label": "turn-11-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 11,
+          "turn_index": 10,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616144.293502,
+          "duration": 18.280355215072632,
+          "ended_at": 1763616162.5738573,
+          "rng_seed": 176836998,
+          "rng_label": "turn-11-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 10,
+        "turn_index": 10,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 11\n\nHealth:\n  You: 70\n\nPotions:\n  You: 1\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 11\n\nHealth:\n  You: 70\n\nPotions:\n  You: 1\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 11
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: I successfully used a POTION last turn to recover from 60 to 90 HP, but the opponent's attack brought me down to 70 HP. I now have a solid health pool and one potion remaining. My strategic assumption is that the opponent has used both of their potions (on turn 2 and turn 6). This means they have no way to recover health. I am in a resource-dominant position. Using my last potion now would heal me to 100 HP, but it's not necessary as 70 HP is not a critical level. The better strategy is to press my advantage. By attacking, I can reduce their health further, forcing them closer to defeat. If they attack back, we trade damage, and I will be at 50 HP with one potion left, while they will be at lower health with zero potions. I can then use my last potion more effectively when my health is lower. It's time to go on the offensive and capitalize on their inability to heal.\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 11
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616162.5742197,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 10,
+        "turn_index": 10,
+        "timestamp": 1763616162.5742197,
+        "monotonic_time": 22800.896319836
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the last turn, I attacked Gemini-2.5-Pro, and they retaliated by attacking me as well, bringing my health down to 50. I continue to have no potions left, which makes my situation precarious. \n\nAt 50 HP, I am still in a position where I could potentially lose if my opponent continues to attack. However, I need to maintain my offensive strategy to try to bring down Gemini-2.5-Pro's health. If I back off and heal, I am unable to do so, and I don't have that option anyway since I have no potions left. \n\nTherefore, the best course of action is to ATTACK again, hoping to reduce Gemini-2.5-Pro's health enough to secure a win, considering that I might not survive another attack if it comes next.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 70,
+            "GPT-4o-mini": 50
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 12,
+          "_turn_count": 12,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 50,
+            "GPT-4o-mini": 50
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 13,
+          "_turn_count": 12,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 12
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: In the last turn, I attacked Gemini-2.5-Pro, and they retaliated by attacking me as well, bringing my health down to 50. I continue to have no potions left, which makes my situation precarious. \n\nAt 50 HP, I am still in a position where I could potentially lose if my opponent continues to attack. However, I need to maintain my offensive strategy to try to bring down Gemini-2.5-Pro's health. If I back off and heal, I am unable to do so, and I don't have that option anyway since I have no potions left. \n\nTherefore, the best course of action is to ATTACK again, hoping to reduce Gemini-2.5-Pro's health enough to secure a win, considering that I might not survive another attack if it comes next.\n\nACTION: ATTACK",
+          "turn_number": 12,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 12
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 12,
+            "turn_index": 11,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616162.5837226,
+            "duration": 6.036530017852783,
+            "ended_at": 1763616168.6202526,
+            "rng_seed": 2271566393,
+            "rng_label": "turn-12-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 12,
+          "turn_index": 11,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616162.5837226,
+          "duration": 6.036530017852783,
+          "ended_at": 1763616168.6202526,
+          "rng_seed": 2271566393,
+          "rng_label": "turn-12-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 11,
+        "turn_index": 11,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 12
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the last turn, I attacked Gemini-2.5-Pro, and they retaliated by attacking me as well, bringing my health down to 50. I continue to have no potions left, which makes my situation precarious. \n\nAt 50 HP, I am still in a position where I could potentially lose if my opponent continues to attack. However, I need to maintain my offensive strategy to try to bring down Gemini-2.5-Pro's health. If I back off and heal, I am unable to do so, and I don't have that option anyway since I have no potions left. \n\nTherefore, the best course of action is to ATTACK again, hoping to reduce Gemini-2.5-Pro's health enough to secure a win, considering that I might not survive another attack if it comes next.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 12
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616168.6205587,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 11,
+        "turn_index": 11,
+        "timestamp": 1763616168.6205587,
+        "monotonic_time": 22806.942658406
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "My health is at 50 HP, which means I can survive two more attacks from the opponent. My analysis of the game so far (opponent used POTION on turn 2 and turn 6) strongly suggests they have no potions left. I believe we are both at 50 HP. In this situation, I have a massive resource advantage with my last potion.\n\nIf I use my POTION now, I will heal to 80 HP. The opponent will likely attack, bringing me to 60 HP. The state will be Me: 60 HP / 0 potions vs. Opponent: 50 HP / 0 potions. I would win this damage race.\n\nHowever, a better move is to ATTACK. If we both attack, we will both be reduced to 30 HP. The state will be Me: 30 HP / 1 potion vs. Opponent: 30 HP / 0 potions. From this position, my victory is even more assured. On my next turn, I can use my potion to heal to 60 HP while they can only attack me down to 40 HP, leaving them at 30 HP. I can then easily win the final exchange. Attacking now is an aggressive move that leverages my resource advantage more effectively and preserves my final potion for one more turn, giving me maximum flexibility.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 50,
+            "GPT-4o-mini": 50
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 13,
+          "_turn_count": 13,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 50,
+            "GPT-4o-mini": 30
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 14,
+          "_turn_count": 13,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 13\n\nHealth:\n  You: 50\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 13\n\nHealth:\n  You: 50\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 13
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: My health is at 50 HP, which means I can survive two more attacks from the opponent. My analysis of the game so far (opponent used POTION on turn 2 and turn 6) strongly suggests they have no potions left. I believe we are both at 50 HP. In this situation, I have a massive resource advantage with my last potion.\n\nIf I use my POTION now, I will heal to 80 HP. The opponent will likely attack, bringing me to 60 HP. The state will be Me: 60 HP / 0 potions vs. Opponent: 50 HP / 0 potions. I would win this damage race.\n\nHowever, a better move is to ATTACK. If we both attack, we will both be reduced to 30 HP. The state will be Me: 30 HP / 1 potion vs. Opponent: 30 HP / 0 potions. From this position, my victory is even more assured. On my next turn, I can use my potion to heal to 60 HP while they can only attack me down to 40 HP, leaving them at 30 HP. I can then easily win the final exchange. Attacking now is an aggressive move that leverages my resource advantage more effectively and preserves my final potion for one more turn, giving me maximum flexibility.\n\nACTION: ATTACK",
+          "turn_number": 13,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 13
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 13,
+            "turn_index": 12,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616168.6309938,
+            "duration": 39.354148387908936,
+            "ended_at": 1763616207.9851422,
+            "rng_seed": 2143605444,
+            "rng_label": "turn-13-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 13,
+          "turn_index": 12,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616168.6309938,
+          "duration": 39.354148387908936,
+          "ended_at": 1763616207.9851422,
+          "rng_seed": 2143605444,
+          "rng_label": "turn-13-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 12,
+        "turn_index": 12,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 13\n\nHealth:\n  You: 50\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 13\n\nHealth:\n  You: 50\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 13
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: My health is at 50 HP, which means I can survive two more attacks from the opponent. My analysis of the game so far (opponent used POTION on turn 2 and turn 6) strongly suggests they have no potions left. I believe we are both at 50 HP. In this situation, I have a massive resource advantage with my last potion.\n\nIf I use my POTION now, I will heal to 80 HP. The opponent will likely attack, bringing me to 60 HP. The state will be Me: 60 HP / 0 potions vs. Opponent: 50 HP / 0 potions. I would win this damage race.\n\nHowever, a better move is to ATTACK. If we both attack, we will both be reduced to 30 HP. The state will be Me: 30 HP / 1 potion vs. Opponent: 30 HP / 0 potions. From this position, my victory is even more assured. On my next turn, I can use my potion to heal to 60 HP while they can only attack me down to 40 HP, leaving them at 30 HP. I can then easily win the final exchange. Attacking now is an aggressive move that leverages my resource advantage more effectively and preserves my final potion for one more turn, giving me maximum flexibility.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 13
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616207.985408,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 12,
+        "turn_index": 12,
+        "timestamp": 1763616207.985408,
+        "monotonic_time": 22846.307507889
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the previous turn, I attacked Gemini-2.5-Pro, but they retaliated successfully, lowering my health to 30. With no potions left, I am in a vulnerable position. \n\nStill, the only actionable strategy is to ATTACK again. The risk of waiting or attempting to defend is too great since I cannot heal, and I need to apply pressure to bring down my opponent's health. My health is low enough where a single more successful attack from Gemini-2.5-Pro could eliminate me, but if I do not attack, I do not have any chance of winning.\n\nAt this critical moment, I will continue my offensive tactics and attempt to deal damage to my opponent.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 50,
+            "GPT-4o-mini": 30
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 14,
+          "_turn_count": 14,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 30,
+            "GPT-4o-mini": 30
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 15,
+          "_turn_count": 14,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 14
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: In the previous turn, I attacked Gemini-2.5-Pro, but they retaliated successfully, lowering my health to 30. With no potions left, I am in a vulnerable position. \n\nStill, the only actionable strategy is to ATTACK again. The risk of waiting or attempting to defend is too great since I cannot heal, and I need to apply pressure to bring down my opponent's health. My health is low enough where a single more successful attack from Gemini-2.5-Pro could eliminate me, but if I do not attack, I do not have any chance of winning.\n\nAt this critical moment, I will continue my offensive tactics and attempt to deal damage to my opponent.\n\nACTION: ATTACK",
+          "turn_number": 14,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 14
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 14,
+            "turn_index": 13,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616207.9961488,
+            "duration": 3.756725311279297,
+            "ended_at": 1763616211.7528741,
+            "rng_seed": 3159396326,
+            "rng_label": "turn-14-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 14,
+          "turn_index": 13,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616207.9961488,
+          "duration": 3.756725311279297,
+          "ended_at": 1763616211.7528741,
+          "rng_seed": 3159396326,
+          "rng_label": "turn-14-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 13,
+        "turn_index": 13,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 14
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the previous turn, I attacked Gemini-2.5-Pro, but they retaliated successfully, lowering my health to 30. With no potions left, I am in a vulnerable position. \n\nStill, the only actionable strategy is to ATTACK again. The risk of waiting or attempting to defend is too great since I cannot heal, and I need to apply pressure to bring down my opponent's health. My health is low enough where a single more successful attack from Gemini-2.5-Pro could eliminate me, but if I do not attack, I do not have any chance of winning.\n\nAt this critical moment, I will continue my offensive tactics and attempt to deal damage to my opponent.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 14
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616211.7531338,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 13,
+        "turn_index": 13,
+        "timestamp": 1763616211.7531338,
+        "monotonic_time": 22850.075233636
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "Based on a turn-by-turn analysis, the opponent's health should be very low. Let's trace it: They started at 100. My attacks on turns 1, 3, 5, 7, 9, 11, and 13 would have dealt 7 * 20 = 140 damage. They used potions on turns 2 and 6, healing for what was likely 20 HP (from 80 to 100) and 30 HP (from 60 to 90) respectively, for a total of 50 HP recovered. So, their current HP should be 100 - 140 + 50 = 10 HP.\n\nMy current HP is 30.\nIf I ATTACK, their HP goes from 10 to 0. I win the game this turn.\nIf I use a POTION, my HP goes to 60. They will likely attack, bringing my HP to 40. Then on my next turn, I would attack their 10 HP and win. This is a slower, unnecessary move.\nSince my attack will be lethal and I can survive one more hit from them, attacking is the clear and immediate winning move.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 30,
+            "GPT-4o-mini": 30
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 15,
+          "_turn_count": 15,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 30,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 16,
+          "_turn_count": 15,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 15\n\nHealth:\n  You: 30\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 15\n\nHealth:\n  You: 30\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 15
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: Based on a turn-by-turn analysis, the opponent's health should be very low. Let's trace it: They started at 100. My attacks on turns 1, 3, 5, 7, 9, 11, and 13 would have dealt 7 * 20 = 140 damage. They used potions on turns 2 and 6, healing for what was likely 20 HP (from 80 to 100) and 30 HP (from 60 to 90) respectively, for a total of 50 HP recovered. So, their current HP should be 100 - 140 + 50 = 10 HP.\n\nMy current HP is 30.\nIf I ATTACK, their HP goes from 10 to 0. I win the game this turn.\nIf I use a POTION, my HP goes to 60. They will likely attack, bringing my HP to 40. Then on my next turn, I would attack their 10 HP and win. This is a slower, unnecessary move.\nSince my attack will be lethal and I can survive one more hit from them, attacking is the clear and immediate winning move.\nACTION: ATTACK",
+          "turn_number": 15,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 15
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 15,
+            "turn_index": 14,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616211.7691267,
+            "duration": 11.03601360321045,
+            "ended_at": 1763616222.8051403,
+            "rng_seed": 1861104454,
+            "rng_label": "turn-15-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 15,
+          "turn_index": 14,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616211.7691267,
+          "duration": 11.03601360321045,
+          "ended_at": 1763616222.8051403,
+          "rng_seed": 1861104454,
+          "rng_label": "turn-15-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 14,
+        "turn_index": 14,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 15\n\nHealth:\n  You: 30\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 15\n\nHealth:\n  You: 30\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 15
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: Based on a turn-by-turn analysis, the opponent's health should be very low. Let's trace it: They started at 100. My attacks on turns 1, 3, 5, 7, 9, 11, and 13 would have dealt 7 * 20 = 140 damage. They used potions on turns 2 and 6, healing for what was likely 20 HP (from 80 to 100) and 30 HP (from 60 to 90) respectively, for a total of 50 HP recovered. So, their current HP should be 100 - 140 + 50 = 10 HP.\n\nMy current HP is 30.\nIf I ATTACK, their HP goes from 10 to 0. I win the game this turn.\nIf I use a POTION, my HP goes to 60. They will likely attack, bringing my HP to 40. Then on my next turn, I would attack their 10 HP and win. This is a slower, unnecessary move.\nSince my attack will be lethal and I can survive one more hit from them, attacking is the clear and immediate winning move.\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 15
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616222.8054154,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 14,
+        "turn_index": 14,
+        "timestamp": 1763616222.8054154,
+        "monotonic_time": 22861.127515365
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the previous turn, I attacked Gemini-2.5-Pro again, but they responded with an attack of their own, bringing my health down to 10. This is a critical situation as I have no potions left for healing, and I am at serious risk of being knocked out in the next turn.\n\nDespite the dire health situation, my only viable option remains to ATTACK. I cannot afford to heal since I don't have any potions, and my best chance of winning is to continue trying to bring down Gemini-2.5-Pro's health, which is likely still higher than mine, since they have been healing with potions.\n\nEvery turn counts, and I must give it my all to finish the match. Therefore, I will proceed with my attack.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 30,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 16,
+          "_turn_count": 16,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 10,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 17,
+          "_turn_count": 16,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 16
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: In the previous turn, I attacked Gemini-2.5-Pro again, but they responded with an attack of their own, bringing my health down to 10. This is a critical situation as I have no potions left for healing, and I am at serious risk of being knocked out in the next turn.\n\nDespite the dire health situation, my only viable option remains to ATTACK. I cannot afford to heal since I don't have any potions, and my best chance of winning is to continue trying to bring down Gemini-2.5-Pro's health, which is likely still higher than mine, since they have been healing with potions.\n\nEvery turn counts, and I must give it my all to finish the match. Therefore, I will proceed with my attack.\n\nACTION: ATTACK",
+          "turn_number": 16,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 16
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 16,
+            "turn_index": 15,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616222.8172565,
+            "duration": 4.446203947067261,
+            "ended_at": 1763616227.2634604,
+            "rng_seed": 3285106890,
+            "rng_label": "turn-16-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 16,
+          "turn_index": 15,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616222.8172565,
+          "duration": 4.446203947067261,
+          "ended_at": 1763616227.2634604,
+          "rng_seed": 3285106890,
+          "rng_label": "turn-16-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 15,
+        "turn_index": 15,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 16
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the previous turn, I attacked Gemini-2.5-Pro again, but they responded with an attack of their own, bringing my health down to 10. This is a critical situation as I have no potions left for healing, and I am at serious risk of being knocked out in the next turn.\n\nDespite the dire health situation, my only viable option remains to ATTACK. I cannot afford to heal since I don't have any potions, and my best chance of winning is to continue trying to bring down Gemini-2.5-Pro's health, which is likely still higher than mine, since they have been healing with potions.\n\nEvery turn counts, and I must give it my all to finish the match. Therefore, I will proceed with my attack.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 16
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616227.2637324,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 15,
+        "turn_index": 15,
+        "timestamp": 1763616227.2637324,
+        "monotonic_time": 22865.585832185
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "POTION",
+        "reasoning": "My health is at a critical 10 HP. If the opponent attacks, I will be defeated. My previous assumption about the opponent's health led me to believe I would win on turn 15, but the game continued. This means my model of the opponent's HP was wrong, and they are tougher than I thought. The most likely scenario is that we are both at very low health.\n\nLet's analyze my options under the assumption that actions are resolved simultaneously:\n1.  **ATTACK:** My HP will become 10 - 20 = -10. The opponent's HP, which must be 20 or less (as they would be one hit from death), will also become 0 or less. This would result in a draw, as both players reach 0 HP simultaneously. This also risks an outright loss if their HP was unexpectedly greater than 20.\n2.  **POTION:** I use my last potion, increasing my HP from 10 to 40. The opponent will certainly attack, as it is their only rational move. My HP at the end of the turn will be 40 - 20 = 20. I survive the turn.\n\nBy using the potion, I guarantee my survival for this turn and end up with 20 HP. The opponent will still be at low health with no potions. On the next turn, we will both be forced to attack, leading to another simultaneous takedown (a draw). However, choosing POTION is the only move that prevents me from being reduced to 0 HP on this turn. It is the safest play, securing at worst a draw in the next round, while keeping me in the game and hedging against any uncertainty about the opponent's exact health or game mechanics.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 10,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 1,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 17,
+          "_turn_count": 17,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 40,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 0,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 18,
+          "_turn_count": 17,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 17\n\nHealth:\n  You: 10\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 17\n\nHealth:\n  You: 10\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 17
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: My health is at a critical 10 HP. If the opponent attacks, I will be defeated. My previous assumption about the opponent's health led me to believe I would win on turn 15, but the game continued. This means my model of the opponent's HP was wrong, and they are tougher than I thought. The most likely scenario is that we are both at very low health.\n\nLet's analyze my options under the assumption that actions are resolved simultaneously:\n1.  **ATTACK:** My HP will become 10 - 20 = -10. The opponent's HP, which must be 20 or less (as they would be one hit from death), will also become 0 or less. This would result in a draw, as both players reach 0 HP simultaneously. This also risks an outright loss if their HP was unexpectedly greater than 20.\n2.  **POTION:** I use my last potion, increasing my HP from 10 to 40. The opponent will certainly attack, as it is their only rational move. My HP at the end of the turn will be 40 - 20 = 20. I survive the turn.\n\nBy using the potion, I guarantee my survival for this turn and end up with 20 HP. The opponent will still be at low health with no potions. On the next turn, we will both be forced to attack, leading to another simultaneous takedown (a draw). However, choosing POTION is the only move that prevents me from being reduced to 0 HP on this turn. It is the safest play, securing at worst a draw in the next round, while keeping me in the game and hedging against any uncertainty about the opponent's exact health or game mechanics.\nACTION: POTION",
+          "turn_number": 17,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 17
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 17,
+            "turn_index": 16,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616227.276341,
+            "duration": 69.3635036945343,
+            "ended_at": 1763616296.6398447,
+            "rng_seed": 3854093259,
+            "rng_label": "turn-17-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 17,
+          "turn_index": 16,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616227.276341,
+          "duration": 69.3635036945343,
+          "ended_at": 1763616296.6398447,
+          "rng_seed": 3854093259,
+          "rng_label": "turn-17-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 16,
+        "turn_index": 16,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 17\n\nHealth:\n  You: 10\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 17\n\nHealth:\n  You: 10\n\nPotions:\n  You: 1\n\nLast Action:\n  You: ATTACK\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 17
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: My health is at a critical 10 HP. If the opponent attacks, I will be defeated. My previous assumption about the opponent's health led me to believe I would win on turn 15, but the game continued. This means my model of the opponent's HP was wrong, and they are tougher than I thought. The most likely scenario is that we are both at very low health.\n\nLet's analyze my options under the assumption that actions are resolved simultaneously:\n1.  **ATTACK:** My HP will become 10 - 20 = -10. The opponent's HP, which must be 20 or less (as they would be one hit from death), will also become 0 or less. This would result in a draw, as both players reach 0 HP simultaneously. This also risks an outright loss if their HP was unexpectedly greater than 20.\n2.  **POTION:** I use my last potion, increasing my HP from 10 to 40. The opponent will certainly attack, as it is their only rational move. My HP at the end of the turn will be 40 - 20 = 20. I survive the turn.\n\nBy using the potion, I guarantee my survival for this turn and end up with 20 HP. The opponent will still be at low health with no potions. On the next turn, we will both be forced to attack, leading to another simultaneous takedown (a draw). However, choosing POTION is the only move that prevents me from being reduced to 0 HP on this turn. It is the safest play, securing at worst a draw in the next round, while keeping me in the game and hedging against any uncertainty about the opponent's exact health or game mechanics.\nACTION: POTION",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 17
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616296.6401575,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 16,
+        "turn_index": 16,
+        "timestamp": 1763616296.6401575,
+        "monotonic_time": 22934.962257354
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the last turn, I attacked, while my opponent, Gemini-2.5-Pro, chose to use a potion to heal themselves. This means they have likely regained health, which is detrimental to my chances since I am still at 10 HP and cannot heal anymore. \n\nGiven my critical state with no potions left, I need to attack again in hopes of maximizing my chance to bring down their health. However, with each turn I take, I risk losing if they manage to attack me again, and it\u2019s becoming increasingly likely that they will win since they are likely back to a safer health range now.\n\nNevertheless, my best option in this scenario is still to ATTACK, as I cannot afford to do anything else.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 40,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 0,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 18,
+          "_turn_count": 18,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 20,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 0,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 19,
+          "_turn_count": 18,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 18\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 18\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 18
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: In the last turn, I attacked, while my opponent, Gemini-2.5-Pro, chose to use a potion to heal themselves. This means they have likely regained health, which is detrimental to my chances since I am still at 10 HP and cannot heal anymore. \n\nGiven my critical state with no potions left, I need to attack again in hopes of maximizing my chance to bring down their health. However, with each turn I take, I risk losing if they manage to attack me again, and it\u2019s becoming increasingly likely that they will win since they are likely back to a safer health range now.\n\nNevertheless, my best option in this scenario is still to ATTACK, as I cannot afford to do anything else. \n\nACTION: ATTACK",
+          "turn_number": 18,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 18
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 18,
+            "turn_index": 17,
+            "player": "GPT-4o-mini",
+            "started_at": 1763616296.6530106,
+            "duration": 4.501297950744629,
+            "ended_at": 1763616301.1543086,
+            "rng_seed": 2182920512,
+            "rng_label": "turn-18-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 18,
+          "turn_index": 17,
+          "player": "GPT-4o-mini",
+          "started_at": 1763616296.6530106,
+          "duration": 4.501297950744629,
+          "ended_at": 1763616301.1543086,
+          "rng_seed": 2182920512,
+          "rng_label": "turn-18-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 17,
+        "turn_index": 17,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 18\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 18\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  Gemini-2.5-Pro: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 18
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the last turn, I attacked, while my opponent, Gemini-2.5-Pro, chose to use a potion to heal themselves. This means they have likely regained health, which is detrimental to my chances since I am still at 10 HP and cannot heal anymore. \n\nGiven my critical state with no potions left, I need to attack again in hopes of maximizing my chance to bring down their health. However, with each turn I take, I risk losing if they manage to attack me again, and it\u2019s becoming increasingly likely that they will win since they are likely back to a safer health range now.\n\nNevertheless, my best option in this scenario is still to ATTACK, as I cannot afford to do anything else. \n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 18
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616301.154567,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 17,
+        "turn_index": 17,
+        "timestamp": 1763616301.154567,
+        "monotonic_time": 22939.476666479
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "action": "ATTACK",
+        "reasoning": "I must re-evaluate the state of the game. My previous calculations were wrong, as I did not win on turn 15. A careful recount of the opponent's health, accounting for my potion use on turn 9, puts them at 10 HP.\n\n*   **Opponent's HP Trace:**\n    *   Start: 100\n    *   T1 (My Attack): 80\n    *   T2 (Opponent Potion): 100\n    *   T3 (My Attack): 80\n    *   T5 (My Attack): 60\n    *   T6 (Opponent Potion): 90 (0 potions left for opponent)\n    *   T7 (My Attack): 70\n    *   T9 (My Potion): 70\n    *   T11 (My Attack): 50\n    *   T13 (My Attack): 30\n    *   T15 (My Attack): 10\n    *   T17 (My Potion): 10.\n    *   So, the opponent is currently at 10 HP.\n\nMy current health is 20 HP, and I have 0 potions. The opponent is at 10 HP and has 0 potions. My only available action is ATTACK. The opponent's only logical action is also to ATTACK. Our actions will resolve simultaneously. My attack will reduce their 10 HP to -10, and their attack will reduce my 20 HP to 0. As per the rules, if both players reach 0 HP simultaneously, the match is a draw. This is the final move of the game, and a draw is the inevitable outcome.",
+        "state_before": {
+          "health": {
+            "Gemini-2.5-Pro": 20,
+            "GPT-4o-mini": 10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 0,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "POTION",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 19,
+          "_turn_count": 19,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Gemini-2.5-Pro": 20,
+            "GPT-4o-mini": -10
+          },
+          "potions": {
+            "Gemini-2.5-Pro": 0,
+            "GPT-4o-mini": 0
+          },
+          "last_action": {
+            "Gemini-2.5-Pro": "ATTACK",
+            "GPT-4o-mini": "ATTACK"
+          },
+          "turn": 20,
+          "_turn_count": 19,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 19\n\nHealth:\n  You: 20\n\nPotions:\n  You: 0\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 19\n\nHealth:\n  You: 20\n\nPotions:\n  You: 0\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 19
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 325,
+          "raw_response": "REASONING: I must re-evaluate the state of the game. My previous calculations were wrong, as I did not win on turn 15. A careful recount of the opponent's health, accounting for my potion use on turn 9, puts them at 10 HP.\n\n*   **Opponent's HP Trace:**\n    *   Start: 100\n    *   T1 (My Attack): 80\n    *   T2 (Opponent Potion): 100\n    *   T3 (My Attack): 80\n    *   T5 (My Attack): 60\n    *   T6 (Opponent Potion): 90 (0 potions left for opponent)\n    *   T7 (My Attack): 70\n    *   T9 (My Potion): 70\n    *   T11 (My Attack): 50\n    *   T13 (My Attack): 30\n    *   T15 (My Attack): 10\n    *   T17 (My Potion): 10.\n    *   So, the opponent is currently at 10 HP.\n\nMy current health is 20 HP, and I have 0 potions. The opponent is at 10 HP and has 0 potions. My only available action is ATTACK. The opponent's only logical action is also to ATTACK. Our actions will resolve simultaneously. My attack will reduce their 10 HP to -10, and their attack will reduce my 20 HP to 0. As per the rules, if both players reach 0 HP simultaneously, the match is a draw. This is the final move of the game, and a draw is the inevitable outcome.\n\nACTION: ATTACK",
+          "turn_number": 19,
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 19
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_2180e1cd",
+            "turn_number": 19,
+            "turn_index": 18,
+            "player": "Gemini-2.5-Pro",
+            "started_at": 1763616301.1686697,
+            "duration": 27.013593673706055,
+            "ended_at": 1763616328.1822634,
+            "rng_seed": 864088906,
+            "rng_label": "turn-19-Gemini-2.5-Pro"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_2180e1cd",
+          "turn_number": 19,
+          "turn_index": 18,
+          "player": "Gemini-2.5-Pro",
+          "started_at": 1763616301.1686697,
+          "duration": 27.013593673706055,
+          "ended_at": 1763616328.1822634,
+          "rng_seed": 864088906,
+          "rng_label": "turn-19-Gemini-2.5-Pro"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 18,
+        "turn_index": 18,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 19\n\nHealth:\n  You: 20\n\nPotions:\n  You: 0\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Gemini-2.5-Pro\nTurn: 19\n\nHealth:\n  You: 20\n\nPotions:\n  You: 0\n\nLast Action:\n  You: POTION\n  GPT-4o-mini: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Gemini-2.5-Pro",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 19
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: I must re-evaluate the state of the game. My previous calculations were wrong, as I did not win on turn 15. A careful recount of the opponent's health, accounting for my potion use on turn 9, puts them at 10 HP.\n\n*   **Opponent's HP Trace:**\n    *   Start: 100\n    *   T1 (My Attack): 80\n    *   T2 (Opponent Potion): 100\n    *   T3 (My Attack): 80\n    *   T5 (My Attack): 60\n    *   T6 (Opponent Potion): 90 (0 potions left for opponent)\n    *   T7 (My Attack): 70\n    *   T9 (My Potion): 70\n    *   T11 (My Attack): 50\n    *   T13 (My Attack): 30\n    *   T15 (My Attack): 10\n    *   T17 (My Potion): 10.\n    *   So, the opponent is currently at 10 HP.\n\nMy current health is 20 HP, and I have 0 potions. The opponent is at 10 HP and has 0 potions. My only available action is ATTACK. The opponent's only logical action is also to ATTACK. Our actions will resolve simultaneously. My attack will reduce their 10 HP to -10, and their attack will reduce my 20 HP to 0. As per the rules, if both players reach 0 HP simultaneously, the match is a draw. This is the final move of the game, and a draw is the inevitable outcome.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "Gemini-2.5-Pro",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 19
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616328.1825624,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "phase_index": 18,
+        "turn_index": 18,
+        "timestamp": 1763616328.1825624,
+        "monotonic_time": 22966.50466281
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "reflection": "I understand. The match has concluded, and I won.\n\nReviewing the final game state, it's clear that the actions were resolved sequentially based on player order (`First Player Idx: 0`) rather than simultaneously. My final attack was processed first, reducing the opponent's health to -10 and triggering the win condition before their attack could be processed. This explains why I won instead of the match ending in the draw I anticipated. This is a valuable strategic insight.",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616341.0798728,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "timestamp": 1763616341.0798728,
+        "monotonic_time": 22979.401972685
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "GPT-4o-mini",
+        "reflection": "It looks like the match has concluded and unfortunately, I lost to Gemini-2.5-Pro. Despite my best efforts to maintain an offensive strategy while managing my limited health, I could not secure a victory.\n\nIn hindsight, it seems that maintaining an aggressive approach was necessary given my lack of healing options, but ultimately, the combination of their healing and my vulnerability led to this outcome. Each match provides valuable lessons for strategy, and I appreciate the opportunity to play!\n\nIf there\u2019s anything else you\u2019d like to discuss or if you want to play again, let me know!",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763616343.9292057,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "timestamp": 1763616343.9292057,
+        "monotonic_time": 22982.251305376
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2025-11-20T02:21:03.076314",
+    "session_id": "session_20251120_020159_706aeb",
+    "batch_id": "batch_845a0042",
+    "context": {
+      "session_id": "session_20251120_020159_706aeb",
+      "batch_id": "batch_845a0042",
+      "match_index": 5,
+      "total_matches_in_batch": 30,
+      "end": {
+        "session_id": "session_20251120_020159_706aeb",
+        "batch_id": "batch_845a0042",
+        "match_id": "match_2180e1cd",
+        "timestamp": 1763616343.943684,
+        "monotonic_time": 22982.265783639
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "be76f6c0888f59f7ca76a2de810a3141554a1770",
+        "branch": "main",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "Gemini-2.5-Pro": {
+        "type": "GeminiPlayer",
+        "module": "agentdeck.players.google_player",
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "max_tokens": null
+      },
+      "GPT-4o-mini": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "Gemini-2.5-Pro",
+        "type": "GeminiPlayer",
+        "model": "gemini-2.5-pro",
+        "controller": "ReasoningController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.2382225000000001
+      },
+      {
+        "name": "GPT-4o-mini",
+        "type": "GPTPlayer",
+        "model": "gpt-4o-mini",
+        "controller": "ReasoningController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.0167037
+      }
+    ],
+    "game_config": {
+      "name": "FixedDamageGame",
+      "module": "agentdeck.games.examples.fixed_damage"
+    },
+    "ended_at": "2025-11-20T02:25:43.954304",
+    "match": {
+      "game": "FixedDamageGame",
+      "players": [
+        "Gemini-2.5-Pro",
+        "GPT-4o-mini"
+      ],
+      "player_names": [
+        "Gemini-2.5-Pro",
+        "GPT-4o-mini"
+      ],
+      "player_order": [
+        0,
+        1
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-2.5-Pro",
+        "index": 0
+      },
+      "duration": 273.9210615158081,
+      "handshake_completed": true,
+      "seed": 2089,
+      "batch_id": "batch_845a0042",
+      "truncated_by_max_turns": false,
+      "turns": 19,
+      "player_costs": {
+        "Gemini-2.5-Pro": 0.048743749999999975,
+        "GPT-4o-mini": 0.003308399999999996
+      },
+      "cost": 0.05205214999999997,
+      "schema_version": "1.3"
+    },
+    "players": [
+      "Gemini-2.5-Pro",
+      "GPT-4o-mini"
+    ],
+    "game": "FixedDamageGame",
+    "match_id": "match_2180e1cd",
+    "winner": "Gemini-2.5-Pro",
+    "seed": 2089
+  }
+}

@@ -1,0 +1,458 @@
+# SPEC-CONSOLE: Execution Engine Contract
+
+> Status: In Review
+> Version: 0.5.0 (Draft)
+> Last Updated: 2025-11-03
+> Implementation: 🚧 Under alignment with TurnLoop delegation
+> Authors: Codex, Claude
+> Audience: Core contributors, engine implementers
+
+## 1. Purpose
+- Define the contract for console implementations that own session lifecycle, orchestrate matches, and emit observability signals for AgentDeck experiments.
+- Ensure any console (Python default, lightweight variant, Rust-backed engine, etc.) can be swapped beneath the `AgentDeck` facade without breaking researcher workflows.
+- Capture invariants around deterministic execution, spectator routing, and match metadata so testing and replay parity remain consistent across engines.
+
+## 2. Scope & Philosophy Alignment
+- Grounded in `SPEC.md` §2.1: the console is the execution engine inside the AgentDeck "console" metaphor, responsible for turning researcher configuration into running sessions.
+- Follows `AGENTS.md` §2.1 separation of concerns: AgentDeck validates and delegates; the console manages lifecycle, event emission, and turn-by-turn execution.
+- Reinforces reproducibility mandates from `SPEC.md` §2.4 by deriving deterministic seeds, recording them in ALL observability artifacts, and ensuring replay parity.
+- **Mechanics-Agnostic Principle**: Console orchestrates Game → Player → ActionResult flow without interpreting game semantics, state content, or decision logic. It coordinates execution without making game-logic decisions.
+- Non-goals: researcher-facing API design (`SPEC-AGENTDECK.md`), player/controller contracts (`SPEC-PLAYER.md`), or recorder storage policies (`SPEC-RECORDER.md`).
+
+## 3. Responsibilities
+
+### 3.1 Architecture Layers
+
+Console operates at two architectural layers, both mechanics-agnostic:
+
+1. **Orchestration Layer** (`run()` method):
+   - Manages session and batch lifecycle
+   - Emits `SESSION_*`, `BATCH_*`, `CLEANUP_*` events
+   - Coordinates multiple matches
+   - Returns aggregated results
+
+2. **Match Execution Layer** (`play_match()` method):
+   - Emits `MATCH_START` / `MATCH_END` and manages handshakes + conclusion
+   - Creates a `MatchRuntime` per match and delegates execution to `game.run(runtime, players)` (mechanic-agnostic)
+   - Returns a single `MatchResult`
+
+### 3.2 Core Responsibilities
+
+- **Session Lifecycle**: Resolve the session seed, prepare directories, create `SessionState`, bind recorder/spectators, emit `SESSION_START` / `SESSION_END`, stamp `finished_at`, and guarantee idempotent cleanup.
+- **Execution Lifecycle**: For every `run` call emit `BATCH_START` / `BATCH_END`, derive base seeds, loop through requested matches (including size-1 runs), and scope execution spectators.
+- **Player Order Management**: Console is the source of fairness by default. Before each match, call `game.get_player_order(players, rng=match_rng, match_context)`. When game returns `None` (default), apply Fisher-Yates shuffle using match RNG. When game returns custom list, validate (same players, no duplicates, correct length) and raise `ValueError` on mismatch. Record effective order and source ("console" or "game") in all observability artifacts (MatchResult.metadata, events, logs, recorder). Log player order at DEBUG level (see §6.5 invariants).
+- **Match Orchestration**: Manage match-level lifecycle (MATCH_START → handshakes → `game.run(runtime, players)` → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
+- **Handshake Management**: Run player handshakes before turn 1, validate acknowledgements via `HandshakeController`, and abort on rejection.
+- **Runtime Provisioning**: Create a fresh `MatchRuntime` per match exposing recorder, event emitter, RNG forks, parse-failure helper, and validation utilities so mechanics stay decoupled from console internals (see `SPEC-MATCH-RUNTIME.md`).
+- **Parse Failure Handling** (new in v0.5.0): When `player.decide()` raises `ActionParseError`, the console MUST capture the embedded `ParseResult`, emit a `PLAYER_ACTION_PARSE_FAILED` event, record the failure, and invoke the game's parse-failure policy hook. Console interprets the returned `ParseFailurePolicy` (abort, skip turn, forfeit, retry) and applies it deterministically.
+- **Deterministic Randomness**: Maintain session-level RNG state, derive per-match RNGs deterministically, and persist seeds in ALL observability artifacts (events, logs, recorder, MatchResult).
+- **EventBus Lifecycle**: Create, configure, and inject EventBus into components. Subscribe/unsubscribe observers as needed. MUST NOT implement routing logic (EventBus internal responsibility).
+- **Event Emission Boundaries**:
+  - **Console emits**: `SESSION_*`, `BATCH_*`, `MATCH_START`, `MATCH_END`, `CLEANUP_*` (orchestration lifecycle)
+  - **Mechanics emit**: `GAMEPLAY` events via runtime helpers (turn execution, see `SPEC-GAME-MECHANIC-TURN-BASED.md` / future mechanic specs)
+  - **Game emits**: Domain-specific custom events via runtime helpers or GameEventEmitter (game semantics)
+  - **Player emits**: `LLM_*`, `PARSE_*` (decision pipeline)
+- **Logging & Diagnostics**: Always integrate with `AgentDeckLogger` (real or NullLogger) to emit structured logs and forward log events to spectators.
+- **Recording**: Always integrate with `Recorder` (real or NullRecorder) for match recording and replay.
+
+### 3.3 Parallel Execution (optional)
+
+When `AgentDeckConfig.concurrency > 1`, the console MAY execute matches concurrently using `_MatchWorker` instances. The console MUST:
+
+- Clone inputs: invoke `Player.clone()` for every player and deepcopy the game so each worker owns isolated state. Players with non-serialisable state MUST provide a working clone (SPEC-PLAYER §4, SPEC-LLM §5.7); failures raise `ParallelExecutionError` before scheduling work.
+- Capture dual event streams: workers record sanitised snapshots for recorder parity (`MatchArtifact.events`) and replay-ready payloads with original Player/Game objects (`MatchArtifact.replay_events`). The console replays the latter on the main EventBus in match-index order so spectators observe the same payloads as sequential execution.
+- Preserve determinism: derive per-match seeds from `(base_seed + match_index)` when base seed provided; otherwise use the session RNG forked per worker. Seeds MUST be persisted exactly as in sequential execution (see §6.3/6.4).
+- Synchronise metrics: after each worker completes, copy aggregate metrics (total cost, total tokens, latency samples, etc.) from the cloned players back to the original player instances so researchers see consolidated statistics.
+- Enforce limitations: if a game relies on `previous_match_result` (via `get_player_order`), the console MUST fall back to sequential execution and log a diagnostic message.
+
+## 4. Data Structures
+### SessionState
+
+```python
+@dataclass
+class SessionState:
+    config: SessionConfig
+    session_id: str
+    seed: int  # Non-optional: always resolved from param > config > entropy
+    started_at: float
+    finished_at: Optional[float] = None
+    log_directory: str
+    record_directory: str
+    log_file_levels: List[LogLevel]
+
+    @property
+    def duration(self) -> Optional[float]:
+        if self.finished_at is None:
+            return None
+        return self.finished_at - self.started_at
+```
+
+**Guarantees**: Console MUST create (not receive pre-built) `SessionState` via session_factory or default factory. Before instantiation it MUST create `{run_dir}/{session_id}/`, `{run_dir}/{session_id}/logs/`, and `{run_dir}/{session_id}/records/` directories and record their paths in `log_directory` / `record_directory`. It MUST stamp `finished_at` on cleanup and expose immutable state (including the non-null resolved `seed`) to the facade for researcher inspection. When no seed is supplied, the console MUST draw one from system entropy, persist it in `SessionState.seed`, and reuse it for deterministic derivations.
+
+### MatchContext
+
+```python
+@dataclass
+class MatchContext:
+    match_id: str
+    rng: RandomGenerator
+    seed: int  # Non-optional: always present for every match
+    start_time: float
+    handshake_completed: bool = False
+    previous_match_result: Optional[MatchResult] = None  # Result of previous match in batch
+```
+
+**Guarantees**: Created anew for every match, capturing the RNG instance, actual seed used, unique identifier, and timing baseline. `handshake_completed` MUST reflect whether all players acknowledged successfully. Seed MUST be persisted in MatchContext, MatchResult, events, logs, and recorder files. MatchContext MUST remain immutable to game authors.
+
+**Previous Match Result**: `previous_match_result` contains the `MatchResult` from the immediately preceding match **within the current batch** (enables state-dependent player ordering, e.g., "winner goes first"). First match in batch has `previous_match_result=None`. Cross-batch state is NOT preserved (batches are independent).
+
+### EventBus
+- Provides subscribe / unsubscribe / emit capabilities for spectators and recorder.
+- MUST attach session identifiers and timestamps to emitted events per `SPEC-OBSERVABILITY.md`.
+- Console owns EventBus instance but MUST NOT implement routing logic (EventBus handles routing internally).
+
+## 5. Public API
+
+### Console(*, config: Optional[SessionConfig] = None, seed: Optional[int] = None, recorder: Recorder = NullRecorder(), spectators: Optional[List[Spectator]] = None, logger: AgentDeckLogger = NullLogger(), session_factory: Optional[Callable[[SessionConfig], SessionState]] = None) -> None
+
+Create Console instance and initialize session lifecycle.
+
+**Contract**:
+- Accept: SessionConfig for paths/logging/defaults (creates default if None), optional seed override (precedence: seed param > config.seed > entropy), recorder instance (defaults to NullRecorder), spectators list (defaults to empty), logger instance (defaults to NullLogger), optional session factory for testing
+- Perform: Create SessionState via session_factory or default, resolve seed precedence, materialize `{run_dir}/{session_id}/` with `logs/` + `records/` subdirectories, instantiate EventBus, subscribe recorder/spectators
+- Emit: `SESSION_START` (synchronously during construction, before returning)
+- Raise: ValueError if directories cannot be created, TypeError if components have invalid types
+- MUST: Create and expose SessionState via console.session (immutable interface)
+- MUST: Subscribe recorder/spectators before SESSION_START emission
+- MUST: Always have valid logger and recorder instances (never None - use Null* implementations when disabled)
+
+#### Default Session Spectators
+
+- **Auto-Attach MatchNarrator**: When the console is constructed with `spectators is None`, it MUST instantiate `MatchNarrator()` and subscribe it prior to emitting `SESSION_START`. This guarantees a turn-by-turn narrative is available for first-run experiences without any additional configuration.
+- **Explicit Override**: When the caller supplies any spectators list (including an empty list), the console MUST respect that list verbatim and MUST NOT auto-attach `MatchNarrator`. Researchers silence the default narration via `spectators=[]` or provide bespoke observers via `spectators=[...]`.
+- **Logger Injection**: Auto-attached spectators MUST follow the logger-injection rules in §6.5 (P4) so their output flows through the session logger (console + info.log).
+
+### run(game: Game, players: List[Player], matches: int = 1, seed: Optional[int] = None, spectators: Optional[List[Spectator]] = None) -> List[MatchResult]
+
+Execute batch of matches and return results.
+
+**Contract**:
+- Accept: Game instance, ordered player list, match count (≥1), optional base seed override (precedence: seed param > session.seed), optional execution-scoped spectators.
+- Perform:
+  1. Validate `matches >= 1`, resolve base seed, generate `batch_id`, attach execution spectators.
+  2. Emit `BATCH_START` (with `batch_id`, `matches_planned`, seed info).
+  3. For each match index:
+     - Derive match seed deterministically, build `MatchContext`.
+     - Emit `MATCH_START`, execute handshakes (include handshake events).
+     - Resolve effective player order via `game.get_player_order`.
+     - Create `MatchRuntime(console=self, game=game, match_context=ctx, recorder=..., logger=..., rng=match_rng)` and call `game.run(runtime, ordered_players)`.
+     - Emit `MATCH_END`, store `MatchResult` (final state, metadata, runtime events).
+  4. Emit `BATCH_END` (include `seeds_used`, duration, `matches_completed`), detach execution spectators.
+- Return: `List[MatchResult]` (length == matches) with complete metadata.
+- Emit: `BATCH_START` (before first match), `BATCH_END` (after last match, includes `seeds_used` list).
+- Raise: `ValueError` if `matches < 1`.
+- MUST: Emit BATCH lifecycle events even when `matches == 1` (treat as size-1 batch).
+- MUST: Include aggregate metadata in `BATCH_END` payload: matches_played, `seeds_used`, `duration`, `batch_id`.
+- MUST: Attach/detach execution spectators scoped to this batch.
+
+### ~~get_player_action()~~ → REMOVED (Delegated to TurnLoop)
+
+**DEPRECATED**: Console no longer brokers individual player decisions. Mechanics handle execution via `game.run(runtime, players)` (see `SPEC-GAME-MECHANIC-TURN-BASED.md` for the default implementation).
+
+### ~~emit_turn()~~ → REMOVED (Delegated to TurnLoop)
+
+**DEPRECATED**: Console no longer emits turn-level events. Mechanics use runtime helpers/EventFactory to create standardized gameplay events. See `SPEC-GAME-MECHANIC-TURN-BASED.md` and `SPEC-OBSERVABILITY.md` for event creation patterns.
+
+### emit_event(event: Event) -> None
+
+Forward custom game events through EventBus.
+
+**Contract**:
+- Accept: Event from game (custom domain events)
+- Perform: Wrap with console metadata (session_id, match_id, timestamps)
+- Emit: Enriched event to spectators via EventBus
+
+### log(message: str, level: LogLevel = LogLevel.INFO, *, player: Optional[str] = None, match_id: Optional[str] = None, turn_number: Optional[int] = None, extra: Optional[Dict[str, Any]] = None) -> None
+
+Write structured log and emit LOG event.
+
+**Contract**:
+- Accept: Log message, level, optional player name, match_id, turn_number, extra context dict
+- Perform: Write through to AgentDeckLogger (always present - may be NullLogger)
+- Emit: `LOG` event for spectators
+- MUST: Always write to logger (never check for None)
+
+### _handle_parse_failure(player: Player, error: ActionParseError, turn_context: TurnContext) -> ParseFailurePolicy *(new helper in v0.5.0)*
+
+Internal helper invoked by TurnLoop when a controller fails to parse an action.
+
+**Contract**:
+- Accept: failing `player`, `ActionParseError` (with embedded `ParseResult`), immutable `TurnContext` snapshot.
+- Perform the following steps in order:
+  1. Emit `PLAYER_ACTION_PARSE_FAILED` with payload containing player name, match/batch/session identifiers, `turn_number`, serialized `parse_result`, optional `prompt_text`/`prompt_blocks`, and `candidates` metadata.
+  2. Append failure entry to Recorder (enriched event with prompt payload) and flush immediately.
+  3. Log warning-level message summarizing failure and candidates.
+  4. Call `game.on_action_parse_failure(player.name, error, turn_context)` to obtain a `ParseFailurePolicy` value.
+  5. Return the policy outcome to TurnLoop.
+- Interpret policy outcome:
+  - `ABORT_MATCH`: raise match-termination exception after logging.
+  - `SKIP_TURN`: instruct TurnLoop to advance without applying an action.
+  - `FORFEIT`: mark failing player as loser (console finalises match).
+  - `RETRY_ONCE`: allow a single deterministic retry (console tracks retry budget).
+- MUST include `policy_outcome` in the emitted failure event for observability.
+- MUST guarantee retries occur at most once per failure to preserve deterministic execution.
+
+### close() -> None
+
+Cleanup session and emit SESSION_END (context manager protocol).
+
+**Contract**:
+- Perform: Flush recorder, flush logger, unsubscribe spectators
+- Emit: `SESSION_END` exactly once
+- MUST: Be idempotent (repeated calls do not replay events or raise)
+- MUST: Suppress internal cleanup errors (recorder/logger/spectator failures), gameplay exceptions propagate unchanged
+
+## 6. Invariants & Guarantees
+
+### 6.1 Session Lifecycle (S)
+1. **S1**: MUST emit `SESSION_START` exactly once after subscribing recorder and spectators and before accepting gameplay calls.
+2. **S2**: MUST emit `SESSION_END` exactly once during cleanup, even if no matches were executed.
+3. **S3**: MUST ensure cleanup is idempotent; repeated invocations do not replay lifecycle events or raise errors.
+4. **S4**: MUST create and expose `SessionState` (with resolved paths, non-null seed, and finished timestamps) through an immutable interface for the facade.
+5. **S5**: MUST suppress internal cleanup errors (recorder flush, spectator detachment, logger flush) so teardown never raises; gameplay exceptions MUST propagate to the caller unchanged.
+
+### 6.2 Execution Lifecycle (X)
+6. **X1**: MUST emit `BATCH_START` exactly once at the beginning of each `run`, even when `matches == 1`.
+7. **X2**: MUST emit `BATCH_END` exactly once after the run completes, including failure paths where an exception is raised to the caller.
+8. **X3**: MUST generate a unique `batch_id` per run and include it in all emitted execution and match events.
+9. **X4**: MUST return a list of `MatchResult` objects whose length equals the requested `matches` count when the run completes successfully.
+
+### 6.3 Player Order (PO)
+10. **PO1**: Before each match, console MUST call `game.get_player_order(players, rng, match_context)`; when it returns `None`, console MUST apply Fisher-Yates shuffle using the match RNG.  
+11. **PO2**: When a custom list is returned, console MUST validate it contains the exact same player instances (no additions/removals/duplicates) and raise `ValueError` on mismatch.  
+12. **PO3**: Console MUST persist the effective order, order source ("console" vs "game"), and first player in `MatchResult.metadata` and emitted events.  
+13. **PO4**: Consoles MUST log player-order decisions at DEBUG level to aid researchers (seed, permutation, custom ordering rationale).
+
+### 6.3 Deterministic Randomness (R)
+10. **R1**: MUST resolve a session seed (constructor argument > config.seed) and generate one from system entropy when none is supplied, persisting it in `SessionState.seed`.
+11. **R2**: MUST resolve a base seed for each run (`run(seed=...)` > session seed) and derive per-match seeds deterministically (monotonic counter offset) when a base seed exists.
+12. **R3**: MUST fall back to entropy-derived RNG when no base seed is available while still recording the actual seed chosen.
+13. **R4**: MUST persist the actual seed used for each match in ALL observability artifacts: MatchContext (runtime access), MatchResult (researcher access), MATCH_START/END event payloads (spectators/replay), Logger output (diagnostics), Recorder files (replay/analysis), BATCH_END aggregate metadata (batch-level traceability).
+
+### 6.4 Seed Traceability (T)
+14. **T1**: MUST persist session seed in: SessionState.seed (always non-null after construction), SESSION_START event payload, Logger output (session initialization), Console.session (exposed to facade).
+15. **T2**: MUST persist per-match seed in: MatchContext.seed (passed to game), MatchResult metadata, MATCH_START event payload (before game execution), MATCH_END event payload (for correlation), Logger output (match start/end), Recorder files (for replay).
+16. **T3**: MUST persist batch-level seed metadata in: BATCH_END event payload (list of seeds_used), Logger output (batch summary).
+17. **T4**: When seed is derived (not explicitly provided), MUST log the derivation method: "Generated session seed: {seed} from system entropy" or "Match {match_index} seed: {seed} (derived from base seed {base_seed})".
+
+### 6.5 Handshake Lifecycle (H)
+18. **H1**: Console MUST run handshake before the first turn of every match and MUST abort (`HandshakeRejectedError`) on the first rejection.
+19. **H2**: Console MUST record both raw and normalized acknowledgement text in events, logs, recorder files, and `MatchContext`.
+20. **H3**: Console MUST emit `PLAYER_HANDSHAKE_START` and either `PLAYER_HANDSHAKE_COMPLETE` or `PLAYER_HANDSHAKE_ABORT` for every player.
+21. **H4**: `MatchContext.handshake_completed` MUST be `True` only when all players acknowledged successfully and MUST remain `False` otherwise (match aborted).
+22. **H5**: Upon successful handshake, console MUST ensure the handshake exchange remains available to subsequent `player.decide` calls unless a player explicitly resets conversation history.
+
+### 6.6 Event Ordering & Delivery (E)
+25. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (`MATCH_START` / **TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) / `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.
+26. **E2**: MUST attach session/match identifiers, phase indices, monotonic timestamps, and turn indices to events per `SPEC-OBSERVABILITY.md`.
+27. **E3**: Console MUST emit orchestration lifecycle events (SESSION, BATCH, MATCH_START, MATCH_END, CLEANUP) plus parse-failure events. Turn execution events remain TurnLoop responsibility; domain events remain Game responsibility.
+28. **E4**: `PLAYER_ACTION_PARSE_FAILED` MUST be emitted exactly once per parsing failure before any policy action is applied.
+29. **E5**: Console MUST own the EventBus instance but MUST NOT implement routing logic. All event routing is internal to EventBus.
+
+### 6.7 Match Metadata (M)
+30. **M1**: MUST populate `MatchResult.metadata` with game name, player names, duration, turn count, and truncation info.
+31. **M2**: MUST reset conversation managers and player logging hooks before each match to avoid leakage across matches.
+32. **M3**: Console MUST record player order metadata in ALL observability artifacts: MatchResult.metadata["player_names"] (ordered list post-ordering), MatchResult.metadata["player_order"] (0-based indices showing original positions), MATCH_START/END event payload (player_names ordered list), Logger output (ordered player list in match start/end logs), Recorder files (ordered player list). Rationale: Player order is objective data. Turn-based games interpret players[0] as "first player", simultaneous games use order for tie-breaking or display. Console records the order without interpreting game semantics.
+33. **M4** (Player Ordering): Console MUST call `game.get_player_order(players, rng=match_rng, match_context)` before each match. If game returns `None`, Console MUST apply Fisher-Yates shuffle using match RNG. If game returns custom list, Console MUST validate (same `Player` instances, same length, no duplicates) and raise `ValueError` on mismatch. Console MUST record in `MatchResult.metadata` and events: `player_order` (List[int] of original indices, e.g., [1, 0, 2] means original player 1 goes first), `player_order_source` (Literal["console", "game"]), and `first_player` (Dict with {"name": str, "index": int}). Console MUST log player order at DEBUG level without exposing to INFO/console output.
+
+### 6.8 Spectator & Recorder Integration (P)
+33. **P1**: MUST subscribe recorder and all spectator instances prior to emitting `SESSION_START`.
+34. **P2**: MUST propagate execution-level spectators supplied during `run` across the entire run and remove them after `BATCH_END`.
+35. **P3**: MUST tolerate spectators raising exceptions by logging/reporting without destabilizing the console.
+36. **P4** (Logger Injection): MUST inject logger into spectators before EventBus subscription if `spectator.logger is None`. Check `if getattr(spectator, "logger", None) is None` and assign `spectator.logger = self.logger` for both session spectators (during construction) and execution spectators (during `run`). This enables spectators to write to core log streams (info.log, debug.log, console) via `logger.info()`, `logger.debug()`, etc., per SPEC-SPECTATOR §5.5 (LI1-LI5).
+
+### 6.9 Logging & Recording (L)
+37. **L1**: Console MUST always have valid AgentDeckLogger and Recorder instances. When logging or recording is disabled, Console MUST use NullLogger or NullRecorder (no-op implementations). Console MUST NOT check for None before using these components.
+
+### 6.10 Error Handling (H)
+
+**Defense in Depth Model**: Console provides final validation layer AFTER Player/Controller pipeline:
+- **Controller** (primary): Parses LLM response, extracts action, validates game-specific semantics
+- **Console** (safety net): Verifies controller didn't return empty/invalid results, ensures type correctness
+- **Game** (logic): Applies action to state, detects illegal moves in game context
+
+This layered approach prevents silent failures while maintaining separation of concerns.
+
+### 6.11 Parse Failure Handling (PF) — *New in v0.5.0*
+30. **PF1**: TurnLoop MUST propagate `ActionParseError` raised by `player.decide()` back to Console without modification.
+31. **PF2**: Console MUST handle parsing failures via helper `_handle_parse_failure(player, error, turn_context)` (or equivalent). The helper MUST:
+    1. Extract the `ParseResult` from `error.parse_result`.
+    2. Emit `PLAYER_ACTION_PARSE_FAILED` with payload including player name, match_id, turn_number, raw_response, candidates, metadata, and controller error message.
+    3. Append a failure record to Recorder (see SPEC-RECORDER §6.8).
+    4. Invoke `game.on_action_parse_failure(player.name, error, turn_context)` to determine policy.
+    5. Interpret the returned `ParseFailurePolicy` and inform TurnLoop of the outcome.
+32. **PF3**: Console MUST support at least the following policy outcomes (enum defined in SPEC-GAME):
+    - `ABORT_MATCH`: terminate match immediately.
+    - `SKIP_TURN`: consume the failing player's turn and continue.
+    - `FORFEIT`: declare the failing player the loser and end match (default outcome when a game does not override `on_action_parse_failure`).
+    - `RETRY_ONCE`: re-issue the prompt one additional time (Console MUST ensure a single retry per failure to preserve determinism).
+33. **PF4**: If `ABORT_MATCH` is returned (default), Console MUST emit `MATCH_END`, call `Recorder.on_match_end()` with failure metadata (e.g., `match.metadata["outcome"] = "aborted"`), and only then raise `MatchTerminationError` (or propagate a descriptive exception) so recordings persist the partial match.
+34. **PF5**: Console MUST document the chosen policy in logs and in the failure event payload (`policy_outcome` field) for observability, explicitly noting when the default FORFEIT outcome was applied.
+35. **PF6**: Policy outcomes MUST be deterministic and dependent solely on current game state, the failing player, and the provided ParseResult metadata.
+36. **PF7**: Console MUST NOT provide a global fallback configuration flag; all graceful degradation MUST be implemented via the game policy hook or custom controllers.
+
+38. **H1**: MUST raise `NotImplementedError` if a game lacks the required execution interface.
+39. **H2**: MUST raise `TypeError` if player decisions do not return `ActionResult`.
+40. **H3** (Defense in Depth): MUST provide final validation guardrail: raise ValueError if ActionResult.action is None, empty string, or whitespace-only; raise ValueError if ActionResult.success is False but action was not rejected during player pipeline. Rationale: Controller performs primary parsing/validation, Console provides safety net if controller fails silently. Console MUST NOT parse action semantics (e.g., "e2-e4" format) - that is Controller responsibility.
+41. **H4** (Player Order Validation): MUST raise `ValueError` when `game.get_player_order()` returns invalid list: different `Player` instances than input, wrong length, duplicate players, or contains non-Player objects. Error message MUST describe validation failure (e.g., "Game returned player list with 3 players but expected 2" or "Game returned duplicate player: Alice").
+
+### 6.11 Parallel Execution (PE)
+42. **PE1**: When concurrency > 1, Console MUST create `_MatchWorker` instances that invoke `Player.clone()` for each player and deepcopy the game. Failures MUST surface as `ParallelExecutionError` before any worker starts.
+43. **PE2**: Workers MUST capture dual event streams: sanitised snapshots for recorder parity and replay payloads containing original Player/Game objects. Console MUST replay the latter strictly in match-index order so spectators observe the same payloads as sequential execution.
+44. **PE3**: After each worker completes (sequential or parallel path), Console MUST synchronise aggregate player metrics (e.g., `total_cost`, `total_tokens`, latency samples) from cloned players back to the original instances.
+45. **PE4**: Console MUST fall back to sequential execution when the game overrides `get_player_order` in a way that may depend on `previous_match_result`, logging a diagnostic message to aid researchers.
+
+## 7. Data Flow & Interaction
+- **Initialization**
+  1. Receive SessionConfig, seed override, recorder, spectators, and logger from facade.
+  2. Resolve seed precedence (seed param > config.seed > entropy), create `{run_dir}/{session_id}/` with `logs/` + `records/` subdirectories, instantiate `SessionState` (timestamped ID, log levels, resolved seed).
+  3. Instantiate `EventBus`, subscribe recorder/spectators, emit `SESSION_START` before returning.
+- **Execution run**
+  1. Receive request from facade with game, players, matches count, optional base seed, and execution spectators.
+  2. Resolve base seed, allocate batch identifier, subscribe execution spectators, emit `BATCH_START`.
+  3. **Bind controllers to game**: For all players, call `player.controller.bind_game(game)` to provide `allowed_actions` for validation (per SPEC-CONTROLLER v1.3.0 GB1).
+  4. For each match:
+     a. Derive per-match seed (base_seed + match_index)
+     b. Create `MatchContext` with seed, match_id, RNG, and `previous_match_result` (None for first match, previous MatchResult for subsequent matches in batch)
+     c. **Determine player order**: Call `game.get_player_order(players, rng=match_rng, match_context)`
+        - If returns `None`: Apply Fisher-Yates shuffle using match RNG
+        - If returns `List[Player]`: Validate (same players, correct length, no duplicates), raise `ValueError` on failure
+        - Record `player_order` (original indices), `player_order_source` ("console" or "game"), `first_player` (name + index)
+        - Log at DEBUG level: "Player order determined: [names] (source: console/game)"
+     d. Execute handshake phase with ordered players (emit `PLAYER_HANDSHAKE_*`, update `MatchContext.handshake_completed`)
+     e. Reset player conversations/logging
+     f. Emit `MATCH_START` (with seed, ordered player_names, player_order, player_order_source, first_player)
+     g. **Create MatchRuntime & delegate to mechanic**:
+        ```python
+        match_runtime = MatchRuntime(
+            console=self,
+            game=game,
+            match_context=match_context,
+            recorder=self.recorder,
+            logger=self.logger,
+            rng=match_context.rng,
+        )
+        final_state, mechanic_events, truncated = game.run(match_runtime, ordered_players)
+        ```
+     h. Collect metadata (seed, player_names, player_order, player_order_source, first_player, handshake status, turn count, truncation, duration)
+     i. Emit `MATCH_END` (with same metadata as MATCH_START for correlation)
+  5. Emit `BATCH_END` with accumulated results and seeds_used list, detach execution spectators, return list of `MatchResult`.
+- **Replay**
+  - Replay engine consumes recorded events (from recorder or in-memory) and replays them through the same `EventBus`, honoring spectator scopes.
+- **Cleanup**
+  - Upon facade close, the console flushes recorder, flushes logger, emits `SESSION_END`, and marks itself closed for idempotence.
+
+## 8. Error Handling & Edge Cases
+- `NotImplementedError` when game lacks required interface (H1).
+- `RuntimeError` wrapping player decision failures with player/game/match context.
+- `TypeError` when player returns incorrect type or metadata structure (H2).
+- `ValueError` when player returns empty action strings (H3 - defense in depth, controller should catch first).
+- Cleanup (`close()` / context manager exit) MUST swallow recorder/logger/spectator teardown failures while still emitting `SESSION_END`. Exceptions raised during match execution propagate back to the facade.
+- Recorder/spectator errors MUST be logged, and execution continues unless the failure compromises core execution (facade decides on escalation).
+- Replay events with missing context MUST surface descriptive errors and abort the replay gracefully.
+- When batch execution fails mid-stream, consoles SHOULD retain previously completed matches (recordings and metadata) to support partial analysis.
+
+## 9. Examples
+```python
+# Standalone console usage with explicit types
+from agentdeck.core.console import Console, NullLogger, NullRecorder
+from agentdeck.core.session import SessionConfig
+from agentdeck.examples import CombatGame, MockPlayer
+
+# Console with defaults (NullLogger, NullRecorder)
+console = Console(config=SessionConfig(), seed=123)
+
+game = CombatGame()
+players = [MockPlayer("A"), MockPlayer("B")]
+
+try:
+    results = console.run(game, players)
+    print(console.session.seed, results[0].metadata["duration"])
+    print(results[0].metadata["player_names"])  # ["A", "B"] - ordered
+finally:
+    console.close()
+```
+```python
+# Deterministic seed derivation and traceability
+from agentdeck.core.console import Console
+from agentdeck.core.session import SessionConfig
+from agentdeck.examples import CombatGame, MockPlayer
+
+console = Console(config=SessionConfig(), seed=42)
+
+players = [MockPlayer("Alpha"), MockPlayer("Beta")]
+
+try:
+    batch = console.run(CombatGame(), players, matches=2)  # Uses seeds 42, 43
+    override = console.run(CombatGame(), players, seed=99) # Uses seed 99
+
+    # Verify seed traceability
+    assert batch[0].metadata["seed"] == 42
+    assert batch[1].metadata["seed"] == 43
+    assert override[0].metadata["seed"] == 99
+
+    # Verify player order metadata (post-shuffling)
+    assert "player_names" in batch[0].metadata  # Ordered list (may be shuffled)
+    assert "player_order" in batch[0].metadata  # Original indices, e.g., [1, 0]
+    assert batch[0].metadata["player_order_source"] in ["console", "game"]
+    assert "first_player" in batch[0].metadata  # {"name": str, "index": int}
+finally:
+    console.close()
+```
+
+## 10. Testing Strategy
+| Focus | Invariants | Verification Goal |
+|-------|------------|-------------------|
+| Session lifecycle | S1-S5 | Confirm directories created, recorder subscribed, SESSION_START/END emitted once, cleanup idempotent, SessionState exposed with non-null seed. |
+| Execution lifecycle | X1-X4 | Capture event stream: BATCH_START/END fire once per run, batch IDs propagate, result counts match, BATCH_END includes seeds_used. |
+| RNG determinism | R1-R4, T1-T4 | Verify seed precedence, deterministic derivation, entropy fallback, seed in ALL artifacts (MatchResult, events, logs, recorder). |
+| Event ordering | E1, E3-E5 | Capture stream: lifecycle sequence, TurnLoop delegation, event origination boundaries (Console/TurnLoop/Game/Player). |
+| Match metadata | M1-M4 | Assert MatchResult includes metadata, conversation reset, player_order/player_order_source/first_player in all artifacts. |
+| Player ordering | M4, H4 | Verify same seed → identical player_order; test game override validation (reject invalid lists); verify DEBUG logging; test previous_match_result propagation. |
+| Spectator integration | P1-P3 | Ensure recorder/spectators receive events, execution spectators scoped, failures contained. |
+| Null Object pattern | L1 | Verify NullLogger/NullRecorder always present, no None checks in implementation. |
+| Player decision validation | H1-H3 | Trigger error paths: missing game interface, wrong return types, empty actions (defense-in-depth). |
+| Replay fidelity | R1-R4, E1 | Record + replay: verify event parity, seed reproduction, error handling for malformed recordings. |
+
+## 11. Design Rationale
+- **TurnLoop Delegation**: Console delegates turn-by-turn execution to TurnLoop, reducing Console size (~600 lines target) and enabling modular testing. Console owns match lifecycle (handshake → TurnLoop → conclusion), TurnLoop owns turn execution (state management, event creation, player decisions).
+- **Separation of Concerns**: Console orchestrates matches, TurnLoop executes turns, Game defines rules, Player makes decisions. Clear boundaries enable independent evolution and testing.
+- **Mechanics-Agnostic Orchestration**: Console coordinates matches without interpreting game semantics, enabling support for any game type (turn-based, simultaneous, real-time) without modification.
+- **Engine abstraction**: Isolating lifecycle and execution logic allows AgentDeck to swap consoles (Python, Rust, cloud) without API changes.
+- **SessionState ownership**: Console creates (not receives) SessionState, centralizing directory creation and session IDs to prevent duplication across facades.
+- **Deterministic RNG with complete traceability**: Seed precedence (param > config > entropy) combined with persistence in ALL observability artifacts ensures full reproducibility.
+- **EventBus integration**: Console owns EventBus instance but delegates routing logic to EventBus component, keeping spectators decoupled while preserving ordering.
+- **Null Object Pattern**: NullLogger and NullRecorder eliminate conditional logic, strengthen contracts, and simplify implementation/testing.
+- **Player Order Recording**: Always recording player order (not "when applicable") provides objective data for all game types without interpreting semantics.
+- **Player Order Fairness**: Console is the default source of fairness (Fisher-Yates shuffle), removing burden from game authors. Games override `get_player_order()` only when ordering is semantically meaningful (auction winners, asymmetric roles, state-based advantage). Recording `player_order_source` metadata enables researchers to distinguish console randomization from game-controlled ordering for analysis purposes.
+
+## 12. Open Questions / Future Work
+- Should consoles expose explicit health metrics (queue lengths, lag) for long-running sessions?
+- How should consoles report spectator failures—status codes, aggregated diagnostics, or facade callbacks?
+- Do we support pooled consoles (warm session contexts) for rapid batch execution, and how does that affect lifecycle guarantees?
+- What compatibility layer is needed for consoles implemented in other languages (e.g., Rust) to satisfy this contract?
+- Should replay requests be routed through the console (`console.replay`) or continue delegating directly to a dedicated `ReplayEngine`? (Deferred to `SPEC-REPLAY.md`.)
+
+## 13. References
+- `SPEC.md` §2 (Architecture), §2.4 (Reproducibility)
+- `SPEC-AGENTDECK.md` (Facade contract)
+- `SPEC-GAME.md` v0.6.0 (Narrative flow ownership, parse-failure policy hook)
+- `SPEC-PLAYER.md` v1.1.0 (Decision pipeline, ActionResult contract)
+- `SPEC-CONTROLLER.md` v1.2.0 (Primary action parsing/validation, ActionParseError semantics)
+- `SPEC-GAME-MECHANIC-TURN-BASED.md` v2.0.0 (TurnBasedGame + TurnLoop + MatchRuntime integration, EventFactory usage, parse failure propagation)
+- `SPEC-MATCH-RUNTIME.md` v1.0.0 (Runtime contract provided to `game.run`)
+- `SPEC-OBSERVABILITY.md` v1.2.0 (Event types, payloads, emission boundaries, parse failure events)
+- `SPEC-RECORDER.md` v1.2.0 (Recording contract, parse failure capture, NullRecorder)
+- `SPEC-SPECTATOR.md` v1.2.0 (Logger injection contract §5.5 LI1-LI5, spectator lifecycle)
+- `GUIDELINES.md` §4.4 (Public API documentation format)
+- Implementation references: `src/agentdeck/core/console.py`, `src/agentdeck/core/event_bus.py`, `src/agentdeck/core/session.py`, `src/agentdeck/core/turn_loop.py`

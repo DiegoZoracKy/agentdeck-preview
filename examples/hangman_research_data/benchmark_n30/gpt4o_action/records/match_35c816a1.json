@@ -1,0 +1,234 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_35c816a1",
+  "game": "HangmanGame",
+  "players": [
+    "gpt-4o"
+  ],
+  "winner": null,
+  "final_state": {
+    "secret_word": "TOKEN",
+    "guessed_letters": [
+      "E",
+      "A",
+      "T",
+      "R",
+      "S",
+      "H",
+      "I",
+      "L"
+    ],
+    "wrong_guesses": 6,
+    "max_wrong_guesses": 6,
+    "guess_history": [
+      {
+        "player": "gpt-4o",
+        "guess": "E",
+        "result": "correct",
+        "turn": 1
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "A",
+        "result": "wrong",
+        "turn": 2
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "T",
+        "result": "correct",
+        "turn": 3
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "R",
+        "result": "wrong",
+        "turn": 4
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "S",
+        "result": "wrong",
+        "turn": 5
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "H",
+        "result": "wrong",
+        "turn": 6
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "I",
+        "result": "wrong",
+        "turn": 7
+      },
+      {
+        "player": "gpt-4o",
+        "guess": "L",
+        "result": "wrong",
+        "turn": 8
+      }
+    ],
+    "turn": 9,
+    "players": [
+      "gpt-4o"
+    ],
+    "_turn_count": 8,
+    "_first_player_idx": 0
+  },
+  "seed": 1787767050,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "gpt-4o",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "gpt-4o"
+        },
+        "prompt_text": "You are playing HangmanGame.\\n\\nCooperative Hangman\n\nObjective:\n- Work together to guess the secret word before running out of attempts\n\nRules:\n- On your turn, guess ONE letter (A-Z)\n- Correct guesses reveal all instances of that letter in the word\n- Wrong guesses count against the team (max 6)\n- You can see which letters have already been guessed\n- Win: Complete the word before 6 wrong guesses\n- Lose: Reach 6 wrong guesses\n\nStrategy Tips:\n- Common letters: E, T, A, O, I, N, S, R\n- Look at the pattern to narrow down possibilities\n- Don't repeat letters that were already guessed\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing HangmanGame.\\n\\nCooperative Hangman\n\nObjective:\n- Work together to guess the secret word before running out of attempts\n\nRules:\n- On your turn, guess ONE letter (A-Z)\n- Correct guesses reveal all instances of that letter in the word\n- Wrong guesses count against the team (max 6)\n- You can see which letters have already been guessed\n- Win: Complete the word before 6 wrong guesses\n- Lose: Reach 6 wrong guesses\n\nStrategy Tips:\n- Common letters: E, T, A, O, I, N, S, R\n- Look at the pattern to narrow down possibilities\n- Don't repeat letters that were already guessed\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763845993.7705593,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_181249_4661b9",
+        "match_id": "match_35c816a1",
+        "batch_id": "batch_9244c2dc",
+        "phase_index": null,
+        "timestamp": 1763845993.7705593,
+        "monotonic_time": 52627.227140507
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "gpt-4o",
+        "reflection": "Thank you for playing! If you'd like to try again or start a new game, feel free to let me know.",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763845993.7817602,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_181249_4661b9",
+        "match_id": "match_35c816a1",
+        "batch_id": "batch_9244c2dc",
+        "timestamp": 1763845993.7817602,
+        "monotonic_time": 52627.23834182
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2025-11-22T18:13:13.770665",
+    "session_id": "session_20251122_181249_4661b9",
+    "batch_id": "batch_9244c2dc",
+    "context": {
+      "session_id": "session_20251122_181249_4661b9",
+      "batch_id": "batch_9244c2dc",
+      "match_index": 23,
+      "total_matches_in_batch": 30,
+      "end": {
+        "session_id": "session_20251122_181249_4661b9",
+        "match_id": "match_35c816a1",
+        "batch_id": "batch_9244c2dc",
+        "timestamp": 1763845993.7829707,
+        "monotonic_time": 52627.239552302
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "5dbba6c9b5361e913fc7d27d341f77774cbc3d46",
+        "branch": "claude/review-pre-release-gaps-01RGHjs1e1JAWqf1JPCgJeRH",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "gpt-4o": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-4o",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "gpt-4o",
+        "type": "GPTPlayer",
+        "model": "gpt-4o",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.0357175
+      }
+    ],
+    "game_config": {
+      "name": "HangmanGame",
+      "module": "agentdeck.games.examples.hangman"
+    },
+    "session": {
+      "session_id": "session_20251122_181249_4661b9",
+      "started_at": 1763845969.599759,
+      "seed": 1787767027
+    },
+    "ended_at": "2025-11-22T18:13:13.783869",
+    "match": {
+      "game": "HangmanGame",
+      "players": [
+        "gpt-4o"
+      ],
+      "player_names": [
+        "gpt-4o"
+      ],
+      "player_order": [
+        0
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o",
+        "index": 0
+      },
+      "duration": 5.354804992675781,
+      "handshake_completed": true,
+      "seed": 1787767050,
+      "batch_id": "batch_9244c2dc",
+      "truncated_by_max_turns": false,
+      "turns": 8,
+      "player_costs": {
+        "gpt-4o": 0.0357175
+      },
+      "cost": 0.0357175,
+      "schema_version": "1.3"
+    },
+    "players": [
+      "gpt-4o"
+    ],
+    "game": "HangmanGame",
+    "match_id": "match_35c816a1",
+    "seed": 1787767050
+  }
+}

@@ -1,0 +1,3056 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_b6e41935",
+  "game": "HangmanGame",
+  "players": [
+    "GPT-2",
+    "GPT-1"
+  ],
+  "winner": null,
+  "final_state": {
+    "secret_word": "TOKEN",
+    "guessed_letters": [
+      "E",
+      "T",
+      "R",
+      "A",
+      "S",
+      "O",
+      "U",
+      "N",
+      "L",
+      "M"
+    ],
+    "wrong_guesses": 6,
+    "max_wrong_guesses": 6,
+    "guess_history": [
+      {
+        "player": "GPT-2",
+        "guess": "E",
+        "result": "correct",
+        "turn": 1
+      },
+      {
+        "player": "GPT-1",
+        "guess": "T",
+        "result": "correct",
+        "turn": 2
+      },
+      {
+        "player": "GPT-2",
+        "guess": "R",
+        "result": "wrong",
+        "turn": 3
+      },
+      {
+        "player": "GPT-1",
+        "guess": "A",
+        "result": "wrong",
+        "turn": 4
+      },
+      {
+        "player": "GPT-2",
+        "guess": "S",
+        "result": "wrong",
+        "turn": 5
+      },
+      {
+        "player": "GPT-1",
+        "guess": "O",
+        "result": "correct",
+        "turn": 6
+      },
+      {
+        "player": "GPT-2",
+        "guess": "U",
+        "result": "wrong",
+        "turn": 7
+      },
+      {
+        "player": "GPT-1",
+        "guess": "N",
+        "result": "correct",
+        "turn": 8
+      },
+      {
+        "player": "GPT-2",
+        "guess": "L",
+        "result": "wrong",
+        "turn": 9
+      },
+      {
+        "player": "GPT-1",
+        "guess": "M",
+        "result": "wrong",
+        "turn": 10
+      }
+    ],
+    "turn": 11,
+    "players": [
+      "GPT-2",
+      "GPT-1"
+    ],
+    "_turn_count": 10,
+    "_first_player_idx": 0
+  },
+  "seed": 42,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT-2",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "GPT-2"
+        },
+        "prompt_text": "You are playing HangmanGame.\\n\\nCooperative Hangman\n\nObjective:\n- Work together to guess the secret word before running out of attempts\n\nRules:\n- On your turn, guess ONE letter (A-Z)\n- Correct guesses reveal all instances of that letter in the word\n- Wrong guesses count against the team (max 6)\n- You can see which letters have already been guessed\n- Win: Complete the word before 6 wrong guesses\n- Lose: Reach 6 wrong guesses\n\nStrategy Tips:\n- Common letters: E, T, A, O, I, N, S, R\n- Look at the pattern to narrow down possibilities\n- Don't repeat letters that were already guessed\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing HangmanGame.\\n\\nCooperative Hangman\n\nObjective:\n- Work together to guess the secret word before running out of attempts\n\nRules:\n- On your turn, guess ONE letter (A-Z)\n- Correct guesses reveal all instances of that letter in the word\n- Wrong guesses count against the team (max 6)\n- You can see which letters have already been guessed\n- Win: Complete the word before 6 wrong guesses\n- Lose: Reach 6 wrong guesses\n\nStrategy Tips:\n- Common letters: E, T, A, O, I, N, S, R\n- Look at the pattern to narrow down possibilities\n- Don't repeat letters that were already guessed\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763828392.4306784,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": null,
+        "timestamp": 1763828392.4306784,
+        "monotonic_time": 45401.962294804
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT-1",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "GPT-1"
+        },
+        "prompt_text": "You are playing HangmanGame.\\n\\nCooperative Hangman\n\nObjective:\n- Work together to guess the secret word before running out of attempts\n\nRules:\n- On your turn, guess ONE letter (A-Z)\n- Correct guesses reveal all instances of that letter in the word\n- Wrong guesses count against the team (max 6)\n- You can see which letters have already been guessed\n- Win: Complete the word before 6 wrong guesses\n- Lose: Reach 6 wrong guesses\n\nStrategy Tips:\n- Common letters: E, T, A, O, I, N, S, R\n- Look at the pattern to narrow down possibilities\n- Don't repeat letters that were already guessed\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing HangmanGame.\\n\\nCooperative Hangman\n\nObjective:\n- Work together to guess the secret word before running out of attempts\n\nRules:\n- On your turn, guess ONE letter (A-Z)\n- Correct guesses reveal all instances of that letter in the word\n- Wrong guesses count against the team (max 6)\n- You can see which letters have already been guessed\n- Win: Complete the word before 6 wrong guesses\n- Lose: Reach 6 wrong guesses\n\nStrategy Tips:\n- Common letters: E, T, A, O, I, N, S, R\n- Look at the pattern to narrow down possibilities\n- Don't repeat letters that were already guessed\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763828393.6422093,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": null,
+        "timestamp": 1763828393.6422093,
+        "monotonic_time": 45403.173825219
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: GPT-2 (index 0)",
+        "level": "info",
+        "log_context": {}
+      },
+      "timestamp": 1763828393.655249,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": null,
+        "timestamp": 1763828393.655249,
+        "monotonic_time": 45403.186865027
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-2",
+        "action": "E",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [],
+          "wrong_guesses": 0,
+          "max_wrong_guesses": 6,
+          "guess_history": [],
+          "turn": 1,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E"
+          ],
+          "wrong_guesses": 0,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            }
+          ],
+          "turn": 2,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "E"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-2\nTurn: 1\n\nBoard: _ _ _ _ _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - E\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 1\n\nBoard: _ _ _ _ _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - E\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 489,
+          "raw_response": "ACTION: E",
+          "turn_number": 1,
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "GPT-2",
+            "started_at": 1763828393.658818,
+            "duration": 0.45732975006103516,
+            "ended_at": 1763828394.1161478,
+            "rng_seed": 1906092833,
+            "rng_label": "turn-1-GPT-2"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "GPT-2",
+          "started_at": 1763828393.658818,
+          "duration": 0.45732975006103516,
+          "ended_at": 1763828394.1161478,
+          "rng_seed": 1906092833,
+          "rng_label": "turn-1-GPT-2"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-2\nTurn: 1\n\nBoard: _ _ _ _ _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - E\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 1\n\nBoard: _ _ _ _ _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - E\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: E",
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 1
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828394.116427,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1763828394.116427,
+        "monotonic_time": 45403.648042992
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-1",
+        "action": "T",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E"
+          ],
+          "wrong_guesses": 0,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            }
+          ],
+          "turn": 2,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 2,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T"
+          ],
+          "wrong_guesses": 0,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            }
+          ],
+          "turn": 3,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 2,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "T"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-1\nTurn: 2\n\nBoard: _ _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 2\n\nBoard: _ _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 512,
+          "raw_response": "ACTION: T",
+          "turn_number": 2,
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 2
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 2,
+            "turn_index": 1,
+            "player": "GPT-1",
+            "started_at": 1763828394.1185071,
+            "duration": 1.0895578861236572,
+            "ended_at": 1763828395.208065,
+            "rng_seed": 1331077789,
+            "rng_label": "turn-2-GPT-1"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 2,
+          "turn_index": 1,
+          "player": "GPT-1",
+          "started_at": 1763828394.1185071,
+          "duration": 1.0895578861236572,
+          "ended_at": 1763828395.208065,
+          "rng_seed": 1331077789,
+          "rng_label": "turn-2-GPT-1"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "turn_index": 1,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-1\nTurn: 2\n\nBoard: _ _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 2\n\nBoard: _ _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - T\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: T",
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 2
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828395.2083318,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 1,
+        "turn_index": 1,
+        "timestamp": 1763828395.2083318,
+        "monotonic_time": 45404.739947795
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-2",
+        "action": "R",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T"
+          ],
+          "wrong_guesses": 0,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            }
+          ],
+          "turn": 3,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 3,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R"
+          ],
+          "wrong_guesses": 1,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            }
+          ],
+          "turn": 4,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 3,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "R"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-2\nTurn: 3\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 3\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 535,
+          "raw_response": "ACTION: R",
+          "turn_number": 3,
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 3
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 3,
+            "turn_index": 2,
+            "player": "GPT-2",
+            "started_at": 1763828395.2106383,
+            "duration": 1.1959617137908936,
+            "ended_at": 1763828396.4066,
+            "rng_seed": 2951687956,
+            "rng_label": "turn-3-GPT-2"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 3,
+          "turn_index": 2,
+          "player": "GPT-2",
+          "started_at": 1763828395.2106383,
+          "duration": 1.1959617137908936,
+          "ended_at": 1763828396.4066,
+          "rng_seed": 2951687956,
+          "rng_label": "turn-3-GPT-2"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 2,
+        "turn_index": 2,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-2\nTurn: 3\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 3\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 0\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - R\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: R",
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 3
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828396.4069192,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 2,
+        "turn_index": 2,
+        "timestamp": 1763828396.4069192,
+        "monotonic_time": 45405.938535286
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-1",
+        "action": "A",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R"
+          ],
+          "wrong_guesses": 1,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            }
+          ],
+          "turn": 4,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 4,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A"
+          ],
+          "wrong_guesses": 2,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            }
+          ],
+          "turn": 5,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 4,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "A"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-1\nTurn: 4\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 1\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 4\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 1\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 556,
+          "raw_response": "ACTION: A",
+          "turn_number": 4,
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 4
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 4,
+            "turn_index": 3,
+            "player": "GPT-1",
+            "started_at": 1763828396.4097884,
+            "duration": 0.976874828338623,
+            "ended_at": 1763828397.3866632,
+            "rng_seed": 3722819199,
+            "rng_label": "turn-4-GPT-1"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 4,
+          "turn_index": 3,
+          "player": "GPT-1",
+          "started_at": 1763828396.4097884,
+          "duration": 0.976874828338623,
+          "ended_at": 1763828397.3866632,
+          "rng_seed": 3722819199,
+          "rng_label": "turn-4-GPT-1"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 3,
+        "turn_index": 3,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-1\nTurn: 4\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 1\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 4\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 1\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n\nAvailable Letters:\n  - A\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: A",
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 4
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828397.3869817,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 3,
+        "turn_index": 3,
+        "timestamp": 1763828397.3869817,
+        "monotonic_time": 45406.918597769
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-2",
+        "action": "S",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A"
+          ],
+          "wrong_guesses": 2,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            }
+          ],
+          "turn": 5,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 5,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S"
+          ],
+          "wrong_guesses": 3,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            }
+          ],
+          "turn": 6,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 5,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "S"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-2\nTurn: 5\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 2\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 5\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 2\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 577,
+          "raw_response": "ACTION: S",
+          "turn_number": 5,
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 5
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 5,
+            "turn_index": 4,
+            "player": "GPT-2",
+            "started_at": 1763828397.3984675,
+            "duration": 0.44329094886779785,
+            "ended_at": 1763828397.8417585,
+            "rng_seed": 179455741,
+            "rng_label": "turn-5-GPT-2"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 5,
+          "turn_index": 4,
+          "player": "GPT-2",
+          "started_at": 1763828397.3984675,
+          "duration": 0.44329094886779785,
+          "ended_at": 1763828397.8417585,
+          "rng_seed": 179455741,
+          "rng_label": "turn-5-GPT-2"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 4,
+        "turn_index": 4,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-2\nTurn: 5\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 2\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 5\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 2\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - S\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: S",
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 5
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828397.842099,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 4,
+        "turn_index": 4,
+        "timestamp": 1763828397.842099,
+        "monotonic_time": 45407.3737164
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-1",
+        "action": "O",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S"
+          ],
+          "wrong_guesses": 3,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            }
+          ],
+          "turn": 6,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 6,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O"
+          ],
+          "wrong_guesses": 3,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            }
+          ],
+          "turn": 7,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 6,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "O"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-1\nTurn: 6\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 6\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 598,
+          "raw_response": "ACTION: O",
+          "turn_number": 6,
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 6
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 6,
+            "turn_index": 5,
+            "player": "GPT-1",
+            "started_at": 1763828397.845645,
+            "duration": 0.4985969066619873,
+            "ended_at": 1763828398.3442419,
+            "rng_seed": 3136498926,
+            "rng_label": "turn-6-GPT-1"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 6,
+          "turn_index": 5,
+          "player": "GPT-1",
+          "started_at": 1763828397.845645,
+          "duration": 0.4985969066619873,
+          "ended_at": 1763828398.3442419,
+          "rng_seed": 3136498926,
+          "rng_label": "turn-6-GPT-1"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 5,
+        "turn_index": 5,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-1\nTurn: 6\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 6\n\nBoard: T _ _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - O\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: E (correct)\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: O",
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 6
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828398.3446045,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 5,
+        "turn_index": 5,
+        "timestamp": 1763828398.3446045,
+        "monotonic_time": 45407.876220386
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-2",
+        "action": "U",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O"
+          ],
+          "wrong_guesses": 3,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            }
+          ],
+          "turn": 7,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 7,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U"
+          ],
+          "wrong_guesses": 4,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            }
+          ],
+          "turn": 8,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 7,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "U"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-2\nTurn: 7\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 7\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 598,
+          "raw_response": "ACTION: U",
+          "turn_number": 7,
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 7
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 7,
+            "turn_index": 6,
+            "player": "GPT-2",
+            "started_at": 1763828398.348539,
+            "duration": 0.59218430519104,
+            "ended_at": 1763828398.9407234,
+            "rng_seed": 3508632916,
+            "rng_label": "turn-7-GPT-2"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 7,
+          "turn_index": 6,
+          "player": "GPT-2",
+          "started_at": 1763828398.348539,
+          "duration": 0.59218430519104,
+          "ended_at": 1763828398.9407234,
+          "rng_seed": 3508632916,
+          "rng_label": "turn-7-GPT-2"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 6,
+        "turn_index": 6,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-2\nTurn: 7\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 7\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 3\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - U\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: T (correct)\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: U",
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 7
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828398.941057,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 6,
+        "turn_index": 6,
+        "timestamp": 1763828398.941057,
+        "monotonic_time": 45408.472672938
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-1",
+        "action": "N",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U"
+          ],
+          "wrong_guesses": 4,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            }
+          ],
+          "turn": 8,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 8,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U",
+            "N"
+          ],
+          "wrong_guesses": 4,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            },
+            {
+              "player": "GPT-1",
+              "guess": "N",
+              "result": "correct",
+              "turn": 8
+            }
+          ],
+          "turn": 9,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 8,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "N"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-1\nTurn: 8\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 8\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 596,
+          "raw_response": "ACTION: N",
+          "turn_number": 8,
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 8
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 8,
+            "turn_index": 7,
+            "player": "GPT-1",
+            "started_at": 1763828398.9511743,
+            "duration": 1.4045145511627197,
+            "ended_at": 1763828400.3556888,
+            "rng_seed": 2161019043,
+            "rng_label": "turn-8-GPT-1"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 8,
+          "turn_index": 7,
+          "player": "GPT-1",
+          "started_at": 1763828398.9511743,
+          "duration": 1.4045145511627197,
+          "ended_at": 1763828400.3556888,
+          "rng_seed": 2161019043,
+          "rng_label": "turn-8-GPT-1"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 7,
+        "turn_index": 7,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-1\nTurn: 8\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 8\n\nBoard: T O _ E _\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - N\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: R (wrong)\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: N",
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 8
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828400.3560956,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 7,
+        "turn_index": 7,
+        "timestamp": 1763828400.3560956,
+        "monotonic_time": 45409.887713211
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-2",
+        "action": "L",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U",
+            "N"
+          ],
+          "wrong_guesses": 4,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            },
+            {
+              "player": "GPT-1",
+              "guess": "N",
+              "result": "correct",
+              "turn": 8
+            }
+          ],
+          "turn": 9,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 9,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U",
+            "N",
+            "L"
+          ],
+          "wrong_guesses": 5,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            },
+            {
+              "player": "GPT-1",
+              "guess": "N",
+              "result": "correct",
+              "turn": 8
+            },
+            {
+              "player": "GPT-2",
+              "guess": "L",
+              "result": "wrong",
+              "turn": 9
+            }
+          ],
+          "turn": 10,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 9,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "L"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-2\nTurn: 9\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 9\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 598,
+          "raw_response": "ACTION: L",
+          "turn_number": 9,
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 9
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 9,
+            "turn_index": 8,
+            "player": "GPT-2",
+            "started_at": 1763828400.3616202,
+            "duration": 0.7271053791046143,
+            "ended_at": 1763828401.0887256,
+            "rng_seed": 1407035201,
+            "rng_label": "turn-9-GPT-2"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 9,
+          "turn_index": 8,
+          "player": "GPT-2",
+          "started_at": 1763828400.3616202,
+          "duration": 0.7271053791046143,
+          "ended_at": 1763828401.0887256,
+          "rng_seed": 1407035201,
+          "rng_label": "turn-9-GPT-2"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 8,
+        "turn_index": 8,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-2\nTurn: 9\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-2\nTurn: 9\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 4\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - L\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-1: A (wrong)\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n\n=========================",
+              "metadata": {
+                "player": "GPT-2",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: L",
+          "renderer_output": {
+            "player": "GPT-2",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 9
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828401.0890932,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 8,
+        "turn_index": 8,
+        "timestamp": 1763828401.0890932,
+        "monotonic_time": 45410.620710501
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-1",
+        "action": "M",
+        "reasoning": null,
+        "state_before": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U",
+            "N",
+            "L"
+          ],
+          "wrong_guesses": 5,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            },
+            {
+              "player": "GPT-1",
+              "guess": "N",
+              "result": "correct",
+              "turn": 8
+            },
+            {
+              "player": "GPT-2",
+              "guess": "L",
+              "result": "wrong",
+              "turn": 9
+            }
+          ],
+          "turn": 10,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 10,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "secret_word": "TOKEN",
+          "guessed_letters": [
+            "E",
+            "T",
+            "R",
+            "A",
+            "S",
+            "O",
+            "U",
+            "N",
+            "L",
+            "M"
+          ],
+          "wrong_guesses": 6,
+          "max_wrong_guesses": 6,
+          "guess_history": [
+            {
+              "player": "GPT-2",
+              "guess": "E",
+              "result": "correct",
+              "turn": 1
+            },
+            {
+              "player": "GPT-1",
+              "guess": "T",
+              "result": "correct",
+              "turn": 2
+            },
+            {
+              "player": "GPT-2",
+              "guess": "R",
+              "result": "wrong",
+              "turn": 3
+            },
+            {
+              "player": "GPT-1",
+              "guess": "A",
+              "result": "wrong",
+              "turn": 4
+            },
+            {
+              "player": "GPT-2",
+              "guess": "S",
+              "result": "wrong",
+              "turn": 5
+            },
+            {
+              "player": "GPT-1",
+              "guess": "O",
+              "result": "correct",
+              "turn": 6
+            },
+            {
+              "player": "GPT-2",
+              "guess": "U",
+              "result": "wrong",
+              "turn": 7
+            },
+            {
+              "player": "GPT-1",
+              "guess": "N",
+              "result": "correct",
+              "turn": 8
+            },
+            {
+              "player": "GPT-2",
+              "guess": "L",
+              "result": "wrong",
+              "turn": 9
+            },
+            {
+              "player": "GPT-1",
+              "guess": "M",
+              "result": "wrong",
+              "turn": 10
+            }
+          ],
+          "turn": 11,
+          "players": [
+            "GPT-2",
+            "GPT-1"
+          ],
+          "_turn_count": 10,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "X",
+            "V",
+            "T",
+            "G",
+            "O",
+            "P",
+            "H",
+            "E",
+            "Z",
+            "B",
+            "Y",
+            "L",
+            "K",
+            "J",
+            "M",
+            "A",
+            "Q",
+            "W",
+            "I",
+            "U",
+            "F",
+            "C",
+            "S",
+            "N",
+            "D",
+            "R"
+          ],
+          "candidates": [
+            "M"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-1\nTurn: 10\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 5\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n  - L\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n  - GPT-2: L (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 10\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 5\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n  - L\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n  - GPT-2: L (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 599,
+          "raw_response": "ACTION: M",
+          "turn_number": 10,
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 10
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_b6e41935",
+            "turn_number": 10,
+            "turn_index": 9,
+            "player": "GPT-1",
+            "started_at": 1763828401.0951467,
+            "duration": 0.7898635864257812,
+            "ended_at": 1763828401.8850102,
+            "rng_seed": 3765760109,
+            "rng_label": "turn-10-GPT-1"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_b6e41935",
+          "turn_number": 10,
+          "turn_index": 9,
+          "player": "GPT-1",
+          "started_at": 1763828401.0951467,
+          "duration": 0.7898635864257812,
+          "ended_at": 1763828401.8850102,
+          "rng_seed": 3765760109,
+          "rng_label": "turn-10-GPT-1"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 9,
+        "turn_index": 9,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-1\nTurn: 10\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 5\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n  - L\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n  - GPT-2: L (wrong)\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-1\nTurn: 10\n\nBoard: T O _ E N\n\nWord Length: 5\n\nWrong Guesses: 5\n\nMax Wrong Guesses: 6\n\nGuessed Letters:\n  - E\n  - T\n  - R\n  - A\n  - S\n  - O\n  - U\n  - N\n  - L\n\nAvailable Letters:\n  - B\n  - C\n  - D\n  - F\n  - G\n  - H\n  - I\n  - J\n  - K\n  - M\n  - P\n  - Q\n  - V\n  - W\n  - X\n  - Y\n  - Z\n\nRecent Guesses:\n  - GPT-2: S (wrong)\n  - GPT-1: O (correct)\n  - GPT-2: U (wrong)\n  - GPT-1: N (correct)\n  - GPT-2: L (wrong)\n\n=========================",
+              "metadata": {
+                "player": "GPT-1",
+                "sections": [
+                  "turn",
+                  "board",
+                  "word_length",
+                  "wrong_guesses",
+                  "max_wrong_guesses",
+                  "guessed_letters",
+                  "available_letters",
+                  "recent_guesses"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: M",
+          "renderer_output": {
+            "player": "GPT-1",
+            "sections": [
+              "turn",
+              "board",
+              "word_length",
+              "wrong_guesses",
+              "max_wrong_guesses",
+              "guessed_letters",
+              "available_letters",
+              "recent_guesses"
+            ],
+            "turn_number": 10
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828401.8854012,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "phase_index": 9,
+        "turn_index": 9,
+        "timestamp": 1763828401.8854012,
+        "monotonic_time": 45411.417017425
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "GPT-2",
+        "reflection": "It looks like we've concluded the game and it resulted in a draw. The secret word was \"TOKEN,\" but we couldn't guess it before reaching the maximum number of wrong guesses. Thank you for playing! If you'd like to play again or try something else, let me know!",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828403.4370058,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "timestamp": 1763828403.4370058,
+        "monotonic_time": 45412.968621655
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "GPT-1",
+        "reflection": "The game has concluded in a draw. The secret word was \"TOKEN.\" While we made some good guesses, we unfortunately reached the maximum number of wrong guesses. \n\nWould you like to play again or do something else?",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763828404.8153305,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "timestamp": 1763828404.8153305,
+        "monotonic_time": 45414.346946495
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2025-11-22T13:19:53.642665",
+    "session_id": "session_20251122_131951_43d70c",
+    "batch_id": "batch_8f3ee281",
+    "context": {
+      "session_id": "session_20251122_131951_43d70c",
+      "batch_id": "batch_8f3ee281",
+      "match_index": 0,
+      "total_matches_in_batch": 1,
+      "end": {
+        "session_id": "session_20251122_131951_43d70c",
+        "batch_id": "batch_8f3ee281",
+        "match_id": "match_b6e41935",
+        "timestamp": 1763828404.8215494,
+        "monotonic_time": 45414.353165281
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "c4655ba01fb42b49c1eb6d9ce355b0669d5b6b45",
+        "branch": "claude/review-pre-release-gaps-01RGHjs1e1JAWqf1JPCgJeRH",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "GPT-2": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      },
+      "GPT-1": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "GPT-2",
+        "type": "GPTPlayer",
+        "model": "gpt-4o-mini",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 2.805e-05
+      },
+      {
+        "name": "GPT-1",
+        "type": "GPTPlayer",
+        "model": "gpt-4o-mini",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 2.805e-05
+      }
+    ],
+    "game_config": {
+      "name": "HangmanGame",
+      "module": "agentdeck.games.examples.hangman"
+    },
+    "session": {
+      "session_id": "session_20251122_131951_43d70c",
+      "started_at": 1763828391.2813096,
+      "seed": 4255675201
+    },
+    "ended_at": "2025-11-22T13:20:04.822668",
+    "match": {
+      "game": "HangmanGame",
+      "players": [
+        "GPT-2",
+        "GPT-1"
+      ],
+      "player_names": [
+        "GPT-2",
+        "GPT-1"
+      ],
+      "player_order": [
+        1,
+        0
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT-2",
+        "index": 1
+      },
+      "duration": 10.593631267547607,
+      "handshake_completed": true,
+      "seed": 42,
+      "batch_id": "batch_8f3ee281",
+      "truncated_by_max_turns": false,
+      "turns": 10,
+      "player_costs": {
+        "GPT-2": 0.0010926,
+        "GPT-1": 0.0011085
+      },
+      "cost": 0.0022011,
+      "schema_version": "1.3"
+    },
+    "players": [
+      "GPT-2",
+      "GPT-1"
+    ],
+    "game": "HangmanGame",
+    "match_id": "match_b6e41935",
+    "seed": 42
+  }
+}

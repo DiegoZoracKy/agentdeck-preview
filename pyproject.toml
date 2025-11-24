@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentdeck-ai"
+dynamic = ["version"]
+description = "Research platform for studying AI behavior through game scenarios"
+readme = "README.md"
+authors = [
+    {name = "AgentDeck Team", email = "contact@agentdeck.ai"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Games/Entertainment",
+]
+
+dependencies = [
+    # Config/utilities
+    "pyyaml>=6.0",
+
+    # Research stack (CORE mission - statistical analysis)
+    "numpy>=1.21.0",
+    "scipy>=1.9.0",
+    "statsmodels>=0.13.0",
+    "matplotlib>=3.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing tools
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    # Code quality tools
+    "black>=22.0",
+    "pylint>=2.15",
+    "mypy>=0.990",
+]
+openai = [
+    "openai>=1.0",
+]
+anthropic = [
+    "anthropic>=0.5",
+]
+google = [
+    "google-cloud-aiplatform>=1.70.0",
+]
+providers = [
+    "openai>=1.0",
+    "anthropic>=0.5",
+    "google-cloud-aiplatform>=1.70.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/agentdeck/agentdeck"
+Documentation = "https://agentdeck.readthedocs.io"
+Repository = "https://github.com/agentdeck/agentdeck.git"
+Issues = "https://github.com/agentdeck/agentdeck/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "agentdeck.__version__"}
+
+[tool.setuptools.package-data]
+agentdeck = ["py.typed", "config/pricing.yaml"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.pylint.messages_control]
+max-line-length = 100
+disable = [
+    "C0111",  # missing-docstring
+    "R0903",  # too-few-public-methods
+    "R0913",  # too-many-arguments
+    "W0212",  # protected-access
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = [
+    "--verbose",
+    "--cov=agentdeck",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]

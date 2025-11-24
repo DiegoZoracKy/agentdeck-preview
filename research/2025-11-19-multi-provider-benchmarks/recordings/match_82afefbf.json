@@ -1,0 +1,471 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_82afefbf",
+  "game": "FixedDamageGame",
+  "players": [
+    "GPT-4o-mini",
+    "Gemini-2.5-Pro"
+  ],
+  "winner": "GPT-4o-mini",
+  "final_state": {
+    "health": {
+      "GPT-4o-mini": 100,
+      "Gemini-2.5-Pro": 80
+    },
+    "potions": {
+      "GPT-4o-mini": 2,
+      "Gemini-2.5-Pro": 2
+    },
+    "last_action": {
+      "GPT-4o-mini": "ATTACK",
+      "Gemini-2.5-Pro": null
+    },
+    "turn": 2,
+    "_turn_count": 2,
+    "_first_player_idx": 0
+  },
+  "seed": 2097,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT-4o-mini",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "GPT-4o-mini"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763613924.477033,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_014359_cfae67",
+        "batch_id": "batch_dd9327e4",
+        "match_id": "match_82afefbf",
+        "phase_index": null,
+        "timestamp": 1763613924.477033,
+        "monotonic_time": 20562.79913248
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "Gemini-2.5-Pro"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763613926.6497874,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_014359_cfae67",
+        "batch_id": "batch_dd9327e4",
+        "match_id": "match_82afefbf",
+        "phase_index": null,
+        "timestamp": 1763613926.6497874,
+        "monotonic_time": 20564.971887393
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: GPT-4o-mini (index 0)",
+        "level": "info",
+        "log_context": {}
+      },
+      "timestamp": 1763613926.6744752,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_014359_cfae67",
+        "batch_id": "batch_dd9327e4",
+        "match_id": "match_82afefbf",
+        "phase_index": null,
+        "timestamp": 1763613926.6744752,
+        "monotonic_time": 20564.996575006
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT-4o-mini",
+        "action": "ATTACK",
+        "reasoning": "In the first turn, both players start with full health and no actions have been taken yet. Since I have 100 HP and 2 potions available, my options are to either attack my opponent or use a potion. Attacking seems to be the more aggressive approach, aiming to quickly reduce my opponent's health and remain in a strong position. If my opponent also chooses to attack on their turn, I can utilize a potion in later turns if needed. Therefore, I will choose to attack now.",
+        "state_before": {
+          "health": {
+            "GPT-4o-mini": 100,
+            "Gemini-2.5-Pro": 100
+          },
+          "potions": {
+            "GPT-4o-mini": 2,
+            "Gemini-2.5-Pro": 2
+          },
+          "last_action": {
+            "GPT-4o-mini": null,
+            "Gemini-2.5-Pro": null
+          },
+          "turn": 1,
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "GPT-4o-mini": 100,
+            "Gemini-2.5-Pro": 80
+          },
+          "potions": {
+            "GPT-4o-mini": 2,
+            "Gemini-2.5-Pro": 2
+          },
+          "last_action": {
+            "GPT-4o-mini": "ATTACK",
+            "Gemini-2.5-Pro": null
+          },
+          "turn": 2,
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "reasoning_extracted": true,
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  Gemini-2.5-Pro: None\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  Gemini-2.5-Pro: None\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 321,
+          "raw_response": "REASONING: In the first turn, both players start with full health and no actions have been taken yet. Since I have 100 HP and 2 potions available, my options are to either attack my opponent or use a potion. Attacking seems to be the more aggressive approach, aiming to quickly reduce my opponent's health and remain in a strong position. If my opponent also chooses to attack on their turn, I can utilize a potion in later turns if needed. Therefore, I will choose to attack now.\n\nACTION: ATTACK",
+          "turn_number": 1,
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_82afefbf",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "GPT-4o-mini",
+            "started_at": 1763613926.6760495,
+            "duration": 2.3201074600219727,
+            "ended_at": 1763613928.996157,
+            "rng_seed": 847615002,
+            "rng_label": "turn-1-GPT-4o-mini"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_82afefbf",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "GPT-4o-mini",
+          "started_at": 1763613926.6760495,
+          "duration": 2.3201074600219727,
+          "ended_at": 1763613928.996157,
+          "rng_seed": 847615002,
+          "rng_label": "turn-1-GPT-4o-mini"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  Gemini-2.5-Pro: None\n\n=========================\\n\\nPlease respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT-4o-mini\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 2\n\nLast Action:\n  You: None\n  Gemini-2.5-Pro: None\n\n=========================",
+              "metadata": {
+                "player": "GPT-4o-mini",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Please respond in the following format:\nREASONING: [Your step-by-step thought process]\nACTION: [Your chosen action]\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "REASONING: In the first turn, both players start with full health and no actions have been taken yet. Since I have 100 HP and 2 potions available, my options are to either attack my opponent or use a potion. Attacking seems to be the more aggressive approach, aiming to quickly reduce my opponent's health and remain in a strong position. If my opponent also chooses to attack on their turn, I can utilize a potion in later turns if needed. Therefore, I will choose to attack now.\n\nACTION: ATTACK",
+          "renderer_output": {
+            "player": "GPT-4o-mini",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763613928.9964345,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_014359_cfae67",
+        "batch_id": "batch_dd9327e4",
+        "match_id": "match_82afefbf",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1763613928.9964345,
+        "monotonic_time": 20567.318534041
+      }
+    },
+    {
+      "type": "player_action_parse_failed",
+      "data": {
+        "player": "Gemini-2.5-Pro",
+        "match_id": "match_82afefbf",
+        "turn_number": 2,
+        "parse_result": {
+          "success": false,
+          "error": "No action token found",
+          "raw_response": "REASONING: The",
+          "reasoning": "The",
+          "metadata": {
+            "allowed_actions": [
+              "ATTACK",
+              "POTION"
+            ],
+            "candidates": [],
+            "reasoning_extracted": true
+          },
+          "candidates": []
+        },
+        "raw_response": "REASONING: The",
+        "policy_outcome": "forfeit",
+        "prompt_text": "",
+        "prompt_blocks": [],
+        "response_text": "REASONING: The",
+        "prompt": {
+          "phase": "parse_failure",
+          "turn_number": 2,
+          "prompt_text": "",
+          "prompt_blocks": [],
+          "response_text": "REASONING: The",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763613931.1877801,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_014359_cfae67",
+        "batch_id": "batch_dd9327e4",
+        "match_id": "match_82afefbf",
+        "timestamp": 1763613931.1877801,
+        "monotonic_time": 20569.509880145
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2025-11-20T01:45:26.662917",
+    "session_id": "session_20251120_014359_cfae67",
+    "batch_id": "batch_dd9327e4",
+    "context": {
+      "session_id": "session_20251120_014359_cfae67",
+      "batch_id": "batch_dd9327e4",
+      "match_index": 13,
+      "total_matches_in_batch": 30,
+      "end": {
+        "session_id": "session_20251120_014359_cfae67",
+        "batch_id": "batch_dd9327e4",
+        "match_id": "match_82afefbf",
+        "timestamp": 1763613931.1904945,
+        "monotonic_time": 20569.512594127
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "4f89acdab6782c2e565313cb33947c6b326022a2",
+        "branch": "main",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "GPT-4o-mini": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      },
+      "Gemini-2.5-Pro": {
+        "type": "GeminiPlayer",
+        "module": "agentdeck.players.google_player",
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "max_tokens": null
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "GPT-4o-mini",
+        "type": "GPTPlayer",
+        "model": "gpt-4o-mini",
+        "controller": "ReasoningController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.0009122999999999999
+      },
+      {
+        "name": "Gemini-2.5-Pro",
+        "type": "GeminiPlayer",
+        "model": "gemini-2.5-pro",
+        "controller": "ReasoningController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.008411250000000002
+      }
+    ],
+    "game_config": {
+      "name": "FixedDamageGame",
+      "module": "agentdeck.games.examples.fixed_damage"
+    },
+    "ended_at": "2025-11-20T01:45:31.192551",
+    "match": {
+      "game": "FixedDamageGame",
+      "players": [
+        "GPT-4o-mini",
+        "Gemini-2.5-Pro"
+      ],
+      "player_names": [
+        "GPT-4o-mini",
+        "Gemini-2.5-Pro"
+      ],
+      "player_order": [
+        1,
+        0
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT-4o-mini",
+        "index": 1
+      },
+      "duration": 7.323203802108765,
+      "handshake_completed": true,
+      "seed": 2097,
+      "batch_id": "batch_dd9327e4",
+      "truncated_by_max_turns": false,
+      "turns": 2,
+      "player_costs": {
+        "GPT-4o-mini": 0.0001303500000000001,
+        "Gemini-2.5-Pro": 0.0006212500000000003
+      },
+      "cost": 0.0007516000000000004,
+      "schema_version": "1.3",
+      "outcome": "forfeit",
+      "forfeit_reason": "parse_failure",
+      "forfeiting_player": "Gemini-2.5-Pro",
+      "policy": "forfeit",
+      "forfeit_turn": 2,
+      "forfeit_turn_context": {
+        "match_id": "match_82afefbf",
+        "turn_number": 2,
+        "turn_index": 1,
+        "player": "Gemini-2.5-Pro",
+        "started_at": 1763613929.0005822,
+        "duration": 0.0,
+        "rng_seed": 3609757446,
+        "rng_label": "turn-2-Gemini-2.5-Pro"
+      },
+      "parse_error": {
+        "success": false,
+        "error": "No action token found",
+        "raw_response": "REASONING: The",
+        "reasoning": "The",
+        "metadata": {
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [],
+          "reasoning_extracted": true
+        },
+        "candidates": []
+      }
+    },
+    "players": [
+      "GPT-4o-mini",
+      "Gemini-2.5-Pro"
+    ],
+    "game": "FixedDamageGame",
+    "match_id": "match_82afefbf",
+    "winner": "GPT-4o-mini",
+    "seed": 2097
+  }
+}

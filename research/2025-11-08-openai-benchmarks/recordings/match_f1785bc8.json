@@ -1,0 +1,257 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_f1785bc8",
+  "game": "FixedDamageGame",
+  "players": [
+    "GPT-5",
+    "GPT-5-nano"
+  ],
+  "winner": "GPT-5-nano",
+  "final_state": {
+    "health": {
+      "GPT-5": 0,
+      "GPT-5-nano": 20
+    },
+    "potions": {
+      "GPT-5": 0,
+      "GPT-5-nano": 0
+    },
+    "last_action": {
+      "GPT-5": "ATTACK",
+      "GPT-5-nano": "ATTACK"
+    },
+    "turn": 20,
+    "_turn_count": 19,
+    "_first_player_idx": 1
+  },
+  "seed": 2161,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT-5",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "GPT-5"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763612735.6773176,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_011617_a11d85",
+        "match_id": "match_f1785bc8",
+        "batch_id": "batch_fe554c55",
+        "phase_index": null,
+        "timestamp": 1763612735.6773176,
+        "monotonic_time": 19373.999417231
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT-5-nano",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "GPT-5-nano"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 2 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1763612735.6778262,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_011617_a11d85",
+        "match_id": "match_f1785bc8",
+        "batch_id": "batch_fe554c55",
+        "phase_index": null,
+        "timestamp": 1763612735.6778262,
+        "monotonic_time": 19373.999925576
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "GPT-5",
+        "reflection": "Tough game\u2014well played.\n\nQuick post-game thoughts:\n- Your heal timings were mostly solid: don\u2019t potion above 40; potion at 30 was correct.\n- The Turn 6 potion at 40 traded tempo for safety. It\u2019s defensible, but that tempo loss likely let GPT-5-nano stabilize and line up its double-potion window later.\n- In partial info, a useful rule: attack when >40 HP; potion at \u226440 only if it prevents a worse forced-heal line next turn. If you can see a likely two-turn lethal race in your favor, keep attacking even at 40.\n- You correctly pressured through their potions midgame. Once you were out of potions at 40, continuing to attack was the only line.\n\nWant to run it back?",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763612735.7041101,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_011617_a11d85",
+        "match_id": "match_f1785bc8",
+        "batch_id": "batch_fe554c55",
+        "timestamp": 1763612735.7041101,
+        "monotonic_time": 19374.026210106
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "GPT-5-nano",
+        "reflection": "Great game! You (GPT-5-nano) won.\n\nFinal state:\n- You: 20 HP, 0 potions\n- Opponent (GPT-5): 0 HP, 0 potions\n\nIf you\u2019d like to play again, say \u201cnew game\u201d and tell me any preferences (starting HP, potions, information level).",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1763612735.7057607,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20251120_011617_a11d85",
+        "match_id": "match_f1785bc8",
+        "batch_id": "batch_fe554c55",
+        "timestamp": 1763612735.7057607,
+        "monotonic_time": 19374.027860439
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2025-11-20T01:25:35.691220",
+    "session_id": "session_20251120_011617_a11d85",
+    "batch_id": "batch_fe554c55",
+    "context": {
+      "session_id": "session_20251120_011617_a11d85",
+      "batch_id": "batch_fe554c55",
+      "match_index": 17,
+      "total_matches_in_batch": 30,
+      "end": {
+        "session_id": "session_20251120_011617_a11d85",
+        "match_id": "match_f1785bc8",
+        "batch_id": "batch_fe554c55",
+        "timestamp": 1763612735.7074788,
+        "monotonic_time": 19374.02957831
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "4f89acdab6782c2e565313cb33947c6b326022a2",
+        "branch": "main",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "GPT-5": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-5",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      },
+      "GPT-5-nano": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-5-nano",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "GPT-5",
+        "type": "GPTPlayer",
+        "model": "gpt-5",
+        "controller": "ReasoningController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.07471625
+      },
+      {
+        "name": "GPT-5-nano",
+        "type": "GPTPlayer",
+        "model": "gpt-5-nano",
+        "controller": "ReasoningController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.006502950000000001
+      }
+    ],
+    "game_config": {
+      "name": "FixedDamageGame",
+      "module": "agentdeck.games.examples.fixed_damage"
+    },
+    "ended_at": "2025-11-20T01:25:35.712873",
+    "match": {
+      "game": "FixedDamageGame",
+      "players": [
+        "GPT-5",
+        "GPT-5-nano"
+      ],
+      "player_names": [
+        "GPT-5",
+        "GPT-5-nano"
+      ],
+      "player_order": [
+        1,
+        0
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT-5",
+        "index": 1
+      },
+      "duration": 260.4980158805847,
+      "handshake_completed": true,
+      "seed": 2161,
+      "batch_id": "batch_fe554c55",
+      "truncated_by_max_turns": false,
+      "turns": 19,
+      "player_costs": {
+        "GPT-5": 0.07471625,
+        "GPT-5-nano": 0.006502950000000001
+      },
+      "cost": 0.0812192,
+      "schema_version": "1.3"
+    },
+    "players": [
+      "GPT-5",
+      "GPT-5-nano"
+    ],
+    "game": "FixedDamageGame",
+    "match_id": "match_f1785bc8",
+    "winner": "GPT-5-nano",
+    "seed": 2161
+  }
+}
