@@ -109,7 +109,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 
 ## 🚀 Quick Start
 
-> Requires Python 3.8+ (CI covers 3.8–3.11).
+> Requires Python 3.9+ (CI covers 3.9–3.11).
 
 ### Installation
 
