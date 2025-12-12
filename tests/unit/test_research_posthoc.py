@@ -8,8 +8,6 @@ Per SPEC-RESEARCH v1.1.0 §10:
 - Test multi-session comparison and meta-analysis
 """
 
-import json
-import shutil
 from pathlib import Path
 from typing import List, Optional
 
@@ -21,15 +19,15 @@ from agentdeck.core.session import AgentDeckConfig
 from agentdeck.games.examples import FixedDamageGame
 from agentdeck.players.mock import MockPlayer
 from agentdeck.research import (
-    StatisticalAnalysis,
-    PerformanceAnalysis,
-    CostAnalysis,
     ComparisonAnalysis,
+    CostAnalysis,
+    PerformanceAnalysis,
+    StatisticalAnalysis,
 )
 from agentdeck.spectators import (
-    StatisticalAnalysisSpectator,
-    PerformanceTrackerSpectator,
     CostAnalysisSpectator,
+    PerformanceTrackerSpectator,
+    StatisticalAnalysisSpectator,
 )
 
 

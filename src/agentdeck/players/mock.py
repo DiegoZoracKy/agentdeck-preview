@@ -1,8 +1,8 @@
 """Mock player for testing."""
 
 from typing import List, Optional
+
 from ..core.base.player import Player
-from ..core.base.controller import Controller
 
 
 class MockPlayer(Player):

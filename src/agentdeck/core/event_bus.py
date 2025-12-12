@@ -24,7 +24,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from .types import Event, EventContext, EventType
 
-
 # Module-level logger per SPEC (IMPLEMENTATION_KICKOFF.md Design Decision #4)
 logger = logging.getLogger("agentdeck.event_bus")
 
@@ -338,8 +337,8 @@ class EventBus:
               from leaking between spectators (per SPEC.md §5.4 payload cloning).
         """
         # Import here to avoid circular dependency
-        from .base.player import Player
         from .base.game import Game
+        from .base.player import Player
         from .base.spectator import Spectator
 
         # Selectively deepcopy data, excluding unpicklable objects

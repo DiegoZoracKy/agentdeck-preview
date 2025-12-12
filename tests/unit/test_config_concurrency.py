@@ -8,6 +8,7 @@ Tests verify:
 """
 
 import pytest
+
 from agentdeck.core.session import AgentDeckConfig
 
 

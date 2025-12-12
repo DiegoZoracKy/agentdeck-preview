@@ -11,10 +11,10 @@ import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Protocol, Union, cast
+from typing import Any, Dict, List, Optional, Protocol, Union, cast
 
 from .session import SessionContext
-from .types import MatchResult, ActionResult, Event, EventContext
+from .types import ActionResult, Event, EventContext, MatchResult
 
 
 class RecorderCollector(Protocol):

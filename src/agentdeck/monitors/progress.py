@@ -13,8 +13,8 @@ import sys
 import time
 from typing import Literal, Optional
 
-from .base import Monitor
 from ..core.types import Event
+from .base import Monitor
 
 
 class ProgressMonitor(Monitor):

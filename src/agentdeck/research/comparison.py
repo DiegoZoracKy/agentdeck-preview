@@ -1,15 +1,14 @@
 """Model comparison utilities for AgentDeck research."""
 
-from typing import List, Optional, Dict, Any, Tuple
-from dataclasses import dataclass, field
 import time
-from ..core.base import Player, Game, Spectator
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
+
 from ..core.agentdeck import AgentDeck
+from ..core.base import Game, Player, Spectator
 from ..core.session import AgentDeckConfig
 from ..spectators.stats import StatsTracker
 from .statistical import (
-    statistical_significance,
-    calculate_confidence_interval,
     calculate_effect_size,
 )
 

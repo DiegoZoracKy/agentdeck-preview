@@ -9,24 +9,25 @@ Tests the complete flow:
 5. Partial match recorded with outcome="aborted"
 """
 
-import pytest
-import tempfile
 import json
+import tempfile
 from pathlib import Path
 
+import pytest
+
+from agentdeck.controllers import ActionOnlyController
 from agentdeck.core import Console
-from agentdeck.core.base import Player, Game
+from agentdeck.core.base import Player
 from agentdeck.core.mechanics.turn_based import TurnBasedGame
+from agentdeck.core.recorder import Recorder
+from agentdeck.core.session import AgentDeckConfig
 from agentdeck.core.types import (
-    ParseResult,
+    ActionParseError,
     GameStatus,
     MatchAbortedError,
     ParseFailurePolicy,
-    ActionParseError,
+    ParseResult,
 )
-from agentdeck.core.session import AgentDeckConfig
-from agentdeck.controllers import ActionOnlyController
-from agentdeck.core.recorder import Recorder
 
 
 class MockGame(TurnBasedGame):

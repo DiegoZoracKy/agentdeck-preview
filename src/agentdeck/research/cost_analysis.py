@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 class CostAnalysis:
@@ -113,7 +113,7 @@ class CostAnalysis:
 
         # Load batch data
         batch_file = batch_files[0]
-        with open(batch_file, "r") as f:
+        with open(batch_file, "r", encoding="utf-8") as f:
             self.batch_data = json.load(f)
 
         # Extract match references

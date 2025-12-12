@@ -5,8 +5,8 @@ SciPy and statsmodels are bundled with AgentDeck as core dependencies.
 """
 
 import math
-from typing import Tuple, List, Dict, Any
 from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
 
 # Try to import scipy and statsmodels
 try:

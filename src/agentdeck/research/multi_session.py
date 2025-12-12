@@ -8,9 +8,9 @@ Per SPEC-RESEARCH v1.1.0 §4.2:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .statistical_analysis import StatisticalAnalysis
 
@@ -159,8 +159,9 @@ class ComparisonAnalysis:
             Dict mapping player to combined p-value
         """
         try:
-            from scipy import stats
             import math
+
+            from scipy import stats
 
             combined_p_values = {}
 
@@ -319,7 +320,7 @@ class ComparisonAnalysis:
 
     def export_markdown(self, path: Path):
         """Export comparison as markdown file."""
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write("# Cross-Session Comparison\n\n")
 
             # Win rates table

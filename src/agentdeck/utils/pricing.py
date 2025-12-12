@@ -1,9 +1,10 @@
 """Pricing utilities for LLM cost calculations."""
 
-import yaml
 import logging
-from typing import Dict, Optional, Tuple
 from pathlib import Path
+from typing import Dict, Optional, Tuple
+
+import yaml
 
 # Cache the loaded pricing data
 _pricing_data: Optional[Dict] = None
@@ -84,7 +85,7 @@ def load_pricing_data() -> Dict:
         return {}
 
     try:
-        with open(pricing_file, "r") as f:
+        with open(pricing_file, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
             # Validate structure before caching

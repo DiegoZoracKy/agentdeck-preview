@@ -27,7 +27,7 @@ Critical invariants:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ..types import ActionResult, Event, GameStatus, RandomGenerator
 

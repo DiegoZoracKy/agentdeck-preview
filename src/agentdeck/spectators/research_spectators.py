@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ..core.base.spectator import Spectator
-from ..core.types import Event
 
 
 class StatisticalAnalysisSpectator(Spectator):

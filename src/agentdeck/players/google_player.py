@@ -6,8 +6,8 @@ import os
 import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
-from .llm_player import LLMPlayer
 from ..utils.pricing import calculate_cost
+from .llm_player import LLMPlayer
 
 
 class GeminiPlayer(LLMPlayer):

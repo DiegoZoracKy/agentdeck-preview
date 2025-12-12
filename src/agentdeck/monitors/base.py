@@ -79,7 +79,6 @@ class Monitor:
             - mode: Literal["sequential", "parallel"]
             - base_seed: Optional[int]
         """
-        pass
 
     def on_console_batch_progress(self, event: Event) -> None:
         """
@@ -96,7 +95,6 @@ class Monitor:
             - elapsed_time: float
             - estimated_remaining: Optional[float] (None until first match completes)
         """
-        pass
 
     def on_console_worker_start(self, event: Event) -> None:
         """
@@ -110,7 +108,6 @@ class Monitor:
             - seed: Optional[int]
             - started_at: float
         """
-        pass
 
     def on_console_worker_complete(self, event: Event) -> None:
         """
@@ -126,7 +123,6 @@ class Monitor:
             - turns: int
             - completed_at: float
         """
-        pass
 
     def on_console_worker_failed(self, event: Event) -> None:
         """
@@ -141,7 +137,6 @@ class Monitor:
             - error_message: str
             - failed_at: float
         """
-        pass
 
     def on_console_batch_complete(self, event: Event) -> None:
         """
@@ -156,4 +151,3 @@ class Monitor:
             - avg_match_duration: float
             - seeds_used: List[Optional[int]]
         """
-        pass

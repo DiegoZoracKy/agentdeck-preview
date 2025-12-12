@@ -10,10 +10,8 @@ Tests verify that MatchNarrator:
 - Resets state between matches
 """
 
-import pytest
+from agentdeck.core.types import ActionResult, Event, MatchResult
 from agentdeck.spectators.narrator import MatchNarrator
-from agentdeck.core.types import Event, MatchResult, ActionResult
-from agentdeck.core.logging import NullLogger
 
 
 class MockLogger:
@@ -32,8 +30,6 @@ class MockLogger:
 
 class MockGame:
     """Mock game for testing."""
-
-    pass
 
 
 class MockPlayer:

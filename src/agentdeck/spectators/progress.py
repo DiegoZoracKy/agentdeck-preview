@@ -7,7 +7,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from ..core.base.spectator import Spectator
-from ..core.types import Event, EventContext, MatchResult
+from ..core.types import EventContext, MatchResult
 
 
 class ProgressDisplay(Spectator):

@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+import copy
 import time
 from dataclasses import dataclass
-import copy
 from typing import Any, Dict, List, Optional, Set, Union, cast
 
 from .base.spectator import Spectator
 from .event_bus import EventBus
 from .replay_utils import ReplayScheduler, rehydrate_context, rehydrate_players
-from .types import ActionResult, Event, EventContext, EventType, MatchResult, SpectatorContext
+from .types import ActionResult, Event, EventContext, EventType, MatchResult
 
 
 @dataclass

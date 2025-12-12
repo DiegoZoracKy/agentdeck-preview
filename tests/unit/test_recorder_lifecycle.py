@@ -9,7 +9,6 @@ event buffering for handshakes that arrive before MATCH_START.
 import json
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
 
 import pytest
 

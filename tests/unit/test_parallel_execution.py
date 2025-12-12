@@ -8,7 +8,6 @@ Verifies:
 - Fallback to sequential when game uses previous_match_result
 """
 
-import pytest
 from agentdeck import AgentDeck, AgentDeckConfig
 from agentdeck.games.examples.fixed_damage import FixedDamageGame
 from agentdeck.players.mock import MockPlayer

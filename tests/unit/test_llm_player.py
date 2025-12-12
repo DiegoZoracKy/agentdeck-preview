@@ -5,22 +5,17 @@ Ensures handshake, decide (turn), conclude, and clone work correctly
 per SPEC-PLAYER v1.2.0.
 """
 
-from dataclasses import dataclass
-
 import pytest
 
-from agentdeck.players.llm_player import LLMPlayer
 from agentdeck.controllers.action_only import ActionOnlyController
-from agentdeck.renderers.text_renderer import TextRenderer
-from agentdeck.core.types import (
-    MatchResult,
-    MatchContext,
-    HandshakeContext,
-    RenderResult,
-    TurnContext,
-)
 from agentdeck.core.conversation import ConversationManager
-from agentdeck.players import GPTPlayer, ClaudePlayer, GeminiPlayer
+from agentdeck.core.types import (
+    MatchContext,
+    MatchResult,
+)
+from agentdeck.players import ClaudePlayer, GeminiPlayer, GPTPlayer
+from agentdeck.players.llm_player import LLMPlayer
+from agentdeck.renderers.text_renderer import TextRenderer
 
 
 class DummyLLMPlayer(LLMPlayer):

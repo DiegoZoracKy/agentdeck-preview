@@ -15,9 +15,8 @@ These tests verify:
 
 import pytest
 
-from agentdeck.renderers.text_renderer import TextRenderer
 from agentdeck.core.types import TurnContext
-
+from agentdeck.renderers.text_renderer import TextRenderer
 
 # Fixtures
 

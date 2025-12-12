@@ -1,14 +1,14 @@
 """Spectator implementations for AgentDeck."""
 
-from .stats import StatsTracker
-from .progress import ProgressDisplay
-from .token_usage import TokenUsageTracker
 from .narrator import MatchNarrator
+from .progress import ProgressDisplay
 from .research_spectators import (
-    StatisticalAnalysisSpectator,
-    PerformanceTrackerSpectator,
     CostAnalysisSpectator,
+    PerformanceTrackerSpectator,
+    StatisticalAnalysisSpectator,
 )
+from .stats import StatsTracker
+from .token_usage import TokenUsageTracker
 
 __all__ = [
     "StatsTracker",

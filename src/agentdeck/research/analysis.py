@@ -1,6 +1,7 @@
 """Results analysis and visualization for AgentDeck research."""
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict
+
 from ..core.types import MatchResults
 
 
@@ -134,7 +135,7 @@ class ResultsAnalyzer:
         """
         import csv
 
-        with open(filename, "w", newline="") as csvfile:
+        with open(filename, "w", encoding="utf-8", newline="") as csvfile:
             fieldnames = ["match_id", "winner", "turns", "duration", "seed"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 

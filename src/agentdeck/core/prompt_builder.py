@@ -31,17 +31,17 @@ Example:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Dict, Any, Optional
-from types import MappingProxyType
 from string import Formatter
+from types import MappingProxyType
+from typing import Any, Callable, Dict, Optional
 
 from .types import (
     LifecyclePhase,
-    PromptContext,
     PromptBlock,
     PromptBundle,
-    TemplateError,
+    PromptContext,
     RenderResult,
+    TemplateError,
     TurnContext,
 )
 

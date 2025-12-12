@@ -9,11 +9,10 @@ Tests:
 - Logger injection
 """
 
-import pytest
 from agentdeck import AgentDeck, AgentDeckConfig
-from agentdeck.monitors import Monitor, ProgressMonitor
-from agentdeck.core.types import Event, EventType
+from agentdeck.core.types import Event
 from agentdeck.games.examples import FixedDamageGame
+from agentdeck.monitors import Monitor, ProgressMonitor
 from agentdeck.players import MockPlayer
 from agentdeck.spectators import MatchNarrator
 

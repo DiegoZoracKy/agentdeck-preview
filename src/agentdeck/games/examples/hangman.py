@@ -18,8 +18,12 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from agentdeck.core.mechanics.turn_based import TurnBasedGame
-from agentdeck.core.types import ActionResult, GameStatus, RandomGenerator, ParseFailurePolicy
-
+from agentdeck.core.types import (
+    ActionResult,
+    GameStatus,
+    ParseFailurePolicy,
+    RandomGenerator,
+)
 
 # Default word list for testing - mix of AI/ML terms
 DEFAULT_WORDS = [

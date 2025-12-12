@@ -12,11 +12,9 @@ Test Coverage:
 - LI5: Spectator logger writes to core log streams
 """
 
-import pytest
 from agentdeck import AgentDeck
 from agentdeck.core.base.spectator import Spectator
-from agentdeck.core.console import Console
-from agentdeck.core.logging import NullLogger, InMemoryLogHandler, LoggingConfig
+from agentdeck.core.logging import InMemoryLogHandler, NullLogger
 from agentdeck.core.replay import ReplayEngine
 from agentdeck.core.session import AgentDeckConfig
 from agentdeck.games.examples import FixedDamageGame
@@ -228,7 +226,7 @@ def test_spectator_logger_writes_to_core_streams():
 
     # Create deck with in-memory handler
     handler = InMemoryLogHandler()
-    from agentdeck.core.logging import LoggingConfig, LogLevel
+    from agentdeck.core.logging import LogLevel
 
     # Enable logging at INFO level so logger exists
     session_config = AgentDeckConfig(

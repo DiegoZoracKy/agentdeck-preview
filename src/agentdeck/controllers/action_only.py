@@ -9,12 +9,11 @@ Returns ParseResult for stateless, deterministic parsing.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional, Set
+from typing import List, Optional, Set
 
 from ..core.base.controller import Controller
 from ..core.base.game import Game
 from ..core.types import ParseResult
-
 
 # Regex patterns for action extraction
 ACTION_FIELD = re.compile(r"ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)", re.IGNORECASE)

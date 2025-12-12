@@ -9,7 +9,6 @@ from ..core.base.controller import Controller
 from ..core.base.game import Game
 from ..core.types import ParseResult
 
-
 # Regex patterns for action extraction (same as ActionOnlyController)
 ACTION_FIELD = re.compile(r"ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)", re.IGNORECASE)
 UPPER_WORDS = re.compile(r"\b([A-Z][A-Z0-9_\-]+)\b")

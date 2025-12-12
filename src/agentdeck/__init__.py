@@ -2,46 +2,15 @@
 
 __version__ = "0.1.0rc1"
 
-# Core imports
-from .core.agentdeck import AgentDeck
-from .core.session import AgentDeckConfig, SessionContext, SessionConfig
-from .core.types import (
-    ActionResult,
-    GameStatus,
-    Event,
-    MatchResult,
-    MatchResults,
-    LogLevel,
-    LifecyclePhase,
-    PromptBundle,
-    PromptBlock,
-    PromptContext,
-    TemplateError,
-    HandshakeContext,
-    HandshakeResult,
-    MatchContext,
-    TurnContext,
-)
-
-# Base classes for extension
-from .core.base import Game, Player, Renderer, Controller, Spectator
-from .core.mechanics import TurnBasedGame
-
-# Player implementations
-from .players import MockPlayer, GPTPlayer, ClaudePlayer, GeminiPlayer
-
-# Renderer implementations
-from .renderers import TextRenderer
-
 # Controller implementations
 from .controllers import ActionOnlyController, ReasoningController
 
-# Spectator implementations
-from .spectators import StatsTracker, ProgressDisplay, TokenUsageTracker, MatchNarrator
+# Core imports
+from .core.agentdeck import AgentDeck
 
-# Game examples
-from .games.examples.fixed_damage import FixedDamageGame
-from .games.examples.hangman import HangmanGame
+# Base classes for extension
+from .core.base import Controller, Game, Player, Renderer, Spectator
+from .core.mechanics import TurnBasedGame
 
 # Prompt composition
 from .core.prompt_builder import PromptBuilder
@@ -49,6 +18,37 @@ from .core.prompt_builder import PromptBuilder
 # Recorder and Replay
 from .core.recorder import Recorder
 from .core.replay import ReplayEngine
+from .core.session import AgentDeckConfig, SessionConfig, SessionContext
+from .core.types import (
+    ActionResult,
+    Event,
+    GameStatus,
+    HandshakeContext,
+    HandshakeResult,
+    LifecyclePhase,
+    LogLevel,
+    MatchContext,
+    MatchResult,
+    MatchResults,
+    PromptBlock,
+    PromptBundle,
+    PromptContext,
+    TemplateError,
+    TurnContext,
+)
+
+# Game examples
+from .games.examples.fixed_damage import FixedDamageGame
+from .games.examples.hangman import HangmanGame
+
+# Player implementations
+from .players import ClaudePlayer, GeminiPlayer, GPTPlayer, MockPlayer
+
+# Renderer implementations
+from .renderers import TextRenderer
+
+# Spectator implementations
+from .spectators import MatchNarrator, ProgressDisplay, StatsTracker, TokenUsageTracker
 
 __all__ = [
     # Main

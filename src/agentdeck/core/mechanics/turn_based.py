@@ -30,7 +30,7 @@ from ..base.game import Game
 from ..event_factory import EventFactory
 from ..game_event_emitter import GameEventEmitter
 from ..state_adapter import StateAdapter
-from ..types import ActionResult, Event, EventType, TurnContext
+from ..types import ActionResult, Event, TurnContext
 
 if TYPE_CHECKING:
     from ..base.player import Player

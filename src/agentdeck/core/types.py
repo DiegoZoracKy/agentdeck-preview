@@ -13,12 +13,11 @@ All types are designed for JSON serialization and replay compatibility.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any, TypedDict, Mapping
-from enum import Enum
-import time
 import random
-
+import time
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Mapping, Optional, TypedDict
 
 # ============================================================================
 # Event System Types (SPEC-OBSERVABILITY v1.0.0 §4)

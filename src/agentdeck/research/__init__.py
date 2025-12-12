@@ -15,38 +15,38 @@ Per SPEC-RESEARCH v1.1.0:
 - ComparisonAnalysis: Multi-session comparison and meta-analysis
 """
 
+from .analysis import ResultsAnalyzer
 from .comparison import (
-    compare_models,
-    compare_models_progressive,
-    run_benchmark,
-    ComparisonResult,
-    ProgressiveResult,
     Benchmark,
     BenchmarkGame,
     BenchmarkResult,
+    ComparisonResult,
+    ProgressiveResult,
+    compare_models,
+    compare_models_progressive,
+    run_benchmark,
 )
+from .cost_analysis import CostAnalysis
+from .multi_session import (
+    ComparisonAnalysis,
+    ComparisonTable,
+    MetaAnalysisResult,
+)
+from .performance_analysis import PerformanceAnalysis
 from .statistical import (
+    TestResult,
+    aggregate_metrics,
     calculate_confidence_interval,
     calculate_effect_size,
     statistical_significance,
     statistical_test,
-    aggregate_metrics,
-    TestResult,
 )
-from .analysis import ResultsAnalyzer
 
 # v1.1.0: Post-hoc analysis from recordings
 from .statistical_analysis import (
-    StatisticalAnalysis,
-    PairwiseComparison,
     ComparisonStats,
-)
-from .performance_analysis import PerformanceAnalysis
-from .cost_analysis import CostAnalysis
-from .multi_session import (
-    ComparisonAnalysis,
-    MetaAnalysisResult,
-    ComparisonTable,
+    PairwiseComparison,
+    StatisticalAnalysis,
 )
 
 __all__ = [

@@ -6,16 +6,15 @@ and respects explicit spectator lists (including empty lists).
 """
 
 import pytest
+
+from agentdeck.core.base import Spectator
 from agentdeck.core.console import Console
 from agentdeck.core.session import AgentDeckConfig, SessionContext
 from agentdeck.spectators import MatchNarrator
-from agentdeck.core.base import Spectator
 
 
 class CustomSpectator(Spectator):
     """Test spectator for validation."""
-
-    pass
 
 
 class TestAutoAttachMatchNarrator:

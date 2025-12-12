@@ -10,11 +10,9 @@ Tests all invariants:
 Per TEST-PLAN-spec-driven.md §3.1 (~15 tests)
 """
 
-import pytest
 from unittest.mock import Mock
-from agentdeck.core.event_bus import EventBus
-from agentdeck.core.types import EventType, Event
 
+from agentdeck.core.types import Event, EventType
 
 # ============================================================================
 # EI1-EI3: Error Isolation Tests

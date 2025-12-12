@@ -7,8 +7,7 @@ Tests verify:
 - Sorting by match_index (for ordered replay)
 """
 
-import pytest
-from agentdeck.core.types import MatchArtifact, MatchResult, Event
+from agentdeck.core.types import Event, MatchArtifact, MatchResult
 
 
 def test_match_artifact_structure():

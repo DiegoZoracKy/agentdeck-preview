@@ -22,7 +22,9 @@ from .types import (
     GameStatus,
     HandshakeContext,
     MatchArtifact,
-    MatchContext as PlayerMatchContext,
+)
+from .types import MatchContext as PlayerMatchContext
+from .types import (
     MatchResult,
     RandomGenerator,
     TurnContext,
@@ -653,7 +655,7 @@ class _MatchWorker:
         TurnLoop obtains this via runtime._console to keep legacy behaviour while the
         worker isolates side effects from the parent console/event bus.
         """
-        from .types import ActionParseError, ParseFailurePolicy, MatchAbortedError
+        from .types import ActionParseError, MatchAbortedError, ParseFailurePolicy
 
         try:
             action_result = player.decide(player_view, turn_context=turn_context, extras=extras)
@@ -788,7 +790,7 @@ class _MatchWorker:
         """
         Delegate parse-failure handling to the parent console while preserving isolation.
         """
-        from .types import ActionParseError, ParseFailurePolicy
+        from .types import ActionParseError
 
         if not isinstance(error, ActionParseError):  # Defensive - should never happen
             raise TypeError(f"Expected ActionParseError, got {type(error).__name__}")
@@ -1314,8 +1316,8 @@ class Console:
             # PF4: Check if match was aborted and raise to stop batch
             # Worker emitted MATCH_END and returned artifact, now we raise to halt execution
             from .types import (
-                MatchAbortedError,
                 ActionParseError,
+                MatchAbortedError,
                 ParseFailurePolicy,
                 ParseResult,
                 TurnContext,
@@ -2054,7 +2056,6 @@ class Console:
 
         Per SPEC-CONSOLE PF2-PF5.
         """
-        from .types import ActionParseError, ParseFailurePolicy
 
         parse_result = error.parse_result
 
@@ -2118,7 +2119,7 @@ class Console:
             MatchAbortedError: When policy is ABORT_MATCH. Caller MUST emit MATCH_END
                               with metadata["outcome"]="aborted" before propagating (PF4).
         """
-        from .types import ActionParseError, ParseFailurePolicy, MatchAbortedError
+        from .types import ActionParseError, MatchAbortedError, ParseFailurePolicy
 
         try:
             action_result = player.decide(player_view, turn_context=turn_context, extras=extras)

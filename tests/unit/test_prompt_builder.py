@@ -12,20 +12,18 @@ These tests verify:
 - Deterministic composition per CD1-CD3 invariants
 """
 
-import pytest
-from pathlib import Path
 from types import MappingProxyType
-from unittest.mock import Mock
+
+import pytest
 
 from agentdeck.core.prompt_builder import PromptBuilder
 from agentdeck.core.types import (
     LifecyclePhase,
-    RenderResult,
-    TurnContext,
-    TemplateError,
     PromptContext,
+    RenderResult,
+    TemplateError,
+    TurnContext,
 )
-
 
 # Fixtures
 

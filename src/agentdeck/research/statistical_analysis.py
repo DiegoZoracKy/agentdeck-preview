@@ -10,14 +10,14 @@ Per SPEC-RESEARCH v1.1.0 §4.2, §6.8, §6.9:
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .statistical import (
     calculate_confidence_interval,
-    statistical_significance,
     calculate_effect_size,
+    statistical_significance,
 )
 
 
@@ -155,7 +155,7 @@ class StatisticalAnalysis:
 
         # Load batch data
         batch_file = batch_files[0]
-        with open(batch_file, "r") as f:
+        with open(batch_file, "r", encoding="utf-8") as f:
             self.batch_data = json.load(f)
 
         # Extract match references
@@ -544,7 +544,7 @@ class StatisticalAnalysis:
 
     def export_markdown(self, path: Path):
         """Export analysis as markdown report."""
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(f"# Statistical Analysis: {self.session_id}\n\n")
             f.write(f"**Total Matches**: {self.total_matches}\n\n")
 
@@ -570,5 +570,5 @@ class StatisticalAnalysis:
     def export_json(self, path: Path):
         """Export analysis as JSON."""
         data = self.to_dict()
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)

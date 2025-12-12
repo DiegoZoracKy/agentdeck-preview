@@ -1,16 +1,15 @@
 """Base LLM player class for AgentDeck."""
 
-from abc import ABC, abstractmethod
 import copy
 import os
 import time
-from typing import Optional, Dict, Any, List, Tuple
-from ..core.base.player import Player
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Tuple
+
 from ..core.base.controller import Controller
+from ..core.base.player import Player
 from ..core.base.renderer import Renderer
-from ..controllers.action_only import ActionOnlyController
-from ..core.types import ActionResult, LifecyclePhase, RenderResult
-from ..renderers.text_renderer import TextRenderer
+from ..core.types import LifecyclePhase, RenderResult
 
 
 class LLMPlayer(Player, ABC):
@@ -160,7 +159,6 @@ class LLMPlayer(Player, ABC):
     @abstractmethod
     def _initialize_client(self):
         """Initialize the API client."""
-        pass
 
     @abstractmethod
     def _make_api_call(self, messages: List[Dict[str, str]]) -> Tuple[str, Dict]:
@@ -171,7 +169,6 @@ class LLMPlayer(Player, ABC):
             Tuple of (response_text, metadata_dict)
             metadata should include: tokens_used, cost, model_used
         """
-        pass
 
     def _invoke_model(self, bundle, turn_context):
         user_prompt = bundle.text

@@ -5,12 +5,13 @@ Validates complete execution: AgentDeck setup → handshake → match → record
 Uses real components (FixedDamageGame, MockPlayer) per TEST-PLAN §4.1.
 """
 
-import pytest
-import tempfile
 import json
+import tempfile
 from pathlib import Path
 
-from agentdeck import AgentDeck, FixedDamageGame, MockPlayer, AgentDeckConfig
+import pytest
+
+from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, MockPlayer
 from agentdeck.core.types import Event
 
 

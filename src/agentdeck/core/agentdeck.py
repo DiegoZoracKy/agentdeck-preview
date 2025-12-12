@@ -9,11 +9,11 @@ from typing import Any, Dict, List, Optional, Union
 
 from .base import Game, Player, Spectator
 from .console import Console
+from .logging import create_logger
 from .recorder import Recorder
 from .replay import ReplayEngine
 from .session import AgentDeckConfig, SessionContext
-from .types import MatchResult, MatchResults, LogLevel
-from .logging import create_logger
+from .types import LogLevel, MatchResult, MatchResults
 
 
 class AgentDeck:

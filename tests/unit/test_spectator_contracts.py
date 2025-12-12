@@ -7,18 +7,15 @@ Tests verify SPEC-SPECTATOR v1.0.0 invariants:
 - EI1-EI3: Error isolation, no execution mutations
 """
 
-import pytest
 from unittest.mock import MagicMock, Mock
-from collections import defaultdict
 
-from agentdeck.spectators.stats import StatsTracker
-from agentdeck.spectators.token_usage import TokenUsageTracker
 from agentdeck.core.types import (
     ActionResult,
     Event,
-    EventContext,
     MatchResult,
 )
+from agentdeck.spectators.stats import StatsTracker
+from agentdeck.spectators.token_usage import TokenUsageTracker
 
 
 def make_event(event_type: str, data: dict) -> Event:

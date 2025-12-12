@@ -12,16 +12,15 @@ Tests verify all invariants from SPEC-GAME §5:
 Uses FixedDamageGame as reference implementation per TEST-PLAN-spec-driven.md §3.2.
 """
 
-import json
 import copy
-import pytest
+import json
 from unittest.mock import Mock
 
-from agentdeck.core.base import Game
-from agentdeck.games.examples import FixedDamageGame
-from agentdeck.core.types import ActionResult, GameStatus, RandomGenerator
-from agentdeck.core.game_event_emitter import GameEventEmitter
+import pytest
 
+from agentdeck.core.game_event_emitter import GameEventEmitter
+from agentdeck.core.types import ActionResult, GameStatus, RandomGenerator
+from agentdeck.games.examples import FixedDamageGame
 
 # ============================================================================
 # GS1-GS4: Game State Data Tests

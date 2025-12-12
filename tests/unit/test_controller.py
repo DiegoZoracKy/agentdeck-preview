@@ -14,14 +14,12 @@ Uses ActionOnlyController and ReasoningController per TEST-PLAN-spec-driven.md Â
 """
 
 import pytest
-from unittest.mock import Mock
 
 from agentdeck.controllers import (
     ActionOnlyController,
     ReasoningController,
 )
-from agentdeck.core.types import HandshakeContext, ParseResult, ActionResult, ActionParseError
-
+from agentdeck.core.types import ActionParseError, HandshakeContext
 
 # ============================================================================
 # Test Helpers

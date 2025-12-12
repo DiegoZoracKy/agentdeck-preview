@@ -13,17 +13,13 @@ Tests verify all player ordering invariants:
 Uses FixedDamageGame as reference implementation per TEST-PLAN-spec-driven.md §3.2.
 """
 
+from typing import Any, List, Optional
+
 import pytest
-import copy
-from typing import List, Optional, Any
 
 from agentdeck import AgentDeck, AgentDeckConfig
-from agentdeck.games.examples import FixedDamageGame
-from agentdeck.core.base import Game
 from agentdeck.core.types import RandomGenerator
-from agentdeck.core.console import Console
-from agentdeck.core.event_bus import EventBus
-
+from agentdeck.games.examples import FixedDamageGame
 
 # ============================================================================
 # Helper Classes

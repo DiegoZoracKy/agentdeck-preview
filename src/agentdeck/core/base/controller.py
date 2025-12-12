@@ -32,7 +32,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from ..types import ActionResult, HandshakeContext, HandshakeResult, ParseResult, TurnContext
+from ..types import HandshakeContext, HandshakeResult, ParseResult, TurnContext
 
 if TYPE_CHECKING:
     from .game import Game

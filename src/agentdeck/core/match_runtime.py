@@ -24,7 +24,6 @@ Critical invariants:
 
 from __future__ import annotations
 
-import logging
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -45,7 +44,6 @@ if TYPE_CHECKING:
     from .console import Console
     from .logging import AgentDeckLogger
     from .recorder import Recorder
-    from .session import MatchContext
 
 
 class MatchRuntime:
@@ -233,6 +231,7 @@ class MatchRuntime:
             - PM1-PM6: Always includes raw_response and available metadata
         """
         import copy
+
         from .types import EventType
 
         # Build GAMEPLAY event payload (SPEC-OBSERVABILITY §3.2)
@@ -512,4 +511,3 @@ class MatchRuntime:
             Runtime automatically forwards to console helper when implemented.
         """
         # Future: self._console._checkpoint(state, self._match_context)
-        pass

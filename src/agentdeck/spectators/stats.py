@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
-from collections import defaultdict
 import time
+from collections import defaultdict
+from typing import Any, Dict, List, Optional
 
 from ..core.base.spectator import Spectator
-from ..core.types import ActionResult, Event, EventContext, MatchResult, SpectatorContext
+from ..core.types import ActionResult, Event, EventContext, MatchResult
 from .utils import CounterMap, DurationTracker
 
 

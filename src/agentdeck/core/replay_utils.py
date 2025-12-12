@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import List
 
-from .types import Event, EventContext, ReplaySpeed, SpectatorContext
+from .types import Event, EventContext, SpectatorContext
 
 
 class ReplayScheduler:

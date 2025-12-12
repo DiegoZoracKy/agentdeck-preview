@@ -18,25 +18,24 @@ from __future__ import annotations
 import copy
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Any, Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ..prompt_builder import PromptBuilder
 from ..types import (
-    HandshakeContext,
-    HandshakeResult,
     ActionResult,
-    MatchResult,
-    MatchContext,
-    TurnContext,
+    HandshakeContext,
     LifecyclePhase,
+    MatchContext,
+    MatchResult,
     RenderResult,
+    TurnContext,
 )
 
 if TYPE_CHECKING:
-    from .controller import Controller
-    from .renderer import Renderer
     from ..conversation import ConversationManager
     from ..logging import AgentDeckLogger
+    from .controller import Controller
+    from .renderer import Renderer
 
 
 class Player(ABC):

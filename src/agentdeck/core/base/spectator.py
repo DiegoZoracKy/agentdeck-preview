@@ -25,7 +25,6 @@ class Spectator:
         Note: Per SPEC-SPECTATOR v1.0.0, uses **kwargs for forward compatibility.
         Console may emit additional fields (session_id, seed, log_directory, etc.)
         """
-        pass
 
     def on_session_end(self, context: Optional[EventContext] = None, **kwargs: Any):
         """Console closing.
@@ -35,7 +34,6 @@ class Spectator:
         Note: Per SPEC-SPECTATOR v1.0.0, uses **kwargs for forward compatibility.
         Console may emit additional fields (session_id, etc.)
         """
-        pass
 
     def on_batch_start(
         self,
@@ -49,7 +47,6 @@ class Spectator:
 
         Context includes: session_id, timestamp, batch_id
         """
-        pass
 
     def on_batch_end(
         self,
@@ -64,7 +61,6 @@ class Spectator:
 
         Note: Per SPEC-CONSOLE T3, receives matches_completed, duration, seeds_used metadata.
         """
-        pass
 
     def on_match_start(
         self,
@@ -81,7 +77,6 @@ class Spectator:
         Note: Per player ordering implementation, accepts additional fields:
         seed, player_names, player_order, player_order_source, first_player
         """
-        pass
 
     def on_player_instructed(
         self, player: str, instructions: str, context: Optional[EventContext] = None
@@ -90,18 +85,15 @@ class Spectator:
 
         Context includes: session_id, timestamp, batch_id (if in batch), match_id
         """
-        pass
 
     def on_gameplay(self, event: Event) -> None:
         """Gameplay event emitted each phase."""
-        pass
 
     def on_event(self, event: Event, context: Optional[EventContext] = None):
         """Custom game event.
 
         Context includes: session_id, timestamp, and other fields as available
         """
-        pass
 
     # on_dialogue_turn removed in schema v1.3
     # Prompt metadata now in lifecycle events (PLAYER_HANDSHAKE_COMPLETE, GAMEPLAY, etc.)
@@ -112,7 +104,6 @@ class Spectator:
 
         Context includes: session_id, timestamp, batch_id (if in batch), match_id
         """
-        pass
 
     def on_log(
         self,
@@ -129,7 +120,6 @@ class Spectator:
             log_context: Log-specific context (game state, etc.)
             context: Event context with session_id, timestamp, and other fields as available
         """
-        pass
 
     # ------------------------------------------------------------------
     # Helper utilities

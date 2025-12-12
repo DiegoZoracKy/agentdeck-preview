@@ -1,15 +1,15 @@
 """Tests for research metadata capturing API costs."""
 
-from typing import Optional, List
+from typing import List, Optional
 
 import pytest
 
 from agentdeck import AgentDeck
 from agentdeck.controllers import ActionOnlyController
+from agentdeck.core.types import MatchResult
 from agentdeck.games.examples import FixedDamageGame
 from agentdeck.players.mock import MockPlayer
 from agentdeck.research import compare_models
-from agentdeck.core.types import MatchResult
 
 
 class CostTrackingMockPlayer(MockPlayer):
@@ -191,6 +191,7 @@ def test_conclusion_costs_included_in_metadata():
 def test_cost_analysis_no_double_counting(tmp_path):
     """CostAnalysis should sum per-match deltas without double counting."""
     from pathlib import Path
+
     from agentdeck import AgentDeckConfig
     from agentdeck.research.cost_analysis import CostAnalysis
 

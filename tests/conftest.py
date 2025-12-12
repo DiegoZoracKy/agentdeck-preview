@@ -9,25 +9,18 @@ Per TEST-PLAN-consensus.md, provides:
 - Temporary directories for recordings
 """
 
+from unittest.mock import Mock
+
 import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch
-from typing import List, Dict, Any
 
 # Import AgentDeck components
-from agentdeck.core.base import Game, Player
-from agentdeck.core.base.controller import Controller
-from agentdeck.core.base.renderer import Renderer
-from agentdeck.games.examples import FixedDamageGame
+from agentdeck.core.base import Player
 from agentdeck.core.event_bus import EventBus
 from agentdeck.core.types import (
     HandshakeContext,
-    HandshakeResult,
-    ActionResult,
-    RenderResult,
     TurnContext,
 )
-
+from agentdeck.games.examples import FixedDamageGame
 
 # ============================================================================
 # MOCK PLAYERS

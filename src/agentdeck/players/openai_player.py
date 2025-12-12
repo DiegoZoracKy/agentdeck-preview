@@ -1,8 +1,9 @@
 """OpenAI GPT player for AgentDeck."""
 
-from typing import List, Dict, Tuple
-from .llm_player import LLMPlayer
+from typing import Dict, List, Tuple
+
 from ..utils.pricing import calculate_cost
+from .llm_player import LLMPlayer
 
 
 class GPTPlayer(LLMPlayer):

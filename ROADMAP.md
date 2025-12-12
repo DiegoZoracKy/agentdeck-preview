@@ -166,8 +166,15 @@ After v0.1.0 public release, iterate on community feedback:
 - Trigger CI to generate coverage badges
 - Optional: Clean export to fresh repo (per cleanup plan above)
 
+**Code Quality Strategy (v0.1.0)**:
+- Pylint: 10.00/10 score (design warnings disabled, hygiene enforced)
+- Mypy: Runs but non-blocking (120+ type errors documented as debt)
+- Black: 100 char limit enforced
+- Coverage: 75% enforced
+
 **Deferred to v0.1.x**:
-- Mypy error resolution (120+ errors)
+- Mypy error resolution (120+ type errors)
+- Pylint design warnings (re-enable R09XX family)
 - PyPI release automation
 - Auto-generated API docs
 
