@@ -1,8 +1,8 @@
 # AgentDeck Pre-Release Roadmap
 
-> **Last Updated**: 2025-11-24
-> **Status**: Final polish phase (v0.1.0-rc → v0.1.0 public) — previously tracked as v0.3.0
-> **Release Readiness**: 8.2/10 (P0/P1 complete; CI ready; mypy technical debt documented)
+> **Last Updated**: 2025-12-12
+> **Status**: ✅ **READY FOR v0.1.0 RELEASE** — All polish complete, CI passing
+> **Release Readiness**: 9.5/10 (P0/P1/polish complete; production-ready)
 
 ---
 
@@ -149,21 +149,25 @@ After v0.1.0 public release, iterate on community feedback:
 
 ## Summary
 
-**Release Readiness**: 8.2/10 (P0/P1 complete; ready for preview release)
+**Release Readiness**: 9.5/10 (Production-ready for v0.1.0)
 
 **What's Done**:
 - ✅ All P0 blockers cleared
 - ✅ All P1 polish items completed
-- ✅ CI configured with strict checks (pytest 75% coverage, pylint, black)
-- ✅ Mypy runs but doesn't block (120+ errors documented as v0.1.x debt)
-- ✅ 314 tests passing, 75% coverage enforced
+- ✅ **CI passing 100%** (all checks green)
+  - Pylint: 10.00/10 (exit code 0)
+  - Black: formatted
+  - Pytest: 314 tests, 75% coverage
+  - Mypy: runs (non-blocking, documented debt)
+- ✅ Python 3.9+ support (dropped 3.8 - EOL)
+- ✅ Code quality: unused imports removed, encoding fixed, imports ordered
 - ✅ Provider extras isolated, base install slim (pyyaml only)
 - ✅ Documentation consistent and walkthrough added
 
-**Remaining for v0.1.0 Public**:
-- Push to `main` branch
-- Tag v0.1.0-preview release
-- Trigger CI to generate coverage badges
+**Ready to Ship**:
+- All code pushed to `main`
+- Tag v0.1.0 when ready
+- CI will auto-publish coverage badges
 - Optional: Clean export to fresh repo (per cleanup plan above)
 
 **Code Quality Strategy (v0.1.0)**:
