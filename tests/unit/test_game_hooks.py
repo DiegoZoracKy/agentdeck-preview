@@ -148,8 +148,9 @@ def test_fixed_damage_game_behavior_stable_with_hook_defaults():
     deck1 = AgentDeck(game=FixedDamageGame())
     result1 = deck1.play(players=players, matches=1, seed=123)[0]
 
-    # Only canonical keys should be present
-    assert set(result1.final_state.keys()) == {"health", "potions", "last_action", "turn", "_turn_count"}
+    # Only canonical keys should be present (no hook-added keys)
+    expected_keys = {"health", "potions", "last_action", "turn", "_turn_count", "_first_player_idx"}
+    assert set(result1.final_state.keys()) == expected_keys
     assert result1.winner in {None, "A", "B"}
 
     # Deterministic repeat with the same seed yields identical outcome and state
