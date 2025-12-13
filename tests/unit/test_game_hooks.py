@@ -71,7 +71,7 @@ class ConclusionGame(BaseHookGame):
         return game_state["winner"]
 
     def get_conclusion_prompt(self, player: str, game_state: dict) -> str:
-        return "Respond with JSON: {\"summary\": \"...\"}"
+        return 'Respond with JSON: {"summary": "..."}'
 
     def parse_conclusion(self, player: str, response: str | None) -> dict:
         return {} if not response else json.loads(response)
@@ -126,7 +126,9 @@ def test_conclusion_phase_persists_conclusion():
     deck = AgentDeck(game=ConclusionGame())
     results = deck.play(
         players=[
-            ConclusionPlayer("Alice", actions=["END"], conclusion_response='{"summary": "Alice won"}'),
+            ConclusionPlayer(
+                "Alice", actions=["END"], conclusion_response='{"summary": "Alice won"}'
+            ),
             ConclusionPlayer("Bob", actions=["END"], conclusion_response='{"summary": "Bob won"}'),
         ],
         matches=1,
