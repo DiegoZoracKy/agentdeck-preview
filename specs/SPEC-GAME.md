@@ -1,12 +1,20 @@
-# SPEC-GAME: Game Author Contract
+# SPEC-GAME: Game Author Contract v0.7.0
 
-> Status: Final
-> Version: 0.6.0 (Draft)
-> Last Updated: 2025-11-03
-> Implementation: ✅ Ready for Phase 1B (TurnLoop integration)
-> Authors: Codex, Diego Zoracky, Claude
-> Approvals: ✅ Codex (2025-01-24)
-> Audience: Game authors, framework contributors, researcher tool builders
+> **Status**: ✅ Final
+> **Version**: 0.7.0
+> **Last Updated**: 2025-12-12
+> **Base Version**: 0.6.0 (Final)
+> **Implementation**: 🚧 Phase B (in progress)
+> **Authors**: Claude, Diego Zoracky, Codex
+> **Approvals**: ✅ Diego, ✅ Codex, ✅ Claude
+> **Audience**: Game authors, framework contributors, researcher tool builders
+>
+> **Changes in v0.7.0**:
+> - Add `on_match_forfeited()` hook for enriching terminal state after parse failures
+> - Add conclusion phase orchestration (opt-in via `requires_conclusion()`)
+> - Add `on_handshake_complete()` hook (fixes bug - was documented but not called)
+> - Add `HandshakeResult` typed dataclass for type safety
+> - Document Hook Stability Guarantee principle (backward compatibility)
 
 ## 1. Purpose
 - Define the canonical contract for games plugged into AgentDeck’s console-driven execution loop.
@@ -208,6 +216,148 @@ Games SHOULD use these canonical outcomes when deciding how to handle controller
 - MAY use `error.parse_result.metadata` (candidates, reasoning flags, allowed actions) to tailor penalties.
 - MUST avoid mutating match state; state changes occur only through Console/TurnLoop policy application.
 
+### on_match_forfeited(game_state, player_name, error, policy) -> Dict[str, Any] *(new in v0.7.0)*
+- **Role**: Enrich terminal state after forfeit decision, before MATCH_END event emission.
+- Accept: Current `game_state`, failing `player_name`, `ActionParseError`, applied `ParseFailurePolicy`.
+- Perform: Optionally update state to record terminal condition (e.g., `resolution_status="invalid_response"`).
+- Return: Updated JSON-serializable dict (canonical state for recording).
+- Emit: MAY emit diagnostic events via `emit_event` (emitter remains bound through this hook).
+- MUST NOT: Raise exceptions (already in error path).
+- Default implementation: Return `game_state` unchanged (backward compatible).
+
+**Lifecycle**: Called by TurnLoop after `MatchForfeitedError` caught, before event emitter unbind.
+
+**Example**:
+```python
+def on_match_forfeited(self, game_state, player_name, error, policy):
+    state = dict(game_state)  # Copy for safety
+    state["resolution_status"] = "invalid_response"
+    state["failed_player"] = player_name
+    state["failure_reason"] = str(error)
+    self.emit_event("parse_failure_terminal", player=player_name)
+    return state
+```
+
+### Conclusion Phase Hooks *(new in v0.7.0)*
+
+Three-hook system for post-match player reflections (opt-in, zero LLM calls by default).
+
+#### requires_conclusion(game_state) -> Optional[str]
+- **Role**: Determine which player (if any) should provide conclusion.
+- Accept: Final `game_state` after `status.is_over == True`.
+- Return: Player name requiring conclusion, or `None` to skip phase.
+- Default implementation: Return `None` (no conclusion phase - backward compatible).
+- MUST: Return player name from match roster, or None.
+
+**Example**:
+```python
+def requires_conclusion(self, game_state):
+    # Winner provides reflection
+    winner = self.status(game_state).winner
+    return winner if winner else None
+
+    # Or: support agent provides post-escalation summary
+    if game_state["resolution_status"] == "escalated":
+        return "support"
+    return None
+```
+
+#### get_conclusion_prompt(player, game_state) -> str
+- **Role**: Generate conclusion prompt for specified player.
+- Accept: Player name (from `requires_conclusion`), final `game_state`.
+- Return: Prompt string for player's `conclude()` call.
+- Called only if `requires_conclusion()` returned non-None.
+- Default implementation: Generic reflection prompt.
+
+**Example**:
+```python
+def get_conclusion_prompt(self, player, game_state):
+    if game_state["resolution_status"] == "escalated":
+        return (
+            "The client escalated. Provide a summary in JSON:\\n"
+            '{"summary": "...", "why_escalated": "...", "next_steps": "..."}'
+        )
+    return "Reflect on the match outcome."
+```
+
+#### parse_conclusion(player, response) -> Dict[str, Any]
+- **Role**: Parse conclusion response into structured data.
+- Accept: Player name, raw conclusion response.
+- Return: JSON-serializable dict with conclusion data.
+- Default implementation: `json.loads(response)` with error handling.
+- MAY: Override for custom parsing logic.
+
+#### on_conclusion_received(game_state, player, conclusion) -> Dict[str, Any]
+- **Role**: Store conclusion data in final state.
+- Accept: Current `game_state`, player name, parsed `conclusion` dict.
+- Return: Updated state with conclusion embedded.
+- Default implementation: Return `game_state` unchanged (backward compatible).
+
+**Example**:
+```python
+def on_conclusion_received(self, game_state, player, conclusion):
+    state = dict(game_state)
+    if player == "support":
+        state["support_conclusion"] = conclusion
+    else:
+        state["client_conclusion"] = conclusion
+    return state
+```
+
+**Lifecycle**: After game ends → `requires_conclusion()` → prompt player → `parse_conclusion()` → `on_conclusion_received()` → MATCH_END.
+
+### on_handshake_complete(game_state, player, handshake_result) -> Dict[str, Any] *(new in v0.7.0)*
+- **Role**: Process handshake metadata after successful validation, before MATCH_START.
+- Accept: Initial `game_state` (from `setup`), player name, `HandshakeResult` from controller.
+- Perform: Extract and store metadata (e.g., persona, initial strategy) into state.
+- Return: Updated JSON-serializable dict.
+- Default implementation: Return `game_state` unchanged (backward compatible).
+- MUST NOT: Raise exceptions (match setup already in progress).
+
+**Lifecycle**: After `player.handshake()` → controller validates → **this hook** → gameplay starts.
+
+**HandshakeResult structure** (typed dataclass in v0.7.0):
+```python
+@dataclass
+class HandshakeResult:
+    accepted: bool
+    raw_response: str
+    normalized_response: str
+    reason: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Always dict, never None
+```
+
+**Example**:
+```python
+def on_handshake_complete(self, game_state, player, handshake_result):
+    state = dict(game_state)
+    # Extract persona from client handshake
+    if player == "client" and "persona" in handshake_result.metadata:
+        state["client_persona"] = handshake_result.metadata["persona"]
+    # Extract initial strategy
+    if "strategy" in handshake_result.metadata:
+        state["initial_strategies"] = state.get("initial_strategies", {})
+        state["initial_strategies"][player] = handshake_result.metadata["strategy"]
+    return state
+```
+
+**Note**: This hook was documented in SPEC-PLAYER v1.1.0 but Console did not invoke it (bug). v0.7.0 fixes this omission.
+
+### Hook Stability Guarantee *(new principle in v0.7.0)*
+
+**Principle**: New hooks introduced in minor versions MUST preserve backward compatibility via safe defaults.
+
+**Requirements**:
+1. **HS1**: Default implementations MUST return unchanged inputs or None.
+2. **HS2**: Hooks that trigger LLM calls MUST default to None/False (opt-in only).
+3. **HS3**: Default implementations MUST NOT mutate provided state.
+4. **HS4**: Existing games (e.g., FixedDamageGame) MUST continue exact behavior after hook additions.
+5. **HS5**: Every new hook MUST include regression test proving FixedDamageGame unchanged.
+
+**Validation**: Before merging hook additions, verify FixedDamageGame produces identical results (winner, turn count, events) in v0.6.0 vs v0.7.0.
+
+**Rationale**: Enables AgentDeck to evolve observability/metadata capabilities without breaking 100+ existing games in the ecosystem. Researchers expect deterministic behavior across minor versions.
+
 ## 5. Invariants & Guarantees
 
 ### 5.1 Game State Data (GS)
@@ -265,13 +415,35 @@ Games SHOULD use these canonical outcomes when deciding how to handle controller
 30. **ME4**: `run()` MUST return a JSON-serialisable final state and MUST signal truncation via the boolean flag when runtime’s `max_turns` limit or a mechanic-level termination triggers.
 31. **ME5**: `run()` MUST propagate unhandled exceptions; runtime/console attach `match_context` metadata for logging and replay. Mechanics MAY raise domain-specific exceptions, but they MUST include the acting player/turn in the error message for diagnostics.
 
+### 5.10 Hook Stability (HS) — *New in v0.7.0*
+32. **HS1**: Default implementations of all hooks MUST return unchanged inputs (game_state) or None.
+33. **HS2**: Hooks that trigger LLM calls (e.g., `requires_conclusion`) MUST default to None/False (opt-in only).
+34. **HS3**: Default hook implementations MUST NOT mutate provided state dictionaries.
+35. **HS4**: Hook additions in minor versions MUST NOT change behavior of existing games (e.g., FixedDamageGame).
+36. **HS5**: Every new hook MUST include regression test proving FixedDamageGame produces identical results.
+
+### 5.11 Lifecycle Hooks (LH) — *New in v0.7.0*
+37. **LH1**: `on_handshake_complete()` MUST be called after successful handshake validation, before MATCH_START event.
+38. **LH2**: `on_match_forfeited()` MUST be called after forfeit decision, before MATCH_END event, with emitter still bound.
+39. **LH3**: `requires_conclusion()` MUST be called after `status.is_over == True`, before MATCH_END event.
+40. **LH4**: Conclusion phase (prompt + `on_conclusion_received`) MUST only execute if `requires_conclusion()` returns non-None player name.
+41. **LH5**: Games MUST NOT call conclusion hooks directly; Console/TurnLoop orchestrates lifecycle.
+
+### 5.12 Typed Contracts (TC) — *New in v0.7.0*
+42. **TC1**: `HandshakeResult.metadata` MUST always be a dict (never None), enabling safe access without defensive checks.
+43. **TC2**: Games receiving `HandshakeResult` MAY assume `metadata` field exists and is dict-like.
+44. **TC3**: Controllers producing `HandshakeResult` MUST populate `metadata` field (empty dict if no metadata).
+
 ## 6. Data Flow & Interaction
 - **Session init**: Facade → Console (game, players, seed) → game.setup(players) → canonical `game_state`.
 - **Player ordering**: Console.run() → **game.get_player_order(players, rng=match_rng, match_context)** → returns None or custom list → Console applies shuffle or validates custom order → records `player_order`, `player_order_source`, `first_player` in metadata.
+- **Handshake phase** *(updated in v0.7.0)*: Console._run_handshake() → Player.handshake() → Controller.validate_handshake() → **game.on_handshake_complete(state, player, handshake_result)** → updated state → PLAYER_HANDSHAKE_COMPLETE event → repeat for each player → MATCH_START.
 - **Match execution**: Console._play_match() → constructs `MatchRuntime` → **game.run(runtime, ordered_players)** → mechanic helper (TurnLoop, etc.) → (final_state, events, truncated).
 - **Turn sequencing**: TurnLoop._execute_turn() → **game.get_current_player(game_state, players)** → identify acting player → proceed with turn.
 - **View generation**: Console → game.get_view(game_state, player) → Renderer.format(view) → Player.decide().
 - **Turn loop**: TurnLoop → game.update(game_state, player, action, rng) → validate_state → status → GAMEPLAY events.
+- **Parse failure → forfeit** *(updated in v0.7.0)*: Controller.parse() fails → TurnLoop catches → game.on_action_parse_failure() → policy=FORFEIT → **game.on_match_forfeited(state, player, error, policy)** → enriched state captured → MatchForfeitedError raised → MATCH_END.
+- **Conclusion phase** *(new in v0.7.0)*: status.is_over → **game.requires_conclusion(state)** → if player returned: prompt player.conclude() → **game.parse_conclusion()** → **game.on_conclusion_received(state, player, conclusion)** → updated final_state → PLAYER_CONCLUSION event → MATCH_END.
 - **Narrative**: Game mutates `game_state` / view → Renderer surfaces content → Player experiences narrative.
 - **Domain events**: Game.emit_event(...) → GameEventEmitter → EventBus → Recorder/Spectators.
 - **Validation failures**: game.validate_state(...) raises ValueError → Console propagates → match abort / diagnostic logging.
@@ -388,6 +560,9 @@ class TutorialGame(Game):
 | Validation guardrails | V1-V2 | Trigger invalid transitions; expect ValueError without state mutation. |
 | Handshake template | HT1-HT3 | Assert game provides default_handshake_template; verify console runs handshake before turn 1. |
 | Player ordering | PO1-PO4 | Run same seed twice, assert identical player_order metadata; test custom override validation (reject invalid lists); verify default None triggers Console shuffle. |
+| Hook stability | HS1-HS5 | Verify FixedDamageGame produces identical results (winner, turns, events) after hook additions; assert default hooks return unchanged inputs. |
+| Lifecycle hooks | LH1-LH5 | Trigger forfeit → verify `on_match_forfeited()` called with emitter alive; verify `on_handshake_complete()` called after validation; verify conclusion phase only runs when opted-in. |
+| Typed contracts | TC1-TC3 | Assert `HandshakeResult.metadata` is always dict (never None); verify safe access without defensive checks. |
 
 ## 10. Design Rationale
 - Dict-based `game_state` keeps recorder, renderer, and replay pipelines simple and language-agnostic.
@@ -398,6 +573,11 @@ class TutorialGame(Game):
 - **run() delegation pattern**: Centralizing mechanics inside `game.run(runtime, players)` keeps the console generic while ensuring games use the shared runtime for events, recorder, RNG, and parse-failure handling. The stock `TurnBasedGame` implementation delegates to TurnLoop so all sequential games follow an identical execution lifecycle.
 - **get_current_player() override point**: Provides clean extension for custom turn order (auction bidding, simultaneous phases) while maintaining round-robin default for 90% of games. TurnLoop validates returned player name prevents runtime errors from mismatched names.
 - **get_player_order() optional hook**: Console is the source of fairness by default (Fisher-Yates shuffle), removing burden from 99% of games. Games override only when ordering is semantically meaningful (auction winners, asymmetric roles, previous-winner advantage). Optional return (None vs List) makes intent explicit and keeps game authors from feeling obligated to implement custom logic.
+- **on_match_forfeited() hook** *(v0.7.0)*: Parse failures are terminal conditions that should be recorded accurately. Allowing games to enrich state (e.g., `resolution_status="invalid_response"`) enables filtering/analysis in benchmark datasets. Keeping emitter alive enables diagnostic events for debugging format adherence issues.
+- **Conclusion phase opt-in** *(v0.7.0)*: Post-match reflections capture valuable behavioral data (AI self-assessment, failure attribution, satisfaction prediction) without forcing all games to implement it. Zero LLM calls by default prevents unexpected costs. Three-hook design (requires/prompt/store) follows existing pattern (handshake/turn/conclusion).
+- **on_handshake_complete() invocation** *(v0.7.0)*: This was a bug - the hook existed in spec but Console never called it. Fixing enables games to extract metadata (personas, initial strategies) from handshake responses, critical for behavioral research (e.g., Support CS persona inference).
+- **HandshakeResult typing** *(v0.7.0)*: Explicit dataclass with `metadata: Dict` (never None) eliminates defensive `getattr()`/`isinstance()` checks, reduces bugs, and makes contracts self-documenting.
+- **Hook Stability Guarantee** *(v0.7.0)*: AgentDeck's promise to researchers: minor versions preserve deterministic behavior. No-op defaults ensure 100+ existing games continue working exactly as before. Every hook addition requires backward compatibility regression test.
 
 ## 11. Open Questions / Future Work
 - Define mechanic-specific specs (e.g., `SPEC-MECHANIC-TURNBASED.md`) that document helper classes like `TurnBasedGame`.
