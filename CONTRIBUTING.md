@@ -117,17 +117,22 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 
 **Process**:
 1. **Draft specs** following [Writing Specifications](#writing-specifications) guidelines
+   - Create draft in `specs/drafts/SPEC-<component>-v<version>.md`
+   - Drafts stay in `drafts/` until team approval
 2. **Team review** - All three review specs
    - Diego: Product/user perspective
    - Claude: Technical feasibility
    - Codex: Pragmatic critique (catch issues early)
 3. **Incorporate feedback** - Refine specs based on reviews
+   - Update draft in `specs/drafts/`
 4. **Consensus gate** - **All three must approve before Phase B**
+   - Once approved, move spec from `drafts/` to `specs/`
+   - Update version in main spec file (or create new file for major versions)
 
 **Deliverables**:
-- Finalized SPEC-*.md files in `specs/`
+- Approved SPEC-*.md files in `specs/` (moved from `drafts/`)
 - Updated related specs for consistency
-- Team consensus documented
+- Team consensus documented (in commit message)
 
 **Exit Criteria**:
 - [ ] Specs follow `specs/GUIDELINES.md`
