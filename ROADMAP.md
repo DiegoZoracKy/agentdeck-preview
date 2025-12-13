@@ -1,7 +1,7 @@
 # AgentDeck Pre-Release Roadmap
 
-> **Last Updated**: 2025-12-12
-> **Status**: ✅ **READY FOR v0.1.0 RELEASE** — All polish complete, CI passing
+> **Last Updated**: 2025-12-13
+> **Status**: ✅ **v0.1.0rc2 RELEASED** — Lifecycle hooks added, CI passing
 > **Release Readiness**: 9.5/10 (P0/P1/polish complete; production-ready)
 
 ---
@@ -94,6 +94,11 @@ This roadmap tracks work needed for the first public release (v0.1.0) in the fre
 
 ### P2 Nice-to-Haves (post-release / v0.1.x)
 - [x] LLMPlayer.reset_conversation should reset ConversationManager if externally injected (SPEC-PLAYER CS3) — 1h
+- [x] **Game lifecycle hooks (v0.7.0)** — 12h
+  - on_handshake_complete: Game-controlled handshake metadata processing
+  - on_match_forfeited: Terminal state enrichment after forfeit
+  - Conclusion phase hooks: Game-controlled player reflections
+  - Released in v0.1.0rc2 with full backward compatibility (HS1-HS5 guarantees)
 - PyPI distribution + release automation — 2-3h
 - Auto-generated API docs (Sphinx/MkDocs) — 4-8h
 - Research module enhancements (I² heterogeneity statistic) — variable
@@ -182,7 +187,17 @@ After v0.1.0 public release, iterate on community feedback:
 - PyPI release automation
 - Auto-generated API docs
 
-**Status**: Ready for v0.1.0-preview release. All critical functionality validated.
+**Status**: v0.1.0rc2 released with lifecycle hooks. All critical functionality validated.
+
+**Latest Release (v0.1.0rc2)**:
+- Game lifecycle hooks (SPEC-GAME v0.7.0)
+  - on_handshake_complete: Process handshake metadata
+  - on_match_forfeited: Enrich terminal state after forfeit
+  - Conclusion phase: Game-controlled player reflections
+  - Full backward compatibility (all existing games unchanged)
+- 9 files modified (+684/-40 lines)
+- 4 new regression tests (test_game_hooks.py)
+- All 314 tests passing, 75% coverage maintained
 
 ---
 

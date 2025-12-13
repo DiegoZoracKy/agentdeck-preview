@@ -2,9 +2,9 @@
 
 **A research platform for studying AI behavior through game scenarios**
 
-> **Status**: v0.1.0 (Pre-release) - Core functionality complete, polish in progress
-> **Test Coverage**: 300+ tests, CI gate at 75% coverage
-> **Note**: This is a work-in-progress repository. The first public release in the fresh repository will be tagged v0.1.0.
+> **Status**: v0.1.0rc2 (Release Candidate) - Production-ready with lifecycle hooks
+> **Test Coverage**: 314 tests, CI gate at 75% coverage
+> **Latest Release**: v0.1.0rc2 with Game lifecycle hooks (SPEC-GAME v0.7.0)
 
 ---
 
@@ -45,7 +45,8 @@ AgentDeck is architected like a video game console to keep experiments modular a
 By separating these concerns, AgentDeck ensures your research is **reproducible, observable, and easy to modify**.
 
 **Core Capabilities:**
-- Run experiments with GPT-5, Claude, Gemini in ~10 lines of code
+- Run experiments with GPT-4, Claude, Gemini in ~10 lines of code
+- **Game lifecycle hooks** - Process handshake metadata, enrich forfeit states, control player reflections
 - **Parallel execution** - 10× speedup with worker-based concurrency
 - **Complete observability** - every decision, timing, and reasoning captured
 - **Real-time monitoring** - live progress tracking with ETA and cost estimates
@@ -113,32 +114,30 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 
 ### Installation
 
-**Source install (recommended for v0.1.0):**
+**PyPI install (recommended):**
 ```bash
-# Clone repository
-git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
-cd agentdeck-preview
+# Latest release candidate
+pip install agentdeck-ai==0.1.0rc2
 
-# Install with dependencies
-pip install -e .
+# With provider SDKs
+pip install agentdeck-ai[openai]      # OpenAI SDK
+pip install agentdeck-ai[anthropic]   # Anthropic SDK
+pip install agentdeck-ai[google]      # Google Vertex SDK
+pip install agentdeck-ai[providers]   # All provider SDKs
 
-# Or install with dev tools
-pip install -e ".[dev]"
+# With research stack (statistics/plotting)
+pip install agentdeck-ai[research]
 
-# Optional provider extras
-pip install -e ".[openai]"      # OpenAI SDK
-pip install -e ".[anthropic]"   # Anthropic SDK
-pip install -e ".[google]"      # Google Vertex SDK
-pip install -e ".[providers]"   # All provider SDKs
-
-# Research stack (optional statistics/plotting utilities)
-pip install -e ".[research]"
-
-# Minimal replay-only install (no providers)
-pip install -e .
+# Development install
+pip install agentdeck-ai[dev]
 ```
 
-> 📦 **PyPI available**: `pip install agentdeck-ai`
+**Source install (for contributors):**
+```bash
+git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
+cd agentdeck-preview
+pip install -e ".[dev]"
+```
 
 ### Your First Experiment
 ```python
@@ -358,6 +357,7 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 
 ### ✅ Complete & Tested
 - **Core Execution**: Console, EventBus, three-phase lifecycle
+- **Game Lifecycle Hooks** (v0.7.0): on_handshake_complete, on_match_forfeited, conclusion phase hooks
 - **Parallel Execution**: Worker-based concurrency with deterministic replay parity (10× speedup validated)
 - **Monitor System**: Real-time progress tracking with ProgressMonitor (auto-attached for parallel runs)
 - **LLM Integration**: GPTPlayer, ClaudePlayer, GeminiPlayer (full lifecycle support with clone())
@@ -369,7 +369,7 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 - **Replay**: ReplayEngine with full lifecycle parity (R1 guarantee)
 - **Prompt Composition**: PromptBuilder with template system
 - **Reproducibility**: Deterministic seeding and exact replay (validated in production)
-- **Test Suite**: Hundreds of tests with CI coverage gate at 75%
+- **Test Suite**: 314 tests with CI coverage gate at 75%
 
 ### 🚧 Coming Soon (See [ROADMAP.md](ROADMAP.md))
 - **Research Module**: Statistical comparison tools (Phase 2)
@@ -381,14 +381,17 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 
 ## 🔬 Current Milestone
 
-**v0.1.0 (Pre-release)**: Core Functionality Complete
+**v0.1.0rc2**: Game Lifecycle Hooks
+- ✅ Game lifecycle hooks (SPEC-GAME v0.7.0): on_handshake_complete, on_match_forfeited, conclusion phase
+- ✅ Full backward compatibility (HS1-HS5 guarantees)
 - ✅ Worker-based parallel execution with deterministic replay parity (SPEC-PARALLEL v1.0.0)
 - ✅ Monitor system for real-time progress tracking (SPEC-MONITOR v1.0.0)
 - ✅ Production validation: 4 experiments, 40× faster than estimated
-- ✅ CI suite passing with coverage gate at 75%
+- ✅ CI suite passing with coverage gate at 75% (314 tests)
 - ✅ Validated with OpenAI GPT-4o-mini and GPT-4o
+- ✅ Published to PyPI: `pip install agentdeck-ai==0.1.0rc2`
 
-**Next**: Pre-release polish (packaging, docs, validation) → Public v0.1.0 in fresh repository
+**Next**: Additional corporate use cases → v0.1.0 stable release
 
 ---
 
