@@ -579,6 +579,25 @@ class TutorialGame(Game):
 - **HandshakeResult typing** *(v0.7.0)*: Explicit dataclass with `metadata: Dict` (never None) eliminates defensive `getattr()`/`isinstance()` checks, reduces bugs, and makes contracts self-documenting.
 - **Hook Stability Guarantee** *(v0.7.0)*: AgentDeck's promise to researchers: minor versions preserve deterministic behavior. No-op defaults ensure 100+ existing games continue working exactly as before. Every hook addition requires backward compatibility regression test.
 
+### Relationship to Existing Architecture *(v0.7.0)*
+
+**on_handshake_complete()** complements PLAYER_HANDSHAKE_COMPLETE event (SPEC-OBSERVABILITY §3.1.1):
+- **Event**: Read-only observation of handshake via Spectators - observers track handshake success/failure without affecting gameplay
+- **Hook**: Game-driven state mutation for gameplay use (e.g., storing persona extracted from handshake to customize game views)
+- **Both serve different purposes**: Event enables observation/analytics; hook enables game logic that depends on handshake metadata. Hook is not redundant with event system.
+
+**Conclusion hooks** extend existing Console._run_conclusion() orchestration:
+- **v0.6.0 behavior**: Console prompts ALL players for post-match reflection (player-driven, no game control)
+- **v0.7.0 enhancement**: Game controls WHO concludes via `requires_conclusion()`, provides custom prompts via `get_conclusion_prompt()`, and stores parsed data in `final_state` via `on_conclusion_received()`
+- **Backward compatible**: Default implementations (`requires_conclusion()` returns `None`) preserve v0.6.0 behavior (no LLM calls, no state changes)
+- **Relationship to events**: PLAYER_CONCLUSION event (SPEC-OBSERVABILITY §3.1.1 line 78) enables spectators to observe reflections; hooks enable game to control and store them
+
+**on_match_forfeited()** enriches state alongside PLAYER_ACTION_PARSE_FAILED event:
+- **Event**: Spectators observe parse failures via read-only PLAYER_ACTION_PARSE_FAILED event (includes player, error, policy)
+- **Hook**: Game enriches terminal state for filtering/analysis (e.g., setting `resolution_status="invalid_response"` enables benchmark filtering)
+- **Alternative considered**: Console could set `_forfeit_metadata` flag for `game.status()` to check, but hook provides cleaner game-controlled state management
+- **Event remains authoritative**: Spectators/Recorder capture complete forfeit context via event; hook enables game-specific terminal state representation
+
 ## 11. Open Questions / Future Work
 - Define mechanic-specific specs (e.g., `SPEC-MECHANIC-TURNBASED.md`) that document helper classes like `TurnBasedGame`.
 - Explore schema helpers or dataclass validators for complex game_state definitions.
