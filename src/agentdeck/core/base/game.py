@@ -34,6 +34,7 @@ from ..types import ActionResult, Event, GameStatus, RandomGenerator
 if TYPE_CHECKING:
     from ..event_factory import EventFactory
     from ..game_event_emitter import GameEventEmitter
+    from ..types import ActionParseError, HandshakeResult, ParseFailurePolicy
 
 
 class Game(ABC):
@@ -469,6 +470,73 @@ class Game(ABC):
               raises ValueError on mismatch (H4).
         """
         return None  # Default: no preference, Console applies fairness
+
+    def on_match_forfeited(
+        self,
+        game_state: Dict[str, Any],
+        player_name: str,
+        error: "ActionParseError",  # Forward reference
+        policy: "ParseFailurePolicy",  # Forward reference
+    ) -> Dict[str, Any]:
+        """
+        Hook invoked after a parse failure is converted into a forfeit decision.
+
+        Games may enrich terminal state (e.g., set resolution_status="invalid_response")
+        or emit diagnostic events. Default is a no-op that returns the provided state
+        unchanged to preserve backward compatibility.
+        """
+        return game_state
+
+    def requires_conclusion(self, game_state: Dict[str, Any]) -> Optional[str]:
+        """
+        Optional hook to request a conclusion phase for a specific player.
+
+        Return the player name that should provide a conclusion, or None to skip.
+        Default skips the conclusion phase (no additional LLM calls).
+        """
+        return None
+
+    def get_conclusion_prompt(self, player: str, game_state: Dict[str, Any]) -> str:
+        """
+        Build a conclusion prompt for the specified player.
+
+        Default provides a generic reflection prompt; games override to embed
+        domain-specific instructions or JSON shapes.
+        """
+        return "Provide a brief reflection on the match outcome."
+
+    def parse_conclusion(self, player: str, response: Optional[str]) -> Dict[str, Any]:
+        """
+        Parse the conclusion response into structured data.
+
+        Default attempts JSON parsing; if response is empty/None, returns {}.
+        """
+        import json
+
+        if response in (None, ""):
+            return {}
+        return json.loads(response)
+
+    def on_conclusion_received(
+        self, game_state: Dict[str, Any], player: str, conclusion: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Hook to persist parsed conclusion data into final state.
+
+        Default returns game_state unchanged (backward compatible).
+        """
+        return game_state
+
+    def on_handshake_complete(
+        self, game_state: Dict[str, Any], player: str, handshake_result: "HandshakeResult"
+    ) -> Dict[str, Any]:
+        """
+        Hook invoked after successful handshake validation.
+
+        Games may extract metadata (e.g., personas, strategies) and store it in state.
+        Default returns the state unchanged.
+        """
+        return game_state
 
     # ========================================================================
     # Infrastructure Hooks (Console integration)

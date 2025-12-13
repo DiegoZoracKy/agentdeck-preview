@@ -341,6 +341,32 @@ class LLMPlayer(Player, ABC):
         Returns:
             Optional reflection string from LLM
         """
+        explicit_prompt = getattr(match_context, "conclusion_prompt", None)
+
+        if explicit_prompt:
+            try:
+                reflection = self.get_response(explicit_prompt)
+            except Exception as exc:  # pragma: no cover - defensive
+                logger = getattr(self, "logger", None)
+                if logger:
+                    logger.debug(f"Conclusion failed for {self.name}: {exc}")
+                reflection = None
+            else:
+                self._record_exchange(
+                    explicit_prompt,
+                    reflection or "",
+                    phase="conclusion",
+                    turn_context=None,
+                    prompt_blocks=[
+                        {"key": "conclusion_prompt", "content": explicit_prompt, "metadata": {}}
+                    ],
+                    controller_format="",
+                    renderer_output={},
+                    usage_info=None,
+                )
+
+            return reflection.strip() if reflection else None
+
         # Check if conclusion template is configured in PromptBuilder
         if (
             not hasattr(self.prompt_builder, "_conclusion_template")

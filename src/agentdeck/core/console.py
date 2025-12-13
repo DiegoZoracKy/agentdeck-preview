@@ -10,7 +10,9 @@ from typing import Any, Callable, Dict, List, Optional
 
 from .base import Game, Player, Spectator
 from .conversation import ConversationManager
+from .event_factory import EventFactory
 from .event_bus import EventBus
+from .game_event_emitter import GameEventEmitter
 from .logging import AgentDeckLogger
 from .match_runtime import MatchRuntime
 from .recorder import Recorder
@@ -251,9 +253,33 @@ class _MatchWorker:
             match_id=runtime.match_id, batch_id=self.batch_ctx.batch_id, phase_index=None
         )
 
-        # Prepare players, run handshake, emit MATCH_START
+        # Prepare players, run setup + handshake, emit MATCH_START
         self._prepare_players(ordered_players)
-        self._run_handshake(ordered_players, runtime)
+
+        infra_runtime = self._create_infrastructure_runtime(runtime)
+
+        temp_emitter = GameEventEmitter(self.event_bus, runtime.match_id)
+        temp_factory = EventFactory(runtime.match_id)
+        self.game.bind_event_factory(temp_factory)
+        self.game.bind_event_emitter(temp_emitter)
+        try:
+            # Pre-compute initial state (per SPEC-GAME v0.7.0 data flow)
+            setup_rng = infra_runtime.fork_rng("setup")
+            state = self.game.setup(player_names, seed=setup_rng.seed)
+            if not isinstance(state, dict):
+                raise TypeError(
+                    f"{self.game.__class__.__name__}.setup() must return a dict, got {type(state).__name__}"
+                )
+            state.setdefault("_turn_count", 1)
+            infra_runtime.validate_state(state)
+
+            state = self._run_handshake(ordered_players, runtime, infra_runtime, state)
+            infra_runtime.initial_state = state
+            infra_runtime.validate_state(state)
+        finally:
+            self.game.bind_event_factory(None)
+            self.game.bind_event_emitter(None)
+            temp_emitter.clear_phase_index()
 
         self._dispatch_event(
             EventType.MATCH_START,
@@ -267,9 +293,6 @@ class _MatchWorker:
             player_order_source=player_order_source,
             first_player=first_player,
         )
-
-        # Create MatchRuntime and delegate to game.run() (mechanic-agnostic flow)
-        infra_runtime = self._create_infrastructure_runtime(runtime)
 
         from .types import MatchAbortedError, MatchForfeitedError
 
@@ -580,8 +603,15 @@ class _MatchWorker:
             if hasattr(player, "logger"):
                 player.logger = self.console.logger
 
-    def _run_handshake(self, players: List[Player], runtime: MatchExecutionContext) -> None:
+    def _run_handshake(
+        self,
+        players: List[Player],
+        runtime: MatchExecutionContext,
+        infra_runtime: MatchRuntime,
+        game_state: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Run handshake phase (isolated implementation)."""
+        state = copy.deepcopy(game_state)
         player_names = [p.name for p in players]
         for player in players:
             context = HandshakeContext(
@@ -619,6 +649,12 @@ class _MatchWorker:
                     prompt_text = history[-2]["content"]
 
             result = player.controller.validate_handshake(raw, context=context)
+            result.metadata = result.metadata or {}
+            if result.normalized_response is None:
+                result.normalized_response = result.raw_response
+            if result.normalized_response is None:
+                result.normalized_response = result.raw_response
+            result.metadata = result.metadata or {}
             if not result.accepted:
                 self._dispatch_event(
                     EventType.PLAYER_HANDSHAKE_ABORT,
@@ -630,7 +666,16 @@ class _MatchWorker:
                 raise HandshakeRejectedError(
                     f"Player {player.name} rejected handshake: {result.reason}"
                 )
+
+            try:
+                state = self.game.on_handshake_complete(state, player.name, result) or state
+            except Exception as exc:  # pragma: no cover - defensive
+                raise RuntimeError(
+                    f"{self.game.__class__.__name__}.on_handshake_complete() failed for player {player.name}"
+                ) from exc
+
             runtime.handshake_completed = True
+            infra_runtime.initial_state = state
             self._dispatch_event(
                 EventType.PLAYER_HANDSHAKE_COMPLETE,
                 events=runtime.events,
@@ -639,6 +684,8 @@ class _MatchWorker:
                 metadata=result.metadata,
                 prompt_text=prompt_text,
             )
+
+        return state
 
     def get_player_action(
         self,
@@ -860,8 +907,43 @@ class _MatchWorker:
             handshake_completed=runtime.handshake_completed,
             rng_info={"seed": runtime.seed},
         )
+        concluding_player = None
+        conclusion_reflection: Optional[str] = None
+
+        try:
+            concluding_player = self.game.requires_conclusion(result.final_state)
+        except Exception as exc:  # pragma: no cover - defensive
+            raise RuntimeError(
+                f"{self.game.__class__.__name__}.requires_conclusion() failed"
+            ) from exc
+
+        if concluding_player:
+            target = next((p for p in players if p.name == concluding_player), None)
+            if target is None:
+                raise ValueError(
+                    f"{self.game.__class__.__name__}.requires_conclusion returned unknown player '{concluding_player}'"
+                )
+
+            prompt = self.game.get_conclusion_prompt(concluding_player, result.final_state)
+            match_ctx.conclusion_prompt = prompt
+            conclusion_reflection = target.conclude(result, match_context=match_ctx)
+            parsed = self.game.parse_conclusion(concluding_player, conclusion_reflection)
+            try:
+                result.final_state = self.game.on_conclusion_received(
+                    result.final_state, concluding_player, parsed
+                )
+            except Exception as exc:  # pragma: no cover - defensive
+                raise RuntimeError(
+                    f"{self.game.__class__.__name__}.on_conclusion_received() failed"
+                ) from exc
+
         for player in players:
-            reflection = player.conclude(result, match_context=match_ctx)
+            if player.name == concluding_player:
+                reflection = conclusion_reflection
+            else:
+                match_ctx.conclusion_prompt = None
+                reflection = player.conclude(result, match_context=match_ctx)
+
             self._dispatch_event(
                 EventType.PLAYER_CONCLUSION,
                 events=runtime.events,
@@ -1782,7 +1864,30 @@ class Console:
         self.event_bus.update_context(match_id=runtime.match_id, phase_index=None)
 
         self._prepare_players(ordered_players)
-        self._run_handshake(game, ordered_players, runtime)
+
+        infra_runtime = self._create_infrastructure_runtime(game, runtime, previous_match_result)
+
+        temp_emitter = GameEventEmitter(self.event_bus, runtime.match_id)
+        temp_factory = EventFactory(runtime.match_id)
+        game.bind_event_factory(temp_factory)
+        game.bind_event_emitter(temp_emitter)
+        try:
+            setup_rng = infra_runtime.fork_rng("setup")
+            state = game.setup(player_names, seed=setup_rng.seed)
+            if not isinstance(state, dict):
+                raise TypeError(
+                    f"{game.__class__.__name__}.setup() must return a dict, got {type(state).__name__}"
+                )
+            state.setdefault("_turn_count", 1)
+            infra_runtime.validate_state(state)
+
+            state = self._run_handshake(game, ordered_players, runtime, infra_runtime, state)
+            infra_runtime.initial_state = state
+            infra_runtime.validate_state(state)
+        finally:
+            game.bind_event_factory(None)
+            game.bind_event_emitter(None)
+            temp_emitter.clear_phase_index()
 
         self._dispatch_event(
             EventType.MATCH_START,
@@ -1798,9 +1903,6 @@ class Console:
         )
 
         from .types import MatchAbortedError, MatchForfeitedError
-
-        # Create MatchRuntime infrastructure for game.run() (SPEC-MATCH-RUNTIME v1.0.0)
-        infra_runtime = self._create_infrastructure_runtime(game, runtime, previous_match_result)
 
         try:
             # Call game.run(runtime, players) - mechanic-agnostic delegation (SPEC-GAME v0.6.0)
@@ -2529,8 +2631,14 @@ class Console:
                 player.logger = self.logger
 
     def _run_handshake(
-        self, game: Game, players: List[Player], runtime: MatchExecutionContext
-    ) -> None:
+        self,
+        game: Game,
+        players: List[Player],
+        runtime: MatchExecutionContext,
+        infra_runtime: MatchRuntime,
+        game_state: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        state = copy.deepcopy(game_state)
         player_names = [p.name for p in players]
         for player in players:
             context = HandshakeContext(
@@ -2580,7 +2688,16 @@ class Console:
                 raise HandshakeRejectedError(
                     f"Player {player.name} rejected handshake: {result.reason}"
                 )
+
+            try:
+                state = game.on_handshake_complete(state, player.name, result) or state
+            except Exception as exc:  # pragma: no cover - defensive
+                raise RuntimeError(
+                    f"{game.__class__.__name__}.on_handshake_complete() failed for player {player.name}"
+                ) from exc
+
             runtime.handshake_completed = True
+            infra_runtime.initial_state = state
             self._dispatch_event(
                 EventType.PLAYER_HANDSHAKE_COMPLETE,
                 events=runtime.events,
@@ -2589,6 +2706,8 @@ class Console:
                 metadata=result.metadata,
                 prompt_text=prompt_text,
             )
+
+        return state
 
     def _run_conclusion(
         self,
@@ -2604,8 +2723,37 @@ class Console:
             handshake_completed=runtime.handshake_completed,
             rng_info={"seed": runtime.seed},
         )
+        concluding_player = None
+        conclusion_reflection: Optional[str] = None
+
+        try:
+            concluding_player = self.game.requires_conclusion(match_result.final_state)
+        except Exception as exc:  # pragma: no cover - defensive
+            raise RuntimeError(
+                f"{self.game.__class__.__name__}.requires_conclusion() failed"
+            ) from exc
+
+        if concluding_player:
+            target = next((p for p in players if p.name == concluding_player), None)
+            if target is None:
+                raise ValueError(
+                    f"{self.game.__class__.__name__}.requires_conclusion returned unknown player '{concluding_player}'"
+                )
+
+            prompt = self.game.get_conclusion_prompt(concluding_player, match_result.final_state)
+            match_ctx.conclusion_prompt = prompt
+            conclusion_reflection = target.conclude(match_result, match_context=match_ctx)
+            parsed = self.game.parse_conclusion(concluding_player, conclusion_reflection)
+            match_result.final_state = self.game.on_conclusion_received(
+                match_result.final_state, concluding_player, parsed
+            )
+
         for player in players:
-            reflection = player.conclude(match_result, match_context=match_ctx)
+            if player.name == concluding_player:
+                reflection = conclusion_reflection
+            else:
+                match_ctx.conclusion_prompt = None
+                reflection = player.conclude(match_result, match_context=match_ctx)
             self._dispatch_event(
                 EventType.PLAYER_CONCLUSION,
                 events=runtime.events,

@@ -290,6 +290,8 @@ class TurnLoop:
             - TL5: Annotate exceptions with match_context
             - TL6: Attach phase_index/turn_number to events
         """
+        from ..types import MatchForfeitedError
+
         # Make factory and emitter available for custom game hooks
         # Note: This maintains backward compatibility with games using emit_event()
         emitter = GameEventEmitter(
@@ -299,19 +301,27 @@ class TurnLoop:
         self.game.bind_event_factory(self.event_factory)
         self.game.bind_event_emitter(emitter)
 
+        state: Dict[str, Any] = {}
         try:
-            # TL1: Deterministic Setup - fork RNG before game.setup()
-            setup_rng = self.runtime.fork_rng("setup")
-            state = self.game.setup(self.player_names, seed=setup_rng.seed)
+            state = (
+                copy.deepcopy(self.runtime.initial_state)
+                if getattr(self.runtime, "initial_state", None) is not None
+                else None
+            ) or {}
 
-            # Type check: setup() must return a dict
-            if not isinstance(state, dict):
-                raise TypeError(
-                    f"{self.game.__class__.__name__}.setup() must return a dict, "
-                    f"got {type(state).__name__}"
-                )
+            if not state:
+                # TL1: Deterministic Setup - fork RNG before game.setup()
+                setup_rng = self.runtime.fork_rng("setup")
+                state = self.game.setup(self.player_names, seed=setup_rng.seed)
 
-            state["_turn_count"] = 1
+                # Type check: setup() must return a dict
+                if not isinstance(state, dict):
+                    raise TypeError(
+                        f"{self.game.__class__.__name__}.setup() must return a dict, "
+                        f"got {type(state).__name__}"
+                    )
+
+            state.setdefault("_turn_count", 1)
             events: List[Event] = []
 
             # Validate initial state via runtime (TL3)
@@ -350,6 +360,17 @@ class TurnLoop:
                 events=events,
                 truncated_by_max_turns=truncated,
             )
+        except MatchForfeitedError as forfeit_error:
+            # Allow game to enrich terminal state before Console emits MATCH_END
+            forfeit_state = getattr(forfeit_error, "forfeit_state", copy.deepcopy(state))
+            updated_state = self.game.on_match_forfeited(
+                forfeit_state,
+                forfeit_error.player_name,
+                forfeit_error.parse_error,
+                forfeit_error.policy,
+            )
+            forfeit_error.forfeit_state = updated_state
+            raise
         finally:
             # TL6: Restore bindings even if mechanics raise (MR6)
             self.game.bind_event_factory(None)

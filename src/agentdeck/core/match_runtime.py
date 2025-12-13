@@ -96,6 +96,7 @@ class MatchRuntime:
         rng: RandomGenerator,
         previous_match_result: Optional[Any] = None,
         events_list: Optional[List] = None,
+        initial_state: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Create a new MatchRuntime instance.
@@ -130,6 +131,7 @@ class MatchRuntime:
         self._rng = rng
         self._previous_match_result = previous_match_result
         self._events_list = events_list  # For replay parity (TL6)
+        self._initial_state = initial_state
 
     @property
     def match_id(self) -> str:
@@ -155,6 +157,15 @@ class MatchRuntime:
     def max_turns(self) -> int:
         """Maximum turns before truncation."""
         return self._max_turns
+
+    @property
+    def initial_state(self) -> Optional[Dict[str, Any]]:
+        """Optional precomputed game state to seed mechanics."""
+        return self._initial_state
+
+    @initial_state.setter
+    def initial_state(self, state: Optional[Dict[str, Any]]) -> None:
+        self._initial_state = state
 
     @property
     def events(self) -> List:

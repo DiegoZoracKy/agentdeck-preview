@@ -269,10 +269,10 @@ class HandshakeResult:
     """
 
     accepted: bool
-    normalized_response: str
-    raw_response: str
+    normalized_response: Optional[str] = None
+    raw_response: str = ""
     reason: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -343,6 +343,7 @@ class MatchContext:
     handshake_completed: bool = False
     rng_info: Optional[Dict[str, Any]] = None
     previous_match_result: Optional["MatchResult"] = None  # Forward reference for type hint
+    conclusion_prompt: Optional[str] = None
 
 
 class ActionParseError(Exception):
