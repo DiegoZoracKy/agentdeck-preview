@@ -57,7 +57,11 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 
 ## 🔬 Research Findings
 
-AgentDeck has been used to conduct rigorous AI behavioral research. Here are key findings from our experiments:
+AgentDeck has been used to conduct rigorous AI behavioral research. All experiments used [**FixedDamageGame**](src/agentdeck/games/examples/fixed_damage.py) — a turn-based combat game where players choose between ATTACK (deal damage) or POTION (restore HP). First to reduce opponent to 0 HP wins. Win rates below represent head-to-head match outcomes.
+
+**Controller Strategies Tested:**
+- **ReasoningController** — Requires explicit chain-of-thought reasoning before action selection (e.g., "I should attack because...")
+- **ActionOnlyController** — Direct action selection without explicit reasoning (just outputs "ATTACK" or "POTION")
 
 ### OpenAI Strategic Benchmarks (2025-11-08)
 **Research Question**: How do model configurations affect strategic gameplay?
@@ -67,23 +71,23 @@ AgentDeck has been used to conduct rigorous AI behavioral research. Here are key
 | **Format instruction repetition dominates** | ~67 percentage point swing in win rates |
 | **CoT reasoning provides 2:1 advantage** | Model-agnostic (works for GPT-4o-mini and GPT-5-nano) |
 | **Model size ≠ strategic superiority** | gpt-4o-mini beats gpt-4o (77% vs 23%) |
-| **GPT-5 family shows no advantage** | 2-15× cost with no performance benefit |
+| **GPT-5 family matches GPT-4o-mini** | No significant performance difference detected |
 
-**Optimal Configuration**: `gpt-4o-mini + ReasoningController` at $0.0028/match
+**Optimal Configuration**: `gpt-4o-mini + ReasoningController`
 
 ### Multi-Provider Benchmarks (2025-11-19)
 **Research Question**: How do providers compare in strategic tasks?
 
-| Matchup | Result | Cost Ratio |
-|---------|--------|------------|
-| GPT-4o-mini vs Gemini-2.5-Flash | GPT wins 70-30 (p=0.043) | Gemini 10× more expensive |
-| GPT-4o-mini vs Gemini-2.5-Pro | Statistical tie (p=0.856) | Gemini 15× more expensive |
+| Matchup | Result |
+|---------|--------|
+| GPT-4o-mini vs Gemini-2.5-Flash | GPT wins 70-30 (p=0.043) |
+| GPT-4o-mini vs Gemini-2.5-Pro | Statistical tie (p=0.856) |
 
-**Key Insight**: Performance parity across providers, but significant cost disparity.
+**Key Insight**: GPT-4o-mini outperforms Gemini Flash; ties with Gemini Pro in constrained strategic tasks.
 
 ### Explore Full Research
 - **[Research Directory](research/)** - Complete experiment narratives
-- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - 410 matches, ~$7.50 total
+- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - 410 matches across model configurations
 - **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - Cross-vendor comparisons
 
 ---
