@@ -55,6 +55,39 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 
 ---
 
+## 🔬 Research Findings
+
+AgentDeck has been used to conduct rigorous AI behavioral research. Here are key findings from our experiments:
+
+### OpenAI Strategic Benchmarks (2025-11-08)
+**Research Question**: How do model configurations affect strategic gameplay?
+
+| Finding | Impact |
+|---------|--------|
+| **Format instruction repetition dominates** | ~67 percentage point swing in win rates |
+| **CoT reasoning provides 2:1 advantage** | Model-agnostic (works for GPT-4o-mini and GPT-5-nano) |
+| **Model size ≠ strategic superiority** | gpt-4o-mini beats gpt-4o (77% vs 23%) |
+| **GPT-5 family shows no advantage** | 2-15× cost with no performance benefit |
+
+**Optimal Configuration**: `gpt-4o-mini + ReasoningController` at $0.0028/match
+
+### Multi-Provider Benchmarks (2025-11-19)
+**Research Question**: How do providers compare in strategic tasks?
+
+| Matchup | Result | Cost Ratio |
+|---------|--------|------------|
+| GPT-4o-mini vs Gemini-2.5-Flash | GPT wins 70-30 (p=0.043) | Gemini 10× more expensive |
+| GPT-4o-mini vs Gemini-2.5-Pro | Statistical tie (p=0.856) | Gemini 15× more expensive |
+
+**Key Insight**: Performance parity across providers, but significant cost disparity.
+
+### Explore Full Research
+- **[Research Directory](research/)** - Complete experiment narratives
+- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - 410 matches, ~$7.50 total
+- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - Cross-vendor comparisons
+
+---
+
 ## ⚙️ Architecture
 
 AgentDeck follows a **gaming console metaphor** with clean separation of concerns:
