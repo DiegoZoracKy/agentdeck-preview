@@ -57,7 +57,11 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 
 ## 🔬 Research Findings
 
-AgentDeck has been used to conduct rigorous AI behavioral research. Here are key findings from our experiments:
+AgentDeck has been used to conduct rigorous AI behavioral research. All experiments used [**FixedDamageGame**](src/agentdeck/games/examples/fixed_damage.py) — a turn-based combat game where players choose between ATTACK (deal damage) or POTION (restore HP). First to reduce opponent to 0 HP wins. Win rates below represent head-to-head match outcomes.
+
+**Controller Strategies Tested:**
+- **ReasoningController** — Requires explicit chain-of-thought reasoning before action selection (e.g., "I should attack because...")
+- **ActionOnlyController** — Direct action selection without explicit reasoning (just outputs "ATTACK" or "POTION")
 
 ### OpenAI Strategic Benchmarks (2025-11-08)
 **Research Question**: How do model configurations affect strategic gameplay?
