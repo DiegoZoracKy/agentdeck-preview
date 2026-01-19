@@ -15,7 +15,7 @@
 
 ## 2. Scope & Philosophy Alignment
 - Supports `SPEC.md` §1.1 success criteria (built-in statistical analysis tools).
-- Grounded in `AGENTS.md` §2.3: data-driven iteration via comprehensive metrics and reproducible benchmarks.
+- Grounded in `SPEC.md` §2.4: data-driven iteration via comprehensive metrics and reproducible benchmarks.
 - Maintains separation of concerns: research utilities consume `MatchResults` and recorder outputs, never influence live execution.
 - **Clean slate design**: v1.0.0 assumes modern recorder schema (SPEC-RECORDER v1.0.0) with complete metadata capture—no legacy format compatibility, no backward compatibility shims.
 - **Statistical transparency**: All comparisons MUST report p-values, confidence intervals, test selection, and effect sizes for reproducibility.
@@ -955,7 +955,7 @@ def test_missing_recordings_error():
 
 ### Specifications
 - [SPEC.md](./SPEC.md) §1.1 (Research focus), §2.4 (Reproducibility)
-- [AGENTS.md](./AGENTS.md) §2.3 (Data-driven iteration)
+- [SPEC.md](./SPEC.md) §2.4 (Data-driven iteration)
 - [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) v0.3.0 (Match execution, seed handling)
 - [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.3.0 (Match orchestration)
 - [SPEC-RECORDER.md](./SPEC-RECORDER.md) v1.0.0 (Match metadata capture, load_match() utilities)

@@ -314,8 +314,8 @@ Expect to trim 10-15% from first draft without losing guarantees.
 #### Cross-Referencing Standard
 
 - **Other specs**: `SPEC-CONSOLE §4.2`
-- **Source files**: `[src/agentdeck/core/console.py](../src/agentdeck/core/console.py)`
-- **Examples**: `[examples/games/auction.py](../examples/games/auction.py)`
+- **Source files**: `[src/agentdeck/core/console.py](src/agentdeck/core/console.py)`
+- **Examples**: `[examples/games/auction.py](examples/games/auction.py)`
 - **Philosophy**: `` `SPEC.md` §3.1`` or `` `AGENTS.md` §2.1``
 
 #### Voice & Tense
@@ -772,7 +772,7 @@ Planning docs are **temporal artifacts** that become outdated. Relying on them f
 - Confusion about what's actually implemented
 - LLM/AI context pollution from stale information
 
-**See [docs/planning/README.md](docs/planning/README.md) for complete guidance.**
+**See [docs/README.md](docs/README.md) for documentation map and entry points.**
 
 ---
 

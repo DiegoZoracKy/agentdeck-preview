@@ -1,0 +1,31 @@
+schema_version: 1
+experiment_id: YYYY-MM-DD-slug
+title: Experiment Title
+status: planned
+question: ""
+game:
+  name: FixedDamageGame
+  config: {}
+players:
+  - id: A
+    provider: openai
+    model: gpt-4o-mini
+    controller: ActionOnlyController
+  - id: B
+    provider: openai
+    model: gpt-4o-mini
+    controller: ReasoningController
+run:
+  seed_base: 42
+  matches_planned: 100
+  matches_completed: 0
+  concurrency: 1
+  max_turns: 100
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  results_json: results.json
+  results_csv: results.csv
+notes: ""

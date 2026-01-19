@@ -2,9 +2,9 @@
 
 **A research platform for studying AI behavior through game scenarios**
 
-> **Status**: v0.1.0rc2 (Release Candidate) - Production-ready with lifecycle hooks
-> **Test Coverage**: 314 tests, CI gate at 75% coverage
-> **Latest Release**: v0.1.0rc2 with Game lifecycle hooks (SPEC-GAME v0.7.0)
+> **Status**: v0.1.0 (Stable) - Production-ready with lifecycle hooks
+> **Test Coverage**: 319 tests, CI gate at 75% coverage
+> **Latest Release**: v0.1.0 with Game lifecycle hooks (SPEC-GAME v0.7.0)
 
 ---
 
@@ -154,7 +154,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 **PyPI install (recommended):**
 ```bash
 # Latest release candidate
-pip install agentdeck-ai==0.1.0rc2
+pip install agentdeck-ai==0.1.0
 
 # With provider SDKs
 pip install agentdeck-ai[openai]      # OpenAI SDK
@@ -406,7 +406,7 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 - **Replay**: ReplayEngine with full lifecycle parity (R1 guarantee)
 - **Prompt Composition**: PromptBuilder with template system
 - **Reproducibility**: Deterministic seeding and exact replay (validated in production)
-- **Test Suite**: 314 tests with CI coverage gate at 75%
+- **Test Suite**: 319 tests with CI coverage gate at 75%
 
 ### 🚧 Coming Soon (See [ROADMAP.md](ROADMAP.md))
 - **Research Module**: Statistical comparison tools (Phase 2)
@@ -418,15 +418,15 @@ AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctn
 
 ## 🔬 Current Milestone
 
-**v0.1.0rc2**: Game Lifecycle Hooks
+**v0.1.0**: Game Lifecycle Hooks
 - ✅ Game lifecycle hooks (SPEC-GAME v0.7.0): on_handshake_complete, on_match_forfeited, conclusion phase
 - ✅ Full backward compatibility (HS1-HS5 guarantees)
 - ✅ Worker-based parallel execution with deterministic replay parity (SPEC-PARALLEL v1.0.0)
 - ✅ Monitor system for real-time progress tracking (SPEC-MONITOR v1.0.0)
 - ✅ Production validation: 4 experiments, 40× faster than estimated
-- ✅ CI suite passing with coverage gate at 75% (314 tests)
+- ✅ CI suite passing with coverage gate at 75% (319 tests)
 - ✅ Validated with OpenAI GPT-4o-mini and GPT-4o
-- ✅ Published to PyPI: `pip install agentdeck-ai==0.1.0rc2`
+- ✅ Published to PyPI: `pip install agentdeck-ai==0.1.0`
 
 **Next**: Additional corporate use cases → v0.1.0 stable release
 

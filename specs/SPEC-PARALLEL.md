@@ -140,4 +140,4 @@
 - [SPEC-CONSOLE.md](SPEC-CONSOLE.md) — baseline console responsibilities.  
 - [SPEC-OBSERVABILITY.md](SPEC-OBSERVABILITY.md) — event ordering and replay guarantees.  
 - [README.md](../README.md) — researcher quick start for match execution.  
-- [docs/experiments.md](../docs/experiments.md) — running batches and analysing results.
+- [research/README.md](../research/README.md) — running batches and analysing results.

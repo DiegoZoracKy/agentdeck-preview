@@ -1,0 +1,38 @@
+schema_version: 1
+experiment_id: 2025-11-08-openai-benchmarks
+title: OpenAI Strategic Benchmarks
+status: running
+question: How do OpenAI model configurations compare in strategic gameplay?
+game:
+  name: FixedDamageGame
+  config: {}
+players:
+  - id: A
+    provider: openai
+    model: mixed
+  - id: B
+    provider: openai
+    model: mixed
+variants:
+  models:
+    - gpt-4o-mini
+    - gpt-5-nano
+    - gpt-5-mini
+    - gpt-5
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+run:
+  seed_base: 42
+  matches_planned: 230
+  matches_completed: 185
+  concurrency: 10
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+notes: Results reflect recordings present in this repo; full narrative lives in logs/.

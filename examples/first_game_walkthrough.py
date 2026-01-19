@@ -7,11 +7,15 @@ This example shows how to:
 3) Record the match and replay it for debugging
 """
 
+# DOCS_SNIPPET_START
+
 import json
 from pathlib import Path
+from typing import Any, Dict, List
 
 from agentdeck import (
     ActionOnlyController,
+    ActionResult,
     AgentDeck,
     GameStatus,
     MatchNarrator,
@@ -22,45 +26,78 @@ from agentdeck import (
     TurnBasedGame,
 )
 
-
 class TinyBattleGame(TurnBasedGame):
     """Simple duel: ATTACK deals 1 damage, DEFEND heals 1 (max 3 HP)."""
 
     MAX_HEALTH = 3
+    MAX_TURNS = 12
 
-    def setup(self, players):
-        return {"health": {player: self.MAX_HEALTH for player in players}, "_turn_count": 1}
-
-    def get_view(self, state, player):
-        opponent = next(name for name in state["health"] if name != player)
+    @property
+    def instructions(self) -> str:
         return (
-            f"Your HP: {state['health'][player]} | "
-            f"Opponent HP: {state['health'][opponent]}\n"
-            "Choose ATTACK (deal 1 damage) or DEFEND (recover 1 HP)."
+            "Tiny Battle Game\n\n"
+            "Actions:\n"
+            "- ATTACK: deal 1 damage to the opponent\n"
+            "- DEFEND: recover 1 HP (max 3)\n\n"
+            "Win by reducing the opponent to 0 HP."
         )
 
-    def update(self, state, player, action, *, rng, match_context):
-        action = (action or "").strip().upper()
+    @property
+    def allowed_actions(self) -> List[str]:
+        return ["ATTACK", "DEFEND"]
+
+    @property
+    def default_handshake_template(self) -> str:
+        return (
+            "{game_instructions}\n\n"
+            "Reply with 'OK' when you understand and are ready to begin.\n\n"
+            "{handshake_controller_format}"
+        )
+
+    def setup(self, players: List[str], seed: int) -> Dict[str, Any]:
+        return {"health": {player: self.MAX_HEALTH for player in players}, "_turn_count": 1}
+
+    def get_view(self, state: Dict[str, Any], player: str) -> Dict[str, Any]:
         opponent = next(name for name in state["health"] if name != player)
+        return {
+            "turn": state.get("_turn_count", 1),
+            "player": player,
+            "opponent": opponent,
+            "health": {
+                player: state["health"][player],
+                opponent: state["health"][opponent],
+            },
+            "prompt": "Choose ATTACK (deal 1 damage) or DEFEND (recover 1 HP).",
+        }
 
-        if action not in {"ATTACK", "DEFEND"}:
-            raise ValueError(f"Invalid action '{action}'. Choose ATTACK or DEFEND.")
+    def update(
+        self,
+        state: Dict[str, Any],
+        player: str,
+        action: ActionResult,
+        *,
+        rng,
+    ) -> Dict[str, Any]:
+        opponent = next(name for name in state["health"] if name != player)
+        action_token = (action.action or "").strip().upper()
 
-        if action == "ATTACK":
+        if action_token not in self.allowed_actions:
+            raise ValueError(f"Invalid action '{action_token}'. Choose ATTACK or DEFEND.")
+
+        if action_token == "ATTACK":
             state["health"][opponent] -= 1
         else:
             state["health"][player] = min(self.MAX_HEALTH, state["health"][player] + 1)
 
-        state["_turn_count"] = state.get("_turn_count", 0) + 1
         return state
 
-    def status(self, state):
+    def status(self, state: Dict[str, Any]) -> GameStatus:
         alive = [player for player, hp in state["health"].items() if hp > 0]
         if len(alive) == 1:
             return GameStatus(is_over=True, winner=alive[0])
         if not alive:
             return GameStatus(is_over=True, winner=None)
-        if state.get("_turn_count", 0) >= 12:
+        if state.get("_turn_count", 0) > self.MAX_TURNS:
             return GameStatus(is_over=True, winner=None)
         return GameStatus(is_over=False)
 
@@ -99,3 +136,5 @@ def run_and_replay():
 
 if __name__ == "__main__":
     run_and_replay()
+
+# DOCS_SNIPPET_END

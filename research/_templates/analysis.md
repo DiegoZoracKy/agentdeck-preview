@@ -1,0 +1,13 @@
+# Analysis
+
+## Key Findings
+- ...
+
+## Statistical Summary
+- ...
+
+## Limitations
+- ...
+
+## Next Steps
+- ...

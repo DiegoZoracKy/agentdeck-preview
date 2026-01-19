@@ -867,8 +867,7 @@ def test_monitor_exception_isolation():
 - [SPEC-PARALLEL.md](./SPEC-PARALLEL.md) v0.1.0 (Parallel execution semantics, worker lifecycle, event replay)
 - [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) (Event types, EventContext structure, emission boundaries)
 - [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) (Facade contract, spectator attachment scopes)
-- [AGENTS.md](./AGENTS.md) §2.1 (Separation of concerns), §2.2 (Simplicity)
-- [SPEC.md](./SPEC.md) §1 (Research-first design), §2.4 (Observability)
+- [SPEC.md](./SPEC.md) §1 (Research-first design), §2.4 (Observability), §3.1 (Simplicity), §3.2 (Separation of concerns)
 
 ### Implementation References (Planned)
 - `src/agentdeck/monitors/__init__.py`

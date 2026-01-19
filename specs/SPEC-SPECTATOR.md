@@ -13,7 +13,7 @@
 - Specify scope semantics (session vs execution), context access patterns, and error handling for production analytics.
 
 ## 2. Scope & Philosophy Alignment
-- Upholds `AGENTS.md` §2.1 separation: spectators observe, never mutate. Framework owns execution, spectators own analysis.
+- Upholds `SPEC.md` §3.2 separation: spectators observe, never mutate. Framework owns execution, spectators own analysis.
 - Reinforces `SPEC-OBSERVABILITY.md`: spectators consume Event objects with EventContext envelopes for consistent metadata access.
 - Aligns with `SPEC.md` §1.2: enable custom spectators in <20 lines while scaling to production dashboards and analytics pipelines.
 - **Clean slate design**: v1.0.0 assumes modern event system (SPEC-OBSERVABILITY §3) with three-phase player lifecycle—no legacy event formats, no backward compatibility shims.
@@ -810,7 +810,7 @@ def test_logger_writes_to_core_streams():
 
 ### Specifications
 - [SPEC.md](./SPEC.md) §1.2 (Ease of use), §2.4 (Observability)
-- [AGENTS.md](./AGENTS.md) §2.1 (Separation of concerns: observers never mutate)
+- [SPEC.md](./SPEC.md) §3.2 (Separation of concerns: observers never mutate)
 - [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) v1.0.0 (Event types, EventContext structure, player lifecycle events §3.1.1)
 - [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) v0.3.0 (Spectator attachment scopes, session vs execution)
 - [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.3.0 (Event emission timing, match orchestration)

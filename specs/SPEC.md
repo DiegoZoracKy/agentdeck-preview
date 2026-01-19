@@ -286,26 +286,23 @@ agentdeck/
 │       ├── spectators/                # Stats tracker, logger
 │       └── research/                  # Analysis utilities
 ├── tests/                             # Pytest suite
-└── docs/
-    └── specs/                         # Component specifications
-        ├── SPEC.md                    # This file (navigation hub)
-        ├── SPEC-AGENTDECK.md
-        ├── SPEC-CONSOLE.md
-        ├── SPEC-GAME.md
-        ├── SPEC-PLAYER.md
-        ├── SPEC-CONTROLLER.md
-        ├── SPEC-RENDERER.md
-        ├── SPEC-SPECTATOR.md
-        ├── SPEC-RECORDER.md
-        ├── SPEC-REPLAY.md
-        ├── SPEC-PROMPT-BUILDER.md
-        ├── SPEC-GAME-MECHANIC-TURN-BASED.md
-        ├── SPEC-PRICING.md
-        ├── SPEC-OBSERVABILITY.md
-        ├── SPEC-LLM.md
-        ├── SPEC-RESEARCH.md
-        └── archive/
-            └── SPEC-FULL-v1.md        # Archived full spec
+└── specs/                             # Component specifications
+    ├── SPEC.md                        # This file (navigation hub)
+    ├── SPEC-AGENTDECK.md
+    ├── SPEC-CONSOLE.md
+    ├── SPEC-GAME.md
+    ├── SPEC-PLAYER.md
+    ├── SPEC-CONTROLLER.md
+    ├── SPEC-RENDERER.md
+    ├── SPEC-SPECTATOR.md
+    ├── SPEC-RECORDER.md
+    ├── SPEC-REPLAY.md
+    ├── SPEC-PROMPT-BUILDER.md
+    ├── SPEC-GAME-MECHANIC-TURN-BASED.md
+    ├── SPEC-PRICING.md
+    ├── SPEC-OBSERVABILITY.md
+    ├── SPEC-LLM.md
+    └── SPEC-RESEARCH.md
 ```
 
 ---
@@ -315,7 +312,7 @@ agentdeck/
 For detailed authoring guidelines, design patterns, and architectural decisions, see:
 - [GUIDELINES.md](GUIDELINES.md) - Spec authoring best practices
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guide, design principles, and workflow
-- [RESEARCH_WORKFLOW.md](../RESEARCH_WORKFLOW.md) - Research experiment patterns
+- [research/README.md](../research/README.md) - Research experiment patterns
 
 ---
 
@@ -361,25 +358,24 @@ from agentdeck.research import (
 
 ### v2.0 (2025-01-27) - Lean Navigation
 - **Breaking Change**: Restructured as navigation hub to component specs
-- Archived detailed content to `archive/SPEC-FULL-v1.md`
+- Archived detailed content outside this repo
 - Added component specification table with versions and status
 - Added quick start example and file structure
 - Reduced from 1360 lines to ~250 lines (navigation-only)
 - **Rationale**: Component specs ([SPEC-GAME.md](SPEC-GAME.md), [SPEC-PLAYER.md](SPEC-PLAYER.md), etc.) are source of truth. This document now provides high-level orientation and navigation, preventing sync issues.
 
 ### v1.0 (2025-01-24) - Full Specification
-- Comprehensive implementation specification (archived)
+- Comprehensive implementation specification (archived outside this repo)
 - Detailed component contracts, data flows, and examples
-- See `archive/SPEC-FULL-v1.md` for historical reference
 
 ---
 
 ## 10. References
 
 ### External Documentation
-- [README.md](../../README.md) - Project overview and getting started
-- [Contributing Guide](../../CONTRIBUTING.md) - Development workflow
-- [API Reference](../../docs/api/) - Generated API documentation
+- [README.md](../README.md) - Project overview and getting started
+- [Contributing Guide](../CONTRIBUTING.md) - Development workflow
+- API Reference (planned)
 
 ### Related Specifications
 - All component specs linked in Section 4
@@ -388,4 +384,4 @@ from agentdeck.research import (
 
 ---
 
-**Note**: This is the lean navigation version (v2.0). For the full implementation specification from v1.0, see [archive/SPEC-FULL-v1.md](archive/SPEC-FULL-v1.md).
+**Note**: This is the lean navigation version (v2.0). The v1.0 full specification is archived outside this repo.

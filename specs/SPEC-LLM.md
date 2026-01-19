@@ -13,7 +13,7 @@
 - Provide extension hooks for new providers while keeping player/prompt/controller contracts consistent.
 
 ## 2. Scope & Philosophy Alignment
-- Upholds `AGENTS.md` §2.1 separation: LLM players handle API transport; console governs lifecycle; controllers/renderer stay provider-agnostic.
+- Upholds `SPEC.md` §3.2 separation: LLM players handle API transport; console governs lifecycle; controllers/renderer stay provider-agnostic.
 - Reinforces `SPEC.md` §2.4 reproducibility by capturing tokens, costs, latency, retries, and provider identifiers.
 - **Clean slate design**: v1.0.0 assumes modern three-phase lifecycle (handshake → turn → conclusion) with prompt metadata capture—no legacy handshake policy system, no backward compatibility shims.
 - **Provider transparency**: All LLM calls (handshake, turn, conclusion) MUST capture complete metadata for cost accounting, fairness analysis, and reproducibility studies.
@@ -460,7 +460,7 @@ def test_provider_constant_defined():
 
 ### Specifications
 - [SPEC.md](./SPEC.md) §2.4 (Reproducibility via token/cost/retry metadata capture)
-- [AGENTS.md](./AGENTS.md) §2.1 (Separation of concerns: LLM transport vs prompt composition vs parsing)
+- [SPEC.md](./SPEC.md) §3.2 (Separation of concerns: LLM transport vs prompt composition vs parsing)
 - [SPEC-PLAYER.md](./SPEC-PLAYER.md) v1.0.0 (Three-phase lifecycle: handshake → turn → conclusion)
 - [SPEC-CONTROLLER.md](./SPEC-CONTROLLER.md) v1.0.0 (Controller parsing post-LLM, provider-agnostic validation)
 - [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.3.0 (Console orchestration, handshake enforcement)

@@ -3,7 +3,7 @@
 > Status: Final v1.0.0  
 > Last Updated: 2025-01-22  
 > Purpose: Align specification writing with AgentDeck product & engineering philosophy  
-> References: [`SPEC.md`](../../SPEC.md), [`AGENTS.md`](../../AGENTS.md), [`specs/_template.md`](./_template.md)
+> References: [`SPEC.md`](./SPEC.md), [`CONTRIBUTING.md`](../CONTRIBUTING.md), [`specs/_template.md`](./_template.md)
 
 ---
 
@@ -11,10 +11,10 @@
 
 | Principle | Source | Application in Specs |
 |-----------|--------|----------------------|
-| **Simplicity is sacred** | `AGENTS.md` §2.2 | Specs should describe the simplest solution that meets the user need. Avoid enumerating optional bells & whistles unless they are product-backed requirements. |
-| **Single responsibility** | `AGENTS.md` §2.1 | Each spec must lock in *one* well-defined component responsibility. If the component does more, split the spec. |
-| **Separation of concerns** | `AGENTS.md` §2.1 | Capture clear contracts between components. Specs should highlight boundaries, not implementation tricks. |
-| **Compose, don't integrate** | `AGENTS.md` §2.1 | Document how components plug together (inputs/outputs). Specs are the wiring diagrams for modularity. |
+| **Simplicity is sacred** | `SPEC.md` §3.1 | Specs should describe the simplest solution that meets the user need. Avoid enumerating optional bells & whistles unless they are product-backed requirements. |
+| **Single responsibility** | `SPEC.md` §3.2 | Each spec must lock in *one* well-defined component responsibility. If the component does more, split the spec. |
+| **Separation of concerns** | `SPEC.md` §3.2 | Capture clear contracts between components. Specs should highlight boundaries, not implementation tricks. |
+| **Compose, don't integrate** | `SPEC.md` §3.2 | Document how components plug together (inputs/outputs). Specs are the wiring diagrams for modularity. |
 | **Reproducibility & determinism** | `SPEC.md` §2.4 | Whenever randomness or stateful behavior appears, explicitly state determinism expectations & seed flow. |
 | **Research-first framing** | `SPEC.md` §1 | Specs should speak in terms of researcher value and workflows. Start from the user story, then drill into engineering detail. |
 
@@ -70,7 +70,7 @@ AgentDeck is a research platform for studying AI behavior. Specs must support:
 
 8. **Document error handling**  
    - Explain both the user-facing error (what they see) and internal logging/metrics implications.  
-   - Tie back to “Fail noisily & early” (AGENTS.md).
+   - Tie back to “Fail noisily & early” as a guiding principle.
 
 9. **Provide runnable examples**  
    - Examples should compile/run with the current codebase.  
@@ -207,7 +207,7 @@ Before marking a spec "Final", ensure:
 - [ ] **Testing strategy**: Maps directly to invariants at behavioral level (not specific file names unless they exist).
 - [ ] **Design rationale**: Records key decisions and alternatives.
 - [ ] **Open questions**: Captured (if any) with TODOs or future spec references.
-- [ ] **Cross-links**: References relevant philosophy sections (`SPEC.md`, `AGENTS.md`, other specs).
+- [ ] **Cross-links**: References relevant philosophy sections (`SPEC.md`, `CONTRIBUTING.md`, other specs).
 - [ ] **LLM coverage** (if applicable): Player pipeline specs address model integration, cost tracking, retries, metadata.
 
 **Abstraction Level** (§2a):
@@ -236,9 +236,9 @@ Before marking a spec "Final", ensure:
 
 ### 4.2 Cross-Referencing Standard
 - **Other specs**: `SPEC-CONSOLE §4.2` (spec name, section number)
-- **Source files**: `[src/agentdeck/core/console.py:142](../../src/agentdeck/core/console.py)` (markdown link)
-- **Examples**: `[examples/games/auction.py](../../examples/games/auction.py)` (markdown link)
-- **Philosophy docs**: `` `SPEC.md` §2.4`` or `` `AGENTS.md` §2.1`` (inline code with section)
+- **Source files**: `[src/agentdeck/core/console.py:142](../src/agentdeck/core/console.py)` (markdown link)
+- **Examples**: `[examples/games/auction.py](../examples/games/auction.py)` (markdown link)
+- **Philosophy docs**: `` `SPEC.md` §2.4`` or `` `SPEC.md` §3.2`` (inline code with section)
 
 ### 4.3 Voice & Tense
 - **Active voice**: "The Console emits events" (not "Events are emitted")

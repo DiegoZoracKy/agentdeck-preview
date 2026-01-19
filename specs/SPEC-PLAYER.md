@@ -15,7 +15,7 @@
 - Provide a configurable structure so researchers can swap templates, controllers, and renderers without touching console flow.
 
 ## 2. Scope & Philosophy Alignment
-- Upholds `AGENTS.md` §2.1 composition: console orchestrates, games own rules, players own LLM conversations.
+- Upholds `SPEC.md` §3.2 separation: console orchestrates, games own rules, players own LLM conversations.
 - Supports `SPEC.md` §2.4 reproducibility by capturing prompt blocks, responses, usage info, and lifecycle events.
 - Lifecycle follows the consensus handshake-first design; handshake is always mandatory (no policy configuration).
 - **Clean slate design**: v1.0.0 contract assumes modern three-phase lifecycle with prompt metadata capture—no legacy handshake policy system, no backward compatibility shims.
@@ -403,7 +403,7 @@ def test_conversation_reset():
 
 ### Specifications
 - [SPEC.md](./SPEC.md) §2.4 (Reproducibility requirements)
-- [AGENTS.md](./AGENTS.md) §2.1 (Composition and separation of concerns)
+- [SPEC.md](./SPEC.md) §3.2 (Composition and separation of concerns)
 - [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.3.0 (Handshake orchestration H1-H5)
 - [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) §3.1.1 (Player lifecycle events)
 - [SPEC-RECORDER.md](./SPEC-RECORDER.md) v1.3.0 §6.7 (Prompt payload capture PM1-PM6)

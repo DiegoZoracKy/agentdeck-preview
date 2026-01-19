@@ -4,7 +4,7 @@ This guide helps contributors set up their local development environment for Age
 
 ## Prerequisites
 
-- Python 3.8+ (3.11 recommended)
+- Python 3.9+ (3.11 recommended)
 - Git
 - Virtual environment tool (venv, conda, etc.)
 
@@ -12,8 +12,8 @@ This guide helps contributors set up their local development environment for Age
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/agentdeck/agentdeck.git
-cd agentdeck
+git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
+cd agentdeck-preview
 
 # 2. Create and activate virtual environment
 python -m venv venv
@@ -90,9 +90,6 @@ black --check src/ tests/
 ```bash
 # Lint source code
 pylint src/agentdeck
-
-# Lint with exit code 0 (for CI)
-pylint src/agentdeck --exit-zero
 ```
 
 ### Mypy (Type Checker)
@@ -128,7 +125,7 @@ pytest -k "test_handshake"
 
 Our GitHub Actions CI runs:
 
-1. **Tests** (Python 3.8, 3.9, 3.10, 3.11)
+1. **Tests** (Python 3.9, 3.10, 3.11)
    - Full test suite with coverage
    - Coverage uploaded to Codecov
 
@@ -210,7 +207,6 @@ pip install -e ".[dev]"
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
 - [ROADMAP.md](../ROADMAP.md) - Project roadmap
 - [specs/SPEC.md](../specs/SPEC.md) - Specification hub
-- [RELEASE_READINESS_ASSESSMENT.md](../RELEASE_READINESS_ASSESSMENT.md) - Release status
 
 ## Getting Help
 
