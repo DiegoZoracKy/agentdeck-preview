@@ -1,6 +1,6 @@
 # AgentDeck Roadmap (Consensus + Execution Log)
 
-Last updated: 2026-01-19T18:23:41Z
+Last updated: 2026-01-19T19:28:17Z
 
 > Purpose: shared context for release readiness and research standardization.
 > This file records decisions, execution status, and timestamps.
@@ -92,14 +92,14 @@ Phase 3: Research Standardization
   - research/README.md updated and research/INDEX.md generated.
 
 Phase 4: Release Readiness
-- Status: In Progress (release notes + tagging remaining)
+- Status: Complete
 - Start: 2026-01-19T15:13:35Z
-- End: TBD
+- End: 2026-01-19T19:28:17Z
 - Checklist:
   - Pytest passes with coverage (75.21%).
   - Internal doc links verified (markdown link check).
   - Smoke examples (walkthrough, mock_demo) run cleanly.
-  - Release notes drafted in CHANGELOG.md; tag pending.
+  - Release notes drafted in CHANGELOG.md; tag created.
 
 ## v0.1.0 Release Criteria (Draft)
 - [x] `PYTHONPATH=src python examples/first_game_walkthrough.py` exits 0
