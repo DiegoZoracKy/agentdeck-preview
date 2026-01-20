@@ -342,6 +342,6 @@ export VERTEX_LOCATION="us-central1"
 
 ## Questions?
 
-- GitHub Issues: https://github.com/DiegoZoracKy/agentdeck-preview/issues
+- GitHub Issues: https://github.com/DiegoZoracKy/agentdeck/issues
 - Documentation: See `docs/` directory
 - Examples: This directory (`examples/`)

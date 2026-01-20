@@ -3,6 +3,9 @@
 This directory hosts standardized, objective experiment results for AgentDeck.
 Each experiment follows the Experiment Package layout defined in `SCHEMA.md`.
 
+Note: The current experiments are reference examples from AgentDeck development.
+Use `_templates/` to start new experiments for your own work.
+
 ## Start Here
 - `SCHEMA.md` - manifest/results schema and required fields
 - `INDEX.md` - registry of experiments with status and topline results
@@ -44,6 +47,28 @@ python scripts/research_export.py \
 5) Update the index:
 ```
 python scripts/research_index.py
+```
+
+## Create Package From Session
+
+If you already have a completed session under `agentdeck_runs/`, promote it to a
+research package in one step:
+```
+python scripts/research_package.py \
+  --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
+  --question "Your research question here"
+```
+
+## Validation
+
+Validate manifests and the index before committing research changes:
+```
+python scripts/research_validate.py --research-dir research
+```
+
+To regenerate the index if out of date:
+```
+python scripts/research_validate.py --research-dir research --write-index
 ```
 
 ## Recordings Policy

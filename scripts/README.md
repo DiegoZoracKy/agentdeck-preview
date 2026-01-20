@@ -2,6 +2,39 @@
 
 Utility scripts for validation, testing, and experiments.
 
+## Research Validation
+
+**Script**: `research_validate.py`
+
+Validates research manifests and checks that `research/INDEX.md` is up to date.
+
+### Usage:
+
+```bash
+python scripts/research_validate.py --research-dir research
+```
+
+Regenerate the index if needed:
+
+```bash
+python scripts/research_validate.py --research-dir research --write-index
+```
+
+## Research Packager
+
+**Script**: `research_package.py`
+
+Promotes a completed session in `agentdeck_runs/` into a standardized research
+package under `research/`.
+
+### Usage:
+
+```bash
+python scripts/research_package.py \
+  --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
+  --question "Your research question here"
+```
+
 ## Schema v1.3.0 Validation
 
 **Script**: `validate_schema_v1_3.py`

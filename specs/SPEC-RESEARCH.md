@@ -1,9 +1,9 @@
 # SPEC-RESEARCH: Analysis & Statistical Testing Contract
 
-> Status: Draft v1.1.0
+> Status: Final v1.1.0
 > Version: 1.1.0
-> Last Updated: 2025-11-01
-> Implementation: 🟡 In Progress (Phase 2 + Post-Hoc Analysis)
+> Last Updated: 2026-01-20
+> Implementation: ✅ Complete (I^2 heterogeneity currently reported as 0.0)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Research engineers, data scientists, AI practitioners
 
@@ -17,7 +17,7 @@
 - Supports `SPEC.md` §1.1 success criteria (built-in statistical analysis tools).
 - Grounded in `SPEC.md` §2.4: data-driven iteration via comprehensive metrics and reproducible benchmarks.
 - Maintains separation of concerns: research utilities consume `MatchResults` and recorder outputs, never influence live execution.
-- **Clean slate design**: v1.0.0 assumes modern recorder schema (SPEC-RECORDER v1.0.0) with complete metadata capture—no legacy format compatibility, no backward compatibility shims.
+- **Clean slate design**: v1.0.0 assumes modern recorder schema (SPEC-RECORDER v1.3.0) with complete metadata capture—no legacy format compatibility, no backward compatibility shims.
 - **Statistical transparency**: All comparisons MUST report p-values, confidence intervals, test selection, and effect sizes for reproducibility.
 - Non-goals: match execution (`SPEC-CONSOLE.md`), data recording (`SPEC-RECORDER.md`), live visualization frameworks.
 
@@ -27,7 +27,7 @@
 - **Progressive testing**: Support early stopping when statistical significance reached (minimize matches while maintaining validity).
 - **Statistical testing**: Select appropriate tests (t-test for normal, Mann-Whitney for non-parametric, bootstrap for small samples) and report p-values, effect sizes, confidence intervals.
 - **Benchmark management**: Define, version, and execute benchmark suites (collections of games/configurations) for reproducible evaluation.
-- **Dependency signaling**: Fail fast with informative errors when optional libraries (`scipy`, `statsmodels`) are missing.
+- **Dependency signaling**: Raise informative errors when optional libraries are required; fall back to conservative defaults where feasible.
 - **[v1.1.0] Post-hoc analysis**: Provide standalone analysis tools that read recordings from disk and compute comprehensive statistics without re-execution.
 - **[v1.1.0] Cross-player comparison**: Automatically compute pairwise comparisons for 2-player games (direct) and 3+ player games (matrix).
 - **[v1.1.0] Spectator conveniences**: Provide thin spectator wrappers that auto-run post-hoc analysis at batch end for zero-config UX.
@@ -35,9 +35,9 @@
 ## 4. Public API
 
 ### ResultsAnalyzer
-- `ResultsAnalyzer(results: Union[MatchResults, List[MatchResult]])`
+- `ResultsAnalyzer(results: MatchResults)`
   - Methods: `get_win_rates()`, `get_summary_stats()`, `print_detailed_report()`, `export_csv(path)`
-  - Guarantees: MUST accept `MatchResults` or plain match lists, MUST NOT mutate input data
+  - Guarantees: MUST accept `MatchResults` and MUST NOT mutate input data
 
 ### Model Comparison
 - `compare_models(model_a, model_b, game, matches=100, seed=None, *, test="auto", confidence=0.95, spectators=None, parallel=False) -> ComparisonResult`
@@ -49,6 +49,7 @@
     - MUST return ComparisonResult with metadata (avg_turns, costs, decision_times)
     - MUST use seed for reproducibility (derives per-match seeds deterministically)
     - MAY accept optional spectators list; MUST pass through to `AgentDeck` so observers receive lifecycle events without affecting gameplay
+    - `parallel` is reserved for future use and currently ignored
 
 - `compare_models_progressive(model_a, model_b, game, min_matches=30, max_matches=500, alpha=0.05, check_interval=10, seed=None, *, spectators=None) -> ProgressiveResult`
   - Progressive comparison with early stopping
@@ -73,13 +74,17 @@
   - Requires: `scipy` or `statsmodels`
   - Guarantees: MUST select appropriate test based on sample size/normality, return p_value, statistic, confidence_interval, test_used
 
+- `statistical_significance(successes: int, trials: int, expected_probability: float = 0.5) -> float`
+  - Exact binomial test for p-values
+  - Requires: `scipy`
+
 - `calculate_confidence_interval(successes, trials, confidence_level=0.95) -> Tuple[float, float]`
   - Binomial proportion confidence interval (Wilson score method)
   - Requires: `scipy` or `statsmodels`
 
 - `calculate_effect_size(observed_proportion, expected_proportion, sample_size) -> float`
   - Cohen's h (arcsine transformation) for proportion differences
-  - Requires: `scipy` or `statsmodels`
+  - Requires: None (uses standard math)
 
 ### Metrics Aggregation
 - `aggregate_metrics(matches: List[MatchResult], metric: str = "winner") -> Dict[str, Any]`
@@ -95,11 +100,11 @@
 - `StatisticalAnalysis.from_session(session_id: str, recordings_dir: Path = Path("agentdeck_runs")) -> StatisticalAnalysis`
   - Load and analyze recorded session from disk
   - Guarantees:
-    - MUST read batch and match recordings from `recordings_dir/session_id/`
+    - MUST read batch and match recordings from `recordings_dir/session_id/records/`
     - MUST validate recordings exist and are complete before computing
     - MUST compute win rates, confidence intervals, significance tests, effect sizes
     - MUST automatically compute cross-player comparisons (2-player direct, 3+ pairwise matrix)
-    - MUST handle missing scipy/statsmodels gracefully (fall back to normal approximation with warning)
+    - MUST handle missing scipy/statsmodels gracefully (fall back to conservative defaults: CI +/- 0.1, p-values 1.0)
 
 - Methods:
   - `compute_win_rates() -> Dict[str, float]`
@@ -284,7 +289,7 @@ class MetaAnalysisResult:
     aggregate_win_rates: Dict[str, float]
     aggregate_p_values: Dict[str, float]  # Combined using Fisher's method
     aggregate_effect_sizes: Dict[str, float]
-    heterogeneity: float  # I² statistic for consistency across sessions
+    heterogeneity: float  # I^2 statistic (currently reported as 0.0; not computed yet)
 ```
 
 ### [v1.1.0] ComparisonTable
@@ -300,8 +305,8 @@ class ComparisonTable:
 ## 6. Invariants & Guarantees
 
 ### 6.1 Data Integrity (DI)
-1. **DI1**: Utilities MUST accept `MatchResults` or plain match lists recorded via AgentDeck. Utilities MUST NOT mutate input data (read-only).
-2. **DI2**: CSV export MUST preserve winner, turn count, duration, seed, model identifiers per match for external analysis.
+1. **DI1**: `ResultsAnalyzer` MUST accept `MatchResults` and MUST NOT mutate input data. Helpers that accept match lists (e.g., `aggregate_metrics`) MUST document their element types and avoid mutation.
+2. **DI2**: CSV export MUST preserve winner, turn count, duration, and seed per match for external analysis.
 3. **DI3**: Comparison functions MUST track total matches and elapsed time for reporting transparency.
 
 ### 6.2 Statistical Rigor (SR)
@@ -327,13 +332,13 @@ class ComparisonTable:
 17. **MA3**: MUST handle missing metrics gracefully (e.g., costs unavailable for scripted players, report None or exclude).
 
 ### 6.6 Dependency Handling (DH)
-18. **DH1**: Statistical helpers (confidence intervals, effect sizes) MUST raise `ImportError` with install guidance when `scipy`/`statsmodels` missing.
-19. **DH2**: `compare_models` MUST fall back gracefully when statistical packages unavailable (store `None` for CI/effect size, log warning).
-20. **DH3**: Optional dependencies MUST be documented (`pip install agentdeck[research]`). Runtime checks enforce availability.
+18. **DH1**: Statistical helpers that require scientific libraries (`statistical_test`, `statistical_significance`, `calculate_confidence_interval`) MUST raise `ImportError` with install guidance when `scipy`/`statsmodels` are missing.
+19. **DH2**: `compare_models` MUST fall back gracefully when scientific libraries are unavailable (p_value=1.0, statistic=0.0, test_used="none", confidence_interval=(0.0, 0.0), effect_size=None).
+20. **DH3**: Optional dependencies MUST be documented (`pip install agentdeck-ai[research]`). Runtime checks enforce availability.
 
 ### 6.7 Experiment Execution (EE)
-21. **EE1**: `compare_models` MUST warn users about stateful players (docstring guidance) and rely on provided instances (player management responsibility).
-22. **EE2**: Utilities MUST clean up AgentDeck sessions (use context manager or explicit close) to avoid lingering resources.
+21. **EE1**: `compare_models` and `compare_models_progressive` reuse provided player instances across matches; callers are responsible for player state management between matches.
+22. **EE2**: Utilities rely on `deck.play()` to complete the session lifecycle; no explicit close is required.
 
 ### [v1.1.0] 6.8 Cross-Player Comparison (CPC)
 23. **CPC1**: For 2-player games, `StatisticalAnalysis` MUST automatically compute head-to-head comparison (win rates, CI, p-value, effect size).
@@ -343,9 +348,9 @@ class ComparisonTable:
 27. **CPC5**: Cross-player results MUST include effect sizes for all significant comparisons.
 
 ### [v1.1.0] 6.9 Post-Hoc Analysis (PH)
-28. **PH1**: Post-hoc analysis tools MUST read recordings from `agentdeck_runs/session_id/` directory structure.
+28. **PH1**: Post-hoc analysis tools MUST read recordings from `agentdeck_runs/session_id/records/` directory structure.
 29. **PH2**: Tools MUST validate that both batch recording and all match recordings exist before computing statistics.
-30. **PH3**: Tools MUST handle recording schema versions gracefully (support SPEC-RECORDER v1.0.0+).
+30. **PH3**: Tools MUST handle recording schema versions gracefully (support SPEC-RECORDER v1.0.0+ payloads; unified `records/` layout required).
 31. **PH4**: Spectator wrappers MUST NOT duplicate analysis logic—they MUST import and call standalone classes.
 32. **PH5**: Analysis failures (missing recordings, corrupt files) MUST raise informative errors with guidance for resolution.
 
@@ -406,7 +411,7 @@ class ComparisonTable:
 6. Researcher views comparison via `print_comparison_table()` or exports
 
 ## 8. Error Handling & Edge Cases
-- MUST raise `ImportError` for missing scientific libraries, informing user how to install extras (`pip install agentdeck[research]`).
+- MUST raise `ImportError` for missing scientific libraries, informing user how to install extras (`pip install agentdeck-ai[research]`).
 - `export_csv` MUST handle file I/O errors (propagate Python exceptions) so callers can react (e.g., display message).
 - `compare_models` SHOULD guard against dividing by zero (no matches) by returning neutral stats (0.5 win rates, p-value 1.0).
 - `progressive_comparison` MUST cap matches at `max_matches` even if significance not reached (budget enforcement).
@@ -688,7 +693,7 @@ Concurrency:
 | Dependency handling | DH1-DH3 | Mock `scipy` availability; verify correct errors when missing and accurate stats when present. |
 | Experiment execution | EE1-EE2 | Run small comparisons with seeded AgentDeck; check session cleanup and resource management. |
 | **[v1.1.0] Cross-player comparison** | **CPC1-CPC5** | Test 2-player direct comparison and 3+ player pairwise matrix generation. Verify significance symbols (✅/❌/−). |
-| **[v1.1.0] Post-hoc analysis** | **PH1-PH5** | Test recording loading from agentdeck_runs/, schema validation, error handling for missing/corrupt files. Verify spectator wrappers call standalone classes. |
+| **[v1.1.0] Post-hoc analysis** | **PH1-PH5** | Test recording loading from agentdeck_runs/session_id/records/, schema validation, error handling for missing/corrupt files. Verify spectator wrappers call standalone classes. |
 
 ### Concrete Test Examples
 
@@ -911,6 +916,9 @@ def test_missing_recordings_error():
 - Should benchmarks support **game weights** (some games more important than others)?
 - How to compute weighted aggregate statistics while maintaining statistical rigor?
 
+### Meta-Analysis Metrics
+- Implement I^2 heterogeneity statistic (currently reported as 0.0 placeholder).
+
 ### Visualization Tools
 - What **visualization tools** should we provide (plotting, dashboards, notebooks)?
 - Should we integrate with existing libraries (plotly, matplotlib, streamlit)?
@@ -934,7 +942,7 @@ def test_missing_recordings_error():
 ## 12. Design Rationale
 - **Thin wrappers** around scientific libraries keep maintenance light while giving researchers familiar statistical functions.
 - **AgentDeck integration** ensures comparisons use the same execution pipeline as production experiments.
-- **Optional dependencies** isolate heavy statistical packages from core install unless needed (`pip install agentdeck[research]`).
+- **Optional dependencies** isolate heavy statistical packages from core install unless needed (`pip install agentdeck-ai[research]`).
 - **Progressive testing** can save 50-80% of API budget while maintaining statistical validity.
 - **Console-managed player ordering** (SR3): Research utilities rely on Console's fairness mechanism (Fisher-Yates shuffle per match) rather than manual alternation. This simplifies research code, produces single-batch executions (better performance), and respects game-specific ordering overrides when semantically meaningful.
 - **Versioned benchmarks** enable long-term reproducibility as games and models evolve.
@@ -949,7 +957,7 @@ def test_missing_recordings_error():
 - **Automatic cross-player comparison**: For 2-player games, StatisticalAnalysis automatically computes head-to-head comparison (reduces boilerplate). For 3+ player games, generates pairwise matrix automatically.
 - **Module organization**: Standalone tools live in `research/` (tools), spectators live in `spectators/` (observers). Clean separation of concerns, consistent with existing architecture.
 - **Longitudinal analysis support**: Multi-session comparison (ComparisonAnalysis) enables meta-analysis across experiments conducted over weeks/months.
-- **Graceful degradation**: When scipy unavailable, falls back to normal approximation with clear warnings (maintains functionality without optional deps).
+- **Graceful degradation**: When scipy unavailable, falls back to conservative defaults (CI margin 0.1, p-values 1.0) to maintain functionality without optional deps.
 
 ## 13. References
 
@@ -958,7 +966,8 @@ def test_missing_recordings_error():
 - [SPEC.md](./SPEC.md) §2.4 (Data-driven iteration)
 - [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) v0.3.0 (Match execution, seed handling)
 - [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.3.0 (Match orchestration)
-- [SPEC-RECORDER.md](./SPEC-RECORDER.md) v1.0.0 (Match metadata capture, load_match() utilities)
-- [SPEC-PLAYER.md](./SPEC-PLAYER.md) v1.0.0 (Player contract, three-phase lifecycle)
-- [SPEC-SPECTATOR.md](./SPEC-SPECTATOR.md) v1.0.0 (Observer API for custom analytics during comparison)
+- [SPEC-RECORDER.md](./SPEC-RECORDER.md) v1.3.0 (Match metadata capture, load_match() utilities)
+- [SPEC-PLAYER.md](./SPEC-PLAYER.md) v1.2.0 (Player contract, three-phase lifecycle)
+- [SPEC-SPECTATOR.md](./SPEC-SPECTATOR.md) v1.2.0 (Observer API for custom analytics during comparison)
 - [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) v1.0.0 (Event system for tracking comparison progress)
+- [SPEC-RESEARCH-EXPERIMENT.md](./SPEC-RESEARCH-EXPERIMENT.md) v1.0.0 (Experiment package contracts)

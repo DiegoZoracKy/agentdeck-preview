@@ -5,6 +5,8 @@
 > **Status**: v0.1.0 (Stable) - Production-ready with lifecycle hooks
 > **Test Coverage**: 319 tests, CI gate at 75% coverage
 > **Latest Release**: v0.1.0 with Game lifecycle hooks (SPEC-GAME v0.7.0)
+> **Package**: `agentdeck-ai` on PyPI (import as `agentdeck`)
+> **Disambiguation**: Not affiliated with similarly named Agent Deck, AgentDock, or AgentDesk tools
 
 ---
 
@@ -171,8 +173,8 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
-cd agentdeck-preview
+git clone https://github.com/DiegoZoracKy/agentdeck.git
+cd agentdeck
 pip install -e ".[dev]"
 ```
 

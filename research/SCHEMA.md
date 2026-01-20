@@ -123,3 +123,4 @@ from manifest.yaml files and updated whenever experiments change.
 
 - `scripts/research_export.py` generates results.json/results.csv from recordings.
 - `scripts/research_index.py` generates research/INDEX.md from manifests.
+- `scripts/research_package.py` creates a research package from a session directory.

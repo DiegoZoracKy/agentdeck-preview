@@ -1,8 +1,8 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
-> Status: Draft v1.2.0 (Single Controller)
+> Status: Final v1.2.0 (Single Controller)
 > Version: 1.2.0
-> Last Updated: 2025-11-17
+> Last Updated: 2026-01-20
 > Implementation: ✅ Complete (src/agentdeck/core/base/player.py)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Game authors, LLM player implementers, research engineers

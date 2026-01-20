@@ -221,8 +221,8 @@ Results may not generalize to:
 ## Reproducibility
 
 ```bash
-git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
-cd agentdeck-preview
+git clone https://github.com/DiegoZoracKy/agentdeck.git
+cd agentdeck
 pip install -e .
 export OPENAI_API_KEY=your_key
 

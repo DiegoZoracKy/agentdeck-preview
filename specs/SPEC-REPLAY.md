@@ -1,9 +1,9 @@
 # SPEC-REPLAY: Replay Engine Contract
 
-> Status: Draft v1.1.0
+> Status: Final v1.1.0
 > Version: 1.1.0
-> Last Updated: 2025-11-05
-> Implementation: 🔄 In progress (Recorder schema v1.3 alignment)
+> Last Updated: 2026-01-20
+> Implementation: ✅ Complete (Recorder schema v1.3 alignment)
 > Authors: Codex, Claude (consensus)
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors
 
@@ -15,7 +15,7 @@
 ## 2. Scope & Philosophy Alignment
 - Grounded in `SPEC.md` §2.4: reproducibility requires perfect replay parity for research validity.
 - Upholds `SPEC-OBSERVABILITY.md`: Replay emits same event types with same payloads as live execution for spectator compatibility.
-- Reinforces `AGENTS.md` §2.3: enable data-driven iteration via replay analysis tools that behave identically to live spectators.
+- Reinforces `SPEC.md` §2.4: enable data-driven iteration via replay analysis tools that behave identically to live spectators.
 - **Clean slate design**: v1.1 spec targets SPEC-RECORDER v1.3 format only—no backward compatibility, no legacy shims.
 - **Event parity over inference**: Refuse to synthesize missing data; replay is playback, not re-execution.
 - Non-goals: Recording logic (`SPEC-RECORDER.md`), spectator implementations (`SPEC-SPECTATOR.md`), live execution (`SPEC-CONSOLE.md`).

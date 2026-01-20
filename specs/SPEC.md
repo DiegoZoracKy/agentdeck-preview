@@ -191,7 +191,7 @@ All component specifications follow the lean spec format with numbered invariant
 | [Console](SPEC-CONSOLE.md) | 0.4.0 | Final | Execution engine for session/match lifecycle |
 | [EventBus](SPEC-OBSERVABILITY.md) | 1.1.0 | Final | Event distribution and spectator routing |
 | [Game](SPEC-GAME.md) | 0.5.0 | Final | Game author contract (rules, state, narrative) |
-| [Player](SPEC-PLAYER.md) | 1.1.0 | Draft | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Player](SPEC-PLAYER.md) | 1.1.0 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.1.0 | Final | Handshake & action parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
 | [Spectator](SPEC-SPECTATOR.md) | 1.0.0 | Final | Observation and analysis interface |
@@ -200,8 +200,8 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Recorder](SPEC-RECORDER.md) | 1.3.0 | Draft | Match persistence with enriched prompt payloads |
-| [ReplayEngine](SPEC-REPLAY.md) | 1.1.0 | Draft | Exact replay with enriched event prompt payloads |
+| [Recorder](SPEC-RECORDER.md) | 1.3.0 | Final | Match persistence with enriched prompt payloads |
+| [ReplayEngine](SPEC-REPLAY.md) | 1.1.0 | Final | Exact replay with enriched event prompt payloads |
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Draft | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.0.0 | Draft | Per-match infrastructure context (`runtime`) |
@@ -214,7 +214,9 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Research](SPEC-RESEARCH.md) | 1.1.0 | Draft | Statistical analysis, model comparison, and post-hoc analysis from recordings |
+| [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
+| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.0.0 | Draft | Experiment package, manifest/results/index contracts |
+| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.1.0 | Draft | Session-to-experiment package helper |
 
 ---
 
@@ -302,7 +304,8 @@ agentdeck/
     ├── SPEC-PRICING.md
     ├── SPEC-OBSERVABILITY.md
     ├── SPEC-LLM.md
-    └── SPEC-RESEARCH.md
+    ├── SPEC-RESEARCH.md
+    └── SPEC-RESEARCH-EXPERIMENT.md
 ```
 
 ---

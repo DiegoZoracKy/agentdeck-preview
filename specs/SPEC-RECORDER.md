@@ -1,9 +1,9 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
-> Status: Draft v1.3.0
+> Status: Final v1.3.0
 > Version: 1.3.0
-> Last Updated: 2025-11-05
-> Implementation: 🔄 In progress (schema v1.3 event enrichment)
+> Last Updated: 2026-01-20
+> Implementation: ✅ Complete (schema v1.3 event enrichment)
 > Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers
 
@@ -16,7 +16,7 @@
 - Upholds `SPEC.md` §2.2 composition: Recorder is a plug-in spectator that receives events, never driving execution.
 - Follows `SPEC.md` §2.4 reproducibility mandates: every match captures seed, configuration, environment, and game settings (including `information_level`, `allowed_actions`) for exact replay.
 - Aligns with `SPEC-OBSERVABILITY.md`: Recorder is a session-scoped spectator receiving all events (lifecycle, gameplay, domain).
-- Mirrors `AGENTS.md` §2.2 simplicity: JSON payloads with progressive flushing avoid complex storage backends.
+- Mirrors `SPEC.md` §3.1 simplicity: JSON payloads with progressive flushing avoid complex storage backends.
 - Non-goals: Replay logic (`SPEC-REPLAY.md`), data analysis (`SPEC-RESEARCH.md`), or custom storage backends (future extension).
 
 ## 3. Responsibilities

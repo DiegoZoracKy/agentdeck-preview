@@ -10,22 +10,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+try:
+    from agentdeck.research.provider_utils import provider_from_module as _provider_from_module
+except ImportError:
+    def _provider_from_module(module: str) -> str:
+        module_lower = (module or "").lower()
+        if "openai" in module_lower:
+            return "openai"
+        if "anthropic" in module_lower:
+            return "anthropic"
+        if "google" in module_lower:
+            return "google"
+        if "mock" in module_lower:
+            return "mock"
+        return "unknown"
+
 
 def _iso_timestamp() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-
-
-def _provider_from_module(module: str) -> str:
-    module_lower = (module or "").lower()
-    if "openai" in module_lower:
-        return "openai"
-    if "anthropic" in module_lower:
-        return "anthropic"
-    if "google" in module_lower:
-        return "google"
-    if "mock" in module_lower:
-        return "mock"
-    return "unknown"
 
 
 def _safe_mean(values: List[float]) -> float:

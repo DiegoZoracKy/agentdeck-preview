@@ -1,6 +1,9 @@
 # Research Index
 
-Last updated: 2026-01-19T15:05:38.585171Z
+These entries are reference artifacts from AgentDeck development. Use `research/_templates/`
+for new experiments.
+
+Last updated: 2026-01-20T00:57:38.796142Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
