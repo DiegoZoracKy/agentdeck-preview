@@ -151,7 +151,7 @@ RendererRegistry.register('MyGame', MyRenderer);
 
 - [SPEC-VIEWER.md](../specs/SPEC-VIEWER.md) - Viewer contract
 - [SPEC-RECORDER.md](../specs/SPEC-RECORDER.md) - Record schema
-- [ROADMAP-VIEWER.md](../ROADMAP-VIEWER.md) - Development roadmap
+- [ROADMAP.md](../ROADMAP.md) - Development roadmap
 
 ## License
 

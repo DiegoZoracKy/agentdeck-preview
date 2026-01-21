@@ -9,7 +9,7 @@
   - `viewer/css/base.css` for shell layout and `viewer/css/ffvi.css` for FFVI skin.
 - Renderer now derives max HP from recorded config params when present, falling back to first frame state then default 100.
 - Frame ordering uses `context.turn_index` (alias of `phase_index`) when present, with safe fallbacks.
-- Docs/specs aligned to this structure: `specs/SPEC-VIEWER.md` and `ROADMAP-VIEWER.md`.
+- Docs/specs aligned to this structure: `specs/SPEC-VIEWER.md` and `ROADMAP.md`.
 
 ## What’s intentionally left untouched
 - `turn_index` vs `phase_index` aliasing remains in core (spec + code) for now.

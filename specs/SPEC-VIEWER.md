@@ -287,5 +287,5 @@ document.addEventListener('keydown', (e) => {
 
 - [SPEC-RECORDER.md](SPEC-RECORDER.md) v1.3 - Record schema
 - [SPEC-REPLAY.md](SPEC-REPLAY.md) - Python replay engine
-- [ROADMAP-VIEWER.md](../ROADMAP-VIEWER.md) - Implementation roadmap
+- [ROADMAP.md](../ROADMAP.md) - Implementation roadmap
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Development workflow
