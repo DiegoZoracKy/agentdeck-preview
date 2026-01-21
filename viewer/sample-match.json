@@ -1,0 +1,1731 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_45e6917d",
+  "game": "AuctionGame",
+  "players": [
+    "Bob",
+    "Alice"
+  ],
+  "winner": "Bob",
+  "final_state": {
+    "health": {
+      "Bob": 20,
+      "Alice": 0
+    },
+    "potions": {
+      "Bob": 3,
+      "Alice": 3
+    },
+    "last_action": {
+      "Bob": "ATTACK",
+      "Alice": "ATTACK"
+    },
+    "turn": 10,
+    "_turn_count": 9,
+    "_first_player_idx": 0
+  },
+  "seed": 42,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Bob",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "Bob"
+        },
+        "prompt_text": "You are playing AuctionGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing AuctionGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1768837314.4706206,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": null,
+        "timestamp": 1768837314.4706206,
+        "monotonic_time": 7345.067076025
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Alice",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "Alice"
+        },
+        "prompt_text": "You are playing AuctionGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing AuctionGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with 'OK' if you understand and are ready to begin.\\n\\nReply with 'OK' if you understand and are ready to begin.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1768837314.4720492,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": null,
+        "timestamp": 1768837314.4720492,
+        "monotonic_time": 7345.068504525
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: Bob (index 0)",
+        "level": "info",
+        "log_context": {}
+      },
+      "timestamp": 1768837314.5008469,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": null,
+        "timestamp": 1768837314.5008469,
+        "monotonic_time": 7345.097302826
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Bob",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 100,
+            "Alice": 100
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": null,
+            "Alice": null
+          },
+          "turn": 1,
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 100,
+            "Alice": 80
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": null
+          },
+          "turn": 2,
+          "_turn_count": 1,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Bob\nTurn: 1\n\nHealth:\n  You: 100\n  Alice: 100\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: None\n  Alice: None\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 1\n\nHealth:\n  You: 100\n  Alice: 100\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: None\n  Alice: None\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 243,
+          "raw_response": "ATTACK",
+          "turn_number": 1,
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "Bob",
+            "started_at": 1768837314.504648,
+            "duration": 0.0005273818969726562,
+            "ended_at": 1768837314.5051754,
+            "rng_seed": 1906092833,
+            "rng_label": "turn-1-Bob"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "Bob",
+          "started_at": 1768837314.504648,
+          "duration": 0.0005273818969726562,
+          "ended_at": 1768837314.5051754,
+          "rng_seed": 1906092833,
+          "rng_label": "turn-1-Bob"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Bob\nTurn: 1\n\nHealth:\n  You: 100\n  Alice: 100\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: None\n  Alice: None\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 1\n\nHealth:\n  You: 100\n  Alice: 100\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: None\n  Alice: None\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5063877,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1768837314.5063877,
+        "monotonic_time": 7345.102843827
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Alice",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 100,
+            "Alice": 80
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": null
+          },
+          "turn": 2,
+          "_turn_count": 2,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 80,
+            "Alice": 80
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 3,
+          "_turn_count": 2,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Alice\nTurn: 2\n\nHealth:\n  You: 80\n  Bob: 100\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: None\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 2\n\nHealth:\n  You: 80\n  Bob: 100\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: None\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 240,
+          "raw_response": "ATTACK",
+          "turn_number": 2,
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 2,
+            "turn_index": 1,
+            "player": "Alice",
+            "started_at": 1768837314.515769,
+            "duration": 0.0004508495330810547,
+            "ended_at": 1768837314.5162199,
+            "rng_seed": 1331077789,
+            "rng_label": "turn-2-Alice"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 2,
+          "turn_index": 1,
+          "player": "Alice",
+          "started_at": 1768837314.515769,
+          "duration": 0.0004508495330810547,
+          "ended_at": 1768837314.5162199,
+          "rng_seed": 1331077789,
+          "rng_label": "turn-2-Alice"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "turn_index": 1,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Alice\nTurn: 2\n\nHealth:\n  You: 80\n  Bob: 100\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: None\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 2\n\nHealth:\n  You: 80\n  Bob: 100\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: None\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5173266,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 1,
+        "turn_index": 1,
+        "timestamp": 1768837314.5173266,
+        "monotonic_time": 7345.113782427
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Bob",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 80,
+            "Alice": 80
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 3,
+          "_turn_count": 3,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 80,
+            "Alice": 60
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 4,
+          "_turn_count": 3,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Bob\nTurn: 3\n\nHealth:\n  You: 80\n  Alice: 80\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 3\n\nHealth:\n  You: 80\n  Alice: 80\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 245,
+          "raw_response": "ATTACK",
+          "turn_number": 3,
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 3,
+            "turn_index": 2,
+            "player": "Bob",
+            "started_at": 1768837314.5301812,
+            "duration": 0.00030612945556640625,
+            "ended_at": 1768837314.5304873,
+            "rng_seed": 2951687956,
+            "rng_label": "turn-3-Bob"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 3,
+          "turn_index": 2,
+          "player": "Bob",
+          "started_at": 1768837314.5301812,
+          "duration": 0.00030612945556640625,
+          "ended_at": 1768837314.5304873,
+          "rng_seed": 2951687956,
+          "rng_label": "turn-3-Bob"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 2,
+        "turn_index": 2,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Bob\nTurn: 3\n\nHealth:\n  You: 80\n  Alice: 80\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 3\n\nHealth:\n  You: 80\n  Alice: 80\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5312068,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 2,
+        "turn_index": 2,
+        "timestamp": 1768837314.5312068,
+        "monotonic_time": 7345.127662528
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Alice",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 80,
+            "Alice": 60
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 4,
+          "_turn_count": 4,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 60,
+            "Alice": 60
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 5,
+          "_turn_count": 4,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Alice\nTurn: 4\n\nHealth:\n  You: 60\n  Bob: 80\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 4\n\nHealth:\n  You: 60\n  Bob: 80\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 241,
+          "raw_response": "ATTACK",
+          "turn_number": 4,
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 4,
+            "turn_index": 3,
+            "player": "Alice",
+            "started_at": 1768837314.540838,
+            "duration": 0.0002951622009277344,
+            "ended_at": 1768837314.5411332,
+            "rng_seed": 3722819199,
+            "rng_label": "turn-4-Alice"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 4,
+          "turn_index": 3,
+          "player": "Alice",
+          "started_at": 1768837314.540838,
+          "duration": 0.0002951622009277344,
+          "ended_at": 1768837314.5411332,
+          "rng_seed": 3722819199,
+          "rng_label": "turn-4-Alice"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 3,
+        "turn_index": 3,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Alice\nTurn: 4\n\nHealth:\n  You: 60\n  Bob: 80\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 4\n\nHealth:\n  You: 60\n  Bob: 80\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5418177,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 3,
+        "turn_index": 3,
+        "timestamp": 1768837314.5418177,
+        "monotonic_time": 7345.138273528
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Bob",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 60,
+            "Alice": 60
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 5,
+          "_turn_count": 5,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 60,
+            "Alice": 40
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 6,
+          "_turn_count": 5,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Bob\nTurn: 5\n\nHealth:\n  You: 60\n  Alice: 60\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 5\n\nHealth:\n  You: 60\n  Alice: 60\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 245,
+          "raw_response": "ATTACK",
+          "turn_number": 5,
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 5,
+            "turn_index": 4,
+            "player": "Bob",
+            "started_at": 1768837314.5537503,
+            "duration": 0.0003018379211425781,
+            "ended_at": 1768837314.554052,
+            "rng_seed": 179455741,
+            "rng_label": "turn-5-Bob"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 5,
+          "turn_index": 4,
+          "player": "Bob",
+          "started_at": 1768837314.5537503,
+          "duration": 0.0003018379211425781,
+          "ended_at": 1768837314.554052,
+          "rng_seed": 179455741,
+          "rng_label": "turn-5-Bob"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 4,
+        "turn_index": 4,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Bob\nTurn: 5\n\nHealth:\n  You: 60\n  Alice: 60\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 5\n\nHealth:\n  You: 60\n  Alice: 60\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5547001,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 4,
+        "turn_index": 4,
+        "timestamp": 1768837314.5547001,
+        "monotonic_time": 7345.151155529
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Alice",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 60,
+            "Alice": 40
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 6,
+          "_turn_count": 6,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 40,
+            "Alice": 40
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 7,
+          "_turn_count": 6,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Alice\nTurn: 6\n\nHealth:\n  You: 40\n  Bob: 60\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 6\n\nHealth:\n  You: 40\n  Bob: 60\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 241,
+          "raw_response": "ATTACK",
+          "turn_number": 6,
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 6,
+            "turn_index": 5,
+            "player": "Alice",
+            "started_at": 1768837314.5676215,
+            "duration": 0.0004410743713378906,
+            "ended_at": 1768837314.5680625,
+            "rng_seed": 3136498926,
+            "rng_label": "turn-6-Alice"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 6,
+          "turn_index": 5,
+          "player": "Alice",
+          "started_at": 1768837314.5676215,
+          "duration": 0.0004410743713378906,
+          "ended_at": 1768837314.5680625,
+          "rng_seed": 3136498926,
+          "rng_label": "turn-6-Alice"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 5,
+        "turn_index": 5,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Alice\nTurn: 6\n\nHealth:\n  You: 40\n  Bob: 60\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 6\n\nHealth:\n  You: 40\n  Bob: 60\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5687973,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 5,
+        "turn_index": 5,
+        "timestamp": 1768837314.5687973,
+        "monotonic_time": 7345.16525293
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Bob",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 40,
+            "Alice": 40
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 7,
+          "_turn_count": 7,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 40,
+            "Alice": 20
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 8,
+          "_turn_count": 7,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Bob\nTurn: 7\n\nHealth:\n  You: 40\n  Alice: 40\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 7\n\nHealth:\n  You: 40\n  Alice: 40\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 245,
+          "raw_response": "ATTACK",
+          "turn_number": 7,
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 7,
+            "turn_index": 6,
+            "player": "Bob",
+            "started_at": 1768837314.5829296,
+            "duration": 0.0003464221954345703,
+            "ended_at": 1768837314.583276,
+            "rng_seed": 3508632916,
+            "rng_label": "turn-7-Bob"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 7,
+          "turn_index": 6,
+          "player": "Bob",
+          "started_at": 1768837314.5829296,
+          "duration": 0.0003464221954345703,
+          "ended_at": 1768837314.583276,
+          "rng_seed": 3508632916,
+          "rng_label": "turn-7-Bob"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 6,
+        "turn_index": 6,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Bob\nTurn: 7\n\nHealth:\n  You: 40\n  Alice: 40\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 7\n\nHealth:\n  You: 40\n  Alice: 40\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.5840626,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 6,
+        "turn_index": 6,
+        "timestamp": 1768837314.5840626,
+        "monotonic_time": 7345.18051803
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Alice",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 40,
+            "Alice": 20
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 8,
+          "_turn_count": 8,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 20,
+            "Alice": 20
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 9,
+          "_turn_count": 8,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Alice\nTurn: 8\n\nHealth:\n  You: 20\n  Bob: 40\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 8\n\nHealth:\n  You: 20\n  Bob: 40\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 241,
+          "raw_response": "ATTACK",
+          "turn_number": 8,
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 8,
+            "turn_index": 7,
+            "player": "Alice",
+            "started_at": 1768837314.6009994,
+            "duration": 0.00030994415283203125,
+            "ended_at": 1768837314.6013093,
+            "rng_seed": 2161019043,
+            "rng_label": "turn-8-Alice"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 8,
+          "turn_index": 7,
+          "player": "Alice",
+          "started_at": 1768837314.6009994,
+          "duration": 0.00030994415283203125,
+          "ended_at": 1768837314.6013093,
+          "rng_seed": 2161019043,
+          "rng_label": "turn-8-Alice"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 7,
+        "turn_index": 7,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Alice\nTurn: 8\n\nHealth:\n  You: 20\n  Bob: 40\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Alice\nTurn: 8\n\nHealth:\n  You: 20\n  Bob: 40\n\nPotions:\n  You: 3\n  Bob: 3\n\nLast Action:\n  Bob: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Alice",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Alice",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.6019824,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 7,
+        "turn_index": 7,
+        "timestamp": 1768837314.6019824,
+        "monotonic_time": 7345.198438131
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Bob",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Bob": 20,
+            "Alice": 20
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 9,
+          "_turn_count": 9,
+          "_first_player_idx": 0
+        },
+        "state_after": {
+          "health": {
+            "Bob": 20,
+            "Alice": 0
+          },
+          "potions": {
+            "Bob": 3,
+            "Alice": 3
+          },
+          "last_action": {
+            "Bob": "ATTACK",
+            "Alice": "ATTACK"
+          },
+          "turn": 10,
+          "_turn_count": 9,
+          "_first_player_idx": 0
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "ATTACK",
+            "POTION"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Bob\nTurn: 9\n\nHealth:\n  You: 20\n  Alice: 20\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 9\n\nHealth:\n  You: 20\n  Alice: 20\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 245,
+          "raw_response": "ATTACK",
+          "turn_number": 9,
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_45e6917d",
+            "turn_number": 9,
+            "turn_index": 8,
+            "player": "Bob",
+            "started_at": 1768837314.621621,
+            "duration": 0.0005257129669189453,
+            "ended_at": 1768837314.6221466,
+            "rng_seed": 1407035201,
+            "rng_label": "turn-9-Bob"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_45e6917d",
+          "turn_number": 9,
+          "turn_index": 8,
+          "player": "Bob",
+          "started_at": 1768837314.621621,
+          "duration": 0.0005257129669189453,
+          "ended_at": 1768837314.6221466,
+          "rng_seed": 1407035201,
+          "rng_label": "turn-9-Bob"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 8,
+        "turn_index": 8,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Bob\nTurn: 9\n\nHealth:\n  You: 20\n  Alice: 20\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Bob\nTurn: 9\n\nHealth:\n  You: 20\n  Alice: 20\n\nPotions:\n  You: 3\n  Alice: 3\n\nLast Action:\n  You: ATTACK\n  Alice: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Bob",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ATTACK",
+          "renderer_output": {
+            "player": "Bob",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.6233113,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "phase_index": 8,
+        "turn_index": 8,
+        "timestamp": 1768837314.6233113,
+        "monotonic_time": 7345.219767132
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Bob",
+        "reflection": null,
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.6438932,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "timestamp": 1768837314.6438932,
+        "monotonic_time": 7345.240348733
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Alice",
+        "reflection": null,
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768837314.660754,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "timestamp": 1768837314.660754,
+        "monotonic_time": 7345.257209434
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2026-01-19T12:41:54.473061",
+    "session_id": "session_20260119_124154_615851",
+    "batch_id": "batch_520da28a",
+    "context": {
+      "session_id": "session_20260119_124154_615851",
+      "batch_id": "batch_520da28a",
+      "match_index": 0,
+      "total_matches_in_batch": 1,
+      "end": {
+        "session_id": "session_20260119_124154_615851",
+        "batch_id": "batch_520da28a",
+        "match_id": "match_45e6917d",
+        "timestamp": 1768837314.6815677,
+        "monotonic_time": 7345.278023635
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "913ff4b38dca08b7395489fc9c107ce87d78cc2a",
+        "branch": "main",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "Bob": {
+        "type": "MockPlayer",
+        "module": "conftest",
+        "model": "gpt-4"
+      },
+      "Alice": {
+        "type": "MockPlayer",
+        "module": "conftest",
+        "model": "gpt-4"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "Bob",
+        "type": "MockPlayer",
+        "model": "gpt-4",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer"
+      },
+      {
+        "name": "Alice",
+        "type": "MockPlayer",
+        "model": "gpt-4",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer"
+      }
+    ],
+    "game_config": {
+      "name": "AuctionGame",
+      "module": "test_player_ordering"
+    },
+    "session": {
+      "session_id": "session_20260119_124154_615851",
+      "started_at": 1768837314.4342012,
+      "seed": 42
+    },
+    "ended_at": "2026-01-19T12:41:54.685286",
+    "match": {
+      "game": "AuctionGame",
+      "players": [
+        "Bob",
+        "Alice"
+      ],
+      "player_names": [
+        "Bob",
+        "Alice"
+      ],
+      "player_order": [
+        1,
+        0
+      ],
+      "player_order_source": "game",
+      "first_player": {
+        "name": "Bob",
+        "index": 1
+      },
+      "duration": 0.1751852035522461,
+      "handshake_completed": true,
+      "seed": 42,
+      "batch_id": "batch_520da28a",
+      "truncated_by_max_turns": false,
+      "turns": 9,
+      "player_costs": {
+        "Bob": 0.0,
+        "Alice": 0.0
+      },
+      "cost": 0.0,
+      "schema_version": "1.3"
+    },
+    "players": [
+      "Bob",
+      "Alice"
+    ],
+    "game": "AuctionGame",
+    "match_id": "match_45e6917d",
+    "winner": "Bob",
+    "seed": 42
+  }
+}
