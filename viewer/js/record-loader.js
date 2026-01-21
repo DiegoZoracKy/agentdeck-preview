@@ -104,10 +104,23 @@ const RecordLoader = {
       if (event.type !== 'gameplay') continue;
 
       const data = event.data || {};
+      const context = event.context || {};
+      const contextIndex = context.turn_index ?? context.phase_index;
+      const dataIndex = data.turn_index ?? data.phase_index;
+      const turnIndex =
+        typeof contextIndex === 'number'
+          ? contextIndex
+          : typeof dataIndex === 'number'
+            ? dataIndex
+            : frameIndex;
 
       frames.push({
-        index: frameIndex++,
-        turnNumber: data.state_before?.turn || data.metadata?.turn_number || frameIndex,
+        index: turnIndex,
+        turnNumber:
+          data.turn_context?.turn_number ||
+          data.state_before?.turn ||
+          data.metadata?.turn_number ||
+          turnIndex + 1,
         player: data.player || 'Unknown',
         action: data.action || 'UNKNOWN',
         reasoning: data.reasoning || null,
@@ -116,6 +129,8 @@ const RecordLoader = {
         timestamp: event.timestamp || 0,
         prompt: this._extractPromptData(data)
       });
+
+      frameIndex += 1;
     }
 
     // Sort by turn_index to ensure correct order (PI1)

@@ -38,10 +38,10 @@ Transform AgentDeck match records into **shareable, watchable experiences**. A r
 │                                        │                    │
 │                    ┌───────────────────┼────────────────┐   │
 │                    ▼                   ▼                ▼   │
-│           ┌──────────────┐  ┌──────────────┐  ┌──────────┐ │
-│           │FFVIRenderer  │  │DebugRenderer │  │ Future   │ │
-│           │(battle skin) │  │(data view)   │  │ skins... │ │
-│           └──────────────┘  └──────────────┘  └──────────┘ │
+│           ┌──────────────────────┐  ┌──────────────┐  ┌──────────┐ │
+│           │FixedDamageFFVIRenderer│  │DebugRenderer │  │ Future   │ │
+│           │(battle skin)          │  │(data view)   │  │ skins... │ │
+│           └──────────────────────┘  └──────────────┘  └──────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -53,15 +53,14 @@ Transform AgentDeck match records into **shareable, watchable experiences**. A r
 viewer/
 ├── index.html              # Entry point (loads everything)
 ├── js/
+│   ├── app.js              # UI shell + wiring
 │   ├── timeline.js         # Core playback engine
 │   ├── record-loader.js    # Schema validation + parsing
 │   ├── renderers/
-│   │   ├── base.js         # Renderer interface
-│   │   ├── ffvi.js         # FFVI battle renderer
-│   │   └── debug.js        # Debug/data renderer (future)
-│   └── narration.js        # Auto-generate battle text
+│   │   ├── index.js        # Renderer registry
+│   │   └── fixed_damage_ffvi.js # FFVI battle renderer
 ├── css/
-│   ├── viewer.css          # Base viewer styles
+│   ├── base.css            # Base viewer styles
 │   └── ffvi.css            # FFVI skin styles
 ├── assets/
 │   └── (sprites, sounds - future)
@@ -80,8 +79,10 @@ viewer/
 ### Phase 1: Core Implementation (Today)
 - [ ] Write `specs/SPEC-VIEWER.md` (lightweight)
 - [ ] Implement `viewer/js/timeline.js`
-- [ ] Implement `viewer/js/renderers/ffvi.js`
+- [ ] Implement `viewer/js/renderers/fixed_damage_ffvi.js`
 - [ ] Create `viewer/index.html` with controls
+- [ ] Add `viewer/js/app.js` (UI wiring)
+- [ ] Add `viewer/css/base.css`
 - [ ] Add `viewer/css/ffvi.css`
 - [ ] Test with real FixedDamageGame record
 

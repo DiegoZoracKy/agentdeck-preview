@@ -41,6 +41,10 @@
 - Render victory/conclusion state
 - Clean up resources on destroy
 
+### 3.4 Renderer Registry (Optional)
+- Map `matchData.game` to a renderer implementation
+- Provide a simple selection mechanism for swapping skins
+
 ## 4. Data Structures
 
 ### 4.1 MatchData (Normalized Input)
@@ -109,7 +113,7 @@ RecordLoader.validate(json: object): ValidationResult
 **Guarantees:**
 - V1: MUST reject schema versions < 1.3
 - V2: MUST extract all `type: "gameplay"` events into frames
-- V3: MUST preserve frame ordering by `context.turn_index`
+- V3: MUST preserve frame ordering by `context.turn_index` (alias of `phase_index`) when present
 - V4: MUST normalize state keys to camelCase for JS consumption
 
 ### 5.2 Timeline
@@ -170,6 +174,20 @@ interface Renderer {
 - R3: `destroy()` MUST remove all DOM elements added by renderer
 - R4: Renderers MUST NOT modify `MatchData` or `GameplayFrame` objects
 
+### 5.4 RendererRegistry (Optional)
+
+```javascript
+// Register a renderer for a game name
+RendererRegistry.register(gameName: string, rendererClass: Function): void
+
+// Resolve a renderer for a match
+RendererRegistry.create(matchData: MatchData): Renderer
+RendererRegistry.get(gameName: string): Function | null
+```
+
+**Guarantees:**
+- RR1: `create()` MUST throw a clear error when no renderer is registered
+
 ## 6. Invariants & Guarantees
 
 ### 6.1 Record Compatibility (RC)
@@ -179,7 +197,7 @@ interface Renderer {
 4. **RC4**: Missing optional fields MUST use sensible defaults
 
 ### 6.2 Playback Integrity (PI)
-5. **PI1**: Frame order MUST match original event order (by turn_index)
+5. **PI1**: Frame order MUST match original event order (by `turn_index`/`phase_index`)
 6. **PI2**: State transitions MUST be accurate (stateBefore → stateAfter)
 7. **PI3**: Playback MUST be deterministic (same record → same frames)
 8. **PI4**: Speed changes MUST not skip or duplicate frames
@@ -211,7 +229,7 @@ const matchData = RecordLoader.load(json);
 
 // Create timeline and renderer
 const timeline = new Timeline(matchData);
-const renderer = new FFVIRenderer();
+const renderer = RendererRegistry.create(matchData);
 
 // Initialize
 renderer.init(document.getElementById('viewer'), matchData);
@@ -247,6 +265,7 @@ document.addEventListener('keydown', (e) => {
 | Frame extraction | PI1-PI3 | Compare extracted frames to source events |
 | Playback timing | T1, PI4 | Measure frame intervals at different speeds |
 | Renderer contract | R1-R4, RI1-RI4 | Mock renderer, verify callbacks |
+| Renderer registry | RR1 | Register renderer, create instance, assert error on unknown game |
 | Error handling | All error cases | Invalid inputs produce expected errors |
 
 ## 10. Design Rationale

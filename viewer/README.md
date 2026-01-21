@@ -48,6 +48,8 @@ viewer/index.html?match=http://example.com/match.json
 ## Supported Records
 
 The viewer supports AgentDeck match records with schema version **1.3+**.
+The default renderer targets **FixedDamageGame** records; other games require
+registering a custom renderer.
 
 Record files are generated automatically when running matches with AgentDeck:
 
@@ -70,11 +72,14 @@ with AgentDeck() as deck:
 viewer/
 ├── index.html           # Main entry point
 ├── js/
+│   ├── app.js           # UI shell + wiring
 │   ├── record-loader.js # Schema validation & parsing
 │   ├── timeline.js      # Core playback engine
 │   └── renderers/
-│       └── ffvi.js      # FFVI battle renderer
+│       ├── index.js     # Renderer registry
+│       └── fixed_damage_ffvi.js # FFVI battle renderer (FixedDamageGame)
 ├── css/
+│   ├── base.css         # Layout + shell styles
 │   └── ffvi.css         # FFVI styling
 ├── sample-match.json    # Example match for testing
 └── README.md            # This file
@@ -104,7 +109,11 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 - `renderVictory(winner)` - Show end screen
 - `destroy()` - Cleanup
 
-### FFVIRenderer
+### RendererRegistry
+- Selects the renderer based on `matchData.game`
+- Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
+
+### FixedDamageFFVIRenderer
 - FFVI-inspired battle visualization
 - Animated HP bars, damage numbers
 - Attack/heal animations
@@ -133,6 +142,9 @@ class MyRenderer {
     // Cleanup
   }
 }
+
+// Register for your game
+RendererRegistry.register('MyGame', MyRenderer);
 ```
 
 ## Specifications
