@@ -203,8 +203,12 @@ Phase A is complete when:
 | SPEC-SPECTATOR | ✅ Complete | 19 (90.5%) | 2 | 0 | Claude | 2026-01-21 |
 | SPEC-PLAYER | ✅ Complete | 18 (90.0%) | 2 | 0 | Claude | 2026-01-21 |
 | SPEC-AGENTDECK | ✅ Complete | 14 (82.4%) | 3 | 0 | Claude | 2026-01-21 |
-| SPEC-PROMPT-BUILDER | Not Started | | | | | |
-| SPEC-OBSERVABILITY | Not Started | | | | | |
+| SPEC-PROMPT-BUILDER | ✅ Complete | 15 (100%) | 0 | 0 | Claude | 2026-01-21 |
+| SPEC-OBSERVABILITY | ✅ Complete | 18 (90.0%) | 2 | 0 | Claude | 2026-01-21 |
+| SPEC-MONITOR | ✅ Complete | 22 (100%) | 0 | 0 | Claude | 2026-01-21 |
+| SPEC-PRICING | ✅ Complete | 14 (87.5%) | 1 | 1 | Claude | 2026-01-21 |
+| SPEC-LLM | Not Started | | | | | |
+| SPEC-RENDERER | Not Started | | | | | |
 | ... | | | | | | |
 
 ---
