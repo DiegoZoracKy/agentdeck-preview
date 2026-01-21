@@ -87,7 +87,27 @@ class ConclusionPlayer(MockPlayer):
         self._conclusion_response = conclusion_response
 
     def conclude(self, result, *, match_context):
-        return self._conclusion_response
+        response_text = self._conclusion_response
+        prompt_text = match_context.conclusion_prompt or "Match concluded."
+        controller_metadata = self.controller.parse_conclusion(response_text or "")
+        self._record_exchange(
+            prompt=prompt_text,
+            response=response_text or "",
+            phase="conclusion",
+            turn_context=None,
+            prompt_blocks=[
+                {
+                    "key": "outcome",
+                    "content": self._format_outcome(result),
+                    "metadata": {},
+                }
+            ],
+            controller_format=self.controller.get_format_instructions(),
+            controller_metadata=controller_metadata,
+            renderer_output={},
+            usage_info=None,
+        )
+        return response_text
 
 
 def test_on_handshake_complete_updates_state():

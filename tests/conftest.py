@@ -53,6 +53,37 @@ class MockPlayer(Player):
         else:
             return "ATTACK"
 
+    def conclude(self, result, *, match_context):
+        """Return deterministic conclusion and record prompt metadata."""
+        response_text = "Good game!"
+        prompt_text = match_context.conclusion_prompt or "Match concluded."
+        controller_metadata = self.controller.parse_conclusion(response_text)
+        self._record_exchange(
+            prompt=prompt_text,
+            response=response_text,
+            phase="conclusion",
+            turn_context=None,
+            prompt_blocks=[
+                {
+                    "key": "outcome",
+                    "content": self._format_outcome(result),
+                    "metadata": {},
+                }
+            ],
+            controller_format=self.controller.get_format_instructions(),
+            controller_metadata=controller_metadata,
+            renderer_output={},
+            usage_info=None,
+        )
+        return response_text
+
+    def _format_outcome(self, result) -> str:
+        if result.winner is None:
+            return "Draw"
+        if result.winner == self.name:
+            return f"You ({self.name}) won the match."
+        return f"{result.winner} won the match."
+
 
 @pytest.fixture
 def mock_player():

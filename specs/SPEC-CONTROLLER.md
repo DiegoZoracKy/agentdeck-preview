@@ -143,14 +143,14 @@ class Controller(ABC):
         """
         Parse conclusion reflection (optional, default passthrough).
 
-        Default implementation: {"reflection": response}
+        Default implementation: {"reflection_text": response.strip()}
         Override for structured parsing (e.g., extract lessons_learned, strategy_adjustments).
 
         Args:
             response: Raw LLM conclusion string
 
         Returns:
-            Dictionary with parsed conclusion metadata
+            Dictionary with parsed conclusion metadata (e.g., reflection_text)
         """
 ```
 

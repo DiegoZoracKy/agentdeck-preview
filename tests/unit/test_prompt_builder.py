@@ -367,6 +367,17 @@ def test_conclusion_phase(render_result):
     assert bundle.metadata["phase"] == "conclusion"
 
 
+def test_conclusion_template_none_disables_composition(render_result):
+    builder = PromptBuilder(conclusion_template=None)
+    with pytest.raises(ValueError, match="Conclusion template is disabled"):
+        builder.compose(
+            phase=LifecyclePhase.CONCLUSION,
+            render_result=render_result,
+            controller_format="N/A",
+            extras={"outcome": "You won!"},
+        )
+
+
 # Test: Metadata capture (MC1-MC3 invariants)
 
 

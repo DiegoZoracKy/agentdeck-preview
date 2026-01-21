@@ -69,6 +69,7 @@ class MockPlayer(Player):
         """
         # Record empty dialogue for replay parity
         # This ensures PLAYER_CONCLUSION events are emitted during replay
+        controller_metadata = self.controller.parse_conclusion("")
         self._record_exchange(
             prompt="Match concluded.",  # Minimal prompt
             response="",  # Empty response
@@ -82,6 +83,7 @@ class MockPlayer(Player):
                 }
             ],
             controller_format="",  # No controller format for conclusions
+            controller_metadata=controller_metadata,
             renderer_output={},
             usage_info=None,  # Mock players have no usage info
         )

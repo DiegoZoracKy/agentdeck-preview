@@ -490,7 +490,13 @@ def test_narrator_handshake_complete():
     # Handshake events
     handshake_event = Event(
         type="player_handshake_complete",
-        data={"player": "Alice", "response": "OK", "metadata": {}},
+        data={
+            "player": "Alice",
+            "accepted": True,
+            "normalized_response": "OK",
+            "response_text": "OK",
+            "controller_metadata": {},
+        },
         context={"match_id": "match-1"},
     )
 
@@ -516,7 +522,14 @@ def test_narrator_handshake_abort():
     # Handshake rejection event
     abort_event = Event(
         type="player_handshake_abort",
-        data={"player": "Bob", "reason": "I don't understand the rules", "metadata": {}},
+        data={
+            "player": "Bob",
+            "accepted": False,
+            "normalized_response": None,
+            "response_text": "maybe",
+            "controller_metadata": {},
+            "reason": "I don't understand the rules",
+        },
         context={"match_id": "match-1"},
     )
 
@@ -544,7 +557,7 @@ def test_narrator_player_conclusion():
         type="player_conclusion",
         data={
             "player": "Alice",
-            "reflection": "Great match! I should have used more potions.",
+            "reflection_text": "Great match! I should have used more potions.",
             "metadata": {},
         },
         context={"match_id": "match-1"},
@@ -572,7 +585,7 @@ def test_narrator_conclusion_without_reflection():
     # Conclusion event without reflection (player returned None)
     conclusion_event = Event(
         type="player_conclusion",
-        data={"player": "Bob", "reflection": None, "metadata": {}},
+        data={"player": "Bob", "reflection_text": None, "metadata": {}},
         context={"match_id": "match-1"},
     )
 
@@ -614,7 +627,13 @@ def test_narrator_handshake_complete_with_instructions():
     # Then emit handshake_complete
     handshake_event = Event(
         type="player_handshake_complete",
-        data={"player": "Alice", "response": "OK", "metadata": {}},
+        data={
+            "player": "Alice",
+            "accepted": True,
+            "normalized_response": "OK",
+            "response_text": "OK",
+            "controller_metadata": {},
+        },
         context={"match_id": "match-1"},
     )
 
@@ -656,7 +675,13 @@ def test_narrator_handshake_instructions_cached_from_prompt_field():
 
     handshake_event = Event(
         type="player_handshake_complete",
-        data={"player": "Alice", "response": "OK", "metadata": {}},
+        data={
+            "player": "Alice",
+            "accepted": True,
+            "normalized_response": "OK",
+            "response_text": "OK",
+            "controller_metadata": {},
+        },
         context={"match_id": "match-1"},
     )
 
@@ -699,7 +724,14 @@ def test_narrator_handshake_abort_with_instructions():
     # Then emit handshake_abort
     abort_event = Event(
         type="player_handshake_abort",
-        data={"player": "Bob", "reason": "Unclear instructions", "metadata": {}},
+        data={
+            "player": "Bob",
+            "accepted": False,
+            "normalized_response": None,
+            "response_text": "I don't understand",
+            "controller_metadata": {},
+            "reason": "Unclear instructions",
+        },
         context={"match_id": "match-1"},
     )
 
@@ -745,7 +777,13 @@ def test_narrator_handshake_instructions_display_full_prompt():
     # Emit handshake_complete
     handshake_event = Event(
         type="player_handshake_complete",
-        data={"player": "Alice", "response": "OK", "metadata": {}},
+        data={
+            "player": "Alice",
+            "accepted": True,
+            "normalized_response": "OK",
+            "response_text": "OK",
+            "controller_metadata": {},
+        },
         context={"match_id": "match-1"},
     )
 

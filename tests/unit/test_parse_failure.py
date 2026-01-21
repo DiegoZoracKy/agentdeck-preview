@@ -123,7 +123,7 @@ class MockPlayer(Player):
 
     def get_response(self, prompt: str) -> str:
         """Mock LLM response."""
-        return f"Player {self.name} mock response"
+        return "READY"
 
     def decide(self, observation, **kwargs):
         # Simple mock: just return "raw" and let controller parse
@@ -131,11 +131,36 @@ class MockPlayer(Player):
         parse_result = self.controller.parse(raw_response)
         return parse_result.to_action_result()
 
-    def handshake(self, context):
-        return "READY"
-
     def conclude(self, outcome, **kwargs):
-        pass
+        match_context = kwargs.get("match_context")
+        prompt_text = getattr(match_context, "conclusion_prompt", None) or "Match concluded."
+        response_text = "Good game!"
+        controller_metadata = self.controller.parse_conclusion(response_text)
+        self._record_exchange(
+            prompt=prompt_text,
+            response=response_text,
+            phase="conclusion",
+            turn_context=None,
+            prompt_blocks=[
+                {
+                    "key": "outcome",
+                    "content": self._format_outcome(outcome),
+                    "metadata": {},
+                }
+            ],
+            controller_format=self.controller.get_format_instructions(),
+            controller_metadata=controller_metadata,
+            renderer_output={},
+            usage_info=None,
+        )
+        return response_text
+
+    def _format_outcome(self, result) -> str:
+        if result is None or result.winner is None:
+            return "Draw"
+        if result.winner == self.name:
+            return f"You ({self.name}) won the match."
+        return f"{result.winner} won the match."
 
 
 def test_parse_failure_abort_and_record():
@@ -605,18 +630,45 @@ def test_parse_failure_retry_once_exhausted():
                 super().__init__(name=name, controller=controller)
 
             def get_response(self, prompt: str) -> str:
-                return f"Player {self.name} mock response"
+                return "READY"
 
             def decide(self, observation, **kwargs):
                 raw_response = f"Player {self.name} choosing action"
                 parse_result = self.controller.parse(raw_response)
                 return parse_result.to_action_result()
 
-            def handshake(self, context):
-                return "READY"
-
             def conclude(self, outcome, **kwargs):
-                pass
+                match_context = kwargs.get("match_context")
+                prompt_text = (
+                    getattr(match_context, "conclusion_prompt", None) or "Match concluded."
+                )
+                response_text = "Good game!"
+                controller_metadata = self.controller.parse_conclusion(response_text)
+                self._record_exchange(
+                    prompt=prompt_text,
+                    response=response_text,
+                    phase="conclusion",
+                    turn_context=None,
+                    prompt_blocks=[
+                        {
+                            "key": "outcome",
+                            "content": self._format_outcome(outcome),
+                            "metadata": {},
+                        }
+                    ],
+                    controller_format=self.controller.get_format_instructions(),
+                    controller_metadata=controller_metadata,
+                    renderer_output={},
+                    usage_info=None,
+                )
+                return response_text
+
+            def _format_outcome(self, result) -> str:
+                if result is None or result.winner is None:
+                    return "Draw"
+                if result.winner == self.name:
+                    return f"You ({self.name}) won the match."
+                return f"{result.winner} won the match."
 
         # Custom game that returns RETRY_ONCE policy
         class RetryOnceGame(MockGame):

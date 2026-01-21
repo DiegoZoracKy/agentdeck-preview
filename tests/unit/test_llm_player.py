@@ -159,6 +159,20 @@ def test_llmplayer_describe():
     assert "templates" in desc  # prompt_builder is rendered as templates
 
 
+def test_llmplayer_describe_with_disabled_conclusion_template():
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        conclusion_template=None,
+    )
+
+    desc = player.describe()
+
+    assert "templates" in desc
+    assert desc["templates"]["conclusion"] is None
+
+
 def test_provider_players_require_explicit_model():
     """Provider-backed players must be constructed with an explicit model name."""
     with pytest.raises(ValueError):

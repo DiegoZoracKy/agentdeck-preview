@@ -16,7 +16,7 @@ from .game_event_emitter import GameEventEmitter
 from .logging import AgentDeckLogger
 from .match_runtime import MatchRuntime
 from .recorder import Recorder
-from .session import AgentDeckConfig, SessionContext
+from .session import AgentDeckConfig, ConclusionPolicy, SessionContext
 from .types import (
     ActionResult,
     Event,
@@ -108,6 +108,47 @@ def _entropy_seed() -> int:
     return RandomGenerator().fork(time.time()).seed or int(
         time.time() * 1000
     )  # pragma: no cover - fallback
+
+
+def _format_match_outcome(winner: Optional[str]) -> str:
+    """Format a match outcome string for conclusion events."""
+    if winner is None:
+        return "Draw"
+    return f"{winner} won the match."
+
+
+def _resolve_concluding_players(
+    policy: "ConclusionPolicy", players: List[Player], winner: Optional[str]
+) -> List[Player]:
+    """Select players who should conclude based on policy."""
+    if policy is None or not policy.enabled:
+        return []
+
+    mode = policy.mode
+    if mode == "all":
+        return list(players)
+    if mode == "winner":
+        return [p for p in players if winner and p.name == winner]
+    if mode == "loser":
+        return [p for p in players if winner and p.name != winner]
+    if mode == "specific":
+        if not policy.player:
+            raise ValueError("ConclusionPolicy.player is required when mode == 'specific'")
+        return [p for p in players if p.name == policy.player]
+
+    raise ValueError(f"Unknown ConclusionPolicy.mode '{mode}'")
+
+
+def _require_conclusion_prompt_payload(player: Player, prompt_payload: Dict[str, Any]) -> None:
+    """Ensure conclusion prompt metadata exists for lifecycle event emission."""
+    prompt_text = prompt_payload.get("prompt_text")
+    prompt_blocks = prompt_payload.get("prompt_blocks")
+    if not prompt_text or prompt_blocks is None or not isinstance(prompt_blocks, list):
+        raise RuntimeError(
+            f"Player '{player.name}' conclusion missing prompt metadata. "
+            "Ensure Player.conclude() calls _record_exchange(..., phase='conclusion') "
+            "or disable conclusions via AgentDeckConfig(conclusion=ConclusionPolicy(enabled=False))."
+        )
 
 
 class _MatchWorker:
@@ -626,42 +667,57 @@ class _MatchWorker:
                     "allowed_actions": getattr(self.game, "allowed_actions", []),
                 },
             )
+            # Bind controller to game before handshake (GB1)
+            # This allows controller to provide game-specific format instructions with allowed_actions
+            if hasattr(player, "controller") and hasattr(player.controller, "bind_game"):
+                player.controller.bind_game(game)
+
+            bundle = player.build_handshake_bundle(context)
+            prompt_blocks = [
+                {
+                    "key": block.key,
+                    "content": block.content,
+                    "metadata": block.metadata if block.metadata else {},
+                }
+                for block in bundle.blocks
+            ]
+            controller_format = player.controller.get_handshake_format_instructions()
+
             self._dispatch_event(
                 EventType.PLAYER_HANDSHAKE_START,
                 events=runtime.events,
                 player=player.name,
                 match_id=runtime.match_id,
+                prompt_text=bundle.text,
+                prompt_blocks=prompt_blocks,
+                controller_format=controller_format,
             )
 
-            # Bind controller to game before handshake (GB1)
-            # This allows controller to provide game-specific format instructions with allowed_actions
-            if hasattr(player, "controller") and hasattr(player.controller, "bind_game"):
-                player.controller.bind_game(self.game)
+            response = player.execute_handshake(bundle, context)
+            response_text = response.response_text
+            usage_info = response.usage_info
 
-            raw = player.handshake(context)
+            result = player.controller.validate_handshake(response_text, context=context)
+            controller_metadata = result.metadata or {}
+            normalized_response = result.normalized_response
+            if normalized_response is None and result.accepted:
+                normalized_response = result.raw_response or response_text
 
-            # Capture handshake prompt from conversation history (if available)
-            prompt_text: Optional[str] = None
-            conversation_manager = getattr(player, "conversation_manager", None)
-            if conversation_manager is not None:
-                history = conversation_manager.history()
-                if len(history) >= 2:
-                    prompt_text = history[-2]["content"]
-
-            result = player.controller.validate_handshake(raw, context=context)
-            result.metadata = result.metadata or {}
-            if result.normalized_response is None:
-                result.normalized_response = result.raw_response
-            if result.normalized_response is None:
-                result.normalized_response = result.raw_response
-            result.metadata = result.metadata or {}
             if not result.accepted:
                 self._dispatch_event(
                     EventType.PLAYER_HANDSHAKE_ABORT,
                     events=runtime.events,
                     player=player.name,
+                    accepted=False,
+                    normalized_response=normalized_response,
+                    response_text=response_text,
+                    controller_metadata=controller_metadata,
+                    controller_format=controller_format,
+                    prompt_text=bundle.text,
+                    prompt_blocks=prompt_blocks,
+                    renderer_output=None,
+                    usage_info=usage_info,
                     reason=result.reason,
-                    prompt_text=prompt_text,
                 )
                 raise HandshakeRejectedError(
                     f"Player {player.name} rejected handshake: {result.reason}"
@@ -680,9 +736,15 @@ class _MatchWorker:
                 EventType.PLAYER_HANDSHAKE_COMPLETE,
                 events=runtime.events,
                 player=player.name,
-                response=result.normalized_response,
-                metadata=result.metadata,
-                prompt_text=prompt_text,
+                accepted=True,
+                normalized_response=normalized_response or "",
+                response_text=response_text,
+                controller_metadata=controller_metadata,
+                controller_format=controller_format,
+                prompt_text=bundle.text,
+                prompt_blocks=prompt_blocks,
+                renderer_output=None,
+                usage_info=usage_info,
             )
 
         return state
@@ -910,6 +972,11 @@ class _MatchWorker:
         concluding_player = None
         conclusion_reflection: Optional[str] = None
 
+        policy = self.console.config.conclusion
+        concluding_players = _resolve_concluding_players(policy, players, result.winner)
+        if not concluding_players:
+            return
+
         try:
             concluding_player = self.game.requires_conclusion(result.final_state)
         except Exception as exc:  # pragma: no cover - defensive
@@ -917,8 +984,19 @@ class _MatchWorker:
                 f"{self.game.__class__.__name__}.requires_conclusion() failed"
             ) from exc
 
+        concluding_names = {p.name for p in concluding_players}
+        if concluding_player and concluding_player not in concluding_names:
+            logger = getattr(self.console, "logger", None)
+            if logger:
+                logger.debug(
+                    f"Ignoring requires_conclusion='{concluding_player}' not in policy set"
+                )
+            concluding_player = None
+
+        outcome_text = _format_match_outcome(result.winner)
+
         if concluding_player:
-            target = next((p for p in players if p.name == concluding_player), None)
+            target = next((p for p in concluding_players if p.name == concluding_player), None)
             if target is None:
                 raise ValueError(
                     f"{self.game.__class__.__name__}.requires_conclusion returned unknown player '{concluding_player}'"
@@ -937,18 +1015,31 @@ class _MatchWorker:
                     f"{self.game.__class__.__name__}.on_conclusion_received() failed"
                 ) from exc
 
-        for player in players:
+        for player in concluding_players:
             if player.name == concluding_player:
                 reflection = conclusion_reflection
             else:
                 match_ctx.conclusion_prompt = None
                 reflection = player.conclude(result, match_context=match_ctx)
 
+            prompt_payload = player._get_last_exchange("conclusion") or {}
+            _require_conclusion_prompt_payload(player, prompt_payload)
+            reflection_text = reflection or ""
+            controller_metadata = prompt_payload.get("controller_metadata") or {}
+            prompt_text = prompt_payload.get("prompt_text") or ""
             self._dispatch_event(
                 EventType.PLAYER_CONCLUSION,
                 events=runtime.events,
                 player=player.name,
-                reflection=reflection,
+                reflection_text=reflection_text,
+                outcome=outcome_text,
+                prompt_text=prompt_text,
+                prompt_blocks=prompt_payload.get("prompt_blocks", []),
+                response_text=prompt_payload.get("response_text", reflection_text),
+                renderer_output=prompt_payload.get("renderer_output", {}),
+                controller_format=prompt_payload.get("controller_format", ""),
+                controller_metadata=controller_metadata,
+                usage_info=prompt_payload.get("usage_info"),
             )
 
     def _dispatch_event(
@@ -1070,6 +1161,7 @@ class Console:
 
         factory = session_factory or self._default_session_factory
         self.session_state = factory(base_config, session, resolved_seed)
+        self.config = base_config
 
         self.logger = logger
         self.recorder = recorder
@@ -2653,37 +2745,57 @@ class Console:
                     "allowed_actions": getattr(game, "allowed_actions", []),
                 },
             )
-            self._dispatch_event(
-                EventType.PLAYER_HANDSHAKE_START,
-                events=runtime.events,
-                player=player.name,
-                match_id=runtime.match_id,
-            )
-
             # Bind controller to game before handshake (GB1)
             # This allows controller to provide game-specific format instructions with allowed_actions
             if hasattr(player, "controller") and hasattr(player.controller, "bind_game"):
                 player.controller.bind_game(self.game)
 
-            raw = player.handshake(context)
+            bundle = player.build_handshake_bundle(context)
+            prompt_blocks = [
+                {
+                    "key": block.key,
+                    "content": block.content,
+                    "metadata": block.metadata if block.metadata else {},
+                }
+                for block in bundle.blocks
+            ]
+            controller_format = player.controller.get_handshake_format_instructions()
 
-            # Capture handshake prompt from conversation history (if available)
-            prompt_text: Optional[str] = None
-            conversation_manager = getattr(player, "conversation_manager", None)
-            if conversation_manager is not None:
-                history = conversation_manager.history()
-                if len(history) >= 2:
-                    # Handshake adds user prompt followed by assistant response
-                    prompt_text = history[-2]["content"]
+            self._dispatch_event(
+                EventType.PLAYER_HANDSHAKE_START,
+                events=runtime.events,
+                player=player.name,
+                match_id=runtime.match_id,
+                prompt_text=bundle.text,
+                prompt_blocks=prompt_blocks,
+                controller_format=controller_format,
+            )
 
-            result = player.controller.validate_handshake(raw, context=context)
+            response = player.execute_handshake(bundle, context)
+            response_text = response.response_text
+            usage_info = response.usage_info
+
+            result = player.controller.validate_handshake(response_text, context=context)
+            controller_metadata = result.metadata or {}
+            normalized_response = result.normalized_response
+            if normalized_response is None and result.accepted:
+                normalized_response = result.raw_response or response_text
+
             if not result.accepted:
                 self._dispatch_event(
                     EventType.PLAYER_HANDSHAKE_ABORT,
                     events=runtime.events,
                     player=player.name,
+                    accepted=False,
+                    normalized_response=normalized_response,
+                    response_text=response_text,
+                    controller_metadata=controller_metadata,
+                    controller_format=controller_format,
+                    prompt_text=bundle.text,
+                    prompt_blocks=prompt_blocks,
+                    renderer_output=None,
+                    usage_info=usage_info,
                     reason=result.reason,
-                    prompt_text=prompt_text,
                 )
                 raise HandshakeRejectedError(
                     f"Player {player.name} rejected handshake: {result.reason}"
@@ -2702,9 +2814,15 @@ class Console:
                 EventType.PLAYER_HANDSHAKE_COMPLETE,
                 events=runtime.events,
                 player=player.name,
-                response=result.normalized_response,
-                metadata=result.metadata,
-                prompt_text=prompt_text,
+                accepted=True,
+                normalized_response=normalized_response or "",
+                response_text=response_text,
+                controller_metadata=controller_metadata,
+                controller_format=controller_format,
+                prompt_text=bundle.text,
+                prompt_blocks=prompt_blocks,
+                renderer_output=None,
+                usage_info=usage_info,
             )
 
         return state
@@ -2726,6 +2844,11 @@ class Console:
         concluding_player = None
         conclusion_reflection: Optional[str] = None
 
+        policy = self.config.conclusion
+        concluding_players = _resolve_concluding_players(policy, players, match_result.winner)
+        if not concluding_players:
+            return
+
         try:
             concluding_player = self.game.requires_conclusion(match_result.final_state)
         except Exception as exc:  # pragma: no cover - defensive
@@ -2733,8 +2856,19 @@ class Console:
                 f"{self.game.__class__.__name__}.requires_conclusion() failed"
             ) from exc
 
+        concluding_names = {p.name for p in concluding_players}
+        if concluding_player and concluding_player not in concluding_names:
+            logger = getattr(self, "logger", None)
+            if logger:
+                logger.debug(
+                    f"Ignoring requires_conclusion='{concluding_player}' not in policy set"
+                )
+            concluding_player = None
+
+        outcome_text = _format_match_outcome(match_result.winner)
+
         if concluding_player:
-            target = next((p for p in players if p.name == concluding_player), None)
+            target = next((p for p in concluding_players if p.name == concluding_player), None)
             if target is None:
                 raise ValueError(
                     f"{self.game.__class__.__name__}.requires_conclusion returned unknown player '{concluding_player}'"
@@ -2748,17 +2882,31 @@ class Console:
                 match_result.final_state, concluding_player, parsed
             )
 
-        for player in players:
+        for player in concluding_players:
             if player.name == concluding_player:
                 reflection = conclusion_reflection
             else:
                 match_ctx.conclusion_prompt = None
                 reflection = player.conclude(match_result, match_context=match_ctx)
+
+            prompt_payload = player._get_last_exchange("conclusion") or {}
+            _require_conclusion_prompt_payload(player, prompt_payload)
+            reflection_text = reflection or ""
+            controller_metadata = prompt_payload.get("controller_metadata") or {}
+            prompt_text = prompt_payload.get("prompt_text") or ""
             self._dispatch_event(
                 EventType.PLAYER_CONCLUSION,
                 events=runtime.events,
                 player=player.name,
-                reflection=reflection,
+                reflection_text=reflection_text,
+                outcome=outcome_text,
+                prompt_text=prompt_text,
+                prompt_blocks=prompt_payload.get("prompt_blocks", []),
+                response_text=prompt_payload.get("response_text", reflection_text),
+                renderer_output=prompt_payload.get("renderer_output", {}),
+                controller_format=prompt_payload.get("controller_format", ""),
+                controller_metadata=controller_metadata,
+                usage_info=prompt_payload.get("usage_info"),
             )
 
     def _safe_status(self, game: Game, state: Dict[str, Any]) -> GameStatus:

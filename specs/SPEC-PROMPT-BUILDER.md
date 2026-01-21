@@ -39,10 +39,12 @@ Create PromptBuilder instance with phase-specific templates.
   - **Path objects**: File path to load (e.g., `Path("prompts/turn.txt")`)
   - When `Path` provided, builder loads file contents (UTF-8) during initialization
   - Raises `FileNotFoundError` if path doesn't exist, `UnicodeDecodeError` if not valid UTF-8
-- Missing template for a phase → use minimal default:
+- Missing template for a phase → use minimal default (when template not provided):
   - handshake: `"You are playing {game_name}.\n\n{game_instructions}\n\n{player_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"`
   - turn: `"{game_view}"`
   - conclusion: `"=== Match Concluded ===\n\n{outcome}\n\nFinal state:\n{game_view}"`
+- If `conclusion_template=None` is provided explicitly, PromptBuilder stores `None` for the conclusion template and callers SHOULD skip prompt composition for conclusion (use minimal prompt metadata instead).
+  - Calling `compose(phase=CONCLUSION, ...)` when the conclusion template is disabled MUST raise a `ValueError`.
 
 **Example**:
 ```python

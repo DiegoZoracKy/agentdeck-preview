@@ -76,8 +76,8 @@ class ReplayEngine:
             players=self.metadata.get("players", []),
             metadata=self.metadata,
         )
-        self._pending_conclusions: List[tuple[Dict[str, Any], Dict[str, Any]]] = []
         self._handshake_started: Set[str] = set()
+        self._handshake_prompt_cache: Dict[str, Dict[str, Any]] = {}
 
     def replay(self, spectators: List[Spectator], speed: Optional[float] = None) -> None:
         """
@@ -115,6 +115,7 @@ class ReplayEngine:
                 EventType.PLAYER_HANDSHAKE_COMPLETE.value,
                 EventType.PLAYER_HANDSHAKE_ABORT.value,
             }
+            self._build_handshake_prompt_cache()
             start_index = 0
             total_events = len(self.events)
             while start_index < total_events:
@@ -166,12 +167,8 @@ class ReplayEngine:
                 EventType.MATCH_END,
                 result=match_result,
             )
-            for payload, context in self._pending_conclusions:
-                payload_copy = copy.deepcopy(payload)
-                self._apply_event_context(context)
-                self.event_bus.emit(EventType.PLAYER_CONCLUSION, **payload_copy)
-            self._pending_conclusions.clear()
             self._handshake_started.clear()
+            self._handshake_prompt_cache.clear()
 
         finally:
             self._cleanup_spectators(spectators)
@@ -221,6 +218,21 @@ class ReplayEngine:
 
         if event_type == EventType.PLAYER_HANDSHAKE_START.value:
             player = payload.get("player")
+            prompt_payload = payload.get("prompt") or {}
+            if player:
+                if not payload.get("prompt_text") and prompt_payload.get("prompt_text"):
+                    payload["prompt_text"] = prompt_payload["prompt_text"]
+                if "prompt_blocks" not in payload and "prompt_blocks" in prompt_payload:
+                    payload["prompt_blocks"] = prompt_payload["prompt_blocks"]
+                if not payload.get("controller_format") and prompt_payload.get("controller_format"):
+                    payload["controller_format"] = prompt_payload["controller_format"]
+                cached = self._handshake_prompt_cache.get(player, {})
+                if not payload.get("prompt_text") and cached.get("prompt_text"):
+                    payload["prompt_text"] = cached["prompt_text"]
+                if "prompt_blocks" not in payload and "prompt_blocks" in cached:
+                    payload["prompt_blocks"] = cached["prompt_blocks"]
+                if not payload.get("controller_format") and cached.get("controller_format"):
+                    payload["controller_format"] = cached["controller_format"]
             if player:
                 self._handshake_started.add(player)
             self.event_bus.emit(event_type, **payload)
@@ -239,7 +251,7 @@ class ReplayEngine:
             return
 
         if event_type == EventType.PLAYER_CONCLUSION.value:
-            self._pending_conclusions.append((payload, context))
+            self.event_bus.emit(event_type, **payload)
             return
 
         if event_type in {"turn", "gameplay"}:
@@ -274,14 +286,64 @@ class ReplayEngine:
         if updates:
             self.event_bus.update_context(**updates)
 
+    def _build_handshake_prompt_cache(self) -> None:
+        """Populate prompt metadata for handshake START backfill."""
+        self._handshake_prompt_cache.clear()
+        for event in self.events:
+            event_type = event.type.value if isinstance(event.type, EventType) else event.type
+            if event_type not in {
+                EventType.PLAYER_HANDSHAKE_COMPLETE.value,
+                EventType.PLAYER_HANDSHAKE_ABORT.value,
+            }:
+                continue
+            payload = event.data or {}
+            player = payload.get("player")
+            if not player:
+                continue
+            prompt_payload = payload.get("prompt") or {}
+            prompt_text = payload.get("prompt_text") or prompt_payload.get("prompt_text")
+            prompt_blocks = payload.get("prompt_blocks")
+            if prompt_blocks is None:
+                prompt_blocks = prompt_payload.get("prompt_blocks")
+            controller_format = payload.get("controller_format") or prompt_payload.get(
+                "controller_format"
+            )
+            cached = self._handshake_prompt_cache.setdefault(player, {})
+            if prompt_text and not cached.get("prompt_text"):
+                cached["prompt_text"] = prompt_text
+            if prompt_blocks is not None and "prompt_blocks" not in cached:
+                cached["prompt_blocks"] = prompt_blocks
+            if controller_format and not cached.get("controller_format"):
+                cached["controller_format"] = controller_format
+
     def _emit_handshake_start(self, payload: Dict[str, Any], context: Dict[str, Any]) -> None:
         """Emit synthetic PLAYER_HANDSHAKE_START before COMPLETE/ABORT events."""
         start_payload: Dict[str, Any] = {
             "player": payload.get("player"),
         }
+        prompt_payload = payload.get("prompt") or {}
+        prompt_text = payload.get("prompt_text") or prompt_payload.get("prompt_text")
+        prompt_blocks = payload.get("prompt_blocks") or prompt_payload.get("prompt_blocks")
+        controller_format = payload.get("controller_format") or prompt_payload.get(
+            "controller_format"
+        )
+        player = start_payload.get("player")
+        cached = self._handshake_prompt_cache.get(player, {}) if player else {}
+        if not prompt_text:
+            prompt_text = cached.get("prompt_text")
+        if prompt_blocks is None and "prompt_blocks" in cached:
+            prompt_blocks = cached.get("prompt_blocks")
+        if not controller_format:
+            controller_format = cached.get("controller_format")
         match_id = context.get("match_id") or self.metadata.get("match_id")
         if match_id:
             start_payload["match_id"] = match_id
+        if prompt_text:
+            start_payload["prompt_text"] = prompt_text
+        if prompt_blocks is not None:
+            start_payload["prompt_blocks"] = prompt_blocks
+        if controller_format:
+            start_payload["controller_format"] = controller_format
         self.event_bus.emit(EventType.PLAYER_HANDSHAKE_START, **start_payload)
         player = start_payload.get("player")
         if player:

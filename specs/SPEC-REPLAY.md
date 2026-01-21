@@ -24,7 +24,7 @@
 - **Artifact Ingestion**: Load SPEC-RECORDER v1.3 artifacts (JSON schema 1.x) and hydrate deterministic event timeline including three-phase lifecycle.
 - **Prompt Replay**: Consume Recorder's enriched `events` stream (schema v1.3) and emit lifecycle events with embedded prompt payloads so prompt metadata survives round-trip without a separate dialogue transcript.
 - **Context Reconstruction**: Rebuild EventContext from stored metadata (session_id, batch_id, match_id, phase_index, timestamp) without recomputation.
-- **Event Emission**: Emit PLAYER_HANDSHAKE_* → MATCH_START → recorded events → MATCH_END → optional PLAYER_CONCLUSION through EventBus for spectator consumption (matches live execution order per SPEC-CONSOLE §6.6 E1).
+- **Event Emission**: Emit PLAYER_HANDSHAKE_* → MATCH_START → recorded events → PLAYER_CONCLUSION (when present) → MATCH_END through EventBus for spectator consumption (matches live execution order per SPEC-CONSOLE §6.6 E1).
 - **Playback Control**: Support speed multiplier (2.0 = 2x speed, 0.5 = half speed, 0.0 = instant) via ReplayScheduler for time-based delays.
 - **Spectator Binding**: Subscribe spectators to isolated EventBus before replay, unsubscribe after (same semantics as live execution).
 - **State Tracking**: Maintain state_before/state_after continuity during gameplay event replay using recorded turn metadata (no on-the-fly recomputation).
@@ -109,7 +109,7 @@ Execute replay with spectators.
 **Contract**:
 - Accept: List of spectator instances, optional speed override (overrides scheduler's default speed)
 - Perform: Subscribe spectators to EventBus, emit lifecycle and recorded events with computed delays, unsubscribe spectators
-- Emit: Event sequence per LC1-LC5 (PLAYER_HANDSHAKE_* → MATCH_START → recorded events → MATCH_END → optional PLAYER_CONCLUSION)
+- Emit: Event sequence per LC1-LC5 (PLAYER_HANDSHAKE_* → MATCH_START → recorded events → PLAYER_CONCLUSION → MATCH_END)
 - Raise: ValueError if speed is invalid type
 - MUST: Catch and log spectator exceptions per SPEC-SPECTATOR §5.3 EI1 (error isolation), continue replay with remaining spectators
 - MUST: Respect speed multiplier for delays (0.0 = instant, 2.0 = 2x speed)
@@ -139,11 +139,11 @@ Execute replay with spectators.
 11. **CR2**: MUST preserve phase_index from recorded events as read-only (do not recompute from turn_number or other fields).
 
 ### 6.5 Lifecycle Events (LC)
-12. **LC1**: MUST emit events in exact order: **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per player) → **MATCH_START** → **GAMEPLAY** events → **MATCH_END** → optional **PLAYER_CONCLUSION** (per player). This matches live execution order per SPEC-CONSOLE §6.6 E1.
+12. **LC1**: MUST emit events in exact order: **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per player) → **MATCH_START** → **GAMEPLAY** events → **PLAYER_CONCLUSION** (per player when present) → **MATCH_END**. This matches live execution order per SPEC-CONSOLE §6.6 E1.
 13. **LC2**: MUST emit recorded PLAYER_HANDSHAKE_* events (with embedded prompt payloads) before MATCH_START to match live execution ordering.
 14. **LC3**: MUST emit MATCH_START after handshake phase completes, with rehydrated game/player metadata.
-15. **LC4**: MUST emit MATCH_END after all recorded gameplay/domain events with MatchResult containing winner, final_state, seed.
-16. **LC5**: MUST emit recorded PLAYER_CONCLUSION events after MATCH_END when present (prompt payload `phase="conclusion"`).
+15. **LC4**: MUST emit MATCH_END after all recorded gameplay/domain events AND any PLAYER_CONCLUSION events, with MatchResult containing winner, final_state, seed.
+16. **LC5**: MUST emit recorded PLAYER_CONCLUSION events before MATCH_END when present (prompt payload `phase="conclusion"`).
 
 ### 6.6 Prompt Metadata Replay (PM)
 17. **PM1**: MUST deliver `prompt.prompt_text`, `prompt.prompt_blocks`, and `prompt.response_text` from the recorded event payload to spectators for handshake/turn/conclusion/parse_failure phases.
@@ -174,15 +174,14 @@ Execute replay with spectators.
 2. Emit PLAYER_HANDSHAKE_START for each player.
 3. Emit recorded PLAYER_HANDSHAKE_COMPLETE|ABORT events (prompt payload phase="handshake").
 4. Emit MATCH_START with reconstructed game/player metadata (AFTER handshake phase, matching live execution order per SPEC-CONSOLE §6.6 E1).
-5. For each recorded event in chronological order:
+5. For each recorded event in chronological order (including PLAYER_CONCLUSION when present):
    - Compute delay from timestamps via scheduler.
    - Sleep delay (unless speed == 0.0).
    - Rehydrate EventContext (match_id, session_id, phase_index, timestamp).
    - Emit event through EventBus (spectators receive).
    - Catch and log any spectator exceptions (error isolation per SPEC-SPECTATOR §5.3 EI1).
 6. Emit MATCH_END with MatchResult (winner, final_state, seed).
-7. Emit PLAYER_CONCLUSION for each player (when present; prompt payload phase="conclusion").
-8. Unsubscribe spectators from EventBus.
+7. Unsubscribe spectators from EventBus.
 
 **Key Principle**: Replay uses recorded turn metadata (turn_number, phase_index, timestamps)—no on-the-fly recomputation. The recorded event payload (`event.data["prompt"]`) is the **canonical source** for all prompt metadata.
 
@@ -334,7 +333,7 @@ viewer.print_summary()
 | Event parity | EP1-EP3 | Record live match. Replay. Diff event streams (type, data, context, order). Assert exact match. |
 | Timing control | TO1-TO3 | Mock `time.sleep()`. Verify delay computation and speed multiplier accuracy. Test instant (0.0), slow-mo (0.5), fast (2.0). |
 | Context reconstruction | CR1-CR2 | Inspect rehydrated EventContext. Confirm match_id, session_id, phase_index preserved from recording. Verify no recomputation. |
-| Lifecycle events | LC1-LC5 | Capture emitted event sequence. Verify order: PLAYER_HANDSHAKE_* → MATCH_START → GAMEPLAY → MATCH_END → PLAYER_CONCLUSION. |
+| Lifecycle events | LC1-LC5 | Capture emitted event sequence. Verify order: PLAYER_HANDSHAKE_* → MATCH_START → GAMEPLAY → PLAYER_CONCLUSION → MATCH_END. |
 | Prompt metadata | PM1-PM3 | Inspect recorded event payloads (`event.data["prompt"]`). Replay. Verify prompt_text, prompt_blocks, response_text, renderer_output, controller_format, controller_metadata delivered to spectators. |
 | State tracking | ST1-ST2 | Verify state_before/state_after continuity. Confirm turn_number/phase_index match recorded values (no recomputation). |
 | Spectator isolation | SI1-SI3 | Verify dedicated EventBus created. Confirm spectators unsubscribed post-replay. Test exception propagation. |

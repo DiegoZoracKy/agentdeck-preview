@@ -207,7 +207,7 @@ Late-binding helper for attaching session context after construction.
 - MUST flush immediately after recording the failure to guarantee durability.
 
 #### on_player_conclusion(event: Event)
-- Serializes PLAYER_CONCLUSION event into `events` with PM1-PM6 metadata describing post-match reflection (`prompt_text`, `prompt_blocks`, `response_text`, optional `reflection_text`, `controller_format`, `controller_metadata`, `renderer_output`, `usage_info`).
+- Serializes PLAYER_CONCLUSION event into `events` with PM1-PM6 metadata describing post-match reflection (`prompt_text`, `prompt_blocks`, `response_text`, `reflection_text`, `outcome`, `controller_format`, `controller_metadata`, `renderer_output`, `usage_info`).
 - **MUST flush match file progressively** after processing.
 
 #### on_event(event: Event, context=None)

@@ -16,6 +16,24 @@ if TYPE_CHECKING:
 
 
 @dataclass
+class ConclusionPolicy:
+    """Policy for post-match conclusion phase."""
+
+    enabled: bool = True
+    mode: str = "all"  # one of: all, winner, loser, specific
+    player: Optional[str] = None  # required when mode == "specific"
+
+    def __post_init__(self) -> None:
+        valid_modes = {"all", "winner", "loser", "specific"}
+        if self.mode not in valid_modes:
+            raise ValueError(
+                f"ConclusionPolicy.mode must be one of {sorted(valid_modes)}, got '{self.mode}'"
+            )
+        if self.mode == "specific" and not self.player:
+            raise ValueError("ConclusionPolicy.player is required when mode == 'specific'")
+
+
+@dataclass
 class AgentDeckConfig:
     """User-facing configuration for an AgentDeck session."""
 
@@ -27,6 +45,7 @@ class AgentDeckConfig:
     log_format: str = "simple"
     concurrency: int = 1  # Number of parallel workers (1 = sequential)
     monitors: Optional[List["Monitor"]] = None  # Console-level observers (progress, hardware, etc.)
+    conclusion: ConclusionPolicy = field(default_factory=ConclusionPolicy)
 
     def __post_init__(self):
         """Validate configuration fields."""
@@ -115,7 +134,7 @@ class SessionContext:
         }
 
 
-__all__ = ["AgentDeckConfig", "SessionContext"]
+__all__ = ["AgentDeckConfig", "ConclusionPolicy", "SessionContext"]
 
 # Backwards compatibility for older spec references
 SessionConfig = AgentDeckConfig

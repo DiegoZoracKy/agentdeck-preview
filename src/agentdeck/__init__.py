@@ -18,12 +18,13 @@ from .core.prompt_builder import PromptBuilder
 # Recorder and Replay
 from .core.recorder import Recorder
 from .core.replay import ReplayEngine
-from .core.session import AgentDeckConfig, SessionConfig, SessionContext
+from .core.session import AgentDeckConfig, ConclusionPolicy, SessionConfig, SessionContext
 from .core.types import (
     ActionResult,
     Event,
     GameStatus,
     HandshakeContext,
+    HandshakeResponse,
     HandshakeResult,
     LifecyclePhase,
     LogLevel,
@@ -54,6 +55,7 @@ __all__ = [
     # Main
     "AgentDeck",
     "AgentDeckConfig",
+    "ConclusionPolicy",
     "SessionContext",
     "SessionConfig",
     # Base classes
@@ -76,6 +78,7 @@ __all__ = [
     "PromptContext",
     "TemplateError",
     "HandshakeContext",
+    "HandshakeResponse",
     "HandshakeResult",
     "MatchContext",
     "TurnContext",

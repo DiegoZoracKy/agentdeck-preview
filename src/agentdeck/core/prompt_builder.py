@@ -46,6 +46,9 @@ from .types import (
 )
 
 
+_DEFAULT_TEMPLATE = object()
+
+
 class PromptBuilder:
     """
     Template-driven prompt builder for three-phase player lifecycle.
@@ -101,7 +104,7 @@ class PromptBuilder:
         *,
         handshake_template: Optional[str | Path] = None,
         turn_template: Optional[str | Path] = None,
-        conclusion_template: Optional[str | Path] = None,
+        conclusion_template: Optional[str | Path] | object = _DEFAULT_TEMPLATE,
     ):
         """
         Initialize PromptBuilder with phase-specific templates.
@@ -109,7 +112,8 @@ class PromptBuilder:
         Args:
             handshake_template: Template for handshake phase (string or Path)
             turn_template: Template for turn phase (string or Path)
-            conclusion_template: Template for conclusion phase (string or Path)
+            conclusion_template: Template for conclusion phase (string or Path).
+                Use None to disable conclusion composition explicitly.
 
         Raises:
             FileNotFoundError: If Path provided but file doesn't exist
@@ -127,18 +131,29 @@ class PromptBuilder:
             )
         """
         # Load templates (from files if Path, otherwise use string directly)
-        self._handshake_template = self._load_template(handshake_template, self.DEFAULT_HANDSHAKE)
+        self._handshake_template = self._load_template(
+            handshake_template, self.DEFAULT_HANDSHAKE
+        )
         self._turn_template = self._load_template(turn_template, self.DEFAULT_TURN)
         self._conclusion_template = self._load_template(
-            conclusion_template, self.DEFAULT_CONCLUSION
+            conclusion_template, self.DEFAULT_CONCLUSION, allow_none=True
         )
 
         # Custom providers: Dict[str, Callable[[PromptContext], str]]
         self._providers: Dict[str, Callable[[PromptContext], str]] = {}
 
-    def _load_template(self, template: Optional[str | Path], default: str) -> str:
+    def _load_template(
+        self,
+        template: Optional[str | Path] | object,
+        default: str,
+        *,
+        allow_none: bool = False,
+    ) -> Optional[str]:
         """
         Load template from Path or use string directly.
+
+        If allow_none is True and template is None, returns None to signal
+        that composition is disabled for that phase.
 
         Args:
             template: Template string or Path to load
@@ -151,7 +166,10 @@ class PromptBuilder:
             FileNotFoundError: If Path provided but doesn't exist
             UnicodeDecodeError: If file not valid UTF-8
         """
+        if template is _DEFAULT_TEMPLATE:
+            return default
         if template is None:
+            return None if allow_none else default
             return default
         if isinstance(template, Path):
             # Load from file (UTF-8)
@@ -390,6 +408,8 @@ class PromptBuilder:
         elif phase == LifecyclePhase.TURN:
             return self._turn_template, "turn"
         elif phase == LifecyclePhase.CONCLUSION:
+            if self._conclusion_template is None:
+                raise ValueError("Conclusion template is disabled for PromptBuilder.")
             return self._conclusion_template, "conclusion"
         else:
             raise ValueError(f"Unsupported phase: {phase}")

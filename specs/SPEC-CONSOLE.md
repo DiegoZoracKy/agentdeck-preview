@@ -1,9 +1,9 @@
 # SPEC-CONSOLE: Execution Engine Contract
 
-> Status: In Review
-> Version: 0.5.0 (Draft)
-> Last Updated: 2025-11-03
-> Implementation: 🚧 Under alignment with TurnLoop delegation
+> Status: Draft v0.6.0
+> Version: 0.6.0
+> Last Updated: 2026-01-20
+> Implementation: ✅ Implemented
 > Authors: Codex, Claude
 > Audience: Core contributors, engine implementers
 
@@ -41,14 +41,15 @@ Console operates at two architectural layers, both mechanics-agnostic:
 - **Session Lifecycle**: Resolve the session seed, prepare directories, create `SessionState`, bind recorder/spectators, emit `SESSION_START` / `SESSION_END`, stamp `finished_at`, and guarantee idempotent cleanup.
 - **Execution Lifecycle**: For every `run` call emit `BATCH_START` / `BATCH_END`, derive base seeds, loop through requested matches (including size-1 runs), and scope execution spectators.
 - **Player Order Management**: Console is the source of fairness by default. Before each match, call `game.get_player_order(players, rng=match_rng, match_context)`. When game returns `None` (default), apply Fisher-Yates shuffle using match RNG. When game returns custom list, validate (same players, no duplicates, correct length) and raise `ValueError` on mismatch. Record effective order and source ("console" or "game") in all observability artifacts (MatchResult.metadata, events, logs, recorder). Log player order at DEBUG level (see §6.5 invariants).
-- **Match Orchestration**: Manage match-level lifecycle (MATCH_START → handshakes → `game.run(runtime, players)` → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
-- **Handshake Management**: Run player handshakes before turn 1, validate acknowledgements via `HandshakeController`, and abort on rejection.
+- **Match Orchestration**: Manage match-level lifecycle (handshakes → MATCH_START → `game.run(runtime, players)` → conclusion phase → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
+- **Conclusion Policy**: Apply the session conclusion policy to decide whether the conclusion phase runs and which players conclude. Game hooks may override prompts/state for a single player, but do not gate conclusion execution.
+- **Handshake Management**: Run handshake build+execute before turn 1, emit `PLAYER_HANDSHAKE_START` using the exact prompt bundle, validate acknowledgements via controller, and abort on rejection.
 - **Runtime Provisioning**: Create a fresh `MatchRuntime` per match exposing recorder, event emitter, RNG forks, parse-failure helper, and validation utilities so mechanics stay decoupled from console internals (see `SPEC-MATCH-RUNTIME.md`).
 - **Parse Failure Handling** (new in v0.5.0): When `player.decide()` raises `ActionParseError`, the console MUST capture the embedded `ParseResult`, emit a `PLAYER_ACTION_PARSE_FAILED` event, record the failure, and invoke the game's parse-failure policy hook. Console interprets the returned `ParseFailurePolicy` (abort, skip turn, forfeit, retry) and applies it deterministically.
 - **Deterministic Randomness**: Maintain session-level RNG state, derive per-match RNGs deterministically, and persist seeds in ALL observability artifacts (events, logs, recorder, MatchResult).
 - **EventBus Lifecycle**: Create, configure, and inject EventBus into components. Subscribe/unsubscribe observers as needed. MUST NOT implement routing logic (EventBus internal responsibility).
 - **Event Emission Boundaries**:
-  - **Console emits**: `SESSION_*`, `BATCH_*`, `MATCH_START`, `MATCH_END`, `CLEANUP_*` (orchestration lifecycle)
+  - **Console emits**: `SESSION_*`, `BATCH_*`, `MATCH_START`, `PLAYER_CONCLUSION`, `MATCH_END`, `CLEANUP_*` (orchestration lifecycle)
   - **Mechanics emit**: `GAMEPLAY` events via runtime helpers (turn execution, see `SPEC-GAME-MECHANIC-TURN-BASED.md` / future mechanic specs)
   - **Game emits**: Domain-specific custom events via runtime helpers or GameEventEmitter (game semantics)
   - **Player emits**: `LLM_*`, `PARSE_*` (decision pipeline)
@@ -143,8 +144,9 @@ Execute batch of matches and return results.
   2. Emit `BATCH_START` (with `batch_id`, `matches_planned`, seed info).
   3. For each match index:
      - Derive match seed deterministically, build `MatchContext`.
-     - Emit `MATCH_START`, execute handshakes (include handshake events).
      - Resolve effective player order via `game.get_player_order`.
+     - Execute handshakes before `MATCH_START` (build prompt → emit `PLAYER_HANDSHAKE_START` → execute LLM call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`).
+     - Emit `MATCH_START` after successful handshake completion.
      - Create `MatchRuntime(console=self, game=game, match_context=ctx, recorder=..., logger=..., rng=match_rng)` and call `game.run(runtime, ordered_players)`.
      - Emit `MATCH_END`, store `MatchResult` (final state, metadata, runtime events).
   4. Emit `BATCH_END` (include `seeds_used`, duration, `matches_completed`), detach execution spectators.
@@ -246,14 +248,15 @@ Cleanup session and emit SESSION_END (context manager protocol).
 17. **T4**: When seed is derived (not explicitly provided), MUST log the derivation method: "Generated session seed: {seed} from system entropy" or "Match {match_index} seed: {seed} (derived from base seed {base_seed})".
 
 ### 6.5 Handshake Lifecycle (H)
-18. **H1**: Console MUST run handshake before the first turn of every match and MUST abort (`HandshakeRejectedError`) on the first rejection.
-19. **H2**: Console MUST record both raw and normalized acknowledgement text in events, logs, recorder files, and `MatchContext`.
-20. **H3**: Console MUST emit `PLAYER_HANDSHAKE_START` and either `PLAYER_HANDSHAKE_COMPLETE` or `PLAYER_HANDSHAKE_ABORT` for every player.
-21. **H4**: `MatchContext.handshake_completed` MUST be `True` only when all players acknowledged successfully and MUST remain `False` otherwise (match aborted).
-22. **H5**: Upon successful handshake, console MUST ensure the handshake exchange remains available to subsequent `player.decide` calls unless a player explicitly resets conversation history.
+18. **H1**: Console MUST run handshake before the first turn of every match using the two-step Player API (`build_handshake_bundle` → `execute_handshake`) and MUST abort (`HandshakeRejectedError`) on the first rejection.
+19. **H2**: Console MUST emit `PLAYER_HANDSHAKE_START` before the LLM call, using the exact `PromptBundle` returned by `build_handshake_bundle` (prompt_text + prompt_blocks) and the controller handshake format.
+20. **H3**: Console MUST call `execute_handshake` with the exact bundle returned by `build_handshake_bundle` and then validate via `controller.validate_handshake(raw, context)`.
+21. **H4**: Console MUST emit `PLAYER_HANDSHAKE_COMPLETE` or `PLAYER_HANDSHAKE_ABORT` for every player with `accepted`, `normalized_response`, `response_text`, `controller_metadata`, and prompt metadata (prompt_text, prompt_blocks, controller_format, renderer_output, usage_info when available).
+22. **H5**: `MatchContext.handshake_completed` MUST be `True` only when all players acknowledged successfully and MUST remain `False` otherwise (match aborted).
+23. **H6**: Upon successful handshake, console MUST ensure the handshake exchange remains available to subsequent `player.decide` calls unless a player explicitly resets conversation history.
 
 ### 6.6 Event Ordering & Delivery (E)
-25. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (`MATCH_START` / **TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) / `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.
+25. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (`MATCH_START` / **TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) / **PLAYER_CONCLUSION** (per policy) / `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.
 26. **E2**: MUST attach session/match identifiers, phase indices, monotonic timestamps, and turn indices to events per `SPEC-OBSERVABILITY.md`.
 27. **E3**: Console MUST emit orchestration lifecycle events (SESSION, BATCH, MATCH_START, MATCH_END, CLEANUP) plus parse-failure events. Turn execution events remain TurnLoop responsibility; domain events remain Game responsibility.
 28. **E4**: `PLAYER_ACTION_PARSE_FAILED` MUST be emitted exactly once per parsing failure before any policy action is applied.
@@ -329,7 +332,7 @@ This layered approach prevents silent failures while maintaining separation of c
         - If returns `List[Player]`: Validate (same players, correct length, no duplicates), raise `ValueError` on failure
         - Record `player_order` (original indices), `player_order_source` ("console" or "game"), `first_player` (name + index)
         - Log at DEBUG level: "Player order determined: [names] (source: console/game)"
-     d. Execute handshake phase with ordered players (emit `PLAYER_HANDSHAKE_*`, update `MatchContext.handshake_completed`)
+     d. Execute handshake phase with ordered players (build prompt → emit `PLAYER_HANDSHAKE_START` with prompt_text/prompt_blocks + controller_format → execute LLM call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`, update `MatchContext.handshake_completed`)
      e. Reset player conversations/logging
      f. Emit `MATCH_START` (with seed, ordered player_names, player_order, player_order_source, first_player)
      g. **Create MatchRuntime & delegate to mechanic**:
@@ -345,7 +348,8 @@ This layered approach prevents silent failures while maintaining separation of c
         final_state, mechanic_events, truncated = game.run(match_runtime, ordered_players)
         ```
      h. Collect metadata (seed, player_names, player_order, player_order_source, first_player, handshake status, turn count, truncation, duration)
-     i. Emit `MATCH_END` (with same metadata as MATCH_START for correlation)
+     i. Execute conclusion phase per policy (emit `PLAYER_CONCLUSION` for selected players)
+     j. Emit `MATCH_END` (with same metadata as MATCH_START for correlation)
   5. Emit `BATCH_END` with accumulated results and seeds_used list, detach execution spectators, return list of `MatchResult`.
 - **Replay**
   - Replay engine consumes recorded events (from recorder or in-memory) and replays them through the same `EventBus`, honoring spectator scopes.

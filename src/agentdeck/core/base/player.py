@@ -1,8 +1,8 @@
 """
-Player abstract base class for AgentDeck v1.0.0.
+Player abstract base class for AgentDeck v1.3.0.
 
-Implements the three-phase player lifecycle per SPEC-PLAYER v1.0.0:
-- Handshake: Initial acknowledgment phase (mandatory)
+Implements the three-phase player lifecycle per SPEC-PLAYER v1.3.0:
+- Handshake: Build prompt + execute LLM acknowledgement (mandatory)
 - Turn: Repeated decision phase (action selection)
 - Conclusion: Optional post-match reflection phase
 
@@ -20,13 +20,15 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from ..prompt_builder import PromptBuilder
+from ..prompt_builder import PromptBuilder, _DEFAULT_TEMPLATE
 from ..types import (
     ActionResult,
     HandshakeContext,
+    HandshakeResponse,
     LifecyclePhase,
     MatchContext,
     MatchResult,
+    PromptBundle,
     RenderResult,
     TurnContext,
 )
@@ -42,7 +44,7 @@ class Player(ABC):
     """
     Abstract base for AI players with three-phase lifecycle.
 
-    Per SPEC-PLAYER v1.0.0, players execute three lifecycle phases:
+    Per SPEC-PLAYER v1.3.0, players execute three lifecycle phases:
     1. Handshake: Acknowledge match conditions (mandatory, called once)
     2. Turn: Make decisions each turn (repeated until match ends)
     3. Conclusion: Optional reflection after match completes
@@ -72,7 +74,7 @@ class Player(ABC):
         renderer: Optional[Renderer] = None,
         handshake_template: Optional[str | Path] = None,
         turn_template: Optional[str | Path] = None,
-        conclusion_template: Optional[str | Path] = None,
+        conclusion_template: Optional[str | Path] | object = _DEFAULT_TEMPLATE,
         model: str = "gpt-4",
         **config,
     ):
@@ -85,7 +87,8 @@ class Player(ABC):
             renderer: State formatter (defaults to TextRenderer)
             handshake_template: Template for handshake phase (string or Path)
             turn_template: Template for turn phase (string or Path)
-            conclusion_template: Template for conclusion phase (string or Path)
+            conclusion_template: Template for conclusion phase (string or Path).
+                Use None to disable conclusion composition explicitly.
             model: LLM model identifier (e.g., "gpt-4", "claude-3-opus")
             **config: Model parameters (temperature, max_tokens, etc.)
 
@@ -129,6 +132,7 @@ class Player(ABC):
         # Conversation management (CS2)
         self.conversation_manager: Optional[ConversationManager] = None
         self._local_history: List[Dict[str, str]] = []
+        self._last_exchange: Dict[str, Dict[str, Any]] = {}
 
         # Logging
         self.logger: Optional[AgentDeckLogger] = None
@@ -158,80 +162,68 @@ class Player(ABC):
     # Three-Phase Lifecycle Methods (SPEC-PLAYER §4)
     # =========================================================================
 
-    def handshake(self, context: HandshakeContext) -> str:
+    def build_handshake_bundle(self, context: HandshakeContext) -> PromptBundle:
         """
-        Execute handshake phase (mandatory, called once per match).
+        Build the handshake prompt bundle without invoking the LLM.
 
-        Per SPEC-PLAYER §5.1 HS1-HS4, handshake is always mandatory and must
-        preserve prompts/responses in conversation history.
-
-        Args:
-            context: Handshake context from console (match metadata)
-
-        Returns:
-            Raw acknowledgement string from LLM (console validates via handshake_controller)
-
-        Raises:
-            RuntimeError: If LLM provider fails after retries
-
-        Example:
-            context = HandshakeContext(
-                match_id="match-123",
-                player_name="Alice",
-                opponent_names=["Bob"],
-                game_name="FixedDamageGame",
-                seed=42
-            )
-            raw_response = player.handshake(context)
-            # Console validates: result = handshake_controller.parse(raw_response, context)
+        Per SPEC-PLAYER §5.1 HS1-HS3, Console must emit PLAYER_HANDSHAKE_START
+        before the LLM call using the exact prompt bundle returned here.
         """
-        # Build handshake prompt via PromptBuilder (PP1)
-        # Use empty RenderResult since no game state yet
         empty_render = RenderResult(text="", metadata={})
 
-        # During handshake, pass handshake instructions to BOTH parameters for backward compatibility:
-        # - controller_format: for legacy templates that reference {controller_format}
-        # - handshake_controller_format: for new templates that reference {handshake_controller_format}
         handshake_fmt = self.controller.get_handshake_format_instructions()
-        bundle = self.prompt_builder.compose(
+        return self.prompt_builder.compose(
             phase=LifecyclePhase.HANDSHAKE,
             render_result=empty_render,
-            controller_format=handshake_fmt,  # For legacy template compatibility
-            handshake_controller_format=handshake_fmt,  # For new template placeholder
+            controller_format=handshake_fmt,  # Legacy template compatibility
+            handshake_controller_format=handshake_fmt,  # New template placeholder
             turn_context=None,
             extras={
                 "game_name": context.game_name,
                 "game_instructions": (
                     context.metadata.get("game_instructions", "") if context.metadata else ""
                 ),
-                "player_instructions": "",  # Optional, renders empty if not provided
+                "player_instructions": (
+                    context.metadata.get("player_instructions", "") if context.metadata else ""
+                ),
             },
         )
 
-        # Invoke LLM
+    def execute_handshake(
+        self, bundle: PromptBundle, context: HandshakeContext
+    ) -> HandshakeResponse:
+        """
+        Execute the handshake LLM call and record the exchange.
+
+        Returns:
+            HandshakeResponse containing raw response and optional usage metadata.
+        """
         raw_response = self.get_response(bundle.text)
 
-        # Preserve in conversation history (HS2)
-        # Capture PM1-PM6 metadata for dialogue array
+        usage_info = getattr(self, "last_usage_info", None)
+        retries = getattr(self, "last_retries", None)
+        retry_durations = getattr(self, "last_retry_durations", None)
+        attempt_durations = getattr(self, "last_attempt_durations", None)
+
+        prompt_blocks = self._serialize_prompt_blocks(bundle.blocks)
         self._record_exchange(
             bundle.text,
             raw_response,
             phase="handshake",
             turn_context=None,
-            prompt_blocks=[
-                {
-                    "key": b.key,
-                    "content": b.content,
-                    "metadata": b.metadata if b.metadata else {},
-                }
-                for b in bundle.blocks
-            ],
+            prompt_blocks=prompt_blocks,
             controller_format=self.controller.get_handshake_format_instructions(),
-            renderer_output=None,  # No game state yet in handshake
-            usage_info=None,  # Will be populated by LLMPlayer subclass if available
+            renderer_output=None,
+            usage_info=usage_info,
         )
 
-        return raw_response
+        return HandshakeResponse(
+            response_text=raw_response,
+            usage_info=usage_info,
+            retries=retries,
+            retry_durations=retry_durations,
+            attempt_durations=attempt_durations,
+        )
 
     def decide(
         self,
@@ -306,14 +298,7 @@ class Player(ABC):
         action_result.metadata.update(
             {
                 "raw_prompt": bundle.text,
-                "prompt_blocks": [
-                    {
-                        "key": b.key,
-                        "content": b.content,
-                        "metadata": b.metadata if b.metadata else {},
-                    }
-                    for b in bundle.blocks
-                ],
+                "prompt_blocks": self._serialize_prompt_blocks(bundle.blocks),
                 "prompt_length": len(bundle.text),
                 "raw_response": raw_response,
                 "turn_number": turn_context.turn_number,
@@ -346,7 +331,7 @@ class Player(ABC):
         """
         Execute conclusion phase (optional, called once after match ends).
 
-        Per SPEC-PLAYER §4, default implementation returns None. Subclasses
+        Default implementation records prompt metadata and returns None. Subclasses
         can override to provide post-match reflection.
 
         Args:
@@ -363,6 +348,97 @@ class Player(ABC):
                         return "GG! I played well and secured the win."
                     return "Tough loss. Need to adjust strategy next time."
         """
+        logger = getattr(self, "logger", None)
+
+        def _format_outcome() -> str:
+            if result.winner is None:
+                return "Draw"
+            if result.winner == self.name:
+                return f"You ({self.name}) won the match."
+            return f"{result.winner} won the match."
+
+        def _parse_conclusion_metadata(response_text: str) -> Dict[str, Any]:
+            if not response_text:
+                return {}
+            try:
+                parsed = self.controller.parse_conclusion(response_text)
+                return parsed if isinstance(parsed, dict) else {"reflection_text": parsed}
+            except Exception as exc:  # pragma: no cover - defensive
+                if logger:
+                    logger.debug(f"Conclusion parse failed for {self.name}: {exc}")
+                return {}
+
+        prompt_text = getattr(match_context, "conclusion_prompt", None)
+        prompt_blocks: List[Dict[str, Any]]
+        renderer_output: Dict[str, Any]
+
+        if prompt_text:
+            prompt_blocks = [
+                {"key": "conclusion_prompt", "content": prompt_text, "metadata": {}}
+            ]
+            renderer_output = {}
+        else:
+            try:
+                if self.prompt_builder._conclusion_template is None:
+                    prompt_text = f"Match concluded.\n\n{_format_outcome()}"
+                    prompt_blocks = [
+                        {"key": "outcome", "content": _format_outcome(), "metadata": {}}
+                    ]
+                    renderer_output = {}
+                else:
+                    final_view = self.renderer.render(
+                        result.final_state,
+                        player=self.name,
+                        turn_context=None,
+                    )
+                    render_result = (
+                        final_view
+                        if isinstance(final_view, RenderResult)
+                        else RenderResult(
+                            text=str(final_view),
+                            metadata=(
+                                getattr(final_view, "metadata", {})
+                                if hasattr(final_view, "metadata")
+                                else {}
+                            ),
+                        )
+                    )
+                    bundle = self.prompt_builder.compose(
+                        phase=LifecyclePhase.CONCLUSION,
+                        render_result=render_result,
+                        controller_format="",
+                        handshake_controller_format=None,
+                        turn_context=None,
+                        extras={
+                            "outcome": _format_outcome(),
+                            "player_name": self.name,
+                        },
+                    )
+                    prompt_text = bundle.text
+                    prompt_blocks = self._serialize_prompt_blocks(bundle.blocks)
+                    renderer_output = render_result.metadata if render_result.metadata else {}
+            except Exception as exc:  # pragma: no cover - defensive
+                if logger:
+                    logger.debug(f"Conclusion prompt build failed for {self.name}: {exc}")
+                prompt_text = f"Match concluded.\n\n{_format_outcome()}"
+                prompt_blocks = [
+                    {"key": "outcome", "content": _format_outcome(), "metadata": {}}
+                ]
+                renderer_output = {}
+
+        controller_metadata = _parse_conclusion_metadata("")
+        self._record_exchange(
+            prompt_text,
+            "",
+            phase="conclusion",
+            turn_context=None,
+            prompt_blocks=prompt_blocks,
+            controller_format="",
+            controller_metadata=controller_metadata,
+            renderer_output=renderer_output,
+            usage_info=None,
+        )
+
         return None  # Default: no reflection
 
     # =========================================================================
@@ -430,8 +506,20 @@ class Player(ABC):
             # Ready for match 2
         """
         self._local_history.clear()
+        self._last_exchange.clear()
         if self.conversation_manager:
             self.conversation_manager.reset()
+
+    def _serialize_prompt_blocks(self, blocks: List[Any]) -> List[Dict[str, Any]]:
+        """Convert PromptBuilder blocks into recorder-friendly dicts."""
+        return [
+            {
+                "key": block.key,
+                "content": block.content,
+                "metadata": block.metadata if block.metadata else {},
+            }
+            for block in blocks
+        ]
 
     def _record_exchange(
         self,
@@ -442,6 +530,7 @@ class Player(ABC):
         turn_context: Optional[TurnContext] = None,
         prompt_blocks: Optional[List[Dict]] = None,
         controller_format: Optional[str] = None,
+        controller_metadata: Optional[Dict[str, Any]] = None,
         renderer_output: Optional[Dict] = None,
         usage_info: Optional[Dict] = None,
     ) -> None:
@@ -460,9 +549,16 @@ class Player(ABC):
             turn_context: Optional turn metadata
             prompt_blocks: Structured prompt components from PromptBuilder (PM2)
             controller_format: Controller type used (PM5)
+            controller_metadata: Parsed controller metadata (PM6)
             renderer_output: Rendered view metadata (PM6)
             usage_info: LLM usage metadata - tokens, cost, model (PM4)
         """
+        response_metadata: Dict[str, Any] = {}
+        if usage_info:
+            response_metadata["usage_info"] = usage_info
+        if controller_metadata is not None:
+            response_metadata["controller_metadata"] = controller_metadata
+
         if self.conversation_manager:
             # Delegate to manager (CS2)
             self.conversation_manager.record_turn(
@@ -470,7 +566,7 @@ class Player(ABC):
                 assistant_message=response,
                 turn_context=turn_context,
                 prompt_metadata=[],
-                response_metadata={"usage_info": usage_info} if usage_info else {},
+                response_metadata=response_metadata,
                 phase=phase,
                 prompt_blocks=prompt_blocks,
                 controller_format=controller_format,
@@ -480,6 +576,23 @@ class Player(ABC):
             # Store locally (CS2)
             self._local_history.append({"role": "user", "content": prompt})
             self._local_history.append({"role": "assistant", "content": response})
+
+        # Preserve the latest exchange per phase for conclusion metadata
+        self._last_exchange[phase] = {
+            "prompt_text": prompt,
+            "prompt_blocks": copy.deepcopy(prompt_blocks) if prompt_blocks else [],
+            "response_text": response,
+            "controller_format": controller_format or "",
+            "controller_metadata": copy.deepcopy(controller_metadata)
+            if controller_metadata is not None
+            else {},
+            "renderer_output": copy.deepcopy(renderer_output) if renderer_output else {},
+            "usage_info": copy.deepcopy(usage_info) if usage_info else None,
+        }
+
+    def _get_last_exchange(self, phase: str) -> Optional[Dict[str, Any]]:
+        """Return the last recorded exchange for a lifecycle phase, if available."""
+        return self._last_exchange.get(phase)
 
     # =========================================================================
     # Introspection Helpers (CI2)
@@ -544,8 +657,10 @@ class Player(ABC):
             "module": component.__class__.__module__,
         }
 
-    def _truncate_template(self, template: str, max_length: int = 200) -> str:
+    def _truncate_template(self, template: Optional[str], max_length: int = 200) -> Optional[str]:
         """Truncate template for display in describe()."""
+        if template is None:
+            return None
         if len(template) <= max_length:
             return template
         return template[:max_length] + f"... ({len(template)} chars total)"

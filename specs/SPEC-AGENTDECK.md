@@ -38,9 +38,18 @@ class SessionConfig:
     log_level: Optional[LogLevel] = LogLevel.INFO
     log_file_levels: Optional[List[LogLevel]] = None
     log_format: str = "simple"
+    conclusion: ConclusionPolicy = ConclusionPolicy()
+
+@dataclass
+class ConclusionPolicy:
+    """Policy for post-match conclusion phase."""
+
+    enabled: bool = True
+    mode: str = "all"  # one of: all, winner, loser, specific
+    player: Optional[str] = None  # required when mode == "specific"
 ```
 
-**Guarantees**: Immutable input. `run_dir` is the console template for per-session directories. Console MUST create a run root at `{run_dir}/{session_id}/` and provision `logs/` + `records/` subdirectories within it. Custom recording/logging paths come from injecting alternative Recorder/Logger implementations. Session seeds are supplied via the `AgentDeck` constructor.
+**Guarantees**: Immutable input. `run_dir` is the console template for per-session directories. Console MUST create a run root at `{run_dir}/{session_id}/` and provision `logs/` + `records/` subdirectories within it. Custom recording/logging paths come from injecting alternative Recorder/Logger implementations. Session seeds are supplied via the `AgentDeck` constructor. `conclusion` controls whether and which players participate in the conclusion phase (SPEC-CONSOLE).
 
 **Logging Defaults**:
 - `log_level`: Controls stdout/console output. Defaults to `LogLevel.INFO` (match summaries, turn progress).

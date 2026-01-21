@@ -73,12 +73,12 @@ Player lifecycle events track the three-phase player model (handshake → turn �
   - Includes `player`, `match_id`, `response_text`, `normalized_response`, `accepted=False`, `reason` (rejection explanation)
   - Console aborts match after this event per SPEC-CONSOLE H1
 
-**Conclusion Phase Event** (emitted after match ends):
+**Conclusion Phase Event** (emitted before `MATCH_END` when policy enabled):
 
-- **`PLAYER_CONCLUSION`**: Emitted when player completes optional post-match reflection
-  - Includes `player`, `match_id`, `reflection_text` (LLM response), `outcome` (match result summary)
+- **`PLAYER_CONCLUSION`**: Emitted when the conclusion phase runs for a player (per Console policy)
+  - Includes `player`, `match_id`, `reflection_text` (LLM response, may be empty), `outcome` (match result summary)
   - Prompt metadata: `prompt_text`, `prompt_blocks`, `response_text`, `renderer_output`
-  - Emitted only when player implements `conclude()` and returns non-None reflection
+  - Emitted even when a player returns an empty reflection; policy determines who concludes
 
 **Parse Failure Event** (emitted during turn execution):
 
@@ -747,7 +747,7 @@ class PromptAnalyzer:
 | **EventBus** | Accepts `EventType` & `str`; constructs `Event`; routes to handlers; handles subscription churn. |
 | **GameEventEmitter** | Injects match context; sets/clears phase index; refuses to emit when unbound. |
 | **Execution helpers** | `TurnLoop` sets phase index correctly; emits `GAMEPLAY` with zero-based counter; binds/unbinds helpers in `finally`. |
-| **Player Lifecycle Events** | Emits `PLAYER_HANDSHAKE_START` → `PLAYER_HANDSHAKE_COMPLETE|ABORT` before first turn; emits `PLAYER_ACTION_PARSE_FAILED` on parsing failures; emits `PLAYER_CONCLUSION` after match; includes full prompt metadata and failure diagnostics. |
+| **Player Lifecycle Events** | Emits `PLAYER_HANDSHAKE_START` → `PLAYER_HANDSHAKE_COMPLETE|ABORT` before first turn; emits `PLAYER_ACTION_PARSE_FAILED` on parsing failures; emits `PLAYER_CONCLUSION` before `MATCH_END` when enabled; includes full prompt metadata and failure diagnostics. |
 | **Recorder/Replay** | Round-trip structural + domain events; ensure replays recreate the same `Event` objects; verify prompt metadata preserved. |
 | **Spectators** | Example spectators receive both structural and domain events; `event.context` contains expected metadata; JSON serialization validated. |
 
@@ -759,7 +759,7 @@ Automated tests should cover:
 - Replay integrity: recorded stream matches live stream.
 - **Handshake phase**: Verify `PLAYER_HANDSHAKE_START` emitted before `PLAYER_HANDSHAKE_COMPLETE|ABORT`; verify prompt metadata fields (`prompt_text`, `prompt_blocks`, `response_text`, `renderer_output`, `controller_format`, `controller_metadata`) present in COMPLETE/ABORT events.
 - **Parse failure phase**: Validate `PLAYER_ACTION_PARSE_FAILED` is emitted before policy resolution, includes serialized ParseResult, policy outcome, and optional prompt snapshot.
-- **Conclusion phase**: Verify `PLAYER_CONCLUSION` emitted only when player returns non-None reflection; verify prompt metadata present.
+- **Conclusion phase**: Verify `PLAYER_CONCLUSION` emitted for policy-selected players (even if reflection is empty); verify prompt metadata present.
 - **Prompt metadata integrity**: Verify `prompt_blocks` accurately represents PromptBuilder composition; verify `renderer_output` includes RenderResult metadata when applicable.
 - **Player ordering metadata**: Verify `MATCH_START` and `MATCH_END` include `player_order`, `player_order_source`, `first_player` fields; verify same seed produces identical player_order; verify metadata schema consistency across events and MatchResult.metadata.
 

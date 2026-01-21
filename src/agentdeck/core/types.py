@@ -35,7 +35,7 @@ class EventType(Enum):
 
     Event ordering per SPEC-CONSOLE §6.6 E1:
     SESSION_START → BATCH_START → PLAYER_HANDSHAKE_* → MATCH_START →
-    GAMEPLAY → MATCH_END → PLAYER_CONCLUSION → BATCH_END → SESSION_END
+    GAMEPLAY → PLAYER_CONCLUSION → MATCH_END → BATCH_END → SESSION_END
     """
 
     # Session lifecycle events (SPEC-OBSERVABILITY §3.1)
@@ -200,16 +200,16 @@ class SpectatorContext:
 
 
 # ============================================================================
-# Player Interaction Types (SPEC-PLAYER v1.0.0, SPEC-CONTROLLER v1.0.0)
+# Player Interaction Types (SPEC-PLAYER v1.3.0, SPEC-CONTROLLER v1.3.0)
 # ============================================================================
 
 
 @dataclass
 class HandshakeContext:
     """
-    Context provided to Player.handshake() and HandshakeController.parse().
+    Context provided to Player.build_handshake_bundle() and execute_handshake().
 
-    Per SPEC-PLAYER v1.0.0 §6, console provides this context so players can
+    Per SPEC-PLAYER v1.3.0 §6, console provides this context so players can
     tailor handshake prompts with match-specific information.
 
     Fields:
@@ -276,6 +276,29 @@ class HandshakeResult:
 
 
 @dataclass
+class HandshakeResponse:
+    """
+    Raw handshake response returned by Player.execute_handshake().
+
+    Per SPEC-PLAYER v1.3.0, this response is unvalidated. Console is
+    responsible for controller validation and lifecycle events.
+
+    Fields:
+        response_text: Raw LLM response
+        usage_info: Optional usage metadata (tokens, cost, latency)
+        retries: Optional retry count used by provider
+        retry_durations: Optional list of backoff delays (seconds)
+        attempt_durations: Optional list of attempt durations (seconds)
+    """
+
+    response_text: str
+    usage_info: Optional[Dict[str, Any]] = None
+    retries: Optional[int] = None
+    retry_durations: Optional[List[float]] = None
+    attempt_durations: Optional[List[float]] = None
+
+
+@dataclass
 class ActionResult:
     """
     Result from parsing turn action response (SPEC-CONTROLLER v1.0.0 §4.2).
@@ -309,7 +332,7 @@ class MatchContext:
     """
     Console-managed context for match execution.
 
-    Per SPEC-PLAYER v1.0.0 §6, this extends basic match metadata with
+    Per SPEC-PLAYER v1.3.0 §6, this extends basic match metadata with
     lifecycle tracking (handshake_completed) and RNG information.
 
     Per SPEC-CONSOLE §3 M4, includes previous_match_result for batch-local
@@ -323,6 +346,7 @@ class MatchContext:
         handshake_completed: True after all players complete handshake
         rng_info: Optional RNG state/metadata
         previous_match_result: Previous match result within current batch (None for first match)
+        conclusion_prompt: Optional override prompt for conclusion phase
 
     Example:
         context = MatchContext(

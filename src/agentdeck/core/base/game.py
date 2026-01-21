@@ -489,10 +489,12 @@ class Game(ABC):
 
     def requires_conclusion(self, game_state: Dict[str, Any]) -> Optional[str]:
         """
-        Optional hook to request a conclusion phase for a specific player.
+        Optional hook to request a game-specific conclusion prompt for a player.
 
-        Return the player name that should provide a conclusion, or None to skip.
-        Default skips the conclusion phase (no additional LLM calls).
+        Return the player name that should receive a custom conclusion prompt,
+        or None to indicate no game-specific prompt. The Console conclusion
+        policy controls whether conclusions run; this hook does not gate the
+        conclusion phase itself.
         """
         return None
 
@@ -501,7 +503,8 @@ class Game(ABC):
         Build a conclusion prompt for the specified player.
 
         Default provides a generic reflection prompt; games override to embed
-        domain-specific instructions or JSON shapes.
+        domain-specific instructions or JSON shapes. Called only when
+        requires_conclusion() selects the player and policy includes them.
         """
         return "Provide a brief reflection on the match outcome."
 

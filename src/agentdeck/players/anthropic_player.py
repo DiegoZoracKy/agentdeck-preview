@@ -41,14 +41,18 @@ class ClaudePlayer(LLMPlayer):
         # If we only have user messages, that's fine
         claude_messages = user_messages
 
-        response = self.client.messages.create(
-            model=self.model,
-            system=system_prompt if system_prompt else None,
-            messages=claude_messages,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
+        # Build kwargs, only include system if present
+        kwargs = {
+            "model": self.model,
+            "messages": claude_messages,
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
             **self.config,
-        )
+        }
+        if system_prompt:
+            kwargs["system"] = system_prompt
+
+        response = self.client.messages.create(**kwargs)
 
         response_text = response.content[0].text
 

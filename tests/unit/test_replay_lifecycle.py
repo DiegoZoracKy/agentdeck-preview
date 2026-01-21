@@ -73,11 +73,31 @@ def sample_recording_with_handshakes():
                 "type": "player_handshake_complete",
                 "data": {
                     "player": "Player-1",
-                    "response": "OK",
-                    "metadata": {
+                    "accepted": True,
+                    "normalized_response": "OK",
+                    "response_text": "OK",
+                    "controller_metadata": {
                         "allowed": ["READY", "OK", "YES"],
                         "player": "Player-1",
                         "match_id": "match_test",
+                    },
+                    "controller_format": "Reply with OK",
+                    "prompt_text": "Handshake prompt for Player-1",
+                    "prompt_blocks": [],
+                    "renderer_output": None,
+                    "prompt": {
+                        "phase": "handshake",
+                        "turn_number": None,
+                        "prompt_text": "Handshake prompt for Player-1",
+                        "prompt_blocks": [],
+                        "response_text": "OK",
+                        "controller_format": "Reply with OK",
+                        "controller_metadata": {
+                            "allowed": ["READY", "OK", "YES"],
+                            "player": "Player-1",
+                            "match_id": "match_test",
+                        },
+                        "renderer_output": None,
                     },
                 },
                 "context": {"match_id": "match_test"},
@@ -87,11 +107,31 @@ def sample_recording_with_handshakes():
                 "type": "player_handshake_complete",
                 "data": {
                     "player": "Player-2",
-                    "response": "READY",
-                    "metadata": {
+                    "accepted": True,
+                    "normalized_response": "READY",
+                    "response_text": "READY",
+                    "controller_metadata": {
                         "allowed": ["READY", "OK", "YES"],
                         "player": "Player-2",
                         "match_id": "match_test",
+                    },
+                    "controller_format": "Reply with OK",
+                    "prompt_text": "Handshake prompt for Player-2",
+                    "prompt_blocks": [],
+                    "renderer_output": None,
+                    "prompt": {
+                        "phase": "handshake",
+                        "turn_number": None,
+                        "prompt_text": "Handshake prompt for Player-2",
+                        "prompt_blocks": [],
+                        "response_text": "READY",
+                        "controller_format": "Reply with OK",
+                        "controller_metadata": {
+                            "allowed": ["READY", "OK", "YES"],
+                            "player": "Player-2",
+                            "match_id": "match_test",
+                        },
+                        "renderer_output": None,
                     },
                 },
                 "context": {"match_id": "match_test"},
@@ -120,7 +160,8 @@ def sample_recording_with_handshakes():
                 "type": "player_conclusion",
                 "data": {
                     "player": "Player-1",
-                    "reflection": "Great game.",
+                    "reflection_text": "Great game.",
+                    "outcome": "Player-1 won the match.",
                     "prompt_text": "How did you play?",
                     "prompt_blocks": [{"key": "outcome", "content": "You won!"}],
                 },
@@ -167,7 +208,8 @@ def sample_recording_with_conclusions():
                 "type": "player_conclusion",
                 "data": {
                     "player": "Player-1",
-                    "reflection": "I played well and won.",
+                    "reflection_text": "I played well and won.",
+                    "outcome": "Player-1 won the match.",
                     "prompt_text": "Match concluded. You won!",
                     "prompt_blocks": [{"key": "outcome", "content": "You won!"}],
                 },
@@ -237,9 +279,9 @@ class TestHandshakeReplay:
 
     def test_handshake_event_includes_metadata(self, sample_recording_with_handshakes):
         """
-        Verify handshake events include response and controller metadata.
+        Verify handshake events include normalized response and controller metadata.
 
-        Per SPEC-REPLAY EP3: payload must match live execution data (player, response, metadata)
+        Per SPEC-REPLAY EP3: payload must match live execution data (player, normalized_response, controller_metadata)
         """
         engine = ReplayEngine(sample_recording_with_handshakes)
         spy = EventCapture()
@@ -252,8 +294,10 @@ class TestHandshakeReplay:
 
         # Verify payload matches live structure
         assert first_handshake.data["player"] == "Player-1"
-        assert first_handshake.data["response"] == "OK"
-        assert first_handshake.data["metadata"] == {
+        assert first_handshake.data["accepted"] is True
+        assert first_handshake.data["normalized_response"] == "OK"
+        assert first_handshake.data["response_text"] == "OK"
+        assert first_handshake.data["controller_metadata"] == {
             "allowed": ["READY", "OK", "YES"],
             "player": "Player-1",
             "match_id": "match_test",
@@ -277,7 +321,12 @@ class TestHandshakeReplay:
             "events": [
                 {
                     "type": "player_handshake_start",
-                    "data": {"player": "Player-1"},
+                    "data": {
+                        "player": "Player-1",
+                        "prompt_text": "Handshake prompt for Player-1",
+                        "prompt_blocks": [],
+                        "controller_format": "Reply with OK",
+                    },
                     "context": {"match_id": "match_start_prefixed"},
                     "timestamp": 900,
                 },
@@ -285,12 +334,18 @@ class TestHandshakeReplay:
                     "type": "player_handshake_complete",
                     "data": {
                         "player": "Player-1",
-                        "response": "OK",
-                        "metadata": {
+                        "accepted": True,
+                        "normalized_response": "OK",
+                        "response_text": "OK",
+                        "controller_metadata": {
                             "player": "Player-1",
                             "match_id": "match_start_prefixed",
                             "allowed": ["OK"],
                         },
+                        "controller_format": "Reply with OK",
+                        "prompt_text": "Handshake prompt for Player-1",
+                        "prompt_blocks": [],
+                        "renderer_output": None,
                     },
                     "context": {"match_id": "match_start_prefixed"},
                     "timestamp": 950,
@@ -327,23 +382,83 @@ class TestHandshakeReplay:
         start_index = event_types.index(EventType.PLAYER_HANDSHAKE_START)
         assert start_index < match_start_index, "MATCH_START must follow all handshake events"
 
+    def test_backfills_handshake_start_prompt_from_complete(self):
+        """
+        ReplayEngine should enrich missing handshake START prompt_text using COMPLETE payloads.
+        """
+        recording = {
+            "schema_version": "1.3",
+            "schema_type": "match",
+            "match_id": "match_missing_prompt",
+            "game": "TestGame",
+            "players": ["Player-1"],
+            "winner": "Player-1",
+            "final_state": {},
+            "seed": 1,
+            "events": [
+                {
+                    "type": "player_handshake_start",
+                    "data": {
+                        "player": "Player-1",
+                    },
+                    "context": {"match_id": "match_missing_prompt"},
+                    "timestamp": 900,
+                },
+                {
+                    "type": "player_handshake_complete",
+                    "data": {
+                        "player": "Player-1",
+                        "accepted": True,
+                        "normalized_response": "OK",
+                        "response_text": "OK",
+                        "controller_metadata": {
+                            "player": "Player-1",
+                            "match_id": "match_missing_prompt",
+                            "allowed": ["OK"],
+                        },
+                        "controller_format": "Reply with OK",
+                        "prompt_text": "Handshake prompt for Player-1",
+                        "prompt_blocks": [],
+                        "renderer_output": None,
+                    },
+                    "context": {"match_id": "match_missing_prompt"},
+                    "timestamp": 950,
+                },
+            ],
+            "metadata": {
+                "match_id": "match_missing_prompt",
+                "players": ["Player-1"],
+            },
+        }
+
+        engine = ReplayEngine(recording)
+        spy = EventCapture()
+
+        engine.replay(spectators=[spy], speed=0.0)
+
+        handshake_starts = [e for e in spy.events if e.type == EventType.PLAYER_HANDSHAKE_START]
+        assert len(handshake_starts) == 1, "Should emit one handshake START"
+        assert (
+            handshake_starts[0].data.get("prompt_text") == "Handshake prompt for Player-1"
+        ), "Handshake START should be enriched with prompt_text"
+
 
 class TestConclusionReplay:
     """
-    Test 2B.2: Validate PLAYER_CONCLUSION events emitted after MATCH_END.
+    Test 2B.2: Validate PLAYER_CONCLUSION events emitted before MATCH_END.
 
-    Per SPEC-REPLAY LC5: conclusions must be emitted AFTER MATCH_END.
+    Per SPEC-REPLAY LC5: conclusions must be emitted BEFORE MATCH_END.
     """
 
-    def test_emits_conclusions_after_match_end(self, sample_recording_with_conclusions):
+    def test_emits_conclusions_before_match_end(self, sample_recording_with_conclusions):
         """
-        Verify conclusion events emitted after MATCH_END.
+        Verify conclusion events emitted before MATCH_END.
 
         Event order must be (per SPEC-REPLAY LC5):
         1. MATCH_START
         2. ... gameplay events ...
-        3. MATCH_END
-        4. PLAYER_CONCLUSION (Player-1)
+        3. PLAYER_CONCLUSION (Player-1)
+        4. MATCH_END
         """
         engine = ReplayEngine(sample_recording_with_conclusions)
         spy = EventCapture()
@@ -359,14 +474,14 @@ class TestConclusionReplay:
 
         assert len(conclusion_indices) == 1, "Should have 1 conclusion event"
         assert (
-            conclusion_indices[0] > match_end_idx
-        ), "Conclusion must follow MATCH_END (SPEC-REPLAY LC5)"
+            conclusion_indices[0] < match_end_idx
+        ), "Conclusion must precede MATCH_END (SPEC-REPLAY LC5)"
 
     def test_conclusion_event_includes_reflection(self, sample_recording_with_conclusions):
         """
         Verify conclusion events include reflection text.
 
-        Per SPEC-REPLAY PM1-PM3: MUST include response_text as reflection.
+        Per SPEC-REPLAY PM1-PM3: MUST include reflection_text and outcome fields.
         """
         engine = ReplayEngine(sample_recording_with_conclusions)
         spy = EventCapture()
@@ -378,7 +493,8 @@ class TestConclusionReplay:
 
         conclusion = conclusion_events[0]
         assert conclusion.data["player"] == "Player-1"
-        assert conclusion.data["reflection"] == "I played well and won."
+        assert conclusion.data["reflection_text"] == "I played well and won."
+        assert conclusion.data["outcome"] == "Player-1 won the match."
         assert "prompt_text" in conclusion.data
 
 
@@ -435,12 +551,18 @@ class TestContextHydration:
                     "type": "player_handshake_complete",
                     "data": {
                         "player": "Player-1",
-                        "response": "OK",
-                        "metadata": {
+                        "accepted": True,
+                        "normalized_response": "OK",
+                        "response_text": "OK",
+                        "controller_metadata": {
                             "allowed": ["READY", "OK", "YES"],
                             "player": "Player-1",
                             "match_id": "match_ctx_test",
                         },
+                        "controller_format": "Reply with OK",
+                        "prompt_text": "Handshake prompt for Player-1",
+                        "prompt_blocks": [],
+                        "renderer_output": None,
                     },
                     "context": {
                         "session_id": "session_abc123",
@@ -453,7 +575,8 @@ class TestContextHydration:
                     "type": "player_conclusion",
                     "data": {
                         "player": "Player-1",
-                        "reflection": "I won",
+                        "reflection_text": "I won",
+                        "outcome": "Player-1 won the match.",
                         "prompt_text": "Reflect",
                     },
                     "context": {

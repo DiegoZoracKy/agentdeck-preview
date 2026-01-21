@@ -309,19 +309,21 @@ class Controller(ABC):
     # Conclusion Phase (Default Passthrough - Rarely Overridden)
     # -------------------------------------------------------------------------
 
-    def parse_conclusion(self, response: str, *, context: Optional[TurnContext] = None) -> str:
+    def parse_conclusion(
+        self, response: str, *, context: Optional[TurnContext] = None
+    ) -> Dict[str, Any]:
         """
         Parse conclusion-phase response (per SPEC-CONTROLLER v1.3.0 §4).
 
-        Default implementation returns response as-is (trimmed). Override for
-        custom conclusion parsing (e.g., extracting reflections, emotions).
+        Default implementation returns a dict with ``reflection_text``. Override for
+        structured conclusion parsing (e.g., extracting lessons learned).
 
         Args:
             response: Raw LLM response from conclusion phase
             context: Optional context (game state, turn history, etc.)
 
         Returns:
-            Parsed conclusion string
+            Parsed conclusion metadata dict
 
         Requirements (CP1-CP2):
             - CP1: MUST be deterministic and side-effect free
@@ -330,16 +332,16 @@ class Controller(ABC):
         Example (default behavior):
             >>> result = controller.parse_conclusion("  Good game!  ")
             >>> result
-            'Good game!'
+            {'reflection_text': 'Good game!'}
 
         Example (custom override):
             >>> class ReflectiveController(ActionOnlyController):
             ...     def parse_conclusion(self, response, *, context=None):
             ...         # Extract reflection from "REFLECTION: ..." format
             ...         if "REFLECTION:" in response:
-            ...             return response.split("REFLECTION:")[1].strip()
-            ...         return response.strip()
+            ...             return {"reflection_text": response.split("REFLECTION:")[1].strip()}
+            ...         return {"reflection_text": response.strip()}
 
         Usage: Console calls this during conclusion phase to parse final message.
         """
-        return response.strip()
+        return {"reflection_text": response.strip()}

@@ -121,7 +121,11 @@ class MatchNarrator(Spectator):
 
         data = event.data
         player = data.get("player", "Unknown")
-        response = data.get("response", "")
+        response = (
+            data.get("normalized_response")
+            or data.get("response_text")
+            or data.get("response", "")
+        )
 
         # Log the handshake acceptance
         prompt = data.get("prompt_text") or self._handshake_prompts.get(player)
@@ -263,7 +267,7 @@ class MatchNarrator(Spectator):
 
         data = event.data
         player = data.get("player", "Unknown")
-        reflection = data.get("reflection")
+        reflection = data.get("reflection_text")
 
         if reflection:
             self.logger.info(f"💭 {player} reflection: {reflection}")

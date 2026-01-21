@@ -29,6 +29,7 @@
 ## 4. Public API
 - `LLMPlayer(name, *, api_key=None, model=None, temperature=1.0, max_tokens=None, prompt=None, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, max_retries=3, retry_delay=1.0, **kwargs)`
   - **Note**: Single `controller` parameter per SPEC-PLAYER v1.2.0 / SPEC-CONTROLLER v1.3.0.
+  - `conclusion_template=None` disables conclusion prompt composition; player SHOULD still record minimal conclusion prompt metadata for observability.
   - `kwargs` forwarded to provider (top_p, penalties, etc.).
   - Defaults: Null handshake/turn templates, TextRenderer. Controller parameter is required.
 - Subclass responsibilities:
@@ -338,7 +339,9 @@ def test_conversation_manager_delegation():
         return "OK", {"tokens_used": 10, "cost": 0.0}
 
     with patch.object(player, '_make_api_call', side_effect=mock_api_call):
-        player.handshake(MagicMock())
+        context = MagicMock()
+        bundle = player.build_handshake_bundle(context)
+        player.execute_handshake(bundle, context)
 
     # Verify history delegated to manager
     mock_manager.append_history.assert_called()

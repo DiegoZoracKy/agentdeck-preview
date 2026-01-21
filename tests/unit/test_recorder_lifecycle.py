@@ -76,19 +76,21 @@ class TestHandshakeEventBuffering:
                 type=EventType.PLAYER_HANDSHAKE_COMPLETE,
                 data={
                     "player": "Player-1",
-                    "response": "OK",
+                    "accepted": True,
+                    "normalized_response": "OK",
+                    "response_text": "OK",
                     "prompt_text": "You are playing TestGame. Reply OK to start.",
-                    "metadata": {
-                        "usage_info": {"tokens": 10, "cost": 0.0001},
-                        "prompt_blocks": [
-                            {
-                                "key": "game_instructions",
-                                "content": "You are playing TestGame.",
-                                "metadata": {},
-                            }
-                        ],
-                        "controller_format": "Reply with OK, READY, or YES",
-                    },
+                    "prompt_blocks": [
+                        {
+                            "key": "game_instructions",
+                            "content": "You are playing TestGame.",
+                            "metadata": {},
+                        }
+                    ],
+                    "controller_format": "Reply with OK, READY, or YES",
+                    "controller_metadata": {"allowed": ["OK", "READY", "YES"]},
+                    "renderer_output": None,
+                    "usage_info": {"tokens": 10, "cost": 0.0001},
                 },
                 context={"session_id": "test_session"},
             )
@@ -173,9 +175,14 @@ class TestHandshakeEventBuffering:
                 type=EventType.PLAYER_HANDSHAKE_COMPLETE,
                 data={
                     "player": "Player-1",
-                    "response": "OK",
+                    "accepted": True,
+                    "normalized_response": "OK",
+                    "response_text": "OK",
                     "prompt_text": "Test prompt",
-                    "metadata": {},
+                    "prompt_blocks": [],
+                    "controller_format": "Reply with OK",
+                    "controller_metadata": {},
+                    "renderer_output": None,
                 },
                 context={"session_id": "test_session"},
             )
@@ -254,23 +261,24 @@ class TestHandshakeMetadata:
                 type=EventType.PLAYER_HANDSHAKE_COMPLETE,
                 data={
                     "player": "Player-1",
-                    "response": "OK",
+                    "accepted": True,
+                    "normalized_response": "OK",
+                    "response_text": "OK",
                     "prompt_text": "Full handshake prompt",  # PM1
-                    "metadata": {
-                        "prompt_blocks": [  # PM2
-                            {"key": "instructions", "content": "Game rules", "metadata": {}},
-                            {"key": "format", "content": "Reply OK", "metadata": {}},
-                        ],
-                        "usage_info": {  # PM4
-                            "tokens": 50,
-                            "prompt_tokens": 30,
-                            "completion_tokens": 20,
-                            "cost": 0.0005,
-                            "model": "gpt-4o-mini",
-                        },
-                        "controller_format": "Reply with OK, READY, or YES",  # PM5
-                        "controller_metadata": {"accepted": True},  # PM6
+                    "prompt_blocks": [  # PM2
+                        {"key": "instructions", "content": "Game rules", "metadata": {}},
+                        {"key": "format", "content": "Reply OK", "metadata": {}},
+                    ],
+                    "usage_info": {  # PM4
+                        "tokens": 50,
+                        "prompt_tokens": 30,
+                        "completion_tokens": 20,
+                        "cost": 0.0005,
+                        "model": "gpt-4o-mini",
                     },
+                    "controller_format": "Reply with OK, READY, or YES",  # PM5
+                    "controller_metadata": {"accepted": True},  # PM6
+                    "renderer_output": None,
                 },
                 context={"match_id": "match_001"},
             )
@@ -343,12 +351,16 @@ class TestHandshakeAbort:
                 type=EventType.PLAYER_HANDSHAKE_ABORT,
                 data={
                     "player": "Player-1",
-                    "response": "I refuse to play",
+                    "accepted": False,
+                    "normalized_response": None,
+                    "response_text": "I refuse to play",
+                    "controller_metadata": {},
                     "reason": "Player declined participation",
                     "prompt_text": "Handshake prompt",
-                    "metadata": {
-                        "usage_info": {"tokens": 15},
-                    },
+                    "prompt_blocks": [],
+                    "controller_format": "Reply with OK",
+                    "renderer_output": None,
+                    "usage_info": {"tokens": 15},
                 },
                 context={"match_id": "match_001"},
             )
@@ -413,11 +425,13 @@ class TestConclusionDialogue:
                 type=EventType.PLAYER_CONCLUSION,
                 data={
                     "player": "Player-1",
-                    "response": "I played well and won!",
+                    "reflection_text": "I played well and won!",
+                    "outcome": "Player-1 won the match.",
                     "prompt_text": "Reflect on your performance.",
+                    "response_text": "I played well and won!",
+                    "controller_format": "Provide a brief reflection",
                     "metadata": {
                         "usage_info": {"tokens": 25},
-                        "controller_format": "Provide a brief reflection",
                     },
                 },
                 context={"match_id": "match_001"},
@@ -473,9 +487,14 @@ class TestDialogueOrdering:
                 type=EventType.PLAYER_HANDSHAKE_COMPLETE,
                 data={
                     "player": "Player-1",
-                    "response": "OK",
+                    "accepted": True,
+                    "normalized_response": "OK",
+                    "response_text": "OK",
                     "prompt_text": "Handshake prompt",
-                    "metadata": {},
+                    "prompt_blocks": [],
+                    "controller_format": "Reply with OK",
+                    "controller_metadata": {},
+                    "renderer_output": None,
                 },
                 context={"session_id": "test_session"},
             )
@@ -515,8 +534,10 @@ class TestDialogueOrdering:
                 type=EventType.PLAYER_CONCLUSION,
                 data={
                     "player": "Player-1",
-                    "response": "Good game!",
+                    "reflection_text": "Good game!",
+                    "outcome": "Player-1 won the match.",
                     "prompt_text": "Conclusion prompt",
+                    "response_text": "Good game!",
                     "metadata": {},
                 },
                 context={"match_id": "match_001"},

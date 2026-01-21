@@ -11,17 +11,10 @@ Additionally validates:
 - LC1/LC2: PLAYER_HANDSHAKE_START → COMPLETE/ABORT before MATCH_START
 - CR1/CR2: EventContext populated with session/batch/match IDs
 
-KNOWN ISSUE - Console LC5 violation:
-Console currently emits PLAYER_CONCLUSION events BEFORE MATCH_END (console.py:303-304),
-which violates SPEC-REPLAY LC5. This test XFAILS the conclusion ordering assertion
-until Console is fixed. Once Console emits conclusions AFTER MATCH_END, remove
-the xfail and this test will enforce full parity including correct LC5 ordering.
-
 Test approach:
 1. Run live match with EventCapture
 2. Replay recording with EventCapture
 3. Compare event streams (types, order, data)
-4. XFAIL conclusion ordering due to known Console bug
 """
 
 import json
@@ -96,9 +89,6 @@ def test_live_vs_replay_event_parity(temp_recording_dir):
     - LC1/LC2: Handshake lifecycle (START → COMPLETE) in both
     - CR1/CR2: Context fields present in replay events
 
-    XFAIL: Conclusion ordering will differ until Console bug is fixed.
-    Live emits conclusions BEFORE MATCH_END (Console bug), replay correctly
-    emits AFTER MATCH_END per SPEC-REPLAY LC5.
     """
     # =============== LIVE EXECUTION ===============
     # Capture events during live match
@@ -149,7 +139,6 @@ def test_live_vs_replay_event_parity(temp_recording_dir):
     replay_event_types = [e.type for e in replay_capture.events]
 
     # EP1: Event type parity
-    # NOTE: Conclusion ordering differs (Console LC5 bug) but counts are the same
 
     # Count each event type
     live_counts = {
@@ -205,6 +194,15 @@ def test_live_vs_replay_event_parity(temp_recording_dir):
         assert live_hs.data.get("player") == replay_hs.data.get(
             "player"
         ), f"Handshake START {i}: player mismatch (EP3)"
+        assert live_hs.data.get(
+            "prompt_text"
+        ), f"Handshake START {i}: missing prompt_text (HS spec)"
+        assert isinstance(
+            live_hs.data.get("prompt_blocks"), list
+        ), f"Handshake START {i}: prompt_blocks must be list (HS spec)"
+        assert (
+            live_hs.data.get("prompt_text") == replay_hs.data.get("prompt_text")
+        ), f"Handshake START {i}: prompt_text mismatch (EP3)"
 
     live_handshake_completes = [
         e for e in live_capture.events if e.type == EventType.PLAYER_HANDSHAKE_COMPLETE
@@ -257,25 +255,22 @@ def test_live_vs_replay_event_parity(temp_recording_dir):
             idx < match_start_idx for idx in all_handshake_indices
         ), f"{name}: All handshake events must precede MATCH_START (LC2)"
 
-    # LC5: Verify replay emits conclusions AFTER MATCH_END (correct per spec)
+    # LC5: Verify conclusions are emitted BEFORE MATCH_END
     replay_match_end_idx = replay_event_types.index(EventType.MATCH_END)
     replay_conclusion_indices = [
         i for i, t in enumerate(replay_event_types) if t == EventType.PLAYER_CONCLUSION
     ]
     assert all(
-        idx > replay_match_end_idx for idx in replay_conclusion_indices
-    ), "Replay conclusions must follow MATCH_END (LC5)"
+        idx < replay_match_end_idx for idx in replay_conclusion_indices
+    ), "Replay conclusions must precede MATCH_END (LC5)"
 
-    # Document Console LC5 violation (for tracking purposes, not failing the test)
     live_match_end_idx = live_event_types.index(EventType.MATCH_END)
     live_conclusion_indices = [
         i for i, t in enumerate(live_event_types) if t == EventType.PLAYER_CONCLUSION
     ]
-    console_violates_lc5 = any(idx < live_match_end_idx for idx in live_conclusion_indices)
-    if console_violates_lc5:
-        # Expected: Console emits conclusions before MATCH_END (known bug)
-        # This will be fixed when Console is updated to follow LC5
-        pass
+    assert all(
+        idx < live_match_end_idx for idx in live_conclusion_indices
+    ), "Live conclusions must precede MATCH_END (LC5)"
 
     # CR1/CR2: Verify replay events have context fields
     replay_lifecycle_events = [

@@ -2,7 +2,7 @@
 
 **Version**: 2.0 (Lean Navigation)
 **Status**: Active
-**Last Updated**: 2025-01-27
+**Last Updated**: 2026-01-20
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -114,12 +114,14 @@ session_start
 
 ### 2.3 Three-Phase Player Lifecycle
 
-Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.1.0:
+Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.3.0:
 
 1. **Handshake Phase** (Mandatory, before gameplay):
-   - Console → Player.handshake() → Raw response
-   - Console → HandshakeController.parse() → HandshakeResult
-   - Console emits PLAYER_HANDSHAKE_START → COMPLETE/ABORT
+   - Console → Player.build_handshake_bundle() → PromptBundle
+   - Console emits PLAYER_HANDSHAKE_START (with prompt_text + prompt_blocks)
+   - Console → Player.execute_handshake() → HandshakeResponse
+   - Console → Controller.validate_handshake() → HandshakeResult
+   - Console emits PLAYER_HANDSHAKE_COMPLETE/ABORT
 
 2. **Turn Phase** (Gameplay loop):
    - Game.get_view() → player_view (includes narrative)
@@ -128,9 +130,9 @@ Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.1.0:
    - Game.update() → New State
    - Console emits GAMEPLAY (with prompt payload)
 
-3. **Conclusion Phase** (Optional, post-match reflection):
-   - Console → Player.conclude() → Optional reflection
-   - Console emits PLAYER_CONCLUSION
+3. **Conclusion Phase** (Policy-driven, post-match reflection):
+   - Console applies conclusion policy → Player.conclude()
+   - Console emits PLAYER_CONCLUSION before MATCH_END
 
 ### 2.4 Reproducibility Architecture
 
@@ -188,10 +190,10 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [AgentDeck](SPEC-AGENTDECK.md) | 1.0.0 | Final | Public API facade for the framework |
-| [Console](SPEC-CONSOLE.md) | 0.4.0 | Final | Execution engine for session/match lifecycle |
+| [Console](SPEC-CONSOLE.md) | 0.6.0 | Draft | Execution engine for session/match lifecycle |
 | [EventBus](SPEC-OBSERVABILITY.md) | 1.1.0 | Final | Event distribution and spectator routing |
 | [Game](SPEC-GAME.md) | 0.5.0 | Final | Game author contract (rules, state, narrative) |
-| [Player](SPEC-PLAYER.md) | 1.1.0 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Player](SPEC-PLAYER.md) | 1.3.0 | Draft | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.1.0 | Final | Handshake & action parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
 | [Spectator](SPEC-SPECTATOR.md) | 1.0.0 | Final | Observation and analysis interface |

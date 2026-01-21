@@ -1,10 +1,14 @@
 # File: pricing.yaml
 # Pricing per 1 million tokens (Input/Output) in USD
-# Source: OpenAI pricing (Standard tier) as of 2025-01-15
+# Sources:
+#   - OpenAI: https://openai.com/api/pricing
+#   - Anthropic: https://platform.claude.com/docs/en/about-claude/pricing
 
 metadata:
-  last_updated: "2025-01-15"
-  source: "https://openai.com/api/pricing"
+  last_updated: "2026-01-20"
+  sources:
+    - "https://openai.com/api/pricing"
+    - "https://platform.claude.com/docs/en/about-claude/pricing"
 
 openai:
   # --- GPT-4.1 Series (Standard) ---
@@ -57,4 +61,99 @@ openai:
     input_cost_per_million: 5.00
     output_cost_per_million: 15.00
     last_updated: "2025-01-15"
+    tier: "standard"
+
+# ============================================================================
+# Anthropic Claude Models
+# Source: https://platform.claude.com/docs/en/about-claude/pricing
+# ============================================================================
+anthropic:
+  # --- Claude 4.5 Series (Latest) ---
+  claude-opus-4-5-20251101: &claude_opus_45
+    input_cost_per_million: 5.00
+    output_cost_per_million: 25.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-opus-4.5-latest: *claude_opus_45
+
+  claude-sonnet-4-5-20251101: &claude_sonnet_45
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-sonnet-4.5-latest: *claude_sonnet_45
+
+  claude-haiku-4-5-20251101: &claude_haiku_45
+    input_cost_per_million: 1.00
+    output_cost_per_million: 5.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-haiku-4.5-latest: *claude_haiku_45
+
+  # --- Claude 4.1 Series ---
+  claude-opus-4-1-20250514: &claude_opus_41
+    input_cost_per_million: 15.00
+    output_cost_per_million: 75.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-opus-4.1-latest: *claude_opus_41
+
+  # --- Claude 4 Series ---
+  claude-opus-4-20250514: &claude_opus_4
+    input_cost_per_million: 15.00
+    output_cost_per_million: 75.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-opus-4-latest: *claude_opus_4
+
+  claude-sonnet-4-20250514: &claude_sonnet_4
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-sonnet-4-latest: *claude_sonnet_4
+
+  # --- Claude 3.7 Series (Deprecated) ---
+  claude-3-7-sonnet-20250219: &claude_sonnet_37
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-sonnet-3.7-latest: *claude_sonnet_37
+
+  # --- Claude 3.5 Series ---
+  claude-3-5-sonnet-20241022: &claude_sonnet_35
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-3-5-sonnet-latest: *claude_sonnet_35
+
+  claude-3-5-haiku-20241022: &claude_haiku_35
+    input_cost_per_million: 0.80
+    output_cost_per_million: 4.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-3-5-haiku-latest: *claude_haiku_35
+
+  # --- Claude 3 Series ---
+  claude-3-opus-20240229: &claude_opus_3
+    input_cost_per_million: 15.00
+    output_cost_per_million: 75.00
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-3-opus-latest: *claude_opus_3
+
+  claude-3-haiku-20240307: &claude_haiku_3
+    input_cost_per_million: 0.25
+    output_cost_per_million: 1.25
+    last_updated: "2026-01-20"
+    tier: "standard"
+  claude-3-haiku-latest: *claude_haiku_3
+
+  # --- Defaults for Anthropic ---
+  _default:
+    input_cost_per_million: 3.00
+    output_cost_per_million: 15.00
+    last_updated: "2026-01-20"
     tier: "standard"

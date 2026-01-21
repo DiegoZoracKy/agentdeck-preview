@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..core.base.controller import Controller
 from ..core.base.player import Player
+from ..core.prompt_builder import _DEFAULT_TEMPLATE
 from ..core.base.renderer import Renderer
 from ..core.types import LifecyclePhase, RenderResult
 
@@ -31,7 +32,7 @@ class LLMPlayer(Player, ABC):
         renderer: Optional[Renderer] = None,
         handshake_template: Optional[Any] = None,
         turn_template: Optional[Any] = None,
-        conclusion_template: Optional[Any] = None,
+        conclusion_template: Optional[Any] | object = _DEFAULT_TEMPLATE,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         **kwargs,
@@ -49,7 +50,7 @@ class LLMPlayer(Player, ABC):
             renderer: State formatter (optional, uses TextRenderer if None)
             handshake_template: Template for handshake phase
             turn_template: Template for turn phase
-            conclusion_template: Template for conclusion phase
+            conclusion_template: Template for conclusion phase (use None to disable)
             max_retries: Number of API call retries
             retry_delay: Delay between retries in seconds
             **kwargs: Additional provider-specific parameters
@@ -280,7 +281,10 @@ class LLMPlayer(Player, ABC):
     def get_response(self, prompt: str) -> str:
         from ..core.prompt_builder import PromptBundle
 
-        response, _ = self._invoke_model(PromptBundle(text=prompt, blocks=[]), None)
+        response, metadata = self._invoke_model(PromptBundle(text=prompt, blocks=[]), None)
+        self.last_retries = metadata.get("retries")
+        self.last_retry_durations = metadata.get("retry_durations")
+        self.last_attempt_durations = metadata.get("attempt_durations")
         return response
 
     def describe(self) -> Dict[str, Any]:
@@ -331,7 +335,7 @@ class LLMPlayer(Player, ABC):
         """
         Execute conclusion phase - provide post-match reflection.
 
-        If conclusion_template is None, returns None (no reflection).
+        If conclusion_template is None, records minimal prompt metadata and returns None.
         Otherwise, prompts LLM for reflection on the match outcome.
 
         Args:
@@ -341,17 +345,31 @@ class LLMPlayer(Player, ABC):
         Returns:
             Optional reflection string from LLM
         """
+        logger = getattr(self, "logger", None)
+
+        def _parse_conclusion_metadata(text: str) -> Dict[str, Any]:
+            try:
+                parsed = self.controller.parse_conclusion(text)
+                return parsed if isinstance(parsed, dict) else {"reflection_text": parsed}
+            except Exception as exc:  # pragma: no cover - defensive
+                if logger:
+                    logger.debug(f"Conclusion parse failed for {self.name}: {exc}")
+                return {}
+
         explicit_prompt = getattr(match_context, "conclusion_prompt", None)
 
         if explicit_prompt:
             try:
                 reflection = self.get_response(explicit_prompt)
             except Exception as exc:  # pragma: no cover - defensive
-                logger = getattr(self, "logger", None)
                 if logger:
                     logger.debug(f"Conclusion failed for {self.name}: {exc}")
                 reflection = None
             else:
+                usage_info = getattr(self, "last_usage_info", None)
+                controller_metadata = (
+                    _parse_conclusion_metadata(reflection) if reflection is not None else {}
+                )
                 self._record_exchange(
                     explicit_prompt,
                     reflection or "",
@@ -361,18 +379,16 @@ class LLMPlayer(Player, ABC):
                         {"key": "conclusion_prompt", "content": explicit_prompt, "metadata": {}}
                     ],
                     controller_format="",
+                    controller_metadata=controller_metadata,
                     renderer_output={},
-                    usage_info=None,
+                    usage_info=usage_info,
                 )
 
             return reflection.strip() if reflection else None
 
         # Check if conclusion template is configured in PromptBuilder
-        if (
-            not hasattr(self.prompt_builder, "_conclusion_template")
-            or self.prompt_builder._conclusion_template is None
-        ):
-            return None
+        if self.prompt_builder._conclusion_template is None:
+            return super().conclude(result, match_context=match_context)
 
         # Build conclusion prompt using PromptBuilder
         try:
@@ -410,6 +426,9 @@ class LLMPlayer(Player, ABC):
 
             # Get LLM reflection
             reflection, metadata = self._invoke_model(bundle, None)
+            controller_metadata = (
+                _parse_conclusion_metadata(reflection) if reflection is not None else {}
+            )
 
             # Record dialogue for replay parity (SPEC-RECORDER PM1-PM6)
             self._record_exchange(
@@ -426,6 +445,7 @@ class LLMPlayer(Player, ABC):
                     for b in bundle.blocks
                 ],
                 controller_format="",  # No controller format for conclusions
+                controller_metadata=controller_metadata,
                 renderer_output=(
                     final_view.metadata
                     if isinstance(final_view, RenderResult) and final_view.metadata
