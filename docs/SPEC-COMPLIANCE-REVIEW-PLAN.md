@@ -195,9 +195,16 @@ Phase A is complete when:
 
 | Spec | Status | Compliant | Partial | Non-Compliant | Reviewer | Date |
 |------|--------|-----------|---------|---------------|----------|------|
-| SPEC-CONSOLE | Not Started | | | | | |
-| SPEC-GAME | Not Started | | | | | |
-| SPEC-RECORDER | Not Started | | | | | |
+| SPEC-CONSOLE | ✅ Complete | 39 (86.7%) | 3 | 3 | Claude | 2026-01-21 |
+| SPEC-GAME | ✅ Complete | 41 (93.2%) | 2 | 1 | Claude | 2026-01-21 |
+| SPEC-RECORDER | ✅ Complete | - | - | - | Claude | 2026-01-21 |
+| SPEC-REPLAY | ✅ Complete | - | - | - | Claude | 2026-01-21 |
+| SPEC-CONTROLLER | ✅ Complete | 26 (89.7%) | 2 | 1 | Claude | 2026-01-21 |
+| SPEC-SPECTATOR | ✅ Complete | 19 (90.5%) | 2 | 0 | Claude | 2026-01-21 |
+| SPEC-PLAYER | ✅ Complete | 18 (90.0%) | 2 | 0 | Claude | 2026-01-21 |
+| SPEC-AGENTDECK | ✅ Complete | 14 (82.4%) | 3 | 0 | Claude | 2026-01-21 |
+| SPEC-PROMPT-BUILDER | Not Started | | | | | |
+| SPEC-OBSERVABILITY | Not Started | | | | | |
 | ... | | | | | | |
 
 ---
