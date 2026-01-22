@@ -5,9 +5,9 @@
 ## SPEC-AGENTDECK
 Source: `docs/compliance/SPEC-AGENTDECK.md`
 
-- [ ] **E3**: Add `elapsed_time` as `@property` on AgentDeck class
-- [ ] **L4**: Consider exposing `session.finished_at` if needed for duration analysis
-- [ ] **R1**: Add explicit type validation in `replay()` method for match parameter
+- [x] **E3**: Add `elapsed_time` as `@property` on AgentDeck class ✅ Fixed 2026-01-22
+- [x] **L4**: Consider exposing `session.finished_at` if needed for duration analysis ✅ Addressed via `elapsed_time` property (duration available)
+- [x] **R1**: Add explicit type validation in `replay()` method for match parameter ✅ Fixed 2026-01-22
 
 ## SPEC-CONTROLLER
 Source: `docs/compliance/SPEC-CONTROLLER.md`
