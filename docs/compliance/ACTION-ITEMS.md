@@ -76,24 +76,24 @@ Source: `docs/compliance/SPEC-RENDERER.md`
 ## SPEC-RESEARCH
 Source: `docs/compliance/SPEC-RESEARCH.md`
 
-- [ ] Add elapsed_time tracking for progressive comparisons
-- [ ] Include player_order_source and ordering metadata in comparison outputs
-- [ ] Attach model and game config snapshots to comparison metadata
-- [ ] Compute CIs for aggregated metrics beyond win rates
-- [ ] Add explicit install guidance in dependency ImportErrors
-- [ ] Validate match recording files before analysis
-- [ ] Handle recorder schema version compatibility in post-hoc tools
+- [ ] DI3: Add elapsed_time tracking for progressive comparisons (deferred - enhancement)
+- [ ] SR3: Include player_order_source and ordering metadata in comparison outputs (deferred - enhancement)
+- [ ] RE2: Attach model and game config snapshots to comparison metadata (deferred - enhancement)
+- [ ] MA2: Compute CIs for aggregated metrics beyond win rates (deferred - enhancement)
+- [ ] DH1: Add explicit install guidance in dependency ImportErrors (deferred - documentation)
+- [ ] PH2: Validate match recording files before analysis (deferred - enhancement)
+- [ ] PH3: Handle recorder schema version compatibility in post-hoc tools (deferred - enhancement)
 
 ## SPEC-RESEARCH-EXPERIMENT
 Source: `docs/compliance/SPEC-RESEARCH-EXPERIMENT.md`
 
-- [ ] Enforce README.md presence per experiment in validator
-- [ ] Validate results.json/results.csv format and schema_version
-- [ ] Add recordings/ pointer-only validation
-- [ ] Provide deterministic export option or exclude generated_at from diff-sensitive checks
+- [ ] RE1: Enforce README.md presence per experiment in validator (deferred - validator enhancement)
+- [ ] RE2/RE5: Validate results.json/results.csv format and schema_version (deferred - validator enhancement)
+- [ ] RE6: Add recordings/ pointer-only validation (deferred - validator enhancement)
+- [ ] RE8: Provide deterministic export option or exclude generated_at from diff-sensitive checks (deferred - enhancement)
 
 ## SPEC-SPECTATOR
 Source: `docs/compliance/SPEC-SPECTATOR.md`
 
-- [ ] Consider adding player lifecycle handler stubs to base Spectator class for discoverability (optional, per duck-typing contract)
-- [ ] Document explicitly in spectator.py which handlers exist for player lifecycle events
+- [ ] CA1/CA3: Consider adding player lifecycle handler stubs to base Spectator class for discoverability (deferred - optional per duck-typing contract)
+- [ ] Document explicitly in spectator.py which handlers exist for player lifecycle events (deferred - documentation)
