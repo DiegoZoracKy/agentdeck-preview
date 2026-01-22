@@ -10,16 +10,23 @@ import yaml
 _pricing_data: Optional[Dict] = None
 
 
-def _validate_pricing_structure(data: Dict) -> None:
+def _validate_pricing_structure(data) -> None:
     """
     Validate pricing.yaml structure to catch typos and malformed data.
 
     Args:
-        data: The loaded pricing data dictionary
+        data: The loaded pricing data (should be dict)
 
     Raises:
         ValueError: If structure is invalid
     """
+    # V0: MUST check isinstance(data, dict) BEFORE calling .items()
+    # This prevents AttributeError when YAML root is list/scalar/None
+    if not isinstance(data, dict):
+        raise ValueError(
+            f"pricing.yaml root must be a dict, got {type(data).__name__}"
+        )
+
     if not data:
         return  # Empty dict is valid (will trigger warnings elsewhere)
 

@@ -58,14 +58,14 @@ Source: `docs/compliance/SPEC-PARALLEL.md`
 ## SPEC-PLAYER
 Source: `docs/compliance/SPEC-PLAYER.md`
 
-- [ ] **DS2**: Consider documenting that retry-related metadata (retries, attempt_durations) is LLMPlayer-specific, not required in base Player
-- [ ] **CI3**: Audit LLMPlayer subclasses to ensure they override `clone()` when needed for parallel execution
+- [x] **DS2**: Documented that retry-related metadata (retries, attempt_durations) is LLMPlayer-specific ✅ Verified 2026-01-22 - base Player lacks retry fields by design; LLMPlayer subclasses provide them
+- [x] **CI3**: Audit LLMPlayer subclasses for clone() ✅ Verified 2026-01-22 - LLMPlayer.clone() recreates client, providers inherit correctly
 
 ## SPEC-PRICING
 Source: `docs/compliance/SPEC-PRICING.md`
 
-- [ ] **V0**: Add explicit `isinstance(data, dict)` check at start of `_validate_pricing_structure()` (critical)
-- [ ] **C1**: Consider using AgentDeckLogger for consistent logging integration (optional)
+- [x] **V0**: Add explicit `isinstance(data, dict)` check at start of `_validate_pricing_structure()` (critical) ✅ Fixed 2026-01-22
+- [ ] **C1**: Consider using AgentDeckLogger for consistent logging integration (optional, deferred)
 
 ## SPEC-RENDERER
 Source: `docs/compliance/SPEC-RENDERER.md`
