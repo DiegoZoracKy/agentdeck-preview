@@ -211,6 +211,7 @@ Phase A is complete when:
 | SPEC-RENDERER | ✅ Complete | 7 (77.8%) | 1 | 1 | Codex | 2026-01-21 |
 | SPEC-RESEARCH | ✅ Complete | 25 (78.1%) | 7 | 0 | Codex | 2026-01-21 |
 | SPEC-PARALLEL | ✅ Complete | 8 (72.7%) | 3 | 0 | Codex | 2026-01-21 |
+| SPEC-RESEARCH-EXPERIMENT | ✅ Complete | 3 (37.5%) | 5 | 0 | Codex | 2026-01-21 |
 | ... | | | | | | |
 
 ---
