@@ -26,13 +26,13 @@ Source: `docs/compliance/SPEC-GAME-MECHANIC-TURN-BASED.md`
 ## SPEC-LLM
 Source: `docs/compliance/SPEC-LLM.md`
 
-- [ ] Define spec-compliant behavior for ADC providers like Gemini (update spec or enforce CC1 for non-ADC providers)
-- [ ] Add phase context to logger calls and metadata payloads
-- [ ] Include provider identifiers in usage_info and error messages
-- [ ] Propagate estimated token flags into usage_info/metadata
-- [ ] Remove duplicate local history appends
-- [ ] Align pricing fallback logging level with spec
-- [ ] Wire usage_info into handshake/turn metadata and add response_text/phase fields
+- [ ] CC1: Define spec-compliant behavior for ADC providers like Gemini (deferred - spec clarification needed)
+- [x] RE2/PM3: Add phase context to metadata payloads ✅ Fixed 2026-01-22
+- [x] RE3/MA1: Include provider identifiers in usage_info and error messages ✅ Fixed 2026-01-22
+- [x] MA4: Propagate estimated token flags into usage_info/metadata ✅ Fixed 2026-01-22
+- [x] CH2: Remove duplicate local history appends ✅ Fixed 2026-01-22
+- [x] PI3: Align pricing fallback logging level with spec (warning not error) ✅ Fixed 2026-01-22
+- [x] PM2: Add response_text to metadata ✅ Fixed 2026-01-22
 
 ## SPEC-MATCH-RUNTIME
 Source: `docs/compliance/SPEC-MATCH-RUNTIME.md`

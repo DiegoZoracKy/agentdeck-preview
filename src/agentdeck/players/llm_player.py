@@ -211,6 +211,8 @@ class LLMPlayer(Player, ABC):
 
                 self.last_response = response_text
 
+                # MA1: Include provider identifier in usage_info
+                provider = getattr(self, "PROVIDER", "unknown")
                 self.last_usage_info = {
                     "tokens": metadata.get("tokens_used", 0),
                     "total_tokens": self.total_tokens,
@@ -220,9 +222,13 @@ class LLMPlayer(Player, ABC):
                     "total_cost": self.total_cost,
                     "latency_ms": round(response_time * 1000, 1),
                     "model": metadata.get("model", self.model),
+                    "provider": provider,
                 }
                 if "provider_model" in metadata:
                     self.last_usage_info["provider_model"] = metadata["provider_model"]
+                # MA4: Propagate estimated flag when present
+                if metadata.get("estimated"):
+                    self.last_usage_info["estimated"] = True
 
                 if logger:
                     logger.api_response(player=self.name, response_text=response_text)
@@ -235,10 +241,21 @@ class LLMPlayer(Player, ABC):
                         duration=response_time,
                     )
 
-                self._append_history(current_user_message, response_text)
+                # CH2: History is recorded by Player._record_exchange() in lifecycle methods.
+                # Don't call _append_history here to avoid duplication.
+
+                # PM2/PM3: Include response_text and phase in metadata
+                phase = None
+                if turn_context is not None:
+                    phase = getattr(turn_context, "phase", None)
+                    if phase is None:
+                        # Infer phase from turn_context presence
+                        phase = "turn"
 
                 return response_text, {
                     "raw_response": response_text,
+                    "response_text": response_text,  # PM2: response_text key
+                    "phase": phase,  # PM3: phase context
                     "usage_info": getattr(self, "last_usage_info", None),
                     "retries": attempt,
                     "retry_durations": retry_durations,
@@ -249,8 +266,11 @@ class LLMPlayer(Player, ABC):
                 response_time = time.time() - start_time
                 attempt_durations.append(response_time)
                 if attempt == self.max_retries - 1:
+                    # RE3: Include provider identifier in error message
+                    provider = getattr(self, "PROVIDER", "unknown")
                     raise RuntimeError(
-                        f"Failed to get response from {self.model} after {self.max_retries} attempts: {exc}"
+                        f"Failed to get response from {provider}/{self.model} "
+                        f"after {self.max_retries} attempts: {exc}"
                     ) from exc
                 delay = self.retry_delay * (2**attempt)
                 retry_durations.append(delay)
@@ -260,7 +280,9 @@ class LLMPlayer(Player, ABC):
                     )
                 time.sleep(delay)
 
-        raise RuntimeError(f"Failed to get response from {self.model}")
+        # RE3: Include provider identifier in error message
+        provider = getattr(self, "PROVIDER", "unknown")
+        raise RuntimeError(f"Failed to get response from {provider}/{self.model}")
 
     def reset_conversation(self):
         """Reset conversation history for a new match."""
