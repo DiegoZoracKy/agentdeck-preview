@@ -209,6 +209,7 @@ Phase A is complete when:
 | SPEC-PRICING | ✅ Complete | 14 (87.5%) | 1 | 1 | Claude | 2026-01-21 |
 | SPEC-LLM | ✅ Complete | 11 (52.4%) | 8 | 2 | Codex | 2026-01-21 |
 | SPEC-RENDERER | ✅ Complete | 7 (77.8%) | 1 | 1 | Codex | 2026-01-21 |
+| SPEC-RESEARCH | ✅ Complete | 25 (78.1%) | 7 | 0 | Codex | 2026-01-21 |
 | ... | | | | | | |
 
 ---
