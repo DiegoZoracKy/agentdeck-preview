@@ -207,7 +207,7 @@ Phase A is complete when:
 | SPEC-OBSERVABILITY | ✅ Complete | 18 (90.0%) | 2 | 0 | Claude | 2026-01-21 |
 | SPEC-MONITOR | ✅ Complete | 22 (100%) | 0 | 0 | Claude | 2026-01-21 |
 | SPEC-PRICING | ✅ Complete | 14 (87.5%) | 1 | 1 | Claude | 2026-01-21 |
-| SPEC-LLM | Not Started | | | | | |
+| SPEC-LLM | ✅ Complete | 11 (52.4%) | 8 | 2 | Codex | 2026-01-21 |
 | SPEC-RENDERER | Not Started | | | | | |
 | ... | | | | | | |
 
