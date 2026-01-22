@@ -213,6 +213,7 @@ Phase A is complete when:
 | SPEC-PARALLEL | ✅ Complete | 8 (72.7%) | 3 | 0 | Codex | 2026-01-21 |
 | SPEC-RESEARCH-EXPERIMENT | ✅ Complete | 3 (37.5%) | 5 | 0 | Codex | 2026-01-21 |
 | SPEC-RESEARCH-PACKAGER | ✅ Complete | 8 (100%) | 0 | 0 | Codex | 2026-01-21 |
+| SPEC-MATCH-RUNTIME | ✅ Complete | 3 (42.9%) | 4 | 0 | Codex | 2026-01-21 |
 | ... | | | | | | |
 
 ---
