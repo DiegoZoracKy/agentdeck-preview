@@ -70,8 +70,8 @@ Source: `docs/compliance/SPEC-PRICING.md`
 ## SPEC-RENDERER
 Source: `docs/compliance/SPEC-RENDERER.md`
 
-- [ ] Add a metadata format hint (e.g., "format": "text")
-- [ ] Implement explicit validation and descriptive ValueError for required fields
+- [x] MO1: Add a metadata format hint (e.g., "format": "text") ✅ Fixed 2026-01-22
+- [ ] EH1: Implement explicit validation and descriptive ValueError for required fields (deferred - TextRenderer intentionally lenient; custom renderers can add validation)
 
 ## SPEC-RESEARCH
 Source: `docs/compliance/SPEC-RESEARCH.md`
