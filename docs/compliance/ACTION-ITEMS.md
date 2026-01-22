@@ -1,0 +1,99 @@
+# Action Items
+
+**Generated**: 2026-01-21
+
+## SPEC-AGENTDECK
+Source: `docs/compliance/SPEC-AGENTDECK.md`
+
+- [ ] **E3**: Add `elapsed_time` as `@property` on AgentDeck class
+- [ ] **L4**: Consider exposing `session.finished_at` if needed for duration analysis
+- [ ] **R1**: Add explicit type validation in `replay()` method for match parameter
+
+## SPEC-CONTROLLER
+Source: `docs/compliance/SPEC-CONTROLLER.md`
+
+- [ ] **GB6**: Add RuntimeError check in ActionOnlyController.parse() and ReasoningController.parse() when unbound and validation is expected, OR clarify in spec that validation-optional controllers don't need this check
+- [ ] **CP2**: Align parse_conclusion() return type between spec (dict) and implementation (str)
+
+## SPEC-GAME-MECHANIC-TURN-BASED
+Source: `docs/compliance/SPEC-GAME-MECHANIC-TURN-BASED.md`
+
+- [ ] Replace console.get_player_action calls with runtime-first parse failure handling
+- [ ] Validate get_current_player outputs and raise ValueError on invalid results
+- [ ] Include match_id in TurnLoop exception messages
+- [ ] Enforce JSON-serializable custom events
+
+## SPEC-LLM
+Source: `docs/compliance/SPEC-LLM.md`
+
+- [ ] Define spec-compliant behavior for ADC providers like Gemini (update spec or enforce CC1 for non-ADC providers)
+- [ ] Add phase context to logger calls and metadata payloads
+- [ ] Include provider identifiers in usage_info and error messages
+- [ ] Propagate estimated token flags into usage_info/metadata
+- [ ] Remove duplicate local history appends
+- [ ] Align pricing fallback logging level with spec
+- [ ] Wire usage_info into handshake/turn metadata and add response_text/phase fields
+
+## SPEC-MATCH-RUNTIME
+Source: `docs/compliance/SPEC-MATCH-RUNTIME.md`
+
+- [ ] Inject mechanic metadata and enforce ordering in emit_event
+- [ ] Fix handle_parse_failure to pass game context in Console runtime
+- [ ] Add runtime-level cleanup helpers for mechanics
+- [ ] Introduce compatibility tests/versioning for MatchRuntime API
+
+## SPEC-OBSERVABILITY
+Source: `docs/compliance/SPEC-OBSERVABILITY.md`
+
+- [ ] **PL3**: Verify PLAYER_ACTION_PARSE_FAILED emission includes all specified fields
+- [ ] **PL4**: Verify all lifecycle events include complete prompt metadata schema
+
+## SPEC-PARALLEL
+Source: `docs/compliance/SPEC-PARALLEL.md`
+
+- [ ] Log a warning when falling back to sequential due to get_player_order override
+- [ ] Cancel outstanding futures on first worker failure
+- [ ] Document benchmarking guidance for concurrency selection
+
+## SPEC-PLAYER
+Source: `docs/compliance/SPEC-PLAYER.md`
+
+- [ ] **DS2**: Consider documenting that retry-related metadata (retries, attempt_durations) is LLMPlayer-specific, not required in base Player
+- [ ] **CI3**: Audit LLMPlayer subclasses to ensure they override `clone()` when needed for parallel execution
+
+## SPEC-PRICING
+Source: `docs/compliance/SPEC-PRICING.md`
+
+- [ ] **V0**: Add explicit `isinstance(data, dict)` check at start of `_validate_pricing_structure()` (critical)
+- [ ] **C1**: Consider using AgentDeckLogger for consistent logging integration (optional)
+
+## SPEC-RENDERER
+Source: `docs/compliance/SPEC-RENDERER.md`
+
+- [ ] Add a metadata format hint (e.g., "format": "text")
+- [ ] Implement explicit validation and descriptive ValueError for required fields
+
+## SPEC-RESEARCH
+Source: `docs/compliance/SPEC-RESEARCH.md`
+
+- [ ] Add elapsed_time tracking for progressive comparisons
+- [ ] Include player_order_source and ordering metadata in comparison outputs
+- [ ] Attach model and game config snapshots to comparison metadata
+- [ ] Compute CIs for aggregated metrics beyond win rates
+- [ ] Add explicit install guidance in dependency ImportErrors
+- [ ] Validate match recording files before analysis
+- [ ] Handle recorder schema version compatibility in post-hoc tools
+
+## SPEC-RESEARCH-EXPERIMENT
+Source: `docs/compliance/SPEC-RESEARCH-EXPERIMENT.md`
+
+- [ ] Enforce README.md presence per experiment in validator
+- [ ] Validate results.json/results.csv format and schema_version
+- [ ] Add recordings/ pointer-only validation
+- [ ] Provide deterministic export option or exclude generated_at from diff-sensitive checks
+
+## SPEC-SPECTATOR
+Source: `docs/compliance/SPEC-SPECTATOR.md`
+
+- [ ] Consider adding player lifecycle handler stubs to base Spectator class for discoverability (optional, per duck-typing contract)
+- [ ] Document explicitly in spectator.py which handlers exist for player lifecycle events
