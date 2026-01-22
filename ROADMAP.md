@@ -1,6 +1,6 @@
 # AgentDeck Roadmap (Post v0.1.0)
 
-Last updated: 2026-01-22T00:00:00Z
+Last updated: 2026-01-22T01:30:00Z
 
 > Purpose: plan for spec compliance and validation of the research experiment standard.
 
@@ -122,9 +122,9 @@ Phase 6: Spec Compliance Review
   - See `docs/compliance/` for full reports.
 
 Phase 7: Full Drift Resolution
-- Status: In Progress
+- Status: Complete
 - Start: 2026-01-22T00:00:00Z
-- End: TBD
+- End: 2026-01-22T01:30:00Z
 - Deliverables:
   - Resolve ALL action items from `docs/compliance/ACTION-ITEMS.md` before Phase B.
   - Fix each spec in sequence, commit after each spec's fixes.
@@ -148,6 +148,11 @@ Phase 7: Full Drift Resolution
   - ACTION-ITEMS.md updated with completion status.
   - Compliance reports updated to reflect fixes.
   - No silent failure paths remain.
+- Results:
+  - 12 specs received code fixes (10 commits)
+  - Critical fixes: SPEC-PRICING V0, SPEC-CONTROLLER CP2, SPEC-LLM PM1-PM3
+  - 26 items fixed, remaining items deferred with rationale
+  - See `docs/compliance/ACTION-ITEMS.md` for full status
 
 Phase 8: Spec → Tests (Phase B)
 - Status: Not Started
@@ -174,4 +179,5 @@ Phase 8: Spec → Tests (Phase B)
 | 2026-01-21 | Completed Phase A spec compliance review | Systematic audit of all 20 specs against implementation |
 | 2026-01-21 | Created drift summary and action items | Aggregate findings for prioritized resolution |
 | 2026-01-22 | Expanded Phase 7 to cover ALL action items | Complete drift resolution before Phase B testing |
+| 2026-01-22 | Completed Phase 7 drift resolution | 26 items fixed; remaining deferred with rationale |
 | YYYY-MM-DD | ... | ... |
