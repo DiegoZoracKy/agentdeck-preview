@@ -37,10 +37,10 @@ Source: `docs/compliance/SPEC-LLM.md`
 ## SPEC-MATCH-RUNTIME
 Source: `docs/compliance/SPEC-MATCH-RUNTIME.md`
 
-- [ ] Inject mechanic metadata and enforce ordering in emit_event
-- [ ] Fix handle_parse_failure to pass game context in Console runtime
-- [ ] Add runtime-level cleanup helpers for mechanics
-- [ ] Introduce compatibility tests/versioning for MatchRuntime API
+- [ ] MR2: Inject mechanic metadata and enforce ordering in emit_event (deferred - architectural enhancement)
+- [x] MR4: Fix handle_parse_failure to pass game context in Console runtime ✅ Fixed 2026-01-22
+- [ ] MR6: Add runtime-level cleanup helpers for mechanics (deferred - architectural enhancement)
+- [ ] MR7: Introduce compatibility tests/versioning for MatchRuntime API (deferred - testing scope)
 
 ## SPEC-OBSERVABILITY
 Source: `docs/compliance/SPEC-OBSERVABILITY.md`

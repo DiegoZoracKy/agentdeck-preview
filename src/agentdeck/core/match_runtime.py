@@ -387,10 +387,12 @@ class MatchRuntime:
             ...     elif policy == ParseFailurePolicy.SKIP_TURN:
             ...         continue  # Skip to next turn
         """
+        # MR4: Pass game context to console helper
         return self._console._handle_parse_failure(
             player=player,
             error=error,
             turn_context=turn_context,
+            game=self._game,
         )
 
     def fork_rng(self, label: str) -> RandomGenerator:
