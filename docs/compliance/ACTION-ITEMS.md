@@ -18,10 +18,10 @@ Source: `docs/compliance/SPEC-CONTROLLER.md`
 ## SPEC-GAME-MECHANIC-TURN-BASED
 Source: `docs/compliance/SPEC-GAME-MECHANIC-TURN-BASED.md`
 
-- [ ] Replace console.get_player_action calls with runtime-first parse failure handling
-- [ ] Validate get_current_player outputs and raise ValueError on invalid results
-- [ ] Include match_id in TurnLoop exception messages
-- [ ] Enforce JSON-serializable custom events
+- [ ] TL3: Replace console.get_player_action calls with runtime-first parse failure handling (deferred - requires larger refactor, documented with NOTE comment)
+- [x] TL2: Validate get_current_player outputs and raise ValueError on invalid results ✅ Fixed 2026-01-22
+- [x] TL5: Include match_id in TurnLoop exception messages ✅ Fixed 2026-01-22
+- [x] TL6: Enforce JSON-serializable custom events ✅ Fixed 2026-01-22
 
 ## SPEC-LLM
 Source: `docs/compliance/SPEC-LLM.md`

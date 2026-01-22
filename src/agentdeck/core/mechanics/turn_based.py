@@ -338,8 +338,10 @@ class TurnLoop:
                     status = self.game.status(state)
                 except Exception as e:
                     turn_num = state.get("_turn_count", "unknown")
+                    # TL5: Include match_id in exception messages
                     raise RuntimeError(
-                        f"Error in {self.game.__class__.__name__}.status() at turn {turn_num}"
+                        f"Error in {self.game.__class__.__name__}.status() at turn {turn_num}. "
+                        f"match_id={self.runtime.match_id}"
                     ) from e
 
                 if status.is_over:
@@ -453,9 +455,11 @@ class TurnLoop:
                 break
 
         if player_obj is None:
-            raise RuntimeError(
+            # TL2: Raise ValueError for invalid player (not RuntimeError)
+            raise ValueError(
                 f"Game {self.game.__class__.__name__}.get_current_player() returned "
-                f"'{current_player_name}' which is not in the player list: {self.player_names}"
+                f"'{current_player_name}' which is not in the player list: {self.player_names}. "
+                f"match_id={self.runtime.match_id}"
             )
 
         turn_start = time.time()
@@ -465,9 +469,10 @@ class TurnLoop:
         try:
             player_view = self.game.get_view(state_copy_for_view, current_player_name)
         except Exception as e:
+            # TL5: Include match_id in exception messages
             raise RuntimeError(
                 f"Error in {self.game.__class__.__name__}.get_view() for player {current_player_name} "
-                f"during turn {turn_number}"
+                f"during turn {turn_number}. match_id={self.runtime.match_id}"
             ) from e
 
         # Build TurnContext (TL6)
@@ -484,6 +489,10 @@ class TurnLoop:
         )
 
         # Get player action (via console helper - maintains existing interface)
+        # NOTE (TL3): Ideally this would go through runtime.get_player_action() instead
+        # of runtime._console.get_player_action(). Currently the console method handles
+        # parse failures internally with retries/abort/forfeit logic. A future refactor
+        # could expose this via runtime to maintain the runtime-gateway contract.
         # Wrap in try/except to capture state before abort/forfeit (PF4)
         from ..types import MatchAbortedError, MatchForfeitedError
 
@@ -544,6 +553,17 @@ class TurnLoop:
         custom_events = self.game.get_events(adapter.before, current_player_name, action)
         turn_events: List[Event] = []
         if custom_events:
+            # TL6: Validate JSON-serializability of custom events
+            import json
+
+            for event in custom_events:
+                try:
+                    json.dumps(event.data)
+                except (TypeError, ValueError) as e:
+                    raise TypeError(
+                        f"Custom event '{event.event_type}' has non-JSON-serializable data: {e}. "
+                        f"match_id={self.runtime.match_id}, turn={turn_number}"
+                    ) from e
             turn_events.extend(custom_events)
 
         # Emit custom events via runtime (TL3)
@@ -554,8 +574,10 @@ class TurnLoop:
         try:
             status = self.game.status(final_state)
         except Exception as e:
+            # TL5: Include match_id in exception messages
             raise RuntimeError(
-                f"Error in {self.game.__class__.__name__}.status() after turn {turn_number}"
+                f"Error in {self.game.__class__.__name__}.status() after turn {turn_number}. "
+                f"match_id={self.runtime.match_id}"
             ) from e
 
         # Increment turn counter if game not over
