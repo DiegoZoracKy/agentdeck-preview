@@ -1,6 +1,6 @@
 # AgentDeck Roadmap (Post v0.1.0)
 
-Last updated: 2026-01-20T02:34:30Z
+Last updated: 2026-01-21T23:59:59Z
 
 > Purpose: plan for spec compliance and validation of the research experiment standard.
 
@@ -101,6 +101,54 @@ Phase 5: Session-to-Research Packager
   - Running the script creates a valid experiment folder with results and index.
   - `scripts/research_validate.py` passes on generated packages.
 
+Phase 6: Spec Compliance Review
+- Status: Complete
+- Start: 2026-01-21T00:00:00Z
+- End: 2026-01-21T23:59:59Z
+- Deliverables:
+  - Phase A complete: All 20 specs reviewed for implementation compliance.
+  - Per-spec compliance reports in `docs/compliance/SPEC-*.md`.
+  - Aggregated drift summary in `docs/compliance/DRIFT-SUMMARY.md`.
+  - Prioritized action items in `docs/compliance/ACTION-ITEMS.md`.
+  - Progress tracking updated in `docs/SPEC-COMPLIANCE-REVIEW-PLAN.md`.
+- Acceptance:
+  - All P0-P3 specs have compliance reports with invariant matrices.
+  - Every drift issue documented with resolution path.
+  - No non-compliant items without action plan.
+- Results:
+  - 20 specs reviewed (~307 invariants)
+  - 100% compliant: PROMPT-BUILDER, MONITOR, RESEARCH-PACKAGER
+  - Critical drift identified: PRICING V0, CONTROLLER GB6/CP2, LLM PM1-PM3
+  - See `docs/compliance/` for full reports.
+
+Phase 7: Critical Drift Resolution
+- Status: Not Started
+- Start: TBD
+- End: TBD
+- Deliverables:
+  - Fix SPEC-PRICING V0: Add `isinstance(data, dict)` check before `.items()`.
+  - Fix SPEC-CONTROLLER GB6: Add RuntimeError for unbound validation OR update spec.
+  - Fix SPEC-CONTROLLER CP2: Align parse_conclusion() return type (str vs dict).
+  - Fix SPEC-LLM PM1-PM3: Wire usage_info into metadata, add response_text/phase.
+- Acceptance:
+  - All critical (🔴) action items resolved.
+  - Compliance reports updated to reflect fixes.
+  - No silent failure paths remain.
+
+Phase 8: Spec → Tests (Phase B)
+- Status: Not Started
+- Start: TBD
+- End: TBD
+- Deliverables:
+  - Map each spec invariant to existing test(s).
+  - Identify untested invariants and prioritize by risk.
+  - Add tests to existing test files (not parallel structure).
+  - Use naming convention: `test_<component>_<invariant_id>_<description>`.
+- Acceptance:
+  - Coverage matrix for all P0/P1 invariants.
+  - Critical invariants have automated tests.
+  - Test backlog documented for remaining gaps.
+
 ## Decision Log
 | Date | Decision | Rationale |
 |------|----------|-----------|
@@ -109,4 +157,6 @@ Phase 5: Session-to-Research Packager
 | 2026-01-20 | Reconciled spec statuses + repo links | Align public signals with v0.1.0 release |
 | 2026-01-20 | Drafted session-to-research packager spec | Reduce boilerplate for experiment packaging |
 | 2026-01-20 | Implemented session-to-research packager | Create packages from sessions with consistent exports |
+| 2026-01-21 | Completed Phase A spec compliance review | Systematic audit of all 20 specs against implementation |
+| 2026-01-21 | Created drift summary and action items | Aggregate findings for prioritized resolution |
 | YYYY-MM-DD | ... | ... |
