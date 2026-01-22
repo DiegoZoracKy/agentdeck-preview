@@ -12,8 +12,8 @@ Source: `docs/compliance/SPEC-AGENTDECK.md`
 ## SPEC-CONTROLLER
 Source: `docs/compliance/SPEC-CONTROLLER.md`
 
-- [ ] **GB6**: Add RuntimeError check in ActionOnlyController.parse() and ReasoningController.parse() when unbound and validation is expected, OR clarify in spec that validation-optional controllers don't need this check
-- [ ] **CP2**: Align parse_conclusion() return type between spec (dict) and implementation (str)
+- [x] **GB6**: Clarified in spec that built-in controllers (ActionOnlyController, ReasoningController) are validation-optional - they accept any parsed action when unbound. Custom controllers requiring strict validation should implement GB6 check. ✅ Documented 2026-01-22
+- [x] **CP2**: Align parse_conclusion() return type between spec (dict) and implementation (str) ✅ Fixed 2026-01-22 - now returns `{"reflection": response.strip()}`
 
 ## SPEC-GAME-MECHANIC-TURN-BASED
 Source: `docs/compliance/SPEC-GAME-MECHANIC-TURN-BASED.md`
