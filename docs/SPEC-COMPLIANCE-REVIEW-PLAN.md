@@ -214,6 +214,7 @@ Phase A is complete when:
 | SPEC-RESEARCH-EXPERIMENT | ✅ Complete | 3 (37.5%) | 5 | 0 | Codex | 2026-01-21 |
 | SPEC-RESEARCH-PACKAGER | ✅ Complete | 8 (100%) | 0 | 0 | Codex | 2026-01-21 |
 | SPEC-MATCH-RUNTIME | ✅ Complete | 3 (42.9%) | 4 | 0 | Codex | 2026-01-21 |
+| SPEC-GAME-MECHANIC-TURN-BASED | ✅ Complete | 2 (33.3%) | 3 | 1 | Codex | 2026-01-21 |
 | ... | | | | | | |
 
 ---
