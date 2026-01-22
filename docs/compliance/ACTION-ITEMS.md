@@ -45,15 +45,15 @@ Source: `docs/compliance/SPEC-MATCH-RUNTIME.md`
 ## SPEC-OBSERVABILITY
 Source: `docs/compliance/SPEC-OBSERVABILITY.md`
 
-- [ ] **PL3**: Verify PLAYER_ACTION_PARSE_FAILED emission includes all specified fields
-- [ ] **PL4**: Verify all lifecycle events include complete prompt metadata schema
+- [x] **PL3**: Verify PLAYER_ACTION_PARSE_FAILED emission includes all specified fields ✅ Verified 2026-01-22 (event includes player, match_id, turn_number, parse_result, policy_outcome)
+- [x] **PL4**: Verify all lifecycle events include complete prompt metadata schema ✅ Verified 2026-01-22 (core fields present; optional fields vary by event type as expected)
 
 ## SPEC-PARALLEL
 Source: `docs/compliance/SPEC-PARALLEL.md`
 
-- [ ] Log a warning when falling back to sequential due to get_player_order override
-- [ ] Cancel outstanding futures on first worker failure
-- [ ] Document benchmarking guidance for concurrency selection
+- [x] PO1: Log a warning when falling back to sequential due to get_player_order override ✅ Fixed 2026-01-22
+- [ ] FP1: Cancel outstanding futures on first worker failure (deferred - requires concurrent.futures refactor)
+- [ ] PC1: Document benchmarking guidance for concurrency selection (deferred - documentation scope)
 
 ## SPEC-PLAYER
 Source: `docs/compliance/SPEC-PLAYER.md`

@@ -1260,11 +1260,12 @@ class Console:
                 game_overrides_player_order = "get_player_order" in type(game).__dict__
 
                 if game_overrides_player_order:
-                    # Fallback: Sequential execution with isolation
+                    # PO1: Fallback to sequential with warning (not debug)
                     if self.logger:
-                        self.logger.debug(
-                            f"Falling back to sequential execution: game.get_player_order() "
-                            f"may use previous_match_result (not supported in parallel mode)"
+                        self.logger.warning(
+                            f"Falling back to sequential execution (concurrency=1): "
+                            f"game.get_player_order() may use previous_match_result "
+                            f"(not supported in parallel mode). Requested concurrency={concurrency}."
                         )
                     _, seeds_used = self._run_sequential(
                         game=game,
