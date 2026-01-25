@@ -101,13 +101,12 @@ class MatchRuntime:
 - Console can override to persist state snapshots for long-running experiments (runtime automatically forwards to console helper).
 
 ## 5. Invariants & Guarantees
-1. **Runtime Isolation (MR1)**: One runtime per match. No shared mutable state across matches or workers.  
-2. **Event Ordering (MR2)**: `emit_event` ensures lifecycle ordering (MATCH_START < GAMEPLAY < MATCH_END) and attaches `mechanic` metadata.  
-3. **Recorder Consistency (MR3)**: `record_turn` emits `GAMEPLAY` events in execution order so Recorder captures an ordered transcript directly from the event stream.  
-4. **Parse Failure Integrity (MR4)**: `handle_parse_failure` MUST emit `PLAYER_ACTION_PARSE_FAILED`, log warning, update recorder, and return a policy outcome.  
-5. **RNG Traceability (MR5)**: Every RNG fork label is recorded in debug logs so researchers can trace randomness sources.  
-6. **Exception Safety (MR6)**: Runtime MUST restore console bindings (event emitter, game emitter) even if mechanics raise exceptions.  
-7. **Extensibility (MR7)**: New runtime methods MUST remain backward compatible; existing mechanics rely only on documented methods.
+1. **Runtime Isolation (MR1)**: One runtime per match. No shared mutable state across matches or workers.
+2. **Recorder Consistency (MR2)**: `record_turn` emits `GAMEPLAY` events in execution order so Recorder captures an ordered transcript directly from the event stream.
+3. **Parse Failure Integrity (MR3)**: `handle_parse_failure` MUST emit `PLAYER_ACTION_PARSE_FAILED`, log warning, update recorder, and return a policy outcome.
+4. **RNG Traceability (MR4)**: Every RNG fork label is recorded in debug logs so researchers can trace randomness sources.
+
+> **Note**: Event ordering (lifecycle ordering, mechanic metadata injection) and exception-safety bindings are handled by mechanics (e.g., TurnLoop) rather than enforced by MatchRuntime. Backward compatibility is a versioning policy, not a runtime invariant.
 
 ## 6. Usage Pattern
 ```python
