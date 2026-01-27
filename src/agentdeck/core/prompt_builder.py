@@ -167,7 +167,6 @@ class PromptBuilder:
             return default
         if template is None:
             return None if allow_none else default
-            return default
         if isinstance(template, Path):
             # Load from file (UTF-8)
             return template.read_text(encoding="utf-8")
