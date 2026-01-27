@@ -1,6 +1,7 @@
 # Drift Summary
 
-**Generated**: 2026-01-21
+**Generated**: 2026-01-21  
+**Status**: Superseded by `docs/compliance/ACTION-ITEMS.md` (updated 2026-01-27)
 
 ## SPEC-AGENTDECK
 Source: `docs/compliance/SPEC-AGENTDECK.md`

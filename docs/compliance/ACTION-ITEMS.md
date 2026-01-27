@@ -1,7 +1,7 @@
 # Action Items
 
 **Generated**: 2026-01-21
-**Updated**: 2026-01-25 (spec relaxations applied)
+**Updated**: 2026-01-27 (TL5/FP1/RE2/RE8 fixes and validation updates)
 
 ## SPEC-AGENTDECK
 Source: `docs/compliance/SPEC-AGENTDECK.md`
@@ -53,7 +53,7 @@ Source: `docs/compliance/SPEC-OBSERVABILITY.md`
 Source: `docs/compliance/SPEC-PARALLEL.md`
 
 - [x] PO1: Log a warning when falling back to sequential due to get_player_order override ✅ Fixed 2026-01-22
-- [x] FP1: ~~Cancel outstanding futures on first worker failure~~ ✅ Spec relaxed 2026-01-25 - best-effort cancellation; failed results not counted
+- [x] FP1: ~~Cancel outstanding futures on first worker failure~~ ✅ Spec relaxed 2026-01-25; best-effort cancellation implemented 2026-01-27
 - [x] PC1: ~~Document benchmarking guidance for concurrency selection~~ ✅ Dropped from spec 2026-01-25 - README guidance, not spec invariant
 
 ## SPEC-PLAYER
@@ -78,7 +78,7 @@ Source: `docs/compliance/SPEC-RENDERER.md`
 Source: `docs/compliance/SPEC-RESEARCH.md`
 
 - [x] DI3: ~~Add elapsed_time tracking for progressive comparisons~~ ✅ Spec relaxed 2026-01-25 - elapsed_time RECOMMENDED not MUST
-- [x] SR3: ~~Include player_order_source and ordering metadata in comparison outputs~~ ✅ Already guidance in spec - player_order_source optional for post-hoc analysis
+- [x] SR3: ~~Include player_order_source and ordering metadata in comparison outputs~~ ✅ Not required - spec requires fair ordering (Console handles); player_order_source metadata is optional guidance
 - [x] RE2: ~~Attach model and game config snapshots to comparison metadata~~ ✅ Spec relaxed 2026-01-25 - MUST record seed, SHOULD record configs
 - [x] MA2: ~~Compute CIs for aggregated metrics beyond win rates~~ ✅ Spec relaxed 2026-01-25 - SHOULD compute CIs where statistically meaningful
 - [x] DH1: ~~Add explicit install guidance in dependency ImportErrors~~ ✅ Spec relaxed 2026-01-25 - install guidance SHOULD be included
@@ -89,14 +89,14 @@ Source: `docs/compliance/SPEC-RESEARCH.md`
 Source: `docs/compliance/SPEC-RESEARCH-EXPERIMENT.md`
 
 - [x] RE1: ~~Enforce README.md presence per experiment in validator~~ ✅ Spec relaxed 2026-01-25 - README RECOMMENDED for curated experiments, not required
-- [x] RE2/RE5: ~~Validate results.json/results.csv format and schema_version~~ ✅ Spec clarified 2026-01-25 - validator checks provenance; schema_version SHOULD be included
+- [x] RE2/RE5: ~~Validate results.json/results.csv format and schema_version~~ ✅ Implemented 2026-01-27 - validator checks results presence/provenance for completed experiments; schema_version validated when present
 - [x] RE6: ~~Add recordings/ pointer-only validation~~ ✅ Spec clarified 2026-01-25 - repo policy via .gitignore, not runtime validation
-- [x] RE8: ~~Provide deterministic export option or exclude generated_at from diff-sensitive checks~~ ✅ Spec clarified 2026-01-25 - output deterministic excluding timestamps
+- [x] RE8: ~~Provide deterministic export option or exclude generated_at from diff-sensitive checks~~ ✅ Implemented 2026-01-27 - `--no-generated-at` omits timestamp for deterministic exports
 
 ## SPEC-SPECTATOR
 Source: `docs/compliance/SPEC-SPECTATOR.md`
 
-- [x] CA1/CA3: ~~Consider adding player lifecycle handler stubs to base Spectator class for discoverability~~ ✅ Not applicable - spec already defines duck-typing contract (HC1), stubs are ergonomics not compliance
+- [x] ~~Consider adding player lifecycle handler stubs to base Spectator class for discoverability~~ ✅ Not applicable - spec already defines duck-typing contract (HC1), stubs are ergonomics not compliance
 - [x] ~~Document explicitly in spectator.py which handlers exist for player lifecycle events~~ ✅ Not applicable - spec §4 documents all handlers, implementation follows spec
 
 ---

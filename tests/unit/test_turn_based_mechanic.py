@@ -134,62 +134,53 @@ class GameWithNonJSONSerializableEvents(TurnBasedGame):
 # Test: TL6 - JSON-serializability validation
 
 
-def test_tl6_json_serializable_events_accepted():
+def test_tl6_json_serializable_events_accepted(tmp_path):
     """Test TL6: Custom events with JSON-serializable data are accepted."""
     # SPEC-GAME-MECHANIC-TURN-BASED TL6: JSON-serializable events should work
-    config = AgentDeckConfig(seed=42)
-    deck = AgentDeck(game=GameWithJSONSerializableEvents(), session=config)
+    config = AgentDeckConfig(seed=42, run_dir=tmp_path)
+    with AgentDeck(game=GameWithJSONSerializableEvents(), session=config) as deck:
+        players = [MockPlayer("Alice", actions=["MOVE", "END"]), MockPlayer("Bob")]
 
-    players = [MockPlayer("Alice", actions=["MOVE", "END"]), MockPlayer("Bob")]
-
-    # Should complete without errors
-    results = deck.play(players=players, matches=1)
-    assert results.single.winner == "Alice"
-
-    # AgentDeck cleanup via __del__, no explicit close needed
+        # Should complete without errors
+        results = deck.play(players=players, matches=1)
+        assert results.single.winner == "Alice"
 
 
-def test_tl6_non_json_serializable_events_raise_typeerror():
+def test_tl6_non_json_serializable_events_raise_typeerror(tmp_path):
     """Test TL6: Custom events with non-JSON-serializable data raise TypeError."""
     # SPEC-GAME-MECHANIC-TURN-BASED TL6: Non-JSON-serializable data must raise TypeError
-    config = AgentDeckConfig(seed=42)
-    deck = AgentDeck(game=GameWithNonJSONSerializableEvents(), session=config)
+    config = AgentDeckConfig(seed=42, run_dir=tmp_path)
+    with AgentDeck(game=GameWithNonJSONSerializableEvents(), session=config) as deck:
+        # Use valid actions so game actually runs and triggers get_events()
+        players = [MockPlayer("Alice", actions=["MOVE"]), MockPlayer("Bob", actions=["MOVE"])]
 
-    # Use valid actions so game actually runs and triggers get_events()
-    players = [MockPlayer("Alice", actions=["MOVE"]), MockPlayer("Bob", actions=["MOVE"])]
+        # Should raise TypeError when trying to validate the custom event
+        with pytest.raises(TypeError) as exc_info:
+            deck.play(players=players, matches=1)
 
-    # Should raise TypeError when trying to validate the custom event
-    with pytest.raises(TypeError) as exc_info:
-        deck.play(players=players, matches=1)
-
-    # TL6: Error message must include event type and match_id
-    error_msg = str(exc_info.value)
-    assert "INVALID_EVENT" in error_msg
-    assert "non-JSON-serializable" in error_msg
-    assert "match_id" in error_msg
-
-    # AgentDeck cleanup via __del__, no explicit close needed
+        # TL6: Error message must include event type and match_id
+        error_msg = str(exc_info.value)
+        assert "INVALID_EVENT" in error_msg
+        assert "non-JSON-serializable" in error_msg
+        assert "match_id" in error_msg
 
 
-def test_tl6_error_includes_turn_number():
+def test_tl6_error_includes_turn_number(tmp_path):
     """Test TL6: TypeError for non-JSON-serializable events includes turn number."""
     # SPEC-GAME-MECHANIC-TURN-BASED TL6: Error must include turn number
-    config = AgentDeckConfig(seed=99)
-    deck = AgentDeck(game=GameWithNonJSONSerializableEvents(), session=config)
+    config = AgentDeckConfig(seed=99, run_dir=tmp_path)
+    with AgentDeck(game=GameWithNonJSONSerializableEvents(), session=config) as deck:
+        players = [MockPlayer("Alice", actions=["MOVE"]), MockPlayer("Bob", actions=["MOVE"])]
 
-    players = [MockPlayer("Alice", actions=["MOVE"]), MockPlayer("Bob", actions=["MOVE"])]
+        with pytest.raises(TypeError) as exc_info:
+            deck.play(players=players, matches=1)
 
-    with pytest.raises(TypeError) as exc_info:
-        deck.play(players=players, matches=1)
-
-    # Should mention turn number in error message
-    error_msg = str(exc_info.value)
-    assert "turn" in error_msg.lower()
-
-    # AgentDeck cleanup via __del__, no explicit close needed
+        # Should mention turn number in error message
+        error_msg = str(exc_info.value)
+        assert "turn" in error_msg.lower()
 
 
-def test_tl6_complex_json_serializable_data():
+def test_tl6_complex_json_serializable_data(tmp_path):
     """Test TL6: Complex but JSON-serializable structures work fine."""
 
     class ComplexEventGame(GameWithJSONSerializableEvents):
@@ -219,19 +210,16 @@ def test_tl6_complex_json_serializable_data():
                 )
             ]
 
-    config = AgentDeckConfig(seed=77)
-    deck = AgentDeck(game=ComplexEventGame(), session=config)
+    config = AgentDeckConfig(seed=77, run_dir=tmp_path)
+    with AgentDeck(game=ComplexEventGame(), session=config) as deck:
+        players = [MockPlayer("Alice", actions=["MOVE", "END"]), MockPlayer("Bob")]
 
-    players = [MockPlayer("Alice", actions=["MOVE", "END"]), MockPlayer("Bob")]
-
-    # Complex but JSON-serializable data should work
-    results = deck.play(players=players, matches=1)
-    assert results.single.winner == "Alice"
-
-    # AgentDeck cleanup via __del__, no explicit close needed
+        # Complex but JSON-serializable data should work
+        results = deck.play(players=players, matches=1)
+        assert results.single.winner == "Alice"
 
 
-def test_tl6_multiple_events_one_invalid():
+def test_tl6_multiple_events_one_invalid(tmp_path):
     """Test TL6: If one event in list is invalid, TypeError is raised."""
 
     class MixedEventsGame(GameWithJSONSerializableEvents):
@@ -250,17 +238,14 @@ def test_tl6_multiple_events_one_invalid():
                 ),
             ]
 
-    config = AgentDeckConfig(seed=55)
-    deck = AgentDeck(game=MixedEventsGame(), session=config)
+    config = AgentDeckConfig(seed=55, run_dir=tmp_path)
+    with AgentDeck(game=MixedEventsGame(), session=config) as deck:
+        players = [MockPlayer("Alice", actions=["MOVE"]), MockPlayer("Bob", actions=["MOVE"])]
 
-    players = [MockPlayer("Alice", actions=["MOVE"]), MockPlayer("Bob", actions=["MOVE"])]
+        # Should raise TypeError for the invalid event
+        with pytest.raises(TypeError) as exc_info:
+            deck.play(players=players, matches=1)
 
-    # Should raise TypeError for the invalid event
-    with pytest.raises(TypeError) as exc_info:
-        deck.play(players=players, matches=1)
-
-    # Error should mention the invalid event
-    error_msg = str(exc_info.value)
-    assert "INVALID_EVENT" in error_msg
-
-    # AgentDeck cleanup via __del__, no explicit close needed
+        # Error should mention the invalid event
+        error_msg = str(exc_info.value)
+        assert "INVALID_EVENT" in error_msg
