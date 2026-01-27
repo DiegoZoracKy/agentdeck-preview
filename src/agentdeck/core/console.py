@@ -1265,7 +1265,7 @@ class Console:
                         self.logger.warning(
                             f"Falling back to sequential execution (concurrency=1): "
                             f"game.get_player_order() may use previous_match_result "
-                            f"(not supported in parallel mode). Requested concurrency={concurrency}."
+                            f"(not supported in parallel mode). Requested concurrency={self.session_state.config.concurrency}."
                         )
                     _, seeds_used = self._run_sequential(
                         game=game,

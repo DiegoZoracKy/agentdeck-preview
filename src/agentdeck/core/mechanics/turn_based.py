@@ -561,14 +561,14 @@ class TurnLoop:
                     json.dumps(event.data)
                 except (TypeError, ValueError) as e:
                     raise TypeError(
-                        f"Custom event '{event.event_type}' has non-JSON-serializable data: {e}. "
+                        f"Custom event '{event.type}' has non-JSON-serializable data: {e}. "
                         f"match_id={self.runtime.match_id}, turn={turn_number}"
                     ) from e
             turn_events.extend(custom_events)
 
         # Emit custom events via runtime (TL3)
         for event in custom_events or []:
-            self.runtime.emit_event(event.event_type, **event.data)
+            self.runtime.emit_event(event.type, **event.data)
 
         # Check game status
         try:
