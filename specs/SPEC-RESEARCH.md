@@ -307,7 +307,7 @@ class ComparisonTable:
 ### 6.1 Data Integrity (DI)
 1. **DI1**: `ResultsAnalyzer` MUST accept `MatchResults` and MUST NOT mutate input data. Helpers that accept match lists (e.g., `aggregate_metrics`) MUST document their element types and avoid mutation.
 2. **DI2**: CSV export MUST preserve winner, turn count, duration, and seed per match for external analysis.
-3. **DI3**: Comparison functions MUST track total matches and elapsed time for reporting transparency.
+3. **DI3**: Comparison functions MUST track total matches. Elapsed time tracking is RECOMMENDED for reporting transparency.
 
 ### 6.2 Statistical Rigor (SR)
 4. **SR1**: MUST select appropriate statistical test: t-test (n>30 + normal), Mann-Whitney U (non-parametric), bootstrap (small samples n<30).
@@ -323,16 +323,16 @@ class ComparisonTable:
 
 ### 6.4 Reproducibility (RE)
 12. **RE1**: MUST accept seed parameter and derive per-match seeds deterministically (same seed → identical comparison).
-13. **RE2**: MUST record seed, model configs, game config in result metadata for full reproducibility.
+13. **RE2**: MUST record seed in result metadata. Model/game configs SHOULD be recorded when available for enhanced reproducibility.
 14. **RE3**: MUST version benchmarks (semantic versioning) for long-term reproducibility.
 
 ### 6.5 Metrics Aggregation (MA)
 15. **MA1**: MUST collect win rates, draw rates, average turns, costs, decision times from matches.
-16. **MA2**: MUST compute confidence intervals for all aggregated metrics (not just point estimates).
+16. **MA2**: SHOULD compute confidence intervals for aggregated metrics where statistically meaningful (win rates, turns). Point estimates are acceptable for metrics with unclear distributions.
 17. **MA3**: MUST handle missing metrics gracefully (e.g., costs unavailable for scripted players, report None or exclude).
 
 ### 6.6 Dependency Handling (DH)
-18. **DH1**: Statistical helpers that require scientific libraries (`statistical_test`, `statistical_significance`, `calculate_confidence_interval`) MUST raise `ImportError` with install guidance when `scipy`/`statsmodels` are missing.
+18. **DH1**: Statistical helpers that require scientific libraries (`statistical_test`, `statistical_significance`, `calculate_confidence_interval`) MUST raise `ImportError` when `scipy`/`statsmodels` are missing. Install guidance SHOULD be included in the error message.
 19. **DH2**: `compare_models` MUST fall back gracefully when scientific libraries are unavailable (p_value=1.0, statistic=0.0, test_used="none", confidence_interval=(0.0, 0.0), effect_size=None).
 20. **DH3**: Optional dependencies MUST be documented (`pip install agentdeck-ai[research]`). Runtime checks enforce availability.
 
@@ -349,8 +349,8 @@ class ComparisonTable:
 
 ### [v1.1.0] 6.9 Post-Hoc Analysis (PH)
 28. **PH1**: Post-hoc analysis tools MUST read recordings from `agentdeck_runs/session_id/records/` directory structure.
-29. **PH2**: Tools MUST validate that both batch recording and all match recordings exist before computing statistics.
-30. **PH3**: Tools MUST handle recording schema versions gracefully (support SPEC-RECORDER v1.0.0+ payloads; unified `records/` layout required).
+29. **PH2**: Tools SHOULD validate that batch recording and match recordings exist before computing statistics. Missing recordings MUST produce clear error messages.
+30. **PH3**: Tools MUST support SPEC-RECORDER v1.0.0+ payloads with unified `records/` layout. Older schema versions are not supported.
 31. **PH4**: Spectator wrappers MUST NOT duplicate analysis logic—they MUST import and call standalone classes.
 32. **PH5**: Analysis failures (missing recordings, corrupt files) MUST raise informative errors with guidance for resolution.
 

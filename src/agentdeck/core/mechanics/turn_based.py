@@ -312,13 +312,22 @@ class TurnLoop:
             if not state:
                 # TL1: Deterministic Setup - fork RNG before game.setup()
                 setup_rng = self.runtime.fork_rng("setup")
-                state = self.game.setup(self.player_names, seed=setup_rng.seed)
+                try:
+                    state = self.game.setup(self.player_names, seed=setup_rng.seed)
+                except Exception as e:
+                    raise RuntimeError(
+                        f"Error in {self.game.__class__.__name__}.setup(). "
+                        f"turn_number=0, player_name=unknown, "
+                        f"match_id={self.runtime.match_id}"
+                    ) from e
 
                 # Type check: setup() must return a dict
                 if not isinstance(state, dict):
                     raise TypeError(
                         f"{self.game.__class__.__name__}.setup() must return a dict, "
-                        f"got {type(state).__name__}"
+                        f"got {type(state).__name__}. "
+                        f"turn_number=0, player_name=unknown, "
+                        f"match_id={self.runtime.match_id}"
                     )
 
             state.setdefault("_turn_count", 1)
@@ -338,8 +347,10 @@ class TurnLoop:
                     status = self.game.status(state)
                 except Exception as e:
                     turn_num = state.get("_turn_count", "unknown")
+                    # TL5: Include match_id in exception messages
                     raise RuntimeError(
-                        f"Error in {self.game.__class__.__name__}.status() at turn {turn_num}"
+                        f"Error in {self.game.__class__.__name__}.status() at turn {turn_num}. "
+                        f"player_name=unknown, match_id={self.runtime.match_id}"
                     ) from e
 
                 if status.is_over:
@@ -453,9 +464,12 @@ class TurnLoop:
                 break
 
         if player_obj is None:
-            raise RuntimeError(
+            # TL2: Raise ValueError for invalid player (not RuntimeError)
+            raise ValueError(
                 f"Game {self.game.__class__.__name__}.get_current_player() returned "
-                f"'{current_player_name}' which is not in the player list: {self.player_names}"
+                f"'{current_player_name}' which is not in the player list: {self.player_names}. "
+                f"turn_number={turn_number}, player_name={current_player_name}, "
+                f"match_id={self.runtime.match_id}"
             )
 
         turn_start = time.time()
@@ -465,9 +479,11 @@ class TurnLoop:
         try:
             player_view = self.game.get_view(state_copy_for_view, current_player_name)
         except Exception as e:
+            # TL5: Include match_id in exception messages
             raise RuntimeError(
                 f"Error in {self.game.__class__.__name__}.get_view() for player {current_player_name} "
-                f"during turn {turn_number}"
+                f"during turn {turn_number}. player_name={current_player_name}, "
+                f"match_id={self.runtime.match_id}"
             ) from e
 
         # Build TurnContext (TL6)
@@ -484,6 +500,10 @@ class TurnLoop:
         )
 
         # Get player action (via console helper - maintains existing interface)
+        # NOTE (TL3): Ideally this would go through runtime.get_player_action() instead
+        # of runtime._console.get_player_action(). Currently the console method handles
+        # parse failures internally with retries/abort/forfeit logic. A future refactor
+        # could expose this via runtime to maintain the runtime-gateway contract.
         # Wrap in try/except to capture state before abort/forfeit (PF4)
         from ..types import MatchAbortedError, MatchForfeitedError
 
@@ -544,18 +564,31 @@ class TurnLoop:
         custom_events = self.game.get_events(adapter.before, current_player_name, action)
         turn_events: List[Event] = []
         if custom_events:
+            # TL6: Validate JSON-serializability of custom events
+            import json
+
+            for event in custom_events:
+                try:
+                    json.dumps(event.data)
+                except (TypeError, ValueError) as e:
+                    raise TypeError(
+                        f"Custom event '{event.type}' has non-JSON-serializable data: {e}. "
+                        f"match_id={self.runtime.match_id}, turn={turn_number}"
+                    ) from e
             turn_events.extend(custom_events)
 
         # Emit custom events via runtime (TL3)
         for event in custom_events or []:
-            self.runtime.emit_event(event.event_type, **event.data)
+            self.runtime.emit_event(event.type, **event.data)
 
         # Check game status
         try:
             status = self.game.status(final_state)
         except Exception as e:
+            # TL5: Include match_id in exception messages
             raise RuntimeError(
-                f"Error in {self.game.__class__.__name__}.status() after turn {turn_number}"
+                f"Error in {self.game.__class__.__name__}.status() after turn {turn_number}. "
+                f"player_name={current_player_name}, match_id={self.runtime.match_id}"
             ) from e
 
         # Increment turn counter if game not over
@@ -605,19 +638,29 @@ class TurnLoop:
         except Exception as e:
             raise RuntimeError(
                 f"Error in {self.game.__class__.__name__}.update() during turn {turn_num}. "
-                f"Player: {player}, Action: {action.action}"
+                f"player_name={player}, match_id={self.runtime.match_id}, "
+                f"Action: {action.action}"
             ) from e
 
         # Type check: update() must return dict or None (in-place mutation)
         if updated_state is not None and not isinstance(updated_state, dict):
             raise TypeError(
                 f"{self.game.__class__.__name__}.update() must return a dict or None, "
-                f"got {type(updated_state).__name__}"
+                f"got {type(updated_state).__name__}. "
+                f"turn_number={turn_num}, player_name={player}, "
+                f"match_id={self.runtime.match_id}"
             )
 
         # TL3: Validate state via runtime
         state_to_validate = updated_state if updated_state is not None else adapter.working
-        self.runtime.validate_state(state_to_validate)
+        try:
+            self.runtime.validate_state(state_to_validate)
+        except Exception as e:
+            raise ValueError(
+                f"State validation failed after update. "
+                f"turn_number={turn_num}, player_name={player}, "
+                f"match_id={self.runtime.match_id}"
+            ) from e
 
         return updated_state
 

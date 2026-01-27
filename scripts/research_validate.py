@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -24,6 +26,19 @@ REQUIRED_FIELDS: Tuple[Tuple[str, ...], ...] = (
 )
 
 ALLOWED_STATUS = {"planned", "running", "complete", "archived"}
+RESULTS_CSV_HEADER = (
+    "match_id",
+    "winner",
+    "turns",
+    "outcome",
+    "seed",
+    "duration",
+    "cost",
+    "player_order_source",
+    "first_player",
+    "players",
+    "player_costs",
+)
 
 
 def _load_generate_index() -> Any:
@@ -104,6 +119,79 @@ def _validate_manifest(manifest_path: Path, manifest: Dict[str, Any]) -> List[st
     return errors
 
 
+def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[str]:
+    errors: List[str] = []
+    experiment_name = experiment_dir.name
+    status = manifest.get("status")
+    results_json = experiment_dir / "results.json"
+    results_csv = experiment_dir / "results.csv"
+
+    results_present = results_json.exists() or results_csv.exists()
+    should_validate = results_present or status == "complete"
+
+    if not should_validate:
+        return errors
+
+    if not results_json.exists():
+        errors.append(f"{experiment_name}: results.json missing (run research_export.py)")
+    if not results_csv.exists():
+        errors.append(f"{experiment_name}: results.csv missing (run research_export.py)")
+
+    if results_json.exists():
+        try:
+            data = json.loads(results_json.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"{experiment_name}: results.json invalid JSON ({exc})")
+            data = None
+        if isinstance(data, dict):
+            if data.get("experiment_id") != experiment_name:
+                errors.append(
+                    f"{experiment_name}: results.json experiment_id mismatch"
+                )
+            source = data.get("source", {})
+            if not isinstance(source, dict) or not source.get("recordings_dir"):
+                errors.append(
+                    f"{experiment_name}: results.json missing source.recordings_dir"
+                )
+            if "summary" not in data or not isinstance(data.get("summary"), dict):
+                errors.append(f"{experiment_name}: results.json missing summary")
+            if "players" not in data or not isinstance(data.get("players"), list):
+                errors.append(f"{experiment_name}: results.json missing players list")
+            if "matches" not in data or not isinstance(data.get("matches"), list):
+                errors.append(f"{experiment_name}: results.json missing matches list")
+
+            schema_version = data.get("schema_version")
+            if schema_version is not None:
+                if not _is_int(schema_version):
+                    errors.append(
+                        f"{experiment_name}: results.json schema_version must be int"
+                    )
+                elif schema_version < 1:
+                    errors.append(
+                        f"{experiment_name}: results.json schema_version must be >= 1"
+                    )
+        elif data is not None:
+            errors.append(f"{experiment_name}: results.json must be mapping")
+
+    if results_csv.exists():
+        try:
+            with results_csv.open("r", encoding="utf-8", newline="") as handle:
+                reader = csv.reader(handle)
+                header = next(reader, [])
+        except Exception as exc:
+            errors.append(f"{experiment_name}: results.csv unreadable ({exc})")
+            header = []
+        if not header:
+            errors.append(f"{experiment_name}: results.csv missing header row")
+        elif tuple(header) != RESULTS_CSV_HEADER:
+            errors.append(
+                f"{experiment_name}: results.csv header mismatch "
+                f"(expected {list(RESULTS_CSV_HEADER)})"
+            )
+
+    return errors
+
+
 def _normalize_index(content: str, timestamp_line: str) -> str:
     lines = content.splitlines()
     normalized = []
@@ -180,6 +268,7 @@ def main() -> int:
             errors.append(f"{manifest_path.parent.name}: manifest must be mapping")
             continue
         errors.extend(_validate_manifest(manifest_path, manifest))
+        errors.extend(_validate_results(manifest_path.parent, manifest))
 
     errors.extend(_validate_index(research_dir, args.index, args.write_index))
 

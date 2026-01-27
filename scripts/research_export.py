@@ -103,7 +103,13 @@ def _collect_players(metadata_list: List[Dict[str, Any]]) -> List[Dict[str, Any]
     return [player_meta[name] for name in sorted(player_meta.keys())]
 
 
-def export_results(recordings_dir: Path, output_dir: Path, experiment_id: str) -> None:
+def export_results(
+    recordings_dir: Path,
+    output_dir: Path,
+    experiment_id: str,
+    *,
+    include_generated_at: bool = True,
+) -> None:
     match_files = sorted(recordings_dir.glob("match_*.json"))
     if not match_files:
         raise FileNotFoundError(f"No match_*.json files found in {recordings_dir}")
@@ -154,15 +160,16 @@ def export_results(recordings_dir: Path, output_dir: Path, experiment_id: str) -
         "avg_cost": _safe_mean(costs),
     }
 
-    results = {
+    results: Dict[str, Any] = {
         "schema_version": 1,
         "experiment_id": experiment_id,
-        "generated_at": _iso_timestamp(),
         "source": {"recordings_dir": str(recordings_dir)},
         "summary": summary,
         "players": players,
         "matches": matches,
     }
+    if include_generated_at:
+        results["generated_at"] = _iso_timestamp()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / "results.json"
@@ -209,10 +216,20 @@ def main() -> None:
     parser.add_argument("--recordings-dir", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--experiment-id", default=None)
+    parser.add_argument(
+        "--no-generated-at",
+        action="store_true",
+        help="Omit generated_at timestamp for deterministic exports.",
+    )
     args = parser.parse_args()
 
     experiment_id = args.experiment_id or args.output_dir.name
-    export_results(args.recordings_dir, args.output_dir, experiment_id)
+    export_results(
+        args.recordings_dir,
+        args.output_dir,
+        experiment_id,
+        include_generated_at=not args.no_generated_at,
+    )
 
 
 if __name__ == "__main__":
