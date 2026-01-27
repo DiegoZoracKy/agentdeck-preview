@@ -373,9 +373,7 @@ class Player(ABC):
         renderer_output: Dict[str, Any]
 
         if prompt_text:
-            prompt_blocks = [
-                {"key": "conclusion_prompt", "content": prompt_text, "metadata": {}}
-            ]
+            prompt_blocks = [{"key": "conclusion_prompt", "content": prompt_text, "metadata": {}}]
             renderer_output = {}
         else:
             try:
@@ -421,9 +419,7 @@ class Player(ABC):
                 if logger:
                     logger.debug(f"Conclusion prompt build failed for {self.name}: {exc}")
                 prompt_text = f"Match concluded.\n\n{_format_outcome()}"
-                prompt_blocks = [
-                    {"key": "outcome", "content": _format_outcome(), "metadata": {}}
-                ]
+                prompt_blocks = [{"key": "outcome", "content": _format_outcome(), "metadata": {}}]
                 renderer_output = {}
 
         controller_metadata = _parse_conclusion_metadata("")
@@ -583,9 +579,9 @@ class Player(ABC):
             "prompt_blocks": copy.deepcopy(prompt_blocks) if prompt_blocks else [],
             "response_text": response,
             "controller_format": controller_format or "",
-            "controller_metadata": copy.deepcopy(controller_metadata)
-            if controller_metadata is not None
-            else {},
+            "controller_metadata": (
+                copy.deepcopy(controller_metadata) if controller_metadata is not None else {}
+            ),
             "renderer_output": copy.deepcopy(renderer_output) if renderer_output else {},
             "usage_info": copy.deepcopy(usage_info) if usage_info else None,
         }

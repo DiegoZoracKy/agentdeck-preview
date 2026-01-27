@@ -122,9 +122,7 @@ class MatchNarrator(Spectator):
         data = event.data
         player = data.get("player", "Unknown")
         response = (
-            data.get("normalized_response")
-            or data.get("response_text")
-            or data.get("response", "")
+            data.get("normalized_response") or data.get("response_text") or data.get("response", "")
         )
 
         # Log the handshake acceptance

@@ -32,7 +32,7 @@ class LLMPlayer(Player, ABC):
         renderer: Optional[Renderer] = None,
         handshake_template: Optional[Any] = None,
         turn_template: Optional[Any] = None,
-        conclusion_template: Optional[Any] | object = _DEFAULT_TEMPLATE,
+        conclusion_template: object = _DEFAULT_TEMPLATE,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         **kwargs,

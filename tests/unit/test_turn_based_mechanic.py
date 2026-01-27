@@ -45,9 +45,7 @@ class GameWithJSONSerializableEvents(TurnBasedGame):
             "turn": game_state["turn"],
         }
 
-    def update(
-        self, game_state: Dict[str, Any], player: str, action, *, rng
-    ) -> Dict[str, Any]:
+    def update(self, game_state: Dict[str, Any], player: str, action, *, rng) -> Dict[str, Any]:
         game_state["turn"] += 1
         if action.action == "END":
             game_state["ended"] = True
@@ -56,9 +54,7 @@ class GameWithJSONSerializableEvents(TurnBasedGame):
     def status(self, game_state: Dict[str, Any]) -> GameStatus:
         return GameStatus(is_over=game_state["ended"], winner=game_state["players"][0])
 
-    def get_events(
-        self, game_state: Dict[str, Any], player: str, action
-    ) -> List[Event]:
+    def get_events(self, game_state: Dict[str, Any], player: str, action) -> List[Event]:
         """Return custom events with JSON-serializable data."""
         # TL6: This should work - all data is JSON-serializable
         return [
@@ -103,9 +99,7 @@ class GameWithNonJSONSerializableEvents(TurnBasedGame):
             "turn": game_state["turn"],
         }
 
-    def update(
-        self, game_state: Dict[str, Any], player: str, action, *, rng
-    ) -> Dict[str, Any]:
+    def update(self, game_state: Dict[str, Any], player: str, action, *, rng) -> Dict[str, Any]:
         game_state["turn"] += 1
         if action.action == "END":
             game_state["ended"] = True
@@ -114,9 +108,7 @@ class GameWithNonJSONSerializableEvents(TurnBasedGame):
     def status(self, game_state: Dict[str, Any]) -> GameStatus:
         return GameStatus(is_over=game_state["ended"], winner=game_state["players"][0])
 
-    def get_events(
-        self, game_state: Dict[str, Any], player: str, action
-    ) -> List[Event]:
+    def get_events(self, game_state: Dict[str, Any], player: str, action) -> List[Event]:
         """Return custom events with non-JSON-serializable data (lambda function)."""
         # TL6: This should FAIL - lambda is not JSON-serializable
         return [
@@ -186,9 +178,7 @@ def test_tl6_complex_json_serializable_data(tmp_path):
     class ComplexEventGame(GameWithJSONSerializableEvents):
         """Game with complex but valid JSON data."""
 
-        def get_events(
-            self, game_state: Dict[str, Any], player: str, action
-        ) -> List[Event]:
+        def get_events(self, game_state: Dict[str, Any], player: str, action) -> List[Event]:
             """Return event with complex JSON-serializable data."""
             return [
                 Event(
@@ -225,9 +215,7 @@ def test_tl6_multiple_events_one_invalid(tmp_path):
     class MixedEventsGame(GameWithJSONSerializableEvents):
         """Game that returns both valid and invalid events."""
 
-        def get_events(
-            self, game_state: Dict[str, Any], player: str, action
-        ) -> List[Event]:
+        def get_events(self, game_state: Dict[str, Any], player: str, action) -> List[Event]:
             """Return mix of valid and invalid events."""
             return [
                 Event(type="VALID_EVENT", data={"player": player, "score": 100}, context={}),

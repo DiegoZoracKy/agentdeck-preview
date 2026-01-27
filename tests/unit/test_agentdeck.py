@@ -15,7 +15,6 @@ from agentdeck import AgentDeck, FixedDamageGame, MockPlayer
 from agentdeck.core.session import AgentDeckConfig
 from agentdeck.core.types import MatchResult
 
-
 # Fixtures
 
 

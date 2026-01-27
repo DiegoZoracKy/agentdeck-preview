@@ -345,13 +345,9 @@ class AgentDeck:
 
         # SPEC-AGENTDECK R1: MUST raise TypeError for unsupported input types
         if match is not None and not isinstance(match, (MatchResult, dict)):
-            raise TypeError(
-                f"'match' must be MatchResult or dict, got {type(match).__name__}"
-            )
+            raise TypeError(f"'match' must be MatchResult or dict, got {type(match).__name__}")
         if path is not None and not isinstance(path, (str, os.PathLike)):
-            raise TypeError(
-                f"'path' must be str or PathLike, got {type(path).__name__}"
-            )
+            raise TypeError(f"'path' must be str or PathLike, got {type(path).__name__}")
 
         if path is not None:
             match_data = Recorder.load_match(os.fspath(path))

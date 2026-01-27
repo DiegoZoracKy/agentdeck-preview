@@ -670,7 +670,7 @@ class _MatchWorker:
             # Bind controller to game before handshake (GB1)
             # This allows controller to provide game-specific format instructions with allowed_actions
             if hasattr(player, "controller") and hasattr(player.controller, "bind_game"):
-                player.controller.bind_game(game)
+                player.controller.bind_game(self.game)
 
             bundle = player.build_handshake_bundle(context)
             prompt_blocks = [

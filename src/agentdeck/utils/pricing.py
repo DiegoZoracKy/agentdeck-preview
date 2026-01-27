@@ -23,9 +23,7 @@ def _validate_pricing_structure(data) -> None:
     # V0: MUST check isinstance(data, dict) BEFORE calling .items()
     # This prevents AttributeError when YAML root is list/scalar/None
     if not isinstance(data, dict):
-        raise ValueError(
-            f"pricing.yaml root must be a dict, got {type(data).__name__}"
-        )
+        raise ValueError(f"pricing.yaml root must be a dict, got {type(data).__name__}")
 
     if not data:
         return  # Empty dict is valid (will trigger warnings elsewhere)
