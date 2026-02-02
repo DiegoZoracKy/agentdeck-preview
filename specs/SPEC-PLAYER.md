@@ -1,8 +1,8 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
-> Status: Draft v1.3.0 (Two-Step Handshake)
+> Status: Final
 > Version: 1.3.0
-> Last Updated: 2026-01-20
+> Last Updated: 2026-01-27
 > Implementation: ✅ Implemented
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Game authors, LLM player implementers, research engineers

@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
-> Status: Draft v1.0.0
+> Status: Final
 > Version: 1.0.0
-> Last Updated: 2026-01-19
+> Last Updated: 2026-01-27
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
 > Authors: Diego ZoracKy, Codex
 > Audience: Research engineers, contributors, experiment authors
