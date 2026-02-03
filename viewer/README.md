@@ -70,19 +70,26 @@ with AgentDeck() as deck:
 
 ```
 viewer/
-├── index.html           # Main entry point
+├── index.html                 # Main entry point (host)
 ├── js/
-│   ├── app.js           # UI shell + wiring
-│   ├── record-loader.js # Schema validation & parsing
-│   ├── timeline.js      # Core playback engine
-│   └── renderers/
-│       ├── index.js     # Renderer registry
-│       └── fixed_damage_ffvi.js # FFVI battle renderer (FixedDamageGame)
+│   ├── app.js                 # UI shell + wiring
+│   ├── record-loader.js       # Schema validation & parsing
+│   ├── timeline.js            # Core playback engine
+│   └── renderers/index.js     # Renderer registry (game + skin)
 ├── css/
-│   ├── base.css         # Layout + shell styles
-│   └── ffvi.css         # FFVI styling
-├── sample-match.json    # Example match for testing
-└── README.md            # This file
+│   └── base.css               # Layout + shell styles
+├── sample-match.json          # Example match for testing
+└── README.md                  # This file
+
+src/agentdeck/games/examples/fixed_damage/
+├── game.py                    # Game logic
+└── viewers/                   # Bundled viewers for the game
+    ├── ffvi/
+    │   ├── renderer.js
+    │   └── styles.css
+    └── debug/
+        ├── renderer.js
+        └── styles.css
 ```
 
 ## Architecture
@@ -110,14 +117,12 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 - `destroy()` - Cleanup
 
 ### RendererRegistry
-- Selects the renderer based on `matchData.game`
+- Selects the renderer based on `(matchData.game, skin)`
 - Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
 
-### FixedDamageFFVIRenderer
-- FFVI-inspired battle visualization
-- Animated HP bars, damage numbers
-- Attack/heal animations
-- Victory screen
+### FixedDamageGame Viewers
+- **FFVI**: retro battle visualization
+- **Debug**: state‑focused developer view (before/after, reasoning, prompt/response)
 
 ## Creating Custom Renderers
 
@@ -143,8 +148,11 @@ class MyRenderer {
   }
 }
 
-// Register for your game
-RendererRegistry.register('MyGame', MyRenderer);
+// Register for your game + skin
+RendererRegistry.register('MyGame', 'my-skin', MyRenderer);
+
+// Create for a specific skin
+RendererRegistry.create(matchData, 'my-skin');
 ```
 
 ## Specifications
