@@ -448,13 +448,15 @@ class FixedDamageFFVIRenderer {
 
     this._elements.narrationText.textContent = text;
 
-    // Update reasoning if available
+    // Always show reasoning container to prevent layout bounce
+    this._elements.reasoningContainer.style.display = 'block';
+    this._elements.reasoningPlayer.textContent = player;
     if (frame.reasoning) {
-      this._elements.reasoningContainer.style.display = 'block';
-      this._elements.reasoningPlayer.textContent = player;
       this._elements.reasoningText.textContent = String(frame.reasoning).trim();
+      this._elements.reasoningText.classList.remove('no-reasoning');
     } else {
-      this._elements.reasoningContainer.style.display = 'none';
+      this._elements.reasoningText.textContent = '(ActionOnly — reasoning not requested)';
+      this._elements.reasoningText.classList.add('no-reasoning');
     }
   }
 
