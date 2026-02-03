@@ -1,6 +1,6 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-02-03T13:15:56Z
+Last updated: 2026-02-03T19:47:08Z
 
 > Purpose: keep a lightweight, current map of active roadmap work and recent completions.
 
@@ -17,36 +17,9 @@ Last updated: 2026-02-03T13:15:56Z
 - Record a timestamp for each phase start and conclusion (ISO 8601 UTC).
 
 ## Current Focus
-- Replay Viewer MVP (reference viewer + FFVI skin)
 - Game config export (spec-first drafts in progress)
 
 ## Active Work
-Phase D: Replay Viewer MVP (Reference Viewer)
-- Status: In Progress
-- Start: 2026-01-21T02:39:25Z
-- Deliverables (done):
-  - `viewer/` split into loader/timeline/app/renderer registry.
-  - FixedDamage FFVI renderer wired via registry.
-  - Record loader ordering aligns with `turn_index`/`phase_index`.
-  - Max health derived from recorded params with frame-based fallback.
-  - `specs/SPEC-VIEWER.md` + viewer docs aligned to structure.
-  - Shipped sample record renders out-of-the-box (`viewer/sample-match.json` is `FixedDamageGame`).
-  - Added a lightweight viewer smoke-check (`scripts/viewer_smoke_check.js`).
-  - Visual polish pass (reasoning panel stabilization, winner spoiler prevention, layout bounce fixes).
-  - Test match script for generating matches with mixed controllers.
-- Deliverables (in progress):
-  - Restructure viewer to demonstrate game-bundled viewer pattern.
-  - Update registry to support (game, skin) keys.
-  - Add debug renderer as second viewer for FixedDamageGame.
-  - Add skin selector UI.
-- Implementation steps:
-  1. Restructure: Move FFVI renderer to `src/agentdeck/games/fixed_damage/viewers/ffvi/`
-  2. Registry: Update to support `register(game, skin, RendererClass)` + `getAll(game)`
-  3. Debug renderer: Create minimal `viewers/debug/` with state-focused view
-  4. UI: Add skin dropdown to controls
-  5. Wiring: Update index.html paths and registration
-  6. Tests: Update smoke check for new structure
-
 Phase E: Game Config Export (Spec-First)
 - Status: Drafting
 - Start: 2026-01-21T02:39:25Z
@@ -60,6 +33,25 @@ Phase E: Game Config Export (Spec-First)
   - Update example games + tests for metadata.
 
 ## Recent Work (Complete)
+Phase D: Replay Viewer MVP (Reference Viewer)
+- Status: Complete
+- Start: 2026-01-21T02:39:25Z
+- End: 2026-02-03T19:47:08Z
+- Deliverables:
+  - `viewer/` split into core (loader/timeline/registry) + game-bundled viewers.
+  - FixedDamageGame restructured as self-contained package with bundled viewers.
+  - Viewers moved to `src/agentdeck/games/examples/fixed_damage/viewers/{ffvi,debug}/`.
+  - Registry updated to support (game, skin) keys: `register(game, skin, RendererClass)`.
+  - Created debug renderer as second viewer (state-focused, developer-friendly).
+  - Added skin selector UI with hot-swap capability.
+  - FFVI renderer visual polish (reasoning panel, winner spoiler prevention, layout stability).
+  - Lightweight smoke check tests both renderers.
+  - Test match script for generating mixed-controller matches.
+- Acceptance:
+  - Demonstrates game-bundled viewer pattern for contributors.
+  - Multiple renderers work with same record (multi-skin support).
+  - Viewer structure encourages modularity and external contributions.
+
 Phase A: Conclusion Defaults + Disabled Conclusion Templates (Spec Alignment)
 - Status: Complete
 - Start: 2026-01-20T23:58:19Z
