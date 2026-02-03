@@ -1,4 +1,4 @@
-# Viewer Status (2026-01-20)
+# Viewer Status (2026-02-03)
 
 ## Where we are
 - A working replay viewer exists under `viewer/` with a clean split:
@@ -11,6 +11,11 @@
 - Frame ordering uses `context.turn_index` (alias of `phase_index`) when present, with safe fallbacks.
 - Docs/specs aligned to this structure: `specs/SPEC-VIEWER.md` and `ROADMAP.md`.
 
+## Pre-merge checklist (we're intentionally not merging yet)
+- ✅ `viewer/sample-match.json` is a real `FixedDamageGame` recording (renders out-of-the-box).
+- ✅ Added a lightweight smoke-check: `node scripts/viewer_smoke_check.js`.
+- ⏳ Decide whether Phase E belongs on this branch or a follow-up branch.
+
 ## What’s intentionally left untouched
 - `turn_index` vs `phase_index` aliasing remains in core (spec + code) for now.
 - No live/broadcast replay work yet — viewer is offline playback only.
@@ -20,12 +25,13 @@
 - `specs/drafts/SPEC-RECORDER-v1.4.0.md`: recorder captures `game_config.params` via `Game.describe()`.
 
 ## Where we’re heading next
-1. Review/approve the draft specs above.
-2. Implement `Game.describe()` and `get_config_params()` in `src/agentdeck/core/base/game.py`.
-3. Update recorder to store `game_config` from `Game.describe()`.
-4. Update example games (`FixedDamageGame`, `HangmanGame`) to return params.
-5. Add tests to assert `game_config.params` are recorded and schema version expectations updated.
+1. **Phase D (Viewer MVP)**: Fix the sample record mismatch and add a lightweight smoke-check for `viewer/`.
+2. **Phase E (Spec-first)**: Review/approve the draft specs above and promote them to `specs/`.
+3. Implement `Game.describe()` and `get_config_params()` in `src/agentdeck/core/base/game.py`.
+4. Update recorder to store `game_config.params` from `Game.describe()`.
+5. Update example games (`FixedDamageGame`, `HangmanGame`) to return params.
+6. Add tests to assert `game_config.params` are recorded and schema version expectations updated.
 
 ## Branch status
 - Current branch: `viewer/replay-viewer`
-- Latest commit: `c6293d2` (viewer refactor + registry + app split)
+- Ahead of `main`: 6 commits (+ local changes)

@@ -1,6 +1,6 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-01-27T00:00:00Z
+Last updated: 2026-02-03T13:03:46Z
 
 > Purpose: keep a lightweight, current map of active roadmap work and recent completions.
 
@@ -30,6 +30,8 @@ Phase D: Replay Viewer MVP (Reference Viewer)
   - Record loader ordering aligns with `turn_index`/`phase_index`.
   - Max health derived from recorded params with frame-based fallback.
   - `specs/SPEC-VIEWER.md` + viewer docs aligned to structure.
+  - Shipped sample record renders out-of-the-box (`viewer/sample-match.json` is `FixedDamageGame`).
+  - Added a lightweight viewer smoke-check (`scripts/viewer_smoke_check.js`).
 - Deliverables (remaining):
   - Visual polish pass (FFVI skin spacing, typography, animations).
   - Optional debug renderer (future).
