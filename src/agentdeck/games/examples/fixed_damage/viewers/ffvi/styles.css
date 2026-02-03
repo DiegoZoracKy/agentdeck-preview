@@ -1,0 +1,647 @@
+/**
+ * FFVI-style Battle Renderer Styles
+ *
+ * Inspired by Final Fantasy VI (1994) battle screens:
+ * - Dark blue gradient background
+ * - Segmented HP bars
+ * - Pixel-art aesthetic (via fonts and sharp edges)
+ * - ATB-style layout
+ */
+
+/* =========================================================================
+   Base Variables
+   ========================================================================= */
+
+:root {
+  --ffvi-bg-dark: #0a0a1a;
+  --ffvi-bg-medium: #1a1a3a;
+  --ffvi-bg-light: #2a2a5a;
+  --ffvi-border: #4a4a8a;
+  --ffvi-text: #ffffff;
+  --ffvi-text-dim: #aaaacc;
+  --ffvi-hp-high: #00cc44;
+  --ffvi-hp-medium: #cccc00;
+  --ffvi-hp-low: #cc4400;
+  --ffvi-heal: #44ff88;
+  --ffvi-damage: #ff4444;
+  --ffvi-gold: #ffd700;
+  --ffvi-blue: #4488ff;
+}
+
+/* =========================================================================
+   Battle Scene Container
+   ========================================================================= */
+
+.ffvi-battle-scene {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  background: linear-gradient(180deg, var(--ffvi-bg-dark) 0%, var(--ffvi-bg-medium) 50%, var(--ffvi-bg-light) 100%);
+  border: 4px solid var(--ffvi-border);
+  border-radius: 8px;
+  color: var(--ffvi-text);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 60px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================================================
+   Title Bar
+   ========================================================================= */
+
+.ffvi-title-bar {
+  background: linear-gradient(90deg, var(--ffvi-border) 0%, var(--ffvi-bg-medium) 50%, var(--ffvi-border) 100%);
+  padding: 8px 16px;
+  font-size: 14px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  border-bottom: 2px solid var(--ffvi-border);
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* =========================================================================
+   Battle Area (Main Combat View)
+   ========================================================================= */
+
+.ffvi-battle-area {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  min-height: 250px;
+  position: relative;
+}
+
+/* =========================================================================
+   Player Panels
+   ========================================================================= */
+
+.ffvi-player-panel {
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--ffvi-border);
+  border-radius: 4px;
+  padding: 12px;
+  width: 200px;
+  transition: all 0.3s ease;
+}
+
+.ffvi-player-left {
+  transform-origin: center right;
+}
+
+.ffvi-player-right {
+  transform-origin: center left;
+}
+
+.ffvi-player-name {
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 8px;
+  color: var(--ffvi-gold);
+  text-shadow: 1px 1px 0 #000;
+  text-transform: uppercase;
+}
+
+/* =========================================================================
+   Player Sprites
+   ========================================================================= */
+
+.ffvi-player-sprite {
+  text-align: center;
+  font-size: 48px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  transition: transform 0.1s ease;
+}
+
+.ffvi-sprite-icon {
+  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Attack animation */
+.ffvi-player-left .ffvi-attacking {
+  animation: attack-right 0.4s ease-out;
+}
+
+.ffvi-player-right .ffvi-attacking {
+  animation: attack-left 0.4s ease-out;
+}
+
+@keyframes attack-right {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(80px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes attack-left {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(-80px); }
+  100% { transform: translateX(0); }
+}
+
+/* Healing animation */
+.ffvi-healing {
+  animation: heal-glow 0.4s ease-out;
+}
+
+@keyframes heal-glow {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.8) hue-rotate(60deg); }
+  100% { filter: brightness(1); }
+}
+
+/* Hit animation */
+.ffvi-hit {
+  animation: hit-shake 0.3s ease-out;
+}
+
+@keyframes hit-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* Defeated state */
+.ffvi-defeated {
+  opacity: 0.5;
+  filter: grayscale(80%);
+}
+
+.ffvi-defeated .ffvi-sprite-icon {
+  transform: rotate(90deg);
+  transition: transform 0.5s ease;
+}
+
+/* =========================================================================
+   Stats Section
+   ========================================================================= */
+
+.ffvi-stats {
+  font-size: 10px;
+}
+
+/* HP Bar Container */
+.ffvi-hp-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ffvi-hp-label {
+  color: var(--ffvi-text-dim);
+  width: 24px;
+}
+
+.ffvi-hp-bar {
+  flex: 1;
+  height: 12px;
+  background: #222;
+  border: 1px solid var(--ffvi-border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ffvi-hp-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  position: relative;
+}
+
+.ffvi-hp-high {
+  background: linear-gradient(180deg, #44ff66 0%, var(--ffvi-hp-high) 50%, #008822 100%);
+}
+
+.ffvi-hp-medium {
+  background: linear-gradient(180deg, #ffff44 0%, var(--ffvi-hp-medium) 50%, #888800 100%);
+}
+
+.ffvi-hp-low {
+  background: linear-gradient(180deg, #ff6644 0%, var(--ffvi-hp-low) 50%, #882200 100%);
+  animation: hp-critical 0.5s infinite alternate;
+}
+
+@keyframes hp-critical {
+  from { opacity: 1; }
+  to { opacity: 0.7; }
+}
+
+.ffvi-hp-value {
+  width: 70px;
+  text-align: right;
+  font-size: 9px;
+  color: var(--ffvi-text-dim);
+}
+
+/* Potions */
+.ffvi-potions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.ffvi-potion-icon {
+  font-size: 14px;
+}
+
+.ffvi-potion-count {
+  color: var(--ffvi-heal);
+}
+
+/* =========================================================================
+   Action Display (Center)
+   ========================================================================= */
+
+.ffvi-action-display {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  min-width: 150px;
+  z-index: 10;
+}
+
+.ffvi-action-text {
+  font-size: 16px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+  animation: action-pop 0.3s ease-out;
+}
+
+@keyframes action-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.ffvi-action-name {
+  color: var(--ffvi-gold);
+}
+
+.ffvi-action-name.ffvi-heal {
+  color: var(--ffvi-heal);
+}
+
+.ffvi-fade-out {
+  animation: fade-out 0.3s ease-out forwards;
+}
+
+@keyframes fade-out {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Damage numbers */
+.ffvi-damage-number {
+  font-size: 24px;
+  color: var(--ffvi-damage);
+  text-shadow: 2px 2px 0 #000;
+  animation: damage-float 0.8s ease-out forwards;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes damage-float {
+  0% { transform: translateX(-50%) translateY(0); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-40px); opacity: 0; }
+}
+
+.ffvi-heal-number {
+  font-size: 24px;
+  color: var(--ffvi-heal);
+  text-shadow: 2px 2px 0 #000;
+  animation: heal-float 0.8s ease-out forwards;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes heal-float {
+  0% { transform: translateX(-50%) translateY(0); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-40px); opacity: 0; }
+}
+
+/* =========================================================================
+   Narration Box
+   ========================================================================= */
+
+.ffvi-narration-box {
+  background: rgba(0, 0, 0, 0.7);
+  border-top: 2px solid var(--ffvi-border);
+  padding: 12px 16px;
+  min-height: 50px;
+}
+
+.ffvi-narration-text {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--ffvi-text);
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Reasoning Panel */
+.ffvi-reasoning-container {
+  margin-top: 8px;
+  border-top: 1px solid var(--ffvi-border);
+  padding-top: 8px;
+}
+
+.ffvi-reasoning-toggle {
+  font-size: 9px;
+  color: var(--ffvi-blue);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ffvi-reasoning-toggle:hover {
+  color: var(--ffvi-gold);
+}
+
+.ffvi-reasoning-toggle .arrow {
+  transition: transform 0.2s ease;
+}
+
+.ffvi-reasoning-toggle.expanded .arrow {
+  transform: rotate(90deg);
+}
+
+.ffvi-reasoning-content {
+  display: none;
+  margin-top: 2px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--ffvi-border);
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--ffvi-text-dim);
+  white-space: normal;
+  min-height: 200px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ffvi-reasoning-content.visible {
+  display: block;
+}
+
+.ffvi-reasoning-label {
+  color: var(--ffvi-gold);
+  font-size: 9px;
+  text-transform: uppercase;
+  margin: 0 0 4px 0;
+  padding: 0;
+  line-height: 1;
+}
+
+.ffvi-reasoning-text {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.ffvi-reasoning-text.no-reasoning {
+  color: var(--ffvi-text-dim);
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* =========================================================================
+   Turn Indicator
+   ========================================================================= */
+
+.ffvi-turn-indicator {
+  position: absolute;
+  top: 50px;
+  right: 16px;
+  font-size: 10px;
+  color: var(--ffvi-text-dim);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--ffvi-border);
+}
+
+/* =========================================================================
+   Victory Overlay
+   ========================================================================= */
+
+.ffvi-victory-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 100;
+}
+
+.ffvi-victory-overlay.visible {
+  opacity: 1;
+}
+
+.ffvi-victory-content {
+  text-align: center;
+  animation: victory-entrance 0.5s ease-out;
+}
+
+@keyframes victory-entrance {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.ffvi-victory-text {
+  font-size: 32px;
+  color: var(--ffvi-gold);
+  text-shadow: 3px 3px 0 #000, 0 0 20px var(--ffvi-gold);
+  margin-bottom: 16px;
+  animation: victory-pulse 1s infinite alternate;
+}
+
+@keyframes victory-pulse {
+  from { text-shadow: 3px 3px 0 #000, 0 0 20px var(--ffvi-gold); }
+  to { text-shadow: 3px 3px 0 #000, 0 0 40px var(--ffvi-gold); }
+}
+
+.ffvi-victory-text.ffvi-draw {
+  color: var(--ffvi-text-dim);
+  text-shadow: 3px 3px 0 #000;
+  animation: none;
+}
+
+.ffvi-victory-text.ffvi-forfeit {
+  color: var(--ffvi-hp-low);
+  text-shadow: 3px 3px 0 #000, 0 0 20px var(--ffvi-hp-low);
+  animation: forfeit-pulse 1s infinite alternate;
+}
+
+@keyframes forfeit-pulse {
+  from { text-shadow: 3px 3px 0 #000, 0 0 20px var(--ffvi-hp-low); }
+  to { text-shadow: 3px 3px 0 #000, 0 0 40px var(--ffvi-hp-low); }
+}
+
+.ffvi-winner-name {
+  font-size: 20px;
+  color: var(--ffvi-text);
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.ffvi-victory-stats {
+  font-size: 12px;
+  color: var(--ffvi-text-dim);
+}
+
+/* =========================================================================
+   Controls Bar (External - in index.html)
+   ========================================================================= */
+
+.viewer-controls {
+  background: var(--ffvi-bg-dark);
+  border: 2px solid var(--ffvi-border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--ffvi-text);
+  flex-wrap: wrap;
+}
+
+.viewer-controls button {
+  font-family: inherit;
+  font-size: 10px;
+  background: var(--ffvi-bg-medium);
+  border: 2px solid var(--ffvi-border);
+  border-radius: 4px;
+  color: var(--ffvi-text);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.viewer-controls button:hover {
+  background: var(--ffvi-bg-light);
+  border-color: var(--ffvi-gold);
+}
+
+.viewer-controls button:active {
+  transform: scale(0.95);
+}
+
+.viewer-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.viewer-controls select {
+  font-family: inherit;
+  font-size: 10px;
+  background: var(--ffvi-bg-medium);
+  border: 2px solid var(--ffvi-border);
+  border-radius: 4px;
+  color: var(--ffvi-text);
+  padding: 6px 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.viewer-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.viewer-controls .spacer {
+  flex: 1;
+  min-width: 10px;
+}
+
+.viewer-controls .status {
+  color: var(--ffvi-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+  flex-shrink: 1;
+}
+
+/* =========================================================================
+   File Drop Zone
+   ========================================================================= */
+
+.file-drop-zone {
+  border: 3px dashed var(--ffvi-border);
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  background: var(--ffvi-bg-dark);
+  color: var(--ffvi-text-dim);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.dragover {
+  border-color: var(--ffvi-gold);
+  background: var(--ffvi-bg-medium);
+}
+
+.file-drop-zone.dragover {
+  transform: scale(1.02);
+}
+
+.file-drop-zone p {
+  margin: 8px 0;
+}
+
+.file-drop-zone .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* =========================================================================
+   Progress Bar
+   ========================================================================= */
+
+.viewer-progress {
+  height: 4px;
+  background: var(--ffvi-bg-dark);
+  border: 1px solid var(--ffvi-border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 16px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.viewer-progress-fill {
+  height: 100%;
+  background: var(--ffvi-gold);
+  transition: width 0.1s ease;
+}

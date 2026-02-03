@@ -1,0 +1,105 @@
+/* Base layout and shell styles for the replay viewer. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  text-shadow: 2px 2px 0 #000;
+}
+
+header p {
+  font-size: 14px;
+  color: #aaa;
+  margin: 0;
+}
+
+#viewer-container {
+  margin-bottom: 12px;
+}
+
+.error-message {
+  background: #441111;
+  border: 2px solid #ff4444;
+  border-radius: 8px;
+  padding: 16px;
+  color: #ff8888;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  margin-bottom: 16px;
+}
+
+#file-input {
+  display: none;
+}
+
+.instructions {
+  color: #888;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.instructions kbd {
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: monospace;
+}
+
+.match-info {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.match-info h3 {
+  margin: 0 0 8px 0;
+  color: #fff;
+  font-size: 14px;
+}
+
+.match-info .info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.match-info .info-item {
+  display: flex;
+  gap: 8px;
+}
+
+.match-info .info-label {
+  color: #666;
+}
+
+.match-info .info-value {
+  color: #fff;
+}

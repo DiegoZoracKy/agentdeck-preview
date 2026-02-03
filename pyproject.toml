@@ -98,7 +98,12 @@ where = ["src"]
 version = {attr = "agentdeck.__version__"}
 
 [tool.setuptools.package-data]
-agentdeck = ["py.typed", "config/*.yaml"]
+agentdeck = [
+    "py.typed",
+    "config/*.yaml",
+    "games/examples/*/viewers/*/*.js",
+    "games/examples/*/viewers/*/*.css"
+]
 
 [tool.black]
 line-length = 100

@@ -1,6 +1,6 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-01-27T00:00:00Z
+Last updated: 2026-02-03T19:47:08Z
 
 > Purpose: keep a lightweight, current map of active roadmap work and recent completions.
 
@@ -17,9 +17,41 @@ Last updated: 2026-01-27T00:00:00Z
 - Record a timestamp for each phase start and conclusion (ISO 8601 UTC).
 
 ## Current Focus
-- None (ready for next task).
+- Game config export (spec-first drafts in progress)
+
+## Active Work
+Phase E: Game Config Export (Spec-First)
+- Status: Drafting
+- Start: 2026-01-21T02:39:25Z
+- Deliverables (drafted):
+  - `specs/drafts/SPEC-GAME-v0.8.0.md` (Game.describe + params).
+  - `specs/drafts/SPEC-RECORDER-v1.4.0.md` (game_config.params).
+- Deliverables (remaining):
+  - Approvals and promotion to `specs/`.
+  - Implement `Game.describe()` + `get_config_params()`.
+  - Recorder wiring to store `game_config.params`.
+  - Update example games + tests for metadata.
 
 ## Recent Work (Complete)
+Phase D: Replay Viewer MVP (Reference Viewer)
+- Status: Complete
+- Start: 2026-01-21T02:39:25Z
+- End: 2026-02-03T19:47:08Z
+- Deliverables:
+  - `viewer/` split into core (loader/timeline/registry) + game-bundled viewers.
+  - FixedDamageGame restructured as self-contained package with bundled viewers.
+  - Viewers moved to `src/agentdeck/games/examples/fixed_damage/viewers/{ffvi,debug}/`.
+  - Registry updated to support (game, skin) keys: `register(game, skin, RendererClass)`.
+  - Created debug renderer as second viewer (state-focused, developer-friendly).
+  - Added skin selector UI with hot-swap capability.
+  - FFVI renderer visual polish (reasoning panel, winner spoiler prevention, layout stability).
+  - Lightweight smoke check tests both renderers.
+  - Test match script for generating mixed-controller matches.
+- Acceptance:
+  - Demonstrates game-bundled viewer pattern for contributors.
+  - Multiple renderers work with same record (multi-skin support).
+  - Viewer structure encourages modularity and external contributions.
+
 Phase A: Conclusion Defaults + Disabled Conclusion Templates (Spec Alignment)
 - Status: Complete
 - Start: 2026-01-20T23:58:19Z

@@ -1,0 +1,211 @@
+/**
+ * FixedDamageDebugRenderer - Simple state-focused renderer for debugging.
+ *
+ * Per SPEC-VIEWER §5.3:
+ * - R1: init() MUST be callable multiple times (re-init for new match)
+ * - R2: renderFrame() MUST handle any valid GameplayFrame
+ * - R3: destroy() MUST remove all DOM elements added by renderer
+ * - R4: Renderers MUST NOT modify MatchData or GameplayFrame objects
+ */
+
+class FixedDamageDebugRenderer {
+  constructor() {
+    this._container = null;
+    this._matchData = null;
+    this._elements = {};
+  }
+
+  /**
+   * Initialize renderer in container
+   * @param {HTMLElement} container
+   * @param {MatchData} matchData
+   */
+  init(container, matchData) {
+    // R1: Clean up previous init
+    this.destroy();
+
+    this._container = container;
+    this._matchData = matchData;
+
+    this._createDebugView();
+  }
+
+  /**
+   * Render a gameplay frame
+   * @param {GameplayFrame} frame
+   */
+  renderFrame(frame) {
+    if (!this._container) return;
+
+    // Update frame info
+    this._elements.frameNumber.textContent = frame.index + 1;
+    this._elements.turnNumber.textContent = frame.turnNumber;
+    this._elements.player.textContent = frame.player;
+    this._elements.action.textContent = frame.action;
+
+    // Update state before/after
+    this._elements.stateBefore.textContent = JSON.stringify(frame.stateBefore, null, 2);
+    this._elements.stateAfter.textContent = JSON.stringify(frame.stateAfter, null, 2);
+
+    // Update reasoning if present
+    if (frame.reasoning) {
+      this._elements.reasoning.textContent = frame.reasoning;
+      this._elements.reasoningContainer.style.display = 'block';
+    } else {
+      this._elements.reasoningContainer.style.display = 'none';
+    }
+
+    // Update prompt data if present
+    if (frame.prompt) {
+      this._elements.promptText.textContent = frame.prompt.promptText || 'N/A';
+      this._elements.responseText.textContent = frame.prompt.responseText || 'N/A';
+      this._elements.duration.textContent = `${frame.prompt.duration || 0}ms`;
+      this._elements.promptContainer.style.display = 'block';
+    } else {
+      this._elements.promptContainer.style.display = 'none';
+    }
+  }
+
+  /**
+   * Render victory screen
+   * @param {string | null} winner
+   * @param {GameState} finalState
+   */
+  renderVictory(winner, finalState) {
+    if (!this._container) return;
+
+    this._elements.victoryContainer.style.display = 'block';
+    this._elements.winner.textContent = winner || 'Draw';
+    this._elements.finalState.textContent = JSON.stringify(finalState, null, 2);
+  }
+
+  /**
+   * Cleanup resources
+   */
+  destroy() {
+    if (this._container && this._elements.root) {
+      this._container.removeChild(this._elements.root);
+    }
+    this._container = null;
+    this._matchData = null;
+    this._elements = {};
+  }
+
+  // =========================================================================
+  // Private: View Creation
+  // =========================================================================
+
+  _createDebugView() {
+    const root = document.createElement('div');
+    root.className = 'debug-viewer';
+
+    root.innerHTML = `
+      <div class="debug-header">
+        <h2>Debug Viewer - ${this._escapeHtml(this._matchData.game)}</h2>
+        <div class="debug-match-info">
+          <span>Match: ${this._escapeHtml(this._matchData.matchId)}</span>
+          <span>Players: ${this._matchData.players.map(p => this._escapeHtml(p)).join(' vs ')}</span>
+        </div>
+      </div>
+
+      <div class="debug-frame-info">
+        <div class="debug-row">
+          <label>Frame:</label>
+          <span id="debug-frame-number">-</span>
+        </div>
+        <div class="debug-row">
+          <label>Turn:</label>
+          <span id="debug-turn-number">-</span>
+        </div>
+        <div class="debug-row">
+          <label>Player:</label>
+          <span id="debug-player">-</span>
+        </div>
+        <div class="debug-row">
+          <label>Action:</label>
+          <span id="debug-action">-</span>
+        </div>
+      </div>
+
+      <div class="debug-state-comparison">
+        <div class="debug-state-column">
+          <h3>State Before</h3>
+          <pre id="debug-state-before">{}</pre>
+        </div>
+        <div class="debug-state-column">
+          <h3>State After</h3>
+          <pre id="debug-state-after">{}</pre>
+        </div>
+      </div>
+
+      <div id="debug-reasoning-container" class="debug-section" style="display: none;">
+        <h3>Reasoning</h3>
+        <pre id="debug-reasoning"></pre>
+      </div>
+
+      <div id="debug-prompt-container" class="debug-section" style="display: none;">
+        <h3>Prompt/Response</h3>
+        <div class="debug-prompt-response">
+          <div class="debug-prompt-section">
+            <h4>Prompt</h4>
+            <pre id="debug-prompt-text"></pre>
+          </div>
+          <div class="debug-prompt-section">
+            <h4>Response</h4>
+            <pre id="debug-response-text"></pre>
+          </div>
+          <div class="debug-row">
+            <label>Duration:</label>
+            <span id="debug-duration">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="debug-victory-container" class="debug-victory" style="display: none;">
+        <h2>Match Complete</h2>
+        <div class="debug-row">
+          <label>Winner:</label>
+          <span id="debug-winner">-</span>
+        </div>
+        <h3>Final State</h3>
+        <pre id="debug-final-state">{}</pre>
+      </div>
+    `;
+
+    // Store element references
+    this._elements.root = root;
+    this._elements.frameNumber = root.querySelector('#debug-frame-number');
+    this._elements.turnNumber = root.querySelector('#debug-turn-number');
+    this._elements.player = root.querySelector('#debug-player');
+    this._elements.action = root.querySelector('#debug-action');
+    this._elements.stateBefore = root.querySelector('#debug-state-before');
+    this._elements.stateAfter = root.querySelector('#debug-state-after');
+    this._elements.reasoningContainer = root.querySelector('#debug-reasoning-container');
+    this._elements.reasoning = root.querySelector('#debug-reasoning');
+    this._elements.promptContainer = root.querySelector('#debug-prompt-container');
+    this._elements.promptText = root.querySelector('#debug-prompt-text');
+    this._elements.responseText = root.querySelector('#debug-response-text');
+    this._elements.duration = root.querySelector('#debug-duration');
+    this._elements.victoryContainer = root.querySelector('#debug-victory-container');
+    this._elements.winner = root.querySelector('#debug-winner');
+    this._elements.finalState = root.querySelector('#debug-final-state');
+
+    this._container.appendChild(root);
+  }
+
+  _escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+}
+
+// Register renderer for FixedDamageGame (if registry present).
+if (typeof RendererRegistry !== 'undefined') {
+  RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
+}
+
+// Export for module systems, also available as global
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = FixedDamageDebugRenderer;
+}
