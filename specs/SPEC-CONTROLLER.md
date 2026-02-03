@@ -1,8 +1,8 @@
 # SPEC-CONTROLLER: Unified Controller Contract
 
-> Status: Draft v1.3.0 (Pending Review)
+> Status: Final
 > Version: 1.3.0
-> Last Updated: 2025-11-17
+> Last Updated: 2026-02-03
 > Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
 > Authors: Diego ZoracKy, Codex, Claude
 > Audience: Player authors, controller implementers, validation tooling
@@ -257,7 +257,7 @@ class ReasoningController(Controller):
 22. **GB3**: Controllers that validate actions SHOULD extract `game.allowed_actions` during binding and use it in both `parse()` and `get_format_instructions()`.
 23. **GB4**: Controllers MUST NOT require `bind_game()` to be called before `get_format_instructions()` (must return sensible defaults when unbound).
 24. **GB5**: Controllers SHOULD return game-specific format instructions when bound (e.g., "Respond with one of: ATTACK, POTION") and generic instructions when unbound (e.g., "Respond with your action").
-25. **GB6**: Controllers that require `allowed_actions` for validation MUST raise `RuntimeError` during `parse()` if `bind_game()` was not called (fail-fast, catch configuration errors early).
+25. **GB6**: Controllers that **require** `allowed_actions` for validation MUST raise `RuntimeError` during `parse()` if `bind_game()` was not called (fail-fast, catch configuration errors early). **Note**: Built-in controllers (`ActionOnlyController`, `ReasoningController`) are validation-optional—they accept any parsed action when unbound. Custom controllers requiring strict validation SHOULD implement this check.
 
 ### 5.8 Prompt Metadata Capture (PM)
 

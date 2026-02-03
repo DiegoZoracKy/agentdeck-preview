@@ -1,8 +1,8 @@
 # SPEC-REPLAY: Replay Engine Contract
 
-> Status: Final v1.1.0
+> Status: Final
 > Version: 1.1.0
-> Last Updated: 2026-01-20
+> Last Updated: 2026-02-03
 > Implementation: ✅ Complete (Recorder schema v1.3 alignment)
 > Authors: Codex, Claude (consensus)
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors

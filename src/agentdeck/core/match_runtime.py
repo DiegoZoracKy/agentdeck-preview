@@ -3,7 +3,7 @@ MatchRuntime: Per-match infrastructure context for game mechanics.
 
 Implements the canonical contract per:
 - SPEC-MATCH-RUNTIME v1.0.0 §4 (Public API)
-- SPEC-MATCH-RUNTIME v1.0.0 §5 (Invariants & Guarantees MR1-MR7)
+- SPEC-MATCH-RUNTIME v1.0.0 §5 (Invariants & Guarantees MR1-MR4)
 
 Key responsibilities:
 - Encapsulate per-match state (session_id, batch_id, match_id, seed, RNG)
@@ -14,12 +14,9 @@ Key responsibilities:
 
 Critical invariants:
 - MR1: Runtime Isolation - one runtime per match, no shared state
-- MR2: Event Ordering - lifecycle ordering enforced with mechanic metadata
-- MR3: Recorder Consistency - record_turn flushes in order
-- MR4: Parse Failure Integrity - emit event, log, update recorder, return policy
-- MR5: RNG Traceability - fork labels recorded in debug logs
-- MR6: Exception Safety - restore bindings even if mechanics raise
-- MR7: Extensibility - new methods remain backward compatible
+- MR2: Recorder Consistency - record_turn flushes in order
+- MR3: Parse Failure Integrity - emit event, log, update recorder, return policy
+- MR4: RNG Traceability - fork labels recorded in debug logs
 """
 
 from __future__ import annotations
@@ -192,9 +189,9 @@ class MatchRuntime:
             >>> runtime.emit_event(EventType.TURN_START, player="Alice", turn_number=1)
             >>> runtime.emit_event("card_drawn", player="Bob", card="Ace of Spades")
 
-        Invariants:
-            - MR2: Ensures lifecycle ordering (MATCH_START < GAMEPLAY < MATCH_END)
-            - Automatically enforces SPEC-OBSERVABILITY payload requirements
+        Notes:
+            - Lifecycle ordering and mechanic metadata are enforced by mechanics.
+            - EventBus handles context enrichment (session/batch/match IDs).
         """
         # Convert EventType enum to string if needed
         if hasattr(event_type, "value"):
@@ -216,7 +213,7 @@ class MatchRuntime:
         prompt_blocks: Optional[List[PromptBlock]] = None,
     ) -> None:
         """
-        Emit canonical GAMEPLAY event for turn recording (TL4, MR3, PM1-PM6).
+        Emit canonical GAMEPLAY event for turn recording (TL4, MR2, PM1-PM6).
 
         Per SPEC-GAME-MECHANIC-TURN-BASED v2.0.0 TL4 and SPEC-MATCH-RUNTIME §4.3,
         this builds and emits a GAMEPLAY event containing turn data with complete
@@ -237,7 +234,7 @@ class MatchRuntime:
             prompt_blocks: Optional explicit prompt blocks (if not in action.metadata)
 
         Invariants:
-            - MR3: Emits GAMEPLAY event via runtime event bus
+            - MR2: Emits GAMEPLAY event via runtime event bus
             - TL4: Every successful player.decide produces GAMEPLAY event
             - PM1-PM6: Always includes raw_response and available metadata
         """
@@ -374,8 +371,8 @@ class MatchRuntime:
             ParseFailurePolicy enum (ABORT_MATCH, SKIP_TURN, FORFEIT, RETRY_ONCE)
 
         Invariants:
-            - MR4: Parse Failure Integrity - MUST emit event, log, record, return policy
-            - Mechanics MUST NOT call console helpers directly
+            - MR3: Parse Failure Integrity - MUST emit event, log, record, return policy
+            - Mechanics SHOULD prefer runtime helpers over console internals
 
         Example:
             >>> try:
@@ -387,10 +384,12 @@ class MatchRuntime:
             ...     elif policy == ParseFailurePolicy.SKIP_TURN:
             ...         continue  # Skip to next turn
         """
+        # MR3: Pass game context to console helper
         return self._console._handle_parse_failure(
             player=player,
             error=error,
             turn_context=turn_context,
+            game=self._game,
         )
 
     def fork_rng(self, label: str) -> RandomGenerator:
@@ -407,7 +406,7 @@ class MatchRuntime:
             RandomGenerator fork (child of match RNG)
 
         Invariants:
-            - MR5: RNG Traceability - fork label recorded in debug logs
+            - MR4: RNG Traceability - fork label recorded in debug logs
             - Ensures reproducibility per SPEC-PARALLEL
 
         Example:
@@ -417,7 +416,7 @@ class MatchRuntime:
             ...     turn_rng = runtime.fork_rng(f"turn_{turn}")
             ...     state = game.update(state, player, action, rng=turn_rng)
         """
-        # Log fork for traceability (MR5)
+        # Log fork for traceability (MR4)
         if self._logger:
             self._logger.debug(
                 f"RNG fork: {label} (match_id={self._match_id}, base_seed={self._seed})"

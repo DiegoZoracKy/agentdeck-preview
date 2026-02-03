@@ -45,9 +45,7 @@ def test_conclusion_policy_loser_only(tmp_path: Path):
 
 
 def test_conclusion_policy_specific_player(tmp_path: Path):
-    _, capture = _run_match(
-        ConclusionPolicy(enabled=True, mode="specific", player="Bob"), tmp_path
-    )
+    _, capture = _run_match(ConclusionPolicy(enabled=True, mode="specific", player="Bob"), tmp_path)
     assert len(capture.events) == 1
     assert capture.events[0].data["player"] == "Bob"
 
@@ -86,9 +84,7 @@ def test_conclusion_policy_default_conclude_records_prompt(tmp_path: Path):
     )
 
     capture = ConclusionCapture()
-    with AgentDeck(
-        game=FixedDamageGame(), session=config, spectators=[capture]
-    ) as deck:
+    with AgentDeck(game=FixedDamageGame(), session=config, spectators=[capture]) as deck:
         deck.play(players=[BaseConcludePlayer("Alice"), BaseConcludePlayer("Bob")], matches=1)
 
     assert len(capture.events) == 2

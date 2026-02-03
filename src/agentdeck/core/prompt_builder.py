@@ -45,7 +45,6 @@ from .types import (
     TurnContext,
 )
 
-
 _DEFAULT_TEMPLATE = object()
 
 
@@ -131,9 +130,7 @@ class PromptBuilder:
             )
         """
         # Load templates (from files if Path, otherwise use string directly)
-        self._handshake_template = self._load_template(
-            handshake_template, self.DEFAULT_HANDSHAKE
-        )
+        self._handshake_template = self._load_template(handshake_template, self.DEFAULT_HANDSHAKE)
         self._turn_template = self._load_template(turn_template, self.DEFAULT_TURN)
         self._conclusion_template = self._load_template(
             conclusion_template, self.DEFAULT_CONCLUSION, allow_none=True
@@ -170,7 +167,6 @@ class PromptBuilder:
             return default
         if template is None:
             return None if allow_none else default
-            return default
         if isinstance(template, Path):
             # Load from file (UTF-8)
             return template.read_text(encoding="utf-8")

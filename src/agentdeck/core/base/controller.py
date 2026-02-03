@@ -77,7 +77,7 @@ class Controller(ABC):
         ...         if self._allowed_actions:
         ...             actions = ', '.join(sorted(self._allowed_actions))
         ...             return f"Respond with: ACTION: <action>\\nAllowed: {actions}"
-        ...         return "Respond with: ACTION: <action>"
+        ...         return "Respond with: ACTION: <your_action>"
         ...
         ...     def parse(self, response: str) -> ParseResult:
         ...         # Extract "ACTION: <value>" from response
@@ -315,33 +315,34 @@ class Controller(ABC):
         """
         Parse conclusion-phase response (per SPEC-CONTROLLER v1.3.0 §4).
 
-        Default implementation returns a dict with ``reflection_text``. Override for
-        structured conclusion parsing (e.g., extracting lessons learned).
+        Default implementation returns {"reflection": response.strip()}. Override for
+        custom conclusion parsing (e.g., extracting lessons_learned, strategy_adjustments).
 
         Args:
             response: Raw LLM response from conclusion phase
             context: Optional context (game state, turn history, etc.)
 
         Returns:
-            Parsed conclusion metadata dict
+            Dictionary with parsed conclusion metadata (SPEC-CONTROLLER CP2)
 
         Requirements (CP1-CP2):
             - CP1: MUST be deterministic and side-effect free
-            - CP2: Default returns trimmed response (passthrough)
+            - CP2: Default returns {"reflection": response.strip()} (dict format)
 
         Example (default behavior):
             >>> result = controller.parse_conclusion("  Good game!  ")
             >>> result
-            {'reflection_text': 'Good game!'}
+            {'reflection': 'Good game!'}
 
         Example (custom override):
             >>> class ReflectiveController(ActionOnlyController):
             ...     def parse_conclusion(self, response, *, context=None):
-            ...         # Extract reflection from "REFLECTION: ..." format
-            ...         if "REFLECTION:" in response:
-            ...             return {"reflection_text": response.split("REFLECTION:")[1].strip()}
-            ...         return {"reflection_text": response.strip()}
+            ...         # Extract structured reflection
+            ...         return {
+            ...             "reflection": response.strip(),
+            ...             "lessons_learned": extract_lessons(response),
+            ...         }
 
         Usage: Console calls this during conclusion phase to parse final message.
         """
-        return {"reflection_text": response.strip()}
+        return {"reflection": response.strip()}

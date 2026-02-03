@@ -1,8 +1,8 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
-> Status: Final v1.3.0
+> Status: Final
 > Version: 1.3.0
-> Last Updated: 2026-01-20
+> Last Updated: 2026-02-03
 > Implementation: ✅ Complete (schema v1.3 event enrichment)
 > Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers

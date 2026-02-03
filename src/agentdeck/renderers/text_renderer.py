@@ -112,7 +112,9 @@ class TextRenderer(Renderer):
 
         lines.append("=" * 25)
 
+        # MO1: Include format hint for downstream tooling
         metadata = {
+            "format": "text",  # SPEC-RENDERER MO1: format hint
             "player": player,
             "sections": sections,
         }

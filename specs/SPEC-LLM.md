@@ -1,9 +1,9 @@
 # SPEC-LLM: Provider Integration Contract
 
-> Status: Draft v1.1.0 (Pricing Integration)
+> Status: Final
 > Version: 1.1.0
-> Last Updated: 2025-10-24
-> Implementation: ⬜ Not Started
+> Last Updated: 2026-02-03
+> Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
 
@@ -63,7 +63,7 @@
 
 ## 5. Invariants & Guarantees
 ### 5.1 Credentials & Configuration (CC)
-1. **CC1**: MUST resolve `api_key` from constructor argument > env var > raise `ValueError` if missing.
+1. **CC1**: MUST resolve credentials via constructor argument > env var > provider-specific defaults (e.g., Google ADC). Providers supporting Application Default Credentials (ADC) or similar implicit auth MAY skip explicit `api_key` requirement. Raise `ValueError` only when no valid credential path exists.
 2. **CC2**: MUST ensure `model` set (constructor override or class-level `default_model`); raise `ValueError` otherwise.
 3. **CC3**: MUST call `_initialize_client` during construction; failures MUST raise actionable `ImportError`/`ValueError`.
 

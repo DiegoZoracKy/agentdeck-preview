@@ -200,8 +200,8 @@ def test_live_vs_replay_event_parity(temp_recording_dir):
         assert isinstance(
             live_hs.data.get("prompt_blocks"), list
         ), f"Handshake START {i}: prompt_blocks must be list (HS spec)"
-        assert (
-            live_hs.data.get("prompt_text") == replay_hs.data.get("prompt_text")
+        assert live_hs.data.get("prompt_text") == replay_hs.data.get(
+            "prompt_text"
         ), f"Handshake START {i}: prompt_text mismatch (EP3)"
 
     live_handshake_completes = [

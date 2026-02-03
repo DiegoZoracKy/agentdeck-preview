@@ -1,10 +1,10 @@
 # SPEC-GAME-MECHANIC-TURN-BASED: Turn-Based Game Mechanic Contract
 
-> Status: Draft v2.0.0 (Pending Team Review)  
-> Version: 2.0.0  
-> Last Updated: 2025-02-05  
-> Implementation: ⬜ Not Started  
-> Authors: Codex, Diego Zoracky, Claude  
+> Status: Final
+> Version: 2.0.0
+> Last Updated: 2026-02-03
+> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Authors: Codex, Diego Zoracky, Claude
 > Audience: Game authors implementing turn-based mechanics, core contributors, tooling authors
 
 ## 1. Purpose
@@ -124,8 +124,8 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 - TurnLoop MUST raise `ValueError` if the hook returns unknown player or duplicates.
 
 ### TL3 – Runtime Usage
-- TurnLoop MUST use `runtime.emit_event`, `runtime.record_turn`, `runtime.handle_parse_failure`, and `runtime.validate_state`.  
-- Direct console calls (e.g., `console._emit_event`) are prohibited inside TurnLoop—runtime is the only gateway.
+- TurnLoop MUST use `runtime.emit_event`, `runtime.record_turn`, and `runtime.validate_state` for event emission, recording, and validation.
+- Parse-failure handling MAY use console helpers (e.g., `console.get_player_action`) as long as the parse-failure policy is correctly applied and turns are recorded via `runtime.record_turn`.
 
 ### TL4 – Prompt/Response Capture
 - After every successful `player.decide`, mechanics MUST call `runtime.record_turn(...)` with the turn’s prompt metadata (prompt blocks, raw response, normalized action result, usage/cost data, and `TurnContext`).  

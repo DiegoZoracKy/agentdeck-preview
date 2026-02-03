@@ -2,24 +2,18 @@
 
 **A research platform for studying AI behavior through game scenarios**
 
-> **Status**: v0.1.0 (Stable) - Production-ready with lifecycle hooks
-> **Test Coverage**: 319 tests, CI gate at 75% coverage
-> **Latest Release**: v0.1.0 with Game lifecycle hooks (SPEC-GAME v0.7.0)
-> **Package**: `agentdeck-ai` on PyPI (import as `agentdeck`)
-> **Disambiguation**: Not affiliated with similarly named Agent Deck, AgentDock, or AgentDesk tools
+> **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
+> **Quality**: 75% coverage gate · Python 3.9+
 
 ---
-
-*GPT and Gem AI assistants for exploration, development, contribution, and research:*
-
-[![GPT Assistant](https://img.shields.io/badge/GPT-AgentDeck-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/g/g-6923cdbde5648191a202c3f9a8a8796c-agentdeck)
-[![Gemini Gem](https://img.shields.io/badge/Gem-AgentDeck-4285F4?logo=google&logoColor=white)](https://gemini.google.com/gem/1i6xn0HwFMaCNNeo392WCw1yQQzEsUxix?usp=sharing)
 
 ## 🎯 Purpose & Vision
 
 ![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
 
 AgentDeck is a **research platform for studying AI behavior through game scenarios**. It enables researchers to run controlled experiments where AI agents interact in well-defined environments, providing comprehensive data collection for analysis of prompting strategies, decision-making patterns, and model capabilities.
+
+Want to try it immediately? Jump to [Quick Start](#-quick-start).
 
 ### Why Games?
 
@@ -47,50 +41,34 @@ AgentDeck is architected like a video game console to keep experiments modular a
 By separating these concerns, AgentDeck ensures your research is **reproducible, observable, and easy to modify**.
 
 **Core Capabilities:**
-- Run experiments with GPT-4, Claude, Gemini in ~10 lines of code
-- **Game lifecycle hooks** - Process handshake metadata, enrich forfeit states, control player reflections
-- **Parallel execution** - 10× speedup with worker-based concurrency
-- **Complete observability** - every decision, timing, and reasoning captured
-- **Real-time monitoring** - live progress tracking with ETA and cost estimates
-- **Perfect replay** - reconstruct exact match conditions from recordings
-- **Reproducible research** - deterministic experiments via seeded randomness
+- Run experiments with GPT/Claude/Gemini in ~10 lines of code
+- Deterministic seeding + recordings + replay parity
+- Parallel execution for scaling
+- Event-driven observability via spectators
 
 ---
 
 ## 🔬 Research Findings
 
-AgentDeck has been used to conduct rigorous AI behavioral research. All experiments used [**FixedDamageGame**](src/agentdeck/games/examples/fixed_damage.py) — a turn-based combat game where players choose between ATTACK (deal damage) or POTION (restore HP). First to reduce opponent to 0 HP wins. Win rates below represent head-to-head match outcomes.
+AgentDeck ships with reproducible experiment packages under [`research/`](research/) (recordings → `results.json`/`results.csv` → `analysis.md`). Highlights below are from **FixedDamageGame** (turn-based combat).
 
-**Controller Strategies Tested:**
-- **ReasoningController** — Requires explicit chain-of-thought reasoning before action selection (e.g., "I should attack because...")
-- **ActionOnlyController** — Direct action selection without explicit reasoning (just outputs "ATTACK" or "POTION")
+### OpenAI Strategic Benchmarks (185 recorded matches)
+- **Optimal configuration**: `gpt-4o-mini + ReasoningController` at **$0.0028/match**
+- **CoT vs direct action (gpt-4o-mini)**: **66% vs 34%** (p=0.0328)
+- **Prompt format repetition is a dominant confound**: when format is *not* repeated every turn, `gpt-4o` wins **90–95%**; repeating every turn flips outcomes (`gpt-4o-mini` wins **77%**)
+- **Model size ≠ strategic superiority (in this setup)**: `gpt-4o-mini` beat `gpt-4o` **76.7% vs 23.3%** (p=0.0052)
+- **GPT-5 tiers showed no clear advantage** over `gpt-4o-mini` in this game, despite a **~2–15×** cost premium
 
-### OpenAI Strategic Benchmarks (2025-11-08)
-**Research Question**: How do model configurations affect strategic gameplay?
+### Multi-Provider Benchmarks (93 recorded matches)
+- **`gpt-4o-mini` vs `Gemini-2.5-Flash`**: GPT wins **70/30** (p=0.0428) at ~**10×** lower cost/match (**$0.0020** vs **$0.0204**)
+- **`gpt-4o-mini` vs `Gemini-2.5-Pro`**: statistically tied (p=0.856) but Pro costs ~**15×** more per match (**$0.0476** vs **$0.0030**) and was operationally slower (quotas/latency)
 
-| Finding | Impact |
-|---------|--------|
-| **Format instruction repetition dominates** | ~67 percentage point swing in win rates |
-| **CoT reasoning provides 2:1 advantage** | Model-agnostic (works for GPT-4o-mini and GPT-5-nano) |
-| **Model size ≠ strategic superiority** | gpt-4o-mini beats gpt-4o (77% vs 23%) |
-| **GPT-5 family matches GPT-4o-mini** | No significant performance difference detected |
-
-**Optimal Configuration**: `gpt-4o-mini + ReasoningController`
-
-### Multi-Provider Benchmarks (2025-11-19)
-**Research Question**: How do providers compare in strategic tasks?
-
-| Matchup | Result |
-|---------|--------|
-| GPT-4o-mini vs Gemini-2.5-Flash | GPT wins 70-30 (p=0.043) |
-| GPT-4o-mini vs Gemini-2.5-Pro | Statistical tie (p=0.856) |
-
-**Key Insight**: GPT-4o-mini outperforms Gemini Flash; ties with Gemini Pro in constrained strategic tasks.
+> These findings are prompt/controller dependent and may not generalize beyond FixedDamageGame.
 
 ### Explore Full Research
-- **[Research Directory](research/)** - Complete experiment narratives
-- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - 410 matches across model configurations
-- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - Cross-vendor comparisons
+- **[Research Index](research/INDEX.md)** - Experiment registry
+- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - `analysis.md` + `results.json`/`results.csv`
+- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - `analysis.md` + `results.json`/`results.csv`
 
 ---
 
@@ -117,7 +95,8 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 ### Core Components
 
 **Games** define rules and state
-- Implement 4 methods: `setup()`, `get_view()`, `update()`, `status()`
+- Required properties: `instructions`, `allowed_actions`, `default_handshake_template`
+- Core methods: `setup()`, `get_view()`, `update()`, `status()`
 - State is JSON-serializable dicts (no complex objects)
 - Example: [FixedDamageGame](src/agentdeck/games/examples/fixed_damage.py)
 
@@ -129,7 +108,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 **Controllers** parse AI responses into actions
 - `ActionOnlyController` - extracts single action token
 - `ReasoningController` - extracts reasoning + action
-- `AcceptOKHandshakeController` - validates handshake acceptance
+- Handshake validation is built into the base `Controller` (default accepts OK/READY/YES)
 
 **Renderers** format game state for AI consumption
 - `TextRenderer` - human-readable text format
@@ -155,8 +134,8 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 
 **PyPI install (recommended):**
 ```bash
-# Latest release candidate
-pip install agentdeck-ai==0.1.0
+# Latest release on PyPI
+pip install agentdeck-ai
 
 # With provider SDKs
 pip install agentdeck-ai[openai]      # OpenAI SDK
@@ -173,7 +152,7 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/DiegoZoracKy/agentdeck.git
+git clone https://github.com/agentdeck/agentdeck.git
 cd agentdeck
 pip install -e ".[dev]"
 ```
@@ -232,70 +211,24 @@ print(f"Win rates: {results.win_rates}")
 - Shows live commentary + progress + stats, and saves recordings under `agentdeck_runs/mock_demo/<session>/records/`
 
 ### Walkthroughs & Docs
-- Build your first game + replay tour: `docs/first_game_walkthrough.md` (runs `examples/first_game_walkthrough.py`)
-- Documentation index: `docs/README.md`
+- Build your first game + replay tour: `examples/first_game_walkthrough.py`
+- Examples index: `examples/README.md`
 
-### What You’ll See (Artifacts & Output)
-- **Live progress** (ProgressDisplay):
-  ```
-  [Batch test] Match 2/3 | ETA: 5.1s | Rate: 0.6 matches/sec
-  [Batch test] Match 3/3 | ETA: 0.0s | Rate: 0.7 matches/sec
-  ```
-- **Narration and results** (MatchNarrator/Stats):
-  ```
-  Turn 1: Alice → ATTACK (Bob: 45 HP) | Bob → POTION (65 HP)
-  Turn 2: Alice → ATTACK (Bob: 50 HP) | Bob → ATTACK (Alice: 45 HP)
-  Winner: Alice in 4 turns
-  ```
-- **Recording snippet** (`agentdeck_runs/.../records/match_001.json`):
-  ```json
-  {
-    "match_id": "match_001",
-    "seed": 7,
-    "events": [
-      {"type": "player_handshake_start", "player": "Alice"},
-      {"type": "gameplay", "turn_number": 1, "prompt_text": "..."},
-      {"type": "match_end", "winner": "Alice", "turns": 4}
-    ]
-  }
-  ```
-- **Cost/usage summary** (TokenUsageTracker):
-  ```
-  Total API Calls: 6
-  Total Tokens: 2,180 (prompt 1,420 | completion 760)
-  Total Cost: $0.0421
-  ```
+### Artifacts (Recordings + Logs)
 
-**Output:**
-```
-Configuration:
-  Default Game: FixedDamageGame
-  Seed: 42
+After you run a batch, AgentDeck writes artifacts under `agentdeck_runs/<session_id>/` (or your
+configured `run_dir`):
 
-Player Details:
-  Player-1:
-    Model: gpt-4o-mini
-    Controller: ActionOnlyController
-  Player-2:
-    Model: gpt-4o-mini
-    Controller: ActionOnlyController
+- `records/` contains a `batch_<batch_id>.json` summary plus one `match_*.json` per match
+- `logs/` contains `info.log` and `debug.log` by default
 
-✓ Player-1 handshake: OK
-✓ Player-2 handshake: OK
+Tip: open a match JSON to see prompts, raw responses, parsed actions, costs, and the full event
+timeline.
 
-Match 1/10:
-  Turn 1: Player-1 → ATTACK
-  Turn 2: Player-2 → ATTACK
-  ...
-  Winner: Player-1 (11 turns)
-
-Win rates: {'Player-1': 0.6, 'Player-2': 0.4}
-```
-
-### Parallel Execution (10× Speedup)
+### Parallel Execution (Workload-Dependent Speedups)
 ```python
 from agentdeck import AgentDeck, AgentDeckConfig
-from agentdeck.core.types import LogLevel
+from agentdeck import LogLevel
 
 # Configure parallel execution with real-time monitoring
 config = AgentDeckConfig(
@@ -308,17 +241,10 @@ config = AgentDeckConfig(
 with AgentDeck(game=game, session=config) as deck:
     results = deck.play(players=players, matches=100)
 
-# ProgressMonitor auto-attached - shows real-time ETA and cost tracking
+# ProgressMonitor is auto-attached when concurrency > 1 (unless monitors=[] is provided)
 ```
-
-**Output:**
-```
-[ProgressMonitor] Batch Progress: 10/100 (10.0%) | ETA: 2m 15s | Rate: 4.4 matches/sec
-[ProgressMonitor] Batch Progress: 50/100 (50.0%) | ETA: 1m 08s | Rate: 4.6 matches/sec
-[ProgressMonitor] Batch Progress: 100/100 (100.0%) | Completed in 2m 52s
-```
-
-> **Validated Performance**: 10.26× speedup with concurrency=10, deterministic replay parity guaranteed.
+> Performance depends on provider rate limits and workload. For a determinism + concurrency comparison,
+> see [`examples/test_parallel_execution.py`](examples/test_parallel_execution.py).
 
 ---
 
@@ -343,40 +269,39 @@ with AgentDeck(game=game, spectators=[
 Every match is automatically recorded with full metadata:
 
 ```python
-import json
 from pathlib import Path
 
-from agentdeck import AgentDeck, Recorder
-from agentdeck.core.replay import ReplayEngine
-from agentdeck.spectators import MatchNarrator
+from agentdeck import AgentDeck, MatchNarrator
 
-# Record matches to JSON
-recorder = Recorder(output_dir="agentdeck_records")
-with AgentDeck(game=game, spectators=[recorder]) as deck:
-    deck.play(players, matches=3, seed=7)
+with AgentDeck(game=game) as deck:
+    results = deck.play(players, matches=3, seed=7)
 
-# Load the most recent recording
-recording_path = sorted(Path("agentdeck_records").glob("session_*/match_*.json"))[-1]
-with recording_path.open("r", encoding="utf-8") as handle:
-    match_data = json.load(handle)
+    # Replay from memory (no file I/O)
+    deck.replay(match=results[0], spectators=[MatchNarrator()], speed=0.0)
 
-# Replay with new spectators (exact parity)
-engine = ReplayEngine(match_data)
-engine.replay(spectators=[MatchNarrator()], speed=0.0)
+    # Or replay from disk (recorded under records/)
+    record_dir = Path(deck.session.record_directory)
+    match_path = sorted(record_dir.glob("match_*.json"))[0]
+    deck.replay(path=match_path, spectators=[MatchNarrator()], speed=0.0)
 ```
 
 **Replay Parity Guarantee**: Replay emits identical event stream as live execution, including complete three-phase lifecycle (handshake → gameplay → conclusion).
 
 ### 3. Reproducible Experiments
-Deterministic seeding ensures exact reproducibility:
+Seeding makes **game-level randomness** reproducible (player ordering, RNG) and guarantees recording/replay parity.
+However, **LLM outputs are not guaranteed to be deterministic across runs**, even with a fixed seed.
 
 ```python
-# Same seed → same results
-with AgentDeck(game=game, seed=42) as deck:
-    results1 = deck.play(players, matches=100)
-    results2 = deck.play(players, matches=100)
+from agentdeck import AgentDeck, AgentDeckConfig, MockPlayer
 
-assert results1.win_rates == results2.win_rates
+config = AgentDeckConfig(seed=42)
+players = [
+    MockPlayer(name="Alice", actions=["ATTACK", "POTION"]),
+    MockPlayer(name="Bob", actions=["POTION", "ATTACK"]),
+]
+
+with AgentDeck(game=game, session=config) as deck:
+    results = deck.play(players=players, matches=10)
 ```
 
 ### 4. Three-Phase Player Lifecycle
@@ -390,115 +315,19 @@ This provides rich data for analyzing AI behavior patterns.
 
 ---
 
-## 📊 What's Actually Implemented
-
-AgentDeck v0.1.0 is the result of a **spec-driven rewrite** focusing on correctness, observability, and performance. Here's what's ready:
-
-### ✅ Complete & Tested
-- **Core Execution**: Console, EventBus, three-phase lifecycle
-- **Game Lifecycle Hooks** (v0.7.0): on_handshake_complete, on_match_forfeited, conclusion phase hooks
-- **Parallel Execution**: Worker-based concurrency with deterministic replay parity (10× speedup validated)
-- **Monitor System**: Real-time progress tracking with ProgressMonitor (auto-attached for parallel runs)
-- **LLM Integration**: GPTPlayer, ClaudePlayer, GeminiPlayer (full lifecycle support with clone())
-- **Controllers**: ActionOnlyController, ReasoningController (parser bug fixed), AcceptOKHandshakeController
-- **Renderers**: TextRenderer (generic, works with any game)
-- **Games**: FixedDamageGame example with information levels
-- **Spectators**: MatchNarrator, ProgressDisplay, TokenUsageTracker, StatsTracker
-- **Recording**: Recorder with complete metadata capture (parallel-compatible)
-- **Replay**: ReplayEngine with full lifecycle parity (R1 guarantee)
-- **Prompt Composition**: PromptBuilder with template system
-- **Reproducibility**: Deterministic seeding and exact replay (validated in production)
-- **Test Suite**: 319 tests with CI coverage gate at 75%
-
-### 🚧 Coming Soon (See [ROADMAP.md](ROADMAP.md))
-- **Research Module**: Statistical comparison tools (Phase 2)
-- **Advanced Examples**: Auction game, Prisoner's Dilemma
-- **Extension Templates**: AI-assisted game/player/spectator creation (Phase 3)
-- **Documentation**: Game authoring guide, spectator guide (Phase 3)
-
----
-
-## 🔬 Current Milestone
-
-**v0.1.0**: Game Lifecycle Hooks
-- ✅ Game lifecycle hooks (SPEC-GAME v0.7.0): on_handshake_complete, on_match_forfeited, conclusion phase
-- ✅ Full backward compatibility (HS1-HS5 guarantees)
-- ✅ Worker-based parallel execution with deterministic replay parity (SPEC-PARALLEL v1.0.0)
-- ✅ Monitor system for real-time progress tracking (SPEC-MONITOR v1.0.0)
-- ✅ Production validation: 4 experiments, 40× faster than estimated
-- ✅ CI suite passing with coverage gate at 75% (319 tests)
-- ✅ Validated with OpenAI GPT-4o-mini and GPT-4o
-- ✅ Published to PyPI: `pip install agentdeck-ai==0.1.0`
-
-**Next**: Additional corporate use cases → v0.1.0 stable release
-
----
-
-## 🛠️ Development
-
-### Running Tests
-```bash
-# Install dependencies
-pip install -e ".[dev]"
-
-# Run test suite
-pytest
-
-# Run with coverage
-pytest --cov=src/agentdeck --cov-report=html
-```
-
-### Running Examples
-```bash
-# Set your API key
-export OPENAI_API_KEY="sk-..."
-
-# Run minimal experiment (GPT-4o-mini, 1 match)
-python examples/test_prompt_builder_ux_minimal.py
-
-# Run replay example
-python examples/replay_minimal.py
-
-# See all examples
-ls examples/*.py
-```
-
-### Project Structure
-```
-agentdeck/
-├── src/agentdeck/
-│   ├── core/                 # Console, EventBus, Recorder, Replay
-│   ├── players/              # GPT, Claude, Gemini, Mock
-│   ├── controllers/          # ActionOnly, Reasoning, Handshake
-│   ├── renderers/            # Text renderer
-│   ├── spectators/           # Narrator, Progress, TokenUsage, Stats
-│   └── games/examples/       # FixedDamageGame
-├── tests/                    # Unit + integration suites (CI-gated coverage)
-├── examples/                 # Working examples
-└── specs/                    # Component specifications
-```
-
----
-
 ## 📚 Documentation
 
-- **[Architecture Spec](specs/SPEC.md)** - High-level system design and component navigation
-- **[Component Specs](specs/)** - Detailed specifications for each component
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Workflow, local setup, tests
+- **[Specs](specs/SPEC.md)** - Specification index (source of truth)
 - **[ROADMAP.md](ROADMAP.md)** - Implementation progress and future plans
-- **[Examples](examples/)** - Working code examples
+- **[Examples](examples/README.md)** - Runnable examples and tutorials
 
-### Component Specifications
-All components follow rigorous specifications with numbered invariants:
+### AI Assistants
 
-- [SPEC-GAME.md](specs/SPEC-GAME.md) - Game author contract
-- [SPEC-PLAYER.md](specs/SPEC-PLAYER.md) - Three-phase player lifecycle
-- [SPEC-CONTROLLER.md](specs/SPEC-CONTROLLER.md) - Response parsing
-- [SPEC-RENDERER.md](specs/SPEC-RENDERER.md) - State formatting
-- [SPEC-SPECTATOR.md](specs/SPEC-SPECTATOR.md) - Observation interface
-- [SPEC-RECORDER.md](specs/SPEC-RECORDER.md) - Match persistence
-- [SPEC-REPLAY.md](specs/SPEC-REPLAY.md) - Exact replay with parity guarantee
-- [SPEC-CONSOLE.md](specs/SPEC-CONSOLE.md) - Execution engine
-- [SPEC-OBSERVABILITY.md](specs/SPEC-OBSERVABILITY.md) - Event system
+Project assistants for exploration, development, and research:
+
+[![GPT Assistant](https://img.shields.io/badge/GPT-AgentDeck-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/g/g-6923cdbde5648191a202c3f9a8a8796c-agentdeck)
+[![Gemini Gem](https://img.shields.io/badge/Gem-AgentDeck-4285F4?logo=google&logoColor=white)](https://gemini.google.com/gem/1i6xn0HwFMaCNNeo392WCw1yQQzEsUxix?usp=sharing)
 
 ---
 
@@ -506,7 +335,7 @@ All components follow rigorous specifications with numbered invariants:
 
 1. **Spec-Driven**: Every component has a rigorous specification
 2. **Observable**: Every decision is captured and analyzable
-3. **Reproducible**: Deterministic with seeded randomness
+3. **Reproducible**: Everything we control is reproducible (seeding + recordings + replay parity)
 4. **Composable**: Mix and match components freely
 5. **Research-First**: Built by researchers, for researchers
 
@@ -514,10 +343,10 @@ All components follow rigorous specifications with numbered invariants:
 
 ## 📝 License
 
-MIT License - Free for research and commercial use.
+MIT License (see [LICENSE](LICENSE)).
 
 ---
 
 **Built with ❤️ for AI researchers**
 
-*AgentDeck v0.1.0 - Spec-Driven Architecture for AI Behavioral Research*
+*Spec-Driven Architecture for AI Behavioral Research*

@@ -1,10 +1,10 @@
 # SPEC-PARALLEL: Console Parallel Match Execution
 
-> Status: Draft v0.1.0  
-> Version: 0.1.0  
-> Last Updated: 2025-03-29  
-> Implementation: ⬜ Not Started  
-> Authors: Codex, Claude, Diego  
+> Status: Final
+> Version: 0.1.0
+> Last Updated: 2026-02-03
+> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Authors: Codex, Claude, Diego
 > Audience: Contributors, Research Engineers, Observability Maintainers
 
 ## 1. Purpose
@@ -53,11 +53,10 @@
 - **Session integrity:** console emits a single `SESSION_START`/`BATCH_START`/`MATCH_*` sequence even when matches execute in parallel.  
 - **Player order hook (v1.0 limitation):** games that depend on `previous_match_result` inside an overridden `get_player_order` are incompatible with parallel execution. Console MUST detect overrides of the base implementation and fall back to sequential execution with a warning.  
 - **Isolation:** each worker runs on deep-copied game and player instances with dedicated RNG; no mutable state is shared across matches.  
-- **Failure propagation:** first worker failure cancels remaining work, emits `BATCH_END` with partial results + error payload, and raises to caller (matching current semantics).  
+- **Failure propagation:** first worker failure emits `BATCH_END` with partial results + error payload, and raises to caller. Best-effort cancellation of remaining workers is attempted but not guaranteed; results from failed matches are not counted.  
 - **Cloning failure:** if deep-copy fails for game or any player, console raises `ParallelExecutionError` before launching workers.
 - **Metric propagation:** console MUST synchronise aggregate player metrics (token usage, cost, latency samples) from worker clones back to the original player instances after each match so researchers observe consolidated statistics.
 - **Recorder compatibility:** recorder output (`agentdeck_runs/session_id/records/…`) MUST match sequential execution for identical seeds, except for wall-clock timestamps and aggregate durations.
-- **Performance considerations:** Parallel execution delivers the largest gains when run against local or self-hosted models without strict rate limits. Cloud APIs may queue or throttle concurrent requests, which can negate speedups; researchers SHOULD benchmark their workload before selecting a `concurrency` value.
 
 ## 7. Data Flow & Interaction
 - **Config path:** Research script → `AgentDeckConfig(concurrency=N)` → `AgentDeck` → `Console` (session state).  

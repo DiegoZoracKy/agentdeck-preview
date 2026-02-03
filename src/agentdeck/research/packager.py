@@ -49,9 +49,7 @@ def _resolve_session_paths(
             records_dir = session_dir
             session_root = session_dir.parent
         else:
-            raise FileNotFoundError(
-                f"Session directory must contain records/: {session_dir}"
-            )
+            raise FileNotFoundError(f"Session directory must contain records/: {session_dir}")
         session_id = session_root.name
     else:
         if not session_id:
@@ -114,7 +112,9 @@ def _player_order(metadata: Dict[str, Any], player_names: List[str]) -> List[str
     return sorted(player_names)
 
 
-def _infer_players(metadata: Dict[str, Any], match_refs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _infer_players(
+    metadata: Dict[str, Any], match_refs: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     config_players = _collect_player_configs(metadata)
     summaries = _collect_player_summaries(match_refs)
 
@@ -340,7 +340,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--research-dir", type=Path, default=Path("research"))
     parser.add_argument("--experiment-id", type=str, default=None)
     parser.add_argument("--question", type=str, required=True)
-    parser.add_argument("--status", type=str, choices=["planned", "running", "complete", "archived"])
+    parser.add_argument(
+        "--status", type=str, choices=["planned", "running", "complete", "archived"]
+    )
     parser.add_argument("--title", type=str, default=None)
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()

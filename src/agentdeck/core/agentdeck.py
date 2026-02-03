@@ -343,6 +343,12 @@ class AgentDeck:
         if provided != 1:
             raise ValueError("Provide exactly one of 'match' or 'path'.")
 
+        # SPEC-AGENTDECK R1: MUST raise TypeError for unsupported input types
+        if match is not None and not isinstance(match, (MatchResult, dict)):
+            raise TypeError(f"'match' must be MatchResult or dict, got {type(match).__name__}")
+        if path is not None and not isinstance(path, (str, os.PathLike)):
+            raise TypeError(f"'path' must be str or PathLike, got {type(path).__name__}")
+
         if path is not None:
             match_data = Recorder.load_match(os.fspath(path))
         else:
@@ -373,6 +379,15 @@ class AgentDeck:
         for match in matches:
             self.replay(match=match, spectators=spectators, speed=speed)
 
+    @property
+    def elapsed_time(self) -> float:
+        """Wall-clock seconds since SESSION_START.
+
+        SPEC-AGENTDECK E3: MUST report wall-clock seconds since SESSION_START
+        using the session timestamp.
+        """
+        return time.time() - self.session_start_time
+
     def get_session_stats(self) -> Dict[str, Any]:
         """Get current session statistics without triggering cleanup.
 
@@ -393,7 +408,7 @@ class AgentDeck:
         return {
             "session_id": self.session.session_id,
             "total_matches": self.total_matches,
-            "elapsed_time": time.time() - self.session_start_time,
+            "elapsed_time": self.elapsed_time,
             "log_directory": self.session.log_directory,
             "record_directory": self.session.record_directory,
             "seed": self.session.seed,

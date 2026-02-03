@@ -340,6 +340,16 @@ def test_metadata_no_turn_number_without_context(basic_renderer):
     assert "turn_number" not in result.metadata
 
 
+def test_metadata_includes_format_hint(basic_renderer):
+    """Test metadata includes format hint per SPEC-RENDERER MO1."""
+    state = {"health": 100}
+    result = basic_renderer.render(state, player="Alice", turn_context=None)
+
+    # MO1: MUST include format hint in metadata
+    assert "format" in result.metadata
+    assert result.metadata["format"] == "text"
+
+
 # Test: Insertion order preservation (MB1 invariant)
 
 

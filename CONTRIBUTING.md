@@ -31,6 +31,20 @@ AgentDeck is a **research platform for studying AI behavior through game scenari
 
 **For complete architectural principles**, see [SPEC.md](specs/SPEC.md) §3.
 
+### Repository Layout
+
+```
+src/agentdeck/      # Library code
+tests/              # Unit + integration tests
+examples/           # Runnable examples
+specs/              # Specifications (source of truth)
+docs/               # Documentation + diagrams
+research/           # Reproducible experiment packages
+scripts/            # CI/dev utilities
+```
+
+Runtime artifacts (recordings/logs) are written under `agentdeck_runs/` by default and are ignored by git.
+
 ---
 
 ## Core Philosophy
@@ -513,6 +527,12 @@ pytest tests/
 
 All tests MUST pass without warnings.
 
+### Local Development Setup
+
+```bash
+pip install -e ".[dev]"
+```
+
 ### Coverage Requirements
 
 Each component should have tests for:
@@ -537,6 +557,19 @@ pytest tests/unit/test_game.py
 # Run with coverage
 pytest --cov=agentdeck tests/
 ```
+
+### Running Examples
+
+```bash
+# Zero-dependency sanity check (no API keys required)
+python examples/mock_demo.py
+
+# Provider-backed examples (set provider env vars first)
+export OPENAI_API_KEY="sk-..."
+python examples/minimal_experiment.py
+```
+
+See [examples/README.md](examples/README.md) for a curated list of example scripts and what they demonstrate.
 
 ### Test Organization
 
@@ -772,7 +805,7 @@ Planning docs are **temporal artifacts** that become outdated. Relying on them f
 - Confusion about what's actually implemented
 - LLM/AI context pollution from stale information
 
-**See [docs/README.md](docs/README.md) for documentation map and entry points.**
+**See [README.md](README.md) for the user-facing overview and Quick Start.**
 
 ---
 

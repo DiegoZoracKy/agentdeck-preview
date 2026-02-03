@@ -670,7 +670,7 @@ class _MatchWorker:
             # Bind controller to game before handshake (GB1)
             # This allows controller to provide game-specific format instructions with allowed_actions
             if hasattr(player, "controller") and hasattr(player.controller, "bind_game"):
-                player.controller.bind_game(game)
+                player.controller.bind_game(self.game)
 
             bundle = player.build_handshake_bundle(context)
             prompt_blocks = [
@@ -1352,11 +1352,12 @@ class Console:
                 game_overrides_player_order = "get_player_order" in type(game).__dict__
 
                 if game_overrides_player_order:
-                    # Fallback: Sequential execution with isolation
+                    # PO1: Fallback to sequential with warning (not debug)
                     if self.logger:
-                        self.logger.debug(
-                            f"Falling back to sequential execution: game.get_player_order() "
-                            f"may use previous_match_result (not supported in parallel mode)"
+                        self.logger.warning(
+                            f"Falling back to sequential execution (concurrency=1): "
+                            f"game.get_player_order() may use previous_match_result "
+                            f"(not supported in parallel mode). Requested concurrency={self.session_state.config.concurrency}."
                         )
                     _, seeds_used = self._run_sequential(
                         game=game,
@@ -1375,6 +1376,8 @@ class Console:
                         matches=matches,
                     )
         except Exception as exc:
+            # Ensure seeds_used reflects any completed matches before failure
+            seeds_used = [result.seed for result in batch_ctx.match_results]
             # BATCH_END with T3-required metadata even on failure
             self._dispatch_event(
                 EventType.BATCH_END,
@@ -1634,6 +1637,8 @@ class Console:
         completed_count = 0
         failed_count = 0
         match_durations = []
+        failure_exc: Optional[Exception] = None
+        failure_worker: Optional[_MatchWorker] = None
 
         with ThreadPoolExecutor(max_workers=concurrency) as executor:
             # Submit all workers
@@ -1692,6 +1697,8 @@ class Console:
                 except Exception as exc:
                     # Worker failed
                     failed_count += 1
+                    failure_exc = exc
+                    failure_worker = worker
 
                     # Emit CONSOLE_WORKER_FAILED - SPEC-MONITOR v1.0.0 §6.2 EM5
                     self._emit_console_event(
@@ -1705,15 +1712,24 @@ class Console:
                         },
                     )
 
-                    # Propagate exception
-                    raise RuntimeError(
-                        f"Match {worker.match_index} failed during parallel execution"
-                    ) from exc
+                    # Best-effort cancellation of remaining work (SPEC-PARALLEL FP1)
+                    for pending_future in future_to_worker:
+                        if pending_future is future:
+                            continue
+                        pending_future.cancel()
+                    try:
+                        executor.shutdown(cancel_futures=True)
+                    except TypeError:
+                        executor.shutdown()
+
+                    # Stop collecting further results after first failure
+                    break
 
         # Replay events in match_index order (preserves spectator observation semantics)
-        seeds_used = []
+        seeds_used: List[Optional[int]] = []
         for item in artifacts:
-            assert item is not None
+            if item is None:
+                continue
             artifact, worker = item
 
             self._replay_events(artifact.replay_events)
@@ -1726,6 +1742,11 @@ class Console:
             # Note: Aborted matches (outcome="aborted") are already handled gracefully.
             # The match is recorded with full metadata, and the batch continues.
             # No need to re-raise MatchAbortedError - parse failures are policy-driven now.
+
+        if failure_exc is not None and failure_worker is not None:
+            raise RuntimeError(
+                f"Match {failure_worker.match_index} failed during parallel execution"
+            ) from failure_exc
 
         # Emit CONSOLE_BATCH_COMPLETE - SPEC-MONITOR v1.0.0 §6.2 EM4
         total_duration = time.time() - batch_start_time

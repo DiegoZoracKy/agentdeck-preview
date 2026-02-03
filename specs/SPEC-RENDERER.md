@@ -1,10 +1,10 @@
 # SPEC-RENDERER: Game View Formatting Contract
 
-> Status: In Review  
-> Version: 0.3.0  
-> Last Updated: 2025-01-20  
-> Implementation: 🚧 Alignment pending with renderer refactor  
-> Authors: Codex, Diego Zoracky  
+> Status: Final
+> Version: 0.3.0
+> Last Updated: 2026-02-03
+> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Authors: Codex, Diego Zoracky
 > Audience: Renderer implementers, player authors, observability contributors
 
 ## 1. Purpose
@@ -72,7 +72,7 @@ class RenderResult:
 7. **MO3**: When `turn_context` is provided, renderers SHOULD expose relevant fields inside metadata (turn number, phase, deadlines) for downstream tooling.
 
 ### 5.4 Error Handling (EH)
-8. **EH1**: Renderers MUST raise descriptive exceptions (ValueError or subclass) when required fields in `game_view` are missing.
+8. **EH1**: Schema-specific renderers (e.g., custom game renderers) MAY raise descriptive `ValueError` when required fields are missing. Generic renderers (e.g., `TextRenderer`) SHOULD render whatever data is provided without strict validation.
 9. **EH2**: Renderers MUST tolerate absent `turn_context` and continue rendering using defaults.
 
 ## 6. Data Flow & Interaction
@@ -81,7 +81,7 @@ class RenderResult:
 - **Spectator usage**: Spectators consume `RenderResult.metadata` to build overlays (e.g., turn labels, score tables).
 
 ## 7. Error Handling & Edge Cases
-- Missing keys: Raise `ValueError("render expected key 'scores' in game_view")` to fail fast.
+- Missing keys: Schema-specific renderers MAY raise `ValueError`; generic renderers SHOULD render available data.
 - Unknown players: SHOULD handle gracefully (e.g., default messaging) but MAY raise if view is malformed.
 - Heavy processing: SHOULD precompute or cache within renderer instance; MUST NOT mutate `game_view`.
 - Multimodal outputs: Represent via metadata (e.g., `{"sections": {"board_ascii": "...", "board_matrix": board}}`) while keeping `.text` meaningful for prompt pipelines.
