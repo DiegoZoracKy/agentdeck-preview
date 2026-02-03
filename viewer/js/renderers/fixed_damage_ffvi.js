@@ -451,7 +451,7 @@ class FixedDamageFFVIRenderer {
     if (frame.reasoning) {
       this._elements.reasoningContainer.style.display = 'block';
       this._elements.reasoningPlayer.textContent = player;
-      this._elements.reasoningText.textContent = frame.reasoning;
+      this._elements.reasoningText.textContent = String(frame.reasoning).trim();
     } else {
       this._elements.reasoningContainer.style.display = 'none';
     }
