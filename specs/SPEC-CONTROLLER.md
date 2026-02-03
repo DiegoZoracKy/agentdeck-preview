@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 1.3.0
-> Last Updated: 2026-01-27
+> Last Updated: 2026-02-03
 > Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
 > Authors: Diego ZoracKy, Codex, Claude
 > Audience: Player authors, controller implementers, validation tooling

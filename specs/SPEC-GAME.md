@@ -1,13 +1,13 @@
 # SPEC-GAME: Game Author Contract v0.7.0
 
-> **Status**: ✅ Final
-> **Version**: 0.7.0
-> **Last Updated**: 2026-01-27
-> **Base Version**: 0.6.0 (Final)
-> **Implementation**: ✅ Complete (Phase 6-8 compliance verified)
-> **Authors**: Claude, Diego Zoracky, Codex
-> **Approvals**: ✅ Diego, ✅ Codex, ✅ Claude
-> **Audience**: Game authors, framework contributors, researcher tool builders
+> Status: Final
+> Version: 0.7.0
+> Last Updated: 2026-02-03
+> Base Version: 0.6.0 (Final)
+> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Authors: Claude, Diego Zoracky, Codex
+> Approvals: ✅ Diego, ✅ Codex, ✅ Claude
+> Audience: Game authors, framework contributors, researcher tool builders
 >
 > **Changes in v0.7.0**:
 > - Add `on_match_forfeited()` hook for enriching terminal state after parse failures

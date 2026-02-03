@@ -1,10 +1,10 @@
 # SPEC-GAME-MECHANIC-TURN-BASED: Turn-Based Game Mechanic Contract
 
-> Status: Final  
-> Version: 2.0.0  
-> Last Updated: 2026-01-27  
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)  
-> Authors: Codex, Diego Zoracky, Claude  
+> Status: Final
+> Version: 2.0.0
+> Last Updated: 2026-02-03
+> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Authors: Codex, Diego Zoracky, Claude
 > Audience: Game authors implementing turn-based mechanics, core contributors, tooling authors
 
 ## 1. Purpose
