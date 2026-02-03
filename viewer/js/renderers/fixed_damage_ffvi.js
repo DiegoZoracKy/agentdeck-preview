@@ -87,6 +87,7 @@ class FixedDamageFFVIRenderer {
             </div>
           </div>
         `;
+
       } else {
         overlay.innerHTML = `
           <div class="ffvi-victory-content">
@@ -420,7 +421,7 @@ class FixedDamageFFVIRenderer {
 
   _updateTurnIndicator(turnNumber, frameIndex) {
     const total = this._matchData.frames.length;
-    this._elements.turnIndicator.textContent = `Turn ${turnNumber} (${frameIndex}/${total})`;
+    this._elements.turnIndicator.textContent = `Turn ${frameIndex}/${total}`;
   }
 
   _updateNarration(frame) {
@@ -440,7 +441,7 @@ class FixedDamageFFVIRenderer {
     } else if (action === 'POTION') {
       const heal = (frame.stateAfter.health[player] || 0) - (frame.stateBefore.health[player] || 0);
       const potionsLeft = frame.stateAfter.potions[player] || 0;
-      text = `${player} uses a potion! Recovered ${heal} HP! (${potionsLeft} potions left)`;
+      text = `${player} uses a potion! Recovered ${heal} HP! (${potionsLeft} ${potionsLeft === 1 ? 'potion' : 'potions'} left)`;
     } else {
       text = `${player} uses ${action}!`;
     }
