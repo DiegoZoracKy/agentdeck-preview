@@ -83,28 +83,22 @@ Phase 6: Spec Compliance Review
 - End: 2026-01-21T23:59:59Z
 - Deliverables:
   - Phase A complete: All 20 specs reviewed for implementation compliance.
-  - Per-spec compliance reports in `docs/compliance/SPEC-*.md`.
-  - Aggregated drift summary in `docs/compliance/DRIFT-SUMMARY.md`.
-  - Prioritized action items in `docs/compliance/ACTION-ITEMS.md`.
-  - Progress tracking updated in `docs/SPEC-COMPLIANCE-REVIEW-PLAN.md`.
+  - Drift issues identified and tracked through resolution.
 - Acceptance:
-  - All P0-P3 specs have compliance reports with invariant matrices.
-  - Every drift issue documented with resolution path.
+  - All P0-P3 specs reviewed with clear resolution paths for drift.
   - No non-compliant items without action plan.
 - Results:
   - 20 specs reviewed (~307 invariants)
   - 100% compliant: PROMPT-BUILDER, MONITOR, RESEARCH-PACKAGER
   - Critical drift identified: PRICING V0, CONTROLLER GB6/CP2, LLM PM1-PM3
-  - See `docs/compliance/` for full reports.
 
 Phase 7: Full Drift Resolution
 - Status: Complete
 - Start: 2026-01-22T00:00:00Z
 - End: 2026-01-22T01:30:00Z
 - Deliverables:
-  - Resolve ALL action items from `docs/compliance/ACTION-ITEMS.md` before Phase B.
+  - Resolve all action items identified during Phase 6 before Phase B.
   - Fix each spec in sequence, commit after each spec's fixes.
-  - Update ACTION-ITEMS.md to mark items complete after each fix.
   - Specs to fix (in order):
     1. SPEC-AGENTDECK (3 items): elapsed_time property, finished_at exposure, replay type validation
     2. SPEC-CONTROLLER (2 items): GB6 unbound validation, CP2 return type alignment
@@ -121,14 +115,11 @@ Phase 7: Full Drift Resolution
     13. SPEC-SPECTATOR (2 items): lifecycle handler stubs, handler documentation
 - Acceptance:
   - All action items resolved or documented as deferred with rationale.
-  - ACTION-ITEMS.md updated with completion status.
-  - Compliance reports updated to reflect fixes.
   - No silent failure paths remain.
 - Results:
   - 12 specs received code fixes (10 commits)
   - Critical fixes: SPEC-PRICING V0, SPEC-CONTROLLER CP2, SPEC-LLM PM1-PM3
   - 26 items fixed, remaining items deferred with rationale
-  - See `docs/compliance/ACTION-ITEMS.md` for full status
 
 Phase 8: Spec → Tests (Phase B)
 - Status: Complete
