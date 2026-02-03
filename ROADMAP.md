@@ -32,9 +32,20 @@ Phase D: Replay Viewer MVP (Reference Viewer)
   - `specs/SPEC-VIEWER.md` + viewer docs aligned to structure.
   - Shipped sample record renders out-of-the-box (`viewer/sample-match.json` is `FixedDamageGame`).
   - Added a lightweight viewer smoke-check (`scripts/viewer_smoke_check.js`).
-- Deliverables (remaining):
-  - Visual polish pass (FFVI skin spacing, typography, animations).
-  - Optional debug renderer (future).
+  - Visual polish pass (reasoning panel stabilization, winner spoiler prevention, layout bounce fixes).
+  - Test match script for generating matches with mixed controllers.
+- Deliverables (in progress):
+  - Restructure viewer to demonstrate game-bundled viewer pattern.
+  - Update registry to support (game, skin) keys.
+  - Add debug renderer as second viewer for FixedDamageGame.
+  - Add skin selector UI.
+- Implementation steps:
+  1. Restructure: Move FFVI renderer to `src/agentdeck/games/fixed_damage/viewers/ffvi/`
+  2. Registry: Update to support `register(game, skin, RendererClass)` + `getAll(game)`
+  3. Debug renderer: Create minimal `viewers/debug/` with state-focused view
+  4. UI: Add skin dropdown to controls
+  5. Wiring: Update index.html paths and registration
+  6. Tests: Update smoke check for new structure
 
 Phase E: Game Config Export (Spec-First)
 - Status: Drafting

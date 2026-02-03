@@ -473,7 +473,7 @@ class FixedDamageFFVIRenderer {
 
 // Register renderer for FixedDamageGame (if registry present).
 if (typeof RendererRegistry !== 'undefined') {
-  RendererRegistry.register('FixedDamageGame', FixedDamageFFVIRenderer);
+  RendererRegistry.register('FixedDamageGame', 'ffvi', FixedDamageFFVIRenderer);
 }
 
 // Export for module systems, also available as global

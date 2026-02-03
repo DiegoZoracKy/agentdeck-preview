@@ -5,6 +5,7 @@
 let timeline = null;
 let renderer = null;
 let matchData = null;
+let currentSkin = null;
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
@@ -19,6 +20,7 @@ const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
 const btnReset = document.getElementById('btn-reset');
 const speedSelect = document.getElementById('speed-select');
+const skinSelect = document.getElementById('skin-select');
 const progressBar = document.getElementById('progress-bar');
 const progressFill = document.getElementById('progress-fill');
 const statusText = document.getElementById('status-text');
@@ -48,38 +50,78 @@ async function loadMatchFile(file) {
   }
 }
 
-function createRenderer(data) {
+function createRenderer(data, skin) {
   if (typeof RendererRegistry === 'undefined') {
     throw new Error('Renderer registry not available.');
   }
-  return RendererRegistry.create(data);
+  return RendererRegistry.create(data, skin);
 }
 
-function initializeViewer(data) {
-  // Hide drop zone, show viewer
-  dropZone.style.display = 'none';
-  viewerContainer.style.display = 'block';
-  controlsContainer.style.display = 'flex';
-  matchInfoContainer.style.display = 'block';
+function populateSkinSelector(data) {
+  const skins = RendererRegistry.getAvailableSkins(data.game);
+  skinSelect.innerHTML = skins
+    .map((skin) => `<option value="${skin}">${skin.toUpperCase()}</option>`)
+    .join('');
 
-  // Create timeline
-  timeline = new Timeline(data);
+  // Set current skin to first available if not set
+  if (!currentSkin && skins.length > 0) {
+    currentSkin = skins[0];
+    skinSelect.value = currentSkin;
+  }
+}
 
-  // Create renderer
-  renderer = createRenderer(data);
-  renderer.init(viewerContainer, data);
+function switchSkin(newSkin) {
+  if (!matchData || newSkin === currentSkin) return;
 
-  // Connect timeline to renderer
+  const wasPlaying = timeline && timeline.isPlaying;
+  const currentFrame = timeline ? timeline.currentFrame : -1;
+
+  // Pause if playing
+  if (wasPlaying) {
+    timeline.pause();
+  }
+
+  // Destroy old renderer
+  if (renderer) {
+    renderer.destroy();
+  }
+
+  // Create new renderer with new skin
+  currentSkin = newSkin;
+  renderer = createRenderer(matchData, currentSkin);
+  renderer.init(viewerContainer, matchData);
+
+  // Re-render current frame
+  if (timeline && currentFrame >= 0 && currentFrame < matchData.frames.length) {
+    renderer.renderFrame(matchData.frames[currentFrame]);
+  }
+
+  // Reconnect timeline callbacks
+  reconnectTimeline();
+
+  // Resume if was playing
+  if (wasPlaying) {
+    timeline.play();
+  }
+}
+
+function reconnectTimeline() {
+  if (!timeline || !renderer) return;
+
+  // Clear old callbacks and reconnect
+  timeline.offFrame();
+  timeline.offEnd();
+
   timeline.onFrame((frame) => {
     renderer.renderFrame(frame);
     updateProgress();
   });
 
   timeline.onEnd((winner) => {
-    renderer.renderVictory(winner, data.finalState, {
-      outcome: data.outcome,
-      forfeitReason: data.forfeitReason,
-      forfeitingPlayer: data.forfeitingPlayer
+    renderer.renderVictory(winner, matchData.finalState, {
+      outcome: matchData.outcome,
+      forfeitReason: matchData.forfeitReason,
+      forfeitingPlayer: matchData.forfeitingPlayer
     });
     btnPlay.textContent = 'Replay';
     updateStatus('Complete');
@@ -90,6 +132,27 @@ function initializeViewer(data) {
       winnerEl.textContent = infoGrid.dataset.winner;
     }
   });
+}
+
+function initializeViewer(data) {
+  // Hide drop zone, show viewer
+  dropZone.style.display = 'none';
+  viewerContainer.style.display = 'block';
+  controlsContainer.style.display = 'flex';
+  matchInfoContainer.style.display = 'block';
+
+  // Populate skin selector
+  populateSkinSelector(data);
+
+  // Create timeline
+  timeline = new Timeline(data);
+
+  // Create renderer with selected skin
+  renderer = createRenderer(data, currentSkin);
+  renderer.init(viewerContainer, data);
+
+  // Connect timeline to renderer
+  reconnectTimeline();
 
   timeline.onStateChange(() => {
     updateControls();
@@ -210,6 +273,10 @@ speedSelect.addEventListener('change', (e) => {
   if (timeline) {
     timeline.setSpeed(parseFloat(e.target.value));
   }
+});
+
+skinSelect.addEventListener('change', (e) => {
+  switchSkin(e.target.value);
 });
 
 // Progress bar click to seek
