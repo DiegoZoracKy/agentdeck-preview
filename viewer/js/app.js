@@ -6,6 +6,8 @@ let timeline = null;
 let renderer = null;
 let matchData = null;
 let currentSkin = null;
+let frameCallback = null;
+let endCallback = null;
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
@@ -63,9 +65,9 @@ function populateSkinSelector(data) {
     .map((skin) => `<option value="${skin}">${skin.toUpperCase()}</option>`)
     .join('');
 
-  // Set current skin to first available if not set
+  // Set current skin: prefer 'ffvi', fallback to first available
   if (!currentSkin && skins.length > 0) {
-    currentSkin = skins[0];
+    currentSkin = skins.includes('ffvi') ? 'ffvi' : skins[0];
     skinSelect.value = currentSkin;
   }
 }
@@ -108,16 +110,21 @@ function switchSkin(newSkin) {
 function reconnectTimeline() {
   if (!timeline || !renderer) return;
 
-  // Clear old callbacks and reconnect
-  timeline.offFrame();
-  timeline.offEnd();
+  // Remove old callbacks if they exist
+  if (frameCallback) {
+    timeline.offFrame(frameCallback);
+  }
+  if (endCallback) {
+    timeline.offEnd(endCallback);
+  }
 
-  timeline.onFrame((frame) => {
+  // Create and store new callbacks
+  frameCallback = (frame) => {
     renderer.renderFrame(frame);
     updateProgress();
-  });
+  };
 
-  timeline.onEnd((winner) => {
+  endCallback = (winner) => {
     renderer.renderVictory(winner, matchData.finalState, {
       outcome: matchData.outcome,
       forfeitReason: matchData.forfeitReason,
@@ -131,7 +138,11 @@ function reconnectTimeline() {
     if (winnerEl && infoGrid.dataset.winner) {
       winnerEl.textContent = infoGrid.dataset.winner;
     }
-  });
+  };
+
+  // Register new callbacks
+  timeline.onFrame(frameCallback);
+  timeline.onEnd(endCallback);
 }
 
 function initializeViewer(data) {

@@ -177,16 +177,20 @@ interface Renderer {
 ### 5.4 RendererRegistry (Optional)
 
 ```javascript
-// Register a renderer for a game name
-RendererRegistry.register(gameName: string, rendererClass: Function): void
+// Register a renderer for a game and skin
+RendererRegistry.register(gameName: string, skin: string, rendererClass: Function): void
 
-// Resolve a renderer for a match
-RendererRegistry.create(matchData: MatchData): Renderer
-RendererRegistry.get(gameName: string): Function | null
+// Get available skins for a game
+RendererRegistry.getAvailableSkins(gameName: string): string[]
+
+// Resolve a renderer for a match and skin
+RendererRegistry.create(matchData: MatchData, skin: string): Renderer
+RendererRegistry.get(gameName: string, skin: string): Function | null
 ```
 
 **Guarantees:**
-- RR1: `create()` MUST throw a clear error when no renderer is registered
+- RR1: `create()` MUST throw a clear error when no renderer is registered for the (game, skin) pair
+- RR2: `getAvailableSkins()` MUST return all registered skins for a game in sorted order
 
 ## 6. Invariants & Guarantees
 
@@ -227,9 +231,9 @@ RendererRegistry.get(gameName: string): Function | null
 const json = await fetch('match_xxx.json').then(r => r.json());
 const matchData = RecordLoader.load(json);
 
-// Create timeline and renderer
+// Create timeline and renderer with specific skin
 const timeline = new Timeline(matchData);
-const renderer = RendererRegistry.create(matchData);
+const renderer = RendererRegistry.create(matchData, 'ffvi');
 
 // Initialize
 renderer.init(document.getElementById('viewer'), matchData);
@@ -240,6 +244,22 @@ timeline.onEnd(winner => renderer.renderVictory(winner, matchData.finalState));
 
 // Start playback
 timeline.play();
+```
+
+### 8.1.1 Skin Selection
+
+```javascript
+// Get available skins for the game
+const skins = RendererRegistry.getAvailableSkins(matchData.game);
+// ['debug', 'ffvi']
+
+// Switch skins dynamically
+function switchSkin(newSkin) {
+  renderer.destroy();
+  renderer = RendererRegistry.create(matchData, newSkin);
+  renderer.init(container, matchData);
+  // Reconnect timeline callbacks...
+}
 ```
 
 ### 8.2 Playback Controls
