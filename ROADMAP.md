@@ -1,6 +1,6 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-02-03T13:03:46Z
+Last updated: 2026-02-03T13:15:56Z
 
 > Purpose: keep a lightweight, current map of active roadmap work and recent completions.
 

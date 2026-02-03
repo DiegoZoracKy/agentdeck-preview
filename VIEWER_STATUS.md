@@ -34,4 +34,4 @@
 
 ## Branch status
 - Current branch: `viewer/replay-viewer`
-- Ahead of `main`: 6 commits (+ local changes)
+- Not merged into `main` yet (contains unmerged commits)
