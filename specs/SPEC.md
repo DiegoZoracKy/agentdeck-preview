@@ -283,7 +283,8 @@ agentdeck/
 │       │   └── base/…                 # Game/player/controller/spectator bases
 │       ├── games/
 │       │   ├── __init__.py
-│       │   └── examples/              # Sample games (e.g., fixed_damage.py)
+│       │   └── examples/              # Sample games with bundled viewers
+│       │       └── fixed_damage/      # Game package (game.py + viewers/)
 │       ├── players/                   # Mock player, LLM integrations
 │       ├── controllers/               # ActionOnly, Reasoning controllers
 │       ├── renderers/                 # Text renderer, helpers
