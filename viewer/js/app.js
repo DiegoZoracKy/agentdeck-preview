@@ -82,7 +82,13 @@ function initializeViewer(data) {
       forfeitingPlayer: data.forfeitingPlayer
     });
     btnPlay.textContent = 'Replay';
-    updateStatus('Match Complete');
+    updateStatus('Complete');
+
+    // Reveal winner
+    const winnerEl = document.querySelector('#info-winner .info-value');
+    if (winnerEl && infoGrid.dataset.winner) {
+      winnerEl.textContent = infoGrid.dataset.winner;
+    }
   });
 
   timeline.onStateChange(() => {
@@ -96,7 +102,7 @@ function initializeViewer(data) {
   // Initial state - don't auto-play, just show "ready" state
   updateControls();
   updateProgress();
-  updateStatus(`Loaded: ${data.matchId} - Press Play to start`);
+  updateStatus('Ready');
 }
 
 function resetViewer() {
@@ -124,19 +130,22 @@ function displayMatchInfo(data) {
     { label: 'Match ID', value: data.matchId },
     { label: 'Game', value: data.game },
     { label: 'Players', value: data.players.join(' vs ') },
-    { label: 'Winner', value: data.winner || 'Draw' },
+    { label: 'Winner', value: '<span class="winner-hidden">???</span>', id: 'winner' },
     { label: 'Turns', value: data.frames.length },
     { label: 'Seed', value: data.seed }
   ];
 
   infoGrid.innerHTML = items
     .map((item) => `
-      <div class="info-item">
+      <div class="info-item" ${item.id ? `id="info-${item.id}"` : ''}>
         <span class="info-label">${item.label}:</span>
         <span class="info-value">${item.value}</span>
       </div>
     `)
     .join('');
+
+  // Store winner for reveal later
+  infoGrid.dataset.winner = data.winner || 'Draw';
 }
 
 // ============================================================================
@@ -180,9 +189,10 @@ btnPlay.addEventListener('click', () => {
 
   if (timeline.isPlaying) {
     timeline.pause();
+    updateStatus('Paused');
   } else {
     timeline.play();
-    updateStatus('Playing...');
+    updateStatus('Playing');
   }
 });
 
@@ -296,7 +306,7 @@ document.addEventListener('keydown', (e) => {
 
 async function loadFromUrl(url) {
   clearError();
-  updateStatus('Loading from URL...');
+  updateStatus('Loading');
 
   try {
     const response = await fetch(url);
