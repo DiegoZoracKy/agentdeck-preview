@@ -87,6 +87,11 @@ src/agentdeck/games/examples/fixed_damage/
     ├── ffvi/
     │   ├── renderer.js
     │   └── styles.css
+    ├── ffvi_scene/
+    │   ├── renderer.js
+    │   ├── styles.css
+    │   └── assets/
+    │       └── bg-placeholder.svg
     └── debug/
         ├── renderer.js
         └── styles.css
@@ -122,6 +127,7 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 
 ### FixedDamageGame Viewers
 - **FFVI**: retro battle visualization
+- **FFVI Scene**: logo‑knights battle scene with top message box
 - **Debug**: state‑focused developer view (before/after, reasoning, prompt/response)
 
 ## Creating Custom Renderers

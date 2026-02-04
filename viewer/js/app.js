@@ -11,6 +11,7 @@ let endCallback = null;
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
+const btnLoadSample = document.getElementById('btn-load-sample');
 const fileInput = document.getElementById('file-input');
 const viewerContainer = document.getElementById('viewer-container');
 const controlsContainer = document.getElementById('controls-container');
@@ -62,7 +63,10 @@ function createRenderer(data, skin) {
 function populateSkinSelector(data) {
   const skins = RendererRegistry.getAvailableSkins(data.game);
   skinSelect.innerHTML = skins
-    .map((skin) => `<option value="${skin}">${skin.toUpperCase()}</option>`)
+    .map((skin) => {
+      const label = skin.replace(/[-_]/g, ' ').toUpperCase();
+      return `<option value="${skin}">${label}</option>`;
+    })
     .join('');
 
   // Set current skin: prefer 'ffvi', fallback to first available
@@ -146,8 +150,9 @@ function reconnectTimeline() {
 }
 
 function initializeViewer(data) {
-  // Hide drop zone, show viewer
+  // Hide drop zone and sample button, show viewer
   dropZone.style.display = 'none';
+  btnLoadSample.style.display = 'none';
   viewerContainer.style.display = 'block';
   controlsContainer.style.display = 'flex';
   matchInfoContainer.style.display = 'block';
@@ -194,6 +199,7 @@ function resetViewer() {
   controlsContainer.style.display = 'none';
   matchInfoContainer.style.display = 'none';
   dropZone.style.display = 'block';
+  btnLoadSample.style.display = 'flex';
 
   clearError();
   updateStatus('Ready');
@@ -399,6 +405,14 @@ async function loadFromUrl(url) {
     console.error('URL load error:', err);
   }
 }
+
+// ============================================================================
+// Sample Match Loading
+// ============================================================================
+
+btnLoadSample.addEventListener('click', () => {
+  loadFromUrl('sample-match.json');
+});
 
 // Check for ?match= URL parameter
 const urlParams = new URLSearchParams(window.location.search);

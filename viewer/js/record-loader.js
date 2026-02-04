@@ -180,6 +180,7 @@ const RecordLoader = {
       endedAt: metadata.ended_at || null,
       sessionId: metadata.session_id || null,
       playerSummaries: metadata.player_summaries || [],
+      playerConfigs: metadata.player_configs || {},
       gameConfig: metadata.game_config || {},
       match: metadata.match || {}
     };
