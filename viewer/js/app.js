@@ -60,6 +60,18 @@ function createRenderer(data, skin) {
   return RendererRegistry.create(data, skin);
 }
 
+function applySkinClass(skin) {
+  const skinClasses = Array.from(controlsContainer.classList).filter((className) =>
+    className.startsWith('skin-')
+  );
+  skinClasses.forEach((className) => controlsContainer.classList.remove(className));
+
+  const normalized = String(skin || '').trim().replace(/_/g, '-');
+  if (normalized) {
+    controlsContainer.classList.add(`skin-${normalized}`);
+  }
+}
+
 function populateSkinSelector(data) {
   const skins = RendererRegistry.getAvailableSkins(data.game);
   skinSelect.innerHTML = skins
@@ -69,9 +81,9 @@ function populateSkinSelector(data) {
     })
     .join('');
 
-  // Set current skin: prefer 'ffvi', fallback to first available
+  // Set current skin: prefer 'ffvi_scene', fallback to first available
   if (!currentSkin && skins.length > 0) {
-    currentSkin = skins.includes('ffvi') ? 'ffvi' : skins[0];
+    currentSkin = skins.includes('ffvi_scene') ? 'ffvi_scene' : skins[0];
     skinSelect.value = currentSkin;
   }
 }
@@ -94,6 +106,7 @@ function switchSkin(newSkin) {
 
   // Create new renderer with new skin
   currentSkin = newSkin;
+  applySkinClass(currentSkin);
   renderer = createRenderer(matchData, currentSkin);
   renderer.init(viewerContainer, matchData);
 
@@ -159,6 +172,7 @@ function initializeViewer(data) {
 
   // Populate skin selector
   populateSkinSelector(data);
+  applySkinClass(currentSkin);
 
   // Create timeline
   timeline = new Timeline(data);
