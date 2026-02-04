@@ -90,14 +90,14 @@
   transform: translateX(-50%);
   max-width: 70%;
   padding: 8px 10px;
-  border: 2px solid var(--scene-border);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 10px;
-  background: rgba(8, 10, 24, 0.8);
-  box-shadow: 0 8px 16px var(--scene-shadow);
+  background: rgba(240, 240, 255, 0.92);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   font-size: 8px;
   line-height: 1.4;
-  text-shadow: 2px 2px 0 #000;
-  color: var(--scene-text);
+  text-shadow: none;
+  color: #1a1a2e;
 }
 
 .scene-reasoning.hidden {
@@ -111,7 +111,7 @@
   width: 0;
   height: 0;
   border: 8px solid transparent;
-  border-top-color: rgba(8, 10, 24, 0.8);
+  border-top-color: rgba(240, 240, 255, 0.92);
 }
 
 .scene-reasoning::after {
@@ -129,21 +129,128 @@
 
 .scene-reasoning-header {
   font-size: 8px;
-  color: var(--scene-gold);
+  color: #6a5a8a;
   letter-spacing: 1px;
   margin-bottom: 4px;
+  font-weight: bold;
 }
 
 .scene-reasoning-text {
   max-height: 110px;
   overflow: auto;
   white-space: pre-wrap;
-  color: var(--scene-text);
+  color: #2a2a3e;
 }
 
 .scene-reasoning.empty .scene-reasoning-text {
-  color: var(--scene-text-dim);
+  color: #888;
   font-style: italic;
+}
+
+/* =========================================================================
+   Desktop tweaks
+   ========================================================================= */
+
+@media (min-width: 900px) {
+  .scene-reasoning {
+    max-width: 420px;
+    font-size: 10px;
+    padding: 10px 14px;
+  }
+
+  .scene-reasoning-header {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  .scene-reasoning-text {
+    max-height: 130px;
+  }
+}
+
+/* =========================================================================
+   Mobile tweaks
+   ========================================================================= */
+
+@media (max-width: 700px) {
+  .ffvi-scene {
+    min-height: 320px;
+  }
+
+  .scene-message {
+    margin: 10px 10px 0;
+    padding: 8px 10px;
+  }
+
+  .scene-action {
+    font-size: 10px;
+  }
+
+  .scene-detail {
+    font-size: 8px;
+  }
+
+  .scene-turn {
+    font-size: 8px;
+    padding: 4px 8px;
+  }
+
+  .scene-arena {
+    padding: 14px 16px;
+    min-height: 180px;
+  }
+
+  .scene-reasoning {
+    max-width: 86%;
+    font-size: 7px;
+  }
+
+  .scene-reasoning-text {
+    max-height: 70px;
+  }
+
+  .scene-crest {
+    width: 90px;
+    height: 90px;
+  }
+
+  .scene-logo-img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .scene-weapon {
+    font-size: 16px;
+  }
+
+  .scene-name-text {
+    font-size: 10px;
+  }
+
+  .scene-model {
+    font-size: 8px;
+  }
+
+  .scene-status {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .scene-status-name {
+    font-size: 10px;
+  }
+
+  .scene-status-model {
+    font-size: 8px;
+  }
+
+  .scene-status-hp {
+    font-size: 7px;
+  }
+
+  .scene-hp-bar {
+    height: 6px;
+  }
 }
 
 .scene-knight {
