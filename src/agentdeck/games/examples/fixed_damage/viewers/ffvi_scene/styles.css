@@ -230,22 +230,26 @@
   align-items: center;
   gap: 2px;
   text-shadow: 2px 2px 0 #000;
-  max-width: 160px;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 
 .scene-name-text {
+  display: block;
+  width: 100%;
   font-size: 11px;
   color: var(--scene-text);
-  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .scene-model {
+  display: block;
+  width: 100%;
   font-size: 9px;
   color: var(--scene-text-dim);
-  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -277,10 +281,12 @@
 }
 
 .scene-status-model {
+  display: block;
+  width: 100%;
+  min-width: 0;
   font-size: 9px;
   color: var(--scene-text-dim);
   margin-bottom: 6px;
-  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -434,6 +440,25 @@
   font-size: 10px;
 }
 
+.viewer-controls.skin-ffvi-scene #btn-play {
+  padding: 8px 14px;
+  border-color: #ffd866;
+  background: linear-gradient(180deg, #3a3f76 0%, #2a2e5c 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 216, 102, 0.22) inset,
+    0 0 10px rgba(255, 216, 102, 0.2);
+}
+
+.viewer-controls.skin-ffvi-scene #btn-play:hover:not(:disabled) {
+  background: linear-gradient(180deg, #454c8e 0%, #30366b 100%);
+  border-color: #ffe28f;
+}
+
+.viewer-controls.skin-ffvi-scene #btn-prev,
+.viewer-controls.skin-ffvi-scene #btn-next {
+  padding: 8px 8px;
+}
+
 .viewer-controls.skin-ffvi-scene label {
   font-size: 11px;
   gap: 4px;
@@ -446,9 +471,10 @@
 }
 
 .viewer-controls.skin-ffvi-scene .viewer-progress {
-  flex: 0 1 160px;
-  min-width: 120px;
-  max-width: 220px;
+  flex: 1 1 220px;
+  min-width: 160px;
+  max-width: 320px;
+  height: 10px;
 }
 
 .viewer-controls.skin-ffvi-scene .spacer {
@@ -470,6 +496,10 @@
     font-size: 9px;
   }
 
+  .viewer-controls.skin-ffvi-scene #btn-play {
+    padding: 6px 12px;
+  }
+
   .viewer-controls.skin-ffvi-scene label {
     font-size: 10px;
     gap: 4px;
@@ -481,10 +511,12 @@
   }
 
   .viewer-controls.skin-ffvi-scene .viewer-progress {
-    flex: 0 1 120px;
-    min-width: 90px;
-    max-width: 160px;
+    flex: 1 1 150px;
+    min-width: 110px;
+    max-width: 220px;
+    height: 10px;
   }
+
 }
 
 /* =========================================================================
@@ -579,6 +611,8 @@
   .viewer-controls.skin-ffvi-scene .viewer-progress {
     flex: 1 1 100%;
     max-width: none;
+    min-width: 0;
+    height: 10px;
     order: 5;
   }
 
