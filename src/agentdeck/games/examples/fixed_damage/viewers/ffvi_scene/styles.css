@@ -13,6 +13,7 @@
   --scene-hp-high: #2ecc71;
   --scene-hp-low: #f1c40f;
   --scene-hp-critical: #e74c3c;
+  --scene-hit-glow: rgba(255, 92, 104, 0.72);
   --scene-shadow: rgba(0, 0, 0, 0.45);
 }
 
@@ -51,6 +52,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .scene-message-right {
@@ -64,11 +67,29 @@
   color: var(--scene-gold);
   font-size: 12px;
   letter-spacing: 2px;
+  width: 100%;
 }
 
 .scene-detail {
   color: var(--scene-text-dim);
   font-size: 9px;
+  width: 100%;
+}
+
+.scene-detail-action {
+  color: var(--scene-gold);
+}
+
+.scene-detail-effect {
+  font-weight: bold;
+}
+
+.scene-detail-effect.damage {
+  color: #ff8b9a;
+}
+
+.scene-detail-effect.heal {
+  color: #7af2a0;
 }
 
 .scene-playback-status {
@@ -248,19 +269,10 @@
   transform: scaleX(-1);
 }
 
-.scene-weapon {
-  position: absolute;
-  bottom: -8px;
-  right: -8px;
-  font-size: 18px;
-  filter: drop-shadow(2px 2px 0 #000);
-}
-
 .scene-hit {
   position: absolute;
   inset: -8px;
   border-radius: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
   opacity: 0;
 }
 
@@ -387,12 +399,7 @@
 }
 
 .scene-knight.is-hit .scene-crest {
-  animation: scene-hit-shake 0.3s ease-out;
-}
-
-.scene-knight.is-hit .scene-hit {
-  opacity: 1;
-  animation: scene-hit-flash 0.3s ease-out;
+  animation: scene-hit-shake 0.3s ease-out, scene-hit-glow 0.3s ease-out;
 }
 
 .scene-knight.is-healing .scene-crest {
@@ -419,10 +426,10 @@
   80% { transform: translateX(4px); }
 }
 
-@keyframes scene-hit-flash {
-  0% { opacity: 0; }
-  30% { opacity: 0.8; }
-  100% { opacity: 0; }
+@keyframes scene-hit-glow {
+  0% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
+  40% { box-shadow: 0 0 14px var(--scene-hit-glow); }
+  100% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
 }
 
 @keyframes scene-heal-glow {
@@ -611,61 +618,116 @@
   }
 
   .scene-message {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     margin: 10px 10px 0;
     padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .scene-message-left {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 4px;
+    align-content: start;
+  }
+
+  .scene-message-right {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
   }
 
   .scene-action {
     font-size: 10px;
+    line-height: 1.2;
+    min-height: 1.2em;
   }
 
   .scene-detail {
     font-size: 8px;
+    line-height: 1.35;
+    min-height: calc(1.35em * 2);
+    max-height: calc(1.35em * 2);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .scene-turn {
     font-size: 8px;
     padding: 4px 8px;
-    min-width: 92px;
+    min-width: 0;
+    width: 100%;
   }
 
   .scene-playback-status {
     font-size: 8px;
-    min-width: 76px;
+    min-width: 0;
     padding: 4px 6px;
-  }
-
-  .scene-message-right {
-    gap: 6px;
+    width: 100%;
   }
 
   .scene-arena {
-    padding: 14px 16px;
-    min-height: 180px;
+    padding: 76px 10px 12px;
+    min-height: 210px;
+    align-items: flex-start;
+  }
+
+  .scene-knight {
+    width: 124px;
+    gap: 6px;
   }
 
   .scene-reasoning {
-    top: 6px;
-    max-width: 84%;
-    font-size: 7px;
+    top: 8px;
+    width: min(72%, 240px);
+    max-width: min(72%, 240px);
+    font-size: 8px;
+    z-index: 2;
+  }
+
+  .scene-reasoning::after {
+    bottom: -10px;
+    top: auto;
+    border-top: 10px solid rgba(244, 247, 255, 0.88);
+    border-bottom: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    transform: none;
+  }
+
+  .scene-reasoning.tail-left::after {
+    left: 14px;
+    right: auto;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+
+  .scene-reasoning.tail-right::after {
+    right: 14px;
+    left: auto;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
   }
 
   .scene-reasoning-text {
-    max-height: 64px;
+    max-height: 60px;
   }
 
   .scene-crest {
-    width: 90px;
-    height: 90px;
+    width: 84px;
+    height: 84px;
   }
 
   .scene-logo-img {
-    width: 52px;
-    height: 52px;
-  }
-
-  .scene-weapon {
-    font-size: 16px;
+    width: 48px;
+    height: 48px;
   }
 
   .scene-name-text {

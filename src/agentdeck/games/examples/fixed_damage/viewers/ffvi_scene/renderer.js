@@ -234,15 +234,10 @@ class FixedDamageFFVISceneRenderer {
       logo.textContent = this._shortLabel(playerName);
     }
 
-    const weapon = document.createElement('div');
-    weapon.className = 'scene-weapon';
-    weapon.textContent = '⚔️';
-
     const hit = document.createElement('div');
     hit.className = 'scene-hit';
 
     crest.appendChild(logo);
-    crest.appendChild(weapon);
     crest.appendChild(hit);
 
     const name = document.createElement('div');
@@ -372,24 +367,50 @@ class FixedDamageFFVISceneRenderer {
     const action = (frame.action || 'READY').toUpperCase();
     const attacker = frame.player || 'Player';
     const target = this._getTarget(attacker);
+    const detailEl = this._elements.detailEl;
+    if (!detailEl) return;
 
-    let detail = '';
+    // Build styled detail text safely via text nodes/spans.
+    detailEl.replaceChildren();
+    const appendText = (text) => detailEl.appendChild(document.createTextNode(text));
+    const appendToken = (text, className) => {
+      const span = document.createElement('span');
+      span.className = className;
+      span.textContent = text;
+      detailEl.appendChild(span);
+    };
+
     if (action === 'ATTACK' && target) {
       const before = frame.stateBefore?.health?.[target] ?? 0;
       const after = frame.stateAfter?.health?.[target] ?? 0;
       const dmg = Math.max(0, before - after);
-      detail = `${attacker} attacks ${target}${dmg ? ` (-${dmg})` : ''}`;
+
+      appendText(`${attacker} `);
+      appendToken('attacks', 'scene-detail-action');
+      appendText(` ${target}`);
+      if (dmg) {
+        appendText(' (');
+        appendToken(`-${dmg}`, 'scene-detail-effect damage');
+        appendText(')');
+      }
     } else if (action === 'POTION') {
       const before = frame.stateBefore?.health?.[attacker] ?? 0;
       const after = frame.stateAfter?.health?.[attacker] ?? 0;
       const heal = Math.max(0, after - before);
-      detail = `${attacker} uses POTION${heal ? ` (+${heal})` : ''}`;
+
+      appendText(`${attacker} uses `);
+      appendToken('POTION', 'scene-detail-action');
+      if (heal) {
+        appendText(' (');
+        appendToken(`+${heal}`, 'scene-detail-effect heal');
+        appendText(')');
+      }
     } else {
-      detail = `${attacker} acts`;
+      appendText(`${attacker} `);
+      appendToken('acts', 'scene-detail-action');
     }
 
     this._elements.actionEl.textContent = action;
-    this._elements.detailEl.textContent = detail;
   }
 
   _updateReasoning(frame) {
