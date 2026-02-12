@@ -149,6 +149,106 @@
   overflow-x: auto;
 }
 
+/* =========================================================================
+   Controls Bar (External - in index.html)
+   ========================================================================= */
+
+.viewer-controls.skin-debug {
+  background: #1e1e1e;
+  border: 2px solid #3c3c3c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  gap: 10px;
+  color: #d4d4d4;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
+.viewer-controls.skin-debug button {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  background: #252526;
+  border: 2px solid #3c3c3c;
+  border-radius: 6px;
+  color: #d4d4d4;
+  padding: 7px 11px;
+}
+
+.viewer-controls.skin-debug #btn-play {
+  border-color: #4ec9b0;
+  color: #4ec9b0;
+  background: #1f2a29;
+}
+
+.viewer-controls.skin-debug button:hover:not(:disabled) {
+  border-color: #9cdcfe;
+  color: #ffffff;
+  background: #2c2c2e;
+}
+
+.viewer-controls.skin-debug button:disabled {
+  opacity: 0.45;
+}
+
+.viewer-controls.skin-debug label {
+  font-family: inherit;
+  font-size: 11px;
+  color: #9cdcfe;
+  gap: 6px;
+}
+
+.viewer-controls.skin-debug select {
+  font-family: inherit;
+  font-size: 12px;
+  background: #252526;
+  border: 2px solid #3c3c3c;
+  border-radius: 6px;
+  color: #f2f2f2;
+  padding: 4px 8px;
+}
+
+.viewer-controls.skin-debug .viewer-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: #131314;
+  border: 1px solid #3c3c3c;
+  margin: 0 8px;
+}
+
+.viewer-controls.skin-debug .viewer-progress-fill {
+  background: linear-gradient(90deg, #4ec9b0, #9cdcfe);
+}
+
+.viewer-controls.skin-debug .status {
+  color: #4ec9b0;
+  font-family: inherit;
+}
+
+@media (max-width: 900px) {
+  .viewer-controls.skin-debug {
+    padding: 9px 11px;
+    gap: 8px;
+  }
+
+  .viewer-controls.skin-debug button {
+    font-size: 11px;
+    padding: 6px 9px;
+  }
+
+  .viewer-controls.skin-debug label {
+    font-size: 10px;
+  }
+
+  .viewer-controls.skin-debug select {
+    font-size: 11px;
+    padding: 3px 7px;
+  }
+
+  .viewer-controls.skin-debug .viewer-progress {
+    margin: 0 6px;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .debug-state-comparison {

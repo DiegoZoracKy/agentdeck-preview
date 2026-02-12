@@ -84,9 +84,6 @@ viewer/
 src/agentdeck/games/examples/fixed_damage/
 ├── game.py                    # Game logic
 └── viewers/                   # Bundled viewers for the game
-    ├── ffvi/
-    │   ├── renderer.js
-    │   └── styles.css
     ├── ffvi_scene/
     │   ├── renderer.js
     │   ├── styles.css
@@ -126,7 +123,6 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 - Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
 
 ### FixedDamageGame Viewers
-- **FFVI**: retro battle visualization
 - **FFVI Scene**: logo‑knights battle scene with top message box
 - **Debug**: state‑focused developer view (before/after, reasoning, prompt/response)
 

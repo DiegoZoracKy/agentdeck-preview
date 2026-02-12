@@ -471,13 +471,27 @@
    ========================================================================= */
 
 .viewer-controls.skin-ffvi-scene {
+  background: var(--scene-bg-dark);
+  border: 2px solid var(--scene-border);
+  border-radius: 0 0 8px 8px;
+  padding: 12px 16px;
+  color: var(--scene-text);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   flex-wrap: nowrap;
   gap: 8px;
 }
 
 .viewer-controls.skin-ffvi-scene button {
+  font-family: inherit;
   padding: 8px 10px;
   font-size: 10px;
+  background: var(--scene-bg-deep);
+  border: 2px solid var(--scene-border);
+  border-radius: 4px;
+  color: var(--scene-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
 .viewer-controls.skin-ffvi-scene #btn-play {
@@ -500,33 +514,57 @@
 }
 
 .viewer-controls.skin-ffvi-scene label {
+  font-family: inherit;
   font-size: 10px;
   gap: 4px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .viewer-controls.skin-ffvi-scene select {
+  font-family: inherit;
   font-size: 10px;
   padding: 4px 6px;
+  background: var(--scene-bg-deep);
+  border: 2px solid var(--scene-border);
+  border-radius: 4px;
+  color: var(--scene-text);
 }
 
 .viewer-controls.skin-ffvi-scene .viewer-progress {
   flex: 1 1 220px;
   min-width: 160px;
   max-width: 320px;
-  height: 8px;
+  height: 4px;
+  background: var(--scene-bg-dark);
+  border: 1px solid var(--scene-border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 8px;
 }
 
 .viewer-controls.skin-ffvi-scene .viewer-progress-fill {
-  background: linear-gradient(90deg, #dfe6ff, #ffffff);
+  background: #ffd866;
+  background-image: none;
 }
 
 .viewer-controls.skin-ffvi-scene .spacer {
   display: none;
 }
 
-.viewer-controls.skin-ffvi-scene.status-in-header .status {
+.viewer-controls.skin-ffvi-scene .status {
   display: none;
+}
+
+.viewer-controls.skin-ffvi-scene button:hover:not(:disabled) {
+  background: #2a2d49;
+  border-color: #ffd866;
+}
+
+.viewer-controls.skin-ffvi-scene button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 @media (max-width: 980px) and (min-width: 701px) {
@@ -557,7 +595,8 @@
     flex: 1 1 150px;
     min-width: 110px;
     max-width: 220px;
-    height: 8px;
+    height: 4px;
+    margin: 0 6px;
   }
 
 }
@@ -666,7 +705,8 @@
     flex: 1 1 100%;
     max-width: none;
     min-width: 0;
-    height: 8px;
+    height: 4px;
+    margin: 0;
     order: 5;
   }
 
@@ -675,6 +715,6 @@
   }
 
   .viewer-controls.skin-ffvi-scene .status {
-    margin-left: auto;
+    display: none;
   }
 }

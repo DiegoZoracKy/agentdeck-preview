@@ -25,11 +25,9 @@ const repoRoot = path.join(__dirname, '..');
 const RecordLoader = require(path.join(repoRoot, 'viewer/js/record-loader.js'));
 const Timeline = require(path.join(repoRoot, 'viewer/js/timeline.js'));
 const RendererRegistry = require(path.join(repoRoot, 'viewer/js/renderers/index.js'));
-const FixedDamageFFVIRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/ffvi/renderer.js'));
 const FixedDamageDebugRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js'));
 const FixedDamageFFVISceneRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/ffvi_scene/renderer.js'));
 
-RendererRegistry.register('FixedDamageGame', 'ffvi', FixedDamageFFVIRenderer);
 RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
 RendererRegistry.register('FixedDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
 
@@ -40,10 +38,7 @@ const matchData = RecordLoader.load(raw);
 assert(matchData.game === 'FixedDamageGame', `Expected sample game to be FixedDamageGame, got ${matchData.game}`);
 assert(Array.isArray(matchData.frames) && matchData.frames.length > 0, 'Expected sample to contain frames');
 
-// Test all renderers
-const ffviRenderer = RendererRegistry.create(matchData, 'ffvi');
-assert(ffviRenderer, 'RendererRegistry.create(matchData, "ffvi") returned falsy');
-
+// Test all active renderers
 const debugRenderer = RendererRegistry.create(matchData, 'debug');
 assert(debugRenderer, 'RendererRegistry.create(matchData, "debug") returned falsy');
 
