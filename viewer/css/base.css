@@ -259,6 +259,63 @@ header p {
   color: #ccc;
 }
 
+/* Match Library */
+.match-library {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 2px solid #3f4f83;
+  border-radius: 8px;
+}
+
+.match-library-title {
+  color: #9fb0e0;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.match-library-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.match-library select {
+  background: #1d2542;
+  border: 2px solid #4a4a8a;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.match-library button {
+  background: #242d4f;
+  border: 2px solid #4a4a8a;
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.match-library button:hover:not(:disabled) {
+  border-color: #ffd866;
+  color: #ffd866;
+  background: #2d3860;
+}
+
+.match-library button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Controls */
 .viewer-controls {
   display: flex;
@@ -435,6 +492,29 @@ header p {
     font-size: 10px;
   }
 
+  .match-library {
+    margin-top: 8px;
+    padding: 10px;
+  }
+
+  .match-library-title {
+    font-size: 9px;
+  }
+
+  .match-library-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .match-library select {
+    font-size: 11px;
+    padding: 7px 8px;
+  }
+
+  .match-library button {
+    font-size: 8px;
+    padding: 7px 8px;
+  }
+
   .viewer-controls {
     padding: 10px;
     gap: 6px;
@@ -486,12 +566,15 @@ header p {
   }
 
   .match-info-actions {
-    justify-content: flex-end;
+    justify-content: stretch;
+    align-self: stretch;
   }
 
   .btn-match-new {
-    font-size: 8px;
-    padding: 6px 8px;
+    width: 100%;
+    font-size: 9px;
+    padding: 8px 10px;
+    text-align: center;
   }
 
   .viewer-controls .spacer {
@@ -507,5 +590,9 @@ header p {
 
   .viewer-controls .status {
     margin-left: auto;
+  }
+
+  .instructions {
+    display: none;
   }
 }

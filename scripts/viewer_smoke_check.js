@@ -4,7 +4,7 @@
  * Lightweight smoke-check for the browser replay viewer.
  *
  * Goals:
- * - Ensure the shipped sample record parses with RecordLoader.
+ * - Ensure a shipped local sample record parses with RecordLoader.
  * - Ensure the sample game resolves to a registered renderer.
  * - Ensure Timeline can step through all frames and emits onEnd.
  *
@@ -31,7 +31,13 @@ const FixedDamageFFVISceneRenderer = require(path.join(repoRoot, 'src/agentdeck/
 RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
 RendererRegistry.register('FixedDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
 
-const samplePath = path.join(repoRoot, 'viewer/sample-match.json');
+const manifestPath = path.join(repoRoot, 'viewer/matches/manifest.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+assert(Array.isArray(manifest.matches) && manifest.matches.length > 0, 'Expected viewer/matches/manifest.json to contain entries');
+
+const preferredSample = manifest.matches.find((entry) => entry.path === 'matches/claude-sonnet-4.5-vs-gpt-4o-mini.json');
+const sampleEntry = preferredSample || manifest.matches[0];
+const samplePath = path.join(repoRoot, 'viewer', sampleEntry.path);
 const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
 
 const matchData = RecordLoader.load(raw);

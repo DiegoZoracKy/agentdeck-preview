@@ -8,10 +8,14 @@ let matchData = null;
 let currentSkin = null;
 let frameCallback = null;
 let endCallback = null;
+let localMatchEntries = [];
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
 const btnLoadSample = document.getElementById('btn-load-sample');
+const matchLibrary = document.getElementById('match-library');
+const matchSelect = document.getElementById('match-select');
+const btnLoadMatch = document.getElementById('btn-load-match');
 const fileInput = document.getElementById('file-input');
 const viewerContainer = document.getElementById('viewer-container');
 const controlsContainer = document.getElementById('controls-container');
@@ -39,6 +43,17 @@ function showError(message) {
 
 function clearError() {
   errorContainer.innerHTML = '';
+}
+
+function setLandingVisibility(visible) {
+  const showLanding = Boolean(visible);
+  dropZone.style.display = showLanding ? 'block' : 'none';
+  btnLoadSample.style.display = showLanding ? 'flex' : 'none';
+
+  if (matchLibrary) {
+    const hasLocalMatches = localMatchEntries.length > 0;
+    matchLibrary.style.display = showLanding && hasLocalMatches ? 'block' : 'none';
+  }
 }
 
 async function loadMatchFile(file) {
@@ -163,9 +178,8 @@ function reconnectTimeline() {
 }
 
 function initializeViewer(data) {
-  // Hide drop zone and sample button, show viewer
-  dropZone.style.display = 'none';
-  btnLoadSample.style.display = 'none';
+  // Hide landing and show viewer
+  setLandingVisibility(false);
   viewerContainer.style.display = 'block';
   controlsContainer.style.display = 'flex';
   matchInfoContainer.style.display = 'block';
@@ -212,8 +226,7 @@ function resetViewer() {
   viewerContainer.innerHTML = '';
   controlsContainer.style.display = 'none';
   matchInfoContainer.style.display = 'none';
-  dropZone.style.display = 'block';
-  btnLoadSample.style.display = 'flex';
+  setLandingVisibility(true);
 
   clearError();
   updateStatus('Ready');
@@ -250,6 +263,57 @@ function displayMatchInfo(data) {
 
   // Store winner for reveal later
   infoGrid.dataset.winner = data.winner || 'Draw';
+}
+
+function normalizeManifestEntries(payload) {
+  const candidates = Array.isArray(payload?.matches) ? payload.matches : [];
+  return candidates
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const path = typeof entry.path === 'string' ? entry.path.trim() : '';
+      if (!path) return null;
+      const label = typeof entry.label === 'string' && entry.label.trim()
+        ? entry.label.trim()
+        : path.replace(/^matches\//, '');
+      return { label, path };
+    })
+    .filter(Boolean);
+}
+
+function renderLocalMatchOptions() {
+  if (!matchSelect || !btnLoadMatch) return;
+
+  matchSelect.innerHTML = localMatchEntries
+    .map((entry) => `<option value="${entry.path}">${entry.label}</option>`)
+    .join('');
+
+  const hasEntries = localMatchEntries.length > 0;
+  matchSelect.disabled = !hasEntries;
+  btnLoadMatch.disabled = !hasEntries;
+}
+
+async function loadLocalMatchManifest() {
+  if (!matchLibrary || !matchSelect || !btnLoadMatch) return;
+
+  try {
+    const response = await fetch('matches/manifest.json', { cache: 'no-store' });
+    if (!response.ok) {
+      localMatchEntries = [];
+      renderLocalMatchOptions();
+      setLandingVisibility(!matchData);
+      return;
+    }
+
+    const payload = await response.json();
+    localMatchEntries = normalizeManifestEntries(payload);
+    renderLocalMatchOptions();
+  } catch (err) {
+    localMatchEntries = [];
+    renderLocalMatchOptions();
+    console.warn('Local match manifest not available:', err);
+  }
+
+  setLandingVisibility(!matchData);
 }
 
 // ============================================================================
@@ -324,6 +388,13 @@ speedSelect.addEventListener('change', (e) => {
 skinSelect.addEventListener('change', (e) => {
   switchSkin(e.target.value);
 });
+
+if (btnLoadMatch && matchSelect) {
+  btnLoadMatch.addEventListener('click', () => {
+    if (!matchSelect.value) return;
+    loadFromUrl(matchSelect.value);
+  });
+}
 
 // Progress bar click to seek
 progressBar.addEventListener('click', (e) => {
@@ -440,12 +511,21 @@ async function loadFromUrl(url) {
 // ============================================================================
 
 btnLoadSample.addEventListener('click', () => {
-  loadFromUrl('sample-match.json');
+  loadFromUrl('matches/claude-sonnet-4.5-vs-gpt-4o-mini.json');
 });
 
-// Check for ?match= URL parameter
-const urlParams = new URLSearchParams(window.location.search);
-const matchUrl = urlParams.get('match');
-if (matchUrl) {
-  loadFromUrl(matchUrl);
+async function initApp() {
+  await loadLocalMatchManifest();
+
+  // Check for ?match= URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const matchUrl = urlParams.get('match');
+  if (matchUrl) {
+    loadFromUrl(matchUrl);
+    return;
+  }
+
+  setLandingVisibility(true);
 }
+
+initApp();
