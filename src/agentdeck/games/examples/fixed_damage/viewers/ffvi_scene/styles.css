@@ -53,6 +53,13 @@
   gap: 6px;
 }
 
+.scene-message-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .scene-action {
   color: var(--scene-gold);
   font-size: 12px;
@@ -64,9 +71,42 @@
   font-size: 9px;
 }
 
+.scene-playback-status {
+  font-size: 9px;
+  text-align: center;
+  min-width: 86px;
+  padding: 6px 8px;
+  border: 2px solid var(--scene-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--scene-text-dim);
+}
+
+.scene-playback-status.is-ready {
+  color: var(--scene-text-dim);
+}
+
+.scene-playback-status.is-playing {
+  color: #7af2a0;
+}
+
+.scene-playback-status.is-paused {
+  color: #ffd866;
+}
+
+.scene-playback-status.is-complete {
+  color: #ffe28f;
+}
+
+.scene-playback-status.is-error {
+  color: #ff8b9a;
+}
+
 .scene-turn {
   font-size: 9px;
   color: var(--scene-text);
+  text-align: center;
+  min-width: 106px;
   padding: 6px 10px;
   border: 2px solid var(--scene-border);
   border-radius: 6px;
@@ -460,13 +500,13 @@
 }
 
 .viewer-controls.skin-ffvi-scene label {
-  font-size: 11px;
+  font-size: 10px;
   gap: 4px;
   white-space: nowrap;
 }
 
 .viewer-controls.skin-ffvi-scene select {
-  font-size: 11px;
+  font-size: 10px;
   padding: 4px 6px;
 }
 
@@ -474,16 +514,19 @@
   flex: 1 1 220px;
   min-width: 160px;
   max-width: 320px;
-  height: 10px;
+  height: 8px;
+}
+
+.viewer-controls.skin-ffvi-scene .viewer-progress-fill {
+  background: linear-gradient(90deg, #dfe6ff, #ffffff);
 }
 
 .viewer-controls.skin-ffvi-scene .spacer {
   display: none;
 }
 
-.viewer-controls.skin-ffvi-scene .status {
-  max-width: 70px;
-  font-size: 10px;
+.viewer-controls.skin-ffvi-scene.status-in-header .status {
+  display: none;
 }
 
 @media (max-width: 980px) and (min-width: 701px) {
@@ -501,12 +544,12 @@
   }
 
   .viewer-controls.skin-ffvi-scene label {
-    font-size: 10px;
+    font-size: 9px;
     gap: 4px;
   }
 
   .viewer-controls.skin-ffvi-scene select {
-    font-size: 10px;
+    font-size: 9px;
     padding: 3px 6px;
   }
 
@@ -514,7 +557,7 @@
     flex: 1 1 150px;
     min-width: 110px;
     max-width: 220px;
-    height: 10px;
+    height: 8px;
   }
 
 }
@@ -544,6 +587,17 @@
   .scene-turn {
     font-size: 8px;
     padding: 4px 8px;
+    min-width: 92px;
+  }
+
+  .scene-playback-status {
+    font-size: 8px;
+    min-width: 76px;
+    padding: 4px 6px;
+  }
+
+  .scene-message-right {
+    gap: 6px;
   }
 
   .scene-arena {
@@ -612,7 +666,7 @@
     flex: 1 1 100%;
     max-width: none;
     min-width: 0;
-    height: 10px;
+    height: 8px;
     order: 5;
   }
 

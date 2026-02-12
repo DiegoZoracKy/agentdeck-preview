@@ -133,14 +133,23 @@ class FixedDamageFFVISceneRenderer {
     detailEl.className = 'scene-detail';
     detailEl.textContent = 'Press Play to begin';
 
+    const messageRight = document.createElement('div');
+    messageRight.className = 'scene-message-right';
+
+    const playbackStatusEl = document.createElement('div');
+    playbackStatusEl.className = 'scene-playback-status is-ready';
+    playbackStatusEl.textContent = 'READY';
+
     const turnEl = document.createElement('div');
     turnEl.className = 'scene-turn';
     turnEl.textContent = 'Turn 0/0';
 
     messageLeft.appendChild(actionEl);
     messageLeft.appendChild(detailEl);
+    messageRight.appendChild(playbackStatusEl);
+    messageRight.appendChild(turnEl);
     message.appendChild(messageLeft);
-    message.appendChild(turnEl);
+    message.appendChild(messageRight);
 
     // Arena
     const arena = document.createElement('div');
@@ -187,6 +196,7 @@ class FixedDamageFFVISceneRenderer {
       scene,
       actionEl,
       detailEl,
+      playbackStatusEl,
       turnEl,
       reasoningBubble,
       reasoningText,
@@ -408,6 +418,34 @@ class FixedDamageFFVISceneRenderer {
     const total = this._matchData.frames.length || 0;
     const turnText = turnNumber ? `Turn ${turnNumber}/${total}` : `Turn ${frameNumber}/${total}`;
     this._elements.turnEl.textContent = turnText;
+  }
+
+  setPlaybackStatus(status) {
+    const el = this._elements.playbackStatusEl;
+    if (!el) return;
+
+    const normalized = String(status || 'Ready').trim();
+    const upper = normalized.toUpperCase();
+    el.textContent = upper;
+
+    el.classList.remove('is-ready', 'is-playing', 'is-paused', 'is-complete', 'is-error');
+    if (upper === 'PLAYING') {
+      el.classList.add('is-playing');
+      return;
+    }
+    if (upper === 'PAUSED') {
+      el.classList.add('is-paused');
+      return;
+    }
+    if (upper === 'COMPLETE') {
+      el.classList.add('is-complete');
+      return;
+    }
+    if (upper === 'ERROR') {
+      el.classList.add('is-error');
+      return;
+    }
+    el.classList.add('is-ready');
   }
 
   _triggerAnimation(frame) {

@@ -220,23 +220,33 @@ function resetViewer() {
 }
 
 function displayMatchInfo(data) {
-  const items = [
-    { label: 'Match ID', value: data.matchId },
-    { label: 'Game', value: data.game },
-    { label: 'Players', value: data.players.join(' vs ') },
-    { label: 'Winner', value: '<span class="winner-hidden">???</span>', id: 'winner' },
-    { label: 'Turns', value: data.frames.length },
-    { label: 'Seed', value: data.seed }
-  ];
-
-  infoGrid.innerHTML = items
-    .map((item) => `
-      <div class="info-item" ${item.id ? `id="info-${item.id}"` : ''}>
-        <span class="info-label">${item.label}:</span>
-        <span class="info-value">${item.value}</span>
+  const players = data.players.join(' vs ');
+  infoGrid.innerHTML = `
+    <div class="match-table">
+      <div class="match-table-head">
+        <span>Game</span>
+        <span>Match ID</span>
+        <span>Seed</span>
+        <span>Turns</span>
       </div>
-    `)
-    .join('');
+      <div class="match-table-values">
+        <span class="table-value" title="${data.game}">${data.game}</span>
+        <span class="table-value" title="${data.matchId}">${data.matchId}</span>
+        <span class="table-value">${data.seed}</span>
+        <span class="table-value">${data.frames.length}</span>
+      </div>
+    </div>
+    <div class="match-row match-row-bottom">
+      <div class="info-item info-players">
+        <span class="info-label">Players</span>
+        <span class="info-value" title="${players}">${players}</span>
+      </div>
+      <div class="info-item info-winner" id="info-winner">
+        <span class="info-label">Winner</span>
+        <span class="info-value"><span class="winner-hidden">???</span></span>
+      </div>
+    </div>
+  `;
 
   // Store winner for reveal later
   infoGrid.dataset.winner = data.winner || 'Draw';
@@ -275,6 +285,11 @@ function updateProgress() {
 
 function updateStatus(text) {
   statusText.textContent = text;
+  const headerStatusSupported = renderer && typeof renderer.setPlaybackStatus === 'function';
+  controlsContainer.classList.toggle('status-in-header', Boolean(headerStatusSupported));
+  if (headerStatusSupported) {
+    renderer.setPlaybackStatus(text);
+  }
 }
 
 // Button handlers
