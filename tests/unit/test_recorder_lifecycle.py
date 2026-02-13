@@ -7,6 +7,7 @@ event buffering for handshakes that arrive before MATCH_START.
 """
 
 import json
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -671,3 +672,87 @@ class TestPlayerSummariesMetadata:
         match_ref = batch_data["match_refs"][0]
         assert "player_summaries" in match_ref
         assert len(match_ref["player_summaries"]) == 2
+
+
+class TestRecorderLowPriorityFindings:
+    """Regression tests for low-priority recorder findings."""
+
+    def test_batch_recording_uses_v1_0_schema(self, recorder, temp_recorder_dir):
+        """Batch artifacts must remain on schema v1.0 per SPEC-RECORDER SV1."""
+
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=[MockPlayer("Alice"), MockPlayer("Bob")],
+            matches=1,
+            context={"session_id": "test_session"},
+        )
+
+        recorder.on_match_start(
+            game=MockGame(),
+            players=[MockPlayer("Alice"), MockPlayer("Bob")],
+            match_id="match_001",
+            context={"session_id": "test_session", "batch_id": "batch_001"},
+        )
+
+        recorder.on_match_end(
+            result=MatchResult(
+                winner="Alice",
+                final_state={},
+                events=[],
+                seed=42,
+                metadata={"players": ["Alice", "Bob"]},
+            ),
+            context={"session_id": "test_session"},
+        )
+
+        recorder.on_batch_end(
+            batch_id="batch_001",
+            results=[
+                MatchResult(
+                    winner="Alice",
+                    final_state={},
+                    events=[],
+                    seed=42,
+                    metadata={"players": ["Alice", "Bob"]},
+                )
+            ],
+            context={"session_id": "test_session"},
+        )
+
+        batch_file = temp_recorder_dir / "batch_batch_001.json"
+        with open(batch_file, encoding="utf-8") as f:
+            batch_data = json.load(f)
+
+        assert batch_data["schema_type"] == "batch"
+        assert batch_data["schema_version"] == "1.0"
+
+    def test_git_dirty_uses_tracked_changes_only(self, recorder, monkeypatch):
+        """git_info.dirty must ignore untracked files to avoid false positives."""
+
+        def fake_run(cmd, capture_output, check, text):  # noqa: ANN001
+            if cmd == ["git", "rev-parse", "--git-dir"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout=".git\n", stderr="")
+            if cmd == ["git", "rev-parse", "HEAD"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="deadbeef\n", stderr="")
+            if cmd == ["git", "branch", "--show-current"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="main\n", stderr="")
+            if cmd == ["git", "status", "--porcelain", "--untracked-files=no"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+            raise AssertionError(f"Unexpected git command: {cmd}")
+
+        monkeypatch.setattr("agentdeck.core.recorder.subprocess.run", fake_run)
+
+        git_info = recorder._get_git_info()
+
+        assert git_info is not None
+        assert git_info["commit"] == "deadbeef"
+        assert git_info["branch"] == "main"
+        assert git_info["dirty"] is False

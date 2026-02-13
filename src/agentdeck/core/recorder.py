@@ -146,6 +146,7 @@ class Recorder:
     """
 
     SCHEMA_VERSION = "1.3"  # v1.3.0: Removed dialogue array, embed prompts in events
+    BATCH_SCHEMA_VERSION = "1.0"  # SPEC-RECORDER SV1: batch schema remains 1.0
 
     def __init__(
         self,
@@ -289,7 +290,7 @@ class Recorder:
         }
         self.current_batch = BatchRecording(
             batch_id=batch_id,
-            schema_version=self.schema_version,
+            schema_version=self.BATCH_SCHEMA_VERSION,
             metadata=metadata,
         )
         self.batch_match_ids = []
@@ -775,7 +776,10 @@ class Recorder:
                 ["git", "branch", "--show-current"], capture_output=True, text=True, check=True
             ).stdout.strip()
             status = subprocess.run(
-                ["git", "status", "--short"], capture_output=True, text=True, check=True
+                ["git", "status", "--porcelain", "--untracked-files=no"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             dirty = bool(status.stdout.strip())
             return {"commit": commit_hash, "branch": branch, "dirty": dirty}
