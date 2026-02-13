@@ -1,4 +1,4 @@
-# Analysis: AgentDeck TV Benchmark Matrix
+# Analysis: Performance Methods Benchmark Matrix
 
 ## Executive Summary
 - Pending execution.
@@ -22,4 +22,4 @@
 ## Next Steps
 - Run preflight sentinel cells.
 - Execute Phase A1 pilot.
-- Publish first viewer drop with research context card links.
+- Review expansion candidates based on CI width, p-value range, and reliability gates.

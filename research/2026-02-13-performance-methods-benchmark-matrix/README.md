@@ -1,4 +1,4 @@
-# AgentDeck TV Benchmark Matrix (2026-02-13)
+# Performance Methods Benchmark Matrix (2026-02-13)
 
 **Status**: planned  
 **Research Question**: How much do controller strategy (AO vs CoT), instruction cadence
@@ -6,12 +6,12 @@
 win rate, reliability, and cost across OpenAI and Anthropic in FixedDamageGame?
 
 ## Why This Package Exists
-This package is the anchor for the `research -> entertainment -> research` loop:
+This package exists to measure performance gains from:
 
-1. Run statistically controlled benchmark cells.
-2. Auto-tag notable matches (`clutch`, `comeback`, `chaos`, `dumb_decision`).
-3. Curate highlights into `viewer/matches/` and agentdeck.tv.
-4. Feed audience + analysis findings into the next benchmark iteration.
+1. Controller strategy (`ActionOnly` vs `Reasoning`).
+2. Prompt cadence (`handshake-only` vs per-turn reinforcement).
+3. Model tier tradeoffs (weak/strong, intra/inter-provider).
+4. Reliability and cost behavior under the same game conditions.
 
 ## Matrix Snapshot
 - Models: 4 (`gpt-4o-mini`, `gpt-4o`, `claude-haiku-4.5`, `claude-sonnet-4.5`)
@@ -32,7 +32,7 @@ This package is the anchor for the `research -> entertainment -> research` loop:
 - `A3` Baselines + raw cross-provider (Tracks 7-8): 6 cells
 - `B` Google expansion in a follow-up package
 
-Each phase should produce a viewer drop (curated highlights + research context links).
+Each phase should produce an analysis update and optional qualitative match curation.
 
 ## Preflight Gate
 Before full pilot, run the 4 sentinel cells from `matrix.yaml -> execution_plan.preflight`.
@@ -49,7 +49,7 @@ If parse/timeout/forfeit instability appears, fix config and rerun preflight.
 ## Storage Plan
 - Raw recordings: Hugging Face dataset `agentdeck/replays` under `2026-q1-benchmark-matrix/`
 - Research summaries: committed in this package directory
-- Curated highlights: committed in `viewer/matches/`
+- Optional curated qualitative matches: committed in `viewer/matches/`
 
 ## Repro Notes
 Freeze benchmark inputs before execution:
@@ -58,3 +58,8 @@ Freeze benchmark inputs before execution:
 - pricing snapshot
 
 Populate those freeze fields in `matrix.yaml` / `manifest.yaml` before launching any cells.
+
+Turn-budget helper for this package:
+```bash
+python3 research/2026-02-13-performance-methods-benchmark-matrix/scripts/turn_budget.py
+```
