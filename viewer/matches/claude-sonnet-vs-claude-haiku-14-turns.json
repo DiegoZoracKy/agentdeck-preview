@@ -1,0 +1,2562 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_c1ed5d22",
+  "game": "FixedDamageGame",
+  "players": [
+    "Claude-Sonnet",
+    "Claude-Haiku"
+  ],
+  "winner": "Claude-Sonnet",
+  "final_state": {
+    "health": {
+      "Claude-Sonnet": 20,
+      "Claude-Haiku": 0
+    },
+    "potions": {
+      "Claude-Sonnet": 1,
+      "Claude-Haiku": 3
+    },
+    "last_action": {
+      "Claude-Sonnet": "ATTACK",
+      "Claude-Haiku": "ATTACK"
+    },
+    "turn": 15,
+    "_turn_count": 14,
+    "_first_player_idx": 1
+  },
+  "seed": 933864073,
+  "events": [
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Claude-Sonnet",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "Claude-Sonnet"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1768923041.4641926,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": null,
+        "timestamp": 1768923041.4641926,
+        "monotonic_time": 37997.721788323
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Claude-Haiku",
+        "response": "OK",
+        "metadata": {
+          "allowed": [
+            "OK",
+            "READY",
+            "YES"
+          ],
+          "player": "Claude-Haiku"
+        },
+        "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "You are playing FixedDamageGame.\\n\\nFixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: full\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players only see their own stats\\n\\n\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.\\n\\nReply with ONLY the single word 'OK' (nothing else). Do not add any explanation or additional text.",
+          "response_text": "OK",
+          "duration": 0.1
+        },
+        "accepted": true
+      },
+      "timestamp": 1768923042.1308467,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": null,
+        "timestamp": 1768923042.1308467,
+        "monotonic_time": 37998.388442283
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: Claude-Haiku (index 1)",
+        "level": "info",
+        "log_context": {}
+      },
+      "timestamp": 1768923042.14763,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": null,
+        "timestamp": 1768923042.14763,
+        "monotonic_time": 37998.405225582
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 100,
+            "Claude-Haiku": 100
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": null,
+            "Claude-Haiku": null
+          },
+          "turn": 1,
+          "_turn_count": 1,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 80,
+            "Claude-Haiku": 100
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": null,
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 2,
+          "_turn_count": 1,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 1\n\nHealth:\n  You: 100\n  Claude-Sonnet: 100\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: None\n  You: None\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 1\n\nHealth:\n  You: 100\n  Claude-Sonnet: 100\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: None\n  You: None\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 276,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 1,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "Claude-Haiku",
+            "started_at": 1768923042.1499548,
+            "duration": 0.7752876281738281,
+            "ended_at": 1768923042.9252424,
+            "rng_seed": 3887312118,
+            "rng_label": "turn-1-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "Claude-Haiku",
+          "started_at": 1768923042.1499548,
+          "duration": 0.7752876281738281,
+          "ended_at": 1768923042.9252424,
+          "rng_seed": 3887312118,
+          "rng_label": "turn-1-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 1\n\nHealth:\n  You: 100\n  Claude-Sonnet: 100\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: None\n  You: None\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 1\n\nHealth:\n  You: 100\n  Claude-Sonnet: 100\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: None\n  You: None\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923042.9257343,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1768923042.9257343,
+        "monotonic_time": 37999.183329936
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 80,
+            "Claude-Haiku": 100
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": null,
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 2,
+          "_turn_count": 2,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 80,
+            "Claude-Haiku": 80
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 3,
+          "_turn_count": 2,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 2\n\nHealth:\n  You: 80\n  Claude-Haiku: 100\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: None\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 2\n\nHealth:\n  You: 80\n  Claude-Haiku: 100\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: None\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 275,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 2,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 2,
+            "turn_index": 1,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923042.9305398,
+            "duration": 2.6247220039367676,
+            "ended_at": 1768923045.5552619,
+            "rng_seed": 2518754376,
+            "rng_label": "turn-2-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 2,
+          "turn_index": 1,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923042.9305398,
+          "duration": 2.6247220039367676,
+          "ended_at": 1768923045.5552619,
+          "rng_seed": 2518754376,
+          "rng_label": "turn-2-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "turn_index": 1,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 2\n\nHealth:\n  You: 80\n  Claude-Haiku: 100\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: None\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 2\n\nHealth:\n  You: 80\n  Claude-Haiku: 100\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: None\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923045.5557544,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 1,
+        "turn_index": 1,
+        "timestamp": 1768923045.5557544,
+        "monotonic_time": 38001.813350488
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 80,
+            "Claude-Haiku": 80
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 3,
+          "_turn_count": 3,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 60,
+            "Claude-Haiku": 80
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 4,
+          "_turn_count": 3,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 3\n\nHealth:\n  You: 80\n  Claude-Sonnet: 80\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 3\n\nHealth:\n  You: 80\n  Claude-Sonnet: 80\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 278,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 3,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 3,
+            "turn_index": 2,
+            "player": "Claude-Haiku",
+            "started_at": 1768923045.5632308,
+            "duration": 0.6895861625671387,
+            "ended_at": 1768923046.252817,
+            "rng_seed": 266847590,
+            "rng_label": "turn-3-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 3,
+          "turn_index": 2,
+          "player": "Claude-Haiku",
+          "started_at": 1768923045.5632308,
+          "duration": 0.6895861625671387,
+          "ended_at": 1768923046.252817,
+          "rng_seed": 266847590,
+          "rng_label": "turn-3-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 2,
+        "turn_index": 2,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 3\n\nHealth:\n  You: 80\n  Claude-Sonnet: 80\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 3\n\nHealth:\n  You: 80\n  Claude-Sonnet: 80\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923046.253247,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 2,
+        "turn_index": 2,
+        "timestamp": 1768923046.253247,
+        "monotonic_time": 38002.51084295
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 60,
+            "Claude-Haiku": 80
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 4,
+          "_turn_count": 4,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 60,
+            "Claude-Haiku": 60
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 5,
+          "_turn_count": 4,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 4\n\nHealth:\n  You: 60\n  Claude-Haiku: 80\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 4\n\nHealth:\n  You: 60\n  Claude-Haiku: 80\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 276,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 4,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 4,
+            "turn_index": 3,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923046.2578924,
+            "duration": 1.799494743347168,
+            "ended_at": 1768923048.057387,
+            "rng_seed": 2799128221,
+            "rng_label": "turn-4-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 4,
+          "turn_index": 3,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923046.2578924,
+          "duration": 1.799494743347168,
+          "ended_at": 1768923048.057387,
+          "rng_seed": 2799128221,
+          "rng_label": "turn-4-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 3,
+        "turn_index": 3,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 4\n\nHealth:\n  You: 60\n  Claude-Haiku: 80\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 4\n\nHealth:\n  You: 60\n  Claude-Haiku: 80\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923048.0583894,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 3,
+        "turn_index": 3,
+        "timestamp": 1768923048.0583894,
+        "monotonic_time": 38004.315985551
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 60,
+            "Claude-Haiku": 60
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 5,
+          "_turn_count": 5,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 40,
+            "Claude-Haiku": 60
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 6,
+          "_turn_count": 5,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 5\n\nHealth:\n  You: 60\n  Claude-Sonnet: 60\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 5\n\nHealth:\n  You: 60\n  Claude-Sonnet: 60\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 278,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 5,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 5,
+            "turn_index": 4,
+            "player": "Claude-Haiku",
+            "started_at": 1768923048.0683634,
+            "duration": 0.6841647624969482,
+            "ended_at": 1768923048.7525282,
+            "rng_seed": 2505539163,
+            "rng_label": "turn-5-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 5,
+          "turn_index": 4,
+          "player": "Claude-Haiku",
+          "started_at": 1768923048.0683634,
+          "duration": 0.6841647624969482,
+          "ended_at": 1768923048.7525282,
+          "rng_seed": 2505539163,
+          "rng_label": "turn-5-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 4,
+        "turn_index": 4,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 5\n\nHealth:\n  You: 60\n  Claude-Sonnet: 60\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 5\n\nHealth:\n  You: 60\n  Claude-Sonnet: 60\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923048.752935,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 4,
+        "turn_index": 4,
+        "timestamp": 1768923048.752935,
+        "monotonic_time": 38005.010530613
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 40,
+            "Claude-Haiku": 60
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 6,
+          "_turn_count": 6,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 40,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 7,
+          "_turn_count": 6,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 6\n\nHealth:\n  You: 40\n  Claude-Haiku: 60\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 6\n\nHealth:\n  You: 40\n  Claude-Haiku: 60\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 276,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 6,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 6,
+            "turn_index": 5,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923048.7581449,
+            "duration": 2.1911110877990723,
+            "ended_at": 1768923050.949256,
+            "rng_seed": 2683297951,
+            "rng_label": "turn-6-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 6,
+          "turn_index": 5,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923048.7581449,
+          "duration": 2.1911110877990723,
+          "ended_at": 1768923050.949256,
+          "rng_seed": 2683297951,
+          "rng_label": "turn-6-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 5,
+        "turn_index": 5,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 6\n\nHealth:\n  You: 40\n  Claude-Haiku: 60\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 6\n\nHealth:\n  You: 40\n  Claude-Haiku: 60\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923050.949685,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 5,
+        "turn_index": 5,
+        "timestamp": 1768923050.949685,
+        "monotonic_time": 38007.207280792
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 40,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 7,
+          "_turn_count": 7,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 20,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 8,
+          "_turn_count": 7,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 7\n\nHealth:\n  You: 40\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 7\n\nHealth:\n  You: 40\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 278,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 7,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 7,
+            "turn_index": 6,
+            "player": "Claude-Haiku",
+            "started_at": 1768923050.9559329,
+            "duration": 0.777144193649292,
+            "ended_at": 1768923051.733077,
+            "rng_seed": 1109816194,
+            "rng_label": "turn-7-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 7,
+          "turn_index": 6,
+          "player": "Claude-Haiku",
+          "started_at": 1768923050.9559329,
+          "duration": 0.777144193649292,
+          "ended_at": 1768923051.733077,
+          "rng_seed": 1109816194,
+          "rng_label": "turn-7-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 6,
+        "turn_index": 6,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 7\n\nHealth:\n  You: 40\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 7\n\nHealth:\n  You: 40\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 3\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923051.7335145,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 6,
+        "turn_index": 6,
+        "timestamp": 1768923051.7335145,
+        "monotonic_time": 38007.99111015
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "POTION",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 20,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 3,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 8,
+          "_turn_count": 8,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 50,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 9,
+          "_turn_count": 8,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 8\n\nHealth:\n  You: 20\n  Claude-Haiku: 40\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 8\n\nHealth:\n  You: 20\n  Claude-Haiku: 40\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 276,
+          "raw_response": "ACTION: POTION",
+          "turn_number": 8,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 8,
+            "turn_index": 7,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923051.7395456,
+            "duration": 2.190695285797119,
+            "ended_at": 1768923053.9302409,
+            "rng_seed": 3233954066,
+            "rng_label": "turn-8-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 8,
+          "turn_index": 7,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923051.7395456,
+          "duration": 2.190695285797119,
+          "ended_at": 1768923053.9302409,
+          "rng_seed": 3233954066,
+          "rng_label": "turn-8-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 7,
+        "turn_index": 7,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 8\n\nHealth:\n  You: 20\n  Claude-Haiku: 40\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 8\n\nHealth:\n  You: 20\n  Claude-Haiku: 40\n\nPotions:\n  You: 3\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: POTION",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923053.9311028,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 7,
+        "turn_index": 7,
+        "timestamp": 1768923053.9311028,
+        "monotonic_time": 38010.188699543
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 50,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 9,
+          "_turn_count": 9,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 30,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 10,
+          "_turn_count": 9,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 9\n\nHealth:\n  You: 40\n  Claude-Sonnet: 50\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 9\n\nHealth:\n  You: 40\n  Claude-Sonnet: 50\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 278,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 9,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 9,
+            "turn_index": 8,
+            "player": "Claude-Haiku",
+            "started_at": 1768923053.9548695,
+            "duration": 0.8482146263122559,
+            "ended_at": 1768923054.8030841,
+            "rng_seed": 1809652457,
+            "rng_label": "turn-9-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 9,
+          "turn_index": 8,
+          "player": "Claude-Haiku",
+          "started_at": 1768923053.9548695,
+          "duration": 0.8482146263122559,
+          "ended_at": 1768923054.8030841,
+          "rng_seed": 1809652457,
+          "rng_label": "turn-9-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 8,
+        "turn_index": 8,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 9\n\nHealth:\n  You: 40\n  Claude-Sonnet: 50\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 9\n\nHealth:\n  You: 40\n  Claude-Sonnet: 50\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923054.8043072,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 8,
+        "turn_index": 8,
+        "timestamp": 1768923054.8043072,
+        "monotonic_time": 38011.061904
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 30,
+            "Claude-Haiku": 40
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 10,
+          "_turn_count": 10,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 30,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 11,
+          "_turn_count": 10,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 10\n\nHealth:\n  You: 30\n  Claude-Haiku: 40\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 10\n\nHealth:\n  You: 30\n  Claude-Haiku: 40\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 277,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 10,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 10
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 10,
+            "turn_index": 9,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923054.8289406,
+            "duration": 2.4767231941223145,
+            "ended_at": 1768923057.3056638,
+            "rng_seed": 586512305,
+            "rng_label": "turn-10-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 10,
+          "turn_index": 9,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923054.8289406,
+          "duration": 2.4767231941223145,
+          "ended_at": 1768923057.3056638,
+          "rng_seed": 586512305,
+          "rng_label": "turn-10-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 9,
+        "turn_index": 9,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 10\n\nHealth:\n  You: 30\n  Claude-Haiku: 40\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 10\n\nHealth:\n  You: 30\n  Claude-Haiku: 40\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 10
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923057.3071969,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 9,
+        "turn_index": 9,
+        "timestamp": 1768923057.3071969,
+        "monotonic_time": 38013.564793778
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 30,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 11,
+          "_turn_count": 11,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 10,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 12,
+          "_turn_count": 11,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 11\n\nHealth:\n  You: 20\n  Claude-Sonnet: 30\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 11\n\nHealth:\n  You: 20\n  Claude-Sonnet: 30\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 11
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 279,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 11,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 11
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 11,
+            "turn_index": 10,
+            "player": "Claude-Haiku",
+            "started_at": 1768923057.3403468,
+            "duration": 0.759697437286377,
+            "ended_at": 1768923058.1000443,
+            "rng_seed": 74917065,
+            "rng_label": "turn-11-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 11,
+          "turn_index": 10,
+          "player": "Claude-Haiku",
+          "started_at": 1768923057.3403468,
+          "duration": 0.759697437286377,
+          "ended_at": 1768923058.1000443,
+          "rng_seed": 74917065,
+          "rng_label": "turn-11-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 10,
+        "turn_index": 10,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 11\n\nHealth:\n  You: 20\n  Claude-Sonnet: 30\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 11\n\nHealth:\n  You: 20\n  Claude-Sonnet: 30\n\nPotions:\n  You: 3\n  Claude-Sonnet: 2\n\nLast Action:\n  Claude-Sonnet: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 11
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 11
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923058.1013398,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 10,
+        "turn_index": 10,
+        "timestamp": 1768923058.1013398,
+        "monotonic_time": 38014.35893704
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "POTION",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 10,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 2,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 12,
+          "_turn_count": 12,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 40,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 1,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 13,
+          "_turn_count": 12,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 12\n\nHealth:\n  You: 10\n  Claude-Haiku: 20\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 12\n\nHealth:\n  You: 10\n  Claude-Haiku: 20\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 12
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 277,
+          "raw_response": "ACTION: POTION",
+          "turn_number": 12,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 12
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 12,
+            "turn_index": 11,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923058.1346636,
+            "duration": 2.2433125972747803,
+            "ended_at": 1768923060.3779762,
+            "rng_seed": 2328051641,
+            "rng_label": "turn-12-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 12,
+          "turn_index": 11,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923058.1346636,
+          "duration": 2.2433125972747803,
+          "ended_at": 1768923060.3779762,
+          "rng_seed": 2328051641,
+          "rng_label": "turn-12-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 11,
+        "turn_index": 11,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 12\n\nHealth:\n  You: 10\n  Claude-Haiku: 20\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 12\n\nHealth:\n  You: 10\n  Claude-Haiku: 20\n\nPotions:\n  You: 2\n  Claude-Haiku: 3\n\nLast Action:\n  You: ATTACK\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 12
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: POTION",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 12
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923060.3787458,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 11,
+        "turn_index": 11,
+        "timestamp": 1768923060.3787458,
+        "monotonic_time": 38016.636342132
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Haiku",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 40,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 1,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 13,
+          "_turn_count": 13,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 20,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 1,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 14,
+          "_turn_count": 13,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 13\n\nHealth:\n  You: 20\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 1\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 13\n\nHealth:\n  You: 20\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 1\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 13
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 279,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 13,
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 13
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 13,
+            "turn_index": 12,
+            "player": "Claude-Haiku",
+            "started_at": 1768923060.4010713,
+            "duration": 0.7423291206359863,
+            "ended_at": 1768923061.1434004,
+            "rng_seed": 3918977631,
+            "rng_label": "turn-13-Claude-Haiku"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 13,
+          "turn_index": 12,
+          "player": "Claude-Haiku",
+          "started_at": 1768923060.4010713,
+          "duration": 0.7423291206359863,
+          "ended_at": 1768923061.1434004,
+          "rng_seed": 3918977631,
+          "rng_label": "turn-13-Claude-Haiku"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 12,
+        "turn_index": 12,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 13\n\nHealth:\n  You: 20\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 1\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Haiku\nTurn: 13\n\nHealth:\n  You: 20\n  Claude-Sonnet: 40\n\nPotions:\n  You: 3\n  Claude-Sonnet: 1\n\nLast Action:\n  Claude-Sonnet: POTION\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Haiku",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 13
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Haiku",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 13
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923061.1460268,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 12,
+        "turn_index": 12,
+        "timestamp": 1768923061.1460268,
+        "monotonic_time": 38017.403625098
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Claude-Sonnet",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "Claude-Sonnet": 20,
+            "Claude-Haiku": 20
+          },
+          "potions": {
+            "Claude-Sonnet": 1,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "POTION",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 14,
+          "_turn_count": 14,
+          "_first_player_idx": 1
+        },
+        "state_after": {
+          "health": {
+            "Claude-Sonnet": 20,
+            "Claude-Haiku": 0
+          },
+          "potions": {
+            "Claude-Sonnet": 1,
+            "Claude-Haiku": 3
+          },
+          "last_action": {
+            "Claude-Sonnet": "ATTACK",
+            "Claude-Haiku": "ATTACK"
+          },
+          "turn": 15,
+          "_turn_count": 14,
+          "_first_player_idx": 1
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 14\n\nHealth:\n  You: 20\n  Claude-Haiku: 20\n\nPotions:\n  You: 1\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 14\n\nHealth:\n  You: 20\n  Claude-Haiku: 20\n\nPotions:\n  You: 1\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 14
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 277,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 14,
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 14
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_c1ed5d22",
+            "turn_number": 14,
+            "turn_index": 13,
+            "player": "Claude-Sonnet",
+            "started_at": 1768923061.1665478,
+            "duration": 2.5794272422790527,
+            "ended_at": 1768923063.745975,
+            "rng_seed": 1548311883,
+            "rng_label": "turn-14-Claude-Sonnet"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_c1ed5d22",
+          "turn_number": 14,
+          "turn_index": 13,
+          "player": "Claude-Sonnet",
+          "started_at": 1768923061.1665478,
+          "duration": 2.5794272422790527,
+          "ended_at": 1768923063.745975,
+          "rng_seed": 1548311883,
+          "rng_label": "turn-14-Claude-Sonnet"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 13,
+        "turn_index": 13,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": null,
+          "prompt_text": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 14\n\nHealth:\n  You: 20\n  Claude-Haiku: 20\n\nPotions:\n  You: 1\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================\\n\\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Claude-Sonnet\nTurn: 14\n\nHealth:\n  You: 20\n  Claude-Haiku: 20\n\nPotions:\n  You: 1\n  Claude-Haiku: 3\n\nLast Action:\n  You: POTION\n  Claude-Haiku: ATTACK\n\n=========================",
+              "metadata": {
+                "player": "Claude-Sonnet",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 14
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "player": "Claude-Sonnet",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 14
+          },
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923063.7468915,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "phase_index": 13,
+        "turn_index": 13,
+        "timestamp": 1768923063.7468915,
+        "monotonic_time": 38020.004487782
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Claude-Sonnet",
+        "reflection": "Thank you for the game! I won by reducing Claude-Haiku's HP to 0 while maintaining 20 HP myself. The key strategic moments were using potions at turns 8 and 12 when my health got critically low, which allowed me to survive long enough to deliver the final attack. Good match!",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923068.3468103,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "timestamp": 1768923068.3468103,
+        "monotonic_time": 38024.604406578
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Claude-Haiku",
+        "reflection": "I understand this was a match in the FixedDamageGame where Claude-Sonnet defeated Claude-Haiku. The game ended with Claude-Sonnet having 20 HP remaining, while Claude-Haiku was reduced to 0 HP. The match took 14 turns to complete. Would you like me to reflect on the gameplay or strategy?",
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1768923071.7296298,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "timestamp": 1768923071.7296298,
+        "monotonic_time": 38027.987225825
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2026-01-20T12:30:42.131935",
+    "session_id": "session_20260120_123038_53df98",
+    "batch_id": "batch_6b2b7d3a",
+    "context": {
+      "session_id": "session_20260120_123038_53df98",
+      "batch_id": "batch_6b2b7d3a",
+      "match_index": 0,
+      "total_matches_in_batch": 1,
+      "end": {
+        "session_id": "session_20260120_123038_53df98",
+        "batch_id": "batch_6b2b7d3a",
+        "match_id": "match_c1ed5d22",
+        "timestamp": 1768923071.7518175,
+        "monotonic_time": 38028.009413624
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "5580c185cbb10b5b86ac4249ab0fb1d6c69bd238",
+        "branch": "main",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "Claude-Sonnet": {
+        "type": "ClaudePlayer",
+        "module": "agentdeck.players.anthropic_player",
+        "model": "claude-sonnet-4-20250514",
+        "temperature": 1.0,
+        "max_tokens": 1024,
+        "api_key_prefix": "***hgAA"
+      },
+      "Claude-Haiku": {
+        "type": "ClaudePlayer",
+        "module": "agentdeck.players.anthropic_player",
+        "model": "claude-3-5-haiku-latest",
+        "temperature": 1.0,
+        "max_tokens": 1024,
+        "api_key_prefix": "***hgAA"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "Claude-Sonnet",
+        "type": "ClaudePlayer",
+        "model": "claude-sonnet-4-20250514",
+        "controller": "StrictHandshakeController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": 1024,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.000696
+      },
+      {
+        "name": "Claude-Haiku",
+        "type": "ClaudePlayer",
+        "model": "claude-3-5-haiku-latest",
+        "controller": "StrictHandshakeController",
+        "renderer": "TextRenderer",
+        "temperature": 1.0,
+        "max_tokens": 1024,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.0001856
+      }
+    ],
+    "game_config": {
+      "name": "FixedDamageGame",
+      "module": "agentdeck.games.examples.fixed_damage"
+    },
+    "session": {
+      "session_id": "session_20260120_123038_53df98",
+      "started_at": 1768923038.975913,
+      "seed": 933864073
+    },
+    "ended_at": "2026-01-20T12:31:11.754661",
+    "match": {
+      "game": "FixedDamageGame",
+      "players": [
+        "Claude-Sonnet",
+        "Claude-Haiku"
+      ],
+      "player_names": [
+        "Claude-Sonnet",
+        "Claude-Haiku"
+      ],
+      "player_order": [
+        0,
+        1
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Claude-Sonnet",
+        "index": 0
+      },
+      "duration": 24.756306171417236,
+      "handshake_completed": true,
+      "seed": 933864073,
+      "batch_id": "batch_6b2b7d3a",
+      "truncated_by_max_turns": false,
+      "turns": 14,
+      "player_costs": {
+        "Claude-Sonnet": 0.020277,
+        "Claude-Haiku": 0.005430400000000001
+      },
+      "cost": 0.025707400000000002,
+      "schema_version": "1.3"
+    },
+    "players": [
+      "Claude-Sonnet",
+      "Claude-Haiku"
+    ],
+    "game": "FixedDamageGame",
+    "match_id": "match_c1ed5d22",
+    "winner": "Claude-Sonnet",
+    "seed": 933864073
+  }
+}

@@ -12,8 +12,8 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="../src/agentdeck/games/examples/fixed_damage/viewers/ffvi/styles.css">
   <link rel="stylesheet" href="../src/agentdeck/games/examples/fixed_damage/viewers/debug/styles.css">
+  <link rel="stylesheet" href="../src/agentdeck/games/examples/fixed_damage/viewers/ffvi_scene/styles.css">
 </head>
 <body>
   <div class="container">
@@ -30,6 +30,21 @@
       <div class="icon">📁</div>
       <p>Drop a match JSON file here</p>
       <p>or click to browse</p>
+    </div>
+
+    <!-- Sample match button (shown when no match loaded) -->
+    <button id="btn-load-sample" class="btn-load-sample">
+      ▶ Load Sample Match
+      <span class="btn-sample-sub">GPT-4o-mini vs Claude-Sonnet-4.5</span>
+    </button>
+
+    <!-- Local match library (shown when manifest has entries and no match loaded) -->
+    <div id="match-library" class="match-library" style="display: none;">
+      <div class="match-library-title">Local Match Library</div>
+      <div class="match-library-controls">
+        <select id="match-select" title="Select a local match"></select>
+        <button id="btn-load-match" title="Load selected match">▶ Load Match</button>
+      </div>
     </div>
 
     <!-- Hidden file input -->
@@ -68,14 +83,14 @@
       <span class="spacer"></span>
 
       <span class="status" id="status-text">Ready</span>
-
-      <button id="btn-reset" title="Load new match">📁 New</button>
     </div>
 
     <!-- Match info (shown when match loaded) -->
     <div id="match-info" class="match-info" style="display: none;">
-      <h3>Match Details</h3>
       <div class="info-grid" id="info-grid"></div>
+      <div class="match-info-actions">
+        <button id="btn-reset" class="btn-match-new" title="Load new match">📁 New Match</button>
+      </div>
     </div>
 
     <!-- Instructions -->
@@ -93,8 +108,8 @@
   <script src="js/record-loader.js"></script>
   <script src="js/timeline.js"></script>
   <script src="js/renderers/index.js"></script>
-  <script src="../src/agentdeck/games/examples/fixed_damage/viewers/ffvi/renderer.js"></script>
   <script src="../src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js"></script>
+  <script src="../src/agentdeck/games/examples/fixed_damage/viewers/ffvi_scene/renderer.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

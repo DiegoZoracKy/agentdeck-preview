@@ -16,6 +16,19 @@ start viewer/index.html     # Windows
 
 Then drag & drop a match JSON file onto the viewer.
 
+### Local Match Library
+
+You can preload matches and pick them from the UI:
+
+1. Put replay files in `viewer/matches/`.
+2. Refresh `viewer/matches/manifest.json`:
+
+```bash
+node scripts/update_match_manifest.js
+```
+
+3. Reload `viewer/index.html` and use **Local Match Library**.
+
 ### Option 2: With a local server (recommended)
 
 ```bash
@@ -71,6 +84,9 @@ with AgentDeck() as deck:
 ```
 viewer/
 ├── index.html                 # Main entry point (host)
+├── matches/
+│   ├── manifest.json          # UI catalog for local match picker
+│   └── *.json                 # Local replay files for quick testing
 ├── js/
 │   ├── app.js                 # UI shell + wiring
 │   ├── record-loader.js       # Schema validation & parsing
@@ -78,15 +94,16 @@ viewer/
 │   └── renderers/index.js     # Renderer registry (game + skin)
 ├── css/
 │   └── base.css               # Layout + shell styles
-├── sample-match.json          # Example match for testing
 └── README.md                  # This file
 
 src/agentdeck/games/examples/fixed_damage/
 ├── game.py                    # Game logic
 └── viewers/                   # Bundled viewers for the game
-    ├── ffvi/
+    ├── ffvi_scene/
     │   ├── renderer.js
-    │   └── styles.css
+    │   ├── styles.css
+    │   └── assets/
+    │       └── bg-placeholder.svg
     └── debug/
         ├── renderer.js
         └── styles.css
@@ -121,7 +138,7 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 - Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
 
 ### FixedDamageGame Viewers
-- **FFVI**: retro battle visualization
+- **FFVI Scene**: logo‑knights battle scene with top message box
 - **Debug**: state‑focused developer view (before/after, reasoning, prompt/response)
 
 ## Creating Custom Renderers

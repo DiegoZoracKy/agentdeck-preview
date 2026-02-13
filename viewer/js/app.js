@@ -8,9 +8,14 @@ let matchData = null;
 let currentSkin = null;
 let frameCallback = null;
 let endCallback = null;
+let localMatchEntries = [];
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
+const btnLoadSample = document.getElementById('btn-load-sample');
+const matchLibrary = document.getElementById('match-library');
+const matchSelect = document.getElementById('match-select');
+const btnLoadMatch = document.getElementById('btn-load-match');
 const fileInput = document.getElementById('file-input');
 const viewerContainer = document.getElementById('viewer-container');
 const controlsContainer = document.getElementById('controls-container');
@@ -40,6 +45,17 @@ function clearError() {
   errorContainer.innerHTML = '';
 }
 
+function setLandingVisibility(visible) {
+  const showLanding = Boolean(visible);
+  dropZone.style.display = showLanding ? 'block' : 'none';
+  btnLoadSample.style.display = showLanding ? 'flex' : 'none';
+
+  if (matchLibrary) {
+    const hasLocalMatches = localMatchEntries.length > 0;
+    matchLibrary.style.display = showLanding && hasLocalMatches ? 'block' : 'none';
+  }
+}
+
 async function loadMatchFile(file) {
   clearError();
 
@@ -59,15 +75,30 @@ function createRenderer(data, skin) {
   return RendererRegistry.create(data, skin);
 }
 
+function applySkinClass(skin) {
+  const skinClasses = Array.from(controlsContainer.classList).filter((className) =>
+    className.startsWith('skin-')
+  );
+  skinClasses.forEach((className) => controlsContainer.classList.remove(className));
+
+  const normalized = String(skin || '').trim().replace(/_/g, '-');
+  if (normalized) {
+    controlsContainer.classList.add(`skin-${normalized}`);
+  }
+}
+
 function populateSkinSelector(data) {
   const skins = RendererRegistry.getAvailableSkins(data.game);
   skinSelect.innerHTML = skins
-    .map((skin) => `<option value="${skin}">${skin.toUpperCase()}</option>`)
+    .map((skin) => {
+      const label = skin.replace(/[-_]/g, ' ').toUpperCase();
+      return `<option value="${skin}">${label}</option>`;
+    })
     .join('');
 
-  // Set current skin: prefer 'ffvi', fallback to first available
+  // Set current skin: prefer 'ffvi_scene', fallback to first available
   if (!currentSkin && skins.length > 0) {
-    currentSkin = skins.includes('ffvi') ? 'ffvi' : skins[0];
+    currentSkin = skins.includes('ffvi_scene') ? 'ffvi_scene' : skins[0];
     skinSelect.value = currentSkin;
   }
 }
@@ -90,6 +121,7 @@ function switchSkin(newSkin) {
 
   // Create new renderer with new skin
   currentSkin = newSkin;
+  applySkinClass(currentSkin);
   renderer = createRenderer(matchData, currentSkin);
   renderer.init(viewerContainer, matchData);
 
@@ -146,14 +178,15 @@ function reconnectTimeline() {
 }
 
 function initializeViewer(data) {
-  // Hide drop zone, show viewer
-  dropZone.style.display = 'none';
+  // Hide landing and show viewer
+  setLandingVisibility(false);
   viewerContainer.style.display = 'block';
   controlsContainer.style.display = 'flex';
   matchInfoContainer.style.display = 'block';
 
   // Populate skin selector
   populateSkinSelector(data);
+  applySkinClass(currentSkin);
 
   // Create timeline
   timeline = new Timeline(data);
@@ -193,33 +226,94 @@ function resetViewer() {
   viewerContainer.innerHTML = '';
   controlsContainer.style.display = 'none';
   matchInfoContainer.style.display = 'none';
-  dropZone.style.display = 'block';
+  setLandingVisibility(true);
 
   clearError();
   updateStatus('Ready');
 }
 
 function displayMatchInfo(data) {
-  const items = [
-    { label: 'Match ID', value: data.matchId },
-    { label: 'Game', value: data.game },
-    { label: 'Players', value: data.players.join(' vs ') },
-    { label: 'Winner', value: '<span class="winner-hidden">???</span>', id: 'winner' },
-    { label: 'Turns', value: data.frames.length },
-    { label: 'Seed', value: data.seed }
-  ];
-
-  infoGrid.innerHTML = items
-    .map((item) => `
-      <div class="info-item" ${item.id ? `id="info-${item.id}"` : ''}>
-        <span class="info-label">${item.label}:</span>
-        <span class="info-value">${item.value}</span>
+  const players = data.players.join(' vs ');
+  infoGrid.innerHTML = `
+    <div class="match-table">
+      <div class="match-table-head">
+        <span>Game</span>
+        <span>Match ID</span>
+        <span>Seed</span>
+        <span>Turns</span>
       </div>
-    `)
-    .join('');
+      <div class="match-table-values">
+        <span class="table-value" title="${data.game}">${data.game}</span>
+        <span class="table-value" title="${data.matchId}">${data.matchId}</span>
+        <span class="table-value">${data.seed}</span>
+        <span class="table-value">${data.frames.length}</span>
+      </div>
+    </div>
+    <div class="match-row match-row-bottom">
+      <div class="info-item info-players">
+        <span class="info-label">Players</span>
+        <span class="info-value" title="${players}">${players}</span>
+      </div>
+      <div class="info-item info-winner" id="info-winner">
+        <span class="info-label">Winner</span>
+        <span class="info-value"><span class="winner-hidden">???</span></span>
+      </div>
+    </div>
+  `;
 
   // Store winner for reveal later
   infoGrid.dataset.winner = data.winner || 'Draw';
+}
+
+function normalizeManifestEntries(payload) {
+  const candidates = Array.isArray(payload?.matches) ? payload.matches : [];
+  return candidates
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const path = typeof entry.path === 'string' ? entry.path.trim() : '';
+      if (!path) return null;
+      const label = typeof entry.label === 'string' && entry.label.trim()
+        ? entry.label.trim()
+        : path.replace(/^matches\//, '');
+      return { label, path };
+    })
+    .filter(Boolean);
+}
+
+function renderLocalMatchOptions() {
+  if (!matchSelect || !btnLoadMatch) return;
+
+  matchSelect.innerHTML = localMatchEntries
+    .map((entry) => `<option value="${entry.path}">${entry.label}</option>`)
+    .join('');
+
+  const hasEntries = localMatchEntries.length > 0;
+  matchSelect.disabled = !hasEntries;
+  btnLoadMatch.disabled = !hasEntries;
+}
+
+async function loadLocalMatchManifest() {
+  if (!matchLibrary || !matchSelect || !btnLoadMatch) return;
+
+  try {
+    const response = await fetch('matches/manifest.json', { cache: 'no-store' });
+    if (!response.ok) {
+      localMatchEntries = [];
+      renderLocalMatchOptions();
+      setLandingVisibility(!matchData);
+      return;
+    }
+
+    const payload = await response.json();
+    localMatchEntries = normalizeManifestEntries(payload);
+    renderLocalMatchOptions();
+  } catch (err) {
+    localMatchEntries = [];
+    renderLocalMatchOptions();
+    console.warn('Local match manifest not available:', err);
+  }
+
+  setLandingVisibility(!matchData);
 }
 
 // ============================================================================
@@ -255,6 +349,11 @@ function updateProgress() {
 
 function updateStatus(text) {
   statusText.textContent = text;
+  const headerStatusSupported = renderer && typeof renderer.setPlaybackStatus === 'function';
+  controlsContainer.classList.toggle('status-in-header', Boolean(headerStatusSupported));
+  if (headerStatusSupported) {
+    renderer.setPlaybackStatus(text);
+  }
 }
 
 // Button handlers
@@ -289,6 +388,13 @@ speedSelect.addEventListener('change', (e) => {
 skinSelect.addEventListener('change', (e) => {
   switchSkin(e.target.value);
 });
+
+if (btnLoadMatch && matchSelect) {
+  btnLoadMatch.addEventListener('click', () => {
+    if (!matchSelect.value) return;
+    loadFromUrl(matchSelect.value);
+  });
+}
 
 // Progress bar click to seek
 progressBar.addEventListener('click', (e) => {
@@ -400,9 +506,26 @@ async function loadFromUrl(url) {
   }
 }
 
-// Check for ?match= URL parameter
-const urlParams = new URLSearchParams(window.location.search);
-const matchUrl = urlParams.get('match');
-if (matchUrl) {
-  loadFromUrl(matchUrl);
+// ============================================================================
+// Sample Match Loading
+// ============================================================================
+
+btnLoadSample.addEventListener('click', () => {
+  loadFromUrl('matches/claude-sonnet-4.5-vs-gpt-4o-mini.json');
+});
+
+async function initApp() {
+  await loadLocalMatchManifest();
+
+  // Check for ?match= URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const matchUrl = urlParams.get('match');
+  if (matchUrl) {
+    loadFromUrl(matchUrl);
+    return;
+  }
+
+  setLandingVisibility(true);
 }
+
+initApp();

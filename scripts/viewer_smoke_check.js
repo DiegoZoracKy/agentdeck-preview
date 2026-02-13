@@ -4,7 +4,7 @@
  * Lightweight smoke-check for the browser replay viewer.
  *
  * Goals:
- * - Ensure the shipped sample record parses with RecordLoader.
+ * - Ensure a shipped local sample record parses with RecordLoader.
  * - Ensure the sample game resolves to a registered renderer.
  * - Ensure Timeline can step through all frames and emits onEnd.
  *
@@ -25,25 +25,31 @@ const repoRoot = path.join(__dirname, '..');
 const RecordLoader = require(path.join(repoRoot, 'viewer/js/record-loader.js'));
 const Timeline = require(path.join(repoRoot, 'viewer/js/timeline.js'));
 const RendererRegistry = require(path.join(repoRoot, 'viewer/js/renderers/index.js'));
-const FixedDamageFFVIRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/ffvi/renderer.js'));
 const FixedDamageDebugRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js'));
+const FixedDamageFFVISceneRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/ffvi_scene/renderer.js'));
 
-RendererRegistry.register('FixedDamageGame', 'ffvi', FixedDamageFFVIRenderer);
 RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
+RendererRegistry.register('FixedDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
 
-const samplePath = path.join(repoRoot, 'viewer/sample-match.json');
+const manifestPath = path.join(repoRoot, 'viewer/matches/manifest.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+assert(Array.isArray(manifest.matches) && manifest.matches.length > 0, 'Expected viewer/matches/manifest.json to contain entries');
+
+const preferredSample = manifest.matches.find((entry) => entry.path === 'matches/claude-sonnet-4.5-vs-gpt-4o-mini.json');
+const sampleEntry = preferredSample || manifest.matches[0];
+const samplePath = path.join(repoRoot, 'viewer', sampleEntry.path);
 const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
 
 const matchData = RecordLoader.load(raw);
 assert(matchData.game === 'FixedDamageGame', `Expected sample game to be FixedDamageGame, got ${matchData.game}`);
 assert(Array.isArray(matchData.frames) && matchData.frames.length > 0, 'Expected sample to contain frames');
 
-// Test both renderers
-const ffviRenderer = RendererRegistry.create(matchData, 'ffvi');
-assert(ffviRenderer, 'RendererRegistry.create(matchData, "ffvi") returned falsy');
-
+// Test all active renderers
 const debugRenderer = RendererRegistry.create(matchData, 'debug');
 assert(debugRenderer, 'RendererRegistry.create(matchData, "debug") returned falsy');
+
+const sceneRenderer = RendererRegistry.create(matchData, 'ffvi_scene');
+assert(sceneRenderer, 'RendererRegistry.create(matchData, "ffvi_scene") returned falsy');
 
 const timeline = new Timeline(matchData);
 let frames = 0;
@@ -68,4 +74,3 @@ console.log('viewer smoke-check OK', {
   game: matchData.game,
   frames
 });
-
