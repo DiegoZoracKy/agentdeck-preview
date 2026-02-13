@@ -1245,14 +1245,17 @@ class Console:
         matches: int = 1,
         seed: Optional[int] = None,
         spectators: Optional[List[Spectator]] = None,
+        batch_id: Optional[str] = None,
     ) -> List[MatchResult]:
         """Execute a batch of matches and return MatchResult instances."""
         if self._session_closed:
             raise RuntimeError("Console session already closed")
         if matches <= 0:
             raise ValueError("matches must be >= 1")
+        if batch_id is not None and not batch_id.strip():
+            raise ValueError("batch_id cannot be empty")
 
-        batch_id = self._next_batch_id()
+        batch_id = batch_id or self._next_batch_id()
         base_seed = seed if seed is not None else self.session_state.seed
         batch_ctx = BatchContext(batch_id=batch_id, seed=base_seed, started_at=time.time())
 

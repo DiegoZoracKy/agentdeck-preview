@@ -106,8 +106,6 @@ class AgentDeck:
     def _prepare_batch(
         self,
         game: Optional[Game],
-        players: List[Player],
-        matches: int,
         seed: Optional[int],
     ) -> tuple:
         """Resolve batch configuration before execution."""
@@ -116,8 +114,7 @@ class AgentDeck:
             raise ValueError("No game specified and no default game configured")
 
         base_seed = seed if seed is not None else self.session.seed
-        batch_id = str(uuid.uuid4())[:8]
-        return resolved_game, batch_id, base_seed
+        return resolved_game, base_seed
 
     def _log_player_details(self, players: List[Player]) -> None:
         """Log detailed player information on first batch using get_summary() protocol."""
@@ -146,6 +143,7 @@ class AgentDeck:
         players: List[Player],
         matches: int,
         base_seed: Optional[int],
+        batch_id: str,
         execution_spectators: Optional[List[Spectator]] = None,
     ) -> List[MatchResult]:
         """Delegate execution to the console orchestrator.
@@ -155,6 +153,7 @@ class AgentDeck:
             players: List of players
             matches: Number of matches
             base_seed: Base seed for determinism
+            batch_id: Canonical batch identifier shared across logs and artifacts
             execution_spectators: Optional execution-scoped spectators (additive with session spectators)
         """
         # Pass execution spectators directly to Console.run()
@@ -165,6 +164,7 @@ class AgentDeck:
             matches=matches,
             seed=base_seed,
             spectators=execution_spectators,
+            batch_id=batch_id,
         )
 
     def _calculate_costs(self, results: List[MatchResult]) -> tuple:
@@ -292,7 +292,8 @@ class AgentDeck:
         if seed is not None and not isinstance(seed, int):
             raise TypeError(f"'seed' must be an integer or None, got {type(seed).__name__}")
 
-        resolved_game, batch_id, base_seed = self._prepare_batch(game, players, matches, seed)
+        resolved_game, base_seed = self._prepare_batch(game, seed)
+        batch_id = f"batch_{uuid.uuid4().hex[:8]}"
         self._log_player_details(players)
 
         if self.logger:
@@ -303,7 +304,7 @@ class AgentDeck:
                 matches=matches,
             )
 
-        results = self._run_batch(resolved_game, players, matches, base_seed, spectators)
+        results = self._run_batch(resolved_game, players, matches, base_seed, batch_id, spectators)
         self.total_matches += len(results)
         batch_results = MatchResults(results)
 

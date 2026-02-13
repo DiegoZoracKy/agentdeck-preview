@@ -90,6 +90,14 @@ def test_full_match_lifecycle(players, temp_record_dir, tracking_spectator):
     assert len(batch_data["match_refs"]) == 1
     assert batch_data["match_refs"][0]["winner"] is not None
 
+    # Batch ID must be consistent between logger output and persisted artifacts.
+    batch_id = batch_data["batch_id"]
+    info_log = batch_recording.parent.parent / "logs" / "info.log"
+    assert info_log.exists(), f"Missing info log at {info_log}"
+    info_text = info_log.read_text(encoding="utf-8")
+    assert f"Batch {batch_id} starting" in info_text
+    assert f"Batch {batch_id} complete" in info_text
+
 
 def test_spectator_isolation(players, temp_record_dir):
     """
