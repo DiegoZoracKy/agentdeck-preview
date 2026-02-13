@@ -114,14 +114,12 @@ def build_players() -> tuple[ClaudePlayer, ClaudePlayer]:
         model=MODEL_HAIKU,
         temperature=0.2 if USE_REASONING else 0.0,
         controller=controller,
-        max_tokens=200,
     )
     haiku_b = ClaudePlayer(
         name="Claude-Haiku-B",
         model=MODEL_HAIKU,
         temperature=0.2 if USE_REASONING else 0.0,
         controller=controller,
-        max_tokens=200,
     )
     return haiku_a, haiku_b
 

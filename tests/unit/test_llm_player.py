@@ -190,6 +190,94 @@ def test_provider_players_require_explicit_model():
         )
 
 
+def test_claude_player_uses_high_fallback_max_tokens(monkeypatch):
+    """Claude API calls should include a high max_tokens fallback when unset."""
+
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyContent:
+        text = "ACTION: ATTACK"
+
+    class _DummyResponse:
+        content = [_DummyContent()]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def __init__(self):
+            self.last_kwargs = None
+
+        def create(self, **kwargs):
+            self.last_kwargs = kwargs
+            return _DummyResponse()
+
+    class _DummyClient:
+        def __init__(self):
+            self.messages = _DummyMessagesAPI()
+
+    def _fake_init_client(self):
+        self.client = _DummyClient()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-haiku-4.5-latest",
+    )
+
+    player._make_api_call([{"role": "user", "content": "test"}])
+    assert (
+        player.client.messages.last_kwargs["max_tokens"]
+        == ClaudePlayer.REQUIRED_MAX_TOKENS_FALLBACK
+    )
+
+
+def test_claude_player_preserves_explicit_max_tokens(monkeypatch):
+    """Claude API call should honor explicit max_tokens when provided."""
+
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyContent:
+        text = "ACTION: ATTACK"
+
+    class _DummyResponse:
+        content = [_DummyContent()]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def __init__(self):
+            self.last_kwargs = None
+
+        def create(self, **kwargs):
+            self.last_kwargs = kwargs
+            return _DummyResponse()
+
+    class _DummyClient:
+        def __init__(self):
+            self.messages = _DummyMessagesAPI()
+
+    def _fake_init_client(self):
+        self.client = _DummyClient()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-haiku-4.5-latest",
+        max_tokens=1234,
+    )
+
+    player._make_api_call([{"role": "user", "content": "test"}])
+    assert player.client.messages.last_kwargs["max_tokens"] == 1234
+
+
 def test_reset_conversation_clears_conversation_manager():
     """reset_conversation should clear both local and bound conversation history."""
     player = DummyLLMPlayer(

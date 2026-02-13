@@ -12,6 +12,8 @@ class ClaudePlayer(LLMPlayer):
     PROVIDER = "anthropic"
     default_model = None
     api_key_env_var = "ANTHROPIC_API_KEY"
+    # Anthropic Messages API requires max_tokens on every request.
+    REQUIRED_MAX_TOKENS_FALLBACK = 4096
 
     def _initialize_client(self):
         """Initialize Anthropic client."""
@@ -42,11 +44,15 @@ class ClaudePlayer(LLMPlayer):
         claude_messages = user_messages
 
         # Build kwargs, only include system if present
+        max_tokens = self.max_tokens
+        if not max_tokens:
+            max_tokens = self.REQUIRED_MAX_TOKENS_FALLBACK
+
         kwargs = {
             "model": self.model,
             "messages": claude_messages,
             "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
+            "max_tokens": max_tokens,
             **self.config,
         }
         if system_prompt:
