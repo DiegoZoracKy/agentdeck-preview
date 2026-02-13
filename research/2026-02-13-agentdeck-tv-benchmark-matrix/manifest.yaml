@@ -1,0 +1,62 @@
+schema_version: 1
+experiment_id: 2026-02-13-agentdeck-tv-benchmark-matrix
+title: AgentDeck TV Benchmark Matrix (OpenAI + Anthropic Core)
+status: planned
+question: >-
+  How much do controller strategy (AO vs CoT), instruction cadence (handshake-only vs
+  per-turn reinforcement), and model tier (weak vs strong) influence win rate,
+  reliability, and cost across OpenAI and Anthropic in FixedDamageGame?
+game:
+  name: FixedDamageGame
+  config:
+    information_level: partial
+players:
+  - id: A
+    provider: openai
+    model: mixed
+  - id: B
+    provider: anthropic
+    model: mixed
+variants:
+  models:
+    - gpt-4o-mini
+    - gpt-4o
+    - claude-haiku-4.5
+    - claude-sonnet-4.5
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  prompt_cadence:
+    - handshake_only
+    - turn_persistent
+run:
+  seed_base: 420000
+  matches_planned: 976
+  matches_completed: 0
+  concurrency: 10
+  max_turns: 20
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+  highlights_json: artifacts/highlights.json
+  cells_parquet: artifacts/cells.parquet
+  matches_parquet: artifacts/matches.parquet
+storage:
+  raw_recordings:
+    backend: huggingface
+    dataset: agentdeck/replays
+    path_prefix: 2026-q1-benchmark-matrix
+  summaries:
+    repo_path: research/2026-02-13-agentdeck-tv-benchmark-matrix
+  viewer_curation:
+    repo_path: viewer/matches
+notes: >-
+  Code + templates MUST be frozen with a git tag before execution. This package
+  covers OpenAI + Anthropic core tracks; Google expansion runs in a follow-up package.

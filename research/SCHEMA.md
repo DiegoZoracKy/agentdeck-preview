@@ -9,6 +9,7 @@ Every experiment folder should follow the same structure and use these fields.
 research/<experiment-id>/
 ├── README.md          # Experiment card (short summary)
 ├── manifest.yaml      # Repro metadata (required)
+├── matrix.yaml        # Benchmark grid definition (optional)
 ├── results.json       # Objective results (generated)
 ├── results.csv        # Match-level results (generated)
 ├── analysis.md        # Interpretation (optional)
@@ -38,9 +39,16 @@ research/<experiment-id>/
 - `players[].controller`, `players[].renderer`
 - `variants` (models/controllers used across matchups)
 - `run.matches_completed`, `run.concurrency`, `run.max_turns`
+- `run.matrix_source` (path to matrix definition when present)
 - `analysis_plan` (ci_method, alpha, effect_size)
 - `artifacts` (paths for results.json/results.csv/plots)
+- `storage` (where raw recordings and derived artifacts live)
 - `notes`
+
+When `matrix.yaml` is present, it should be the source of truth for:
+- benchmark cells/phases
+- sampling policy (pilot/expansion)
+- expansion rules and overrides
 
 ### Example
 ```yaml
@@ -92,6 +100,7 @@ notes: ""
 - `decisive_matches`
 - `draws`
 - `win_rates` (per player)
+- `forfeit_rate` (recommended)
 - `total_cost`
 - `avg_turns`, `avg_duration`, `avg_cost`
 
@@ -107,6 +116,30 @@ notes: ""
 - `player_costs`
 - `player_order_source`
 - `first_player`
+
+## matrix.yaml (Optional, Recommended for Benchmark Grids)
+
+Suggested top-level sections:
+- `frozen_inputs` (git tag/commit, template version, pricing snapshot)
+- `model_registry`
+- `config_registry`
+- `sampling_policy`
+- `execution_plan`
+- `cells`
+
+### config_registry.prompt_builder
+
+Recommended fields for reproducible cadence tests:
+- `turn_template_mode` (`default` | `custom`)
+- `turn_template` (rendered template string used for turn prompts)
+
+### execution_plan.preflight
+
+Recommended fields:
+- `cell_ids` (list of benchmark cell IDs to run in reduced scale preflight)
+- `matches_per_cell`
+
+If `cell_ids` is empty, preflight is treated as intentionally skipped.
 
 ## results.csv (Generated)
 

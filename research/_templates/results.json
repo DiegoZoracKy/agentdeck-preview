@@ -10,11 +10,54 @@
     "decisive_matches": 0,
     "draws": 0,
     "win_rates": {},
+    "forfeit_rate": 0.0,
     "total_cost": 0.0,
     "avg_turns": 0.0,
     "avg_duration": 0.0,
     "avg_cost": 0.0
   },
-  "players": [],
-  "matches": []
+  "players": [
+    {
+      "name": "Player A",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "type": "GPTPlayer",
+      "controller": "ReasoningController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "Player B",
+      "provider": "anthropic",
+      "model": "claude-haiku-4.5",
+      "type": "ClaudePlayer",
+      "controller": "ReasoningController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_example",
+      "players": [
+        "Player A",
+        "Player B"
+      ],
+      "winner": "Player A",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 42,
+      "duration": 12.34,
+      "cost": 0.0012,
+      "player_costs": {
+        "Player A": 0.0008,
+        "Player B": 0.0004
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Player A",
+        "index": 0
+      }
+    }
+  ]
 }

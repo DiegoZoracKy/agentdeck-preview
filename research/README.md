@@ -17,6 +17,7 @@ Use `_templates/` to start new experiments for your own work.
 research/<experiment-id>/
 ├── README.md          # Experiment card (short summary)
 ├── manifest.yaml      # Repro metadata (required)
+├── matrix.yaml        # Benchmark grid definition (optional)
 ├── results.json       # Objective results (generated)
 ├── results.csv        # Match-level results (generated)
 ├── analysis.md        # Interpretation (optional)
@@ -34,6 +35,8 @@ cp -R research/_templates research/YYYY-MM-DD-your-experiment
 ```
 
 2) Fill out `manifest.yaml` and `README.md`.
+   - If applicable, define benchmark cells/phases in `matrix.yaml`.
+   - If `matrix.yaml` exists, use it as source of truth for sampling + cells.
 
 3) Run experiments (recordings should be stored externally).
 

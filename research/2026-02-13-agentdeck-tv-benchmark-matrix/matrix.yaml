@@ -1,0 +1,345 @@
+schema_version: 1
+experiment_id: 2026-02-13-agentdeck-tv-benchmark-matrix
+created_at: "2026-02-13T00:00:00Z"
+purpose: >-
+  Concrete benchmark matrix for the AgentDeck TV research->entertainment->research loop.
+  Defines canonical models/configs, execution phases, and 22 benchmark cells.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: null
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill freeze fields before running any cell.
+
+model_registry:
+  openai_weak:
+    provider: openai
+    model: gpt-4o-mini
+    tier: weak
+  openai_strong:
+    provider: openai
+    model: gpt-4o
+    tier: strong
+  anthropic_weak:
+    provider: anthropic
+    model: claude-haiku-4.5
+    tier: weak
+  anthropic_strong:
+    provider: anthropic
+    model: claude-sonnet-4.5
+    tier: strong
+
+config_registry:
+  AO:
+    controller: ActionOnlyController
+    prompt_builder:
+      turn_template_mode: default
+      turn_template: "{game_view}\\n\\n{controller_format}"
+    interpretation: raw_model_intelligence
+  CoT-H:
+    controller: ReasoningController
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+    interpretation: reasoning_with_handshake_only_instruction
+  CoT-T:
+    controller: ReasoningController
+    prompt_builder:
+      turn_template_mode: default
+      turn_template: "{game_view}\\n\\n{controller_format}"
+    interpretation: reasoning_with_persistent_turn_instruction
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 80
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - ci_width_gt_0.2
+    - p_value_between_0.03_and_0.2
+    - viewer_priority_flag_true
+  expansion_selection_rule_definitions:
+    ci_width_gt_0.2: widen sample when uncertainty remains high
+    p_value_between_0.03_and_0.2: increase power for borderline effects
+    viewer_priority_flag_true: prioritize cells marked viewer_priority=true
+  manual_expansion_override:
+    enabled: true
+    tracking:
+      required_log_file: logs/expansion-overrides.md
+      required_fields:
+        - cell_id
+        - reason
+        - approver
+        - timestamp_utc
+  reliability_gate:
+    max_forfeit_rate: 0.05
+    action_if_exceeded: rerun_after_config_fix
+
+execution_plan:
+  preflight:
+    description: 4 sentinel cells to validate provider stability + template wiring.
+    cell_ids:
+      - c17_t7_baseline_openai_weak_ao
+      - c01_t1_openai_weak_uplift
+      - c05_t2_openai_weak_persistence
+      - c11_t4_cross_openai_weak_cott_vs_anthropic_strong_ao
+    matches_per_cell: 6
+  phases:
+    - phase_id: A1
+      name: Core CoT Effects
+      tracks: [1, 2]
+      cell_ids:
+        - c01_t1_openai_weak_uplift
+        - c02_t1_openai_strong_uplift
+        - c03_t1_anthropic_weak_uplift
+        - c04_t1_anthropic_strong_uplift
+        - c05_t2_openai_weak_persistence
+        - c06_t2_openai_strong_persistence
+        - c07_t2_anthropic_weak_persistence
+        - c08_t2_anthropic_strong_persistence
+      publish_drop: true
+    - phase_id: A2
+      name: David vs Goliath + Showdowns
+      tracks: [3, 4, 5, 6]
+      cell_ids:
+        - c09_t3_openai_intra_dvg
+        - c10_t3_anthropic_intra_dvg
+        - c11_t4_cross_openai_weak_cott_vs_anthropic_strong_ao
+        - c12_t4_cross_anthropic_weak_cott_vs_openai_strong_ao
+        - c13_t4_cross_openai_weak_coth_vs_anthropic_strong_ao
+        - c14_t4_cross_anthropic_weak_coth_vs_openai_strong_ao
+        - c15_t5_strong_showdown_cott
+        - c16_t6_budget_showdown_cott
+      publish_drop: true
+    - phase_id: A3
+      name: Baselines + Raw Cross Provider
+      tracks: [7, 8]
+      cell_ids:
+        - c17_t7_baseline_openai_weak_ao
+        - c18_t7_baseline_openai_strong_ao
+        - c19_t7_baseline_anthropic_weak_ao
+        - c20_t7_baseline_anthropic_strong_ao
+        - c21_t8_raw_cross_weak_ao
+        - c22_t8_raw_cross_strong_ao
+      publish_drop: true
+    - phase_id: B
+      name: Google Expansion (Follow-up Package)
+      tracks: []
+      cell_ids: []
+      publish_drop: true
+
+highlight_tag_rules:
+  clutch:
+    definition: winner_hp_lte_20
+  comeback:
+    definition: winner_trailed_by_gte_40_hp_at_any_turn
+  chaos:
+    definition: hp_lead_swings_gte_3
+  dumb_decision:
+    definition:
+      - potion_used_at_full_hp
+      - repeated_non_effective_actions
+
+cells:
+  - id: c01_t1_openai_weak_uplift
+    track: 1
+    phase: A1
+    question: Does CoT help weak OpenAI model vs AO baseline?
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c02_t1_openai_strong_uplift
+    track: 1
+    phase: A1
+    question: Does CoT help strong OpenAI model vs AO baseline?
+    player_a: { model_ref: openai_strong, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c03_t1_anthropic_weak_uplift
+    track: 1
+    phase: A1
+    question: Does CoT help weak Anthropic model vs AO baseline?
+    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c04_t1_anthropic_strong_uplift
+    track: 1
+    phase: A1
+    question: Does CoT help strong Anthropic model vs AO baseline?
+    player_a: { model_ref: anthropic_strong, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c05_t2_openai_weak_persistence
+    track: 2
+    phase: A1
+    question: Does per-turn reinforcement beat handshake-only for weak OpenAI?
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_weak, config_ref: CoT-H }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c06_t2_openai_strong_persistence
+    track: 2
+    phase: A1
+    question: Does per-turn reinforcement beat handshake-only for strong OpenAI?
+    player_a: { model_ref: openai_strong, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: CoT-H }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c07_t2_anthropic_weak_persistence
+    track: 2
+    phase: A1
+    question: Does per-turn reinforcement beat handshake-only for weak Anthropic?
+    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_weak, config_ref: CoT-H }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c08_t2_anthropic_strong_persistence
+    track: 2
+    phase: A1
+    question: Does per-turn reinforcement beat handshake-only for strong Anthropic?
+    player_a: { model_ref: anthropic_strong, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_strong, config_ref: CoT-H }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c09_t3_openai_intra_dvg
+    track: 3
+    phase: A2
+    question: Can weak OpenAI + CoT-T beat strong OpenAI + AO?
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c10_t3_anthropic_intra_dvg
+    track: 3
+    phase: A2
+    question: Can weak Anthropic + CoT-T beat strong Anthropic + AO?
+    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c11_t4_cross_openai_weak_cott_vs_anthropic_strong_ao
+    track: 4
+    phase: A2
+    question: Can weak OpenAI + CoT-T beat strong Anthropic + AO?
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c12_t4_cross_anthropic_weak_cott_vs_openai_strong_ao
+    track: 4
+    phase: A2
+    question: Can weak Anthropic + CoT-T beat strong OpenAI + AO?
+    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c13_t4_cross_openai_weak_coth_vs_anthropic_strong_ao
+    track: 4
+    phase: A2
+    question: Same as c11 but with CoT-H to isolate instruction persistence impact.
+    player_a: { model_ref: openai_weak, config_ref: CoT-H }
+    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c14_t4_cross_anthropic_weak_coth_vs_openai_strong_ao
+    track: 4
+    phase: A2
+    question: Same as c12 but with CoT-H to isolate instruction persistence impact.
+    player_a: { model_ref: anthropic_weak, config_ref: CoT-H }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c15_t5_strong_showdown_cott
+    track: 5
+    phase: A2
+    question: Best-vs-best strong tier showdown with CoT-T.
+    player_a: { model_ref: openai_strong, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_strong, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+    viewer_priority: true
+
+  - id: c16_t6_budget_showdown_cott
+    track: 6
+    phase: A2
+    question: Best-vs-best weak tier showdown with CoT-T.
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_weak, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+    viewer_priority: true
+
+  - id: c17_t7_baseline_openai_weak_ao
+    track: 7
+    phase: A3
+    question: Self-play AO baseline for weak OpenAI model.
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: openai_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 24
+
+  - id: c18_t7_baseline_openai_strong_ao
+    track: 7
+    phase: A3
+    question: Self-play AO baseline for strong OpenAI model.
+    player_a: { model_ref: openai_strong, config_ref: AO }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 24
+
+  - id: c19_t7_baseline_anthropic_weak_ao
+    track: 7
+    phase: A3
+    question: Self-play AO baseline for weak Anthropic model.
+    player_a: { model_ref: anthropic_weak, config_ref: AO }
+    player_b: { model_ref: anthropic_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 24
+
+  - id: c20_t7_baseline_anthropic_strong_ao
+    track: 7
+    phase: A3
+    question: Self-play AO baseline for strong Anthropic model.
+    player_a: { model_ref: anthropic_strong, config_ref: AO }
+    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 24
+
+  - id: c21_t8_raw_cross_weak_ao
+    track: 8
+    phase: A3
+    question: Cross-provider weak-tier comparison without reasoning.
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: anthropic_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c22_t8_raw_cross_strong_ao
+    track: 8
+    phase: A3
+    question: Cross-provider strong-tier comparison without reasoning.
+    player_a: { model_ref: openai_strong, config_ref: AO }
+    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
