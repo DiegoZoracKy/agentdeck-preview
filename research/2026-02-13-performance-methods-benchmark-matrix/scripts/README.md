@@ -8,3 +8,4 @@ Planned:
 
 Available:
 - `turn_budget.py` - compute meaningful turn cap and recommended `max_turns`
+- `run_one_match_openai_mini.py` - one real out-of-the-box smoke match (`gpt-4o-mini` vs `gpt-4o-mini`)

@@ -1,9 +1,10 @@
 schema_version: 1
-experiment_id: 2026-02-13-performance-methods-benchmark-matrix
+experiment_id: 2026-02-13-performance-methods-benchmark-matrix-v2-openai-anchor
 created_at: "2026-02-13T00:00:00Z"
 purpose: >-
-  Benchmark matrix to evaluate performance gains from controller strategy,
-  prompt cadence, and model tier decisions across 22 controlled cells.
+  Narrative-first benchmark matrix focused on proving cost-efficiency through
+  strategy tuning: optimize gpt-4o-mini first, then challenge stronger OpenAI
+  models (gpt-4o, gpt-5.2), then compare against Anthropic and Google tiers.
 
 frozen_inputs:
   git_tag: null
@@ -21,6 +22,10 @@ model_registry:
     provider: openai
     model: gpt-4o
     tier: strong
+  openai_top:
+    provider: openai
+    model: gpt-5.2
+    tier: top
   anthropic_weak:
     provider: anthropic
     model: claude-haiku-4.5
@@ -28,6 +33,14 @@ model_registry:
   anthropic_strong:
     provider: anthropic
     model: claude-sonnet-4.5
+    tier: strong
+  google_weak:
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+  google_strong:
+    provider: google
+    model: gemini-2.5-pro
     tier: strong
 
 config_registry:
@@ -49,6 +62,18 @@ config_registry:
       turn_template_mode: default
       turn_template: "{game_view}\\n\\n{controller_format}"
     interpretation: reasoning_with_persistent_turn_instruction
+
+strategy_assumptions:
+  provisional_best_config: CoT-T
+  provisional_worst_config: AO
+  validation_tracks:
+    - 1
+    - 2
+    - 3
+    - 4
+  note: >-
+    If discovery/calibration contradicts provisional assumptions, replace config
+    refs in tracks 5-6 before full expansion.
 
 sampling_policy:
   pilot_matches_per_cell: 24
@@ -80,55 +105,58 @@ sampling_policy:
 
 execution_plan:
   preflight:
-    description: 4 sentinel cells to validate provider stability + template wiring.
+    description: 4 sentinel cells to validate OpenAI-top + Anthropic + Google stability.
     cell_ids:
-      - c17_t7_baseline_openai_weak_ao
-      - c01_t1_openai_weak_uplift
-      - c05_t2_openai_weak_persistence
-      - c11_t4_cross_openai_weak_cott_vs_anthropic_strong_ao
+      - c02_t1_openai_weak_ao_vs_cott
+      - c07_t3_openai_top_ao_vs_cott
+      - c08_t4_anthropic_weak_ao_vs_cott
+      - c10_t4_google_weak_ao_vs_cott
     matches_per_cell: 6
   phases:
     - phase_id: A1
-      name: Core CoT Effects
-      tracks: [1, 2]
+      name: OpenAI Strategy Discovery
+      tracks: [1, 2, 3]
       cell_ids:
-        - c01_t1_openai_weak_uplift
-        - c02_t1_openai_strong_uplift
-        - c03_t1_anthropic_weak_uplift
-        - c04_t1_anthropic_strong_uplift
-        - c05_t2_openai_weak_persistence
-        - c06_t2_openai_strong_persistence
-        - c07_t2_anthropic_weak_persistence
-        - c08_t2_anthropic_strong_persistence
+        - c01_t1_openai_weak_ao_vs_coth
+        - c02_t1_openai_weak_ao_vs_cott
+        - c03_t1_openai_weak_coth_vs_cott
+        - c04_t2_openai_strong_ao_vs_coth
+        - c05_t2_openai_strong_ao_vs_cott
+        - c06_t2_openai_strong_coth_vs_cott
+        - c07_t3_openai_top_ao_vs_cott
       publish_drop: true
     - phase_id: A2
-      name: David vs Goliath + Showdowns
-      tracks: [3, 4, 5, 6]
+      name: Opponent Strategy Calibration
+      tracks: [4]
       cell_ids:
-        - c09_t3_openai_intra_dvg
-        - c10_t3_anthropic_intra_dvg
-        - c11_t4_cross_openai_weak_cott_vs_anthropic_strong_ao
-        - c12_t4_cross_anthropic_weak_cott_vs_openai_strong_ao
-        - c13_t4_cross_openai_weak_coth_vs_anthropic_strong_ao
-        - c14_t4_cross_anthropic_weak_coth_vs_openai_strong_ao
-        - c15_t5_strong_showdown_cott
-        - c16_t6_budget_showdown_cott
+        - c08_t4_anthropic_weak_ao_vs_cott
+        - c09_t4_anthropic_strong_ao_vs_cott
+        - c10_t4_google_weak_ao_vs_cott
+        - c11_t4_google_strong_ao_vs_cott
       publish_drop: true
     - phase_id: A3
-      name: Baselines + Raw Cross Provider
-      tracks: [7, 8]
+      name: OpenAI Cost-Efficiency Showcase
+      tracks: [5]
       cell_ids:
-        - c17_t7_baseline_openai_weak_ao
-        - c18_t7_baseline_openai_strong_ao
-        - c19_t7_baseline_anthropic_weak_ao
-        - c20_t7_baseline_anthropic_strong_ao
-        - c21_t8_raw_cross_weak_ao
-        - c22_t8_raw_cross_strong_ao
+        - c12_t5_mini_best_vs_4o_worst
+        - c13_t5_mini_best_vs_4o_best
+        - c14_t5_mini_worst_vs_4o_best
+        - c15_t5_mini_best_vs_52_worst
+        - c16_t5_mini_best_vs_52_best
+        - c17_t5_mini_worst_vs_52_best
       publish_drop: true
-    - phase_id: B
-      name: Google Expansion (Follow-up Package)
-      tracks: []
-      cell_ids: []
+    - phase_id: A4
+      name: Cross-Provider Challenge
+      tracks: [6]
+      cell_ids:
+        - c18_t6_mini_best_vs_anthropic_weak_best
+        - c19_t6_mini_best_vs_anthropic_strong_best
+        - c20_t6_mini_best_vs_google_weak_best
+        - c21_t6_mini_best_vs_google_strong_best
+        - c22_t6_mini_worst_vs_anthropic_weak_best
+        - c23_t6_mini_worst_vs_anthropic_strong_best
+        - c24_t6_mini_worst_vs_google_weak_best
+        - c25_t6_mini_worst_vs_google_strong_best
       publish_drop: true
 
 highlight_tag_rules:
@@ -142,204 +170,237 @@ highlight_tag_rules:
     definition:
       - potion_used_at_full_hp
       - repeated_non_effective_actions
+  cost_upset:
+    definition: lower_cost_player_wins_with_margin_gte_0.1
 
 cells:
-  - id: c01_t1_openai_weak_uplift
+  - id: c01_t1_openai_weak_ao_vs_coth
     track: 1
     phase: A1
-    question: Does CoT help weak OpenAI model vs AO baseline?
+    question: Does handshake-only CoT beat AO for gpt-4o-mini?
+    player_a: { model_ref: openai_weak, config_ref: CoT-H }
+    player_b: { model_ref: openai_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c02_t1_openai_weak_ao_vs_cott
+    track: 1
+    phase: A1
+    question: Does persistent CoT beat AO for gpt-4o-mini?
     player_a: { model_ref: openai_weak, config_ref: CoT-T }
     player_b: { model_ref: openai_weak, config_ref: AO }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c02_t1_openai_strong_uplift
+  - id: c03_t1_openai_weak_coth_vs_cott
     track: 1
     phase: A1
-    question: Does CoT help strong OpenAI model vs AO baseline?
-    player_a: { model_ref: openai_strong, config_ref: CoT-T }
-    player_b: { model_ref: openai_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c03_t1_anthropic_weak_uplift
-    track: 1
-    phase: A1
-    question: Does CoT help weak Anthropic model vs AO baseline?
-    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
-    player_b: { model_ref: anthropic_weak, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c04_t1_anthropic_strong_uplift
-    track: 1
-    phase: A1
-    question: Does CoT help strong Anthropic model vs AO baseline?
-    player_a: { model_ref: anthropic_strong, config_ref: CoT-T }
-    player_b: { model_ref: anthropic_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c05_t2_openai_weak_persistence
-    track: 2
-    phase: A1
-    question: Does per-turn reinforcement beat handshake-only for weak OpenAI?
+    question: Does per-turn instruction reinforcement beat handshake-only on gpt-4o-mini?
     player_a: { model_ref: openai_weak, config_ref: CoT-T }
     player_b: { model_ref: openai_weak, config_ref: CoT-H }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c06_t2_openai_strong_persistence
+  - id: c04_t2_openai_strong_ao_vs_coth
     track: 2
     phase: A1
-    question: Does per-turn reinforcement beat handshake-only for strong OpenAI?
+    question: Does handshake-only CoT beat AO for gpt-4o?
+    player_a: { model_ref: openai_strong, config_ref: CoT-H }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c05_t2_openai_strong_ao_vs_cott
+    track: 2
+    phase: A1
+    question: Does persistent CoT beat AO for gpt-4o?
+    player_a: { model_ref: openai_strong, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c06_t2_openai_strong_coth_vs_cott
+    track: 2
+    phase: A1
+    question: Does per-turn instruction reinforcement beat handshake-only on gpt-4o?
     player_a: { model_ref: openai_strong, config_ref: CoT-T }
     player_b: { model_ref: openai_strong, config_ref: CoT-H }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c07_t2_anthropic_weak_persistence
-    track: 2
+  - id: c07_t3_openai_top_ao_vs_cott
+    track: 3
     phase: A1
-    question: Does per-turn reinforcement beat handshake-only for weak Anthropic?
-    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
-    player_b: { model_ref: anthropic_weak, config_ref: CoT-H }
+    question: Strategy sensitivity check on gpt-5.2 (AO vs persistent CoT).
+    player_a: { model_ref: openai_top, config_ref: CoT-T }
+    player_b: { model_ref: openai_top, config_ref: AO }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c08_t2_anthropic_strong_persistence
-    track: 2
-    phase: A1
-    question: Does per-turn reinforcement beat handshake-only for strong Anthropic?
+  - id: c08_t4_anthropic_weak_ao_vs_cott
+    track: 4
+    phase: A2
+    question: "Opponent calibration: does persistent CoT beat AO for Claude Haiku 4.5?"
+    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c09_t4_anthropic_strong_ao_vs_cott
+    track: 4
+    phase: A2
+    question: "Opponent calibration: does persistent CoT beat AO for Claude Sonnet 4.5?"
     player_a: { model_ref: anthropic_strong, config_ref: CoT-T }
-    player_b: { model_ref: anthropic_strong, config_ref: CoT-H }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c09_t3_openai_intra_dvg
-    track: 3
-    phase: A2
-    question: Can weak OpenAI + CoT-T beat strong OpenAI + AO?
-    player_a: { model_ref: openai_weak, config_ref: CoT-T }
-    player_b: { model_ref: openai_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c10_t3_anthropic_intra_dvg
-    track: 3
-    phase: A2
-    question: Can weak Anthropic + CoT-T beat strong Anthropic + AO?
-    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
     player_b: { model_ref: anthropic_strong, config_ref: AO }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c11_t4_cross_openai_weak_cott_vs_anthropic_strong_ao
+  - id: c10_t4_google_weak_ao_vs_cott
     track: 4
     phase: A2
-    question: Can weak OpenAI + CoT-T beat strong Anthropic + AO?
-    player_a: { model_ref: openai_weak, config_ref: CoT-T }
-    player_b: { model_ref: anthropic_strong, config_ref: AO }
+    question: "Opponent calibration: does persistent CoT beat AO for Gemini 2.5 Flash-Lite?"
+    player_a: { model_ref: google_weak, config_ref: CoT-T }
+    player_b: { model_ref: google_weak, config_ref: AO }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c12_t4_cross_anthropic_weak_cott_vs_openai_strong_ao
+  - id: c11_t4_google_strong_ao_vs_cott
     track: 4
     phase: A2
-    question: Can weak Anthropic + CoT-T beat strong OpenAI + AO?
-    player_a: { model_ref: anthropic_weak, config_ref: CoT-T }
-    player_b: { model_ref: openai_strong, config_ref: AO }
+    question: "Opponent calibration: does persistent CoT beat AO for Gemini 2.5 Pro?"
+    player_a: { model_ref: google_strong, config_ref: CoT-T }
+    player_b: { model_ref: google_strong, config_ref: AO }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c13_t4_cross_openai_weak_coth_vs_anthropic_strong_ao
-    track: 4
-    phase: A2
-    question: Same as c11 but with CoT-H to isolate instruction persistence impact.
-    player_a: { model_ref: openai_weak, config_ref: CoT-H }
-    player_b: { model_ref: anthropic_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c14_t4_cross_anthropic_weak_coth_vs_openai_strong_ao
-    track: 4
-    phase: A2
-    question: Same as c12 but with CoT-H to isolate instruction persistence impact.
-    player_a: { model_ref: anthropic_weak, config_ref: CoT-H }
-    player_b: { model_ref: openai_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 80
-
-  - id: c15_t5_strong_showdown_cott
+  - id: c12_t5_mini_best_vs_4o_worst
     track: 5
-    phase: A2
-    question: Best-vs-best strong tier showdown with CoT-T.
-    player_a: { model_ref: openai_strong, config_ref: CoT-T }
+    phase: A3
+    question: Can tuned gpt-4o-mini beat untuned gpt-4o?
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+    viewer_priority: true
+
+  - id: c13_t5_mini_best_vs_4o_best
+    track: 5
+    phase: A3
+    question: Can tuned gpt-4o-mini stay competitive with tuned gpt-4o?
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_strong, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+    viewer_priority: true
+
+  - id: c14_t5_mini_worst_vs_4o_best
+    track: 5
+    phase: A3
+    question: "Control: gap between untuned mini and tuned gpt-4o."
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: openai_strong, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c15_t5_mini_best_vs_52_worst
+    track: 5
+    phase: A3
+    question: "Headline: can tuned gpt-4o-mini beat untuned gpt-5.2?"
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_top, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 120
+    viewer_priority: true
+
+  - id: c16_t5_mini_best_vs_52_best
+    track: 5
+    phase: A3
+    question: "Ceiling check: tuned gpt-4o-mini vs tuned gpt-5.2."
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_top, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 120
+    viewer_priority: true
+
+  - id: c17_t5_mini_worst_vs_52_best
+    track: 5
+    phase: A3
+    question: "Control: untuned gpt-4o-mini vs tuned gpt-5.2."
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: openai_top, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 120
+
+  - id: c18_t6_mini_best_vs_anthropic_weak_best
+    track: 6
+    phase: A4
+    question: Tuned gpt-4o-mini vs tuned Claude Haiku 4.5.
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: anthropic_weak, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c19_t6_mini_best_vs_anthropic_strong_best
+    track: 6
+    phase: A4
+    question: Tuned gpt-4o-mini vs tuned Claude Sonnet 4.5.
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
     player_b: { model_ref: anthropic_strong, config_ref: CoT-T }
     pilot_matches: 24
     expansion_target_matches: 80
     viewer_priority: true
 
-  - id: c16_t6_budget_showdown_cott
+  - id: c20_t6_mini_best_vs_google_weak_best
     track: 6
-    phase: A2
-    question: Best-vs-best weak tier showdown with CoT-T.
+    phase: A4
+    question: Tuned gpt-4o-mini vs tuned Gemini 2.5 Flash-Lite.
     player_a: { model_ref: openai_weak, config_ref: CoT-T }
-    player_b: { model_ref: anthropic_weak, config_ref: CoT-T }
+    player_b: { model_ref: google_weak, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c21_t6_mini_best_vs_google_strong_best
+    track: 6
+    phase: A4
+    question: Tuned gpt-4o-mini vs tuned Gemini 2.5 Pro.
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: google_strong, config_ref: CoT-T }
     pilot_matches: 24
     expansion_target_matches: 80
     viewer_priority: true
 
-  - id: c17_t7_baseline_openai_weak_ao
-    track: 7
-    phase: A3
-    question: Self-play AO baseline for weak OpenAI model.
+  - id: c22_t6_mini_worst_vs_anthropic_weak_best
+    track: 6
+    phase: A4
+    question: Untuned gpt-4o-mini vs tuned Claude Haiku 4.5.
     player_a: { model_ref: openai_weak, config_ref: AO }
-    player_b: { model_ref: openai_weak, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 24
-
-  - id: c18_t7_baseline_openai_strong_ao
-    track: 7
-    phase: A3
-    question: Self-play AO baseline for strong OpenAI model.
-    player_a: { model_ref: openai_strong, config_ref: AO }
-    player_b: { model_ref: openai_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 24
-
-  - id: c19_t7_baseline_anthropic_weak_ao
-    track: 7
-    phase: A3
-    question: Self-play AO baseline for weak Anthropic model.
-    player_a: { model_ref: anthropic_weak, config_ref: AO }
-    player_b: { model_ref: anthropic_weak, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 24
-
-  - id: c20_t7_baseline_anthropic_strong_ao
-    track: 7
-    phase: A3
-    question: Self-play AO baseline for strong Anthropic model.
-    player_a: { model_ref: anthropic_strong, config_ref: AO }
-    player_b: { model_ref: anthropic_strong, config_ref: AO }
-    pilot_matches: 24
-    expansion_target_matches: 24
-
-  - id: c21_t8_raw_cross_weak_ao
-    track: 8
-    phase: A3
-    question: Cross-provider weak-tier comparison without reasoning.
-    player_a: { model_ref: openai_weak, config_ref: AO }
-    player_b: { model_ref: anthropic_weak, config_ref: AO }
+    player_b: { model_ref: anthropic_weak, config_ref: CoT-T }
     pilot_matches: 24
     expansion_target_matches: 80
 
-  - id: c22_t8_raw_cross_strong_ao
-    track: 8
-    phase: A3
-    question: Cross-provider strong-tier comparison without reasoning.
-    player_a: { model_ref: openai_strong, config_ref: AO }
-    player_b: { model_ref: anthropic_strong, config_ref: AO }
+  - id: c23_t6_mini_worst_vs_anthropic_strong_best
+    track: 6
+    phase: A4
+    question: Untuned gpt-4o-mini vs tuned Claude Sonnet 4.5.
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: anthropic_strong, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c24_t6_mini_worst_vs_google_weak_best
+    track: 6
+    phase: A4
+    question: Untuned gpt-4o-mini vs tuned Gemini 2.5 Flash-Lite.
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: google_weak, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c25_t6_mini_worst_vs_google_strong_best
+    track: 6
+    phase: A4
+    question: Untuned gpt-4o-mini vs tuned Gemini 2.5 Pro.
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: google_strong, config_ref: CoT-T }
     pilot_matches: 24
     expansion_target_matches: 80

@@ -4,11 +4,12 @@
 - Pending execution.
 
 ## Track Results
-- Track 1 (CoT uplift): pending
-- Track 2 (Instruction persistence): pending
-- Track 3-4 (David vs Goliath): pending
-- Track 5-6 (Showdowns): pending
-- Track 7-8 (Baselines / raw): pending
+- Track 1 (OpenAI weak strategy discovery): pending
+- Track 2 (OpenAI strong strategy discovery): pending
+- Track 3 (OpenAI top strategy sensitivity): pending
+- Track 4 (Opponent strategy calibration): pending
+- Track 5 (OpenAI cost-efficiency showcase): pending
+- Track 6 (Cross-provider challenge): pending
 
 ## Statistical Findings
 - Pending.
@@ -17,9 +18,10 @@
 - Pending.
 
 ## Viewer Highlights
-- Pending curation + tag validation (`clutch`, `comeback`, `chaos`, `dumb_decision`).
+- Pending curation + tag validation (`clutch`, `comeback`, `chaos`, `dumb_decision`, `cost_upset`).
 
 ## Next Steps
 - Run preflight sentinel cells.
 - Execute Phase A1 pilot.
-- Review expansion candidates based on CI width, p-value range, and reliability gates.
+- Lock best/worst strategy assignments from A1+A2 before running A3+A4 expansions.
+- Review expansion candidates based on CI width, p-value range, viewer priority, and reliability gates.

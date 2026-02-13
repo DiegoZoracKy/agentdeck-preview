@@ -1,36 +1,39 @@
 # Performance Methods Benchmark Matrix (2026-02-13)
 
 **Status**: planned  
-**Research Question**: How much do controller strategy (AO vs CoT), instruction cadence
-(handshake-only vs per-turn reinforcement), and model tier (weak vs strong) influence
-win rate, reliability, and cost across OpenAI and Anthropic in FixedDamageGame?
+**Research Question**: How much can strategy tuning (AO vs CoT-H vs CoT-T) close or overturn
+model-tier gaps by making `gpt-4o-mini` cost-efficient against stronger OpenAI, Anthropic,
+and Google models in FixedDamageGame?
 
 ## Why This Package Exists
-This package exists to measure performance gains from:
+This package is built around a narrative-first benchmark:
 
-1. Controller strategy (`ActionOnly` vs `Reasoning`).
-2. Prompt cadence (`handshake-only` vs per-turn reinforcement).
-3. Model tier tradeoffs (weak/strong, intra/inter-provider).
-4. Reliability and cost behavior under the same game conditions.
+1. Tune `gpt-4o-mini` for the task.
+2. Measure whether tuning beats raw model-tier advantage (`gpt-4o`, `gpt-5.2`).
+3. Test if the same tuned strategy transfers against Anthropic and Google weak/strong tiers.
+4. Quantify the cost-efficiency story with statistically stronger headline cells.
 
-## Matrix Snapshot
-- Models: 4 (`gpt-4o-mini`, `gpt-4o`, `claude-haiku-4.5`, `claude-sonnet-4.5`)
+## Primary Matrix
+- Primary file: `matrix.yaml` (v2 OpenAI-anchor grid)
+
+## Matrix Snapshot (v2)
+- Models: 7 (`gpt-4o-mini`, `gpt-4o`, `gpt-5.2`, `claude-haiku-4.5`, `claude-sonnet-4.5`, `gemini-2.5-flash-lite`, `gemini-2.5-pro`)
 - Configs: 3 (`AO`, `CoT-H`, `CoT-T`)
-- Cells: 22 (see `matrix.yaml`)
-- Pilot: 24 matches/cell (paired seeds + side swap) => 528 matches
-- Expansion: increase selected cells to 80 matches using pre-defined rules
-- Campaign target: 976 matches total
+- Cells: 25
+- Pilot: 24 matches/cell => 600 matches
+- Expansion targets: 80 per cell by default; 120 for headline `gpt-5.2` cells (`c15-c17`)
+- Full-expansion ceiling: 2120 matches
 
 ## Config Definitions
 - `AO`: `ActionOnlyController` + default turn template
 - `CoT-H`: `ReasoningController` + turn template `{game_view}` (handshake-only reinforcement)
 - `CoT-T`: `ReasoningController` + default turn template (includes `{controller_format}` per turn)
 
-## Execution Phases
-- `A1` Core CoT effects (Tracks 1-2): 8 cells
-- `A2` David vs Goliath + showdowns (Tracks 3-6): 8 cells
-- `A3` Baselines + raw cross-provider (Tracks 7-8): 6 cells
-- `B` Google expansion in a follow-up package
+## Execution Phases (v2)
+- `A1` OpenAI Strategy Discovery (Tracks 1-3): 7 cells
+- `A2` Opponent Strategy Calibration (Track 4): 4 cells
+- `A3` OpenAI Cost-Efficiency Showcase (Track 5): 6 cells
+- `A4` Cross-Provider Challenge (Track 6): 8 cells
 
 Each phase should produce an analysis update and optional qualitative match curation.
 
@@ -40,14 +43,15 @@ If parse/timeout/forfeit instability appears, fix config and rerun preflight.
 
 ## Artifacts
 - `manifest.yaml`: package metadata and campaign targets
-- `matrix.yaml`: schema + concrete 22-cell registry
+- `matrix.yaml`: schema + concrete 25-cell registry (primary)
+- `OUT_OF_THE_BOX_REQUIREMENTS.md`: execution requirements checklist using only AgentDeck-native capabilities
 - `analysis.md`: interpretation (to be filled after runs)
 - `artifacts/`: generated exports (`cells.parquet`, `matches.parquet`, highlights)
 - `logs/`: run journals
 - `recordings/`: pointers only (raw recordings live outside git)
 
 ## Storage Plan
-- Raw recordings: Hugging Face dataset `agentdeck/replays` under `2026-q1-benchmark-matrix/`
+- Raw recordings: Hugging Face dataset `agentdeck/replays` under `2026-q1-performance-methods-matrix-v2/`
 - Research summaries: committed in this package directory
 - Optional curated qualitative matches: committed in `viewer/matches/`
 
@@ -62,4 +66,9 @@ Populate those freeze fields in `matrix.yaml` / `manifest.yaml` before launching
 Turn-budget helper for this package:
 ```bash
 python3 research/2026-02-13-performance-methods-benchmark-matrix/scripts/turn_budget.py
+```
+
+Single-match out-of-the-box smoke test:
+```bash
+python3 research/2026-02-13-performance-methods-benchmark-matrix/scripts/run_one_match_openai_mini.py
 ```

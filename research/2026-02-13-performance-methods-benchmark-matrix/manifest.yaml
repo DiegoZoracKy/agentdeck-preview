@@ -1,28 +1,31 @@
 schema_version: 1
 experiment_id: 2026-02-13-performance-methods-benchmark-matrix
-title: Performance Methods Benchmark Matrix (OpenAI + Anthropic Core)
+title: Performance Methods Benchmark Matrix v2 (OpenAI Anchor)
 status: planned
 question: >-
-  How much do controller strategy (AO vs CoT), instruction cadence (handshake-only vs
-  per-turn reinforcement), and model tier (weak vs strong) influence win rate,
-  reliability, and cost across OpenAI and Anthropic in FixedDamageGame?
+  How much can strategy tuning (AO vs CoT-H vs CoT-T) close or overturn model-tier
+  gaps by making gpt-4o-mini cost-efficient against stronger OpenAI, Anthropic,
+  and Google models in FixedDamageGame?
 game:
   name: FixedDamageGame
   config:
     information_level: partial
 players:
   - id: A
-    provider: openai
+    provider: mixed
     model: mixed
   - id: B
-    provider: anthropic
+    provider: mixed
     model: mixed
 variants:
   models:
     - gpt-4o-mini
     - gpt-4o
+    - gpt-5.2
     - claude-haiku-4.5
     - claude-sonnet-4.5
+    - gemini-2.5-flash-lite
+    - gemini-2.5-pro
   controllers:
     - ActionOnlyController
     - ReasoningController
@@ -31,7 +34,7 @@ variants:
     - turn_persistent
 run:
   seed_base: 420000
-  matches_planned: 976
+  matches_planned: 600
   matches_completed: 0
   concurrency: 10
   max_turns: 30
@@ -52,11 +55,12 @@ storage:
   raw_recordings:
     backend: huggingface
     dataset: agentdeck/replays
-    path_prefix: 2026-q1-benchmark-matrix
+    path_prefix: 2026-q1-performance-methods-matrix-v2
   summaries:
     repo_path: research/2026-02-13-performance-methods-benchmark-matrix
   viewer_curation:
     repo_path: viewer/matches
 notes: >-
   Code + templates MUST be frozen with a git tag before execution. This package
-  covers OpenAI + Anthropic core tracks; Google expansion runs in a follow-up package.
+  uses the v2 OpenAI-anchor matrix (25 cells). Pilot scope is 600 matches; full
+  expansion ceiling is 2120 matches depending on selection rules.
