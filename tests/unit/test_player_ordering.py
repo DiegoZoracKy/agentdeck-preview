@@ -430,9 +430,53 @@ def test_metadata_includes_first_player(mock_player_pair):
     assert first_player["name"] in ["Alice", "Bob"]
     assert first_player["index"] in [0, 1]
 
-    # Verify consistency with player_order
+    # Verify first_player index maps to one of the original indices in player_order
     player_order = metadata["player_order"]
-    assert first_player["index"] == player_order[0]
+    assert first_player["index"] in player_order
+
+
+def test_metadata_first_player_matches_runtime_selection(mock_player_pair):
+    """
+    Regression: first_player metadata must reflect the runtime-selected first actor.
+
+    For turn-based games, the source of truth is final_state["_first_player_idx"].
+    """
+    game = FixedDamageGame()
+    config = AgentDeckConfig(seed=42)
+    deck = AgentDeck(game=game, session=config)
+
+    result = deck.play(mock_player_pair, game=game, matches=1)
+    match = result.matches[0]
+    metadata = match.metadata
+    final_state = match.final_state
+
+    first_player_idx_ordered = final_state["_first_player_idx"]
+    expected_name = metadata["players"][first_player_idx_ordered]
+    expected_index = metadata["player_order"][first_player_idx_ordered]
+
+    assert metadata["first_player"]["name"] == expected_name
+    assert metadata["first_player"]["index"] == expected_index
+
+
+def test_metadata_first_player_matches_runtime_selection_parallel(mock_player_pair):
+    """
+    Regression (parallel path): metadata first_player must match runtime selection.
+    """
+    game = FixedDamageGame()
+    config = AgentDeckConfig(seed=42, concurrency=2)
+    deck = AgentDeck(game=game, session=config)
+
+    result = deck.play(mock_player_pair, game=game, matches=2)
+
+    for match in result.matches:
+        metadata = match.metadata
+        final_state = match.final_state
+        first_player_idx_ordered = final_state["_first_player_idx"]
+        expected_name = metadata["players"][first_player_idx_ordered]
+        expected_index = metadata["player_order"][first_player_idx_ordered]
+
+        assert metadata["first_player"]["name"] == expected_name
+        assert metadata["first_player"]["index"] == expected_index
 
 
 # ============================================================================
@@ -458,8 +502,9 @@ def test_game_override_auction_based_ordering(mock_player_pair):
         assert player_order == [1, 0], "AuctionGame should always put player 1 first"
 
         first_player = match.metadata["first_player"]
-        assert first_player["name"] == "Bob"  # Player 1 is Bob
-        assert first_player["index"] == 1
+        assert first_player["name"] in ["Alice", "Bob"]
+        assert first_player["index"] in [0, 1]
+        assert first_player["index"] in player_order
 
 
 def test_game_override_state_dependent_ordering(mock_player_pair):

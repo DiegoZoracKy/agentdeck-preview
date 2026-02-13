@@ -279,6 +279,7 @@ class _MatchWorker:
 
         # Create isolated match runtime
         runtime = self._create_match_runtime()
+        self.first_player_info = None
 
         # Determine player order using Console's extracted helper
         ordered_players, player_order, player_order_source, first_player, cost_baseline = (
@@ -353,13 +354,19 @@ class _MatchWorker:
             # Compute status and duration (normal completion)
             status = self._safe_status(final_state)
             match_duration = time.time() - runtime.started_at
+            resolved_first_player = self.console._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+                selected_first_player=self.first_player_info,
+            )
 
             metadata = self.console._build_match_metadata(
                 self.game,
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 truncated,
@@ -402,6 +409,12 @@ class _MatchWorker:
 
             # Get turn number safely (Codex fix #2: tolerate None turn_context)
             abort_turn = abort_error.turn_context.turn_number if abort_error.turn_context else 0
+            resolved_first_player = self.console._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+                selected_first_player=self.first_player_info,
+            )
 
             # Build metadata with abort information
             metadata = self.console._build_match_metadata(
@@ -409,7 +422,7 @@ class _MatchWorker:
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -495,6 +508,12 @@ class _MatchWorker:
             forfeit_turn = (
                 forfeit_error.turn_context.turn_number if forfeit_error.turn_context else 0
             )
+            resolved_first_player = self.console._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+                selected_first_player=self.first_player_info,
+            )
 
             # Build metadata with forfeit information
             metadata = self.console._build_match_metadata(
@@ -502,7 +521,7 @@ class _MatchWorker:
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -1951,6 +1970,48 @@ class Console:
             "schema_version": Recorder.SCHEMA_VERSION,
         }
 
+    def _resolve_first_player_metadata(
+        self,
+        fallback_first_player: Dict[str, Any],
+        ordered_players: List[Player],
+        player_order: List[int],
+        selected_first_player: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Resolve first-player metadata to the actor that actually played first.
+
+        Turn-based mechanics may choose first actor at runtime (after MATCH_START).
+        When available, selected_first_player index is interpreted against ordered_players
+        and mapped back to original index via player_order.
+        """
+        selected = (
+            selected_first_player if selected_first_player is not None else self.first_player_info
+        )
+        if not selected:
+            return dict(fallback_first_player)
+
+        selected_name = selected.get("name")
+        selected_index = selected.get("index")
+        ordered_index: Optional[int] = None
+
+        if isinstance(selected_index, int) and 0 <= selected_index < len(ordered_players):
+            ordered_index = selected_index
+        elif selected_name:
+            for idx, player in enumerate(ordered_players):
+                if player.name == selected_name:
+                    ordered_index = idx
+                    break
+
+        if ordered_index is None:
+            return dict(fallback_first_player)
+
+        original_index = (
+            player_order[ordered_index]
+            if isinstance(player_order, list) and 0 <= ordered_index < len(player_order)
+            else ordered_index
+        )
+        return {"name": ordered_players[ordered_index].name, "index": original_index}
+
     def play_match(
         self,
         game: Game,
@@ -1963,6 +2024,7 @@ class Console:
     ) -> MatchResult:
         """Execute a single match."""
         runtime = self._create_match_runtime(seed)
+        self.first_player_info = None
 
         # Determine player order using extracted helper
         ordered_players, player_order, player_order_source, first_player, cost_baseline = (
@@ -2039,13 +2101,18 @@ class Console:
 
             abort_state = copy.deepcopy(getattr(abort_error, "abort_state", {}))
             abort_turn = abort_error.turn_context.turn_number if abort_error.turn_context else 0
+            resolved_first_player = self._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+            )
 
             metadata = self._build_match_metadata(
                 game,
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -2119,13 +2186,18 @@ class Console:
             forfeit_turn = (
                 forfeit_error.turn_context.turn_number if forfeit_error.turn_context else 0
             )
+            resolved_first_player = self._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+            )
 
             metadata = self._build_match_metadata(
                 game,
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -2194,6 +2266,11 @@ class Console:
 
         status = self._safe_status(game, final_state)
         match_duration = time.time() - runtime.started_at
+        resolved_first_player = self._resolve_first_player_metadata(
+            first_player,
+            ordered_players,
+            player_order,
+        )
 
         # Build metadata using extracted helper (costs filled after conclusions)
         metadata = self._build_match_metadata(
@@ -2201,7 +2278,7 @@ class Console:
             player_names,
             player_order,
             player_order_source,
-            first_player,
+            resolved_first_player,
             match_duration,
             runtime,
             truncated,

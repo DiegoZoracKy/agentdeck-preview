@@ -256,7 +256,7 @@ Load match JSON from disk and normalize structure.
 9. **SV3**: MUST support forward compatibility within major version (e.g., `1.x` schemas are compatible).
 
 ### 6.4 Metadata Completeness (MC)
-10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices), `player_order_source` (console/game), `first_player` (name + index).
+10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices), `player_order_source` (console/game), `first_player` (name + index; actual first actor when available, else first ordered player).
 11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, `git_info` (commit, branch, dirty status).
 12. **MC3**: MUST capture player configurations: `name`, `type`, `module`, `model`, `temperature`, `max_tokens`, masked `api_key_prefix`, template sources (inline vs file paths) and persist them in recording metadata via `player_summaries` for each player.
 13. **MC4**: MUST capture game configuration: `name`, `module`, `information_level` (when present), `allowed_actions` (when game exposes property).
@@ -266,7 +266,7 @@ Load match JSON from disk and normalize structure.
 15. **SR1**: MUST persist session-level seed in batch metadata (from SessionContext).
 16. **SR2**: MUST persist per-match seed in match payloads (`MatchRecording.seed`, `metadata.seed`).
 17. **SR3**: MUST persist `seeds_used` list in batch recordings for complete traceability (per SPEC-CONSOLE T3).
-18. **SR4**: MUST record complete player ordering metadata (per SPEC-CONSOLE M4 and SPEC-OBSERVABILITY §9.1): `players` (ordered list post-ordering), `player_order` (List[int] of original indices), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int}).
+18. **SR4**: MUST record complete player ordering metadata (per SPEC-CONSOLE M4 and SPEC-OBSERVABILITY §9.1): `players` (ordered list post-ordering), `player_order` (List[int] of original indices), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int}, resolved to actual first actor when runtime data is available).
 
 ### 6.6 API Usage & Collectors (UC)
 19. **UC1**: MUST extract `usage_info` from `ActionResult.metadata` during `on_gameplay()` when present.

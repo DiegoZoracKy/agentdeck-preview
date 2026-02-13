@@ -419,9 +419,9 @@ for event in custom_events:
 | `match_id` | str | ✓ | MATCH_START, MATCH_END | Unique match identifier. |
 | `seed` | int | ✓ | MATCH_START, MATCH_END | Per-match seed used for this specific match. |
 | `player_names` | List[str] | ✓ | MATCH_START, MATCH_END | Ordered player list (post-ordering, may be shuffled by Console or game). |
-| `player_order` | List[int] | ✓ | MATCH_START, MATCH_END | Original indices showing pre-ordering positions (e.g., [1, 0] means original player 1 goes first). |
+| `player_order` | List[int] | ✓ | MATCH_START, MATCH_END | Original indices showing pre-ordering positions (e.g., [1, 0] means original player 1 is first in ordered list). |
 | `player_order_source` | str | ✓ | MATCH_START, MATCH_END | Source of ordering decision: "console" (Fisher-Yates shuffle) or "game" (custom override). |
-| `first_player` | Dict[str, Any] | ✓ | MATCH_START, MATCH_END | First player metadata: {"name": str, "index": int} where index is original position. |
+| `first_player` | Dict[str, Any] | ✓ | MATCH_START, MATCH_END | First-acting player metadata: {"name": str, "index": int} where index is original position (falls back to first ordered player when runtime selection is unavailable). |
 | `result` | MatchResult | ✓ | MATCH_END | Complete match result with metadata. |
 | `player` | str | ✓ | PLAYER_HANDSHAKE_*, PLAYER_CONCLUSION | Player name for lifecycle events. |
 | `prompt_text` | str | ✓ | PLAYER_HANDSHAKE_COMPLETE, PLAYER_HANDSHAKE_ABORT, PLAYER_CONCLUSION, PLAYER_ACTION_PARSE_FAILED* | Raw prompt sent to LLM (when provided). |
@@ -450,11 +450,11 @@ for event in custom_events:
 
 **Player Order Recording**: MATCH_START and MATCH_END include complete player ordering metadata for mechanics-agnostic tracking and research analysis:
 - `player_names` (List[str]): Ordered list post-ordering (post-shuffle or post-game override)
-- `player_order` (List[int]): Original indices showing pre-ordering positions (e.g., [1, 0] means original player at index 1 goes first)
+- `player_order` (List[int]): Original indices showing pre-ordering positions (e.g., [1, 0] means original player at index 1 is first in ordered list)
 - `player_order_source` (Literal["console", "game"]): Indicates whether Console applied Fisher-Yates shuffle ("console") or game provided custom ordering ("game")
-- `first_player` (Dict): First player metadata with {"name": str, "index": int} where index is original position
+- `first_player` (Dict): First-acting player metadata with {"name": str, "index": int} where index is original position; falls back to first ordered player when no runtime first-player signal exists
 
-Console records the order without interpreting game semantics. Research utilities can use `player_order_source` to distinguish console randomization from game-controlled ordering.
+Console records ordering metadata and, when available, runtime-selected first-actor metadata. Research utilities can use `player_order_source` to distinguish console randomization from game-controlled ordering.
 
 **MatchResult.metadata Schema**: The `result` field in MATCH_END events contains a MatchResult object with standardized metadata structure (per SPEC-CONSOLE M1-M4):
 
