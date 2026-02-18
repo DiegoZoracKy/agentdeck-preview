@@ -48,27 +48,16 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 
 ---
 
-## 🔬 Research Findings
+## 🔬 Research Program
 
-AgentDeck ships with reproducible experiment packages under [`research/`](research/) (recordings → `results.json`/`results.csv` → `analysis.md`). Highlights below are from **FixedDamageGame** (turn-based combat).
+This README focuses on the **core AgentDeck platform** (architecture, APIs, and usage).
+Experiment-specific findings, result narratives, and benchmark grids live under [`research/`](research/).
 
-### OpenAI Strategic Benchmarks (185 recorded matches)
-- **Optimal configuration**: `gpt-4o-mini + ReasoningController` at **$0.0028/match**
-- **CoT vs direct action (gpt-4o-mini)**: **66% vs 34%** (p=0.0328)
-- **Prompt format repetition is a dominant confound**: when format is *not* repeated every turn, `gpt-4o` wins **90–95%**; repeating every turn flips outcomes (`gpt-4o-mini` wins **77%**)
-- **Model size ≠ strategic superiority (in this setup)**: `gpt-4o-mini` beat `gpt-4o` **76.7% vs 23.3%** (p=0.0052)
-- **GPT-5 tiers showed no clear advantage** over `gpt-4o-mini` in this game, despite a **~2–15×** cost premium
-
-### Multi-Provider Benchmarks (93 recorded matches)
-- **`gpt-4o-mini` vs `Gemini-2.5-Flash`**: GPT wins **70/30** (p=0.0428) at ~**10×** lower cost/match (**$0.0020** vs **$0.0204**)
-- **`gpt-4o-mini` vs `Gemini-2.5-Pro`**: statistically tied (p=0.856) but Pro costs ~**15×** more per match (**$0.0476** vs **$0.0030**) and was operationally slower (quotas/latency)
-
-> These findings are prompt/controller dependent and may not generalize beyond FixedDamageGame.
-
-### Explore Full Research
-- **[Research Index](research/INDEX.md)** - Experiment registry
-- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - `analysis.md` + `results.json`/`results.csv`
-- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - `analysis.md` + `results.json`/`results.csv`
+### Explore Research
+- **[Research Guide](research/README.md)** - How experiment packages are organized
+- **[Research Index](research/INDEX.md)** - Registry of experiments and status
+- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - Example completed package
+- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - Example cross-provider package
 
 ---
 

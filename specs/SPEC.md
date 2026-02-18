@@ -217,8 +217,8 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
-| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.0.0 | Draft | Experiment package, manifest/results/index contracts |
-| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.1.0 | Draft | Session-to-experiment package helper |
+| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.1.0 | Final | Experiment package, manifest/results/index contracts |
+| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.2.0 | Final | Session-to-experiment package helper |
 
 ---
 

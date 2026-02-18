@@ -19,6 +19,19 @@ research/<experiment-id>/
 └── scripts/           # Experiment scripts (optional)
 ```
 
+## Status-Based Completeness Rules
+
+Packages are validated differently depending on `manifest.status`:
+
+- `planned`: placeholders are allowed in `README.md` and `analysis.md`.
+- `running`: partial factual updates are allowed; interpretive sections may remain placeholders.
+- `complete` with `run.matches_completed > 0`: factual blocks in `README.md` and
+  `analysis.md` MUST be populated (no placeholder values).
+- `archived`: treated like `complete` for validation purposes.
+
+Interpretive sections (conclusions/limitations/next steps) are always human-owned.
+Automation should only write factual content.
+
 ## manifest.yaml (Required)
 
 ### Required Fields
@@ -49,6 +62,9 @@ When `matrix.yaml` is present, it should be the source of truth for:
 - benchmark cells/phases
 - sampling policy (pilot/expansion)
 - expansion rules and overrides
+
+If an experiment is single-run or smoke-test oriented, `matrix.yaml` may be omitted.
+In that case, `run.matrix_source` and `artifacts.matrix_yaml` SHOULD be omitted as well.
 
 ### Example
 ```yaml
@@ -140,6 +156,17 @@ Recommended fields:
 - `matches_per_cell`
 
 If `cell_ids` is empty, preflight is treated as intentionally skipped.
+
+## Markdown Factual Blocks (README.md / analysis.md)
+
+To keep automation deterministic and interpretation human-owned, templates SHOULD
+include a fenced factual block with markers:
+
+- `<!-- AUTO_FACTS:BEGIN -->`
+- `<!-- AUTO_FACTS:END -->`
+
+Packager tools may rewrite only content between those markers.
+Anything outside those markers is considered human-authored narrative.
 
 ## results.csv (Generated)
 

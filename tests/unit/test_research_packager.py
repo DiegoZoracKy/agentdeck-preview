@@ -1,10 +1,11 @@
-"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP7)."""
+"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP11)."""
 
 import json
 import shutil
 from pathlib import Path
 
 import pytest
+import yaml
 
 from agentdeck.research.packager import build_manifest, package_session
 
@@ -133,6 +134,7 @@ def test_package_session_creates_outputs(tmp_path):
         question="Does Alice beat Bob?",
         status=None,
         title="Walkthrough Demo",
+        include_matrix=False,
         dry_run=False,
     )
 
@@ -141,7 +143,44 @@ def test_package_session_creates_outputs(tmp_path):
     assert (experiment_dir / "results.json").exists()
     assert (experiment_dir / "results.csv").exists()
     assert (experiment_dir / "recordings" / "README.md").exists()
+    assert not (experiment_dir / "matrix.yaml").exists()
     assert (research_dir / "INDEX.md").exists()
+
+    manifest = yaml.safe_load((experiment_dir / "manifest.yaml").read_text(encoding="utf-8"))
+    assert "matrix_source" not in manifest["run"]
+    assert "matrix_yaml" not in manifest["artifacts"]
+
+    readme = (experiment_dir / "README.md").read_text(encoding="utf-8")
+    analysis = (experiment_dir / "analysis.md").read_text(encoding="utf-8")
+    assert "Topline Winner: Alice (100.0%)" in readme
+    assert "Sample size (`n`): 1" in analysis
+    assert "One-paragraph motivation and intended audience." in readme
+
+
+def test_package_session_include_matrix_keeps_matrix_scaffold(tmp_path):
+    """RP9: matrix.yaml is optional by default and opt-in for benchmark grids."""
+    session_dir = _make_session(tmp_path)
+    research_dir = _prepare_research_dir(tmp_path)
+
+    result = package_session(
+        session_dir=session_dir,
+        session_id=None,
+        run_dir=tmp_path / "agentdeck_runs",
+        research_dir=research_dir,
+        experiment_id="2026-01-20-demo-matrix",
+        question="Does Alice beat Bob?",
+        status=None,
+        title="Walkthrough Demo Matrix",
+        include_matrix=True,
+        dry_run=False,
+    )
+
+    experiment_dir = Path(result["experiment_dir"])
+    assert (experiment_dir / "matrix.yaml").exists()
+
+    manifest = yaml.safe_load((experiment_dir / "manifest.yaml").read_text(encoding="utf-8"))
+    assert manifest["run"]["matrix_source"] == "matrix.yaml"
+    assert manifest["artifacts"]["matrix_yaml"] == "matrix.yaml"
 
 
 def test_package_session_existing_dir_fails(tmp_path):
@@ -160,6 +199,7 @@ def test_package_session_existing_dir_fails(tmp_path):
             question="Does Alice beat Bob?",
             status=None,
             title=None,
+            include_matrix=False,
             dry_run=False,
         )
 

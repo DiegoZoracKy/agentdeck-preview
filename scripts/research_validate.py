@@ -7,6 +7,7 @@ import argparse
 import csv
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -38,6 +39,17 @@ RESULTS_CSV_HEADER = (
     "first_player",
     "players",
     "player_costs",
+)
+AUTO_FACTS_BEGIN = "<!-- AUTO_FACTS:BEGIN -->"
+AUTO_FACTS_END = "<!-- AUTO_FACTS:END -->"
+AUTO_FACTS_PLACEHOLDER_PATTERNS = (
+    r"\bTBD\b",
+    r"YYYY-MM-DD-slug",
+    r"Matches:\s*0/0",
+    r"Sample size \(`n`\):\s*0\b",
+    r"Win rates:\s*\{\s*\}",
+    r"Topline Winner:\s*TBD",
+    r"Topline winner:\s*TBD",
 )
 
 
@@ -192,6 +204,59 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
     return errors
 
 
+def _extract_auto_facts_block(markdown: str) -> Tuple[bool, str]:
+    begin_idx = markdown.find(AUTO_FACTS_BEGIN)
+    end_idx = markdown.find(AUTO_FACTS_END)
+    if begin_idx == -1 or end_idx == -1 or end_idx < begin_idx:
+        return False, ""
+    block_start = begin_idx + len(AUTO_FACTS_BEGIN)
+    return True, markdown[block_start:end_idx].strip()
+
+
+def _has_auto_facts_placeholder(block: str) -> bool:
+    for pattern in AUTO_FACTS_PLACEHOLDER_PATTERNS:
+        if re.search(pattern, block):
+            return True
+    return False
+
+
+def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> List[str]:
+    errors: List[str] = []
+    experiment_name = experiment_dir.name
+    status = manifest.get("status")
+    run = manifest.get("run") if isinstance(manifest.get("run"), dict) else {}
+    matches_completed = run.get("matches_completed")
+
+    must_enforce = (
+        status in {"complete", "archived"}
+        and _is_int(matches_completed)
+        and matches_completed > 0
+    )
+    if not must_enforce:
+        return errors
+
+    for doc_name in ("README.md", "analysis.md"):
+        path = experiment_dir / doc_name
+        if not path.exists():
+            errors.append(f"{experiment_name}: {doc_name} missing")
+            continue
+
+        content = path.read_text(encoding="utf-8")
+        has_block, block = _extract_auto_facts_block(content)
+        if not has_block:
+            errors.append(
+                f"{experiment_name}: {doc_name} missing AUTO_FACTS block markers"
+            )
+            continue
+
+        if _has_auto_facts_placeholder(block):
+            errors.append(
+                f"{experiment_name}: {doc_name} AUTO_FACTS block still contains placeholders"
+            )
+
+    return errors
+
+
 def _normalize_index(content: str, timestamp_line: str) -> str:
     lines = content.splitlines()
     normalized = []
@@ -269,6 +334,7 @@ def main() -> int:
             continue
         errors.extend(_validate_manifest(manifest_path, manifest))
         errors.extend(_validate_results(manifest_path.parent, manifest))
+        errors.extend(_validate_markdown_facts(manifest_path.parent, manifest))
 
     errors.extend(_validate_index(research_dir, args.index, args.write_index))
 

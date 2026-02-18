@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
 > Status: Final
-> Version: 1.0.0
-> Last Updated: 2026-02-03
+> Version: 1.1.0
+> Last Updated: 2026-02-18
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
 > Authors: Diego ZoracKy, Codex
 > Audience: Research engineers, contributors, experiment authors
@@ -30,6 +30,7 @@
 research/<experiment-id>/
 ├── README.md          # Experiment card (short summary)
 ├── manifest.yaml      # Repro metadata (required)
+├── matrix.yaml        # Benchmark grid definition (optional)
 ├── results.json       # Objective results (generated)
 ├── results.csv        # Match-level results (generated)
 ├── analysis.md        # Interpretation (optional)
@@ -57,6 +58,7 @@ Recommended fields (non-exhaustive):
 - `players[].controller`, `players[].renderer`
 - `variants` (model/controller variants used across matchups)
 - `run.matches_completed`, `run.concurrency`, `run.max_turns`
+- `run.matrix_source` (when `matrix.yaml` exists)
 - `analysis_plan` (ci_method, alpha, effect_size)
 - `artifacts` (paths for results.json/results.csv/plots)
 - `notes`
@@ -114,6 +116,10 @@ A registry table for all experiments. It is generated from manifests using
 - **RE6**: Raw recordings SHOULD NOT be committed to version control; `recordings/` should contain pointers or be gitignored. (This is a repository policy, enforced by `.gitignore`, not runtime validation.)
 - **RE7**: `research/INDEX.md` MUST match the output of `research_index.py`.
 - **RE8**: Export scripts MUST produce deterministic output for identical recordings, excluding `generated_at` timestamps. Use `--no-generated-at` to omit the timestamp for diff-sensitive checks.
+- **RE9**: Status-gated markdown completeness MUST be enforced by validation:
+  - `planned`/`running`: placeholders allowed.
+  - `complete`/`archived` with `run.matches_completed > 0`: factual markdown blocks in `README.md` and `analysis.md` MUST be populated.
+- **RE10**: Auto-written markdown content MUST be limited to the factual marker block (`<!-- AUTO_FACTS:BEGIN -->` ... `<!-- AUTO_FACTS:END -->`). Narrative sections remain human-authored.
 
 ## 7. Data Flow & Interaction
 - Export: `recordings/ -> research_export.py -> results.json + results.csv`
@@ -125,6 +131,7 @@ A registry table for all experiments. It is generated from manifests using
   `FileNotFoundError` (export).
 - Missing required manifest fields → validator exits non-zero with detail.
 - Out-of-date index → validator exits non-zero unless `--write-index` used.
+- Completed experiment with placeholder factual block in README/analysis → validator exits non-zero with detail.
 
 ## 9. Examples
 

@@ -6,15 +6,15 @@
 
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
-- Status: planned
-- Matches: 0/0
+- Status: complete
+- Matches: 1/1
 - Game: FixedDamageGame
-- Players: TBD
-- Seed Base: TBD
-- Topline Winner: TBD
-- Avg Turns: TBD
-- Avg Duration (s): TBD
-- Total Cost: TBD
+- Players: A=openai:gpt-4o-mini, B=openai:gpt-4o-mini
+- Seed Base: 420000
+- Topline Winner: gpt-4o-mini-B (100.0%)
+- Avg Turns: 19.0
+- Avg Duration (s): 64.21738409996033
+- Total Cost: $0.005887
 <!-- AUTO_FACTS:END -->
 
 ## Why This Exists

@@ -1,0 +1,57 @@
+schema_version: 1
+experiment_id: 2026-02-18-openai-mini-smoke
+title: OpenAI Mini One-Match Smoke
+status: complete
+question: Can a single out-of-the-box gpt-4o-mini vs gpt-4o-mini match run end-to-end
+  with complete AgentDeck artifacts?
+game:
+  name: FixedDamageGame
+  config: {}
+players:
+- id: A
+  provider: openai
+  model: gpt-4o-mini
+  controller: ReasoningController
+  renderer: TextRenderer
+- id: B
+  provider: openai
+  model: gpt-4o-mini
+  controller: ReasoningController
+  renderer: TextRenderer
+variants:
+  models:
+  - gpt-4o-mini
+  - claude-haiku-4.5
+  controllers:
+  - ActionOnlyController
+  - ReasoningController
+  prompt_cadence:
+  - handshake_only
+  - turn_persistent
+run:
+  seed_base: 420000
+  matches_planned: 1
+  matches_completed: 1
+  concurrency: 10
+  max_turns: 30
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+  highlights_json: artifacts/highlights.json
+storage:
+  raw_recordings:
+    backend: huggingface
+    dataset: your-org/replays
+    path_prefix: YYYY-qX-experiment-slug
+  summaries:
+    repo_path: research/YYYY-MM-DD-slug
+  viewer_curation:
+    repo_path: viewer/matches
+notes: Fill freeze metadata (git tag/commit + template version) before running.
+started_at: '2026-02-18T14:44:42.539795'
+completed_at: '2026-02-18T14:45:51.424889'

@@ -2,15 +2,15 @@
 
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
-- Sample size (`n`): 0
-- Decisive matches: 0
+- Sample size (`n`): 1
+- Decisive matches: 1
 - Draws: 0
-- Win rates: {}
-- Topline winner: TBD
-- First player in first recorded match: TBD
-- Average turns: TBD
-- Average duration (s): TBD
-- Total cost: TBD
+- Win rates: {'gpt-4o-mini-A': 0.0, 'gpt-4o-mini-B': 1.0}
+- Topline winner: gpt-4o-mini-B (100.0%)
+- First player in first recorded match: gpt-4o-mini-B
+- Average turns: 19.0
+- Average duration (s): 64.21738409996033
+- Total cost: $0.005887
 <!-- AUTO_FACTS:END -->
 
 ## Executive Summary

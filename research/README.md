@@ -3,6 +3,10 @@
 This directory hosts standardized, objective experiment results for AgentDeck.
 Each experiment follows the Experiment Package layout defined in `SCHEMA.md`.
 
+Core framework documentation remains in the repository root (`README.md`,
+`CONTRIBUTING.md`, and `specs/`). This `research/` area is intentionally
+experiment-specific.
+
 Note: The current experiments are reference examples from AgentDeck development.
 Use `_templates/` to start new experiments for your own work.
 
@@ -60,6 +64,14 @@ research package in one step:
 python scripts/research_package.py \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
   --question "Your research question here"
+```
+
+For benchmark grids, opt in to matrix scaffold generation:
+```
+python scripts/research_package.py \
+  --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
+  --question "Your research question here" \
+  --include-matrix
 ```
 
 ## Validation
