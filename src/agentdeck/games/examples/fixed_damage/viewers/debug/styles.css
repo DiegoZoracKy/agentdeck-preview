@@ -2,24 +2,37 @@
  * Debug Renderer Styles - Clean, readable, developer-focused
  */
 
+:root {
+  --debug-blue-bg: #0c132f;
+  --debug-blue-surface: #131c3e;
+  --debug-blue-surface-2: #1a244b;
+  --debug-blue-border: #4a4a8a;
+  --debug-blue-border-soft: #3f4f83;
+  --debug-blue-text: #d9e6ff;
+  --debug-blue-muted: #9fb0e0;
+  --debug-blue-accent: #9cdcfe;
+  --debug-blue-highlight: #ffd866;
+}
+
 .debug-viewer {
   font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: linear-gradient(180deg, rgba(10, 17, 43, 0.95), rgba(11, 18, 45, 0.9));
+  color: var(--debug-blue-text);
   padding: 20px;
   border-radius: 8px;
+  border: 2px solid var(--debug-blue-border-soft);
   min-height: 400px;
 }
 
 .debug-header {
-  border-bottom: 2px solid #3c3c3c;
+  border-bottom: 2px solid var(--debug-blue-border-soft);
   padding-bottom: 16px;
   margin-bottom: 20px;
 }
 
 .debug-header h2 {
   margin: 0 0 8px 0;
-  color: #4ec9b0;
+  color: var(--debug-blue-accent);
   font-size: 18px;
 }
 
@@ -27,12 +40,12 @@
   display: flex;
   gap: 20px;
   font-size: 13px;
-  color: #858585;
+  color: var(--debug-blue-muted);
 }
 
 .debug-frame-info {
-  background: #252526;
-  border: 1px solid #3c3c3c;
+  background: var(--debug-blue-surface);
+  border: 1px solid var(--debug-blue-border-soft);
   border-radius: 4px;
   padding: 12px 16px;
   margin-bottom: 16px;
@@ -46,13 +59,13 @@
 }
 
 .debug-row label {
-  color: #9cdcfe;
+  color: var(--debug-blue-accent);
   font-weight: 600;
   min-width: 80px;
 }
 
 .debug-row span {
-  color: #ce9178;
+  color: var(--debug-blue-highlight);
 }
 
 .debug-state-comparison {
@@ -65,24 +78,24 @@
 .debug-state-column h3 {
   margin: 0 0 8px 0;
   font-size: 14px;
-  color: #4ec9b0;
+  color: var(--debug-blue-accent);
 }
 
 .debug-state-column pre {
-  background: #252526;
-  border: 1px solid #3c3c3c;
+  background: var(--debug-blue-surface);
+  border: 1px solid var(--debug-blue-border-soft);
   border-radius: 4px;
   padding: 12px;
   font-size: 12px;
   line-height: 1.6;
   overflow-x: auto;
   margin: 0;
-  color: #d4d4d4;
+  color: var(--debug-blue-text);
 }
 
 .debug-section {
-  background: #252526;
-  border: 1px solid #3c3c3c;
+  background: var(--debug-blue-surface);
+  border: 1px solid var(--debug-blue-border-soft);
   border-radius: 4px;
   padding: 12px 16px;
   margin-bottom: 16px;
@@ -91,12 +104,12 @@
 .debug-section h3 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #4ec9b0;
+  color: var(--debug-blue-accent);
 }
 
 .debug-section pre {
-  background: #1e1e1e;
-  border: 1px solid #3c3c3c;
+  background: var(--debug-blue-bg);
+  border: 1px solid var(--debug-blue-border-soft);
   border-radius: 4px;
   padding: 12px;
   font-size: 12px;
@@ -104,7 +117,7 @@
   overflow-x: auto;
   margin: 0;
   white-space: pre-wrap;
-  color: #d4d4d4;
+  color: var(--debug-blue-text);
 }
 
 .debug-prompt-response {
@@ -116,12 +129,12 @@
 .debug-prompt-section h4 {
   margin: 0 0 8px 0;
   font-size: 13px;
-  color: #569cd6;
+  color: var(--debug-blue-muted);
 }
 
 .debug-victory {
-  background: #1a3a1a;
-  border: 2px solid #4ec9b0;
+  background: linear-gradient(180deg, rgba(12, 19, 47, 0.95), rgba(9, 16, 39, 0.95));
+  border: 2px solid var(--debug-blue-border);
   border-radius: 8px;
   padding: 20px;
   text-align: center;
@@ -129,24 +142,25 @@
 
 .debug-victory h2 {
   margin: 0 0 16px 0;
-  color: #4ec9b0;
+  color: var(--debug-blue-highlight);
   font-size: 20px;
 }
 
 .debug-victory h3 {
   margin: 16px 0 8px 0;
-  color: #4ec9b0;
+  color: var(--debug-blue-accent);
   font-size: 14px;
 }
 
 .debug-victory pre {
-  background: #252526;
-  border: 1px solid #3c3c3c;
+  background: var(--debug-blue-surface-2);
+  border: 1px solid var(--debug-blue-border-soft);
   border-radius: 4px;
   padding: 12px;
   font-size: 12px;
   text-align: left;
   overflow-x: auto;
+  color: var(--debug-blue-text);
 }
 
 /* =========================================================================
@@ -154,36 +168,32 @@
    ========================================================================= */
 
 .viewer-controls.skin-debug {
-  background: #1e1e1e;
-  border: 2px solid #3c3c3c;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--debug-blue-border);
   border-radius: 8px;
   padding: 10px 14px;
   gap: 10px;
-  color: #d4d4d4;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  color: var(--debug-blue-text);
 }
 
 .viewer-controls.skin-debug button {
-  font-family: inherit;
-  font-size: 12px;
-  line-height: 1.2;
-  background: #252526;
-  border: 2px solid #3c3c3c;
+  background: var(--debug-blue-surface-2);
+  border: 2px solid var(--debug-blue-border-soft);
   border-radius: 6px;
-  color: #d4d4d4;
+  color: var(--debug-blue-text);
   padding: 7px 11px;
 }
 
 .viewer-controls.skin-debug #btn-play {
-  border-color: #4ec9b0;
-  color: #4ec9b0;
-  background: #1f2a29;
+  border-color: var(--debug-blue-highlight);
+  color: var(--debug-blue-highlight);
+  background: rgba(255, 216, 102, 0.08);
 }
 
 .viewer-controls.skin-debug button:hover:not(:disabled) {
-  border-color: #9cdcfe;
-  color: #ffffff;
-  background: #2c2c2e;
+  border-color: var(--debug-blue-highlight);
+  color: #fff;
+  background: #24305f;
 }
 
 .viewer-controls.skin-debug button:disabled {
@@ -191,37 +201,34 @@
 }
 
 .viewer-controls.skin-debug label {
-  font-family: inherit;
   font-size: 11px;
-  color: #9cdcfe;
+  color: var(--debug-blue-muted);
   gap: 6px;
 }
 
 .viewer-controls.skin-debug select {
-  font-family: inherit;
   font-size: 12px;
-  background: #252526;
-  border: 2px solid #3c3c3c;
+  background: var(--debug-blue-surface-2);
+  border: 1px solid var(--debug-blue-border-soft);
   border-radius: 6px;
-  color: #f2f2f2;
+  color: var(--debug-blue-text);
   padding: 4px 8px;
 }
 
 .viewer-controls.skin-debug .viewer-progress {
   height: 6px;
   border-radius: 3px;
-  background: #131314;
-  border: 1px solid #3c3c3c;
+  background: var(--debug-blue-bg);
+  border: 1px solid var(--debug-blue-border-soft);
   margin: 0 8px;
 }
 
 .viewer-controls.skin-debug .viewer-progress-fill {
-  background: linear-gradient(90deg, #4ec9b0, #9cdcfe);
+  background: linear-gradient(90deg, #4a4a8a, #ffd866);
 }
 
 .viewer-controls.skin-debug .status {
-  color: #4ec9b0;
-  font-family: inherit;
+  color: var(--debug-blue-accent);
 }
 
 @media (max-width: 900px) {
