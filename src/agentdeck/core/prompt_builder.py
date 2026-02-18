@@ -90,7 +90,6 @@ class PromptBuilder:
         "You are playing {game_name}.\\n\\n"
         "{game_instructions}\\n\\n"
         "{player_instructions}\\n\\n"
-        "{controller_format}\\n\\n"
         "{handshake_controller_format}"
     )
     DEFAULT_TURN = "{game_view}\\n\\n{controller_format}"

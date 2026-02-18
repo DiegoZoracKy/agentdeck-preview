@@ -537,6 +537,7 @@ def test_default_templates():
     )
     assert "Instructions here" in bundle_hs.text
     assert "Poker" in bundle_hs.text
+    assert bundle_hs.text.count("HANDSHAKE_FORMAT") == 1
 
     # Turn default
     bundle_turn = builder.compose(
