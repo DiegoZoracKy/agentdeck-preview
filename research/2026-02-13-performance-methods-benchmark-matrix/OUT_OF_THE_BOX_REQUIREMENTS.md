@@ -35,7 +35,7 @@ metrics code, no custom post-hoc calculators, no custom reporting pipelines).
 
 1. Matrix orchestration runner
 - Requirement: execute by `phase_id` and `cell_id` directly from `matrix.yaml` with no custom analytics.
-- Status: `gap` (planned script: `run_matrix_phase.py`).
+- Status: `ready` (`scripts/run_matrix_phase.py`).
 
 2. Resume/checkpoint ergonomics
 - Requirement: restart long runs safely from cell/match progress.
