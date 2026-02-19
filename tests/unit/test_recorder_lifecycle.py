@@ -310,6 +310,103 @@ class TestHandshakeMetadata:
         assert handshake_events[0]["data"]["accepted"] is True
 
 
+class TestMatchCostAndIds:
+    """Validate finalized cost fields and top-level batch IDs in recordings."""
+
+    def test_updates_player_summaries_costs_and_exposes_batch_id(self, recorder, temp_recorder_dir):
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+            def get_summary(self):
+                # Simulate stale summary cost captured at match start.
+                return {"name": self.name, "type": "MockPlayer", "total_cost": 0.00001}
+
+        players = [MockPlayer("Player-1"), MockPlayer("Player-2")]
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=players,
+            matches=1,
+            context={"session_id": "test_session"},
+        )
+
+        recorder.on_match_start(
+            game=MockGame(),
+            players=players,
+            match_id="match_001",
+            context={"session_id": "test_session", "batch_id": "batch_001"},
+        )
+
+        result = MatchResult(
+            winner="Player-1",
+            final_state={},
+            events=[],
+            seed=42,
+            metadata={
+                "turns": 5,
+                "duration": 1.23,
+                "cost": 0.003,
+                "player_costs": {"Player-1": 0.001, "Player-2": 0.002},
+            },
+        )
+
+        recorder.on_match_end(result=result, context={"session_id": "test_session"})
+        recorder.on_batch_end(
+            batch_id="batch_001",
+            results=[result],
+            context={"session_id": "test_session", "batch_id": "batch_001"},
+        )
+
+        with open(temp_recorder_dir / "match_001.json") as f:
+            match_data = json.load(f)
+        assert match_data["batch_id"] == "batch_001"
+
+        match_summaries = match_data["metadata"]["player_summaries"]
+        p1 = next(s for s in match_summaries if s["name"] == "Player-1")
+        p2 = next(s for s in match_summaries if s["name"] == "Player-2")
+        assert p1["total_cost"] == 0.001
+        assert p2["total_cost"] == 0.002
+
+        with open(temp_recorder_dir / "batch_batch_001.json") as f:
+            batch_data = json.load(f)
+        batch_summaries = batch_data["match_refs"][0]["player_summaries"]
+        b1 = next(s for s in batch_summaries if s["name"] == "Player-1")
+        b2 = next(s for s in batch_summaries if s["name"] == "Player-2")
+        assert b1["total_cost"] == 0.001
+        assert b2["total_cost"] == 0.002
+
+    def test_match_start_requires_batch_id_in_context(self, recorder):
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+        players = [MockPlayer("Player-1"), MockPlayer("Player-2")]
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=players,
+            matches=1,
+            context={"session_id": "test_session"},
+        )
+
+        with pytest.raises(ValueError, match="requires context\\['batch_id'\\]"):
+            recorder.on_match_start(
+                game=MockGame(),
+                players=players,
+                match_id="match_001",
+                context={"session_id": "test_session"},
+            )
+
+
 class TestHandshakeAbort:
     """Test 2A.3: Validate handshake abort capture."""
 

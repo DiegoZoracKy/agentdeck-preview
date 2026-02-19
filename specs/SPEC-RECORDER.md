@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 1.3.0
-> Last Updated: 2026-02-03
+> Last Updated: 2026-02-18
 > Implementation: ✅ Complete (schema v1.3 event enrichment)
 > Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers
@@ -27,8 +27,8 @@
 - **Game Configuration Capture**: Record game settings (`information_level`, `allowed_actions`) and persist player configuration snapshots (model, controller, key parameters) via `player_summaries` for reproducibility and provenance.
 - **API Usage Tracking**: Aggregate token counts, costs, latencies across LLM calls via `RecorderCollector` protocol.
 - **Batch Aggregation**: Produce batch summary files with match references and aggregate statistics (win rates, turn counts).
-- **Schema Versioning**: Tag recordings with schema version (`1.3` for enriched match events with prompt metadata, `1.0` for batches) and enforce version checks in `load_match()` for forward compatibility.
-- **Normalization**: Provide `load_match()` utility that normalizes recorded data into consistent structure regardless of schema evolution.
+- **Schema Versioning**: Tag recordings with schema version (`1.3` for match recordings, `1.0` for batches) and enforce exact version checks in `load_match()` for current-only validation.
+- **Normalization**: Provide `load_match()` utility that normalizes current schema artifacts into a consistent structure.
 - **Null Object Pattern**: Provide `NullRecorder` implementation so Console always has a valid Recorder instance (never `None`).
 
 ## 4. Data Structures
@@ -233,7 +233,7 @@ Late-binding helper for attaching session context after construction.
 Load match JSON from disk and normalize structure.
 
 **Guarantees**:
-- MUST enforce `schema_version` presence and compatibility (supports `1.x`).
+- MUST enforce `schema_version` presence and exact compatibility with the current match schema (`1.3`).
 - MUST normalize `metadata["match_id"]` (falls back to filename stem if missing).
 - MUST return consistent structure: `{schema_version, events, winner, final_state, seed, metadata, api_usage_summary, collector_data}`.
 - MUST raise `ValueError` for missing/unsupported schema versions.
@@ -253,12 +253,15 @@ Load match JSON from disk and normalize structure.
 ### 6.3 Schema Versioning (SV)
 7. **SV1**: MUST tag all recordings with `schema_version` field (currently `"1.3"` for match recordings with enriched prompt events, `"1.0"` for batch recordings) and `schema_type` field (`"match"` or `"batch"`).
 8. **SV2**: MUST enforce schema version checks in `load_match()` and raise `ValueError` for missing or incompatible versions.
-9. **SV3**: MUST support forward compatibility within major version (e.g., `1.x` schemas are compatible).
+9. **SV3**: MUST validate against the exact current match schema version (`1.3`) in `load_match()` (no major-version wildcard acceptance).
 
 ### 6.4 Metadata Completeness (MC)
 10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices), `player_order_source` (console/game), `first_player` (name + index; actual first actor when available, else first ordered player).
+10a. **MC1a**: Match payload MUST include top-level `batch_id` equal to `metadata.batch_id`.
 11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, `git_info` (commit, branch, dirty status).
 12. **MC3**: MUST capture player configurations: `name`, `type`, `module`, `model`, `temperature`, `max_tokens`, masked `api_key_prefix`, template sources (inline vs file paths) and persist them in recording metadata via `player_summaries` for each player.
+12a. **MC3a**: `player_summaries[].total_cost` MUST reflect finalized per-match player costs after `on_match_end()` when `metadata.match.player_costs` is available.
+12b. **MC3b**: `Recorder.on_match_start()` MUST receive `context["batch_id"]`; missing batch context is invalid for the current schema.
 13. **MC4**: MUST capture game configuration: `name`, `module`, `information_level` (when present), `allowed_actions` (when game exposes property).
 14. **MC5**: MUST capture batch context: `session_id`, `matches_planned`, `matches_completed`, `seeds_used` (list of all per-match seeds).
 
@@ -362,7 +365,7 @@ Recorder stores prompt metadata under a `prompt` object within each recorded eve
 ## 8. Error Handling & Edge Cases
 
 - **Missing schema_version**: Raise `ValueError` with descriptive message.
-- **Unsupported schema_version**: Raise `ValueError` stating expected version range.
+- **Unsupported schema_version**: Raise `ValueError` stating the exact expected version.
 - **Collector exceptions**: Log error but continue recording (collectors are optional extensions).
 - **Missing `usage_info` in metadata**: Silently skip API usage tracking (not all players provide usage data).
 - **Concurrent writes**: Atomic replacement prevents corruption (last write wins).
@@ -454,6 +457,7 @@ deck = AgentDeck(recorder=recorder, session=config)
   "schema_version": "1.3",
   "schema_type": "match",
   "match_id": "20250121_143052",
+  "batch_id": "exec_001",
   "game": "FixedDamageGame",
   "players": ["Alice", "Bob"],
   "player_order": [1, 0],

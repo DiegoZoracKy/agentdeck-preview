@@ -108,6 +108,7 @@ class MatchRecording:
             "seed": self.seed,
             "events": copy.deepcopy(self.events),
             "metadata": metadata,
+            "batch_id": metadata.get("batch_id"),
         }
         summary = self.usage.summary()
         if summary:
@@ -306,14 +307,17 @@ class Recorder:
         match_id = match_id or datetime.now().strftime("%Y%m%d_%H%M%S")
         self.current_match_id = match_id
         match_index = len(self.current_batch.match_refs) if self.current_batch else 0
+        batch_id = self._context_value(context, "batch_id")
+        if not isinstance(batch_id, str) or not batch_id:
+            raise ValueError("Recorder.on_match_start requires context['batch_id']")
 
         metadata = {
             "started_at": datetime.now().isoformat(),
             "session_id": self._context_value(context, "session_id"),
-            "batch_id": self._context_value(context, "batch_id"),
+            "batch_id": batch_id,
             "context": {
                 "session_id": self._context_value(context, "session_id"),
-                "batch_id": self._context_value(context, "batch_id"),
+                "batch_id": batch_id,
                 "match_index": match_index,
                 "total_matches_in_batch": (
                     self.current_batch.metadata["matches_planned"] if self.current_batch else None
@@ -575,6 +579,21 @@ class Recorder:
             self.current_match.metadata.setdefault("match", {}).update(
                 copy.deepcopy(result.metadata)
             )
+            # Keep player_summaries cost fields aligned with finalized per-match costs.
+            player_costs = result.metadata.get("player_costs")
+            summaries = self.current_match.metadata.get("player_summaries")
+            if isinstance(player_costs, dict) and isinstance(summaries, list):
+                for summary in summaries:
+                    if not isinstance(summary, dict):
+                        continue
+                    player_name = summary.get("name")
+                    if not isinstance(player_name, str):
+                        continue
+                    if player_name in player_costs:
+                        try:
+                            summary["total_cost"] = float(player_costs[player_name])
+                        except (TypeError, ValueError):
+                            continue
         if context:
             self.current_match.metadata.setdefault("context", {})["end"] = dict(context)
 
@@ -722,12 +741,13 @@ class Recorder:
         schema_version = raw.get("schema_version")
         if not schema_version:
             raise ValueError(
-                f"Missing schema_version in {Path(resolved).name}. " f"Expected schema version 1.x"
+                f"Missing schema_version in {Path(resolved).name}. "
+                f"Expected schema version {Recorder.SCHEMA_VERSION}"
             )
-        if not str(schema_version).startswith("1"):
+        if str(schema_version) != Recorder.SCHEMA_VERSION:
             raise ValueError(
                 f"Unsupported schema version: {schema_version}. "
-                f"Expected schema version 1.x (current: {Recorder.SCHEMA_VERSION})"
+                f"Expected schema version {Recorder.SCHEMA_VERSION}"
             )
 
         # Extract metadata

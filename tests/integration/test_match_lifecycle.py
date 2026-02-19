@@ -98,6 +98,13 @@ def test_full_match_lifecycle(players, temp_record_dir, tracking_spectator):
     assert f"Batch {batch_id} starting" in info_text
     assert f"Batch {batch_id} complete" in info_text
 
+    # Match artifact should also expose the same batch_id at top-level.
+    match_filename = batch_data["match_refs"][0]["filename"]
+    match_recording = batch_recording.parent / match_filename
+    with open(match_recording) as f:
+        match_data = json.load(f)
+    assert match_data["batch_id"] == batch_id
+
 
 def test_spectator_isolation(players, temp_record_dir):
     """
