@@ -474,12 +474,22 @@ body.mobile-sheet-open {
   background: #333;
   border: 2px solid #555;
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 0 12px;
+  height: 34px;
   color: #fff;
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+#btn-prev,
+#btn-next {
+  font-size: 14px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .viewer-controls button:hover:not(:disabled) {
@@ -505,7 +515,8 @@ body.mobile-sheet-open {
   background: #333;
   border: 1px solid #555;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 0 8px;
+  height: 34px;
   color: #fff;
   font-size: 12px;
 }
@@ -514,9 +525,27 @@ body.mobile-sheet-open {
   display: none;
 }
 
-.viewer-controls .status {
-  color: #888;
-  font-size: 11px;
+.controls-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.controls-meta-status {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #aaa;
+  line-height: 1;
+}
+
+.controls-meta-turn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #9fb0e0;
+  line-height: 1;
 }
 
 /* Progress Bar */
@@ -555,8 +584,13 @@ body.mobile-sheet-open {
     height: 10px;
   }
 
+  .viewer-controls button,
+  .viewer-controls select {
+    height: 38px;
+  }
+
   .viewer-controls button {
-    padding: 10px 14px;
+    padding: 0 14px;
   }
 }
 
@@ -671,16 +705,11 @@ body.mobile-sheet-open {
 
   .viewer-controls label {
     font-size: 10px;
-    margin-left: auto;
   }
 
   .viewer-controls select {
     font-size: 10px;
     padding: 4px 6px;
-  }
-
-  .viewer-controls .status {
-    font-size: 10px;
   }
 
   .match-info {
@@ -745,10 +774,6 @@ body.mobile-sheet-open {
     max-width: none;
     order: 5;
     height: 6px;
-  }
-
-  .viewer-controls .status {
-    margin-left: auto;
   }
 
   .instructions {

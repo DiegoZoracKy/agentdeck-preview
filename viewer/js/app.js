@@ -53,6 +53,7 @@ const skinSelect = document.getElementById('skin-select')
 const progressBar = document.getElementById('progress-bar')
 const progressFill = document.getElementById('progress-fill')
 const statusText = document.getElementById('status-text')
+const controlsTurn = document.getElementById('controls-turn')
 const infoGrid = document.getElementById('info-grid')
 
 // ============================================================================
@@ -308,6 +309,11 @@ function reconnectTimeline() {
   frameCallback = (frame) => {
     renderer.renderFrame(frame)
     updateProgress()
+    if (controlsTurn && matchData) {
+      const total = matchData.frames.length
+      const turn = frame.turnNumber || (frame.index + 1)
+      controlsTurn.textContent = `Turn ${turn}/${total}`
+    }
   }
 
   endCallback = (winner) => {
@@ -387,6 +393,12 @@ function initializeViewer(data) {
     updateControls()
     updateProgress()
   })
+
+  if (controlsTurn) {
+    const first = data.frames[0]
+    const turn = first ? (first.turnNumber || 1) : 1
+    controlsTurn.textContent = `Turn ${turn}/${data.frames.length}`
+  }
 
   displayMatchInfo(data)
   updateControls()

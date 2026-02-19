@@ -59,10 +59,7 @@
 }
 
 .scene-message-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  display: none;
 }
 
 .scene-action {
@@ -527,7 +524,20 @@
 
 .viewer-controls.skin-ffvi-scene #btn-prev,
 .viewer-controls.skin-ffvi-scene #btn-next {
-  padding: 8px 8px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.viewer-controls.skin-ffvi-scene .viewer-nav-icon {
+  display: block;
+  line-height: 1;
+  transform: translateY(-3px);
 }
 
 .viewer-controls.skin-ffvi-scene label {
@@ -643,10 +653,7 @@
   }
 
   .scene-message-right {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    display: none;
   }
 
   .scene-action {
@@ -807,9 +814,11 @@
 
   .viewer-controls.skin-ffvi-scene #btn-prev,
   .viewer-controls.skin-ffvi-scene #btn-next {
+    width: 34px;
     min-width: 34px;
-    padding-left: 6px;
-    padding-right: 6px;
+    height: 34px;
+    padding: 0;
+    line-height: 1;
   }
 
   .viewer-controls.skin-ffvi-scene label {

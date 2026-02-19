@@ -88,15 +88,10 @@
     <!-- Playback controls (shown when match loaded) -->
     <div id="controls-container" class="viewer-controls" style="display: none;">
       <button id="btn-play" title="Play/Pause (Space)">▶ Play</button>
-      <button id="btn-prev" title="Previous (←)">⏮</button>
-      <button id="btn-next" title="Next (→)">⏭</button>
-
-      <div class="viewer-progress" id="progress-bar">
-        <div class="viewer-progress-fill" id="progress-fill"></div>
-      </div>
+        <button id="btn-prev" title="Previous (←)"><span class="viewer-nav-icon">⏮</span></button>
+        <button id="btn-next" title="Next (→)"><span class="viewer-nav-icon">⏭</span></button>
 
       <label class="speed-control">
-        Speed:
         <select id="speed-select">
           <option value="0.5">0.5x</option>
           <option value="1" selected>1x</option>
@@ -105,9 +100,14 @@
         </select>
       </label>
 
-      <span class="spacer"></span>
+      <div class="viewer-progress" id="progress-bar">
+        <div class="viewer-progress-fill" id="progress-fill"></div>
+      </div>
 
-      <span class="status" id="status-text">Ready</span>
+      <div class="controls-meta">
+        <span id="status-text" class="controls-meta-status">READY</span>
+        <span id="controls-turn" class="controls-meta-turn">—</span>
+      </div>
     </div>
 
     <!-- Viewer container (shown when match loaded) -->
