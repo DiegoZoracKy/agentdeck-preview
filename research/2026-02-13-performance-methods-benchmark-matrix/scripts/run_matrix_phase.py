@@ -134,7 +134,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--log-level",
-        choices=["debug", "info", "warning", "error", "off"],
+        choices=["debug", "info", "off"],
         default="info",
         help="Console log level (default: info).",
     )
@@ -240,8 +240,6 @@ def _resolve_log_level(value: str):
     mapping = {
         "debug": LogLevel.DEBUG,
         "info": LogLevel.INFO,
-        "warning": LogLevel.WARNING,
-        "error": LogLevel.ERROR,
         "off": None,
     }
     return mapping[value]

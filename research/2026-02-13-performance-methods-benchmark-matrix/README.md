@@ -8,10 +8,11 @@ and Google models in FixedDamageGame?
 ## Why This Package Exists
 This package is built around a narrative-first benchmark:
 
-1. Tune `gpt-4o-mini` for the task.
-2. Measure whether tuning beats raw model-tier advantage (`gpt-4o`, `gpt-5.2`).
-3. Test if the same tuned strategy transfers against Anthropic and Google weak/strong tiers.
-4. Quantify the cost-efficiency story with statistically stronger headline cells.
+1. Establish mini baselines (`AOxAO`, `CoT-HxCoT-H`, `CoT-TxCoT-T`) to control first-player/variance effects.
+2. Tune `gpt-4o-mini` for the task (`AO` vs `CoT-H`, `AO` vs `CoT-T`, `CoT-H` vs `CoT-T`).
+3. Measure whether tuning beats raw model-tier advantage (`gpt-4o`, `gpt-5.2`).
+4. Test if the same tuned strategy transfers against Anthropic and Google weak/strong tiers.
+5. Quantify the cost-efficiency story with statistically stronger headline cells.
 
 ## Primary Matrix
 - Primary file: `matrix.yaml` (v2 OpenAI-anchor grid)
@@ -19,10 +20,10 @@ This package is built around a narrative-first benchmark:
 ## Matrix Snapshot (v2)
 - Models: 7 (`gpt-4o-mini`, `gpt-4o`, `gpt-5.2`, `claude-haiku-4.5`, `claude-sonnet-4.5`, `gemini-2.5-flash-lite`, `gemini-2.5-pro`)
 - Configs: 3 (`AO`, `CoT-H`, `CoT-T`)
-- Cells: 25
-- Pilot: 24 matches/cell => 600 matches
+- Cells: 28
+- Pilot: 24 matches/cell => 672 matches
 - Expansion targets: 80 per cell by default; 120 for headline `gpt-5.2` cells (`c15-c17`)
-- Full-expansion ceiling: 2120 matches
+- Full-expansion ceiling: 2360 matches
 
 ## Config Definitions
 - `AO`: `ActionOnlyController` + default turn template
@@ -30,7 +31,7 @@ This package is built around a narrative-first benchmark:
 - `CoT-T`: `ReasoningController` + default turn template (includes `{controller_format}` per turn)
 
 ## Execution Phases (v2)
-- `A1` OpenAI Strategy Discovery (Tracks 1-3): 7 cells
+- `A1` OpenAI Strategy Discovery + Baselines (Tracks 0-3): 10 cells
 - `A2` Opponent Strategy Calibration (Track 4): 4 cells
 - `A3` OpenAI Cost-Efficiency Showcase (Track 5): 6 cells
 - `A4` Cross-Provider Challenge (Track 6): 8 cells

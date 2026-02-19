@@ -115,8 +115,11 @@ execution_plan:
   phases:
     - phase_id: A1
       name: OpenAI Strategy Discovery
-      tracks: [1, 2, 3]
+      tracks: [0, 1, 2, 3]
       cell_ids:
+        - c26_t0_openai_weak_ao_vs_ao
+        - c27_t0_openai_weak_coth_vs_coth
+        - c28_t0_openai_weak_cott_vs_cott
         - c01_t1_openai_weak_ao_vs_coth
         - c02_t1_openai_weak_ao_vs_cott
         - c03_t1_openai_weak_coth_vs_cott
@@ -174,6 +177,33 @@ highlight_tag_rules:
     definition: lower_cost_player_wins_with_margin_gte_0.1
 
 cells:
+  - id: c26_t0_openai_weak_ao_vs_ao
+    track: 0
+    phase: A1
+    question: Baseline mirror match for gpt-4o-mini under ActionOnly.
+    player_a: { model_ref: openai_weak, config_ref: AO }
+    player_b: { model_ref: openai_weak, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c27_t0_openai_weak_coth_vs_coth
+    track: 0
+    phase: A1
+    question: Baseline mirror match for gpt-4o-mini under CoT-H (handshake-only).
+    player_a: { model_ref: openai_weak, config_ref: CoT-H }
+    player_b: { model_ref: openai_weak, config_ref: CoT-H }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
+  - id: c28_t0_openai_weak_cott_vs_cott
+    track: 0
+    phase: A1
+    question: Baseline mirror match for gpt-4o-mini under CoT-T (turn-reinforced).
+    player_a: { model_ref: openai_weak, config_ref: CoT-T }
+    player_b: { model_ref: openai_weak, config_ref: CoT-T }
+    pilot_matches: 24
+    expansion_target_matches: 80
+
   - id: c01_t1_openai_weak_ao_vs_coth
     track: 1
     phase: A1

@@ -15,7 +15,7 @@ Prove cost-efficiency gains from strategy tuning (AO vs CoT-H vs CoT-T) in a rep
 - Current repo state:
   - Working tree was clean at kickoff for this phase.
   - Ready to proceed with matrix preflight.
-  - Execution focus now: mini-only strategy sprint (`c01`, `c02`, `c03`).
+  - Execution focus now: mini-only baseline-first sprint (`c26`, `c27`, `c28`, `c01`, `c02`, `c03`).
 
 ## Source of Truth
 - Matrix: `research/2026-02-13-performance-methods-benchmark-matrix/matrix.yaml`
@@ -85,12 +85,16 @@ This is the target behavior for experiment artifacts:
 
 ### Phase 2.5 - Mini-Only Strategy Sprint (Current)
 - Status: NEXT
-- Scope: run only `gpt-4o-mini` Track 1 cells.
+- Scope: run only `gpt-4o-mini` baseline + Track 1 cells.
+  - `c26_t0_openai_weak_ao_vs_ao` (baseline AO vs AO)
+  - `c27_t0_openai_weak_coth_vs_coth` (baseline CoT-H vs CoT-H)
+  - `c28_t0_openai_weak_cott_vs_cott` (baseline CoT-T vs CoT-T)
   - `c01_t1_openai_weak_ao_vs_coth` (AO vs CoT-H)
   - `c02_t1_openai_weak_ao_vs_cott` (AO vs CoT-T)
   - `c03_t1_openai_weak_coth_vs_cott` (CoT-H vs CoT-T)
-- Matches: 24 per cell (pilot), seeds `420000`, `421000`, `422000`.
+- Matches: 24 per cell (pilot), deterministic seeds by runner.
 - Objective:
+  - establish robust mirror baselines before method comparisons;
   - quantify CoT uplift over AO;
   - quantify incremental uplift of persistent instruction reinforcement (CoT-T) over handshake-only (CoT-H).
 - Note:
@@ -123,9 +127,9 @@ This is the target behavior for experiment artifacts:
 
 ## Immediate Checklist (Start Here)
 - [x] Freeze matrix inputs in `matrix.yaml.frozen_inputs` (`git_tag`, `git_commit`, `prompt_template_version`).
-- [x] Resolve and confirm mini-only execution plan (`c01-c03`) via dry-run.
-- [ ] Execute mini-only sprint (`c01-c03`, 24 matches/cell).
-- [ ] Package + validate mini-only results and publish interim findings.
+- [x] Resolve and confirm mini-only execution plan via dry-run.
+- [ ] Execute mini-only baseline-first sprint (`c26-c28`, `c01-c03`, 24 matches/cell).
+- [ ] Package + validate mini-only sprint results and publish interim findings.
 - [ ] Run preflight sentinel cells (4 x 6).
 - [x] Validate generated research artifacts (`research_validate.py`).
 - [ ] Check preflight reliability gate (<= 5% forfeit/instability).
