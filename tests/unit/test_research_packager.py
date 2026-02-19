@@ -118,6 +118,8 @@ def test_build_manifest_infers_required_fields(tmp_path):
     assert manifest["run"]["seed_base"] == 123
     assert manifest["players"][0]["provider"] == "openai"
     assert manifest["players"][0]["model"] == "gpt-4o-mini"
+    assert manifest["variants"]["models"] == ["gpt-4o-mini"]
+    assert manifest["variants"]["controllers"] == ["ActionOnlyController"]
 
 
 def test_package_session_creates_outputs(tmp_path):

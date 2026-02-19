@@ -184,6 +184,30 @@ def _derive_status(matches_planned: int, matches_completed: int) -> str:
     return "running"
 
 
+def _infer_variants(players: List[Dict[str, Any]]) -> Dict[str, List[str]]:
+    models = sorted(
+        {
+            str(player.get("model"))
+            for player in players
+            if player.get("model") is not None and str(player.get("model")).strip()
+        }
+    )
+    controllers = sorted(
+        {
+            str(player.get("controller"))
+            for player in players
+            if player.get("controller") is not None and str(player.get("controller")).strip()
+        }
+    )
+
+    variants: Dict[str, List[str]] = {}
+    if models:
+        variants["models"] = models
+    if controllers:
+        variants["controllers"] = controllers
+    return variants
+
+
 def build_manifest(
     *,
     template_path: Path,
@@ -224,6 +248,11 @@ def build_manifest(
     manifest.setdefault("game", {})
     manifest["game"]["name"] = game_name
     manifest["players"] = players
+    variants = _infer_variants(players)
+    if variants:
+        manifest["variants"] = variants
+    else:
+        manifest.pop("variants", None)
 
     manifest.setdefault("run", {})
     manifest["run"]["seed_base"] = int(seed_base)
