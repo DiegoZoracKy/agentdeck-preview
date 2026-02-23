@@ -19,6 +19,7 @@ class LLMPlayer(Player, ABC):
     # Subclasses must define these
     default_model: str = None
     api_key_env_var: str = None
+    _ENGINE_INTERNAL_STATE_KEYS = {"_turn_count", "_first_player_idx"}
 
     def __init__(
         self,
@@ -414,9 +415,11 @@ class LLMPlayer(Player, ABC):
 
         # Build conclusion prompt using PromptBuilder
         try:
+            final_state_for_prompt = self._sanitize_conclusion_state(result.final_state)
+
             # Render final state from player's perspective
             final_view = self.renderer.render(
-                result.final_state,
+                final_state_for_prompt,
                 player=self.name,
                 turn_context=None,
             )
@@ -483,6 +486,18 @@ class LLMPlayer(Player, ABC):
             if logger:
                 logger.debug(f"Conclusion failed for {self.name}: {e}")
             return None
+
+    def _sanitize_conclusion_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Remove engine bookkeeping keys from LLM-facing conclusion prompts.
+        """
+        if not isinstance(state, dict):
+            return {}
+
+        sanitized = copy.deepcopy(state)
+        for key in self._ENGINE_INTERNAL_STATE_KEYS:
+            sanitized.pop(key, None)
+        return sanitized
 
     def _format_outcome(self, result) -> str:
         """Helper to generate human-readable outcome string for conclusion prompts."""

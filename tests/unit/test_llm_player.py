@@ -108,6 +108,35 @@ def test_llmplayer_conclude_handles_draw():
     assert "Draw" in bundle.text
 
 
+def test_llmplayer_conclude_hides_engine_internal_state_keys():
+    """Conclusion prompt must not expose engine bookkeeping fields."""
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+    )
+
+    match_result = MatchResult(
+        winner="Bob",
+        final_state={
+            "health": {"Alice": 0, "Bob": 20},
+            "potions": {"Alice": 0, "Bob": 0},
+            "_turn_count": 39,
+            "_first_player_idx": 1,
+        },
+        events=[],
+        seed=123,
+        metadata={"game": "FixedDamageGame"},
+    )
+
+    player.conclude(match_result, match_context=_make_match_context())
+    bundle = player.last_bundle
+    assert "_turn_count" not in bundle.text
+    assert "_first_player_idx" not in bundle.text
+    assert "Turn Count" not in bundle.text
+    assert "First Player Idx" not in bundle.text
+
+
 # Test handshake and decide phases are covered by integration tests
 # Skipped here due to complexity of HandshakeContext/decide() setup
 

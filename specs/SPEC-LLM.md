@@ -1,8 +1,8 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.1.0
-> Last Updated: 2026-02-03
+> Version: 1.1.1
+> Last Updated: 2026-02-23
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
@@ -25,6 +25,7 @@
 - **Usage & cost tracking**: Aggregate per-call metadata (tokens, cost, latency) and maintain running totals for reporting.
 - **Metadata injection**: Supply `usage_info`, retry metrics, and provider extras to `HandshakeResult` / `ActionResult` metadata.
 - **Conversation management**: Maintain local history when no `ConversationManager` is bound and preserve handshake exchanges in history.
+- **Prompt hygiene**: For template-driven conclusion prompts, sanitize engine bookkeeping keys from rendered final-state views before LLM invocation.
 
 ## 4. Public API
 - `LLMPlayer(name, *, api_key=None, model=None, temperature=1.0, max_tokens=None, prompt=None, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, max_retries=3, retry_delay=1.0, **kwargs)`
@@ -82,20 +83,21 @@
 11. **CH1**: When `ConversationManager` is bound, MUST delegate history logging (handshake, turns, conclusion) to the manager.
 12. **CH2**: When manager absent, MUST append to `_local_history` (user/assistant pairs) and include handshake exchanges.
 13. **CH3**: `reset_conversation()` MUST clear local history between matches regardless of handshake policy.
+14. **CH4**: For template-driven conclusion composition (no explicit `match_context.conclusion_prompt` override), LLM players MUST sanitize engine bookkeeping keys from final-state prompt views before invoking the model. At minimum `_turn_count` and `_first_player_idx` MUST be removed.
 
 ### 5.5 Pricing Integration (PI)
-14. **PI1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
-15. **PI2**: MUST use `calculate_cost(provider, model, prompt_tokens, completion_tokens)` to derive USD cost.
-16. **PI3**: MUST log warning and default cost to `$0.00` when pricing info unavailable.
+15. **PI1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
+16. **PI2**: MUST use `calculate_cost(provider, model, prompt_tokens, completion_tokens)` to derive USD cost.
+17. **PI3**: MUST log warning and default cost to `$0.00` when pricing info unavailable.
 
 ### 5.6 Prompt Metadata Capture (PM)
-17. **PM1**: `_invoke_model` MUST return metadata dict containing `usage_info` (tokens, cost, latency_ms, model, provider) for Player to include in `ActionResult.metadata` / `HandshakeResult.metadata`.
-18. **PM2**: Metadata MUST include `response_text` (raw LLM output before controller parsing) so Recorder can embed it in the event `prompt` payload (SPEC-RECORDER v1.3 §6.7).
-19. **PM3**: MUST capture phase context (`phase: LifecyclePhase`) in metadata to distinguish handshake/turn/conclusion calls in recorder events.
-20. **PM4**: All metadata values MUST be JSON-serializable (no lambda functions, no non-serializable SDK objects).
+18. **PM1**: `_invoke_model` MUST return metadata dict containing `usage_info` (tokens, cost, latency_ms, model, provider) for Player to include in `ActionResult.metadata` / `HandshakeResult.metadata`.
+19. **PM2**: Metadata MUST include `response_text` (raw LLM output before controller parsing) so Recorder can embed it in the event `prompt` payload (SPEC-RECORDER v1.3 §6.7).
+20. **PM3**: MUST capture phase context (`phase: LifecyclePhase`) in metadata to distinguish handshake/turn/conclusion calls in recorder events.
+21. **PM4**: All metadata values MUST be JSON-serializable (no lambda functions, no non-serializable SDK objects).
 
 ### 5.7 Cloning & Parallel Execution (CL)
-21. **CL1**: LLM players MUST override `clone()` to recreate provider SDK clients (new HTTP session, fresh locks) instead of copying them. Clone implementations MUST preserve configuration and aggregate metrics while leaving runtime bindings (conversation manager, logger) unset so the console can rebind them (see SPEC-PARALLEL §5). Failure to provide a working clone MUST raise a clear error directing researchers to run with `concurrency=1` or implement cloning.
+22. **CL1**: LLM players MUST override `clone()` to recreate provider SDK clients (new HTTP session, fresh locks) instead of copying them. Clone implementations MUST preserve configuration and aggregate metrics while leaving runtime bindings (conversation manager, logger) unset so the console can rebind them (see SPEC-PARALLEL §5). Failure to provide a working clone MUST raise a clear error directing researchers to run with `concurrency=1` or implement cloning.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:
