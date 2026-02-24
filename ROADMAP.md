@@ -1,149 +1,212 @@
-# AgentDeck Roadmap (Research + Product Release)
+# AgentDeck Experiment Reset Roadmap
 
-Last updated: 2026-02-19T18:20:00Z
+Last updated: 2026-02-23T00:30:00Z  
 Owner: Diego + Codex + Claude
 
 ## North Star
-Prove cost-efficiency gains from strategy tuning (AO vs CoT-H vs CoT-T) in a reproducible benchmark, and ship the same evidence as a product-facing experience in the viewer.
+Run a clean, reproducible mini-only benchmark from zero (gpt-4o-mini) and produce publishable research artifacts using only AgentDeck out-of-the-box capabilities.
 
-## Current Snapshot
-- Completed:
-  - Recorder hardening committed (`fd13df6`) and validated.
-  - Packaging/spec workflow commit completed (`9ec7414`).
-  - Viewer mobile/desktop stabilization committed (`53d4cd8`, `330df52`, `ab10a65`).
-  - One-match smoke package generated at `research/2026-02-18-openai-mini-smoke`.
-- Current repo state:
-  - Working tree was clean at kickoff for this phase.
-  - Ready to proceed with matrix preflight.
-  - Execution focus now: mini-only baseline-first sprint (`c26`, `c27`, `c28`, `c01`, `c02`, `c03`).
+## Locked Execution Contract
+- Engine: AgentDeck only (standalone kept only as historical investigation reference).
+- Models in this reset: `openai:gpt-4o-mini` only.
+- Cells: `c26`, `c27`, `c28`, `c01`, `c02`, `c03`.
+- Matches per cell: `24` (paired seed side-swap enabled by matrix runner).
+- `concurrency=10`
+- `max_turns=30`
+- `temperature=1.0`
+- `starting_potions=2`
+- Parse behavior: real-world `FORFEIT` (no custom fallback logic).
+- Conclusion phase: enabled.
+- No custom calculators/prints for benchmark decisions; rely on AgentDeck records/logs/export/packager.
 
-## Source of Truth
-- Matrix: `research/2026-02-13-performance-methods-benchmark-matrix/matrix.yaml`
-- Out-of-the-box execution contract: `research/2026-02-13-performance-methods-benchmark-matrix/OUT_OF_THE_BOX_REQUIREMENTS.md`
-- Research package contract (draft): `specs/drafts/SPEC-RESEARCH-EXPERIMENT-v1.2.0.md`
-- Recorder contract (final): `specs/SPEC-RECORDER.md`
+## What Changes Before Running
+- Update `ROADMAP.md` only (this document).
+- No code/spec changes in this step.
 
-## Product + Engineering Principles (Locked)
-- Use only AgentDeck native execution features for runs (no ad-hoc calculators/print pipelines).
-- Research docs in core must stay framework-level; experiment-specific docs stay inside each `research/<experiment>/`.
-- Current-version-first: no backward-compat constraints for pre-launch artifacts/specs.
-- Keep provenance auditable: freeze inputs before each major run and keep runtime git state clean.
-- Viewer polish should support adoption, but must not block benchmark execution.
+## Reset Plan
 
-## Runtime Decisions (Locked)
-- `max_turns = 30`
-- `concurrency = 10`
-- `conclusion = enabled` (feature showcase + research realism)
-- `max_tokens`: do not cap unless API requires; when required use high headroom to avoid truncation forfeits.
-- Parse policy for benchmark remains real-world (`FORFEIT` behavior on parse failure).
-- Campaign order: `Preflight -> A1 -> A2 -> A3 -> A4`.
-
-## Statistics Direction (Spec Track)
-This is the target behavior for experiment artifacts:
-- `results.json.statistics` is core research output (not optional narrative).
-- Requirement policy:
-  - MUST for `complete|archived`.
-  - SHOULD for `running` when `n_decisive > 0`.
-- Quality tiers: `insufficient|low|moderate|high` with explicit numeric thresholds.
-- Actionability:
-  - `is_actionable` explicit bool.
-  - false for insufficient evidence.
-- Recommendation math:
-  - `n_recommended_total = max(min_decisive_for_inference, n_for_80pct_power, n_for_precision)`.
-  - Power target uses configured MDE (not fragile observed effect from tiny N).
-- Separation of concerns:
-  - packager writes factual blocks only.
-  - interpretation remains human-owned.
-
-## Experiment Identity / Naming Direction
-- Stable series id: `experiment_key`.
-- Unique run id: `experiment_id`.
-- Preferred unique folder pattern:
-  - `research/<experiment_key>__<session_suffix>/`
-  - where `session_suffix = YYYYMMDD_HHMMSS_hash6` (reused from `session_id`).
-- Goal: deterministic traceability between packaged experiment and raw session artifacts, with collision-free same-day reruns.
-
-## Execution Plan
-
-### Phase 0 - Hardening Baseline
+### Phase R0 - Pre-Run Sanity (No Execution Yet)
+- Confirm matrix source of truth:
+  - `research/2026-02-13-performance-methods-benchmark-matrix/matrix.yaml`
+- Confirm runner source of truth:
+  - `research/2026-02-13-performance-methods-benchmark-matrix/scripts/run_matrix_phase.py`
+- Confirm venv/tooling:
+  - `.venv` active and dependencies installed.
 - Status: COMPLETE
-- Exit achieved: recorder and packager validations green.
 
-### Phase 1 - One-Match Smoke (OOTB)
+### Phase R1 - Runtime Cleanup
+- Remove previous runtime sessions used for investigation/parity:
+  - `agentdeck_runs/session_*`
+  - `standalone_runs/session_*`
+- Preserve research artifacts and historical baselines:
+  - keep `research/_parity/`
+  - keep `research/2025-11-08-openai-benchmarks/`
+  - keep committed/uncommitted research package folders in `research/`
 - Status: COMPLETE
-- Output: `research/2026-02-18-openai-mini-smoke`
-- Purpose: validate end-to-end flow (run -> record -> package -> validate).
+- Executed: cleaned only `agentdeck_runs/session_*` and `standalone_runs/session_*`.
 
-### Phase 2 - Matrix Preflight Gate
-- Status: NEXT
-- Scope: 4 sentinel cells, 6 matches each (`matrix.yaml -> execution_plan.preflight`).
-- Gate:
-  - forfeit/instability <= 5%.
-  - prompt/config correctness confirmed for all providers in preflight.
-- If failed:
-  - fix config/prompt/provider limits and rerun preflight only.
+### Phase R2 - Fresh Mini-Only Execution (From Zero)
+Run cells one by one in this order:
+1. `c26_t0_openai_weak_ao_vs_ao`
+2. `c27_t0_openai_weak_coth_vs_coth`
+3. `c28_t0_openai_weak_cott_vs_cott`
+4. `c01_t1_openai_weak_ao_vs_coth`
+5. `c02_t1_openai_weak_ao_vs_cott`
+6. `c03_t1_openai_weak_coth_vs_cott`
 
-### Phase 2.5 - Mini-Only Strategy Sprint (Current)
-- Status: NEXT
-- Scope: run only `gpt-4o-mini` baseline + Track 1 cells.
-  - `c26_t0_openai_weak_ao_vs_ao` (baseline AO vs AO)
-  - `c27_t0_openai_weak_coth_vs_coth` (baseline CoT-H vs CoT-H)
-  - `c28_t0_openai_weak_cott_vs_cott` (baseline CoT-T vs CoT-T)
-  - `c01_t1_openai_weak_ao_vs_coth` (AO vs CoT-H)
-  - `c02_t1_openai_weak_ao_vs_cott` (AO vs CoT-T)
-  - `c03_t1_openai_weak_coth_vs_cott` (CoT-H vs CoT-T)
-- Matches: 24 per cell (pilot), deterministic seeds by runner.
-- Objective:
-  - establish robust mirror baselines before method comparisons;
-  - quantify CoT uplift over AO;
-  - quantify incremental uplift of persistent instruction reinforcement (CoT-T) over handshake-only (CoT-H).
-- Note:
-  - OpenAI-only run (no Anthropic/Google dependency for this sprint).
+Rules during execution:
+- Keep the same runtime parameters across all six cells.
+- Stop and inspect immediately if forfeit rate exceeds 5% in any cell.
+- Keep all session IDs and record paths for traceability.
+- Status: COMPLETE
+- Sessions:
+  - `c26` -> `session_20260221_193351_362c34`
+  - `c27` -> `session_20260221_193521_daf3ea`
+  - `c28` -> `session_20260221_193847_b74a3f`
+  - `c01` -> `session_20260221_194251_bcca11`
+  - `c02` -> `session_20260221_194523_6fdd63`
+  - `c03` -> `session_20260221_194819_37722d`
 
-### Phase 3 - A1 OpenAI Strategy Discovery
-- Status: PENDING
-- Scope: 7 cells, 24 matches/cell.
-- Objective:
-  - prove CoT uplift,
-  - test instruction persistence impact (CoT-H vs CoT-T),
-  - calibrate behavior on top-tier OpenAI model.
-- Deliverable:
-  - publishable A1 package + curated viewer highlights.
+### Phase R3 - Package + Validate
+For each fresh session:
+- Generate export/package artifacts (`results.json`, `results.csv`, factual markdown blocks).
+- Run validator:
+  - `scripts/research_validate.py --research-dir research`
+- Ensure each package is status-consistent and spec-compliant.
+- Status: COMPLETE
+- Packages created:
+  - `research/openai-mini-c26-ao-vs-ao__20260221_193351_362c34/`
+  - `research/openai-mini-c27-coth-vs-coth__20260221_193521_daf3ea/`
+  - `research/openai-mini-c28-cott-vs-cott__20260221_193847_b74a3f/`
+  - `research/openai-mini-c01-ao-vs-coth__20260221_194251_bcca11/`
+  - `research/openai-mini-c02-ao-vs-cott__20260221_194523_6fdd63/`
+  - `research/openai-mini-c03-coth-vs-cott__20260221_194819_37722d/`
+- Validation: `Research validation passed.`
 
-### Phase 4 - A2 Opponent Strategy Calibration
-- Status: PENDING
-- Scope: Anthropic/Google AO vs CoT-T calibration cells.
-- Objective: determine strongest/worst opponent strategy assumptions for later head-to-head claims.
+### Phase R4 - Findings + Decision Gate
+Produce a concise readout:
+- Where strategy improvement is observed.
+- Where expected improvement is not observed.
+- Whether sample size (24/cell) is sufficient for directional claims.
+- Decision:
+  - proceed to expansion (`80` selected cells), or
+  - adjust configuration and rerun affected cells.
+- Status: IN PROGRESS
 
-### Phase 5 - A3 OpenAI Cost-Efficiency Showcase
-- Status: PENDING
-- Scope: mini strategy variants vs 4o / 5.2 variants.
-- Objective: establish the central thesis (task tuning can beat raw model spend).
+## Engine Correctness and Observability Fix Track
 
-### Phase 6 - A4 Cross-Provider Challenge
-- Status: PENDING
-- Scope: tuned mini strategy vs weak/strong Anthropic and Google settings.
-- Objective: external validity of the cost-efficiency thesis.
+### P0 - Functional Correctness (Blockers)
+- [ ] Clamp HP to non-negative in `FixedDamageGame.update()` attack path.
+  - Why: current runtime evidence shows `health: 10 -> -10` in real matches.
+  - Acceptance:
+    - No negative HP values in `records/match_*.json` final or intermediate states.
+    - No negative HP deltas in debug/info logs for fresh smoke run.
+    - Unit test coverage for clamp behavior and winner logic unchanged.
+- [ ] Fix recorder timing consistency (event-level and match-level timestamps).
+  - Scope:
+    - `event.timestamp` in match artifacts must reflect emission time, not flush/write time.
+    - `event.duration` / prompt-level duration must reflect real turn/call duration (not fixed placeholder values).
+    - `started_at` / `ended_at` / `duration_seconds` in match artifacts must be non-null and aligned with batch match refs.
+  - Why:
+    - Current artifacts show compressed event timelines and mismatch between match file vs batch metadata.
+  - Acceptance:
+    - Event timeline span is coherent with turn durations for long matches.
+    - `records/match_*.json` and `records/batch_*.json` agree on match start/end windows.
+    - No `started_at=None` / `ended_at=None` for completed matches.
+- [ ] Add correlation fields to LLM request/response/call debug lines.
+  - Scope: include at least `match_id`, `turn_number`, `phase`, `player`, `call_id` (or `request_id` equivalent).
+  - Why: current `debug.log` interleaving prevents reliable per-match reconstruction in parallel batches.
+  - Acceptance:
+    - Every `API request`, `API response`, and `API call` line can be joined deterministically to one match/turn.
+    - Manual inspection of a concurrent batch is unambiguous without fallback to raw JSON.
 
-## Immediate Checklist (Start Here)
-- [x] Freeze matrix inputs in `matrix.yaml.frozen_inputs` (`git_tag`, `git_commit`, `prompt_template_version`).
-- [x] Resolve and confirm mini-only execution plan via dry-run.
-- [ ] Execute mini-only baseline-first sprint (`c26-c28`, `c01-c03`, 24 matches/cell).
-- [ ] Package + validate mini-only sprint results and publish interim findings.
-- [ ] Run preflight sentinel cells (4 x 6).
-- [x] Validate generated research artifacts (`research_validate.py`).
-- [ ] Check preflight reliability gate (<= 5% forfeit/instability).
-- [ ] Decide go/no-go for A1.
+### P1 - Spec and Telemetry Consistency
+- [ ] Fix event-ordering editorial inconsistency in `specs/SPEC.md`.
+  - Current issue: hierarchy snippet implies handshake nested under `match_start`, while ordering text says handshake precedes `MATCH_START`.
+  - Acceptance:
+    - Single, unambiguous lifecycle order in docs.
+    - Cross-reference remains aligned with `specs/SPEC-CONSOLE.md`.
+- [ ] Align prompt payload turn numbering semantics (`prompt.turn_number`) with spec.
+  - Current issue:
+    - Gameplay prompt payloads in artifacts are serialized with `turn_number: null`.
+    - Spec expectations and implementation behavior are not aligned/documented clearly.
+  - Acceptance:
+    - Either gameplay prompt payloads carry concrete turn numbers (preferred), or spec is explicitly updated to current schema behavior with rationale.
+    - `handshake/conclusion` semantics remain explicit and test-covered.
+- [ ] Persist `player_handshake_start` in match artifacts (or formalize omission in spec).
+  - Current issue: artifacts contain `player_handshake_complete`/`abort` but not `player_handshake_start`.
+  - Acceptance:
+    - Event pipeline and recorder behavior are explicit and consistent (implementation + spec + tests).
+    - Handshake lifecycle is fully auditable in match artifacts.
+- [ ] Clarify `player_order` vs `first_player` semantics in specs/artifacts.
+  - Current issue:
+    - Readers often assume `player_order[0]` is the first actor.
+    - In turn-based flow, first actor may be selected at runtime (`_first_player_idx`) after ordering.
+  - Acceptance:
+    - Specs explicitly document that `player_order` = ordered roster before runtime first-player selection.
+    - `first_player` = actual first actor when runtime data exists.
+    - Analysis docs/checklists use `first_player` (not `player_order[0]`) for first-mover metrics.
+- [ ] Add artifact-level invariant checks for match/batch consistency.
+  - Scope:
+    - Validate monotonic and non-collapsed event timeline for gameplay events.
+    - Validate top-level match timing (`started_at`/`ended_at`/`duration_seconds`) against turn contexts.
+    - Validate prompt payload turn numbering coherence (`prompt.turn_number` vs `turn_context.turn_number`).
+    - Validate winner/final-state consistency (`winner`, terminal HP bounds, turn count coherence).
+  - Why:
+    - Manual triage already surfaced timing/schema drift that should be caught automatically.
+  - Acceptance:
+    - Tests and/or validation script fail-fast on inconsistent artifacts.
+    - Incident triage does not depend on manual log archaeology for these invariants.
+- [ ] Add targeted parse-failure observability regression test.
+  - Goal: prove `PLAYER_ACTION_PARSE_FAILED` event emission + recorder persistence path in worker/sequential flows.
+  - Acceptance:
+    - Test forces parse failure and asserts event presence + policy metadata.
+    - Recorded match JSON contains parse-failure event payload fields.
 
-## Commands
-- Validate research packages:
-  - `.venv/bin/python scripts/research_validate.py --research-dir research`
-- Targeted regression tests:
-  - `.venv/bin/pytest -q tests/unit/test_recorder_lifecycle.py tests/integration/test_match_lifecycle.py tests/unit/test_research_packager.py`
-- One-match smoke runner:
-  - `python3 research/2026-02-13-performance-methods-benchmark-matrix/scripts/run_one_match_openai_mini.py`
+### P2 - Prompt Hygiene (Quality Improvements)
+- [ ] Keep handshake/gameplay template split explicit in research configs.
+  - Goal: avoid accidental instruction leakage and keep experiments interpretable.
+  - Acceptance:
+    - Matrix/config docs state which instruction cadence is under test (HO/HT).
+    - Pre-run checklist verifies A/B symmetry for non-cadence cells.
+- [ ] Make controller asymmetry explicit in experiment intent (fairness guardrail).
+  - Scope:
+    - For baseline/fairness cells, enforce same controller family on both sides unless cell is marked asymmetric by design.
+    - Surface controller mismatch clearly in manifest/report headers.
+  - Why:
+    - A-vs-B controller asymmetry is valid in hypothesis tests but can silently contaminate baseline interpretation.
+  - Acceptance:
+    - Baseline cells fail preflight if controller asymmetry is not declared.
+    - Experiment artifacts annotate whether asymmetry is intentional.
+- [ ] Clarify `information_level="partial"` semantics for opponent `last_action`.
+  - Current issue:
+    - Text says partial shows only own stats, but `get_view()` exposes all `last_action` values.
+  - Decision required:
+    - either keep opponent last action visible and document it explicitly, or hide it in partial mode.
+  - Acceptance:
+    - Game behavior, prompt wording, and spec text are mutually consistent.
+    - No contradictory guidance for experiment interpretation.
+- [ ] Preserve conclusion prompt sanitization of engine-internal keys.
+  - Status: already fixed in engine; keep as release gate verification.
+  - Acceptance:
+    - No `_turn_count` / `_first_player_idx` in LLM-facing conclusion prompt blocks for new sessions.
+- [x] Align policy for engine-internal keys in gameplay `state_before/state_after`.
+  - Decision taken:
+    - sanitize internal runtime keys (prefix `_`) from recorded gameplay state payloads.
+  - Acceptance:
+    - Recorder sanitizes gameplay snapshots before persistence.
+    - SPEC-RECORDER documents sanitized gameplay state behavior.
+- [ ] Add analysis guardrail: compare artifacts only within the same `session_id`/`batch_id` during incident triage.
+  - Goal: avoid false positives caused by cross-run parameter drift (e.g., potions=4 vs potions=6).
+  - Acceptance:
+    - Triage checklist includes explicit provenance check before causal claims.
 
-## Open Questions (Non-Blocking for Preflight)
-- Final numeric thresholds for tier boundaries and `is_actionable` cut.
-- Whether to emit `statistics` in all `running` packages by default or only when explicitly requested.
-- Timestamp readability convention (`YYYYMMDD` vs `YYYY-MM-DD`) across session/experiment ids.
+## Artifact Policy (This Reset)
+- Runtime truth: `agentdeck_runs/<session_id>/records/*.json` and logs.
+- Research truth: packaged experiment folders in `research/`.
+- Do not delete historical baseline evidence unless explicitly requested.
+
+## Definition of Done
+- All six mini-only cells rerun from a clean runtime state.
+- Packaged artifacts generated and validation passes.
+- One consolidated findings report produced with explicit go/no-go for expansion.

@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 1.3.0
-> Last Updated: 2026-02-18
+> Last Updated: 2026-02-23
 > Implementation: ✅ Complete (schema v1.3 event enrichment)
 > Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers
@@ -182,6 +182,11 @@ Late-binding helper for attaching session context after construction.
 - Invokes collector `on_match_start()` hooks.
 - **MUST flush initial match stub immediately** for crash recovery.
 
+#### on_player_handshake_start(event: Event)
+- Serializes `PLAYER_HANDSHAKE_START` lifecycle event into the `events` array (or pre-match buffer when match has not started).
+- MUST persist prompt metadata payload (`prompt_text`, `prompt_blocks`, `controller_format`) so handshake lifecycle is fully auditable.
+- MUST flush progressively when match recording is active.
+
 #### on_player_handshake_complete(event: Event)
 - Serializes PLAYER_HANDSHAKE_COMPLETE event (SPEC-OBSERVABILITY §3.1.1) into the `events` array.
 - MUST persist prompt metadata in-place within the recorded event: `prompt_text`, `prompt_blocks`, `response_text`, `controller_format`, `controller_metadata`, optional `renderer_output`, and `usage_info` (PM1-PM6).
@@ -196,6 +201,7 @@ Late-binding helper for attaching session context after construction.
 #### on_gameplay(event: Event)
 - Extracts `state_before`, `state_after`, `action`, `reasoning`, and `metadata` from the GAMEPLAY event.
 - Deep copies state snapshots to prevent mutation; preserves `phase_index`, `turn_index`, `mechanic`, and `turn_context` when present.
+- MUST sanitize engine-internal state keys (prefix `_`) from recorded gameplay `state_before` / `state_after` payloads.
 - MUST embed prompt metadata directly in the recorded event under a `prompt` payload (PM1-PM6) when supplied by the controller/action metadata.
 - MUST extract API usage from `metadata.get("usage_info")` and aggregate via `APIUsageTracker`.
 - Invokes collector `on_gameplay()` hooks.
@@ -244,6 +250,7 @@ Load match JSON from disk and normalize structure.
 1. **PP1**: MUST flush match recording after every event handler invocation (`on_gameplay`, `on_event`).
 2. **PP2**: MUST flush initial match stub immediately after `on_match_start()` to enable crash recovery.
 3. **PP3**: MUST perform final flush in `on_match_end()` before clearing `current_match`.
+4. **PP4**: MUST preserve event emission timestamps/durations from lifecycle/gameplay events (do not replace with flush-time placeholders).
 
 ### 6.2 Atomic Writes & File Safety (AW)
 4. **AW1**: MUST use atomic file replacement (write to temp file, `os.replace()`) to prevent corruption from crashes or concurrent writes.
@@ -256,8 +263,10 @@ Load match JSON from disk and normalize structure.
 9. **SV3**: MUST validate against the exact current match schema version (`1.3`) in `load_match()` (no major-version wildcard acceptance).
 
 ### 6.4 Metadata Completeness (MC)
-10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices), `player_order_source` (console/game), `first_player` (name + index; actual first actor when available, else first ordered player).
+10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `duration_seconds`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices), `player_order_source` (console/game), `first_player` (name + index; actual first actor when available, else first ordered player).
 10a. **MC1a**: Match payload MUST include top-level `batch_id` equal to `metadata.batch_id`.
+10b. **MC1b**: Match payload MUST expose top-level `started_at`, `ended_at`, and `duration_seconds` aligned with metadata and batch match refs for completed matches.
+10c. **MC1c**: `player_order` captures roster order before runtime first-player selection; `first_player` captures the actual first actor when runtime selects one.
 11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, `git_info` (commit, branch, dirty status).
 12. **MC3**: MUST capture player configurations: `name`, `type`, `module`, `model`, `temperature`, `max_tokens`, masked `api_key_prefix`, template sources (inline vs file paths) and persist them in recording metadata via `player_summaries` for each player.
 12a. **MC3a**: `player_summaries[].total_cost` MUST reflect finalized per-match player costs after `on_match_end()` when `metadata.match.player_costs` is available.
@@ -293,6 +302,7 @@ Recorder embeds prompt metadata directly inside the lifecycle events captured in
 28. **PM4**: MUST capture `renderer_output` (RenderResult metadata) when provided by the renderer during turn/conclusion phases.
 29. **PM5**: MUST capture `controller_format` (format instructions delivered to the LLM) for every exchange.
 30. **PM6**: MUST capture `controller_metadata` (parser outcomes, validation results, retries, normalization) for every exchange.
+30a. **PM7**: SHOULD capture `call_id` when available to support deterministic request/response correlation in debug logs.
 
 **Normalized Prompt Payload**:
 
@@ -315,6 +325,7 @@ Recorder stores prompt metadata under a `prompt` object within each recorded eve
       "controller_metadata": {"accepted": True},
       "renderer_output": null,
       "usage_info": {"tokens": 12, "cost": 0.0001},
+      "call_id": "ab12cd34",
       "duration": 0.234,
       "retries": 0
     }
@@ -326,8 +337,9 @@ Recorder stores prompt metadata under a `prompt` object within each recorded eve
 ```
 
 - `phase` MUST be one of `handshake`, `turn`, `conclusion`, or `parse_failure`.
-- `turn_number` MUST hold the zero-based turn index for turn/parse_failure events (null for handshake/conclusion).
+- `turn_number` MUST hold the 1-based turn number for turn/parse_failure events (`null` for handshake/conclusion).
 - `renderer_output`, `usage_info`, and `retries` are optional but SHOULD be included when provided by upstream components.
+- `call_id` is optional but SHOULD be included when exposed by upstream player metadata.
 
 **Metadata Sources**: Per SPEC-PLAYER v1.0.0 DS2 and SPEC-OBSERVABILITY §3.1.1, lifecycle events already expose the required fields. Recorder MUST deep-copy these payloads to avoid later mutation.
 
@@ -456,8 +468,11 @@ deck = AgentDeck(recorder=recorder, session=config)
 {
   "schema_version": "1.3",
   "schema_type": "match",
-  "match_id": "20250121_143052",
+ "match_id": "20250121_143052",
   "batch_id": "exec_001",
+  "started_at": "2026-02-23T03:00:00+00:00",
+  "ended_at": "2026-02-23T03:01:01+00:00",
+  "duration_seconds": 61.0,
   "game": "FixedDamageGame",
   "players": ["Alice", "Bob"],
   "player_order": [1, 0],

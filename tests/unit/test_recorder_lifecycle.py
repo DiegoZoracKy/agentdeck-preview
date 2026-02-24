@@ -309,6 +309,275 @@ class TestHandshakeMetadata:
         # Verify accepted flag
         assert handshake_events[0]["data"]["accepted"] is True
 
+    def test_handshake_start_is_recorded(self, recorder, temp_recorder_dir):
+        """PLAYER_HANDSHAKE_START should be persisted in match events."""
+
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=[MockPlayer("Player-1"), MockPlayer("Player-2")],
+            matches=1,
+            context={"session_id": "test_session", "timestamp": 1705499400.0},
+        )
+
+        recorder.on_player_handshake_start(
+            Event(
+                type=EventType.PLAYER_HANDSHAKE_START,
+                data={
+                    "player": "Player-1",
+                    "prompt_text": "You are playing TestGame",
+                    "prompt_blocks": [],
+                    "controller_format": "Reply with OK",
+                },
+                context={"session_id": "test_session", "timestamp": 1705499401.0},
+            )
+        )
+
+        recorder.on_match_start(
+            game=MockGame(),
+            players=[MockPlayer("Player-1"), MockPlayer("Player-2")],
+            match_id="match_001",
+            context={
+                "session_id": "test_session",
+                "batch_id": "batch_001",
+                "timestamp": 1705499402.0,
+            },
+        )
+
+        match_file = temp_recorder_dir / "match_001.json"
+        with open(match_file) as f:
+            match_data = json.load(f)
+
+        start_events = [e for e in match_data["events"] if e["type"] == "player_handshake_start"]
+        assert len(start_events) == 1
+        assert start_events[0]["data"]["player"] == "Player-1"
+        assert start_events[0]["data"]["prompt"]["phase"] == "handshake"
+
+    def test_match_timestamps_use_event_context(self, recorder, temp_recorder_dir):
+        """Match started/ended timestamps should come from lifecycle event context."""
+
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+            def get_summary(self):
+                return {"name": self.name, "type": "MockPlayer"}
+
+        started_ts = 1705499402.0
+        ended_ts = 1705499462.0
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=[MockPlayer("Player-1"), MockPlayer("Player-2")],
+            matches=1,
+            context={"session_id": "test_session", "timestamp": started_ts - 1},
+        )
+
+        recorder.on_match_start(
+            game=MockGame(),
+            players=[MockPlayer("Player-1"), MockPlayer("Player-2")],
+            match_id="match_001",
+            context={
+                "session_id": "test_session",
+                "batch_id": "batch_001",
+                "timestamp": started_ts,
+            },
+        )
+
+        recorder.on_match_end(
+            result=MatchResult(
+                winner="Player-1",
+                final_state={"hp": {"Player-1": 10, "Player-2": 0}},
+                events=[],
+                seed=42,
+                metadata={"duration_seconds": 60.0, "turns": 3},
+            ),
+            context={
+                "session_id": "test_session",
+                "batch_id": "batch_001",
+                "timestamp": ended_ts,
+            },
+        )
+
+        match_file = temp_recorder_dir / "match_001.json"
+        with open(match_file) as f:
+            match_data = json.load(f)
+
+        assert match_data["started_at"] is not None
+        assert match_data["ended_at"] is not None
+        assert match_data["duration_seconds"] == 60.0
+
+        # Stored timestamps should be consistent with the injected event context.
+        assert match_data["started_at"].startswith("2024-01-")
+        assert match_data["ended_at"].startswith("2024-01-")
+
+    def test_gameplay_events_preserve_emission_timestamps_and_turn_durations(
+        self, recorder, temp_recorder_dir
+    ):
+        """
+        Gameplay events must keep emission-time timestamps and real turn durations.
+
+        Regression guard:
+        avoid collapsed timelines caused by recorder flush-time stamping.
+        """
+
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+            def get_summary(self):
+                return {"name": self.name, "type": "MockPlayer"}
+
+        started_ts = 1705499402.0
+        turn1_ts = started_ts + 10.0
+        turn2_ts = started_ts + 25.0
+        ended_ts = started_ts + 60.0
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=[MockPlayer("Player-1"), MockPlayer("Player-2")],
+            matches=1,
+            context={"session_id": "test_session", "timestamp": started_ts - 1},
+        )
+
+        recorder.on_match_start(
+            game=MockGame(),
+            players=[MockPlayer("Player-1"), MockPlayer("Player-2")],
+            match_id="match_001",
+            context={
+                "session_id": "test_session",
+                "batch_id": "batch_001",
+                "timestamp": started_ts,
+            },
+        )
+
+        recorder.on_gameplay(
+            Event(
+                type=EventType.GAMEPLAY,
+                data={
+                    "player": "Player-1",
+                    "action": {"action": "ATTACK", "reasoning": "Aggressive opening"},
+                    "state_before": {
+                        "health": {"Player-1": 100, "Player-2": 100},
+                        "_turn_count": 1,
+                        "_first_player_idx": 0,
+                    },
+                    "state_after": {
+                        "health": {"Player-1": 100, "Player-2": 80},
+                        "_turn_count": 2,
+                        "_first_player_idx": 0,
+                    },
+                    "turn_context": {"turn_number": 1, "duration": 1.25},
+                    "metadata": {
+                        "prompt_text": "Turn 1",
+                        "response_text": "ACTION: ATTACK",
+                        "usage_info": {"call_id": "c111aaaa", "tokens": 10, "cost": 0.0001},
+                    },
+                },
+                context={
+                    "session_id": "test_session",
+                    "batch_id": "batch_001",
+                    "timestamp": turn1_ts,
+                },
+                timestamp=turn1_ts,
+                duration=0.1,
+            )
+        )
+
+        recorder.on_gameplay(
+            Event(
+                type=EventType.GAMEPLAY,
+                data={
+                    "player": "Player-2",
+                    "action": {"action": "POTION", "reasoning": "Recover"},
+                    "state_before": {
+                        "health": {"Player-1": 100, "Player-2": 80},
+                        "_turn_count": 2,
+                        "_first_player_idx": 0,
+                    },
+                    "state_after": {
+                        "health": {"Player-1": 100, "Player-2": 100},
+                        "_turn_count": 3,
+                        "_first_player_idx": 0,
+                    },
+                    "turn_context": {"turn_number": 2, "duration": 2.5},
+                    "metadata": {
+                        "prompt_text": "Turn 2",
+                        "response_text": "ACTION: POTION",
+                        "call_id": "c222bbbb",
+                        "usage_info": {"call_id": "c222bbbb", "tokens": 12, "cost": 0.0002},
+                    },
+                },
+                context={
+                    "session_id": "test_session",
+                    "batch_id": "batch_001",
+                    "timestamp": turn2_ts,
+                },
+                timestamp=turn2_ts,
+                duration=0.1,
+            )
+        )
+
+        recorder.on_match_end(
+            result=MatchResult(
+                winner="Player-1",
+                final_state={"health": {"Player-1": 40, "Player-2": 0}},
+                events=[],
+                seed=42,
+                metadata={"duration_seconds": 60.0, "turns": 2},
+            ),
+            context={
+                "session_id": "test_session",
+                "batch_id": "batch_001",
+                "timestamp": ended_ts,
+            },
+        )
+
+        match_file = temp_recorder_dir / "match_001.json"
+        with open(match_file) as f:
+            match_data = json.load(f)
+
+        gameplay_events = [e for e in match_data["events"] if e["type"] == "gameplay"]
+        assert len(gameplay_events) == 2
+
+        # Keep event emission timestamps (not flush-time values).
+        assert gameplay_events[0]["timestamp"] == turn1_ts
+        assert gameplay_events[1]["timestamp"] == turn2_ts
+        assert (gameplay_events[1]["timestamp"] - gameplay_events[0]["timestamp"]) == 15.0
+
+        # Keep real per-turn durations from turn_context.
+        assert gameplay_events[0]["duration"] == 1.25
+        assert gameplay_events[1]["duration"] == 2.5
+
+        # Prompt payload should carry concrete turn numbers.
+        assert gameplay_events[0]["data"]["prompt"]["turn_number"] == 1
+        assert gameplay_events[1]["data"]["prompt"]["turn_number"] == 2
+
+        # Engine-internal keys should be sanitized from recorded gameplay snapshots.
+        assert "_turn_count" not in gameplay_events[0]["data"]["state_before"]
+        assert "_first_player_idx" not in gameplay_events[0]["data"]["state_before"]
+        assert "_turn_count" not in gameplay_events[1]["data"]["state_after"]
+        assert "_first_player_idx" not in gameplay_events[1]["data"]["state_after"]
+
+        # call_id should be explicit in prompt payload for request/response log correlation.
+        assert gameplay_events[0]["data"]["prompt"]["call_id"] == "c111aaaa"
+        assert gameplay_events[1]["data"]["prompt"]["call_id"] == "c222bbbb"
+
 
 class TestMatchCostAndIds:
     """Validate finalized cost fields and top-level batch IDs in recordings."""
