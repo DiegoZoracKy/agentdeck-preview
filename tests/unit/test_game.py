@@ -270,6 +270,23 @@ def test_OB3_get_view_hides_hidden_information():
 
     # Alice should NOT see Bob's health in partial mode
     assert "Bob" not in alice_view["health"]
+    # Opponent last action remains visible by design in partial mode.
+    assert "Bob" in alice_view["last_action"]
+
+
+def test_fixed_damage_attack_clamps_health_to_zero():
+    """FixedDamageGame ATTACK should never drive HP below zero."""
+    game = FixedDamageGame(max_health=30, attack_damage=40)
+    state = game.setup(["Alice", "Bob"], seed=42)
+
+    attacked = game.update(
+        state,
+        "Alice",
+        ActionResult(action="ATTACK", raw_response="ACTION: ATTACK"),
+        rng=RandomGenerator(seed=42),
+    )
+
+    assert attacked["health"]["Bob"] == 0
 
 
 def test_OB3_full_information_level_shows_all():

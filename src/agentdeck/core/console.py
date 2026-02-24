@@ -6,6 +6,7 @@ import copy
 import time
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from .base import Game, Player, Spectator
@@ -250,6 +251,7 @@ class _MatchWorker:
         self.first_player_info: Optional[Dict[str, Any]] = None
         self._retry_budget: Dict[str, bool] = {}
         self._current_phase_index: Optional[int] = None
+        self._active_runtime_events: Optional[List[Event]] = None
 
     def run(self) -> MatchArtifact:
         """
@@ -279,6 +281,7 @@ class _MatchWorker:
 
         # Create isolated match runtime
         runtime = self._create_match_runtime()
+        self._active_runtime_events = runtime.events
         self.first_player_info = None
 
         # Determine player order using Console's extracted helper
@@ -916,14 +919,44 @@ class _MatchWorker:
         turn_context: TurnContext,
     ) -> "ParseFailurePolicy":
         """
-        Delegate parse-failure handling to the parent console while preserving isolation.
+        Handle parse failures on the worker event bus to preserve replay fidelity.
         """
         from .types import ActionParseError
 
         if not isinstance(error, ActionParseError):  # Defensive - should never happen
             raise TypeError(f"Expected ActionParseError, got {type(error).__name__}")
 
-        return self.console._handle_parse_failure(player, error, turn_context, self.game)
+        parse_result = error.parse_result
+        policy = self.game.on_action_parse_failure(player.name, error, turn_context)
+
+        self._dispatch_event(
+            EventType.PLAYER_ACTION_PARSE_FAILED,
+            events=self._active_runtime_events,
+            player=player.name,
+            match_id=turn_context.match_id,
+            turn_number=turn_context.turn_number,
+            parse_result={
+                "success": parse_result.success,
+                "error": parse_result.error,
+                "raw_response": parse_result.raw_response,
+                "reasoning": parse_result.reasoning,
+                "metadata": parse_result.metadata,
+                "candidates": parse_result.metadata.get("candidates", []),
+            },
+            raw_response=parse_result.raw_response,
+            policy_outcome=policy.value,
+            prompt_text=getattr(parse_result, "prompt_text", ""),
+            prompt_blocks=getattr(parse_result, "prompt_blocks", []),
+            response_text=parse_result.raw_response,
+        )
+
+        if self.logger:
+            self.logger.warning(
+                f"Parse failure for {player.name} at turn {turn_context.turn_number}. "
+                f"Error: {parse_result.error}. Policy: {policy.value}"
+            )
+
+        return policy
 
     def emit_turn(
         self,
@@ -1088,11 +1121,10 @@ class _MatchWorker:
                 event_payload[key] = copy.deepcopy(value)
 
         # Emit to spectators on isolated bus
-        self.event_bus.emit(event_type, **event_payload)
+        emitted_event = self.event_bus.emit(event_type, **event_payload)
 
-        # Capture replay-ready event (with original Player/Game objects + context for spectator replay)
-        # Capture current event bus context (match_id, phase_index, etc.)
-        event_context = dict(self.event_bus._base_context)
+        # Capture replay-ready event with the original emission context (including timestamps).
+        event_context = dict(emitted_event.context or {})
         self.replay_events.append((event_type, event_payload, event_context))
 
         # Capture snapshot for runtime.events list (with sanitized data for recording)
@@ -1814,11 +1846,8 @@ class Console:
             for event_type, payload, context in replay_events:
                 # Temporarily restore worker's context (match_id, phase_index, etc.)
                 self.event_bus._base_context.clear()
-                # Exclude timestamps - EventBus.emit will add fresh ones
-                replay_context = {
-                    k: v for k, v in context.items() if k not in ("timestamp", "monotonic_time")
-                }
-                self.event_bus._base_context.update(replay_context)
+                # Preserve worker emission timestamps for faithful observability artifacts.
+                self.event_bus._base_context.update(dict(context))
 
                 # Emit with original payload (spectators get Player/Game objects, not names)
                 self.event_bus.emit(event_type, **payload)
@@ -1955,6 +1984,11 @@ class Console:
         Returns:
             Match metadata dict
         """
+        started_iso = datetime.fromtimestamp(runtime.started_at, tz=timezone.utc).isoformat()
+        ended_iso = datetime.fromtimestamp(
+            runtime.started_at + match_duration, tz=timezone.utc
+        ).isoformat()
+
         return {
             "game": game.__class__.__name__,
             "players": player_names,  # Recorder expects this (ordered list post-ordering)
@@ -1963,6 +1997,9 @@ class Console:
             "player_order_source": player_order_source,  # "console" or "game" (M4)
             "first_player": first_player,  # {"name": str, "index": int} (M4)
             "duration": match_duration,
+            "duration_seconds": match_duration,
+            "started_at": started_iso,
+            "ended_at": ended_iso,
             "handshake_completed": runtime.handshake_completed,
             "seed": runtime.seed,
             "batch_id": batch_ctx.batch_id,

@@ -1,4 +1,4 @@
-"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP11)."""
+"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP12)."""
 
 import json
 import shutil
@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from agentdeck.research.packager import build_manifest, package_session
+from agentdeck.research.packager import _load_batch_data, build_manifest, package_session
 
 
 def _repo_root() -> Path:
@@ -221,3 +221,52 @@ def test_package_session_missing_model_fails(tmp_path):
             batch_data=batch_data,
             match_files=match_files,
         )
+
+
+def test_load_batch_data_aggregates_multiple_batch_files(tmp_path):
+    """RP12: Multi-batch sessions are aggregated into one packaging view."""
+    session_dir = _make_session(tmp_path)
+    records_dir = session_dir / "records"
+
+    # Replace default single batch with two side-swap-like partial batches.
+    (records_dir / "batch_batch_test.json").unlink()
+
+    batch_a = {
+        "schema_version": "1.0",
+        "schema_type": "batch",
+        "batch_id": "batch_a",
+        "match_refs": [{"match_id": "match_001", "filename": "match_001.json"}],
+        "metadata": {
+            "matches_planned": 1,
+            "matches_completed": 1,
+            "seeds_used": [123],
+            "started_at": "2026-01-20T00:00:00Z",
+            "ended_at": "2026-01-20T00:01:00Z",
+        },
+    }
+    batch_b = {
+        "schema_version": "1.0",
+        "schema_type": "batch",
+        "batch_id": "batch_b",
+        "match_refs": [{"match_id": "match_002", "filename": "match_002.json"}],
+        "metadata": {
+            "matches_planned": 1,
+            "matches_completed": 1,
+            "seeds_used": [124],
+            "started_at": "2026-01-20T00:02:00Z",
+            "ended_at": "2026-01-20T00:03:00Z",
+        },
+    }
+
+    _write_json(records_dir / "batch_batch_a.json", batch_a)
+    _write_json(records_dir / "batch_batch_b.json", batch_b)
+
+    merged = _load_batch_data(records_dir)
+    metadata = merged["metadata"]
+
+    assert len(merged["match_refs"]) == 2
+    assert metadata["matches_planned"] == 2
+    assert metadata["matches_completed"] == 2
+    assert metadata["seeds_used"] == [123, 124]
+    assert metadata["started_at"] == "2026-01-20T00:00:00Z"
+    assert metadata["ended_at"] == "2026-01-20T00:03:00Z"

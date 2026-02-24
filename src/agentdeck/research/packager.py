@@ -70,7 +70,63 @@ def _load_batch_data(records_dir: Path) -> Dict[str, Any]:
     batch_files = sorted(records_dir.glob("batch_*.json"))
     if not batch_files:
         raise FileNotFoundError(f"No batch_*.json files found in {records_dir}")
-    return json.loads(batch_files[0].read_text(encoding="utf-8"))
+
+    batches = [json.loads(path.read_text(encoding="utf-8")) for path in batch_files]
+    if len(batches) == 1:
+        return batches[0]
+
+    # Aggregate multi-batch sessions (e.g., paired side-swap runs) into one
+    # manifest view so run-level counters reflect the full session.
+    merged = batches[0]
+    merged_metadata = dict(merged.get("metadata") or {})
+    merged_match_refs: List[Dict[str, Any]] = []
+
+    total_planned = 0
+    total_completed = 0
+    seeds_used: List[int] = []
+    started_at: Optional[str] = None
+    ended_at: Optional[str] = None
+
+    for batch in batches:
+        batch_match_refs = batch.get("match_refs") or []
+        batch_metadata = batch.get("metadata") or {}
+
+        merged_match_refs.extend(batch_match_refs)
+
+        planned = batch_metadata.get("matches_planned")
+        if planned is None:
+            planned = len(batch_match_refs)
+        completed = batch_metadata.get("matches_completed")
+        if completed is None:
+            completed = len(batch_match_refs)
+
+        total_planned += int(planned)
+        total_completed += int(completed)
+
+        for seed in batch_metadata.get("seeds_used") or []:
+            if seed not in seeds_used:
+                seeds_used.append(seed)
+
+        batch_started = batch_metadata.get("started_at")
+        if batch_started and (started_at is None or batch_started < started_at):
+            started_at = batch_started
+
+        batch_ended = batch_metadata.get("ended_at")
+        if batch_ended and (ended_at is None or batch_ended > ended_at):
+            ended_at = batch_ended
+
+    merged["match_refs"] = merged_match_refs
+    merged_metadata["matches_planned"] = total_planned
+    merged_metadata["matches_completed"] = total_completed
+    if seeds_used:
+        merged_metadata["seeds_used"] = seeds_used
+    if started_at:
+        merged_metadata["started_at"] = started_at
+    if ended_at:
+        merged_metadata["ended_at"] = ended_at
+    merged["metadata"] = merged_metadata
+
+    return merged
 
 
 def _load_match_files(records_dir: Path) -> List[Path]:

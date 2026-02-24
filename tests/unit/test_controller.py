@@ -130,6 +130,66 @@ def test_GB3_validation_uses_bound_actions(response, expected_action):
     assert result.action == expected_action
 
 
+def test_action_only_prefers_allowed_candidate_when_non_action_token_trails():
+    """
+    Bound parser should prioritize allowed action candidates over unrelated uppercase tokens.
+    """
+    controller = ActionOnlyController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
+
+    parse_result = controller.parse(
+        "I choose to ATTACK.\n\nCurrent state:\n- You: 100 HP\n- Opponent: 80 HP"
+    )
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+    assert "HP" in parse_result.metadata["candidates"]
+    assert parse_result.metadata["resolution_strategy"] in {
+        "single_allowed_candidate",
+        "intent_pattern",
+    }
+
+
+def test_action_only_does_not_parse_last_action_label_as_action_field():
+    """`Last Action:` from game-state text must not be interpreted as ACTION directive."""
+    controller = ActionOnlyController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
+
+    parse_result = controller.parse(
+        "Last Action:\n  You: None\n  Opponent: ATTACK\n\nI will ATTACK now."
+    )
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+
+
+def test_action_only_recovers_action_from_lowercase_allowed_mention():
+    """Bound parser should recover lowercase allowed actions from free-form text."""
+    controller = ActionOnlyController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
+
+    parse_result = controller.parse("It's your turn now; please attack to finish the match.")
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+    assert parse_result.metadata["resolution_strategy"] in {
+        "single_allowed_mention",
+        "intent_pattern",
+    }
+
+
+def test_action_only_is_game_agnostic_for_allowed_actions():
+    """Controller must honor arbitrary game actions from bind_game(), not fixed domain tokens."""
+    controller = ActionOnlyController()
+    controller.bind_game(MockGame(allowed_actions=["CAST_SPELL", "GUARD"]))
+
+    parse_result = controller.parse("I will cast_spell now.")
+
+    assert parse_result.success is True
+    assert parse_result.action == "CAST_SPELL"
+    assert "CAST_SPELL" in parse_result.metadata["allowed_actions"]
+
+
 # ============================================================================
 # HV1-HV4: Handshake Validation Tests (Parametrized)
 # ============================================================================
@@ -368,6 +428,66 @@ def test_reasoning_controller_casefold_validation():
     parse_result = controller.parse("REASONING: attack.\nACTION: attack")
     assert parse_result.success is True
     assert parse_result.action == "ATTACK"
+
+
+def test_reasoning_controller_prefers_allowed_candidate_when_non_action_token_trails():
+    """
+    Reasoning parser should not forfeit when response includes ATTACK plus noisy uppercase tokens.
+    """
+    controller = ReasoningController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
+
+    parse_result = controller.parse(
+        "It's my turn. I will ATTACK.\n\nHealth:\n- You: 100 HP\n- Opponent: 80 HP"
+    )
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+    assert "HP" in parse_result.metadata["candidates"]
+    assert parse_result.metadata["resolution_strategy"] in {
+        "single_allowed_candidate",
+        "intent_pattern",
+    }
+
+
+def test_reasoning_controller_does_not_parse_last_action_label_as_action_field():
+    """`Last Action:` block should not override intended action in free-form responses."""
+    controller = ReasoningController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
+
+    parse_result = controller.parse(
+        "Last Action:\n  You: None\n  Opponent: ATTACK\n\nI will use ATTACK."
+    )
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+
+
+def test_reasoning_controller_recovers_action_from_lowercase_allowed_mention():
+    """Reasoning parser should recover lowercase action mentions when uppercase tokens are absent."""
+    controller = ReasoningController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
+
+    parse_result = controller.parse("It's your turn! You can attack one more time.")
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+    assert parse_result.metadata["resolution_strategy"] in {
+        "single_allowed_mention",
+        "intent_pattern",
+    }
+
+
+def test_reasoning_controller_is_game_agnostic_for_allowed_actions():
+    """Reasoning controller must follow bound game actions, independent of game domain semantics."""
+    controller = ReasoningController()
+    controller.bind_game(MockGame(allowed_actions=["CAST_SPELL", "GUARD"]))
+
+    parse_result = controller.parse("For this turn, I'll cast_spell to gain advantage.")
+
+    assert parse_result.success is True
+    assert parse_result.action == "CAST_SPELL"
+    assert "CAST_SPELL" in parse_result.metadata["allowed_actions"]
 
 
 def test_reasoning_controller_to_action_result():

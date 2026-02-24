@@ -1,13 +1,14 @@
 # SPEC-CONTROLLER: Unified Controller Contract
 
 > Status: Final
-> Version: 1.3.0
-> Last Updated: 2026-02-03
+> Version: 1.3.1
+> Last Updated: 2026-02-19
 > Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
 > Authors: Diego ZoracKy, Codex, Claude
 > Audience: Player authors, controller implementers, validation tooling
 >
 > **Changes in v1.3.0**: Unified single-controller architecture. Controllers now handle all lifecycle phases (handshake, turn, conclusion) via lifecycle methods instead of separate controller classes. See §14 Migration Guide for dual-controller → single-controller transition.
+> **Changes in v1.3.1**: Clarified bound parsing behavior for built-in controllers: `ACTION:` extraction is line-anchored (avoids matching narration labels like `Last Action:`), and when bound to a game they deterministically prioritize game-allowed actions from candidates/mentions before returning parse failure.
 
 ## 1. Purpose
 - Define controller responsibilities for **all player-game interaction phases**: handshake validation, turn action parsing, and optional conclusion parsing.
@@ -26,6 +27,7 @@
 ## 3. Responsibilities
 - **Handshake validation**: Default implementation accepts OK/READY/YES. Override `validate_handshake()` for custom validation. Report acceptance/rejection with reasons.
 - **Turn action parsing**: Abstract `parse()` method converts LLM responses into actions/reasoning. Validate against allowed sets. **Fail explicitly on parsing errors** (v1.2.0: no fallbacks).
+- **Bound action resolution** (built-ins): When `bind_game()` is active, controllers SHOULD deterministically prefer actions present in `game.allowed_actions` (from explicit `ACTION:`, extracted candidates, or clear mentions) before failing.
 - **Conclusion parsing** (optional): Default passthrough implementation. Override `parse_conclusion()` for structured reflection parsing.
 - **Format instructions**: Provide instructions for all phases via `get_handshake_format_instructions()` and `get_format_instructions()`.
 - **Metadata enrichment**: Attach candidates, reasoning, allowed sets, and validation context for recorder/spectators.
@@ -335,8 +337,9 @@ class ActionOnlyController(Controller):
         """Parse ACTION: <value> from response (AP1-AP3, VF1-VF4)."""
         raw = response.strip()
 
-        # Extract action from "ACTION: <action>" format
-        action_match = re.search(r"ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)", raw, re.IGNORECASE)
+        # Extract action from line-anchored "ACTION: <action>" format
+        # (avoids matching narration labels like "Last Action:")
+        action_match = re.search(r"(?im)^\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\b", raw)
         if not action_match:
             return ParseResult(
                 success=False,
@@ -446,7 +449,7 @@ ACTION: <your_action>{actions_note}"""
 
         # Extract reasoning and action
         reasoning_match = re.search(r"REASONING:\s*(?P<reasoning>.*?)(?=ACTION:)", raw, re.DOTALL | re.IGNORECASE)
-        action_match = re.search(r"ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)", raw, re.IGNORECASE)
+        action_match = re.search(r"(?im)^\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\b", raw)
 
         reasoning = reasoning_match.group("reasoning").strip() if reasoning_match else None
 

@@ -104,6 +104,12 @@ def parse_args() -> argparse.Namespace:
         help="Turn cap per match (default: 30).",
     )
     parser.add_argument(
+        "--starting-potions",
+        type=int,
+        default=2,
+        help="Starting potions per player in FixedDamageGame (default: 2).",
+    )
+    parser.add_argument(
         "--temperature",
         type=float,
         default=1.0,
@@ -293,6 +299,8 @@ def _build_player(
         )
 
     prompt_builder = run_cfg.get("prompt_builder") or {}
+    handshake_template_mode = prompt_builder.get("handshake_template_mode", "default")
+    handshake_template = prompt_builder.get("handshake_template")
     turn_template_mode = prompt_builder.get("turn_template_mode", "default")
     turn_template = prompt_builder.get("turn_template")
 
@@ -304,8 +312,31 @@ def _build_player(
         "temperature": args.temperature,
     }
 
-    if turn_template_mode == "custom" and turn_template:
+    if handshake_template_mode == "custom":
+        if not handshake_template:
+            raise ValueError(
+                f"Config '{config_ref}' sets handshake_template_mode=custom but no "
+                "handshake_template value was provided."
+            )
+        kwargs["handshake_template"] = handshake_template
+    elif handshake_template_mode != "default":
+        raise ValueError(
+            f"Unsupported handshake_template_mode '{handshake_template_mode}' "
+            f"for config '{config_ref}'."
+        )
+
+    if turn_template_mode == "custom":
+        if not turn_template:
+            raise ValueError(
+                f"Config '{config_ref}' sets turn_template_mode=custom but no "
+                "turn_template value was provided."
+            )
         kwargs["turn_template"] = turn_template
+    elif turn_template_mode != "default":
+        raise ValueError(
+            f"Unsupported turn_template_mode '{turn_template_mode}' "
+            f"for config '{config_ref}'."
+        )
 
     if provider == "openai":
         return GPTPlayer(**kwargs)
@@ -320,12 +351,12 @@ def _build_player(
     raise ValueError(f"Unsupported provider in matrix: {provider}")
 
 
-def _build_game() -> FixedDamageGame:
+def _build_game(args: argparse.Namespace) -> FixedDamageGame:
     return FixedDamageGame(
         max_health=100,
         attack_damage=20,
         potion_heal=30,
-        starting_potions=2,
+        starting_potions=args.starting_potions,
         information_level="partial",
     )
 
@@ -347,6 +378,123 @@ def _print_plan(plans: List[CellPlan], providers: List[str]) -> None:
     print("=" * 70)
 
 
+def _resolve_side_swap_policy(matrix: Dict[str, Any]) -> Dict[str, Any]:
+    sampling = matrix.get("sampling_policy") or {}
+    paired = sampling.get("paired_seed_side_swap") or {}
+    return {
+        "enabled": bool(paired.get("enabled", False)),
+        "side_swap_required": bool(paired.get("side_swap_required", False)),
+        "seed_pairs_per_cell": paired.get("seed_pairs_per_cell"),
+    }
+
+
+def _run_batch(
+    *,
+    deck: AgentDeck,
+    matrix: Dict[str, Any],
+    args: argparse.Namespace,
+    plan: CellPlan,
+    matches: int,
+    seed: int,
+    swapped_order: bool,
+):
+    player_a = _build_player(slot="A", side=plan.cell["player_a"], matrix=matrix, args=args)
+    player_b = _build_player(slot="B", side=plan.cell["player_b"], matrix=matrix, args=args)
+    players = [player_a, player_b] if not swapped_order else [player_b, player_a]
+    return deck.play(players=players, matches=matches, seed=seed)
+
+
+def _aggregate_win_rates(matches: List[Any]) -> Dict[str, float]:
+    all_players = set()
+    wins: Dict[str, int] = {}
+    total = len(matches)
+
+    for match in matches:
+        metadata = match.metadata or {}
+        for player_name in metadata.get("players", []):
+            all_players.add(player_name)
+            wins.setdefault(player_name, 0)
+        if match.winner:
+            all_players.add(match.winner)
+            wins[match.winner] = wins.get(match.winner, 0) + 1
+
+    if total == 0:
+        return {player: 0.0 for player in sorted(all_players)}
+
+    return {
+        player: wins.get(player, 0) / total
+        for player in sorted(all_players)
+    }
+
+
+def _run_cell(
+    *,
+    deck: AgentDeck,
+    matrix: Dict[str, Any],
+    args: argparse.Namespace,
+    plan: CellPlan,
+    side_swap_policy: Dict[str, Any],
+) -> List[Any]:
+    if not side_swap_policy["enabled"]:
+        result = _run_batch(
+            deck=deck,
+            matrix=matrix,
+            args=args,
+            plan=plan,
+            matches=plan.matches,
+            seed=plan.seed,
+            swapped_order=False,
+        )
+        return result.matches
+
+    pair_count = plan.matches // 2
+    remainder = plan.matches % 2
+    if side_swap_policy["side_swap_required"] and remainder:
+        raise ValueError(
+            f"Cell {plan.cell_id} requested {plan.matches} matches, but paired "
+            "side-swap requires an even number of matches."
+        )
+
+    collected: List[Any] = []
+    if pair_count > 0:
+        result_ab = _run_batch(
+            deck=deck,
+            matrix=matrix,
+            args=args,
+            plan=plan,
+            matches=pair_count,
+            seed=plan.seed,
+            swapped_order=False,
+        )
+        collected.extend(result_ab.matches)
+
+        result_ba = _run_batch(
+            deck=deck,
+            matrix=matrix,
+            args=args,
+            plan=plan,
+            matches=pair_count,
+            seed=plan.seed,
+            swapped_order=True,
+        )
+        collected.extend(result_ba.matches)
+
+    if remainder:
+        tail_seed = plan.seed + pair_count
+        tail_result = _run_batch(
+            deck=deck,
+            matrix=matrix,
+            args=args,
+            plan=plan,
+            matches=remainder,
+            seed=tail_seed,
+            swapped_order=False,
+        )
+        collected.extend(tail_result.matches)
+
+    return collected
+
+
 def main() -> None:
     args = parse_args()
     matrix = load_matrix(args.matrix)
@@ -354,6 +502,15 @@ def main() -> None:
     providers = _required_providers(plans, matrix)
     _validate_provider_requirements(args, providers)
     _print_plan(plans, providers)
+    side_swap_policy = _resolve_side_swap_policy(matrix)
+    if side_swap_policy["enabled"]:
+        print(
+            "Paired side-swap: enabled "
+            f"(required={side_swap_policy['side_swap_required']}, "
+            f"seed_pairs_per_cell={side_swap_policy['seed_pairs_per_cell']})"
+        )
+    else:
+        print("Paired side-swap: disabled")
 
     if args.dry_run:
         print("Dry run complete. No matches executed.")
@@ -373,19 +530,28 @@ def main() -> None:
     )
     failures: List[str] = []
 
-    with AgentDeck(game=_build_game(), session=config, spectators=spectators) as deck:
+    with AgentDeck(game=_build_game(args), session=config, spectators=spectators) as deck:
         for index, plan in enumerate(plans, start=1):
             print(f"\n[{index}/{len(plans)}] Running cell {plan.cell_id}")
             try:
-                players = [
-                    _build_player(slot="A", side=plan.cell["player_a"], matrix=matrix, args=args),
-                    _build_player(slot="B", side=plan.cell["player_b"], matrix=matrix, args=args),
-                ]
-                results = deck.play(players=players, matches=plan.matches, seed=plan.seed)
-                winner, win_rate = max(results.win_rates.items(), key=lambda item: float(item[1]))
+                matches = _run_cell(
+                    deck=deck,
+                    matrix=matrix,
+                    args=args,
+                    plan=plan,
+                    side_swap_policy=side_swap_policy,
+                )
+                win_rates = _aggregate_win_rates(matches)
+                winner = "N/A"
+                win_rate = 0.0
+                if win_rates:
+                    winner, win_rate = max(
+                        sorted(win_rates.items()),
+                        key=lambda item: float(item[1]),
+                    )
                 print(
                     f"Cell {plan.cell_id} complete: winner={winner}, "
-                    f"win_rate={win_rate:.3f}, matches={plan.matches}"
+                    f"win_rate={win_rate:.3f}, matches={len(matches)}"
                 )
             except Exception as exc:  # pragma: no cover - runtime guard
                 message = f"Cell {plan.cell_id} failed: {exc}"

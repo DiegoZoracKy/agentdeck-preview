@@ -3,6 +3,7 @@
 import copy
 import os
 import time
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -187,6 +188,17 @@ class LLMPlayer(Player, ABC):
 
         self.last_full_prompt = messages
 
+        phase = getattr(self, "_active_phase", None)
+        match_id = getattr(self, "_active_match_id", None)
+        turn_number = getattr(self, "_active_turn_number", None)
+        if turn_context is not None:
+            phase = "turn"
+            match_id = getattr(turn_context, "match_id", match_id)
+            turn_number = getattr(turn_context, "turn_number", turn_number)
+        if phase is None:
+            phase = "unknown"
+        call_id = uuid.uuid4().hex[:8]
+
         logger = getattr(self, "logger", None)
         if logger:
             logger.api_request(
@@ -195,6 +207,10 @@ class LLMPlayer(Player, ABC):
                 messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
+                phase=phase,
+                match_id=match_id,
+                turn_number=turn_number,
+                call_id=call_id,
             )
 
         retry_durations: List[float] = []
@@ -225,6 +241,7 @@ class LLMPlayer(Player, ABC):
                     "latency_ms": round(response_time * 1000, 1),
                     "model": metadata.get("model", self.model),
                     "provider": provider,
+                    "call_id": call_id,
                 }
                 if "provider_model" in metadata:
                     self.last_usage_info["provider_model"] = metadata["provider_model"]
@@ -233,7 +250,14 @@ class LLMPlayer(Player, ABC):
                     self.last_usage_info["estimated"] = True
 
                 if logger:
-                    logger.api_response(player=self.name, response_text=response_text)
+                    logger.api_response(
+                        player=self.name,
+                        response_text=response_text,
+                        phase=phase,
+                        match_id=match_id,
+                        turn_number=turn_number,
+                        call_id=call_id,
+                    )
                     logger.api_call(
                         player=self.name,
                         model=metadata.get("model_used", self.model),
@@ -241,24 +265,23 @@ class LLMPlayer(Player, ABC):
                         tokens_out=metadata.get("completion_tokens", 0),
                         cost=metadata.get("cost", 0.0),
                         duration=response_time,
+                        phase=phase,
+                        match_id=match_id,
+                        turn_number=turn_number,
+                        call_id=call_id,
                     )
 
                 # CH2: History is recorded by Player._record_exchange() in lifecycle methods.
                 # Don't call _append_history here to avoid duplication.
-
-                # PM2/PM3: Include response_text and phase in metadata
-                phase = None
-                if turn_context is not None:
-                    phase = getattr(turn_context, "phase", None)
-                    if phase is None:
-                        # Infer phase from turn_context presence
-                        phase = "turn"
 
                 return response_text, {
                     "raw_response": response_text,
                     "response_text": response_text,  # PM2: response_text key
                     "phase": phase,  # PM3: phase context
                     "usage_info": getattr(self, "last_usage_info", None),
+                    "call_id": call_id,
+                    "match_id": match_id,
+                    "turn_number": turn_number,
                     "retries": attempt,
                     "retry_durations": retry_durations,
                     "attempt_durations": attempt_durations,
@@ -382,13 +405,20 @@ class LLMPlayer(Player, ABC):
         explicit_prompt = getattr(match_context, "conclusion_prompt", None)
 
         if explicit_prompt:
+            self._active_phase = "conclusion"
+            self._active_match_id = getattr(match_context, "match_id", None)
+            self._active_turn_number = 0
             try:
                 reflection = self.get_response(explicit_prompt)
             except Exception as exc:  # pragma: no cover - defensive
                 if logger:
                     logger.debug(f"Conclusion failed for {self.name}: {exc}")
                 reflection = None
-            else:
+            finally:
+                self._active_phase = None
+                self._active_match_id = None
+                self._active_turn_number = None
+            if reflection is not None:
                 usage_info = getattr(self, "last_usage_info", None)
                 controller_metadata = (
                     _parse_conclusion_metadata(reflection) if reflection is not None else {}
@@ -450,7 +480,15 @@ class LLMPlayer(Player, ABC):
             )
 
             # Get LLM reflection
-            reflection, metadata = self._invoke_model(bundle, None)
+            self._active_phase = "conclusion"
+            self._active_match_id = getattr(match_context, "match_id", None)
+            self._active_turn_number = 0
+            try:
+                reflection, metadata = self._invoke_model(bundle, None)
+            finally:
+                self._active_phase = None
+                self._active_match_id = None
+                self._active_turn_number = None
             controller_metadata = (
                 _parse_conclusion_metadata(reflection) if reflection is not None else {}
             )

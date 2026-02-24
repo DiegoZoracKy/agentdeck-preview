@@ -97,10 +97,10 @@ The system uses an event-driven architecture where:
 ```
 session_start
   └── batch_start
+      ├── player_handshake_start         # per player, before gameplay (mandatory)
+      ├── player_handshake_complete      # per player, on acceptance
+      ├── player_handshake_abort         # per player, on rejection
       └── match_start
-          ├── player_handshake_start     # per player, before gameplay (mandatory)
-          ├── player_handshake_complete  # per player, on acceptance
-          ├── player_handshake_abort     # per player, on rejection
           ├── gameplay                   # mechanic-agnostic phase event
           ├── player_action_parse_failed # optional, emitted before policy handling
           ├── <custom domain events>     # snake_case strings from games

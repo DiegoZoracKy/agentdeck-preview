@@ -205,3 +205,33 @@ def test_multi_match_session(players, temp_record_dir):
 
     # New schema v1.1: batch has match_refs
     assert len(batch_data["match_refs"]) == 3
+
+
+def test_parallel_match_recordings_include_gameplay_events(players, temp_record_dir):
+    """
+    Integration: Parallel execution still records gameplay turn events per match.
+
+    Regression guard:
+    In parallel mode, worker gameplay events must be replayed to the main EventBus
+    so Recorder persists turn-level events (not only handshake/conclusion).
+    """
+    config = AgentDeckConfig(run_dir=str(temp_record_dir), seed=42, concurrency=4)
+    deck = AgentDeck(game=FixedDamageGame(), session=config)
+    results = deck.play(players=players, matches=4)
+
+    assert len(results) == 4
+
+    recordings = list(temp_record_dir.glob("**/*.json"))
+    batch_recording = [r for r in recordings if "batch" in r.name][0]
+    with open(batch_recording) as f:
+        batch_data = json.load(f)
+
+    assert len(batch_data["match_refs"]) == 4
+
+    for ref in batch_data["match_refs"]:
+        match_path = batch_recording.parent / ref["filename"]
+        with open(match_path) as f:
+            match_data = json.load(f)
+
+        gameplay_events = [e for e in match_data.get("events", []) if e.get("type") == "gameplay"]
+        assert gameplay_events, f"Expected gameplay events in {match_path.name}"

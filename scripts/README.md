@@ -14,6 +14,36 @@ Validates research manifests and checks that `research/INDEX.md` is up to date.
 python scripts/research_validate.py --research-dir research
 ```
 
+## Standalone LLM Arena
+
+**Script**: `standalone_llm_arena.py`
+
+Runs a minimal turn-based battle loop directly with OpenAI models, without using
+AgentDeck internals. Useful for isolating behavior and comparing against the
+original notebook mechanics.
+
+### Usage:
+
+```bash
+python scripts/standalone_llm_arena.py \
+  --matches 10 \
+  --model-a gpt-4o-mini --mode-a action \
+  --model-b gpt-4o-mini --mode-b reasoning_action
+```
+
+Enable per-turn format reinforcement for each player:
+
+```bash
+python scripts/standalone_llm_arena.py \
+  --turn-reinforce-a \
+  --turn-reinforce-b
+```
+
+### Output:
+
+- `standalone_runs/session_YYYYMMDD_HHMMSS_xxxxxx/summary.json`
+- `standalone_runs/session_YYYYMMDD_HHMMSS_xxxxxx/records/match_*.json`
+
 Regenerate the index if needed:
 
 ```bash

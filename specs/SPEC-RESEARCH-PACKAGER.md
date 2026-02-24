@@ -79,6 +79,7 @@ python scripts/research_package.py \
 9. **RP9**: `matrix.yaml` MUST be optional by default; it is included only when explicitly requested.
 10. **RP10**: If `matrix.yaml` is not included, manifest MUST omit `run.matrix_source` and `artifacts.matrix_yaml`.
 11. **RP11**: Tool MUST auto-populate factual markdown blocks in `README.md` and `analysis.md`, and MUST NOT overwrite narrative sections outside marker blocks.
+12. **RP12**: When a session contains multiple `batch_*.json` files (e.g., side-swap split runs), tool MUST aggregate them into a single packaging view for `match_refs`, `matches_planned`, `matches_completed`, `seeds_used`, and time window (`started_at`/`ended_at`).
 
 ## 7. Data Flow & Interaction
 - Package: CLI → resolve session records → copy templates → write manifest → run export → update index.
@@ -128,6 +129,7 @@ python scripts/research_package.py \
 - **RP7**: Unit test fails when provider/model cannot be inferred.
 - **RP9/RP10**: Unit tests for default matrix omission and `--include-matrix` opt-in behavior.
 - **RP11**: Unit test verifies factual block is populated while template narrative remains untouched.
+- **RP12**: Unit test verifies multi-batch sessions are aggregated deterministically.
 
 ## 11. Design Rationale
 - Keeps research packages intentional and tidy (opt-in, no automatic writes).

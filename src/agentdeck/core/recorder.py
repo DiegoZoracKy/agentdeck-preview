@@ -296,11 +296,12 @@ class Recorder:
         # Duration/retries
         if phase in {"turn", "parse_failure"}:
             turn_context = data.get("turn_context")
-            if isinstance(turn_context, dict) and isinstance(turn_context.get("duration"), (int, float)):
+            if isinstance(turn_context, dict) and isinstance(
+                turn_context.get("duration"), (int, float)
+            ):
                 prompt_payload["duration"] = float(turn_context["duration"])
-            elif (
-                isinstance(metadata.get("turn_context"), dict)
-                and isinstance(metadata["turn_context"].get("duration"), (int, float))
+            elif isinstance(metadata.get("turn_context"), dict) and isinstance(
+                metadata["turn_context"].get("duration"), (int, float)
             ):
                 prompt_payload["duration"] = float(metadata["turn_context"]["duration"])
             elif hasattr(event, "duration"):
@@ -503,7 +504,9 @@ class Recorder:
         event_duration = event.duration
         if data.get("turn_context") is not None:
             turn_context = data["turn_context"]
-            if isinstance(turn_context, dict) and isinstance(turn_context.get("duration"), (int, float)):
+            if isinstance(turn_context, dict) and isinstance(
+                turn_context.get("duration"), (int, float)
+            ):
                 event_duration = float(turn_context["duration"])
 
         recorded_event = Event(
@@ -687,7 +690,9 @@ class Recorder:
         if not isinstance(match_metadata, dict):
             match_metadata = {}
 
-        started_at = match_metadata.get("started_at") or self.current_match.metadata.get("started_at")
+        started_at = match_metadata.get("started_at") or self.current_match.metadata.get(
+            "started_at"
+        )
         ended_at = (
             match_metadata.get("ended_at")
             or self._context_iso_timestamp(context)
@@ -697,11 +702,7 @@ class Recorder:
         if duration_seconds is None:
             duration_seconds = match_metadata.get("duration")
 
-        if (
-            duration_seconds is None
-            and isinstance(started_at, str)
-            and isinstance(ended_at, str)
-        ):
+        if duration_seconds is None and isinstance(started_at, str) and isinstance(ended_at, str):
             try:
                 start_dt = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
                 end_dt = datetime.fromisoformat(ended_at.replace("Z", "+00:00"))

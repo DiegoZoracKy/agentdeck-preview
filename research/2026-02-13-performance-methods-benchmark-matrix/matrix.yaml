@@ -47,18 +47,47 @@ config_registry:
   AO:
     controller: ActionOnlyController
     prompt_builder:
+      handshake_template_mode: custom
+      handshake_template: |-
+        {game_instructions}
+
+        Use the response format below on gameplay turns:
+        ACTION: [Your chosen action]
+        Allowed actions are defined by the game instructions above.
+
+        Reply with 'OK' if you understand and are ready to begin.
       turn_template_mode: default
       turn_template: "{game_view}\\n\\n{controller_format}"
     interpretation: raw_model_intelligence
   CoT-H:
     controller: ReasoningController
     prompt_builder:
+      handshake_template_mode: custom
+      handshake_template: |-
+        {game_instructions}
+
+        Use the response format below on gameplay turns:
+        REASONING: [Your step-by-step thought process]
+        ACTION: [Your chosen action]
+        Allowed actions are defined by the game instructions above.
+
+        Reply with 'OK' if you understand and are ready to begin.
       turn_template_mode: custom
       turn_template: "{game_view}"
     interpretation: reasoning_with_handshake_only_instruction
   CoT-T:
     controller: ReasoningController
     prompt_builder:
+      handshake_template_mode: custom
+      handshake_template: |-
+        {game_instructions}
+
+        Use the response format below on gameplay turns:
+        REASONING: [Your step-by-step thought process]
+        ACTION: [Your chosen action]
+        Allowed actions are defined by the game instructions above.
+
+        Reply with 'OK' if you understand and are ready to begin.
       turn_template_mode: default
       turn_template: "{game_view}\\n\\n{controller_format}"
     interpretation: reasoning_with_persistent_turn_instruction
