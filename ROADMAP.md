@@ -96,36 +96,20 @@ Produce a concise readout:
 ## Engine Correctness and Observability Fix Track
 
 ### P0 - Functional Correctness (Blockers)
-- [ ] Clamp HP to non-negative in `FixedDamageGame.update()` attack path.
-  - Why: current runtime evidence shows `health: 10 -> -10` in real matches.
-  - Acceptance:
-    - No negative HP values in `records/match_*.json` final or intermediate states.
-    - No negative HP deltas in debug/info logs for fresh smoke run.
-    - Unit test coverage for clamp behavior and winner logic unchanged.
-- [ ] Fix recorder timing consistency (event-level and match-level timestamps).
-  - Scope:
-    - `event.timestamp` in match artifacts must reflect emission time, not flush/write time.
-    - `event.duration` / prompt-level duration must reflect real turn/call duration (not fixed placeholder values).
-    - `started_at` / `ended_at` / `duration_seconds` in match artifacts must be non-null and aligned with batch match refs.
-  - Why:
-    - Current artifacts show compressed event timelines and mismatch between match file vs batch metadata.
-  - Acceptance:
-    - Event timeline span is coherent with turn durations for long matches.
-    - `records/match_*.json` and `records/batch_*.json` agree on match start/end windows.
-    - No `started_at=None` / `ended_at=None` for completed matches.
-- [ ] Add correlation fields to LLM request/response/call debug lines.
-  - Scope: include at least `match_id`, `turn_number`, `phase`, `player`, `call_id` (or `request_id` equivalent).
-  - Why: current `debug.log` interleaving prevents reliable per-match reconstruction in parallel batches.
-  - Acceptance:
-    - Every `API request`, `API response`, and `API call` line can be joined deterministically to one match/turn.
-    - Manual inspection of a concurrent batch is unambiguous without fallback to raw JSON.
+- [x] Clamp HP to non-negative in `FixedDamageGame.update()` attack path.
+  - Fixed: `0df1c8b` — `max(0, hp - damage)` in `FixedDamageGame.update()`.
+  - Unit test: `test_fixed_damage_attack_clamps_health_to_zero`.
+- [x] Fix recorder timing consistency (event-level and match-level timestamps).
+  - Fixed: `0df1c8b` — event timestamps set at `bus.emit()` time; `started_at`/`ended_at`/`duration_seconds` derived from wall-clock at `on_match_start`/`on_match_end`.
+  - Regression test: `test_gameplay_events_preserve_emission_timestamps_and_turn_durations` in `test_recorder_lifecycle.py`.
+  - Note: `event.duration` / prompt-level duration (per-turn call timing) remains a future item.
+- [x] Add correlation fields to LLM request/response/call debug lines.
+  - Fixed: `0df1c8b` — `call_id`, `match_id`, `turn_number`, `phase` added to `api_request`/`api_response`/`api_call` in `logging.py` and propagated from `llm_player.py`.
+  - Spec: `SPEC-LLM.md` CL2.
 
 ### P1 - Spec and Telemetry Consistency
-- [ ] Fix event-ordering editorial inconsistency in `specs/SPEC.md`.
-  - Current issue: hierarchy snippet implies handshake nested under `match_start`, while ordering text says handshake precedes `MATCH_START`.
-  - Acceptance:
-    - Single, unambiguous lifecycle order in docs.
-    - Cross-reference remains aligned with `specs/SPEC-CONSOLE.md`.
+- [x] Fix event-ordering editorial inconsistency in `specs/SPEC.md`.
+  - Fixed: `0df1c8b` — handshake events moved under `batch_start` in lifecycle hierarchy diagram.
 - [ ] Align prompt payload turn numbering semantics (`prompt.turn_number`) with spec.
   - Current issue:
     - Gameplay prompt payloads in artifacts are serialized with `turn_number: null`.
@@ -133,11 +117,9 @@ Produce a concise readout:
   - Acceptance:
     - Either gameplay prompt payloads carry concrete turn numbers (preferred), or spec is explicitly updated to current schema behavior with rationale.
     - `handshake/conclusion` semantics remain explicit and test-covered.
-- [ ] Persist `player_handshake_start` in match artifacts (or formalize omission in spec).
-  - Current issue: artifacts contain `player_handshake_complete`/`abort` but not `player_handshake_start`.
-  - Acceptance:
-    - Event pipeline and recorder behavior are explicit and consistent (implementation + spec + tests).
-    - Handshake lifecycle is fully auditable in match artifacts.
+- [x] Persist `player_handshake_start` in match artifacts.
+  - Fixed: `0df1c8b` — console emits `PLAYER_HANDSHAKE_START`; recorder captures it via `on_player_handshake_start`.
+  - Spec: `SPEC-RECORDER.md` v1.3.0.
 - [ ] Clarify `player_order` vs `first_player` semantics in specs/artifacts.
   - Current issue:
     - Readers often assume `player_order[0]` is the first actor.
@@ -157,11 +139,8 @@ Produce a concise readout:
   - Acceptance:
     - Tests and/or validation script fail-fast on inconsistent artifacts.
     - Incident triage does not depend on manual log archaeology for these invariants.
-- [ ] Add targeted parse-failure observability regression test.
-  - Goal: prove `PLAYER_ACTION_PARSE_FAILED` event emission + recorder persistence path in worker/sequential flows.
-  - Acceptance:
-    - Test forces parse failure and asserts event presence + policy metadata.
-    - Recorded match JSON contains parse-failure event payload fields.
+- [x] Add targeted parse-failure observability regression test.
+  - Fixed: `0df1c8b` — `test_parse_failure.py` covers all 5 policies (ABORT, SKIP, FORFEIT, RETRY_ONCE x2, parallel) with `PLAYER_ACTION_PARSE_FAILED` event + PM1-PM3 fields verified.
 - [ ] Cleanup duplicated section/invariant numbering in `SPEC-GAME.md`.
   - Current issue:
     - section `5.6` appears twice and invariant numbers `15-18` are reused for PF and HT sections.
@@ -192,10 +171,9 @@ Produce a concise readout:
   - Acceptance:
     - Game behavior, prompt wording, and spec text are mutually consistent.
     - No contradictory guidance for experiment interpretation.
-- [ ] Preserve conclusion prompt sanitization of engine-internal keys.
-  - Status: already fixed in engine; keep as release gate verification.
-  - Acceptance:
-    - No `_turn_count` / `_first_player_idx` in LLM-facing conclusion prompt blocks for new sessions.
+- [x] Preserve conclusion prompt sanitization of engine-internal keys.
+  - Fixed: `b26e6bd` — `llm_player.py` strips `_`-prefixed keys from `{game_view}` in template-driven conclusion prompts.
+  - Spec: `SPEC-PLAYER.md` CS4, `SPEC-LLM.md` CH4.
 - [x] Align policy for engine-internal keys in gameplay `state_before/state_after`.
   - Decision taken:
     - sanitize internal runtime keys (prefix `_`) from recorded gameplay state payloads.
