@@ -98,6 +98,7 @@
 
 ### 5.7 Cloning & Parallel Execution (CL)
 22. **CL1**: LLM players MUST override `clone()` to recreate provider SDK clients (new HTTP session, fresh locks) instead of copying them. Clone implementations MUST preserve configuration and aggregate metrics while leaving runtime bindings (conversation manager, logger) unset so the console can rebind them (see SPEC-PARALLEL §5). Failure to provide a working clone MUST raise a clear error directing researchers to run with `concurrency=1` or implement cloning.
+23. **CL2**: LLM players MUST pass correlation metadata (`call_id`, `match_id`, `turn_number`, `phase`) to `api_request`, `api_response`, and `api_call` logger hooks so debug logs can be deterministically joined per call in concurrent runs.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:

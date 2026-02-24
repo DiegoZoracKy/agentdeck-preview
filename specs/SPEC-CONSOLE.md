@@ -456,7 +456,7 @@ finally:
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` v2.0.0 (TurnBasedGame + TurnLoop + MatchRuntime integration, EventFactory usage, parse failure propagation)
 - `SPEC-MATCH-RUNTIME.md` v1.0.0 (Runtime contract provided to `game.run`)
 - `SPEC-OBSERVABILITY.md` v1.2.0 (Event types, payloads, emission boundaries, parse failure events)
-- `SPEC-RECORDER.md` v1.2.0 (Recording contract, parse failure capture, NullRecorder)
+- `SPEC-RECORDER.md` v1.3.0 (Recording contract, parse failure capture, NullRecorder)
 - `SPEC-SPECTATOR.md` v1.2.0 (Logger injection contract §5.5 LI1-LI5, spectator lifecycle)
 - `GUIDELINES.md` §4.4 (Public API documentation format)
 - Implementation references: `src/agentdeck/core/console.py`, `src/agentdeck/core/event_bus.py`, `src/agentdeck/core/session.py`, `src/agentdeck/core/turn_loop.py`

@@ -162,6 +162,12 @@ Produce a concise readout:
   - Acceptance:
     - Test forces parse failure and asserts event presence + policy metadata.
     - Recorded match JSON contains parse-failure event payload fields.
+- [ ] Cleanup duplicated section/invariant numbering in `SPEC-GAME.md`.
+  - Current issue:
+    - section `5.6` appears twice and invariant numbers `15-18` are reused for PF and HT sections.
+  - Acceptance:
+    - section numbering is unique and monotonic.
+    - invariant identifiers are unique and stable for cross-references/tests.
 
 ### P2 - Prompt Hygiene (Quality Improvements)
 - [ ] Keep handshake/gameplay template split explicit in research configs.

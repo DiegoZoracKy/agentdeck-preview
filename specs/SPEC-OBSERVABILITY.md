@@ -160,8 +160,8 @@ class Event:
 | `match_id` | Optional[str] | Present between `MATCH_START`/`END`. |
 | `phase_index` | Optional[int] | Zero-based; present during gameplay or domain events when known. |
 | `turn_index` | Optional[int] | Alias for `phase_index` (always matches `phase_index` value). |
-| `timestamp` | float | Wall-clock time (`time.time()`). |
-| `monotonic_time` | float | Monotonic clock (`time.monotonic()`). |
+| `timestamp` | float | Wall-clock time (`time.time()`), or preserved emission timestamp when supplied by upstream replay/worker context. |
+| `monotonic_time` | float | Monotonic clock (`time.monotonic()`), or preserved emission monotonic value when supplied upstream. |
 
 Both `phase_index` and `turn_index` are set to the same value during gameplay events.
 
@@ -785,7 +785,7 @@ Automated tests should cover:
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` v1.1.0 — TurnLoop orchestration, EventFactory integration, StateAdapter, parse failure propagation.
 - `SPEC-CONSOLE.md` v0.5.0 — Match orchestration, lifecycle event emission, parse failure handling, §6.8 P4 (Logger injection).
 - `SPEC-SPECTATOR.md` v1.2.0 — Spectator contract, logger injection §5.5 (LI1-LI5), error isolation.
-- `SPEC-GAME.md` v0.6.0 — Game base classes, domain event emission via GameEventEmitter, parse-failure policy hook.
+- `SPEC-GAME.md` v0.7.0 — Game base classes, domain event emission via GameEventEmitter, parse-failure policy hook.
 - `src/agentdeck/core/event_bus.py` — EventBus implementation.
 - `src/agentdeck/core/turn_loop.py` — TurnLoop execution helper with EventFactory.
 - `src/agentdeck/core/event_factory.py` — EventFactory for standardized GAMEPLAY events.
