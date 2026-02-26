@@ -178,13 +178,12 @@ def temp_output_dir(tmp_path):
 
 @pytest.fixture
 def mock_openai_response():
-    """Mock OpenAI API response structure."""
-    mock_choice = Mock()
-    mock_choice.message.content = "ATTACK"
-
+    """Mock OpenAI Responses API response structure."""
     mock_response = Mock()
-    mock_response.choices = [mock_choice]
-    mock_response.usage = Mock(prompt_tokens=100, completion_tokens=20)
+    mock_response.output_text = "ATTACK"
+    mock_response.output = []
+    mock_response.model = "gpt-4o-mini"
+    mock_response.usage = Mock(input_tokens=100, output_tokens=20, total_tokens=120)
 
     return mock_response
 
@@ -192,7 +191,7 @@ def mock_openai_response():
 @pytest.fixture
 def mock_openai_api(mocker, mock_openai_response):
     """Mocked OpenAI API client."""
-    mocker.patch("openai.OpenAI.chat.completions.create", return_value=mock_openai_response)
+    mocker.patch("openai.OpenAI.responses.create", return_value=mock_openai_response)
     return mock_openai_response
 
 

@@ -1,8 +1,8 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.1.1
-> Last Updated: 2026-02-23
+> Version: 1.1.2
+> Last Updated: 2026-02-24
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
@@ -100,6 +100,13 @@
 22. **CL1**: LLM players MUST override `clone()` to recreate provider SDK clients (new HTTP session, fresh locks) instead of copying them. Clone implementations MUST preserve configuration and aggregate metrics while leaving runtime bindings (conversation manager, logger) unset so the console can rebind them (see SPEC-PARALLEL §5). Failure to provide a working clone MUST raise a clear error directing researchers to run with `concurrency=1` or implement cloning.
 23. **CL2**: LLM players MUST pass correlation metadata (`call_id`, `match_id`, `turn_number`, `phase`) to `api_request`, `api_response`, and `api_call` logger hooks so debug logs can be deterministically joined per call in concurrent runs.
 
+### 5.8 OpenAI Responses API Contract (OR)
+24. **OR1**: OpenAI-backed players MUST invoke `client.responses.create(...)` for model calls and MUST extract reply text from `response.output_text`; when `output_text` is empty, implementations MUST fallback to parsing text blocks under `response.output` and fail noisily if no text exists.
+25. **OR2**: OpenAI-backed players MUST map prompt arrays to Responses API shape as follows: all `system` messages are joined into top-level `instructions`, while non-system messages are sent in top-level `input`.
+26. **OR3**: OpenAI-backed players MUST normalize token-limit aliases (`max_tokens`, `max_completion_tokens`, `max_output_tokens`) to `max_output_tokens` before request dispatch, and MUST reject conflicting alias values with a clear `ValueError`.
+27. **OR4**: OpenAI-backed players MUST map usage fields `usage.input_tokens` / `usage.output_tokens` into internal metadata keys `prompt_tokens` / `completion_tokens` to keep pricing and spectator contracts stable.
+28. **OR5**: Until explicit server-history mode is introduced, OpenAI-backed players MUST send `store=False` on Responses API calls so match reproducibility remains grounded in local conversation history.
+
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:
   1. **Handshake**: Build handshake messages → `_invoke_model(..., phase=HANDSHAKE)` → provider metadata stored in handshake extras.
@@ -113,7 +120,7 @@
 - MUST raise `ValueError` for missing API key/model.
 - MUST catch provider exceptions inside retry loop, log retry attempt, and backoff before retrying.
 - MUST ensure handshake failures propagate so console can enforce policy.
-- SHOULD support provider-specific quirks (e.g., OpenAI `max_completion_tokens`, Anthropic role mapping, Gemini token estimates) while keeping metadata shape consistent.
+- SHOULD support provider-specific quirks (e.g., OpenAI Responses API instructions/input mapping and max_output_tokens, Anthropic role mapping, Gemini token estimates) while keeping metadata shape consistent.
 
 ## 8. Examples
 ```python
