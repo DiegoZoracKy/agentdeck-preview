@@ -1,0 +1,64 @@
+schema_version: 1
+experiment_id: 2026-02-26-fixed-damage-weak-models-v1
+created_at: "2026-02-26T00:00:00Z"
+purpose: >-
+  FixedDamage benchmark focused on weak-model AO performance, starting with
+  OpenAI gpt-4o-mini versus Anthropic Claude Haiku 4.5.
+
+model_registry:
+  openai_weak_mini:
+    provider: openai
+    model: gpt-4o-mini
+    tier: weak
+  anthropic_weak_haiku:
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    tier: weak
+
+config_registry:
+  AO:
+    controller: ActionOnlyController
+    prompt_builder:
+      handshake_template_mode: custom
+      handshake_template: |-
+        {game_instructions}
+
+        Use the response format below on gameplay turns:
+        ACTION: [Your chosen action]
+        Allowed actions are defined by the game instructions above.
+
+        Reply with exactly this single token and nothing else: OK
+      turn_template_mode: default
+      turn_template: "{game_view}\\n\\n{controller_format}"
+    interpretation: raw_model_intelligence
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+
+execution_plan:
+  preflight:
+    description: Single pilot cell for weak-model cross-provider AO benchmark.
+    cell_ids:
+      - c01_fd_mini_ao_vs_haiku_ao
+    matches_per_cell: 24
+  phases:
+    - phase_id: B1
+      name: Weak Models AO FixedDamage
+      tracks: [1]
+      cell_ids:
+        - c01_fd_mini_ao_vs_haiku_ao
+      publish_drop: true
+
+cells:
+  - id: c01_fd_mini_ao_vs_haiku_ao
+    track: 1
+    phase: B1
+    question: In FixedDamage, does gpt-4o-mini AO beat claude-haiku-4.5 AO under paired side-swap?
+    player_a: { model_ref: openai_weak_mini, config_ref: AO }
+    player_b: { model_ref: anthropic_weak_haiku, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80

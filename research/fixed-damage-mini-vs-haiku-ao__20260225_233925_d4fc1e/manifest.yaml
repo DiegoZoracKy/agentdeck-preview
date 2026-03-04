@@ -1,9 +1,8 @@
 schema_version: 1
-experiment_id: openai-mini-smoke__20260218_231119_60983f
-title: OpenAI Mini One-Match Smoke
+experiment_id: fixed-damage-mini-vs-haiku-ao__20260225_233925_d4fc1e
+title: 'FixedDamage AO: gpt-4o-mini vs Claude Haiku 4.5'
 status: complete
-question: Can one out-of-the-box gpt-4o-mini vs gpt-4o-mini match run end-to-end with
-  complete AgentDeck artifacts?
+question: In FixedDamage (AO, side-swapped), does gpt-4o-mini outperform claude-haiku-4.5?
 game:
   name: FixedDamageGame
   config: {}
@@ -11,22 +10,23 @@ players:
 - id: A
   provider: openai
   model: gpt-4o-mini
-  controller: ReasoningController
+  controller: ActionOnlyController
   renderer: TextRenderer
 - id: B
-  provider: openai
-  model: gpt-4o-mini
-  controller: ReasoningController
+  provider: anthropic
+  model: claude-haiku-4-5-20251001
+  controller: ActionOnlyController
   renderer: TextRenderer
 variants:
   models:
+  - claude-haiku-4-5-20251001
   - gpt-4o-mini
   controllers:
-  - ReasoningController
+  - ActionOnlyController
 run:
-  seed_base: 420000
-  matches_planned: 1
-  matches_completed: 1
+  seed_base: 426000
+  matches_planned: 24
+  matches_completed: 24
   concurrency: 10
   max_turns: 30
 analysis_plan:
@@ -48,5 +48,5 @@ storage:
   viewer_curation:
     repo_path: viewer/matches
 notes: Fill freeze metadata (git tag/commit + template version) before running.
-started_at: '2026-02-18T23:11:19.787391'
-completed_at: '2026-02-18T23:12:29.402078'
+started_at: '2026-02-26T02:39:26.129700+00:00'
+completed_at: '2026-02-26T02:47:36.128373+00:00'
