@@ -54,6 +54,7 @@ const RecordLoader = {
 
     // Extract gameplay frames from events
     const frames = this._extractFrames(json.events);
+    const lifecycle = this._extractLifecycle(json.events);
 
     // Warn if no gameplay events
     if (frames.length === 0) {
@@ -73,6 +74,7 @@ const RecordLoader = {
       frames: frames,
       finalState: this._normalizeState(json.final_state || {}),
       metadata: this._normalizeMetadata(json.metadata || {}),
+      lifecycle,
       // Outcome details
       outcome: matchMeta.outcome || (json.winner ? 'victory' : 'draw'),
       forfeitReason: matchMeta.forfeit_reason || null,
@@ -168,6 +170,102 @@ const RecordLoader = {
       responseText: prompt.response_text || prompt.raw_response || '',
       duration: prompt.duration || 0
     };
+  },
+
+  /**
+   * Extract lifecycle events used by debug renderers.
+   * @private
+   */
+  _extractLifecycle(events) {
+    return {
+      handshakes: this._extractHandshakes(events),
+      conclusions: this._extractConclusions(events)
+    };
+  },
+
+  /**
+   * Extract per-player handshake details from lifecycle events.
+   * @private
+   */
+  _extractHandshakes(events) {
+    const byPlayer = new Map();
+    const eventTypes = new Set([
+      'player_handshake_start',
+      'player_handshake_complete',
+      'player_handshake_abort'
+    ]);
+
+    for (const event of events) {
+      if (!eventTypes.has(event.type)) continue;
+
+      const data = event.data || {};
+      const player = data.player || 'Unknown';
+      const ts = Number(event.timestamp || 0);
+
+      if (!byPlayer.has(player)) {
+        byPlayer.set(player, {
+          player,
+          status: 'started',
+          accepted: null,
+          promptText: '',
+          responseText: '',
+          normalizedResponse: '',
+          reason: null,
+          timestamp: ts
+        });
+      }
+
+      const entry = byPlayer.get(player);
+      const promptText = data.prompt_text || data.prompt?.prompt_text || '';
+      const responseText =
+        data.response_text ||
+        data.prompt?.response_text ||
+        data.normalized_response ||
+        '';
+
+      if (promptText) entry.promptText = promptText;
+      if (responseText) entry.responseText = responseText;
+      if (data.normalized_response) entry.normalizedResponse = data.normalized_response;
+      if (typeof data.accepted === 'boolean') entry.accepted = data.accepted;
+      if (data.reason) entry.reason = data.reason;
+      if (ts) entry.timestamp = ts;
+
+      if (event.type === 'player_handshake_complete') {
+        entry.status = 'complete';
+        if (entry.accepted === null) entry.accepted = true;
+      } else if (event.type === 'player_handshake_abort') {
+        entry.status = 'aborted';
+        if (entry.accepted === null) entry.accepted = false;
+      }
+    }
+
+    return Array.from(byPlayer.values()).sort((a, b) => a.timestamp - b.timestamp);
+  },
+
+  /**
+   * Extract conclusion/reflection details.
+   * @private
+   */
+  _extractConclusions(events) {
+    const entries = [];
+
+    for (const event of events) {
+      if (event.type !== 'player_conclusion') continue;
+      const data = event.data || {};
+      const reflectionText = data.reflection_text || data.reflection || '';
+      const responseText = data.response_text || reflectionText || '';
+      const promptText = data.prompt_text || data.prompt?.prompt_text || '';
+
+      entries.push({
+        player: data.player || 'Unknown',
+        reflectionText,
+        responseText,
+        promptText,
+        timestamp: Number(event.timestamp || 0)
+      });
+    }
+
+    return entries.sort((a, b) => a.timestamp - b.timestamp);
   },
 
   /**
