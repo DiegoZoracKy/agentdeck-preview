@@ -538,6 +538,8 @@ def test_default_templates():
     assert "Instructions here" in bundle_hs.text
     assert "Poker" in bundle_hs.text
     assert bundle_hs.text.count("HANDSHAKE_FORMAT") == 1
+    assert "\\n" not in bundle_hs.text
+    assert "\n\n" in bundle_hs.text
 
     # Turn default
     bundle_turn = builder.compose(
@@ -546,6 +548,8 @@ def test_default_templates():
         controller_format="FORMAT",
     )
     assert "Game view" in bundle_turn.text
+    assert "\\n" not in bundle_turn.text
+    assert "\n\nFORMAT" in bundle_turn.text
 
     # Conclusion default
     bundle_conc = builder.compose(
@@ -556,6 +560,8 @@ def test_default_templates():
     )
     assert "Match Concluded" in bundle_conc.text
     assert "Victory!" in bundle_conc.text
+    assert "\\n" not in bundle_conc.text
+    assert "Final state:\nFinal state" in bundle_conc.text
 
 
 # Test: Edge cases

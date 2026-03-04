@@ -87,14 +87,14 @@ class PromptBuilder:
 
     # Default templates per SPEC-PROMPT-BUILDER §4
     DEFAULT_HANDSHAKE = (
-        "You are playing {game_name}.\\n\\n"
-        "{game_instructions}\\n\\n"
-        "{player_instructions}\\n\\n"
+        "You are playing {game_name}.\n\n"
+        "{game_instructions}\n\n"
+        "{player_instructions}\n\n"
         "{handshake_controller_format}"
     )
-    DEFAULT_TURN = "{game_view}\\n\\n{controller_format}"
+    DEFAULT_TURN = "{game_view}\n\n{controller_format}"
     DEFAULT_CONCLUSION = (
-        "=== Match Concluded ===\\n\\n" "{outcome}\\n\\n" "Final state:\\n{game_view}"
+        "=== Match Concluded ===\n\n" "{outcome}\n\n" "Final state:\n{game_view}"
     )
 
     def __init__(
