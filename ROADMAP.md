@@ -93,6 +93,81 @@ Produce a concise readout:
   - adjust configuration and rerun affected cells.
 - Status: IN PROGRESS
 
+## Post-R4 Research Pivot (Run Later)
+
+### Context Lock
+- This block is the execution plan after Claude finishes the OpenAI API update.
+- Do not start new battery runs until API update is merged and smoke-validated.
+
+### Why Pivot
+- Current reset run shows dominant first-player signal in FixedDamageGame:
+  - `c26`: 24/24 first-player wins (100%)
+  - `c02`: 24/24 first-player wins (100%)
+  - `c27`: 20/24 (83.3%)
+  - `c28`: 22/24 (91.7%)
+  - `c01`: 19/24 (79.2%)
+  - `c03`: 20/24 (83.3%)
+- With this regime, method/cadence effects are underpowered at `n=24` and can be confounded by game dynamics.
+
+### Phase P1 - Free Behavioral Extraction (No API Cost)
+- Goal: publishable behavioral finding from existing records before new spend.
+- Input: existing packaged runs from `c26/c27/c28/c01/c02/c03` (latest reset sessions).
+- Output:
+  - POTION probability by own HP bucket, split by controller/cadence.
+  - Early-turn decision profile (first two opportunities as first vs second player).
+  - Forfeit profile by cell and controller.
+- Acceptance:
+  - Analysis artifact committed under `research/` with reproducible script + tables.
+  - No new model calls.
+
+### Phase P2 - Game Viability Smoke (Cheap Gate)
+- Goal: verify if parameterized FixedDamageGame can reduce first-player dominance enough to measure strategy effects.
+- Candidate regimes:
+  - `starting_potions=4`
+  - `starting_potions=6`
+- Minimum run shape:
+  - AO vs AO mirror
+  - side-swap enabled
+  - `n=30` (15 paired seeds) per regime
+- Go/No-Go thresholds:
+  - first-player win rate <= 70%
+  - forfeit rate <= 5%
+  - no schema/recorder invariant violations
+- Decision:
+  - If threshold passes in at least one regime, proceed to P3 with that regime.
+  - If all fail, redesign mechanics before matrix expansion (e.g., SHIELD action or variable damage).
+
+### Phase P3 - Compact Method Matrix (Equalized Cadence)
+- Run only cells that isolate method/cadence cleanly; skip redundant mirror reruns unless reliability gate requires rerun.
+- Target cells:
+  1. AO-HT vs CoT-T-HT (method effect, cadence fixed)
+  2. CoT-H-HT vs CoT-T-HT (turn reinforcement effect, controller family fixed)
+  3. AO-HO vs AO-HT (cadence effect, method fixed)
+- Rules:
+  - same model (`gpt-4o-mini`) for both players
+  - side-swap required
+  - parse policy `FORFEIT`
+  - game params fixed from P2 winner regime
+- Sample sizing:
+  - start at `n=50` per cell
+  - expand to `n=80` only if CI/p-value decision rules from `sampling_policy` are triggered
+  - if first-player remains >80%, pause and redesign game instead of brute-force N
+
+### Phase P4 - Separate Sprint for Model-Selection Narrative
+- Keep model-comparison claim (`mini` vs stronger model) outside method matrix.
+- Precondition:
+  - P3 must establish stable method/cadence behavior in mini-only regime.
+- Then run dedicated cross-model sprint with explicit controls and separate hypotheses.
+
+### Reliability Gate Overrides
+- If any target cell exceeds forfeit threshold (`>5%`), rerun only that cell after fix.
+- Example already observed: `c28` reset run had 2/24 forfeits (8.3%); treat as reliability issue, not strategy result.
+
+### Operational Note
+- Maintain strict provenance in analysis:
+  - compare only artifacts from same `session_id`/`batch_id` set per claim
+  - do not mix runs with different game parameters (e.g., potions 2 vs 4 vs 6) in a single causal conclusion.
+
 ## Engine Correctness and Observability Fix Track
 
 ### P0 - Functional Correctness (Blockers)
@@ -184,6 +259,134 @@ Produce a concise readout:
   - Goal: avoid false positives caused by cross-run parameter drift (e.g., potions=4 vs potions=6).
   - Acceptance:
     - Triage checklist includes explicit provenance check before causal claims.
+
+## OpenAI Responses API Migration
+
+### Context
+- OpenAI has released a new `POST /v1/responses` endpoint intended to replace Chat Completions.
+- Key improvements: 40–80% cache improvement, 3% reasoning improvement (SWE-bench), unified token param (`max_output_tokens`), and server-side conversation history support.
+- `.venv` has `openai==2.15.0` — Responses API is available now.
+- Precondition: merge and smoke-validate before the next battery runs (see Phase R2 constraint note above).
+
+### API Parameter Mapping
+
+| Chat Completions | Responses API |
+|---|---|
+| `messages` | `input` (non-system messages only) |
+| `system` role message(s) | `instructions` (extracted + joined deterministically) |
+| `max_tokens` / `max_completion_tokens` | `max_output_tokens` (unified, no model branching needed) |
+| `client.chat.completions.create()` | `client.responses.create()` |
+| `response.choices[0].message.content` | `response.output_text` (with fallback — see below) |
+| `response.usage.prompt_tokens` | `response.usage.input_tokens` |
+| `response.usage.completion_tokens` | `response.usage.output_tokens` |
+
+### Architecture Decisions
+
+#### Phase 1 = Client-Side History (now)
+- Set `store=False` — AgentDeck passes full conversation history on every call (existing behavior preserved, no server-side state).
+- No behavior change in Phase 1; purely a drop-in API swap.
+
+#### Phase 2 = Server-Side History (future, explicit opt-in only)
+- NOT in scope until Phase 1 is stable and a clear cost/performance case exists.
+- If implemented, MUST include:
+  - `response_id` + `previous_response_id` persisted in match metadata.
+  - Explicit reset behavior on `reset_conversation()`, `clone()`, and match boundaries.
+  - Reproducibility note in spec: local replay is no longer self-contained context when server history is active.
+
+### Safeguards Required Before Coding
+
+#### 1. Scope: This Is a >1-File Migration
+Files that must change:
+- `src/agentdeck/players/openai_player.py` — core implementation
+- `tests/unit/test_openai_player.py` — dedicated `GPTPlayer` tests (currently thin)
+- `tests/conftest.py` — Responses API mock shape (replace/extend Chat Completions mock)
+- `specs/SPEC-LLM.md` — new invariants (Phase MA)
+- `specs/SPEC-PLAYER.md` — token field note (Phase MA)
+
+#### 2. Parameter Compatibility Layer (Critical)
+`**self.config` is currently forwarded blindly; some legacy Chat Completions params will 400 on the Responses API (e.g., `n`, `logprobs`).
+
+Required:
+- Define an explicit allowlist of Responses API supported keys (e.g., `temperature`, `top_p`, `frequency_penalty`, `presence_penalty`, `stop`, `seed`, `user`).
+- Map legacy token params: `max_tokens` / `max_completion_tokens` → `max_output_tokens`.
+- Reject unsupported keys with a clear `ValueError` that names the offending param (not a silent drop or a 400 from the API).
+
+#### 3. System/Instructions Extraction: Robust Multi-Message Case
+- If multiple `system` role messages exist, join their `content` values deterministically (e.g., `"\n\n".join(...)`) into a single `instructions` string.
+- Do NOT silently discard all but the first system message.
+
+#### 4. Response Text Extraction: Fallback + Observability
+- Primary: `response.output_text`
+- Fallback: parse `response.output` list for items where `type == "message"` and extract `content[].text`.
+- If result is empty/None after both paths: raise an explicit `RuntimeError` with the full response repr (not a silent empty string that propagates as a forfeit).
+
+#### 5. Token Metadata Contract: Internal Keys Stay Stable
+Downstream consumers (pricing, packager, spectators) use `prompt_tokens` / `completion_tokens`.
+- Keep internal metadata keys as `prompt_tokens` / `completion_tokens` (map from API's `input_tokens` / `output_tokens`).
+- Optionally surface provider-native keys as `input_tokens` / `output_tokens` alongside (additive, not replacing).
+- Do NOT rename internal keys — that would silently break cost calculation and artifact schema.
+
+#### 6. Dedicated `GPTPlayer` Tests Required
+Currently the GPT call path is barely asserted at the unit level. The new test file MUST cover:
+- Calls `client.responses.create` (not `chat.completions.create`).
+- Payload contains `instructions` + `input` keys.
+- Single system message extracted correctly.
+- Multiple system messages joined into `instructions`.
+- No system message → `instructions` key absent.
+- `max_output_tokens` is used; `max_tokens` / `max_completion_tokens` are absent.
+- Token fields mapped to internal `prompt_tokens` / `completion_tokens`.
+- Unsupported config param (e.g., `n=2`) raises `ValueError` before the API call.
+- Empty / null `output_text` with no fallback match → `RuntimeError`.
+
+#### 7. Migration Gate Before Full Rollout
+After Phase MC passes:
+- Run 1-match smoke to confirm end-to-end path.
+- Run small AO vs AO batch (e.g., 6 matches).
+- Compare vs current baseline: forfeit rate, token accounting, artifact shape.
+- Gate: no regressions before using in next battery sprint.
+
+### Migration Phases
+
+#### Phase MA - Spec (Required Before Implementation)
+- [ ] Add to `SPEC-LLM.md`:
+  - Invariant: `GPTPlayer` MUST use `client.responses.create()` with `input` (non-system messages) and `instructions` (system messages joined deterministically).
+  - Invariant: `GPTPlayer` MUST set `store=False` in Phase 1 to preserve client-side history semantics.
+  - Invariant: `GPTPlayer` MUST validate `**config` keys against an allowlist before forwarding; unsupported keys MUST raise `ValueError`.
+  - Invariant: `GPTPlayer` response text MUST be extracted via `output_text` with structured fallback; empty result MUST raise `RuntimeError`.
+- [ ] Add to `SPEC-PLAYER.md`:
+  - Note: internal metadata keys `prompt_tokens` / `completion_tokens` are mapped from Responses API fields `input_tokens` / `output_tokens`; internal contract is stable regardless of provider API field names.
+- [ ] Update `SPEC-LLM.md` cross-references for any sections referencing Chat Completions parameter names.
+
+#### Phase MB - Implementation
+- Scope: `src/agentdeck/players/openai_player.py`
+- Changes:
+  - Add `_RESPONSES_API_ALLOWLIST` constant (set of supported param keys).
+  - Add `_validate_and_remap_config()` method: validate keys, map `max_tokens`/`max_completion_tokens` → `max_output_tokens`, raise `ValueError` on unknowns.
+  - Extract all `system` role messages from `messages`, join into `instructions`; remainder into `input`.
+  - Replace `client.chat.completions.create()` with `client.responses.create()`.
+  - Response text: `output_text` primary, structured fallback, `RuntimeError` on empty.
+  - Token mapping: `input_tokens` / `output_tokens` → internal `prompt_tokens` / `completion_tokens`.
+  - Add `store=False` to `api_params`.
+
+#### Phase MC - Tests
+- [ ] `tests/conftest.py`: extend mock fixture for Responses API response shape (`output_text`, `usage.input_tokens`, `usage.output_tokens`).
+- [ ] `tests/unit/test_openai_player.py`:
+  - `test_gpt_calls_responses_create` — correct method called.
+  - `test_gpt_single_system_extracted_to_instructions`
+  - `test_gpt_multiple_system_joined_to_instructions`
+  - `test_gpt_no_system_omits_instructions_key`
+  - `test_gpt_max_output_tokens_used`
+  - `test_gpt_legacy_max_tokens_remapped`
+  - `test_gpt_unsupported_config_param_raises`
+  - `test_gpt_token_fields_mapped_to_internal_keys`
+  - `test_gpt_empty_output_text_raises_runtime_error`
+- [ ] Migration gate: 1-match smoke + 6-match AO vs AO batch; compare forfeit rate, token accounting, artifact shape vs current baseline.
+
+### Status
+- [ ] Phase MA (spec)
+- [ ] Phase MB (implementation)
+- [ ] Phase MC (tests)
+- [ ] Migration gate (smoke + batch validation)
 
 ## Artifact Policy (This Reset)
 - Runtime truth: `agentdeck_runs/<session_id>/records/*.json` and logs.
