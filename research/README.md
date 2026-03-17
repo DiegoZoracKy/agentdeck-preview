@@ -7,8 +7,9 @@ Core framework documentation remains in the repository root (`README.md`,
 `CONTRIBUTING.md`, and `specs/`). This `research/` area is intentionally
 experiment-specific.
 
-Note: The current experiments are reference examples from AgentDeck development.
-Use `_templates/` to start new experiments for your own work.
+The baseline branch intentionally ships the **research contract and templates**
+without committed benchmark packages. Use `_templates/` or
+`scripts/research_package.py` to start new experiments.
 
 ## Start Here
 - `SCHEMA.md` - manifest/results schema and required fields

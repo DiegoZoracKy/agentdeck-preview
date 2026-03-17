@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -187,3 +189,35 @@ def test_schema_v1_results_do_not_require_extended_metrics(tmp_path):
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []
+
+
+def test_empty_research_tree_is_valid(tmp_path):
+    validator_script = Path(__file__).resolve().parents[2] / "scripts" / "research_validate.py"
+    index_script = Path(__file__).resolve().parents[2] / "scripts" / "research_index.py"
+
+    research_dir = tmp_path / "research"
+    research_dir.mkdir()
+    index_path = research_dir / "INDEX.md"
+
+    result = subprocess.run(
+        [sys.executable, str(index_script), "--research-dir", str(research_dir), "--output", str(index_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(validator_script),
+            "--research-dir",
+            str(research_dir),
+            "--index",
+            str(index_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr

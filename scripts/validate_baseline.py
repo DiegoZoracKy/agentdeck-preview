@@ -9,8 +9,7 @@ Usage:
     python scripts/validate_baseline.py --model gpt-4o-mini --matches 30 --seed 42
     python scripts/validate_baseline.py --model gpt-4o --matches 30 --seed 43
 
-Part of: OpenAI Strategic Benchmarks Experiment
-See: docs/research/2025-11-08-openai-benchmarks/
+    Use this as a lightweight mirror-match quality gate for local validation.
 """
 
 import argparse
@@ -172,9 +171,6 @@ def main():
 Examples:
   python scripts/validate_baseline.py --model gpt-4o-mini --matches 30 --seed 42
   python scripts/validate_baseline.py --model gpt-4o --matches 30 --seed 43
-
-Part of: OpenAI Strategic Benchmarks Experiment
-See: docs/research/2025-11-08-openai-benchmarks/
         """
     )
 

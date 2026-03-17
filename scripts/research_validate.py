@@ -403,9 +403,6 @@ def main() -> int:
         if "_templates" not in str(path)
     )
 
-    if not manifest_paths:
-        errors.append("No manifest.yaml files found under research/")
-
     for manifest_path in manifest_paths:
         manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
         if not isinstance(manifest, dict):

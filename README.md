@@ -71,11 +71,13 @@ Viewer and replay UI work should currently be treated as **secondary / experimen
 This README focuses on the **core AgentDeck platform** (architecture, APIs, and usage).
 Experiment-specific findings, result narratives, and benchmark grids live under [`research/`](research/).
 
+The baseline branch intentionally keeps the **research contract and tooling**, not archived benchmark packages. New release-facing studies should be created from templates or from packaged sessions.
+
 ### Explore Research
 - **[Research Guide](research/README.md)** - How experiment packages are organized
 - **[Research Index](research/INDEX.md)** - Registry of experiments and status
-- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - Example completed package
-- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - Example cross-provider package
+- **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
+- **[Research Templates](research/_templates/)** - Boilerplate for new experiment packages
 
 ---
 
