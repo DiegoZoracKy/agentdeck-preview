@@ -1,8 +1,8 @@
 # AgentDeck Implementation Specification
 
-**Version**: 2.0 (Lean Navigation)
+**Version**: 2.1 (Lean Navigation)
 **Status**: Active
-**Last Updated**: 2026-01-20
+**Last Updated**: 2026-03-17
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -114,7 +114,7 @@ session_start
 
 ### 2.3 Three-Phase Player Lifecycle
 
-Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.3.0:
+Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.3.2:
 
 1. **Handshake Phase** (Mandatory, before gameplay):
    - Console → Player.build_handshake_bundle() → PromptBundle
@@ -158,7 +158,7 @@ deck = AgentDeck(game=MyGame(), session=config)
 ## 3. Core Design Principles
 
 ### 3.1 Simplicity First
-- Games require only 4 methods: `setup()`, `get_view()`, `update()`, `status()`
+- Games center on 4 core methods: `setup()`, `get_view()`, `update()`, `status()`, plus descriptive properties such as `instructions`, `allowed_actions`, and `default_handshake_template`
 - State is just Python dictionaries, not complex objects
 - Direct instantiation, no registration or string IDs required
 
@@ -189,26 +189,26 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [AgentDeck](SPEC-AGENTDECK.md) | 1.0.0 | Final | Public API facade for the framework |
-| [Console](SPEC-CONSOLE.md) | 0.6.0 | Draft | Execution engine for session/match lifecycle |
-| [EventBus](SPEC-OBSERVABILITY.md) | 1.1.0 | Final | Event distribution and spectator routing |
-| [Game](SPEC-GAME.md) | 0.5.0 | Final | Game author contract (rules, state, narrative) |
-| [Player](SPEC-PLAYER.md) | 1.3.0 | Draft | Three-phase player lifecycle (handshake/turn/conclusion) |
-| [Controller](SPEC-CONTROLLER.md) | 1.1.0 | Final | Handshake & action parsing contract |
+| [AgentDeck](SPEC-AGENTDECK.md) | 0.3.0 | Final | Public API facade for the framework |
+| [Console](SPEC-CONSOLE.md) | 0.7.1 | Final | Execution engine for session/match lifecycle |
+| [Observability / EventBus](SPEC-OBSERVABILITY.md) | 1.2.0 | Final | Event distribution, emission responsibilities, and spectator routing |
+| [Game](SPEC-GAME.md) | 0.7.1 | Final | Game author contract (rules, state, narrative, lifecycle hooks) |
+| [Player](SPEC-PLAYER.md) | 1.3.2 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Controller](SPEC-CONTROLLER.md) | 1.3.1 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
-| [Spectator](SPEC-SPECTATOR.md) | 1.0.0 | Final | Observation and analysis interface |
+| [Spectator](SPEC-SPECTATOR.md) | 1.2.0 | Final | Observation and analysis interface |
 
 ### 4.2 Infrastructure Components
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Recorder](SPEC-RECORDER.md) | 1.3.0 | Final | Match persistence with enriched prompt payloads |
+| [Recorder](SPEC-RECORDER.md) | 1.3.1 | Final | Match persistence with enriched prompt payloads |
 | [ReplayEngine](SPEC-REPLAY.md) | 1.1.0 | Final | Exact replay with enriched event prompt payloads |
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
-| [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Draft | TurnBasedGame + TurnLoop helper using MatchRuntime |
-| [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.0.0 | Draft | Per-match infrastructure context (`runtime`) |
+| [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
+| [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.0.0 | Final | Per-match infrastructure context (`runtime`) |
 | [Pricing](SPEC-PRICING.md) | 1.0.0 | Final | Cost tracking system for LLM usage |
-| [LLM](SPEC-LLM.md) | 1.0.0 | Draft | LLM provider integration contract |
+| [LLM](SPEC-LLM.md) | 1.1.2 | Final | LLM provider integration contract |
 | [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
 | [Monitor](SPEC-MONITOR.md) | 1.0.0 | Final | Console-level observation and progress reporting |
 
@@ -217,46 +217,40 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
-| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.1.0 | Final | Experiment package, manifest/results/index contracts |
-| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.2.0 | Final | Session-to-experiment package helper |
+| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.5.0 | Final | Experiment package, manifest/results/index contracts |
+| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.3.0 | Final | Session-to-experiment package helper |
+
+### 4.4 Viewer Surface
+
+| Component | Version | Status | Description |
+|-----------|---------|--------|-------------|
+| [Viewer](SPEC-VIEWER.md) | 0.2.0 | Final | Offline browser replay viewer for recorded match artifacts |
 
 ---
 
 ## 5. Quick Start Example
 
 ```python
-from agentdeck import AgentDeck, TurnBasedGame, GPTPlayer, ActionOnlyController
+from agentdeck import AgentDeck, FixedDamageGame, MockPlayer
 
-# 1. Define game (~15 lines)
-class FixedDamageGame(TurnBasedGame):
-    @property
-    def instructions(self):
-        return "ATTACK deals 20 damage. First to 0 health loses."
+game = FixedDamageGame(
+    max_health=100,
+    attack_damage=20,
+    potion_heal=30,
+    starting_potions=2,
+    information_level="partial",
+)
 
-    def setup(self, players):
-        return {"health": {p: 100 for p in players}}
+players = [
+    MockPlayer("Alice", actions=["ATTACK"]),
+    MockPlayer("Bob", actions=["POTION", "ATTACK"]),
+]
 
-    def update(self, state, player, action, *, rng):
-        opponent = [p for p in state["health"] if p != player][0]
-        if action.action == "ATTACK":
-            state["health"][opponent] -= 20
-        return state
+with AgentDeck(game=game) as deck:
+    results = deck.play(players=players, matches=3)
 
-    def status(self, state):
-        for player, health in state["health"].items():
-            if health <= 0:
-                winner = [p for p in state["health"] if p != player][0]
-                return GameStatus(is_over=True, winner=winner)
-        return GameStatus(is_over=False)
-
-# 2. Run experiment (~3 lines)
-deck = AgentDeck()
-players = [GPTPlayer("Alice"), GPTPlayer("Bob")]
-results = deck.play(game=FixedDamageGame(), players=players, matches=100)
-
-# 3. Analyze results
-print(f"Win rates: {results.win_rates}")
-print(f"Alice won {results.win_rates['Alice']:.1%} of matches")
+print(results.summary)
+print(results.win_rates)
 ```
 
 ---
