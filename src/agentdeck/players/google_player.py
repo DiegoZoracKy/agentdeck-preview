@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
+import json
 import os
 import warnings
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,8 +19,7 @@ class GeminiPlayer(LLMPlayer):
     PROVIDER = "google"
     default_model = None
     api_key_env_var = None  # Vertex AI uses ADC/Project configuration instead of API keys
-
-    _vertex_initialized: bool = False
+    _SERVICE_ACCOUNT_B64_ENV_VAR = "GOOGLE_APPLICATION_CREDENTIALS_B64"
 
     def __init__(
         self,
@@ -28,12 +30,19 @@ class GeminiPlayer(LLMPlayer):
         generation_config: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
-        self._project_id = project_id or os.getenv("VERTEX_PROJECT_ID")
+        self._service_account_info = self._load_service_account_info_from_env()
+        self._project_id = (
+            project_id
+            or os.getenv("VERTEX_PROJECT_ID")
+            or self._project_id_from_service_account(self._service_account_info)
+        )
         self._location = location or os.getenv("VERTEX_LOCATION", "us-central1")
         if not self._project_id:
             raise ValueError(
                 "GeminiPlayer requires a Vertex AI project ID. "
-                "Set VERTEX_PROJECT_ID or pass project_id= explicitly."
+                "Set VERTEX_PROJECT_ID, pass project_id= explicitly, or provide "
+                "GOOGLE_APPLICATION_CREDENTIALS_B64 with a service-account JSON payload "
+                "that includes project_id."
             )
         self._generation_overrides = generation_config or {}
         super().__init__(name=name, **kwargs)
@@ -46,6 +55,7 @@ class GeminiPlayer(LLMPlayer):
         """Initialize Vertex AI GenerativeModel client."""
         try:
             import vertexai
+            from google.oauth2 import service_account
             from vertexai.generative_models import GenerativeModel
         except ImportError as exc:
             raise ImportError(
@@ -53,9 +63,18 @@ class GeminiPlayer(LLMPlayer):
                 'Install it via the optional extra: pip install "agentdeck-ai[google]"'
             ) from exc
 
-        if not GeminiPlayer._vertex_initialized:
-            vertexai.init(project=self._project_id, location=self._location)
-            GeminiPlayer._vertex_initialized = True
+        credentials = None
+        if self._service_account_info is not None:
+            credentials = service_account.Credentials.from_service_account_info(
+                self._service_account_info
+            )
+
+        # Reinitialize Vertex per player so auth/project overrides remain explicit.
+        vertexai.init(
+            project=self._project_id,
+            location=self._location,
+            credentials=credentials,
+        )
 
         warnings.filterwarnings(
             "ignore",
@@ -65,6 +84,49 @@ class GeminiPlayer(LLMPlayer):
         )
 
         self.client = GenerativeModel(self.model)
+
+    @classmethod
+    def _project_id_from_service_account(
+        cls, service_account_info: Optional[Dict[str, Any]]
+    ) -> Optional[str]:
+        if not service_account_info:
+            return None
+        project_id = service_account_info.get("project_id")
+        if not project_id:
+            return None
+        return str(project_id)
+
+    @classmethod
+    def _load_service_account_info_from_env(cls) -> Optional[Dict[str, Any]]:
+        encoded = os.getenv(cls._SERVICE_ACCOUNT_B64_ENV_VAR)
+        if not encoded:
+            return None
+        normalized = "".join(encoded.split())
+
+        try:
+            decoded = base64.b64decode(normalized, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise ValueError(
+                "GOOGLE_APPLICATION_CREDENTIALS_B64 must be valid base64-encoded JSON."
+            ) from exc
+
+        try:
+            payload = json.loads(decoded.decode("utf-8"))
+        except UnicodeDecodeError as exc:
+            raise ValueError(
+                "GOOGLE_APPLICATION_CREDENTIALS_B64 must decode to UTF-8 JSON."
+            ) from exc
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                "GOOGLE_APPLICATION_CREDENTIALS_B64 must decode to a JSON object."
+            ) from exc
+
+        if not isinstance(payload, dict):
+            raise ValueError(
+                "GOOGLE_APPLICATION_CREDENTIALS_B64 must decode to a JSON object."
+            )
+
+        return payload
 
     def _make_api_call(self, messages: List[Dict[str, str]]) -> Tuple[str, Dict]:
         """Call Vertex AI Gemini model."""
@@ -121,6 +183,9 @@ class GeminiPlayer(LLMPlayer):
             "estimated": estimated,
             "project_id": self._project_id,
             "location": self._location,
+            "credential_source": (
+                self._SERVICE_ACCOUNT_B64_ENV_VAR if self._service_account_info else "adc"
+            ),
         }
 
         return response_text, metadata

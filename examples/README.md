@@ -176,6 +176,10 @@ player = GeminiPlayer(
 )
 ```
 
+Gemini uses Vertex AI credentials. You can provide them through standard ADC or
+through `GOOGLE_APPLICATION_CREDENTIALS_B64` when your environment injects
+secrets as base64.
+
 ### Using Context Manager (Recommended)
 
 ```python
@@ -318,6 +322,8 @@ deck.play(players, matches=50, seed=3)
 Required for LLM players:
 
 ```bash
+# Copy `.env.example` to `.env`, then source it or load it with `python-dotenv`
+
 # OpenAI
 export OPENAI_API_KEY="sk-..."
 
@@ -327,7 +333,13 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 # Google Vertex AI (Gemini)
 export VERTEX_PROJECT_ID="your-gcp-project-id"
 export VERTEX_LOCATION="us-central1"
+
+# Optional: base64-encoded service-account JSON for ADC-free secret injection
+export GOOGLE_APPLICATION_CREDENTIALS_B64="$(base64 < /path/to/service-account.json | tr -d '\n')"
 ```
+
+If `GOOGLE_APPLICATION_CREDENTIALS_B64` is set and the decoded service-account
+JSON includes `project_id`, AgentDeck can infer the Vertex project automatically.
 
 ---
 

@@ -64,7 +64,7 @@
 
 ## 5. Invariants & Guarantees
 ### 5.1 Credentials & Configuration (CC)
-1. **CC1**: MUST resolve credentials via constructor argument > env var > provider-specific defaults (e.g., Google ADC). Providers supporting Application Default Credentials (ADC) or similar implicit auth MAY skip explicit `api_key` requirement. Raise `ValueError` only when no valid credential path exists.
+1. **CC1**: MUST resolve credentials via constructor argument > env var > provider-specific defaults (e.g., Google ADC). Providers supporting Application Default Credentials (ADC) or similar implicit auth MAY skip explicit `api_key` requirement. Env-based credential material MAY include encoded payloads such as `GOOGLE_APPLICATION_CREDENTIALS_B64` when the provider SDK supports direct credential injection. Raise `ValueError` only when no valid credential path exists.
 2. **CC2**: MUST ensure `model` set (constructor override or class-level `default_model`); raise `ValueError` otherwise.
 3. **CC3**: MUST call `_initialize_client` during construction; failures MUST raise actionable `ImportError`/`ValueError`.
 

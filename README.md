@@ -212,7 +212,10 @@ print(f"Win rates: {results.win_rates}")
 > Provider-backed players never fall back to defaults; pass `model=` for every GPT/Claude/Gemini player.
 >
 > ℹ️ **Provider credentials**  
-> Set the provider-specific environment variables before running examples (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and `VERTEX_PROJECT_ID`/`VERTEX_LOCATION` for Gemini).
+> Set the provider-specific environment variables before running examples (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and `VERTEX_PROJECT_ID`/`VERTEX_LOCATION` for Gemini). For Gemini on Vertex, AgentDeck also supports `GOOGLE_APPLICATION_CREDENTIALS_B64` for base64-encoded service-account JSON. Start from [`.env.example`](./.env.example) for local setup.
+
+> 📝 **`.env` loading policy**  
+> AgentDeck does not auto-load `.env` at the library level. Source it in your shell or load it in your entry script.
 
 ### Try AgentDeck Without API Keys
 - Run `python examples/mock_demo.py`
