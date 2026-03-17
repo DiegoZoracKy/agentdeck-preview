@@ -1,6 +1,6 @@
 # AgentDeck Experiment Reset Roadmap
 
-Last updated: 2026-02-23T00:30:00Z  
+Last updated: 2026-03-16T00:00:00Z
 Owner: Diego + Codex + Claude
 
 ## North Star
@@ -22,6 +22,25 @@ Run a clean, reproducible mini-only benchmark from zero (gpt-4o-mini) and produc
 ## What Changes Before Running
 - Update `ROADMAP.md` only (this document).
 - No code/spec changes in this step.
+
+## Research Artifact Metrics Upgrade (2026-03-04)
+- [x] Add inferential statistics directly to `results.json` export (`schema_version: 2`):
+  - per-player CI / p-value / effect size
+  - pairwise comparison payload
+  - basic quality flags
+- [x] Add game-agnostic `format_strictness` block to `results.json`:
+  - parse-failure rate
+  - strict contract pass rate
+  - recoverable non-strict rate
+- [x] Add game-agnostic `position_effect` block to `results.json`:
+  - first-player win rate
+  - upset rate (second-player wins)
+  - per-player split (wins as first vs second)
+- [x] Keep implementation modular in core research module:
+  - `src/agentdeck/research/recording_metrics.py`
+  - consumed by `scripts/research_export.py`
+- [x] Extend validator for extended metrics on `results.json.schema_version >= 2`.
+- [x] Extend packager factual hydration to surface key stats/strictness in `analysis.md`.
 
 ## Reset Plan
 
@@ -91,13 +110,14 @@ Produce a concise readout:
 - Decision:
   - proceed to expansion (`80` selected cells), or
   - adjust configuration and rerun affected cells.
-- Status: IN PROGRESS
+- Status: COMPLETE
+- Outcome: dominant first-player signal across all cells (see Post-R4 pivot below). Method/cadence effects underpowered at n=24 in original game config. Pivot to weak-model cross-provider battery with paired side-swap.
 
-## Post-R4 Research Pivot (Run Later)
+## Post-R4 Research Pivot
 
 ### Context Lock
-- This block is the execution plan after Claude finishes the OpenAI API update.
-- Do not start new battery runs until API update is merged and smoke-validated.
+- OpenAI Responses API migration merged at `b043b66` and smoke-validated via battery runs.
+- Battery runs unblocked.
 
 ### Why Pivot
 - Current reset run shows dominant first-player signal in FixedDamageGame:
@@ -167,6 +187,21 @@ Produce a concise readout:
 - Maintain strict provenance in analysis:
   - compare only artifacts from same `session_id`/`batch_id` set per claim
   - do not mix runs with different game parameters (e.g., potions 2 vs 4 vs 6) in a single causal conclusion.
+
+### Core Experiment Controls (Backlog)
+- [ ] Add first-player/pairing policies as native AgentDeck execution options (not runner-only YAML logic).
+  - Current gap:
+    - `paired_seed_side_swap.enabled` exists only in matrix runner logic (`run_matrix_phase.py`), not in `AgentDeckConfig` / `AgentDeck.play`.
+    - This makes fairness controls non-portable across scripts and creates duplicate orchestration logic.
+  - Scope:
+    - Introduce core-level execution options for:
+      - player pairing policy (`none`, `paired_side_swap`)
+      - first-player policy (`random` default; optional fixed/alternating modes for diagnostics)
+    - Persist selected policies in match/batch metadata for auditability.
+  - Acceptance:
+    - Same fairness experiment can be run through core API without custom runner orchestration.
+    - Metadata explicitly records pairing/first-player policy per match/batch.
+    - Specs updated before implementation (spec-first), including invariants and observability fields.
 
 ## Engine Correctness and Observability Fix Track
 
@@ -348,45 +383,23 @@ After Phase MC passes:
 ### Migration Phases
 
 #### Phase MA - Spec (Required Before Implementation)
-- [ ] Add to `SPEC-LLM.md`:
-  - Invariant: `GPTPlayer` MUST use `client.responses.create()` with `input` (non-system messages) and `instructions` (system messages joined deterministically).
-  - Invariant: `GPTPlayer` MUST set `store=False` in Phase 1 to preserve client-side history semantics.
-  - Invariant: `GPTPlayer` MUST validate `**config` keys against an allowlist before forwarding; unsupported keys MUST raise `ValueError`.
-  - Invariant: `GPTPlayer` response text MUST be extracted via `output_text` with structured fallback; empty result MUST raise `RuntimeError`.
-- [ ] Add to `SPEC-PLAYER.md`:
-  - Note: internal metadata keys `prompt_tokens` / `completion_tokens` are mapped from Responses API fields `input_tokens` / `output_tokens`; internal contract is stable regardless of provider API field names.
-- [ ] Update `SPEC-LLM.md` cross-references for any sections referencing Chat Completions parameter names.
+- [x] Add to `SPEC-LLM.md`: invariants OR1-OR5 — `b043b66`
+- [x] Add to `SPEC-PLAYER.md`: token mapping note CS5 — `b043b66`
+- [x] Update `SPEC-LLM.md` cross-references — `b043b66`
 
-#### Phase MB - Implementation
-- Scope: `src/agentdeck/players/openai_player.py`
-- Changes:
-  - Add `_RESPONSES_API_ALLOWLIST` constant (set of supported param keys).
-  - Add `_validate_and_remap_config()` method: validate keys, map `max_tokens`/`max_completion_tokens` → `max_output_tokens`, raise `ValueError` on unknowns.
-  - Extract all `system` role messages from `messages`, join into `instructions`; remainder into `input`.
-  - Replace `client.chat.completions.create()` with `client.responses.create()`.
-  - Response text: `output_text` primary, structured fallback, `RuntimeError` on empty.
-  - Token mapping: `input_tokens` / `output_tokens` → internal `prompt_tokens` / `completion_tokens`.
-  - Add `store=False` to `api_params`.
+#### Phase MB - Implementation — COMPLETE `b043b66`
+- `_RESPONSES_API_ALLOWLIST`, `_validate_and_remap_config()`, system→instructions extraction, `responses.create`, `output_text` fallback, token mapping, `store=False`.
 
-#### Phase MC - Tests
-- [ ] `tests/conftest.py`: extend mock fixture for Responses API response shape (`output_text`, `usage.input_tokens`, `usage.output_tokens`).
-- [ ] `tests/unit/test_openai_player.py`:
-  - `test_gpt_calls_responses_create` — correct method called.
-  - `test_gpt_single_system_extracted_to_instructions`
-  - `test_gpt_multiple_system_joined_to_instructions`
-  - `test_gpt_no_system_omits_instructions_key`
-  - `test_gpt_max_output_tokens_used`
-  - `test_gpt_legacy_max_tokens_remapped`
-  - `test_gpt_unsupported_config_param_raises`
-  - `test_gpt_token_fields_mapped_to_internal_keys`
-  - `test_gpt_empty_output_text_raises_runtime_error`
-- [ ] Migration gate: 1-match smoke + 6-match AO vs AO batch; compare forfeit rate, token accounting, artifact shape vs current baseline.
+#### Phase MC - Tests — COMPLETE `b043b66`
+- `tests/conftest.py` updated with Responses API mock shape.
+- `tests/unit/test_openai_player.py`: all 9 cases covered (request shape, system extraction, token remapping, config validation, empty output fallback).
+- Migration gate: smoke-validated via B1/B2/B3 battery runs — no regressions in forfeit rate, token accounting, or artifact shape.
 
 ### Status
-- [ ] Phase MA (spec)
-- [ ] Phase MB (implementation)
-- [ ] Phase MC (tests)
-- [ ] Migration gate (smoke + batch validation)
+- [x] Phase MA (spec) — `b043b66`
+- [x] Phase MB (implementation) — `b043b66`
+- [x] Phase MC (tests) — `b043b66`
+- [x] Migration gate — smoke-validated via B1/B2/B3 battery runs
 
 ## Artifact Policy (This Reset)
 - Runtime truth: `agentdeck_runs/<session_id>/records/*.json` and logs.

@@ -1,0 +1,695 @@
+{
+  "schema_version": 2,
+  "experiment_id": "fixed-damage-mini-vs-haiku-handshake-only__20260304_181345_92ec64",
+  "source": {
+    "recordings_dir": "agentdeck_runs/session_20260304_181345_92ec64/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "gpt-4o-mini-A": 0.5833333333333334,
+      "claude-3-haiku-20240307-B": 0.4166666666666667
+    },
+    "total_cost": 0.0686149,
+    "avg_turns": 17.833333333333332,
+    "avg_duration": 16.09442901611328,
+    "avg_cost": 0.002858954166666667
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "gpt-4o-mini-A": {
+        "wins": 14,
+        "win_rate": 0.5833333333333334,
+        "ci": [
+          0.3883466586522876,
+          0.7553239739018824
+        ],
+        "p_value": 0.5412561893463135,
+        "effect_size": 0.1674480792196893,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "claude-3-haiku-20240307-B": {
+        "wins": 10,
+        "win_rate": 0.4166666666666667,
+        "ci": [
+          0.24467602609811764,
+          0.6116533413477124
+        ],
+        "p_value": 0.5412561893463135,
+        "effect_size": -0.16744807921968952,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "gpt-4o-mini-A_vs_claude-3-haiku-20240307-B": {
+        "player_a": "gpt-4o-mini-A",
+        "player_b": "claude-3-haiku-20240307-B",
+        "wins_a": 14,
+        "wins_b": 10,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.5833333333333334,
+        "ci_a": [
+          0.3883466586522876,
+          0.7553239739018824
+        ],
+        "p_value": 0.5412561893463135,
+        "effect_size": 0.1674480792196893,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 428,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 428,
+      "strict_contract_passes": 428,
+      "strict_contract_rate": 1.0,
+      "recoverable_non_strict": 0,
+      "recoverable_non_strict_rate": 0.0,
+      "action_line_rate": 1.0,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "claude-3-haiku-20240307-B": {
+        "turn_attempts": 213,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 213,
+        "strict_contract_passes": 213,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      },
+      "gpt-4o-mini-A": {
+        "turn_attempts": 215,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 215,
+        "strict_contract_passes": 215,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 16,
+    "first_player_win_rate": 0.6666666666666666,
+    "second_player_wins": 8,
+    "upset_rate": 0.3333333333333333,
+    "by_player": {
+      "gpt-4o-mini-A": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 9,
+        "wins_as_second": 5,
+        "win_rate_as_first": 0.75,
+        "win_rate_as_second": 0.4166666666666667
+      },
+      "claude-3-haiku-20240307-B": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 7,
+        "wins_as_second": 3,
+        "win_rate_as_first": 0.5833333333333334,
+        "win_rate_as_second": 0.25
+      }
+    }
+  },
+  "players": [
+    {
+      "name": "gpt-4o-mini-A",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "type": "GPTPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "claude-3-haiku-20240307-B",
+      "provider": "anthropic",
+      "model": "claude-3-haiku-20240307",
+      "type": "ClaudePlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_080f7ca6",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439005,
+      "duration": 11.902345657348633,
+      "cost": 0.002673449999999999,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0008307000000000002,
+        "claude-3-haiku-20240307-B": 0.001842749999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_16b3d191",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439000,
+      "duration": 18.78693723678589,
+      "cost": 0.0030788499999999997,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0012575999999999998,
+        "claude-3-haiku-20240307-B": 0.00182125
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_1abb0c74",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439011,
+      "duration": 12.630164623260498,
+      "cost": 0.0026793500000000074,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0008316000000000018,
+        "claude-3-haiku-20240307-B": 0.0018477500000000056
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_243fa5fd",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439008,
+      "duration": 14.00926160812378,
+      "cost": 0.0026238500000000005,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0016070000000000025,
+        "gpt-4o-mini-A": 0.001016849999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_291edf8f",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439010,
+      "duration": 28.81770372390747,
+      "cost": 0.0031249999999999993,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0012899999999999995,
+        "claude-3-haiku-20240307-B": 0.0018349999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_3fea4851",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 439001,
+      "duration": 12.107543230056763,
+      "cost": 0.0023978499999999995,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0015654999999999996,
+        "gpt-4o-mini-A": 0.0008323499999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_45d2036b",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439009,
+      "duration": 12.913986206054688,
+      "cost": 0.002662350000000006,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0008331000000000015,
+        "claude-3-haiku-20240307-B": 0.0018292500000000045
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_53f4f8d3",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439007,
+      "duration": 24.9217209815979,
+      "cost": 0.00321735,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0013566000000000003,
+        "claude-3-haiku-20240307-B": 0.0018607499999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_54db15e7",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439004,
+      "duration": 16.136674404144287,
+      "cost": 0.0026203,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0015632500000000004,
+        "gpt-4o-mini-A": 0.0010570499999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_611387ca",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 20,
+      "outcome": "win",
+      "seed": 439011,
+      "duration": 14.163146257400513,
+      "cost": 0.0033192999999999973,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0021467499999999994,
+        "gpt-4o-mini-A": 0.001172549999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_7c95f57d",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439006,
+      "duration": 14.64866304397583,
+      "cost": 0.0031789999999999995,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0021604999999999992,
+        "gpt-4o-mini-A": 0.0010185000000000003
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_8c653dca",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 20,
+      "outcome": "win",
+      "seed": 439003,
+      "duration": 21.04354476928711,
+      "cost": 0.003421049999999999,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0021704999999999997,
+        "gpt-4o-mini-A": 0.0012505499999999991
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_96a09450",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 439007,
+      "duration": 12.722656011581421,
+      "cost": 0.0023865499999999977,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.001552999999999997,
+        "gpt-4o-mini-A": 0.0008335500000000006
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_a1c65f95",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 439002,
+      "duration": 15.685494899749756,
+      "cost": 0.0024373499999999996,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0008743500000000007,
+        "claude-3-haiku-20240307-B": 0.0015629999999999989
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_a52e69c3",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 439010,
+      "duration": 10.309288501739502,
+      "cost": 0.0024103500000000073,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0015780000000000065,
+        "gpt-4o-mini-A": 0.0008323500000000008
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_a8283b1f",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439004,
+      "duration": 15.030765056610107,
+      "cost": 0.0027681,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0008691000000000003,
+        "claude-3-haiku-20240307-B": 0.0018989999999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_ad5bc848",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439005,
+      "duration": 15.055996656417847,
+      "cost": 0.0026486999999999986,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.001598249999999999,
+        "gpt-4o-mini-A": 0.0010504499999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_b139d3a8",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439006,
+      "duration": 16.974008798599243,
+      "cost": 0.0030577999999999985,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0012107999999999989,
+        "claude-3-haiku-20240307-B": 0.0018469999999999997
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_b15ea7c9",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439003,
+      "duration": 16.709959030151367,
+      "cost": 0.0031905999999999983,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0010550999999999998,
+        "claude-3-haiku-20240307-B": 0.0021354999999999985
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_b4da4bb7",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439001,
+      "duration": 17.56189489364624,
+      "cost": 0.0030829499999999992,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0012491999999999994,
+        "claude-3-haiku-20240307-B": 0.0018337499999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 1
+      }
+    },
+    {
+      "match_id": "match_c0e9c958",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 439000,
+      "duration": 12.63292407989502,
+      "cost": 0.0024135,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0015817499999999998,
+        "gpt-4o-mini-A": 0.00083175
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_cb4cb86a",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "gpt-4o-mini-A",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 439009,
+      "duration": 18.07377314567566,
+      "cost": 0.0031049499999999987,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0018527500000000002,
+        "gpt-4o-mini-A": 0.0012521999999999985
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_cb9e16c5",
+      "players": [
+        "claude-3-haiku-20240307-B",
+        "gpt-4o-mini-A"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 20,
+      "outcome": "win",
+      "seed": 439002,
+      "duration": 21.674412488937378,
+      "cost": 0.0034267,
+      "player_costs": {
+        "claude-3-haiku-20240307-B": 0.0021317500000000004,
+        "gpt-4o-mini-A": 0.0012949499999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "gpt-4o-mini-A",
+        "index": 0
+      }
+    },
+    {
+      "match_id": "match_fe3e7a2f",
+      "players": [
+        "gpt-4o-mini-A",
+        "claude-3-haiku-20240307-B"
+      ],
+      "winner": "claude-3-haiku-20240307-B",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 439008,
+      "duration": 11.75343108177185,
+      "cost": 0.00268965,
+      "player_costs": {
+        "gpt-4o-mini-A": 0.0008469000000000011,
+        "claude-3-haiku-20240307-B": 0.001842749999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "claude-3-haiku-20240307-B",
+        "index": 0
+      }
+    }
+  ],
+  "generated_at": "2026-03-04T21:21:47.450726Z"
+}

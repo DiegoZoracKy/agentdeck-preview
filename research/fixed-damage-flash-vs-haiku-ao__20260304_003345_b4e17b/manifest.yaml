@@ -1,0 +1,53 @@
+schema_version: 1
+experiment_id: fixed-damage-flash-vs-haiku-ao__20260304_003345_b4e17b
+title: 'FixedDamage AO: Gemini Flash vs Claude Haiku 4.5'
+status: complete
+question: In FixedDamageGame (AO-only), how does gemini-2.5-flash perform against
+  claude-haiku-4-5-20251001 under paired side-swap?
+game:
+  name: FixedDamageGame
+  config: {}
+players:
+- id: A
+  provider: anthropic
+  model: claude-haiku-4-5-20251001
+  controller: ActionOnlyController
+  renderer: TextRenderer
+- id: B
+  provider: google
+  model: gemini-2.5-flash
+  controller: ActionOnlyController
+  renderer: TextRenderer
+variants:
+  models:
+  - claude-haiku-4-5-20251001
+  - gemini-2.5-flash
+  controllers:
+  - ActionOnlyController
+run:
+  seed_base: 427000
+  matches_planned: 24
+  matches_completed: 24
+  concurrency: 10
+  max_turns: 30
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+  highlights_json: artifacts/highlights.json
+storage:
+  raw_recordings:
+    backend: huggingface
+    dataset: your-org/replays
+    path_prefix: YYYY-qX-experiment-slug
+  summaries:
+    repo_path: research/YYYY-MM-DD-slug
+  viewer_curation:
+    repo_path: viewer/matches
+notes: Fill freeze metadata (git tag/commit + template version) before running.
+started_at: '2026-03-04T03:33:48.356915+00:00'
+completed_at: '2026-03-04T03:58:12.482100+00:00'

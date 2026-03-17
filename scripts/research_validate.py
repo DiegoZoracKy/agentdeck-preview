@@ -161,16 +161,95 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                     f"{experiment_name}: results.json experiment_id mismatch"
                 )
             source = data.get("source", {})
-            if not isinstance(source, dict) or not source.get("recordings_dir"):
-                errors.append(
-                    f"{experiment_name}: results.json missing source.recordings_dir"
-                )
+            if not isinstance(source, dict):
+                errors.append(f"{experiment_name}: results.json missing source object")
+            else:
+                recordings_dir = source.get("recordings_dir")
+                recordings_dirs = source.get("recordings_dirs")
+                has_single = isinstance(recordings_dir, str) and bool(recordings_dir.strip())
+                has_multi = isinstance(recordings_dirs, list) and len(recordings_dirs) > 0
+                if not has_single and not has_multi:
+                    errors.append(
+                        f"{experiment_name}: results.json missing source.recordings_dir(s)"
+                    )
             if "summary" not in data or not isinstance(data.get("summary"), dict):
                 errors.append(f"{experiment_name}: results.json missing summary")
             if "players" not in data or not isinstance(data.get("players"), list):
                 errors.append(f"{experiment_name}: results.json missing players list")
             if "matches" not in data or not isinstance(data.get("matches"), list):
                 errors.append(f"{experiment_name}: results.json missing matches list")
+
+            matches = data.get("matches") if isinstance(data.get("matches"), list) else []
+            has_matches = len(matches) > 0
+            results_schema_version = data.get("schema_version", 1)
+            enforce_extended_research_metrics = (
+                _is_int(results_schema_version) and results_schema_version >= 2
+            )
+
+            statistics = data.get("statistics")
+            if has_matches and enforce_extended_research_metrics:
+                if not isinstance(statistics, dict):
+                    errors.append(f"{experiment_name}: results.json missing statistics object")
+                else:
+                    required_stats_keys = {
+                        "method",
+                        "confidence_level",
+                        "alpha",
+                        "null_win_rate",
+                        "n_total",
+                        "n_decisive",
+                        "players",
+                    }
+                    missing_stats = sorted(required_stats_keys - set(statistics.keys()))
+                    if missing_stats:
+                        errors.append(
+                            f"{experiment_name}: results.json.statistics missing keys {missing_stats}"
+                        )
+                    if not isinstance(statistics.get("players"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.statistics.players must be mapping"
+                        )
+
+            strictness = data.get("format_strictness")
+            if has_matches and enforce_extended_research_metrics:
+                if not isinstance(strictness, dict):
+                    errors.append(
+                        f"{experiment_name}: results.json missing format_strictness object"
+                    )
+                else:
+                    if not isinstance(strictness.get("overall"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.format_strictness.overall must be mapping"
+                        )
+                    if not isinstance(strictness.get("by_player"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.format_strictness.by_player must be mapping"
+                        )
+
+            position_effect = data.get("position_effect")
+            if has_matches and enforce_extended_research_metrics:
+                if not isinstance(position_effect, dict):
+                    errors.append(
+                        f"{experiment_name}: results.json missing position_effect object"
+                    )
+                else:
+                    required_position_keys = {
+                        "total_matches",
+                        "first_player_wins",
+                        "first_player_win_rate",
+                        "second_player_wins",
+                        "upset_rate",
+                        "by_player",
+                    }
+                    missing_position = sorted(required_position_keys - set(position_effect.keys()))
+                    if missing_position:
+                        errors.append(
+                            f"{experiment_name}: results.json.position_effect missing keys {missing_position}"
+                        )
+                    if not isinstance(position_effect.get("by_player"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.position_effect.by_player must be mapping"
+                        )
 
             schema_version = data.get("schema_version")
             if schema_version is not None:

@@ -116,10 +116,25 @@ def parse_args() -> argparse.Namespace:
         help="Sampling temperature for all players (default: 1.0).",
     )
     parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=3,
+        help="Max retries for provider API calls per player (default: 3).",
+    )
+    parser.add_argument(
+        "--retry-delay",
+        type=float,
+        default=1.0,
+        help="Base retry delay in seconds for provider API calls (default: 1.0).",
+    )
+    parser.add_argument(
         "--anthropic-max-tokens",
         type=int,
-        default=8192,
-        help="High required max_tokens for Anthropic requests (default: 8192).",
+        default=None,
+        help=(
+            "Optional Anthropic max_tokens override. "
+            "If omitted, player/model defaults are used."
+        ),
     )
     parser.add_argument(
         "--google-project-id",
@@ -310,7 +325,11 @@ def _build_player(
         "model": model_name,
         "controller": _build_controller(controller_name),
         "temperature": args.temperature,
+        "max_retries": args.max_retries,
+        "retry_delay": args.retry_delay,
     }
+    if model_cfg.get("max_tokens") is not None:
+        kwargs["max_tokens"] = int(model_cfg["max_tokens"])
 
     if handshake_template_mode == "custom":
         if not handshake_template:
@@ -341,7 +360,8 @@ def _build_player(
     if provider == "openai":
         return GPTPlayer(**kwargs)
     if provider == "anthropic":
-        kwargs["max_tokens"] = args.anthropic_max_tokens
+        if kwargs.get("max_tokens") is None and args.anthropic_max_tokens is not None:
+            kwargs["max_tokens"] = args.anthropic_max_tokens
         return ClaudePlayer(**kwargs)
     if provider == "google":
         kwargs["project_id"] = args.google_project_id

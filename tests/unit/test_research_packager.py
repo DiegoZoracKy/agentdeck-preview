@@ -154,8 +154,19 @@ def test_package_session_creates_outputs(tmp_path):
 
     readme = (experiment_dir / "README.md").read_text(encoding="utf-8")
     analysis = (experiment_dir / "analysis.md").read_text(encoding="utf-8")
+    results = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+
+    assert "statistics" in results
+    assert "format_strictness" in results
+    assert "position_effect" in results
+    assert "players" in results["statistics"]
+    assert "overall" in results["format_strictness"]
+    assert "first_player_win_rate" in results["position_effect"]
     assert "Topline Winner: Alice (100.0%)" in readme
     assert "Sample size (`n`): 1" in analysis
+    assert "Statistical method:" in analysis
+    assert "First-player win rate:" in analysis
+    assert "Strict contract rate:" in analysis
     assert "One-paragraph motivation and intended audience." in readme
 
 

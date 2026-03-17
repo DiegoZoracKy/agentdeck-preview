@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
 > Status: Final
-> Version: 1.1.0
-> Last Updated: 2026-02-18
+> Version: 1.4.0
+> Last Updated: 2026-03-05
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
 > Authors: Diego ZoracKy, Codex
 > Audience: Research engineers, contributors, experiment authors
@@ -57,7 +57,7 @@ Recommended fields (non-exhaustive):
 - `game.config`
 - `players[].controller`, `players[].renderer`
 - `variants` (model/controller variants used across matchups)
-- `run.matches_completed`, `run.concurrency`, `run.max_turns`
+- `run.matches_completed`, `run.concurrency`, `run.max_turns`, `run.source_sessions`
 - `run.matrix_source` (when `matrix.yaml` exists)
 - `analysis_plan` (ci_method, alpha, effect_size)
 - `artifacts` (paths for results.json/results.csv/plots)
@@ -70,17 +70,85 @@ Required fields:
 - `schema_version` (int)
 - `experiment_id` (string)
 - `generated_at` (ISO-8601)
-- `source.recordings_dir` (string)
+- `source.recordings_dir` (string; canonical single-source pointer)
 - `summary` (object)
 - `players` (array)
 - `matches` (array)
 
-### 4.4 results.csv (Generated)
+Optional source-provenance extension:
+- `source.recordings_dirs` (array of strings) for checkpoint aggregation from multiple sessions.
+
+Extended required fields for `schema_version >= 2`:
+- `statistics` (object; inferential statistics)
+- `format_strictness` (object; response format compliance metrics)
+- `position_effect` (object; first-player and upset metrics)
+
+### 4.4 statistics (Generated in results.json)
+Minimum contract:
+- `method` (string; e.g., `exact_binomial`)
+- `confidence_level` (float)
+- `alpha` (float)
+- `null_win_rate` (float)
+- `n_total` (int)
+- `n_decisive` (int)
+- `players` (object keyed by player name)
+
+Player-level required fields:
+- `wins` (int)
+- `win_rate` (float)
+- `ci` (2-float array)
+- `p_value` (float)
+- `effect_size` (float)
+- `effect_label` (`negligible|small|medium|large`)
+
+Pairwise comparison is RECOMMENDED for 2-player experiments and MAY be omitted for larger setups.
+
+### 4.5 format_strictness (Generated in results.json)
+Minimum contract:
+- `overall` (object)
+- `by_player` (object keyed by player name)
+
+Per-entry required fields:
+- `turn_attempts` (int)
+- `parse_failures` (int)
+- `parse_failure_rate` (float)
+- `contract_evaluable_attempts` (int)
+- `strict_contract_passes` (int)
+- `strict_contract_rate` (float)
+- `recoverable_non_strict` (int)
+- `recoverable_non_strict_rate` (float)
+- `action_line_rate` (float)
+- `reasoning_line_rate` (float)
+
+Strictness MUST be computed from recorder events (`gameplay` and parse-failure events),
+without relying on game-specific semantics.
+
+### 4.6 position_effect (Generated in results.json)
+Minimum contract:
+- `total_matches` (int)
+- `first_player_wins` (int)
+- `first_player_win_rate` (float)
+- `second_player_wins` (int)
+- `upset_rate` (float)
+- `by_player` (object keyed by player name)
+
+Per-player required fields:
+- `first_count` (int)
+- `second_count` (int)
+- `wins_as_first` (int)
+- `wins_as_second` (int)
+- `win_rate_as_first` (float)
+- `win_rate_as_second` (float)
+
+Position metrics MUST be computed from match-level first-player metadata and winner fields,
+without game-specific assumptions.
+
+### 4.7 results.csv (Generated)
 Minimum columns:
 `match_id`, `winner`, `turns`, `outcome`, `seed`, `duration`, `cost`,
 `player_order_source`, `first_player`, `players`, `player_costs`.
 
-### 4.5 research/INDEX.md (Generated)
+### 4.8 research/INDEX.md (Generated)
 A registry table for all experiments. It is generated from manifests using
 `scripts/research_index.py` and MUST match the script output.
 
@@ -120,6 +188,10 @@ A registry table for all experiments. It is generated from manifests using
   - `planned`/`running`: placeholders allowed.
   - `complete`/`archived` with `run.matches_completed > 0`: factual markdown blocks in `README.md` and `analysis.md` MUST be populated.
 - **RE10**: Auto-written markdown content MUST be limited to the factual marker block (`<!-- AUTO_FACTS:BEGIN -->` ... `<!-- AUTO_FACTS:END -->`). Narrative sections remain human-authored.
+- **RE11**: For `results.json.schema_version >= 2`, `results.json.statistics` MUST be produced by `research_export.py` for every exported dataset with one or more matches.
+- **RE12**: For `results.json.schema_version >= 2`, `results.json.format_strictness` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from recorder events only (game-agnostic).
+- **RE13**: For `results.json.schema_version >= 2`, `results.json.position_effect` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from first-player metadata and winners only (game-agnostic).
+- **RE14**: `results.json.source` MUST include either a non-empty `recordings_dir` string or a non-empty `recordings_dirs` array. When `recordings_dirs` is present, `recordings_dir` SHOULD point to the first source directory for backward compatibility.
 
 ## 7. Data Flow & Interaction
 - Export: `recordings/ -> research_export.py -> results.json + results.csv`

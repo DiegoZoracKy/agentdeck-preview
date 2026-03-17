@@ -52,6 +52,7 @@ Automation should only write factual content.
 - `players[].controller`, `players[].renderer`
 - `variants` (models/controllers used across matchups)
 - `run.matches_completed`, `run.concurrency`, `run.max_turns`
+- `run.source_sessions` (ordered session id list used for checkpoint aggregation)
 - `run.matrix_source` (path to matrix definition when present)
 - `analysis_plan` (ci_method, alpha, effect_size)
 - `artifacts` (paths for results.json/results.csv/plots)
@@ -106,10 +107,18 @@ notes: ""
 - `schema_version` (int)
 - `experiment_id` (string)
 - `generated_at` (ISO-8601)
-- `source.recordings_dir` (string)
+- `source.recordings_dir` (string; canonical source pointer)
 - `summary` (object)
 - `players` (array of player metadata)
 - `matches` (array of match summaries)
+
+Optional source extension:
+- `source.recordings_dirs` (array of strings) for multi-session checkpoint aggregation.
+
+For `results.json.schema_version >= 2`, the following are additionally required:
+- `statistics` (object; inferential metrics)
+- `format_strictness` (object; contract compliance metrics)
+- `position_effect` (object; first-player and upset metrics)
 
 ### Summary Fields
 - `total_matches`
@@ -119,6 +128,46 @@ notes: ""
 - `forfeit_rate` (recommended)
 - `total_cost`
 - `avg_turns`, `avg_duration`, `avg_cost`
+
+### statistics Fields (Minimum)
+- `method`, `confidence_level`, `alpha`, `null_win_rate`
+- `n_total`, `n_decisive`
+- `players` (map)
+
+Per-player:
+- `wins`, `win_rate`
+- `ci` (`[lower, upper]`)
+- `p_value`
+- `effect_size`
+- `effect_label` (`negligible|small|medium|large`)
+
+### format_strictness Fields (Minimum)
+- `overall` and `by_player`
+
+Per entry:
+- `turn_attempts`
+- `parse_failures`, `parse_failure_rate`
+- `contract_evaluable_attempts`
+- `strict_contract_passes`, `strict_contract_rate`
+- `recoverable_non_strict`, `recoverable_non_strict_rate`
+- `action_line_rate`, `reasoning_line_rate`
+
+These metrics MUST be game-agnostic and derived only from recorder events and
+controller contracts.
+
+### position_effect Fields (Minimum)
+- `total_matches`
+- `first_player_wins`, `first_player_win_rate`
+- `second_player_wins`, `upset_rate`
+- `by_player`
+
+Per player:
+- `first_count`, `second_count`
+- `wins_as_first`, `wins_as_second`
+- `win_rate_as_first`, `win_rate_as_second`
+
+These metrics MUST be game-agnostic and derived only from `first_player` metadata
+and `winner` fields in recorded matches.
 
 ### Match Fields (per entry)
 - `match_id`
@@ -183,4 +232,4 @@ from manifest.yaml files and updated whenever experiments change.
 
 - `scripts/research_export.py` generates results.json/results.csv from recordings.
 - `scripts/research_index.py` generates research/INDEX.md from manifests.
-- `scripts/research_package.py` creates a research package from a session directory.
+- `scripts/research_package.py` creates a research package from one or more session directories.

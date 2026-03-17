@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-PACKAGER: Session to Experiment Packager
 
 > Status: Final
-> Version: 0.2.0
-> Last Updated: 2026-02-18
+> Version: 0.3.0
+> Last Updated: 2026-03-05
 > Implementation: ✅ Complete (packager module + CLI wrapper)
 > Authors: Codex, Diego ZoracKy
 > Audience: Research engineers, contributors, experiment owners
@@ -25,6 +25,7 @@
 - Update `research/INDEX.md` by invoking `scripts/research_index.py`.
 - Create or update `recordings/README.md` with a pointer to the source session.
 - Auto-populate factual markdown blocks in `README.md` and `analysis.md`.
+- Support checkpoint-style aggregation from multiple compatible sessions in one package.
 - Implement core logic in `src/agentdeck/research/packager.py` with a thin CLI wrapper in `scripts/research_package.py`.
 
 ## 4. Data Structures
@@ -58,6 +59,8 @@ python scripts/research_package.py \
 #### Arguments
 - `--session-dir` (Path, required unless `--session-id`): Session root containing `records/`.
 - `--session-id` (str, optional): Session identifier resolved under `--run-dir`.
+- `--session-dirs` (Path list, optional): Multiple session roots for checkpoint aggregation.
+- `--session-ids` (str list, optional): Multiple session identifiers resolved under `--run-dir`.
 - `--run-dir` (Path, default: `agentdeck_runs`): Base directory for session lookup.
 - `--research-dir` (Path, default: `research`): Destination root for experiment packages.
 - `--experiment-id` (str, optional): Defaults to `session_id`.
@@ -80,6 +83,8 @@ python scripts/research_package.py \
 10. **RP10**: If `matrix.yaml` is not included, manifest MUST omit `run.matrix_source` and `artifacts.matrix_yaml`.
 11. **RP11**: Tool MUST auto-populate factual markdown blocks in `README.md` and `analysis.md`, and MUST NOT overwrite narrative sections outside marker blocks.
 12. **RP12**: When a session contains multiple `batch_*.json` files (e.g., side-swap split runs), tool MUST aggregate them into a single packaging view for `match_refs`, `matches_planned`, `matches_completed`, `seeds_used`, and time window (`started_at`/`ended_at`).
+13. **RP13**: Tool MUST support checkpoint packaging from multiple sessions. When multiple sessions are supplied, tool MUST aggregate all compatible `match_*.json` into one experiment export and MUST record all source sessions in `recordings/README.md`.
+14. **RP14**: Multi-session packaging MUST fail fast when compatibility checks fail (mismatched game name or mismatched player identity/model/controller tuple).
 
 ## 7. Data Flow & Interaction
 - Package: CLI → resolve session records → copy templates → write manifest → run export → update index.
@@ -113,6 +118,14 @@ python scripts/research_package.py \
   --question "Does Alice beat Bob in TinyBattleGame?"
 ```
 
+### Checkpoint aggregation from multiple sessions
+```bash
+python scripts/research_package.py \
+  --session-ids session_20260304_181345_92ec64 session_20260305_010000_ab12cd \
+  --experiment-id fixed-damage-mini-vs-haiku-ao__n80 \
+  --question "Does gpt-4o-mini beat Haiku in FixedDamage AO at N=80?"
+```
+
 ### Dry run
 ```bash
 python scripts/research_package.py \
@@ -130,6 +143,8 @@ python scripts/research_package.py \
 - **RP9/RP10**: Unit tests for default matrix omission and `--include-matrix` opt-in behavior.
 - **RP11**: Unit test verifies factual block is populated while template narrative remains untouched.
 - **RP12**: Unit test verifies multi-batch sessions are aggregated deterministically.
+- **RP13**: Unit test verifies multi-session packaging aggregates match files and emits `source.recordings_dirs`.
+- **RP14**: Unit test verifies multi-session packaging fails on incompatible sessions.
 
 ## 11. Design Rationale
 - Keeps research packages intentional and tidy (opt-in, no automatic writes).

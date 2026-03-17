@@ -1,0 +1,53 @@
+schema_version: 1
+experiment_id: fixed-damage-flash-vs-haiku-handshake-only__20260304_152815_008de3
+title: Fixed Damage Flash vs Haiku AO (Handshake Only, No Max-Tokens Cap)
+status: complete
+question: In FixedDamage, how does Gemini Flash AO perform against Claude Haiku AO
+  when action format is provided only at handshake and no max_tokens cap is applied?
+game:
+  name: FixedDamageGame
+  config: {}
+players:
+- id: A
+  provider: anthropic
+  model: claude-3-haiku-20240307
+  controller: ActionOnlyController
+  renderer: TextRenderer
+- id: B
+  provider: google
+  model: gemini-2.5-flash
+  controller: ActionOnlyController
+  renderer: TextRenderer
+variants:
+  models:
+  - claude-3-haiku-20240307
+  - gemini-2.5-flash
+  controllers:
+  - ActionOnlyController
+run:
+  seed_base: 438100
+  matches_planned: 6
+  matches_completed: 6
+  concurrency: 10
+  max_turns: 30
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+  highlights_json: artifacts/highlights.json
+storage:
+  raw_recordings:
+    backend: huggingface
+    dataset: your-org/replays
+    path_prefix: YYYY-qX-experiment-slug
+  summaries:
+    repo_path: research/YYYY-MM-DD-slug
+  viewer_curation:
+    repo_path: viewer/matches
+notes: Fill freeze metadata (git tag/commit + template version) before running.
+started_at: '2026-03-04T18:28:19.645976+00:00'
+completed_at: '2026-03-04T18:41:59.637424+00:00'

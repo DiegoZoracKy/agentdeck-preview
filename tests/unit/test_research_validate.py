@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 from typing import Any, Dict
 
@@ -22,6 +23,52 @@ def _manifest(status: str, matches_completed: int) -> Dict[str, Any]:
         "status": status,
         "run": {"matches_completed": matches_completed},
     }
+
+
+def _write_results_files(
+    experiment_dir: Path,
+    *,
+    include_statistics: bool,
+    include_position_effect: bool = True,
+    schema_version: int = 2,
+) -> None:
+    results_payload: Dict[str, Any] = {
+        "schema_version": schema_version,
+        "experiment_id": experiment_dir.name,
+        "source": {"recordings_dir": "agentdeck_runs/session_x/records"},
+        "summary": {"total_matches": 1},
+        "players": [{"name": "Alice"}],
+        "matches": [{"match_id": "m1", "winner": "Alice"}],
+        "format_strictness": {"overall": {}, "by_player": {}},
+        "position_effect": {
+            "total_matches": 1,
+            "first_player_wins": 1,
+            "first_player_win_rate": 1.0,
+            "second_player_wins": 0,
+            "upset_rate": 0.0,
+            "by_player": {"Alice": {}},
+        },
+    }
+    if include_statistics:
+        results_payload["statistics"] = {
+            "method": "exact_binomial",
+            "confidence_level": 0.95,
+            "alpha": 0.05,
+            "null_win_rate": 0.5,
+            "n_total": 1,
+            "n_decisive": 1,
+            "players": {"Alice": {"wins": 1}},
+        }
+
+    if not include_position_effect:
+        results_payload.pop("position_effect", None)
+
+    (experiment_dir / "results.json").write_text(json.dumps(results_payload), encoding="utf-8")
+    (experiment_dir / "results.csv").write_text(
+        "match_id,winner,turns,outcome,seed,duration,cost,player_order_source,first_player,players,player_costs\n"
+        "m1,Alice,1,win,42,1.0,0.0,console,Alice,\"Alice,Bob\",{}\n",
+        encoding="utf-8",
+    )
 
 
 def _write_docs(experiment_dir: Path, *, placeholder: bool) -> None:
@@ -78,4 +125,65 @@ def test_planned_allows_placeholders(tmp_path):
     _write_docs(experiment_dir, placeholder=True)
 
     errors = validator._validate_markdown_facts(experiment_dir, _manifest("planned", 0))
+    assert errors == []
+
+
+def test_complete_results_require_statistics_block(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(experiment_dir, include_statistics=False, schema_version=2)
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("missing statistics object" in e for e in errors)
+
+
+def test_complete_results_with_statistics_block_pass(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(experiment_dir, include_statistics=True, schema_version=2)
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert errors == []
+
+
+def test_complete_results_require_position_effect_block(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        include_position_effect=False,
+        schema_version=2,
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("missing position_effect object" in e for e in errors)
+
+
+def test_schema_v1_results_do_not_require_extended_metrics(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(experiment_dir, include_statistics=False, schema_version=1)
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []

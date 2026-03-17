@@ -33,6 +33,11 @@ from .multi_session import (
     MetaAnalysisResult,
 )
 from .performance_analysis import PerformanceAnalysis
+from .recording_metrics import (
+    compute_format_strictness,
+    compute_inferential_statistics,
+    compute_position_effect,
+)
 from .statistical import (
     TestResult,
     aggregate_metrics,
@@ -74,6 +79,9 @@ __all__ = [
     "PerformanceAnalysis",
     "CostAnalysis",
     "ComparisonAnalysis",
+    "compute_inferential_statistics",
+    "compute_format_strictness",
+    "compute_position_effect",
     # Post-hoc data structures (SPEC-RESEARCH v1.1.0)
     "PairwiseComparison",
     "ComparisonStats",

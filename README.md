@@ -46,6 +46,24 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 - Parallel execution for scaling
 - Event-driven observability via spectators
 
+## 🚦 Release Status
+
+AgentDeck is currently published as a **public beta / preview**.
+
+Today, the project is ready for:
+- Core match execution through the `AgentDeck` facade
+- Provider-backed and mock-player experiments
+- Recording, replay, and event-driven observability
+- Research export, packaging, and post-hoc analysis workflows
+
+It is **not** presented as a `1.0` stable platform yet. The main remaining gaps are:
+- Native fairness controls in the core API for paired side-swap / first-player policies
+- Stronger artifact-level invariant checks for recordings and telemetry
+- Full spec/doc consistency across the public surface
+- A methodologically stronger default benchmark regime for behavioral claims
+
+Viewer and replay UI work should currently be treated as **secondary / experimental**. The core product is the engine, record contract, and research workflow.
+
 ---
 
 ## 🔬 Research Program
@@ -141,8 +159,8 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/agentdeck/agentdeck.git
-cd agentdeck
+git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
+cd agentdeck-preview
 pip install -e ".[dev]"
 ```
 
