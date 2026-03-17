@@ -108,6 +108,35 @@ def test_llmplayer_conclude_handles_draw():
     assert "Draw" in bundle.text
 
 
+def test_llmplayer_conclude_hides_engine_internal_state_keys():
+    """Conclusion prompt must not expose engine bookkeeping fields."""
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+    )
+
+    match_result = MatchResult(
+        winner="Bob",
+        final_state={
+            "health": {"Alice": 0, "Bob": 20},
+            "potions": {"Alice": 0, "Bob": 0},
+            "_turn_count": 39,
+            "_first_player_idx": 1,
+        },
+        events=[],
+        seed=123,
+        metadata={"game": "FixedDamageGame"},
+    )
+
+    player.conclude(match_result, match_context=_make_match_context())
+    bundle = player.last_bundle
+    assert "_turn_count" not in bundle.text
+    assert "_first_player_idx" not in bundle.text
+    assert "Turn Count" not in bundle.text
+    assert "First Player Idx" not in bundle.text
+
+
 # Test handshake and decide phases are covered by integration tests
 # Skipped here due to complexity of HandshakeContext/decide() setup
 
@@ -188,6 +217,94 @@ def test_provider_players_require_explicit_model():
             project_id="proj",
             location="us-central1",
         )
+
+
+def test_claude_player_uses_high_fallback_max_tokens(monkeypatch):
+    """Claude API calls should include a high max_tokens fallback when unset."""
+
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyContent:
+        text = "ACTION: ATTACK"
+
+    class _DummyResponse:
+        content = [_DummyContent()]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def __init__(self):
+            self.last_kwargs = None
+
+        def create(self, **kwargs):
+            self.last_kwargs = kwargs
+            return _DummyResponse()
+
+    class _DummyClient:
+        def __init__(self):
+            self.messages = _DummyMessagesAPI()
+
+    def _fake_init_client(self):
+        self.client = _DummyClient()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-haiku-4.5-latest",
+    )
+
+    player._make_api_call([{"role": "user", "content": "test"}])
+    assert (
+        player.client.messages.last_kwargs["max_tokens"]
+        == ClaudePlayer.REQUIRED_MAX_TOKENS_FALLBACK
+    )
+
+
+def test_claude_player_preserves_explicit_max_tokens(monkeypatch):
+    """Claude API call should honor explicit max_tokens when provided."""
+
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyContent:
+        text = "ACTION: ATTACK"
+
+    class _DummyResponse:
+        content = [_DummyContent()]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def __init__(self):
+            self.last_kwargs = None
+
+        def create(self, **kwargs):
+            self.last_kwargs = kwargs
+            return _DummyResponse()
+
+    class _DummyClient:
+        def __init__(self):
+            self.messages = _DummyMessagesAPI()
+
+    def _fake_init_client(self):
+        self.client = _DummyClient()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-haiku-4.5-latest",
+        max_tokens=1234,
+    )
+
+    player._make_api_call([{"role": "user", "content": "test"}])
+    assert player.client.messages.last_kwargs["max_tokens"] == 1234
 
 
 def test_reset_conversation_clears_conversation_manager():

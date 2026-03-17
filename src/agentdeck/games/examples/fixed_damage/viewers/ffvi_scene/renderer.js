@@ -410,7 +410,16 @@ class FixedDamageFFVISceneRenderer {
       appendToken('acts', 'scene-detail-action');
     }
 
-    this._elements.actionEl.textContent = action;
+    const actionEl = this._elements.actionEl;
+    if (actionEl) {
+      actionEl.textContent = action;
+      actionEl.classList.remove('is-attack', 'is-potion');
+      if (action === 'ATTACK') {
+        actionEl.classList.add('is-attack');
+      } else if (action === 'POTION') {
+        actionEl.classList.add('is-potion');
+      }
+    }
   }
 
   _updateReasoning(frame) {

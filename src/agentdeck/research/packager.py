@@ -6,11 +6,14 @@ import argparse
 import json
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import yaml
 
 from .provider_utils import provider_from_module
+
+AUTO_FACTS_BEGIN = "<!-- AUTO_FACTS:BEGIN -->"
+AUTO_FACTS_END = "<!-- AUTO_FACTS:END -->"
 
 
 def _repo_root() -> Path:
@@ -63,11 +66,110 @@ def _resolve_session_paths(
     return session_root, records_dir, session_id
 
 
+def _resolve_session_inputs(
+    session_dir: Optional[Path],
+    session_id: Optional[str],
+    session_dirs: Optional[Sequence[Path]],
+    session_ids: Optional[Sequence[str]],
+    run_dir: Path,
+) -> List[Tuple[Path, Path, str]]:
+    inputs: List[Tuple[str, Any]] = []
+    if session_dir is not None:
+        inputs.append(("dir", session_dir))
+    if session_id:
+        inputs.append(("id", session_id))
+    for entry in session_dirs or []:
+        inputs.append(("dir", entry))
+    for entry in session_ids or []:
+        inputs.append(("id", entry))
+
+    if not inputs:
+        raise ValueError("Provide --session-dir/--session-id or --session-dirs/--session-ids.")
+
+    resolved: List[Tuple[Path, Path, str]] = []
+    seen_ids = set()
+    for input_type, value in inputs:
+        if input_type == "dir":
+            session_root, records_dir, resolved_session_id = _resolve_session_paths(
+                Path(value), None, run_dir
+            )
+        else:
+            session_root, records_dir, resolved_session_id = _resolve_session_paths(
+                None, str(value), run_dir
+            )
+        if resolved_session_id in seen_ids:
+            continue
+        seen_ids.add(resolved_session_id)
+        resolved.append((session_root, records_dir, resolved_session_id))
+
+    return resolved
+
+
+def _merge_batch_payloads(batches: List[Dict[str, Any]]) -> Dict[str, Any]:
+    if not batches:
+        raise FileNotFoundError("No batch payloads available for aggregation.")
+    if len(batches) == 1:
+        return batches[0]
+
+    merged = dict(batches[0])
+    merged_metadata = dict((merged.get("metadata") or {}))
+    merged_match_refs: List[Dict[str, Any]] = []
+
+    total_planned = 0
+    total_completed = 0
+    seeds_used: List[int] = []
+    started_at: Optional[str] = None
+    ended_at: Optional[str] = None
+
+    for batch in batches:
+        batch_match_refs = batch.get("match_refs") or []
+        batch_metadata = batch.get("metadata") or {}
+
+        merged_match_refs.extend(batch_match_refs)
+
+        planned = batch_metadata.get("matches_planned")
+        if planned is None:
+            planned = len(batch_match_refs)
+        completed = batch_metadata.get("matches_completed")
+        if completed is None:
+            completed = len(batch_match_refs)
+
+        total_planned += int(planned)
+        total_completed += int(completed)
+
+        for seed in batch_metadata.get("seeds_used") or []:
+            if seed not in seeds_used:
+                seeds_used.append(seed)
+
+        batch_started = batch_metadata.get("started_at")
+        if batch_started and (started_at is None or batch_started < started_at):
+            started_at = batch_started
+
+        batch_ended = batch_metadata.get("ended_at")
+        if batch_ended and (ended_at is None or batch_ended > ended_at):
+            ended_at = batch_ended
+
+    merged["match_refs"] = merged_match_refs
+    merged_metadata["matches_planned"] = total_planned
+    merged_metadata["matches_completed"] = total_completed
+    if seeds_used:
+        merged_metadata["seeds_used"] = seeds_used
+    if started_at:
+        merged_metadata["started_at"] = started_at
+    if ended_at:
+        merged_metadata["ended_at"] = ended_at
+    merged["metadata"] = merged_metadata
+
+    return merged
+
+
 def _load_batch_data(records_dir: Path) -> Dict[str, Any]:
     batch_files = sorted(records_dir.glob("batch_*.json"))
     if not batch_files:
         raise FileNotFoundError(f"No batch_*.json files found in {records_dir}")
-    return json.loads(batch_files[0].read_text(encoding="utf-8"))
+
+    batches = [json.loads(path.read_text(encoding="utf-8")) for path in batch_files]
+    return _merge_batch_payloads(batches)
 
 
 def _load_match_files(records_dir: Path) -> List[Path]:
@@ -75,6 +177,22 @@ def _load_match_files(records_dir: Path) -> List[Path]:
     if not match_files:
         raise FileNotFoundError(f"No match_*.json files found in {records_dir}")
     return match_files
+
+
+def _load_match_files_from_sessions(records_dirs: Sequence[Path]) -> List[Path]:
+    combined: List[Path] = []
+    seen_match_ids: Dict[str, Path] = {}
+    for records_dir in records_dirs:
+        for path in _load_match_files(records_dir):
+            match_id = path.stem
+            if match_id in seen_match_ids:
+                raise ValueError(
+                    f"Duplicate match file id '{match_id}' across sessions: "
+                    f"{seen_match_ids[match_id]} and {path}"
+                )
+            seen_match_ids[match_id] = path
+            combined.append(path)
+    return combined
 
 
 def _infer_game_name(metadata: Dict[str, Any]) -> Optional[str]:
@@ -159,6 +277,37 @@ def _infer_players(
     return players
 
 
+def _session_compatibility_signature(batch_data: Dict[str, Any]) -> Tuple[str, Tuple[Tuple[Any, ...], ...]]:
+    metadata = batch_data.get("metadata") or {}
+    match_refs = batch_data.get("match_refs") or []
+    game_name = _infer_game_name(metadata) or ""
+    players = _infer_players(metadata, match_refs)
+    signature_players = tuple(
+        (
+            player.get("id"),
+            player.get("provider"),
+            player.get("model"),
+            player.get("controller"),
+            player.get("renderer"),
+        )
+        for player in players
+    )
+    return game_name, signature_players
+
+
+def _validate_session_compatibility(session_batches: Sequence[Dict[str, Any]]) -> None:
+    if len(session_batches) <= 1:
+        return
+    baseline = _session_compatibility_signature(session_batches[0])
+    for idx, batch_data in enumerate(session_batches[1:], start=2):
+        current = _session_compatibility_signature(batch_data)
+        if current != baseline:
+            raise ValueError(
+                "Incompatible sessions for checkpoint aggregation: "
+                f"session #{idx} differs in game or player identity/model/controller."
+            )
+
+
 def _infer_seed_base(metadata: Dict[str, Any], match_files: List[Path]) -> Optional[int]:
     seeds = metadata.get("seeds_used") or []
     if seeds:
@@ -179,6 +328,30 @@ def _derive_status(matches_planned: int, matches_completed: int) -> str:
     if matches_planned and matches_completed >= matches_planned:
         return "complete"
     return "running"
+
+
+def _infer_variants(players: List[Dict[str, Any]]) -> Dict[str, List[str]]:
+    models = sorted(
+        {
+            str(player.get("model"))
+            for player in players
+            if player.get("model") is not None and str(player.get("model")).strip()
+        }
+    )
+    controllers = sorted(
+        {
+            str(player.get("controller"))
+            for player in players
+            if player.get("controller") is not None and str(player.get("controller")).strip()
+        }
+    )
+
+    variants: Dict[str, List[str]] = {}
+    if models:
+        variants["models"] = models
+    if controllers:
+        variants["controllers"] = controllers
+    return variants
 
 
 def build_manifest(
@@ -221,6 +394,11 @@ def build_manifest(
     manifest.setdefault("game", {})
     manifest["game"]["name"] = game_name
     manifest["players"] = players
+    variants = _infer_variants(players)
+    if variants:
+        manifest["variants"] = variants
+    else:
+        manifest.pop("variants", None)
 
     manifest.setdefault("run", {})
     manifest["run"]["seed_base"] = int(seed_base)
@@ -239,46 +417,203 @@ def _write_manifest(path: Path, manifest: Dict[str, Any]) -> None:
     path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
 
 
-def _write_recordings_readme(path: Path, session_id: str, session_root: Path) -> None:
-    content = "\n".join(
+def _write_recordings_readme(path: Path, session_sources: Sequence[Tuple[str, Path]]) -> None:
+    lines = ["# Recordings", ""]
+    if len(session_sources) == 1:
+        session_id, session_root = session_sources[0]
+        lines.extend(
+            [
+                f"- session_id: {session_id}",
+                f"- session_path: {session_root}",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "- source_mode: multi-session-checkpoints",
+                f"- source_count: {len(session_sources)}",
+                "- sessions:",
+            ]
+        )
+        for session_id, session_root in session_sources:
+            lines.append(f"  - {session_id}: {session_root}")
+
+    lines.extend(
         [
-            "# Recordings",
             "",
-            f"- session_id: {session_id}",
-            f"- session_path: {session_root}",
-            "",
-            "Recordings are stored outside the repository. This file points to the source session.",
+            "Recordings are stored outside the repository. This file points to the source session(s).",
             "",
         ]
     )
+    content = "\n".join(lines)
     path.write_text(content, encoding="utf-8")
+
+
+def _format_pct(value: Any) -> str:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "N/A"
+    return f"{numeric * 100:.1f}%"
+
+
+def _format_usd(value: Any) -> str:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "N/A"
+    return f"${numeric:.6f}"
+
+
+def _replace_auto_facts_block(path: Path, lines: List[str]) -> None:
+    if not path.exists():
+        return
+
+    content = path.read_text(encoding="utf-8")
+    begin_idx = content.find(AUTO_FACTS_BEGIN)
+    end_idx = content.find(AUTO_FACTS_END)
+
+    if begin_idx == -1 or end_idx == -1 or end_idx < begin_idx:
+        return
+
+    insert_start = begin_idx + len(AUTO_FACTS_BEGIN)
+    replacement = "\n" + "\n".join(lines).rstrip() + "\n"
+    updated = content[:insert_start] + replacement + content[end_idx:]
+    path.write_text(updated, encoding="utf-8")
+
+
+def _player_label(player: Dict[str, Any]) -> str:
+    player_id = player.get("id", "?")
+    provider = player.get("provider", "unknown")
+    model = player.get("model", "unknown")
+    return f"{player_id}={provider}:{model}"
+
+
+def _winner_topline(results: Dict[str, Any]) -> str:
+    summary = results.get("summary") or {}
+    win_rates = summary.get("win_rates") or {}
+    if not isinstance(win_rates, dict) or not win_rates:
+        return "No decisive winner (empty win_rates)"
+
+    winner, rate = max(win_rates.items(), key=lambda item: float(item[1]))
+    return f"{winner} ({_format_pct(rate)})"
+
+
+def _first_player(results: Dict[str, Any]) -> str:
+    matches = results.get("matches") or []
+    if not matches:
+        return "N/A"
+
+    first = (matches[0].get("first_player") or {}).get("name")
+    return first or "N/A"
+
+
+def _load_results_json(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    if isinstance(payload, dict):
+        return payload
+    return {}
+
+
+def _write_factual_markdown_blocks(dest_dir: Path, manifest: Dict[str, Any]) -> None:
+    results = _load_results_json(dest_dir / "results.json")
+    summary = results.get("summary") or {}
+    statistics = results.get("statistics") or {}
+    strictness = results.get("format_strictness") or {}
+    position = results.get("position_effect") or {}
+    strictness_overall = strictness.get("overall") or {}
+    quality = statistics.get("quality") or {}
+    run = manifest.get("run") or {}
+    players = manifest.get("players") or []
+
+    player_line = ", ".join(_player_label(player) for player in players) or "N/A"
+    matches_planned = run.get("matches_planned", "N/A")
+    matches_completed = run.get("matches_completed", "N/A")
+
+    readme_lines = [
+        f"- Status: {manifest.get('status', 'N/A')}",
+        f"- Matches: {matches_completed}/{matches_planned}",
+        f"- Game: {((manifest.get('game') or {}).get('name') or 'N/A')}",
+        f"- Players: {player_line}",
+        f"- Seed Base: {run.get('seed_base', 'N/A')}",
+        f"- Topline Winner: {_winner_topline(results)}",
+        f"- Avg Turns: {summary.get('avg_turns', 'N/A')}",
+        f"- Avg Duration (s): {summary.get('avg_duration', 'N/A')}",
+        f"- Total Cost: {_format_usd(summary.get('total_cost'))}",
+    ]
+    _replace_auto_facts_block(dest_dir / "README.md", readme_lines)
+
+    analysis_lines = [
+        f"- Sample size (`n`): {summary.get('total_matches', 'N/A')}",
+        f"- Decisive matches: {summary.get('decisive_matches', 'N/A')}",
+        f"- Draws: {summary.get('draws', 'N/A')}",
+        f"- Win rates: {summary.get('win_rates', {})}",
+        f"- Statistical method: {statistics.get('method', 'N/A')}",
+        f"- Confidence level: {statistics.get('confidence_level', 'N/A')}",
+        f"- Alpha: {statistics.get('alpha', 'N/A')}",
+        f"- Topline winner: {_winner_topline(results)}",
+        f"- First player in first recorded match: {_first_player(results)}",
+        f"- Average turns: {summary.get('avg_turns', 'N/A')}",
+        f"- Average duration (s): {summary.get('avg_duration', 'N/A')}",
+        f"- Total cost: {_format_usd(summary.get('total_cost'))}",
+        f"- First-player win rate: {_format_pct(position.get('first_player_win_rate'))}",
+        f"- Upset rate (second-player wins): {_format_pct(position.get('upset_rate'))}",
+        f"- Parse failure rate: {_format_pct(strictness_overall.get('parse_failure_rate'))}",
+        f"- Strict contract rate: {_format_pct(strictness_overall.get('strict_contract_rate'))}",
+        f"- Quality actionable: {quality.get('is_actionable', 'N/A')}",
+        f"- Quality note: {quality.get('quality_note', 'N/A')}",
+    ]
+    _replace_auto_facts_block(dest_dir / "analysis.md", analysis_lines)
+
+
+def _prune_matrix_references(manifest: Dict[str, Any]) -> None:
+    run = manifest.get("run")
+    if isinstance(run, dict):
+        run.pop("matrix_source", None)
+
+    artifacts = manifest.get("artifacts")
+    if isinstance(artifacts, dict):
+        artifacts.pop("matrix_yaml", None)
 
 
 def package_session(
     *,
-    session_dir: Optional[Path],
-    session_id: Optional[str],
     run_dir: Path,
     research_dir: Path,
-    experiment_id: Optional[str],
     question: str,
-    status: Optional[str],
-    title: Optional[str],
-    dry_run: bool,
+    session_dir: Optional[Path] = None,
+    session_id: Optional[str] = None,
+    session_dirs: Optional[Sequence[Path]] = None,
+    session_ids: Optional[Sequence[str]] = None,
+    experiment_id: Optional[str] = None,
+    status: Optional[str] = None,
+    title: Optional[str] = None,
+    include_matrix: bool = False,
+    dry_run: bool = False,
 ) -> Dict[str, Any]:
     if not question or not question.strip():
         raise ValueError("Question is required to create a research package.")
     if status and status not in {"planned", "running", "complete", "archived"}:
         raise ValueError(f"Unsupported status: {status}")
 
-    session_root, records_dir, resolved_session_id = _resolve_session_paths(
-        session_dir, session_id, run_dir
+    resolved_sessions = _resolve_session_inputs(
+        session_dir, session_id, session_dirs, session_ids, run_dir
     )
+    session_roots = [entry[0] for entry in resolved_sessions]
+    records_dirs = [entry[1] for entry in resolved_sessions]
+    resolved_session_ids = [entry[2] for entry in resolved_sessions]
 
-    batch_data = _load_batch_data(records_dir)
-    match_files = _load_match_files(records_dir)
+    session_batches = [_load_batch_data(records_dir) for records_dir in records_dirs]
+    _validate_session_compatibility(session_batches)
+    batch_data = _merge_batch_payloads(session_batches)
+    match_files = _load_match_files_from_sessions(records_dirs)
 
-    experiment_id = experiment_id or resolved_session_id
+    experiment_id = experiment_id or resolved_session_ids[0]
     template_dir = research_dir / "_templates"
     if not template_dir.is_dir():
         raise FileNotFoundError(f"Missing templates directory: {template_dir}")
@@ -296,35 +631,57 @@ def package_session(
         status=status,
         title=title,
     )
+    if len(resolved_session_ids) > 1:
+        manifest.setdefault("run", {})
+        manifest["run"]["source_sessions"] = resolved_session_ids
+    if not include_matrix:
+        _prune_matrix_references(manifest)
 
     if dry_run:
         return {
-            "session_id": resolved_session_id,
-            "session_root": session_root,
-            "records_dir": records_dir,
+            "session_id": resolved_session_ids[0],
+            "session_ids": resolved_session_ids,
+            "session_root": session_roots[0],
+            "session_roots": session_roots,
+            "records_dir": records_dirs[0],
+            "records_dirs": records_dirs,
             "experiment_dir": dest_dir,
             "manifest": manifest,
         }
 
     shutil.copytree(template_dir, dest_dir)
+    if not include_matrix:
+        matrix_path = dest_dir / "matrix.yaml"
+        if matrix_path.exists():
+            matrix_path.unlink()
 
     _write_manifest(dest_dir / "manifest.yaml", manifest)
 
     recordings_dir = dest_dir / "recordings"
     recordings_dir.mkdir(parents=True, exist_ok=True)
-    _write_recordings_readme(recordings_dir / "README.md", resolved_session_id, session_root)
+    _write_recordings_readme(
+        recordings_dir / "README.md",
+        list(zip(resolved_session_ids, session_roots)),
+    )
 
     export_results = _load_script_function("research_export.py", "export_results")
-    export_results(records_dir, dest_dir, experiment_id)
+    if len(records_dirs) == 1:
+        export_results(records_dirs[0], dest_dir, experiment_id)
+    else:
+        export_results(records_dirs, dest_dir, experiment_id)
+    _write_factual_markdown_blocks(dest_dir, manifest)
 
     generate_index = _load_script_function("research_index.py", "generate_index")
     index_content = generate_index(research_dir)
     (research_dir / "INDEX.md").write_text(index_content, encoding="utf-8")
 
     return {
-        "session_id": resolved_session_id,
-        "session_root": session_root,
-        "records_dir": records_dir,
+        "session_id": resolved_session_ids[0],
+        "session_ids": resolved_session_ids,
+        "session_root": session_roots[0],
+        "session_roots": session_roots,
+        "records_dir": records_dirs[0],
+        "records_dirs": records_dirs,
         "experiment_dir": dest_dir,
         "manifest": manifest,
     }
@@ -336,6 +693,20 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--session-dir", type=Path, default=None)
     parser.add_argument("--session-id", type=str, default=None)
+    parser.add_argument(
+        "--session-dirs",
+        nargs="+",
+        type=Path,
+        default=None,
+        help="Checkpoint mode: package from multiple session roots.",
+    )
+    parser.add_argument(
+        "--session-ids",
+        nargs="+",
+        type=str,
+        default=None,
+        help="Checkpoint mode: package from multiple session ids under --run-dir.",
+    )
     parser.add_argument("--run-dir", type=Path, default=Path("agentdeck_runs"))
     parser.add_argument("--research-dir", type=Path, default=Path("research"))
     parser.add_argument("--experiment-id", type=str, default=None)
@@ -344,6 +715,11 @@ def _parse_args() -> argparse.Namespace:
         "--status", type=str, choices=["planned", "running", "complete", "archived"]
     )
     parser.add_argument("--title", type=str, default=None)
+    parser.add_argument(
+        "--include-matrix",
+        action="store_true",
+        help="Include matrix.yaml scaffold (recommended only for benchmark grids).",
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
@@ -353,12 +729,15 @@ def main() -> None:
     result = package_session(
         session_dir=args.session_dir,
         session_id=args.session_id,
+        session_dirs=args.session_dirs,
+        session_ids=args.session_ids,
         run_dir=args.run_dir,
         research_dir=args.research_dir,
         experiment_id=args.experiment_id,
         question=args.question,
         status=args.status,
         title=args.title,
+        include_matrix=args.include_matrix,
         dry_run=args.dry_run,
     )
 

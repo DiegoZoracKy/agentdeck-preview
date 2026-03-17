@@ -198,7 +198,15 @@ class Player(ABC):
         Returns:
             HandshakeResponse containing raw response and optional usage metadata.
         """
-        raw_response = self.get_response(bundle.text)
+        self._active_phase = "handshake"
+        self._active_match_id = context.match_id
+        self._active_turn_number = 0
+        try:
+            raw_response = self.get_response(bundle.text)
+        finally:
+            self._active_phase = None
+            self._active_match_id = None
+            self._active_turn_number = None
 
         usage_info = getattr(self, "last_usage_info", None)
         retries = getattr(self, "last_retries", None)
@@ -282,7 +290,15 @@ class Player(ABC):
         )
 
         # Invoke LLM
-        raw_response = self.get_response(bundle.text)
+        self._active_phase = "turn"
+        self._active_match_id = turn_context.match_id
+        self._active_turn_number = turn_context.turn_number
+        try:
+            raw_response = self.get_response(bundle.text)
+        finally:
+            self._active_phase = None
+            self._active_match_id = None
+            self._active_turn_number = None
 
         # Parse action via controller (DS1)
         # Per SPEC-CONTROLLER v1.3.0, controllers return ParseResult

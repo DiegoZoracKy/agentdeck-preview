@@ -97,10 +97,10 @@ The system uses an event-driven architecture where:
 ```
 session_start
   └── batch_start
+      ├── player_handshake_start         # per player, before gameplay (mandatory)
+      ├── player_handshake_complete      # per player, on acceptance
+      ├── player_handshake_abort         # per player, on rejection
       └── match_start
-          ├── player_handshake_start     # per player, before gameplay (mandatory)
-          ├── player_handshake_complete  # per player, on acceptance
-          ├── player_handshake_abort     # per player, on rejection
           ├── gameplay                   # mechanic-agnostic phase event
           ├── player_action_parse_failed # optional, emitted before policy handling
           ├── <custom domain events>     # snake_case strings from games
@@ -217,8 +217,8 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
-| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.0.0 | Draft | Experiment package, manifest/results/index contracts |
-| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.1.0 | Draft | Session-to-experiment package helper |
+| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.1.0 | Final | Experiment package, manifest/results/index contracts |
+| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.2.0 | Final | Session-to-experiment package helper |
 
 ---
 

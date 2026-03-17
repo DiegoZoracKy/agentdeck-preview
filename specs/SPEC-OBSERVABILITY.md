@@ -160,8 +160,8 @@ class Event:
 | `match_id` | Optional[str] | Present between `MATCH_START`/`END`. |
 | `phase_index` | Optional[int] | Zero-based; present during gameplay or domain events when known. |
 | `turn_index` | Optional[int] | Alias for `phase_index` (always matches `phase_index` value). |
-| `timestamp` | float | Wall-clock time (`time.time()`). |
-| `monotonic_time` | float | Monotonic clock (`time.monotonic()`). |
+| `timestamp` | float | Wall-clock time (`time.time()`), or preserved emission timestamp when supplied by upstream replay/worker context. |
+| `monotonic_time` | float | Monotonic clock (`time.monotonic()`), or preserved emission monotonic value when supplied upstream. |
 
 Both `phase_index` and `turn_index` are set to the same value during gameplay events.
 
@@ -419,9 +419,9 @@ for event in custom_events:
 | `match_id` | str | ✓ | MATCH_START, MATCH_END | Unique match identifier. |
 | `seed` | int | ✓ | MATCH_START, MATCH_END | Per-match seed used for this specific match. |
 | `player_names` | List[str] | ✓ | MATCH_START, MATCH_END | Ordered player list (post-ordering, may be shuffled by Console or game). |
-| `player_order` | List[int] | ✓ | MATCH_START, MATCH_END | Original indices showing pre-ordering positions (e.g., [1, 0] means original player 1 goes first). |
+| `player_order` | List[int] | ✓ | MATCH_START, MATCH_END | Original indices showing pre-ordering positions (e.g., [1, 0] means original player 1 is first in ordered list). |
 | `player_order_source` | str | ✓ | MATCH_START, MATCH_END | Source of ordering decision: "console" (Fisher-Yates shuffle) or "game" (custom override). |
-| `first_player` | Dict[str, Any] | ✓ | MATCH_START, MATCH_END | First player metadata: {"name": str, "index": int} where index is original position. |
+| `first_player` | Dict[str, Any] | ✓ | MATCH_START, MATCH_END | First-acting player metadata: {"name": str, "index": int} where index is original position (falls back to first ordered player when runtime selection is unavailable). |
 | `result` | MatchResult | ✓ | MATCH_END | Complete match result with metadata. |
 | `player` | str | ✓ | PLAYER_HANDSHAKE_*, PLAYER_CONCLUSION | Player name for lifecycle events. |
 | `prompt_text` | str | ✓ | PLAYER_HANDSHAKE_COMPLETE, PLAYER_HANDSHAKE_ABORT, PLAYER_CONCLUSION, PLAYER_ACTION_PARSE_FAILED* | Raw prompt sent to LLM (when provided). |
@@ -450,11 +450,11 @@ for event in custom_events:
 
 **Player Order Recording**: MATCH_START and MATCH_END include complete player ordering metadata for mechanics-agnostic tracking and research analysis:
 - `player_names` (List[str]): Ordered list post-ordering (post-shuffle or post-game override)
-- `player_order` (List[int]): Original indices showing pre-ordering positions (e.g., [1, 0] means original player at index 1 goes first)
+- `player_order` (List[int]): Original indices showing pre-ordering positions (e.g., [1, 0] means original player at index 1 is first in ordered list)
 - `player_order_source` (Literal["console", "game"]): Indicates whether Console applied Fisher-Yates shuffle ("console") or game provided custom ordering ("game")
-- `first_player` (Dict): First player metadata with {"name": str, "index": int} where index is original position
+- `first_player` (Dict): First-acting player metadata with {"name": str, "index": int} where index is original position; falls back to first ordered player when no runtime first-player signal exists
 
-Console records the order without interpreting game semantics. Research utilities can use `player_order_source` to distinguish console randomization from game-controlled ordering.
+Console records ordering metadata and, when available, runtime-selected first-actor metadata. Research utilities can use `player_order_source` to distinguish console randomization from game-controlled ordering.
 
 **MatchResult.metadata Schema**: The `result` field in MATCH_END events contains a MatchResult object with standardized metadata structure (per SPEC-CONSOLE M1-M4):
 
@@ -785,7 +785,7 @@ Automated tests should cover:
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` v1.1.0 — TurnLoop orchestration, EventFactory integration, StateAdapter, parse failure propagation.
 - `SPEC-CONSOLE.md` v0.5.0 — Match orchestration, lifecycle event emission, parse failure handling, §6.8 P4 (Logger injection).
 - `SPEC-SPECTATOR.md` v1.2.0 — Spectator contract, logger injection §5.5 (LI1-LI5), error isolation.
-- `SPEC-GAME.md` v0.6.0 — Game base classes, domain event emission via GameEventEmitter, parse-failure policy hook.
+- `SPEC-GAME.md` v0.7.0 — Game base classes, domain event emission via GameEventEmitter, parse-failure policy hook.
 - `src/agentdeck/core/event_bus.py` — EventBus implementation.
 - `src/agentdeck/core/turn_loop.py` — TurnLoop execution helper with EventFactory.
 - `src/agentdeck/core/event_factory.py` — EventFactory for standardized GAMEPLAY events.

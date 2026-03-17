@@ -90,6 +90,21 @@ def test_full_match_lifecycle(players, temp_record_dir, tracking_spectator):
     assert len(batch_data["match_refs"]) == 1
     assert batch_data["match_refs"][0]["winner"] is not None
 
+    # Batch ID must be consistent between logger output and persisted artifacts.
+    batch_id = batch_data["batch_id"]
+    info_log = batch_recording.parent.parent / "logs" / "info.log"
+    assert info_log.exists(), f"Missing info log at {info_log}"
+    info_text = info_log.read_text(encoding="utf-8")
+    assert f"Batch {batch_id} starting" in info_text
+    assert f"Batch {batch_id} complete" in info_text
+
+    # Match artifact should also expose the same batch_id at top-level.
+    match_filename = batch_data["match_refs"][0]["filename"]
+    match_recording = batch_recording.parent / match_filename
+    with open(match_recording) as f:
+        match_data = json.load(f)
+    assert match_data["batch_id"] == batch_id
+
 
 def test_spectator_isolation(players, temp_record_dir):
     """
@@ -190,3 +205,33 @@ def test_multi_match_session(players, temp_record_dir):
 
     # New schema v1.1: batch has match_refs
     assert len(batch_data["match_refs"]) == 3
+
+
+def test_parallel_match_recordings_include_gameplay_events(players, temp_record_dir):
+    """
+    Integration: Parallel execution still records gameplay turn events per match.
+
+    Regression guard:
+    In parallel mode, worker gameplay events must be replayed to the main EventBus
+    so Recorder persists turn-level events (not only handshake/conclusion).
+    """
+    config = AgentDeckConfig(run_dir=str(temp_record_dir), seed=42, concurrency=4)
+    deck = AgentDeck(game=FixedDamageGame(), session=config)
+    results = deck.play(players=players, matches=4)
+
+    assert len(results) == 4
+
+    recordings = list(temp_record_dir.glob("**/*.json"))
+    batch_recording = [r for r in recordings if "batch" in r.name][0]
+    with open(batch_recording) as f:
+        batch_data = json.load(f)
+
+    assert len(batch_data["match_refs"]) == 4
+
+    for ref in batch_data["match_refs"]:
+        match_path = batch_recording.parent / ref["filename"]
+        with open(match_path) as f:
+            match_data = json.load(f)
+
+        gameplay_events = [e for e in match_data.get("events", []) if e.get("type") == "gameplay"]
+        assert gameplay_events, f"Expected gameplay events in {match_path.name}"

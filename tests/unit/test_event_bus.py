@@ -275,6 +275,28 @@ def test_EC1_timestamp_present(event_bus):
     assert isinstance(spectator.received_event.context["timestamp"], float)
 
 
+def test_EC1_preserves_prepopulated_timestamp(event_bus):
+    """EventBus should preserve externally provided timestamp values."""
+
+    class TestSpectator:
+        def __init__(self):
+            self.received_event = None
+
+        def on_match_start(self, event):
+            self.received_event = event
+
+    spectator = TestSpectator()
+    event_bus.subscribe(spectator)
+
+    event_bus.update_context(timestamp=1234.5, monotonic_time=6789.0)
+    emitted = event_bus.emit(EventType.MATCH_START, game="TestGame")
+
+    assert emitted.context["timestamp"] == 1234.5
+    assert emitted.context["monotonic_time"] == 6789.0
+    assert spectator.received_event.context["timestamp"] == 1234.5
+    assert spectator.received_event.context["monotonic_time"] == 6789.0
+
+
 def test_EC2_ids_preserved(event_bus):
     """
     SPEC-OBSERVABILITY §6.4 EC2: Console-set IDs (match_id, session_id) preserved.

@@ -77,6 +77,7 @@
 - Return: JSON-serialisable dict consumed by renderers and prompt builders.
 - MUST: Avoid mutating the supplied `game_state`; MUST use deep copy or derived structures when enrichment is needed.
 - MUST: Respect `information_level` configuration ("full", "partial", or game-specific levels).
+- MUST: Explicitly document any game-specific public signals that remain visible in partial modes (e.g., global `last_action` history).
 - SHOULD: Include narrative/tutorial content by injecting into the returned view when required.
 
 ### validate_state(game_state: Dict[str, Any]) -> None

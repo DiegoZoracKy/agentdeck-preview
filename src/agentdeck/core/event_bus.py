@@ -136,7 +136,7 @@ class EventBus:
         for field in fields:
             self._base_context.pop(field, None)
 
-    def emit(self, event_type: Union[EventType, str], **data: Any) -> None:
+    def emit(self, event_type: Union[EventType, str], **data: Any) -> Event:
         """
         Construct Event object and route to spectator handlers.
 
@@ -161,6 +161,9 @@ class EventBus:
             - Logs exception with spectator name and event type
             - Continues with remaining spectators (never propagates)
 
+        Returns:
+            The base `Event` object emitted through the bus (with resolved context and timestamps).
+
         Example:
             >>> bus.emit(EventType.MATCH_START, match_id="m1", players=["A", "B"])
             >>> bus.emit("bid_placed", player="Alice", bid=100)
@@ -181,9 +184,11 @@ class EventBus:
         # - Timestamps added here by EventBus
         context: EventContext = {
             **self._base_context,  # type: ignore
-            "timestamp": time.time(),
-            "monotonic_time": time.monotonic(),
         }
+        # Preserve externally supplied timestamps (e.g., parallel worker replay)
+        # and only synthesize when absent.
+        context.setdefault("timestamp", time.time())
+        context.setdefault("monotonic_time", time.monotonic())
 
         # Step 3: Create base Event object (will be cloned for each spectator)
         base_event = Event(
@@ -227,6 +232,8 @@ class EventBus:
                         f"Spectator error in {spectator.__class__.__name__}.on_{event_name}",
                         exc_info=True,  # Standard logging API
                     )
+
+        return base_event
 
     def _route_to_spectator(
         self, spectator: Any, event_name: str, event: Event, data: Dict[str, Any]

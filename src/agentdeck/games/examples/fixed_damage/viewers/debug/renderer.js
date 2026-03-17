@@ -28,6 +28,7 @@ class FixedDamageDebugRenderer {
     this._matchData = matchData;
 
     this._createDebugView();
+    this._renderLifecyclePanels();
   }
 
   /**
@@ -108,6 +109,11 @@ class FixedDamageDebugRenderer {
         </div>
       </div>
 
+      <div id="debug-handshake-container" class="debug-section" style="display: none;">
+        <h3>Handshake Prompts</h3>
+        <div id="debug-handshake-list" class="debug-lifecycle-list"></div>
+      </div>
+
       <div class="debug-frame-info">
         <div class="debug-row">
           <label>Frame:</label>
@@ -170,10 +176,19 @@ class FixedDamageDebugRenderer {
         <h3>Final State</h3>
         <pre id="debug-final-state">{}</pre>
       </div>
+
+      <div id="debug-conclusion-container" class="debug-section" style="display: none;">
+        <h3>Conclusions / Reflections</h3>
+        <div id="debug-conclusion-list" class="debug-lifecycle-list"></div>
+      </div>
     `;
 
     // Store element references
     this._elements.root = root;
+    this._elements.handshakeContainer = root.querySelector('#debug-handshake-container');
+    this._elements.handshakeList = root.querySelector('#debug-handshake-list');
+    this._elements.conclusionContainer = root.querySelector('#debug-conclusion-container');
+    this._elements.conclusionList = root.querySelector('#debug-conclusion-list');
     this._elements.frameNumber = root.querySelector('#debug-frame-number');
     this._elements.turnNumber = root.querySelector('#debug-turn-number');
     this._elements.player = root.querySelector('#debug-player');
@@ -191,6 +206,87 @@ class FixedDamageDebugRenderer {
     this._elements.finalState = root.querySelector('#debug-final-state');
 
     this._container.appendChild(root);
+  }
+
+  _renderLifecyclePanels() {
+    const lifecycle = this._matchData?.lifecycle || {};
+    const handshakes = Array.isArray(lifecycle.handshakes) ? lifecycle.handshakes : [];
+    const conclusions = Array.isArray(lifecycle.conclusions) ? lifecycle.conclusions : [];
+
+    if (handshakes.length > 0) {
+      this._elements.handshakeContainer.style.display = 'block';
+      this._elements.handshakeList.innerHTML = handshakes
+        .map((entry) => {
+          const status = this._formatHandshakeStatus(entry);
+          const prompt = entry.promptText || 'N/A';
+          const response = entry.responseText || entry.normalizedResponse || 'N/A';
+          return `
+            <details class="debug-lifecycle-item">
+              <summary>
+                <span class="debug-lifecycle-player">${this._escapeHtml(entry.player)}</span>
+                <span class="debug-lifecycle-status">${this._escapeHtml(status)}</span>
+              </summary>
+              <div class="debug-lifecycle-body">
+                <div class="debug-lifecycle-grid">
+                  <div class="debug-lifecycle-block">
+                    <h4>Prompt</h4>
+                    <pre>${this._escapeHtml(prompt)}</pre>
+                  </div>
+                  <div class="debug-lifecycle-block">
+                    <h4>Response</h4>
+                    <pre>${this._escapeHtml(response)}</pre>
+                  </div>
+                </div>
+              </div>
+            </details>
+          `;
+        })
+        .join('');
+    } else {
+      this._elements.handshakeContainer.style.display = 'none';
+    }
+
+    if (conclusions.length > 0) {
+      this._elements.conclusionContainer.style.display = 'block';
+      this._elements.conclusionList.innerHTML = conclusions
+        .map((entry) => {
+          const prompt = entry.promptText || 'N/A';
+          const reflection = entry.reflectionText || entry.responseText || 'N/A';
+          return `
+            <details class="debug-lifecycle-item">
+              <summary>
+                <span class="debug-lifecycle-player">${this._escapeHtml(entry.player)}</span>
+                <span class="debug-lifecycle-status">Conclusion</span>
+              </summary>
+              <div class="debug-lifecycle-body">
+                <div class="debug-lifecycle-grid">
+                  <div class="debug-lifecycle-block">
+                    <h4>Prompt</h4>
+                    <pre>${this._escapeHtml(prompt)}</pre>
+                  </div>
+                  <div class="debug-lifecycle-block">
+                    <h4>Reflection</h4>
+                    <pre>${this._escapeHtml(reflection)}</pre>
+                  </div>
+                </div>
+              </div>
+            </details>
+          `;
+        })
+        .join('');
+    } else {
+      this._elements.conclusionContainer.style.display = 'none';
+    }
+  }
+
+  _formatHandshakeStatus(entry) {
+    if (entry.status === 'aborted') {
+      return `Aborted${entry.reason ? ` (${entry.reason})` : ''}`;
+    }
+    if (entry.status === 'complete') {
+      return entry.accepted === false ? 'Rejected' : 'Accepted';
+    }
+    return 'Started';
   }
 
   _escapeHtml(str) {

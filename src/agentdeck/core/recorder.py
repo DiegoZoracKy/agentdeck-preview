@@ -9,7 +9,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Union, cast
 
@@ -97,6 +97,21 @@ class MatchRecording:
         if self.seed is not None:
             metadata.setdefault("seed", self.seed)
 
+        started_at = metadata.get("started_at")
+        ended_at = metadata.get("ended_at")
+        duration_seconds = metadata.get("duration_seconds")
+
+        match_metadata = metadata.get("match")
+        if isinstance(match_metadata, dict):
+            if started_at is None:
+                started_at = match_metadata.get("started_at")
+            if ended_at is None:
+                ended_at = match_metadata.get("ended_at")
+            if duration_seconds is None:
+                duration_seconds = match_metadata.get("duration_seconds")
+            if duration_seconds is None:
+                duration_seconds = match_metadata.get("duration")
+
         payload: Dict[str, Any] = {
             "schema_version": self.schema_version,
             "schema_type": "match",
@@ -108,6 +123,10 @@ class MatchRecording:
             "seed": self.seed,
             "events": copy.deepcopy(self.events),
             "metadata": metadata,
+            "batch_id": metadata.get("batch_id"),
+            "started_at": started_at,
+            "ended_at": ended_at,
+            "duration_seconds": duration_seconds,
         }
         summary = self.usage.summary()
         if summary:
@@ -146,6 +165,7 @@ class Recorder:
     """
 
     SCHEMA_VERSION = "1.3"  # v1.3.0: Removed dialogue array, embed prompts in events
+    BATCH_SCHEMA_VERSION = "1.0"  # SPEC-RECORDER SV1: batch schema remains 1.0
 
     def __init__(
         self,
@@ -207,6 +227,12 @@ class Recorder:
         turn_number = data.get("turn_number")
         if turn_number is None and "turn_number" in metadata:
             turn_number = metadata["turn_number"]
+        if turn_number is None:
+            turn_context = data.get("turn_context")
+            if isinstance(turn_context, dict):
+                turn_number = turn_context.get("turn_number")
+            elif isinstance(metadata.get("turn_context"), dict):
+                turn_number = metadata["turn_context"].get("turn_number")
 
         prompt_payload: Dict[str, Any] = {
             "phase": phase,
@@ -257,8 +283,30 @@ class Recorder:
         elif "usage_info" in metadata:
             prompt_payload["usage_info"] = copy.deepcopy(metadata["usage_info"])
 
+        # Call correlation ID (mirrors debug log request/response call_id).
+        if "call_id" in data:
+            prompt_payload["call_id"] = data["call_id"]
+        elif "call_id" in metadata:
+            prompt_payload["call_id"] = metadata["call_id"]
+        else:
+            usage_info = prompt_payload.get("usage_info")
+            if isinstance(usage_info, dict) and usage_info.get("call_id"):
+                prompt_payload["call_id"] = usage_info["call_id"]
+
         # Duration/retries
-        if hasattr(event, "duration"):
+        if phase in {"turn", "parse_failure"}:
+            turn_context = data.get("turn_context")
+            if isinstance(turn_context, dict) and isinstance(
+                turn_context.get("duration"), (int, float)
+            ):
+                prompt_payload["duration"] = float(turn_context["duration"])
+            elif isinstance(metadata.get("turn_context"), dict) and isinstance(
+                metadata["turn_context"].get("duration"), (int, float)
+            ):
+                prompt_payload["duration"] = float(metadata["turn_context"]["duration"])
+            elif hasattr(event, "duration"):
+                prompt_payload["duration"] = event.duration
+        elif hasattr(event, "duration"):
             prompt_payload["duration"] = event.duration
         if "retries" in data:
             prompt_payload["retries"] = data["retries"]
@@ -266,6 +314,23 @@ class Recorder:
             prompt_payload["retries"] = metadata["retries"]
 
         return prompt_payload
+
+    @staticmethod
+    def _sanitize_gameplay_state_for_recording(state: Any) -> Any:
+        """
+        Remove engine-internal runtime keys from recorded gameplay state snapshots.
+
+        We keep gameplay artifacts focused on game-domain state. Runtime mechanics
+        internals (e.g. _turn_count, _first_player_idx) remain available elsewhere
+        in metadata/final_state when needed for reproducibility.
+        """
+        if not isinstance(state, dict):
+            return copy.deepcopy(state)
+        return {
+            key: copy.deepcopy(value)
+            for key, value in state.items()
+            if not (isinstance(key, str) and key.startswith("_"))
+        }
 
     # ------------------------------------------------------------------
     # Event handlers (duck-typed)
@@ -278,18 +343,19 @@ class Recorder:
         matches: int,
         context: Optional[EventContext] = None,
     ) -> None:
+        started_at = self._context_iso_timestamp(context) or datetime.now(timezone.utc).isoformat()
         metadata = {
             "session_id": self._context_value(context, "session_id"),
             "game": game.__class__.__name__,
             "players": [p.name for p in players],
             "matches_planned": matches,
-            "started_at": datetime.now().isoformat(),
+            "started_at": started_at,
             "git_info": self._get_git_info(),
             "configuration": self._get_configuration(game, players),
         }
         self.current_batch = BatchRecording(
             batch_id=batch_id,
-            schema_version=self.schema_version,
+            schema_version=self.BATCH_SCHEMA_VERSION,
             metadata=metadata,
         )
         self.batch_match_ids = []
@@ -305,14 +371,18 @@ class Recorder:
         match_id = match_id or datetime.now().strftime("%Y%m%d_%H%M%S")
         self.current_match_id = match_id
         match_index = len(self.current_batch.match_refs) if self.current_batch else 0
+        batch_id = self._context_value(context, "batch_id")
+        if not isinstance(batch_id, str) or not batch_id:
+            raise ValueError("Recorder.on_match_start requires context['batch_id']")
+        started_at = self._context_iso_timestamp(context) or datetime.now(timezone.utc).isoformat()
 
         metadata = {
-            "started_at": datetime.now().isoformat(),
+            "started_at": started_at,
             "session_id": self._context_value(context, "session_id"),
-            "batch_id": self._context_value(context, "batch_id"),
+            "batch_id": batch_id,
             "context": {
                 "session_id": self._context_value(context, "session_id"),
-                "batch_id": self._context_value(context, "batch_id"),
+                "batch_id": batch_id,
                 "match_index": match_index,
                 "total_matches_in_batch": (
                     self.current_batch.metadata["matches_planned"] if self.current_batch else None
@@ -417,8 +487,8 @@ class Recorder:
             "player": player,
             "action": action_value,
             "reasoning": reasoning,
-            "state_before": copy.deepcopy(data.get("state_before")),
-            "state_after": copy.deepcopy(data.get("state_after")),
+            "state_before": self._sanitize_gameplay_state_for_recording(data.get("state_before")),
+            "state_after": self._sanitize_gameplay_state_for_recording(data.get("state_after")),
             "metadata": metadata_snapshot,
         }
         if data.get("turn_context") is not None:
@@ -431,12 +501,20 @@ class Recorder:
             turn_payload["turn_index"] = data["turn_index"]
 
         event_context = cast(EventContext, dict(event.context) if event.context else {})
+        event_duration = event.duration
+        if data.get("turn_context") is not None:
+            turn_context = data["turn_context"]
+            if isinstance(turn_context, dict) and isinstance(
+                turn_context.get("duration"), (int, float)
+            ):
+                event_duration = float(turn_context["duration"])
+
         recorded_event = Event(
             type="gameplay",
             data=turn_payload,
             context=event_context,
             timestamp=event.timestamp,
-            duration=event.duration,
+            duration=event_duration,
         )
         event_data = self._serialize_event(recorded_event)
         if event_context:
@@ -490,6 +568,25 @@ class Recorder:
             self._pending_events.append(event_data)
         else:
             # Normal path: append to match events
+            self.current_match.events.append(event_data)
+            self._flush_current_match()
+
+    def on_player_handshake_start(self, event: Event) -> None:
+        """
+        Record PLAYER_HANDSHAKE_START event with prompt metadata.
+
+        Handshake start events arrive before MATCH_START, so they are buffered
+        until the match recording is created.
+        """
+        event_data = self._serialize_event(event)
+        if event.context:
+            event_data["context"] = dict(event.context)
+
+        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "handshake")
+
+        if not self.current_match:
+            self._pending_events.append(event_data)
+        else:
             self.current_match.events.append(event_data)
             self._flush_current_match()
 
@@ -566,7 +663,6 @@ class Recorder:
         if not self.current_match:
             return
 
-        self.current_match.metadata["ended_at"] = datetime.now().isoformat()
         self.current_match.winner = result.winner
         self.current_match.final_state = copy.deepcopy(result.final_state)
         self.current_match.seed = result.seed
@@ -574,6 +670,51 @@ class Recorder:
             self.current_match.metadata.setdefault("match", {}).update(
                 copy.deepcopy(result.metadata)
             )
+            # Keep player_summaries cost fields aligned with finalized per-match costs.
+            player_costs = result.metadata.get("player_costs")
+            summaries = self.current_match.metadata.get("player_summaries")
+            if isinstance(player_costs, dict) and isinstance(summaries, list):
+                for summary in summaries:
+                    if not isinstance(summary, dict):
+                        continue
+                    player_name = summary.get("name")
+                    if not isinstance(player_name, str):
+                        continue
+                    if player_name in player_costs:
+                        try:
+                            summary["total_cost"] = float(player_costs[player_name])
+                        except (TypeError, ValueError):
+                            continue
+
+        match_metadata = self.current_match.metadata.get("match", {})
+        if not isinstance(match_metadata, dict):
+            match_metadata = {}
+
+        started_at = match_metadata.get("started_at") or self.current_match.metadata.get(
+            "started_at"
+        )
+        ended_at = (
+            match_metadata.get("ended_at")
+            or self._context_iso_timestamp(context)
+            or datetime.now(timezone.utc).isoformat()
+        )
+        duration_seconds = match_metadata.get("duration_seconds")
+        if duration_seconds is None:
+            duration_seconds = match_metadata.get("duration")
+
+        if duration_seconds is None and isinstance(started_at, str) and isinstance(ended_at, str):
+            try:
+                start_dt = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
+                end_dt = datetime.fromisoformat(ended_at.replace("Z", "+00:00"))
+                duration_seconds = max(0.0, (end_dt - start_dt).total_seconds())
+            except ValueError:
+                duration_seconds = None
+
+        self.current_match.metadata["started_at"] = started_at
+        self.current_match.metadata["ended_at"] = ended_at
+        if duration_seconds is not None:
+            self.current_match.metadata["duration_seconds"] = duration_seconds
+
         if context:
             self.current_match.metadata.setdefault("context", {})["end"] = dict(context)
 
@@ -596,22 +737,45 @@ class Recorder:
         self._flush_current_match()
 
         if self.current_batch:
-            # Extract actual match execution metadata (not recorder timing)
             match_metadata = self.current_match.metadata.get("match", {})
+            if not isinstance(match_metadata, dict):
+                match_metadata = {}
 
-            # Use actual match start/end times if available from result metadata
-            # Fall back to recorder timestamps if match metadata doesn't have them
-            match_started_at = self.current_match.metadata.get("started_at")
-            match_ended_at = self.current_match.metadata.get("ended_at")
+            match_started_at = match_metadata.get("started_at") or self.current_match.metadata.get(
+                "started_at"
+            )
+            match_ended_at = match_metadata.get("ended_at") or self.current_match.metadata.get(
+                "ended_at"
+            )
+            match_duration_seconds = match_metadata.get("duration_seconds")
+            if match_duration_seconds is None:
+                match_duration_seconds = match_metadata.get("duration")
+            if match_duration_seconds is None:
+                match_duration_seconds = self.current_match.metadata.get("duration_seconds")
+            if (
+                match_duration_seconds is None
+                and isinstance(match_started_at, str)
+                and isinstance(match_ended_at, str)
+            ):
+                try:
+                    start_dt = datetime.fromisoformat(match_started_at.replace("Z", "+00:00"))
+                    end_dt = datetime.fromisoformat(match_ended_at.replace("Z", "+00:00"))
+                    match_duration_seconds = max(0.0, (end_dt - start_dt).total_seconds())
+                except ValueError:
+                    match_duration_seconds = None
 
-            # Calculate actual end time from duration if available
-            if "duration" in match_metadata and match_started_at:
-                # Normalize ISO 8601 timezone format (Z → +00:00) for fromisoformat compatibility
-                # This future-proofs against datetime.utcnow().isoformat() + "Z" timestamps
-                normalized_start = match_started_at.replace("Z", "+00:00")
-                start_dt = datetime.fromisoformat(normalized_start)
-                end_dt = start_dt + timedelta(seconds=match_metadata["duration"])
-                match_ended_at = end_dt.isoformat()
+            # Derive ended_at only when duration is known and ended_at missing.
+            if (
+                not match_ended_at
+                and match_duration_seconds is not None
+                and isinstance(match_started_at, str)
+            ):
+                try:
+                    start_dt = datetime.fromisoformat(match_started_at.replace("Z", "+00:00"))
+                    end_dt = start_dt + timedelta(seconds=float(match_duration_seconds))
+                    match_ended_at = end_dt.isoformat()
+                except ValueError:
+                    pass
 
             # Use actual turn count from match metadata if available
             # Fallback: count gameplay events (for old recordings or incomplete metadata)
@@ -629,6 +793,7 @@ class Recorder:
                 "turns": actual_turns,
                 "started_at": match_started_at,
                 "ended_at": match_ended_at,
+                "duration_seconds": match_duration_seconds,
                 "player_summaries": self.current_match.metadata.get(
                     "player_summaries", []
                 ),  # Per SPEC-RECORDER batch provenance
@@ -662,7 +827,9 @@ class Recorder:
         if not self.current_batch:
             return
 
-        self.current_batch.metadata["ended_at"] = datetime.now().isoformat()
+        self.current_batch.metadata["ended_at"] = (
+            self._context_iso_timestamp(context) or datetime.now(timezone.utc).isoformat()
+        )
         self.current_batch.metadata["matches_completed"] = len(results)
         self.current_batch.metadata["statistics"] = self._calculate_batch_statistics(results)
 
@@ -680,6 +847,17 @@ class Recorder:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+    @staticmethod
+    def _timestamp_to_iso(timestamp: Optional[Any]) -> Optional[str]:
+        if isinstance(timestamp, (int, float)):
+            return datetime.fromtimestamp(float(timestamp), tz=timezone.utc).isoformat()
+        return None
+
+    def _context_iso_timestamp(self, context: Optional[EventContext]) -> Optional[str]:
+        if not context:
+            return None
+        return self._timestamp_to_iso(context.get("timestamp"))
+
     def _flush_current_match(self) -> None:
         if not self.current_match or not self.current_match_path:
             return
@@ -721,12 +899,13 @@ class Recorder:
         schema_version = raw.get("schema_version")
         if not schema_version:
             raise ValueError(
-                f"Missing schema_version in {Path(resolved).name}. " f"Expected schema version 1.x"
+                f"Missing schema_version in {Path(resolved).name}. "
+                f"Expected schema version {Recorder.SCHEMA_VERSION}"
             )
-        if not str(schema_version).startswith("1"):
+        if str(schema_version) != Recorder.SCHEMA_VERSION:
             raise ValueError(
                 f"Unsupported schema version: {schema_version}. "
-                f"Expected schema version 1.x (current: {Recorder.SCHEMA_VERSION})"
+                f"Expected schema version {Recorder.SCHEMA_VERSION}"
             )
 
         # Extract metadata
@@ -775,7 +954,10 @@ class Recorder:
                 ["git", "branch", "--show-current"], capture_output=True, text=True, check=True
             ).stdout.strip()
             status = subprocess.run(
-                ["git", "status", "--short"], capture_output=True, text=True, check=True
+                ["git", "status", "--porcelain", "--untracked-files=no"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             dirty = bool(status.stdout.strip())
             return {"commit": commit_hash, "branch": branch, "dirty": dirty}

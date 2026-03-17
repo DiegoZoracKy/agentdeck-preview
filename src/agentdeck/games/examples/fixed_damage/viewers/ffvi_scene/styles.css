@@ -10,6 +10,8 @@
   --scene-text: #f5f6ff;
   --scene-text-dim: #b0b4d9;
   --scene-gold: #ffd866;
+  --scene-action-attack: #ff8b9a;
+  --scene-action-potion: #7af2a0;
   --scene-hp-high: #2ecc71;
   --scene-hp-low: #f1c40f;
   --scene-hp-critical: #e74c3c;
@@ -57,10 +59,7 @@
 }
 
 .scene-message-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  display: none;
 }
 
 .scene-action {
@@ -68,6 +67,14 @@
   font-size: 12px;
   letter-spacing: 2px;
   width: 100%;
+}
+
+.scene-action.is-attack {
+  color: var(--scene-action-attack);
+}
+
+.scene-action.is-potion {
+  color: var(--scene-action-potion);
 }
 
 .scene-detail {
@@ -502,6 +509,7 @@
 }
 
 .viewer-controls.skin-ffvi-scene #btn-play {
+  min-width: 92px;
   padding: 8px 14px;
   border-color: #ffd866;
   background: linear-gradient(180deg, #3a3f76 0%, #2a2e5c 100%);
@@ -517,7 +525,20 @@
 
 .viewer-controls.skin-ffvi-scene #btn-prev,
 .viewer-controls.skin-ffvi-scene #btn-next {
-  padding: 8px 8px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.viewer-controls.skin-ffvi-scene .viewer-nav-icon {
+  display: block;
+  line-height: 1;
+  transform: translateY(-3px);
 }
 
 .viewer-controls.skin-ffvi-scene label {
@@ -542,7 +563,7 @@
 .viewer-controls.skin-ffvi-scene .viewer-progress {
   flex: 1 1 220px;
   min-width: 160px;
-  max-width: 320px;
+  max-width: none;
   height: 4px;
   background: var(--scene-bg-dark);
   border: 1px solid var(--scene-border);
@@ -601,7 +622,7 @@
   .viewer-controls.skin-ffvi-scene .viewer-progress {
     flex: 1 1 150px;
     min-width: 110px;
-    max-width: 220px;
+    max-width: none;
     height: 4px;
     margin: 0 6px;
   }
@@ -633,10 +654,7 @@
   }
 
   .scene-message-right {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    display: none;
   }
 
   .scene-action {
@@ -792,14 +810,16 @@
   }
 
   .viewer-controls.skin-ffvi-scene #btn-play {
-    min-width: 74px;
+    min-width: 92px;
   }
 
   .viewer-controls.skin-ffvi-scene #btn-prev,
   .viewer-controls.skin-ffvi-scene #btn-next {
+    width: 34px;
     min-width: 34px;
-    padding-left: 6px;
-    padding-right: 6px;
+    height: 34px;
+    padding: 0;
+    line-height: 1;
   }
 
   .viewer-controls.skin-ffvi-scene label {

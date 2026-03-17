@@ -25,46 +25,73 @@
     <!-- Error display -->
     <div id="error-container"></div>
 
-    <!-- File drop zone (shown when no match loaded) -->
-    <div id="drop-zone" class="file-drop-zone">
-      <div class="icon">📁</div>
-      <p>Drop a match JSON file here</p>
-      <p>or click to browse</p>
+    <!-- Global controls (always visible) -->
+    <div id="global-controls" class="global-controls">
+      <label class="global-control global-control-match">
+        Load Match:
+        <select id="match-select" title="Select a local match"></select>
+      </label>
+      <button id="btn-load-match" title="Load selected match">▶ Load Match</button>
+      <button id="btn-upload-match" title="Load match from local JSON file">📁 Upload JSON</button>
+      <label class="global-control global-control-skin">
+        Load Skin:
+        <select id="skin-select" title="Select viewer skin"></select>
+      </label>
     </div>
 
-    <!-- Sample match button (shown when no match loaded) -->
-    <button id="btn-load-sample" class="btn-load-sample">
-      ▶ Load Sample Match
-      <span class="btn-sample-sub">GPT-4o-mini vs Claude-Sonnet-4.5</span>
-    </button>
+    <!-- Mobile compact controls -->
+    <div id="mobile-top-controls" class="mobile-top-controls" style="display: none;">
+      <button id="mobile-btn-match" class="mobile-top-btn" title="Load match">
+        Match: <span id="mobile-match-label">-</span>
+      </button>
+      <button id="mobile-btn-skin" class="mobile-top-btn" title="Load skin">
+        Skin: <span id="mobile-skin-label">-</span>
+      </button>
+      <button id="mobile-btn-more" class="mobile-top-btn mobile-top-btn-icon" title="More options">⋯</button>
+    </div>
 
-    <!-- Local match library (shown when manifest has entries and no match loaded) -->
-    <div id="match-library" class="match-library" style="display: none;">
-      <div class="match-library-title">Local Match Library</div>
-      <div class="match-library-controls">
-        <select id="match-select" title="Select a local match"></select>
-        <button id="btn-load-match" title="Load selected match">▶ Load Match</button>
+    <!-- Mobile bottom sheet -->
+    <div id="mobile-sheet" class="mobile-sheet" aria-hidden="true">
+      <div id="mobile-sheet-backdrop" class="mobile-sheet-backdrop"></div>
+      <div class="mobile-sheet-panel" role="dialog" aria-modal="true" aria-label="Viewer controls">
+        <div class="mobile-sheet-head">
+          <span id="mobile-sheet-title">Controls</span>
+          <button id="mobile-sheet-close" class="mobile-sheet-close" title="Close">✕</button>
+        </div>
+
+        <div id="mobile-sheet-match" class="mobile-sheet-section">
+          <select id="mobile-match-select" title="Select a local match"></select>
+          <button id="mobile-load-match" title="Load selected match">▶ Load Match</button>
+        </div>
+
+        <div id="mobile-sheet-skin" class="mobile-sheet-section">
+          <select id="mobile-skin-select" title="Select viewer skin"></select>
+        </div>
+
+        <div id="mobile-sheet-actions" class="mobile-sheet-section">
+          <button id="mobile-upload-match" title="Load match from local JSON file">📁 Upload JSON</button>
+        </div>
       </div>
+    </div>
+
+    <!-- Fallback empty state (only shown when auto-load fails and no match is loaded) -->
+    <div id="empty-state" class="empty-state" style="display: none;">
+      <div class="icon">📁</div>
+      <p>Could not auto-load a default match.</p>
+      <p>Pick one from "Load Match" or upload a JSON file.</p>
+      <button id="btn-empty-upload" title="Load match from local JSON file">📁 Upload JSON</button>
     </div>
 
     <!-- Hidden file input -->
     <input type="file" id="file-input" accept=".json">
 
-    <!-- Viewer container (shown when match loaded) -->
-    <div id="viewer-container" style="display: none;"></div>
-
-    <!-- Controls (shown when match loaded) -->
+    <!-- Playback controls (shown when match loaded) -->
     <div id="controls-container" class="viewer-controls" style="display: none;">
       <button id="btn-play" title="Play/Pause (Space)">▶ Play</button>
-      <button id="btn-prev" title="Previous (←)">⏮</button>
-      <button id="btn-next" title="Next (→)">⏭</button>
+        <button id="btn-prev" title="Previous (←)"><span class="viewer-nav-icon">⏮</span></button>
+        <button id="btn-next" title="Next (→)"><span class="viewer-nav-icon">⏭</span></button>
 
-      <div class="viewer-progress" id="progress-bar">
-        <div class="viewer-progress-fill" id="progress-fill"></div>
-      </div>
-
-      <label>
-        Speed:
+      <label class="speed-control">
         <select id="speed-select">
           <option value="0.5">0.5x</option>
           <option value="1" selected>1x</option>
@@ -73,24 +100,22 @@
         </select>
       </label>
 
-      <label>
-        Skin:
-        <select id="skin-select">
-          <!-- Options populated dynamically -->
-        </select>
-      </label>
+      <div class="viewer-progress" id="progress-bar">
+        <div class="viewer-progress-fill" id="progress-fill"></div>
+      </div>
 
-      <span class="spacer"></span>
-
-      <span class="status" id="status-text">Ready</span>
+      <div class="controls-meta">
+        <span id="status-text" class="controls-meta-status">READY</span>
+        <span id="controls-turn" class="controls-meta-turn">—</span>
+      </div>
     </div>
+
+    <!-- Viewer container (shown when match loaded) -->
+    <div id="viewer-container" style="display: none;"></div>
 
     <!-- Match info (shown when match loaded) -->
     <div id="match-info" class="match-info" style="display: none;">
       <div class="info-grid" id="info-grid"></div>
-      <div class="match-info-actions">
-        <button id="btn-reset" class="btn-match-new" title="Load new match">📁 New Match</button>
-      </div>
     </div>
 
     <!-- Instructions -->

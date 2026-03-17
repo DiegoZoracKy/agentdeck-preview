@@ -10,22 +10,48 @@ players:
   - id: A
     provider: openai
     model: gpt-4o-mini
-    controller: ActionOnlyController
-  - id: B
-    provider: openai
-    model: gpt-4o-mini
     controller: ReasoningController
+    renderer: TextRenderer
+  - id: B
+    provider: anthropic
+    model: claude-haiku-4.5
+    controller: ReasoningController
+    renderer: TextRenderer
+variants:
+  models:
+    - gpt-4o-mini
+    - claude-haiku-4.5
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  prompt_cadence:
+    - handshake_only
+    - turn_persistent
 run:
   seed_base: 42
   matches_planned: 100
   matches_completed: 0
-  concurrency: 1
-  max_turns: 100
+  concurrency: 10
+  max_turns: 30
+  matrix_source: matrix.yaml
 analysis_plan:
   ci_method: wilson
   alpha: 0.05
   effect_size: cohens_h
 artifacts:
+  matrix_yaml: matrix.yaml
   results_json: results.json
   results_csv: results.csv
-notes: ""
+  analysis_md: analysis.md
+  highlights_json: artifacts/highlights.json
+storage:
+  raw_recordings:
+    backend: huggingface
+    dataset: your-org/replays
+    path_prefix: YYYY-qX-experiment-slug
+  summaries:
+    repo_path: research/YYYY-MM-DD-slug
+  viewer_curation:
+    repo_path: viewer/matches
+notes: >-
+  Fill freeze metadata (git tag/commit + template version) before running.

@@ -1,11 +1,15 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
 > Status: Final
-> Version: 1.3.0
-> Last Updated: 2026-02-03
+> Version: 1.3.2
+> Last Updated: 2026-02-24
 > Implementation: ✅ Implemented
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Game authors, LLM player implementers, research engineers
+>
+> **Changes in v1.3.2**: Clarify that replay/research artifacts MUST remain grounded in local ConversationManager/player history, even when providers offer optional server-side conversation state features.
+>
+> **Changes in v1.3.1**: Clarify that default conclusion prompt rendering MUST sanitize engine bookkeeping keys (e.g., `_turn_count`, `_first_player_idx`) from LLM-facing prompt text.
 >
 > **Changes in v1.3.0**: Split handshake into build + execute steps so Console can emit `PLAYER_HANDSHAKE_START` with the exact prompt before the LLM call, restoring SPEC-OBSERVABILITY compliance.
 
@@ -24,7 +28,7 @@
 ## 3. Responsibilities
 - **Handshake phase (two-step)**: Build a deterministic handshake prompt bundle without invoking the LLM, then execute the LLM call using that bundle and return the raw acknowledgement string for console validation while preserving the exchange in history.
 - **Turn phase**: Compose deterministic prompts via `PromptBuilder`, invoke the LLM, parse actions with the bound controller, and return `ActionResult` with metadata.
-- **Conclusion phase** *(policy-driven)*: Render post-match reflection template when enabled, invoke LLM, return reflection text (or `None`).
+- **Conclusion phase** *(policy-driven)*: Render post-match reflection template when enabled, invoke LLM, return reflection text (or `None`), and hide engine-only bookkeeping keys from default LLM-facing conclusion state views.
 - **Component management**: Provide controller, renderer, prompt builder, and (optionally) conversation manager. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER v1.3.0.
 - **Metadata capture**: Attach prompt blocks, usage info (tokens, cost, latency), retry metrics, lifecycle phase, and controller metadata to the returned results.
 
@@ -56,6 +60,8 @@
   - MUST keep `game_state` immutable, build prompt via `PromptBuilder`, invoke LLM, parse response via `controller.parse()`, and return `ActionResult` with metadata.
 - `conclude(result: MatchResult, *, match_context: MatchContext) -> Optional[str]`
   - OPTIONAL; default implementation records conclusion prompt metadata (using `match_context.conclusion_prompt` when present, otherwise the default conclusion template) and returns `None`.
+  - When using template-driven conclusion composition (`match_context.conclusion_prompt` is absent), players MUST sanitize engine bookkeeping fields from the state rendered into `{game_view}` (at minimum `_turn_count` and `_first_player_idx`).
+  - When `match_context.conclusion_prompt` is present, that prompt is treated as explicit caller-owned text and is sent verbatim.
   - When overridden, MUST return a reflection string or `None` and MUST record prompt metadata for conclusion events.
   - Console policy determines whether this method is invoked for a given match.
 - `clone() -> Player`
@@ -91,15 +97,17 @@
 13. **CS1**: Players MUST treat `game_state` arguments as read-only. Copies happen inside PromptBuilder/renderer when required.
 14. **CS2**: When `ConversationManager` is bound, players MUST delegate history logging to it for all lifecycle phases; otherwise `_local_history` MUST track alternating user/assistant messages.
 15. **CS3**: `reset_conversation()` MUST prepare the player for the next match by clearing local history (while leaving handshake templates intact).
+16. **CS4**: Template-driven conclusion prompts MUST NOT expose engine bookkeeping keys in LLM-facing text. Implementations MUST sanitize at least `_turn_count` and `_first_player_idx` before rendering `{game_view}`.
+17. **CS5**: Replay/research reproducibility MUST remain based on locally recorded conversation history (ConversationManager or `_local_history`). Provider-managed history features MAY be added, but MUST be explicit opt-in and MUST NOT replace local prompt/response recording required by recorder/replay contracts.
 
 ### 5.5 Component Integrity (CI)
-16. **CI1** (v1.2.0): Controller MUST be pluggable; MUST be deterministic and stateless. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER v1.3.0.
-17. **CI2**: Players MUST expose `describe()` / `get_summary()` including controller name, renderer, model, temperature, and prompt strategy (with truncation for large strings).
-18. **CI3**: Players intended for parallel execution MUST supply a `clone()` implementation when default `copy.deepcopy` is insufficient (e.g., presence of LLM clients, sockets, thread locks). Implementations MUST recreate external resources while preserving configuration and aggregate metrics so worker clones behave identically to the original instance (see SPEC-PARALLEL §5).
+18. **CI1** (v1.2.0): Controller MUST be pluggable; MUST be deterministic and stateless. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER v1.3.0.
+19. **CI2**: Players MUST expose `describe()` / `get_summary()` including controller name, renderer, model, temperature, and prompt strategy (with truncation for large strings).
+20. **CI3**: Players intended for parallel execution MUST supply a `clone()` implementation when default `copy.deepcopy` is insufficient (e.g., presence of LLM clients, sockets, thread locks). Implementations MUST recreate external resources while preserving configuration and aggregate metrics so worker clones behave identically to the original instance (see SPEC-PARALLEL §5).
 
 ### 5.6 LLM Provider Integration (LP)
-19. **LP1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
-20. **LP2**: The model identifier MUST be accessible via the `model` attribute (already provided by `Player.__init__`) for pricing lookups.
+21. **LP1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
+22. **LP2**: The model identifier MUST be accessible via the `model` attribute (already provided by `Player.__init__`) for pricing lookups.
 
 ## 6. Data Structures
 - **HandshakeContext**: `match_id`, `player_name`, `opponent_names`, `game_name`, `seed`, `handshake_template_id`, optional metadata. Provided by console so players can tailor handshake prompts.
@@ -173,21 +181,22 @@ class GPTPlayer(LLMPlayer):
         super().__init__(name=name, model=model, **kwargs)
 
     def get_response(self, prompt: str) -> str:
-        # OpenAI API call
-        response = openai.ChatCompletion.create(
+        # OpenAI Responses API call
+        response = self.client.responses.create(
             model=self.model,
-            messages=[{"role": "user", "content": prompt}]
+            input=[{"role": "user", "content": prompt}],
+            store=False,
         )
 
         # Capture usage_info for cost calculation (DS4)
-        usage = response.get("usage", {})
+        usage = getattr(response, "usage", None)
         self._last_usage_info = {
-            "prompt_tokens": usage.get("prompt_tokens", 0),
-            "completion_tokens": usage.get("completion_tokens", 0),
-            "total_tokens": usage.get("total_tokens", 0),
+            "prompt_tokens": getattr(usage, "input_tokens", 0) if usage else 0,
+            "completion_tokens": getattr(usage, "output_tokens", 0) if usage else 0,
+            "total_tokens": getattr(usage, "total_tokens", 0) if usage else 0,
         }
 
-        return response.choices[0].message.content
+        return response.output_text
 
     def decide(self, game_state: dict, *, turn_context: TurnContext) -> ActionResult:
         result = super().decide(game_state, turn_context=turn_context)

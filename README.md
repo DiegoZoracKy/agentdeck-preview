@@ -46,29 +46,38 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 - Parallel execution for scaling
 - Event-driven observability via spectators
 
+## 🚦 Release Status
+
+AgentDeck is currently published as a **public beta / preview**.
+
+Today, the project is ready for:
+- Core match execution through the `AgentDeck` facade
+- Provider-backed and mock-player experiments
+- Recording, replay, and event-driven observability
+- Research export, packaging, and post-hoc analysis workflows
+
+It is **not** presented as a `1.0` stable platform yet. The main remaining gaps are:
+- Native fairness controls in the core API for paired side-swap / first-player policies
+- Stronger artifact-level invariant checks for recordings and telemetry
+- Full spec/doc consistency across the public surface
+- A methodologically stronger default benchmark regime for behavioral claims
+
+Viewer and replay UI work should currently be treated as **secondary / experimental**. The core product is the engine, record contract, and research workflow.
+
 ---
 
-## 🔬 Research Findings
+## 🔬 Research Program
 
-AgentDeck ships with reproducible experiment packages under [`research/`](research/) (recordings → `results.json`/`results.csv` → `analysis.md`). Highlights below are from **FixedDamageGame** (turn-based combat).
+This README focuses on the **core AgentDeck platform** (architecture, APIs, and usage).
+Experiment-specific findings, result narratives, and benchmark grids live under [`research/`](research/).
 
-### OpenAI Strategic Benchmarks (185 recorded matches)
-- **Optimal configuration**: `gpt-4o-mini + ReasoningController` at **$0.0028/match**
-- **CoT vs direct action (gpt-4o-mini)**: **66% vs 34%** (p=0.0328)
-- **Prompt format repetition is a dominant confound**: when format is *not* repeated every turn, `gpt-4o` wins **90–95%**; repeating every turn flips outcomes (`gpt-4o-mini` wins **77%**)
-- **Model size ≠ strategic superiority (in this setup)**: `gpt-4o-mini` beat `gpt-4o` **76.7% vs 23.3%** (p=0.0052)
-- **GPT-5 tiers showed no clear advantage** over `gpt-4o-mini` in this game, despite a **~2–15×** cost premium
+The baseline branch intentionally keeps the **research contract and tooling**, not archived benchmark packages. New release-facing studies should be created from templates or from packaged sessions.
 
-### Multi-Provider Benchmarks (93 recorded matches)
-- **`gpt-4o-mini` vs `Gemini-2.5-Flash`**: GPT wins **70/30** (p=0.0428) at ~**10×** lower cost/match (**$0.0020** vs **$0.0204**)
-- **`gpt-4o-mini` vs `Gemini-2.5-Pro`**: statistically tied (p=0.856) but Pro costs ~**15×** more per match (**$0.0476** vs **$0.0030**) and was operationally slower (quotas/latency)
-
-> These findings are prompt/controller dependent and may not generalize beyond FixedDamageGame.
-
-### Explore Full Research
-- **[Research Index](research/INDEX.md)** - Experiment registry
-- **[OpenAI Benchmarks](research/2025-11-08-openai-benchmarks/)** - `analysis.md` + `results.json`/`results.csv`
-- **[Multi-Provider Benchmarks](research/2025-11-19-multi-provider-benchmarks/)** - `analysis.md` + `results.json`/`results.csv`
+### Explore Research
+- **[Research Guide](research/README.md)** - How experiment packages are organized
+- **[Research Index](research/INDEX.md)** - Registry of experiments and status
+- **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
+- **[Research Templates](research/_templates/)** - Boilerplate for new experiment packages
 
 ---
 
@@ -152,8 +161,8 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/agentdeck/agentdeck.git
-cd agentdeck
+git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
+cd agentdeck-preview
 pip install -e ".[dev]"
 ```
 

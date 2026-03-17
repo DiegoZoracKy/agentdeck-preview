@@ -193,13 +193,18 @@ class MatchRuntime:
             - Lifecycle ordering and mechanic metadata are enforced by mechanics.
             - EventBus handles context enrichment (session/batch/match IDs).
         """
-        # Convert EventType enum to string if needed
-        if hasattr(event_type, "value"):
-            event_type = event_type.value
+        # Prefer console dispatcher when available so worker-mode execution can
+        # capture replay events consistently (parallel replay to main EventBus).
+        dispatch = getattr(self._console, "_dispatch_event", None)
+        if callable(dispatch):
+            dispatch(event_type, events=None, **data)
+            return
 
-        # Emit via console event bus
+        # Fallback for defensive compatibility.
         # Note: session_id/batch_id/match_id are added to EventContext by EventBus,
         # not to the event payload. The console/event_bus handles context enrichment.
+        if hasattr(event_type, "value"):
+            event_type = event_type.value
         self._console.event_bus.emit(event_type, **data)
 
     def record_turn(

@@ -250,6 +250,10 @@ class AgentDeckLogger:
         messages: Iterable[Dict[str, Any]],
         temperature: Optional[float],
         max_tokens: Optional[int],
+        phase: Optional[str] = None,
+        match_id: Optional[str] = None,
+        turn_number: Optional[int] = None,
+        call_id: Optional[str] = None,
     ) -> None:
         payload = {
             "model": model,
@@ -257,14 +261,38 @@ class AgentDeckLogger:
             "max_tokens": max_tokens,
             "messages": list(messages),
         }
-        self._debug(f"[{player}] API request\n{json.dumps(payload, indent=2, ensure_ascii=False)}")
+        prefix = self._format_api_prefix(
+            player=player,
+            phase=phase,
+            match_id=match_id,
+            turn_number=turn_number,
+            call_id=call_id,
+        )
+        self._debug(f"{prefix} API request\n{json.dumps(payload, indent=2, ensure_ascii=False)}")
 
-    def api_response(self, *, player: str, response_text: str, truncate: bool = True) -> None:
+    def api_response(
+        self,
+        *,
+        player: str,
+        response_text: str,
+        truncate: bool = True,
+        phase: Optional[str] = None,
+        match_id: Optional[str] = None,
+        turn_number: Optional[int] = None,
+        call_id: Optional[str] = None,
+    ) -> None:
         if truncate and len(response_text) > 500:
             snippet = response_text[:500] + "…"
         else:
             snippet = response_text
-        self._debug(f"[{player}] API response: {snippet}")
+        prefix = self._format_api_prefix(
+            player=player,
+            phase=phase,
+            match_id=match_id,
+            turn_number=turn_number,
+            call_id=call_id,
+        )
+        self._debug(f"{prefix} API response: {snippet}")
 
     def api_call(
         self,
@@ -275,9 +303,20 @@ class AgentDeckLogger:
         tokens_out: int,
         cost: float,
         duration: float,
+        phase: Optional[str] = None,
+        match_id: Optional[str] = None,
+        turn_number: Optional[int] = None,
+        call_id: Optional[str] = None,
     ) -> None:
+        prefix = self._format_api_prefix(
+            player=player,
+            phase=phase,
+            match_id=match_id,
+            turn_number=turn_number,
+            call_id=call_id,
+        )
         self._debug(
-            f"[{player}] API call model={model} tokens_in={tokens_in} tokens_out={tokens_out} "
+            f"{prefix} API call model={model} tokens_in={tokens_in} tokens_out={tokens_out} "
             f"cost=${cost:.5f} duration={duration:.2f}s"
         )
 
@@ -355,6 +394,24 @@ class AgentDeckLogger:
 
     def _warning(self, message: str) -> None:
         self._log(logging.WARNING, message)
+
+    def _format_api_prefix(
+        self,
+        *,
+        player: str,
+        phase: Optional[str],
+        match_id: Optional[str],
+        turn_number: Optional[int],
+        call_id: Optional[str],
+    ) -> str:
+        resolved_phase = phase or "unknown"
+        resolved_match = match_id or "unknown"
+        resolved_turn = turn_number if turn_number is not None else "unknown"
+        resolved_call = call_id or "unknown"
+        return (
+            f"[player={player} phase={resolved_phase} match_id={resolved_match} "
+            f"turn={resolved_turn} call_id={resolved_call}]"
+        )
 
     def _format_state(self, title: str, state: Optional[Dict[str, Any]]) -> List[str]:
         if state is None:

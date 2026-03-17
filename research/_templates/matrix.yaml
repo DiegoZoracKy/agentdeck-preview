@@ -1,0 +1,94 @@
+schema_version: 1
+experiment_id: YYYY-MM-DD-slug
+created_at: "YYYY-MM-DDTHH:MM:SSZ"
+purpose: >-
+  Optional matrix definition for benchmark-style research campaigns.
+  Use when your experiment has multiple cells/phases.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: null
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill before running.
+
+model_registry:
+  weak_model:
+    provider: openai
+    model: gpt-4o-mini
+    tier: weak
+  strong_model:
+    provider: openai
+    model: gpt-4o
+    tier: strong
+
+config_registry:
+  AO:
+    controller: ActionOnlyController
+    prompt_builder:
+      turn_template_mode: default
+      turn_template: "{game_view}\n\n{controller_format}"
+  CoT-H:
+    controller: ReasoningController
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  CoT-T:
+    controller: ReasoningController
+    prompt_builder:
+      turn_template_mode: default
+      turn_template: "{game_view}\n\n{controller_format}"
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 80
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - ci_width_gt_0.2
+    - p_value_between_0.03_and_0.2
+  manual_expansion_override:
+    enabled: true
+    tracking:
+      required_log_file: logs/expansion-overrides.md
+      required_fields:
+        - cell_id
+        - reason
+        - approver
+        - timestamp_utc
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: if empty, preflight is intentionally skipped
+    matches_per_cell: 6
+  phases:
+    - phase_id: A1
+      name: Core effects
+      tracks: [1]
+      cell_ids: []
+
+highlight_tag_rules:
+  clutch:
+    definition: winner_hp_lte_20
+  comeback:
+    definition: winner_trailed_by_gte_40_hp_at_any_turn
+  chaos:
+    definition: hp_lead_swings_gte_3
+  dumb_decision:
+    definition:
+      - potion_used_at_full_hp
+      - repeated_non_effective_actions
+
+cells:
+  - id: c01_example
+    track: 1
+    phase: A1
+    question: Example cell question.
+    player_a: { model_ref: weak_model, config_ref: CoT-T }
+    player_b: { model_ref: weak_model, config_ref: AO }
+    pilot_matches: 24
+    expansion_target_matches: 80
+    viewer_priority: false

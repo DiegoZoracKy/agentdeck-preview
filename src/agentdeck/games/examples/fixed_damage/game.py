@@ -108,7 +108,7 @@ Win Condition:
 
 Information Level: {self.information_level}
 - "full": Players see all stats (opponent HP/potions)
-- "partial": Players only see their own stats
+- "partial": Players see only their own HP/potions, but last actions remain visible
         """.strip()
 
     @property
@@ -210,7 +210,8 @@ Information Level: {self.information_level}
             if opponent is None:
                 raise ValueError("Cannot attack in single-player game")
 
-            state["health"][opponent] -= self.attack_damage
+            # Clamp at zero so terminal conditions and downstream analytics stay consistent.
+            state["health"][opponent] = max(0, state["health"][opponent] - self.attack_damage)
 
         elif action_str == "POTION":
             if state["potions"][player] > 0:
@@ -286,7 +287,8 @@ Information Level: {self.information_level}
         view = {
             "health": {player: game_state["health"][player]},
             "potions": {player: game_state["potions"][player]},
-            "last_action": game_state["last_action"],  # All actions visible
+            # Intentionally visible in both full/partial modes.
+            "last_action": game_state["last_action"],
             "turn": game_state["turn"],
         }
 

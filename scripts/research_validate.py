@@ -7,6 +7,7 @@ import argparse
 import csv
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -38,6 +39,17 @@ RESULTS_CSV_HEADER = (
     "first_player",
     "players",
     "player_costs",
+)
+AUTO_FACTS_BEGIN = "<!-- AUTO_FACTS:BEGIN -->"
+AUTO_FACTS_END = "<!-- AUTO_FACTS:END -->"
+AUTO_FACTS_PLACEHOLDER_PATTERNS = (
+    r"\bTBD\b",
+    r"YYYY-MM-DD-slug",
+    r"Matches:\s*0/0",
+    r"Sample size \(`n`\):\s*0\b",
+    r"Win rates:\s*\{\s*\}",
+    r"Topline Winner:\s*TBD",
+    r"Topline winner:\s*TBD",
 )
 
 
@@ -149,16 +161,95 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                     f"{experiment_name}: results.json experiment_id mismatch"
                 )
             source = data.get("source", {})
-            if not isinstance(source, dict) or not source.get("recordings_dir"):
-                errors.append(
-                    f"{experiment_name}: results.json missing source.recordings_dir"
-                )
+            if not isinstance(source, dict):
+                errors.append(f"{experiment_name}: results.json missing source object")
+            else:
+                recordings_dir = source.get("recordings_dir")
+                recordings_dirs = source.get("recordings_dirs")
+                has_single = isinstance(recordings_dir, str) and bool(recordings_dir.strip())
+                has_multi = isinstance(recordings_dirs, list) and len(recordings_dirs) > 0
+                if not has_single and not has_multi:
+                    errors.append(
+                        f"{experiment_name}: results.json missing source.recordings_dir(s)"
+                    )
             if "summary" not in data or not isinstance(data.get("summary"), dict):
                 errors.append(f"{experiment_name}: results.json missing summary")
             if "players" not in data or not isinstance(data.get("players"), list):
                 errors.append(f"{experiment_name}: results.json missing players list")
             if "matches" not in data or not isinstance(data.get("matches"), list):
                 errors.append(f"{experiment_name}: results.json missing matches list")
+
+            matches = data.get("matches") if isinstance(data.get("matches"), list) else []
+            has_matches = len(matches) > 0
+            results_schema_version = data.get("schema_version", 1)
+            enforce_extended_research_metrics = (
+                _is_int(results_schema_version) and results_schema_version >= 2
+            )
+
+            statistics = data.get("statistics")
+            if has_matches and enforce_extended_research_metrics:
+                if not isinstance(statistics, dict):
+                    errors.append(f"{experiment_name}: results.json missing statistics object")
+                else:
+                    required_stats_keys = {
+                        "method",
+                        "confidence_level",
+                        "alpha",
+                        "null_win_rate",
+                        "n_total",
+                        "n_decisive",
+                        "players",
+                    }
+                    missing_stats = sorted(required_stats_keys - set(statistics.keys()))
+                    if missing_stats:
+                        errors.append(
+                            f"{experiment_name}: results.json.statistics missing keys {missing_stats}"
+                        )
+                    if not isinstance(statistics.get("players"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.statistics.players must be mapping"
+                        )
+
+            strictness = data.get("format_strictness")
+            if has_matches and enforce_extended_research_metrics:
+                if not isinstance(strictness, dict):
+                    errors.append(
+                        f"{experiment_name}: results.json missing format_strictness object"
+                    )
+                else:
+                    if not isinstance(strictness.get("overall"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.format_strictness.overall must be mapping"
+                        )
+                    if not isinstance(strictness.get("by_player"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.format_strictness.by_player must be mapping"
+                        )
+
+            position_effect = data.get("position_effect")
+            if has_matches and enforce_extended_research_metrics:
+                if not isinstance(position_effect, dict):
+                    errors.append(
+                        f"{experiment_name}: results.json missing position_effect object"
+                    )
+                else:
+                    required_position_keys = {
+                        "total_matches",
+                        "first_player_wins",
+                        "first_player_win_rate",
+                        "second_player_wins",
+                        "upset_rate",
+                        "by_player",
+                    }
+                    missing_position = sorted(required_position_keys - set(position_effect.keys()))
+                    if missing_position:
+                        errors.append(
+                            f"{experiment_name}: results.json.position_effect missing keys {missing_position}"
+                        )
+                    if not isinstance(position_effect.get("by_player"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.position_effect.by_player must be mapping"
+                        )
 
             schema_version = data.get("schema_version")
             if schema_version is not None:
@@ -187,6 +278,59 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
             errors.append(
                 f"{experiment_name}: results.csv header mismatch "
                 f"(expected {list(RESULTS_CSV_HEADER)})"
+            )
+
+    return errors
+
+
+def _extract_auto_facts_block(markdown: str) -> Tuple[bool, str]:
+    begin_idx = markdown.find(AUTO_FACTS_BEGIN)
+    end_idx = markdown.find(AUTO_FACTS_END)
+    if begin_idx == -1 or end_idx == -1 or end_idx < begin_idx:
+        return False, ""
+    block_start = begin_idx + len(AUTO_FACTS_BEGIN)
+    return True, markdown[block_start:end_idx].strip()
+
+
+def _has_auto_facts_placeholder(block: str) -> bool:
+    for pattern in AUTO_FACTS_PLACEHOLDER_PATTERNS:
+        if re.search(pattern, block):
+            return True
+    return False
+
+
+def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> List[str]:
+    errors: List[str] = []
+    experiment_name = experiment_dir.name
+    status = manifest.get("status")
+    run = manifest.get("run") if isinstance(manifest.get("run"), dict) else {}
+    matches_completed = run.get("matches_completed")
+
+    must_enforce = (
+        status in {"complete", "archived"}
+        and _is_int(matches_completed)
+        and matches_completed > 0
+    )
+    if not must_enforce:
+        return errors
+
+    for doc_name in ("README.md", "analysis.md"):
+        path = experiment_dir / doc_name
+        if not path.exists():
+            errors.append(f"{experiment_name}: {doc_name} missing")
+            continue
+
+        content = path.read_text(encoding="utf-8")
+        has_block, block = _extract_auto_facts_block(content)
+        if not has_block:
+            errors.append(
+                f"{experiment_name}: {doc_name} missing AUTO_FACTS block markers"
+            )
+            continue
+
+        if _has_auto_facts_placeholder(block):
+            errors.append(
+                f"{experiment_name}: {doc_name} AUTO_FACTS block still contains placeholders"
             )
 
     return errors
@@ -259,9 +403,6 @@ def main() -> int:
         if "_templates" not in str(path)
     )
 
-    if not manifest_paths:
-        errors.append("No manifest.yaml files found under research/")
-
     for manifest_path in manifest_paths:
         manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
         if not isinstance(manifest, dict):
@@ -269,6 +410,7 @@ def main() -> int:
             continue
         errors.extend(_validate_manifest(manifest_path, manifest))
         errors.extend(_validate_results(manifest_path.parent, manifest))
+        errors.extend(_validate_markdown_facts(manifest_path.parent, manifest))
 
     errors.extend(_validate_index(research_dir, args.index, args.write_index))
 

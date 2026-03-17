@@ -6,6 +6,7 @@ import copy
 import time
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from .base import Game, Player, Spectator
@@ -250,6 +251,7 @@ class _MatchWorker:
         self.first_player_info: Optional[Dict[str, Any]] = None
         self._retry_budget: Dict[str, bool] = {}
         self._current_phase_index: Optional[int] = None
+        self._active_runtime_events: Optional[List[Event]] = None
 
     def run(self) -> MatchArtifact:
         """
@@ -279,6 +281,8 @@ class _MatchWorker:
 
         # Create isolated match runtime
         runtime = self._create_match_runtime()
+        self._active_runtime_events = runtime.events
+        self.first_player_info = None
 
         # Determine player order using Console's extracted helper
         ordered_players, player_order, player_order_source, first_player, cost_baseline = (
@@ -353,13 +357,19 @@ class _MatchWorker:
             # Compute status and duration (normal completion)
             status = self._safe_status(final_state)
             match_duration = time.time() - runtime.started_at
+            resolved_first_player = self.console._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+                selected_first_player=self.first_player_info,
+            )
 
             metadata = self.console._build_match_metadata(
                 self.game,
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 truncated,
@@ -402,6 +412,12 @@ class _MatchWorker:
 
             # Get turn number safely (Codex fix #2: tolerate None turn_context)
             abort_turn = abort_error.turn_context.turn_number if abort_error.turn_context else 0
+            resolved_first_player = self.console._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+                selected_first_player=self.first_player_info,
+            )
 
             # Build metadata with abort information
             metadata = self.console._build_match_metadata(
@@ -409,7 +425,7 @@ class _MatchWorker:
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -495,6 +511,12 @@ class _MatchWorker:
             forfeit_turn = (
                 forfeit_error.turn_context.turn_number if forfeit_error.turn_context else 0
             )
+            resolved_first_player = self.console._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+                selected_first_player=self.first_player_info,
+            )
 
             # Build metadata with forfeit information
             metadata = self.console._build_match_metadata(
@@ -502,7 +524,7 @@ class _MatchWorker:
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -897,14 +919,44 @@ class _MatchWorker:
         turn_context: TurnContext,
     ) -> "ParseFailurePolicy":
         """
-        Delegate parse-failure handling to the parent console while preserving isolation.
+        Handle parse failures on the worker event bus to preserve replay fidelity.
         """
         from .types import ActionParseError
 
         if not isinstance(error, ActionParseError):  # Defensive - should never happen
             raise TypeError(f"Expected ActionParseError, got {type(error).__name__}")
 
-        return self.console._handle_parse_failure(player, error, turn_context, self.game)
+        parse_result = error.parse_result
+        policy = self.game.on_action_parse_failure(player.name, error, turn_context)
+
+        self._dispatch_event(
+            EventType.PLAYER_ACTION_PARSE_FAILED,
+            events=self._active_runtime_events,
+            player=player.name,
+            match_id=turn_context.match_id,
+            turn_number=turn_context.turn_number,
+            parse_result={
+                "success": parse_result.success,
+                "error": parse_result.error,
+                "raw_response": parse_result.raw_response,
+                "reasoning": parse_result.reasoning,
+                "metadata": parse_result.metadata,
+                "candidates": parse_result.metadata.get("candidates", []),
+            },
+            raw_response=parse_result.raw_response,
+            policy_outcome=policy.value,
+            prompt_text=getattr(parse_result, "prompt_text", ""),
+            prompt_blocks=getattr(parse_result, "prompt_blocks", []),
+            response_text=parse_result.raw_response,
+        )
+
+        if self.logger:
+            self.logger.warning(
+                f"Parse failure for {player.name} at turn {turn_context.turn_number}. "
+                f"Error: {parse_result.error}. Policy: {policy.value}"
+            )
+
+        return policy
 
     def emit_turn(
         self,
@@ -1069,11 +1121,10 @@ class _MatchWorker:
                 event_payload[key] = copy.deepcopy(value)
 
         # Emit to spectators on isolated bus
-        self.event_bus.emit(event_type, **event_payload)
+        emitted_event = self.event_bus.emit(event_type, **event_payload)
 
-        # Capture replay-ready event (with original Player/Game objects + context for spectator replay)
-        # Capture current event bus context (match_id, phase_index, etc.)
-        event_context = dict(self.event_bus._base_context)
+        # Capture replay-ready event with the original emission context (including timestamps).
+        event_context = dict(emitted_event.context or {})
         self.replay_events.append((event_type, event_payload, event_context))
 
         # Capture snapshot for runtime.events list (with sanitized data for recording)
@@ -1226,14 +1277,17 @@ class Console:
         matches: int = 1,
         seed: Optional[int] = None,
         spectators: Optional[List[Spectator]] = None,
+        batch_id: Optional[str] = None,
     ) -> List[MatchResult]:
         """Execute a batch of matches and return MatchResult instances."""
         if self._session_closed:
             raise RuntimeError("Console session already closed")
         if matches <= 0:
             raise ValueError("matches must be >= 1")
+        if batch_id is not None and not batch_id.strip():
+            raise ValueError("batch_id cannot be empty")
 
-        batch_id = self._next_batch_id()
+        batch_id = batch_id or self._next_batch_id()
         base_seed = seed if seed is not None else self.session_state.seed
         batch_ctx = BatchContext(batch_id=batch_id, seed=base_seed, started_at=time.time())
 
@@ -1792,11 +1846,8 @@ class Console:
             for event_type, payload, context in replay_events:
                 # Temporarily restore worker's context (match_id, phase_index, etc.)
                 self.event_bus._base_context.clear()
-                # Exclude timestamps - EventBus.emit will add fresh ones
-                replay_context = {
-                    k: v for k, v in context.items() if k not in ("timestamp", "monotonic_time")
-                }
-                self.event_bus._base_context.update(replay_context)
+                # Preserve worker emission timestamps for faithful observability artifacts.
+                self.event_bus._base_context.update(dict(context))
 
                 # Emit with original payload (spectators get Player/Game objects, not names)
                 self.event_bus.emit(event_type, **payload)
@@ -1933,6 +1984,11 @@ class Console:
         Returns:
             Match metadata dict
         """
+        started_iso = datetime.fromtimestamp(runtime.started_at, tz=timezone.utc).isoformat()
+        ended_iso = datetime.fromtimestamp(
+            runtime.started_at + match_duration, tz=timezone.utc
+        ).isoformat()
+
         return {
             "game": game.__class__.__name__,
             "players": player_names,  # Recorder expects this (ordered list post-ordering)
@@ -1941,6 +1997,9 @@ class Console:
             "player_order_source": player_order_source,  # "console" or "game" (M4)
             "first_player": first_player,  # {"name": str, "index": int} (M4)
             "duration": match_duration,
+            "duration_seconds": match_duration,
+            "started_at": started_iso,
+            "ended_at": ended_iso,
             "handshake_completed": runtime.handshake_completed,
             "seed": runtime.seed,
             "batch_id": batch_ctx.batch_id,
@@ -1950,6 +2009,48 @@ class Console:
             "cost": total_match_cost,
             "schema_version": Recorder.SCHEMA_VERSION,
         }
+
+    def _resolve_first_player_metadata(
+        self,
+        fallback_first_player: Dict[str, Any],
+        ordered_players: List[Player],
+        player_order: List[int],
+        selected_first_player: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Resolve first-player metadata to the actor that actually played first.
+
+        Turn-based mechanics may choose first actor at runtime (after MATCH_START).
+        When available, selected_first_player index is interpreted against ordered_players
+        and mapped back to original index via player_order.
+        """
+        selected = (
+            selected_first_player if selected_first_player is not None else self.first_player_info
+        )
+        if not selected:
+            return dict(fallback_first_player)
+
+        selected_name = selected.get("name")
+        selected_index = selected.get("index")
+        ordered_index: Optional[int] = None
+
+        if isinstance(selected_index, int) and 0 <= selected_index < len(ordered_players):
+            ordered_index = selected_index
+        elif selected_name:
+            for idx, player in enumerate(ordered_players):
+                if player.name == selected_name:
+                    ordered_index = idx
+                    break
+
+        if ordered_index is None:
+            return dict(fallback_first_player)
+
+        original_index = (
+            player_order[ordered_index]
+            if isinstance(player_order, list) and 0 <= ordered_index < len(player_order)
+            else ordered_index
+        )
+        return {"name": ordered_players[ordered_index].name, "index": original_index}
 
     def play_match(
         self,
@@ -1963,6 +2064,7 @@ class Console:
     ) -> MatchResult:
         """Execute a single match."""
         runtime = self._create_match_runtime(seed)
+        self.first_player_info = None
 
         # Determine player order using extracted helper
         ordered_players, player_order, player_order_source, first_player, cost_baseline = (
@@ -2039,13 +2141,18 @@ class Console:
 
             abort_state = copy.deepcopy(getattr(abort_error, "abort_state", {}))
             abort_turn = abort_error.turn_context.turn_number if abort_error.turn_context else 0
+            resolved_first_player = self._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+            )
 
             metadata = self._build_match_metadata(
                 game,
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -2119,13 +2226,18 @@ class Console:
             forfeit_turn = (
                 forfeit_error.turn_context.turn_number if forfeit_error.turn_context else 0
             )
+            resolved_first_player = self._resolve_first_player_metadata(
+                first_player,
+                ordered_players,
+                player_order,
+            )
 
             metadata = self._build_match_metadata(
                 game,
                 player_names,
                 player_order,
                 player_order_source,
-                first_player,
+                resolved_first_player,
                 match_duration,
                 runtime,
                 False,
@@ -2194,6 +2306,11 @@ class Console:
 
         status = self._safe_status(game, final_state)
         match_duration = time.time() - runtime.started_at
+        resolved_first_player = self._resolve_first_player_metadata(
+            first_player,
+            ordered_players,
+            player_order,
+        )
 
         # Build metadata using extracted helper (costs filled after conclusions)
         metadata = self._build_match_metadata(
@@ -2201,7 +2318,7 @@ class Console:
             player_names,
             player_order,
             player_order_source,
-            first_player,
+            resolved_first_player,
             match_duration,
             runtime,
             truncated,

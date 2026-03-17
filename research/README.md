@@ -3,8 +3,13 @@
 This directory hosts standardized, objective experiment results for AgentDeck.
 Each experiment follows the Experiment Package layout defined in `SCHEMA.md`.
 
-Note: The current experiments are reference examples from AgentDeck development.
-Use `_templates/` to start new experiments for your own work.
+Core framework documentation remains in the repository root (`README.md`,
+`CONTRIBUTING.md`, and `specs/`). This `research/` area is intentionally
+experiment-specific.
+
+The baseline branch intentionally ships the **research contract and templates**
+without committed benchmark packages. Use `_templates/` or
+`scripts/research_package.py` to start new experiments.
 
 ## Start Here
 - `SCHEMA.md` - manifest/results schema and required fields
@@ -17,6 +22,7 @@ Use `_templates/` to start new experiments for your own work.
 research/<experiment-id>/
 ├── README.md          # Experiment card (short summary)
 ├── manifest.yaml      # Repro metadata (required)
+├── matrix.yaml        # Benchmark grid definition (optional)
 ├── results.json       # Objective results (generated)
 ├── results.csv        # Match-level results (generated)
 ├── analysis.md        # Interpretation (optional)
@@ -34,6 +40,8 @@ cp -R research/_templates research/YYYY-MM-DD-your-experiment
 ```
 
 2) Fill out `manifest.yaml` and `README.md`.
+   - If applicable, define benchmark cells/phases in `matrix.yaml`.
+   - If `matrix.yaml` exists, use it as source of truth for sampling + cells.
 
 3) Run experiments (recordings should be stored externally).
 
@@ -57,6 +65,14 @@ research package in one step:
 python scripts/research_package.py \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
   --question "Your research question here"
+```
+
+For benchmark grids, opt in to matrix scaffold generation:
+```
+python scripts/research_package.py \
+  --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
+  --question "Your research question here" \
+  --include-matrix
 ```
 
 ## Validation

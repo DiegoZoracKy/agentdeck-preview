@@ -759,5 +759,38 @@ def test_parse_failure_retry_once_exhausted():
         assert match_metadata["policy"] == "abort"
 
 
+def test_parse_failure_event_recorded_in_parallel_for_forfeit_policy():
+    """Parse-failure events must remain observable in parallel worker execution."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = AgentDeckConfig(
+            run_dir=str(tmpdir),
+            max_turns=10,
+            concurrency=2,
+        )
+
+        console = Console(config=config, recorder=Recorder())
+        game = MockGame(parse_failure_policy=ParseFailurePolicy.FORFEIT)
+        players = [
+            MockPlayer(name="Alice", fail_on_turn=1),
+            MockPlayer(name="Bob", fail_on_turn=1),
+        ]
+
+        results = console.run(game, players, matches=2, seed=42)
+        assert len(results) == 2
+
+        session_dir = Path(tmpdir) / console.session_state.session_id
+        records_dir = session_dir / "records"
+        match_files = list(records_dir.glob("match_*.json"))
+        assert len(match_files) == 2
+
+        for match_file in match_files:
+            match_data = json.loads(match_file.read_text(encoding="utf-8"))
+            parse_failed_events = [
+                e for e in match_data["events"] if e["type"] == "player_action_parse_failed"
+            ]
+            assert parse_failed_events, f"Expected parse failure event in {match_file.name}"
+            assert parse_failed_events[0]["data"]["policy_outcome"] == "forfeit"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
