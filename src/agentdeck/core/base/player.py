@@ -128,6 +128,7 @@ class Player(ABC):
             turn_template=turn_template,
             conclusion_template=conclusion_template,
         )
+        self._uses_default_handshake_template = handshake_template is None
 
         # Conversation management (CS2)
         self.conversation_manager: Optional[ConversationManager] = None
@@ -172,11 +173,18 @@ class Player(ABC):
         empty_render = RenderResult(text="", metadata={})
 
         handshake_fmt = self.controller.get_handshake_format_instructions()
+        turn_fmt = self.controller.get_format_instructions()
+        handshake_template_override = None
+        template_id_override = None
+        if self._uses_default_handshake_template and context.metadata:
+            handshake_template_override = context.metadata.get("default_handshake_template")
+            if handshake_template_override:
+                template_id_override = "game_default_handshake"
         return self.prompt_builder.compose(
             phase=LifecyclePhase.HANDSHAKE,
             render_result=empty_render,
-            controller_format=handshake_fmt,  # Legacy template compatibility
-            handshake_controller_format=handshake_fmt,  # New template placeholder
+            controller_format=turn_fmt,
+            handshake_controller_format=handshake_fmt,
             turn_context=None,
             extras={
                 "game_name": context.game_name,
@@ -187,6 +195,8 @@ class Player(ABC):
                     context.metadata.get("player_instructions", "") if context.metadata else ""
                 ),
             },
+            template_override=handshake_template_override,
+            template_id_override=template_id_override,
         )
 
     def execute_handshake(

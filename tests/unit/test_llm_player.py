@@ -10,9 +10,11 @@ import pytest
 from agentdeck.controllers.action_only import ActionOnlyController
 from agentdeck.core.conversation import ConversationManager
 from agentdeck.core.types import (
+    HandshakeContext,
     MatchContext,
     MatchResult,
 )
+from agentdeck.games.examples.fixed_damage.game import FixedDamageGame
 from agentdeck.players import ClaudePlayer, GeminiPlayer, GPTPlayer
 from agentdeck.players.llm_player import LLMPlayer
 from agentdeck.renderers.text_renderer import TextRenderer
@@ -139,6 +141,41 @@ def test_llmplayer_conclude_hides_engine_internal_state_keys():
 
 # Test handshake and decide phases are covered by integration tests
 # Skipped here due to complexity of HandshakeContext/decide() setup
+
+
+def test_llmplayer_handshake_uses_game_default_template_and_frontloads_action_format():
+    controller = ActionOnlyController()
+    controller.bind_game(FixedDamageGame())
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=controller,
+        api_key="dummy",
+    )
+    context = HandshakeContext(
+        match_id="match-1",
+        player_name="Alice",
+        opponent_names=["Bob"],
+        game_name="FixedDamageGame",
+        seed=123,
+        metadata={
+            "game_instructions": "Rules here",
+            "default_handshake_template": (
+                "{game_instructions}\n\n"
+                "Gameplay format:\n{controller_format}\n\n"
+                "{handshake_controller_format}"
+            ),
+        },
+    )
+
+    bundle = player.build_handshake_bundle(context)
+
+    assert bundle.metadata["phase"] == "handshake"
+    assert bundle.metadata["template_id"] == "game_default_handshake"
+    assert "Rules here" in bundle.text
+    assert "Gameplay format:" in bundle.text
+    assert "Respond with: ACTION: <action>" in bundle.text
+    assert "Allowed actions: ATTACK, POTION" in bundle.text
+    assert "Reply with 'OK' if you understand and are ready to begin." in bundle.text
 
 
 # Test clone()

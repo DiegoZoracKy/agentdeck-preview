@@ -278,7 +278,7 @@ Controllers support SPEC-RECORDER v1.0.0 §6.7 prompt metadata requirements by e
 
 **Handshake Phase**:
 1. Console calls `controller.get_handshake_format_instructions()`
-2. Player populates both `{handshake_controller_format}` and `{controller_format}` placeholders with instructions (backward compatibility)
+2. Player populates `{handshake_controller_format}` with `get_handshake_format_instructions()` and `{controller_format}` with `get_format_instructions()` so the handshake can front-load gameplay format instructions while still validating acknowledgement.
 3. Player invokes LLM → raw acknowledgement string
 4. Console calls `controller.validate_handshake(raw, context)` → HandshakeResult
 5. Console enforces policy: `accepted=True` → proceed, `accepted=False` → abort match

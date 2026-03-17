@@ -30,8 +30,10 @@ class MockPlayer(Player):
 
     def get_response(self, prompt: str) -> str:
         """Return predetermined response."""
-        # Handshake phase: detect by checking if prompt mentions game instructions
-        # (handshake template includes game_name and game_instructions)
+        if getattr(self, "_active_phase", None) == "handshake":
+            return "OK"
+
+        # Backward-compatible fallback for direct unit calls without lifecycle state.
         if "You are playing" in prompt or "game_name" in prompt.lower():
             return "OK"  # Valid handshake response
 

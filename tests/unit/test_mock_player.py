@@ -3,8 +3,9 @@ from agentdeck.players.mock import MockPlayer
 
 def test_mock_player_handshake_returns_ok() -> None:
     player = MockPlayer(name="Tester")
+    player._active_phase = "handshake"
 
-    response = player.get_response("You are playing FixedDamageGame. Respond 'OK' when ready.")
+    response = player.get_response("Respond with OK.")
 
     assert response == "OK"
 

@@ -152,11 +152,16 @@ class Game(ABC):
         Example:
             >>> @property
             >>> def default_handshake_template(self) -> str:
-            ...     return "{game_instructions}\\n\\nRespond 'OK' when ready."
+            ...     return (
+            ...         "{game_instructions}\\n\\n"
+            ...         "{controller_format}\\n\\n"
+            ...         "{handshake_controller_format}"
+            ...     )
 
         Placeholders:
             - {game_instructions}: Replaced with self.instructions by PromptBuilder
             - {strategy}: Player-specific strategy hint (if provided)
+            - {controller_format}: Controller's gameplay response format
             - {handshake_controller_format}: Controller's response requirements
         """
 

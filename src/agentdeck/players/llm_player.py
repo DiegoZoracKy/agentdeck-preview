@@ -118,7 +118,11 @@ class LLMPlayer(Player, ABC):
         renderer = copy.deepcopy(self.renderer) if self.renderer else None
 
         # Extract templates from PromptBuilder (private attributes by design)
-        handshake_template = getattr(self.prompt_builder, "_handshake_template", None)
+        handshake_template = (
+            None
+            if getattr(self, "_uses_default_handshake_template", False)
+            else getattr(self.prompt_builder, "_handshake_template", None)
+        )
         turn_template = getattr(self.prompt_builder, "_turn_template", None)
         conclusion_template = getattr(self.prompt_builder, "_conclusion_template", None)
 

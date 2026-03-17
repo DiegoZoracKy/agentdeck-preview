@@ -362,6 +362,8 @@ def test_HT2_handshake_includes_instructions():
 
     # Template should have placeholder for game instructions
     assert "{game_instructions}" in template or len(game.instructions) > 0
+    assert "{controller_format}" in template
+    assert "{handshake_controller_format}" in template
 
 
 def test_HT3_handshake_mandatory():

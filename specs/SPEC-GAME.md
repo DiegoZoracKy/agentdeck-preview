@@ -555,7 +555,7 @@ class TutorialGame(Game):
   - Required property on `Game` returning a template string.
   - Used when player doesn't provide custom `handshake_template`.
   - Should contain game instructions, rules, and response format.
-  - Example: `"{game_instructions}\n\nRespond 'OK' to begin."`
+  - Example: `"{game_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"`
   - Rationale: Front-loading instructions in handshake reduces token cost in turn prompts (LLM remembers via conversation history).
 
 ## 9. Testing Strategy

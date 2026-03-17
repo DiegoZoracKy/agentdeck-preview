@@ -153,7 +153,12 @@ Strategy Tips:
         Returns:
             Template string with placeholders for PromptBuilder
         """
-        return "{game_instructions}\n\nRespond 'OK' when you're ready to begin."
+        return (
+            "{game_instructions}\n\n"
+            "When gameplay begins, use this response format:\n"
+            "{controller_format}\n\n"
+            "{handshake_controller_format}"
+        )
 
     def on_action_parse_failure(
         self, player: str, error: str, state: Dict[str, Any]

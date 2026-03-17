@@ -129,7 +129,12 @@ Information Level: {self.information_level}
         Returns:
             Template string with placeholders for PromptBuilder
         """
-        return "{game_instructions}\n\nRespond 'OK' when you're ready to begin the match."
+        return (
+            "{game_instructions}\n\n"
+            "When gameplay begins, use this response format:\n"
+            "{controller_format}\n\n"
+            "{handshake_controller_format}"
+        )
 
     # ========================================================================
     # Required Methods

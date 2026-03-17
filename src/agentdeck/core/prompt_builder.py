@@ -90,9 +90,10 @@ class PromptBuilder:
         "You are playing {game_name}.\n\n"
         "{game_instructions}\n\n"
         "{player_instructions}\n\n"
+        "{controller_format}\n\n"
         "{handshake_controller_format}"
     )
-    DEFAULT_TURN = "{game_view}\n\n{controller_format}"
+    DEFAULT_TURN = "{game_view}"
     DEFAULT_CONCLUSION = (
         "=== Match Concluded ===\n\n" "{outcome}\n\n" "Final state:\n{game_view}"
     )
@@ -260,6 +261,8 @@ class PromptBuilder:
         handshake_controller_format: Optional[str] = None,
         turn_context: Optional[TurnContext] = None,
         extras: Optional[Dict[str, Any]] = None,
+        template_override: Optional[str] = None,
+        template_id_override: Optional[str] = None,
     ) -> PromptBundle:
         """
         Render prompt for given phase with metadata capture.
@@ -278,6 +281,10 @@ class PromptBuilder:
             handshake_controller_format: Handshake controller format instructions
             turn_context: Optional turn execution metadata
             extras: Additional researcher-provided data (optional placeholders)
+            template_override: Optional explicit template string for internal
+                callers that need per-call template selection.
+            template_id_override: Optional template identifier to pair with
+                ``template_override`` metadata.
 
         Returns:
             PromptBundle with rendered text, blocks, and metadata
@@ -328,7 +335,11 @@ class PromptBuilder:
             )
 
         # Select template based on phase (CD3)
-        template, template_id = self._select_template(phase)
+        if template_override is not None:
+            template = template_override
+            template_id = template_id_override or phase.value
+        else:
+            template, template_id = self._select_template(phase)
 
         # Build context for provider evaluation
         turn_number = turn_context.turn_number if turn_context else 0

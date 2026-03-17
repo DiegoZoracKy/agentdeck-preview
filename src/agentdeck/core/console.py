@@ -697,6 +697,9 @@ class _MatchWorker:
                 metadata={
                     "game_instructions": getattr(self.game, "instructions", ""),
                     "allowed_actions": getattr(self.game, "allowed_actions", []),
+                    "default_handshake_template": getattr(
+                        self.game, "default_handshake_template", None
+                    ),
                 },
             )
             # Bind controller to game before handshake (GB1)
@@ -2990,6 +2993,7 @@ class Console:
                 metadata={
                     "game_instructions": getattr(game, "instructions", ""),
                     "allowed_actions": getattr(game, "allowed_actions", []),
+                    "default_handshake_template": getattr(game, "default_handshake_template", None),
                 },
             )
             # Bind controller to game before handshake (GB1)

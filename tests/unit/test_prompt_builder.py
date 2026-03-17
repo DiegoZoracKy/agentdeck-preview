@@ -537,7 +537,7 @@ def test_default_templates():
     )
     assert "Instructions here" in bundle_hs.text
     assert "Poker" in bundle_hs.text
-    assert bundle_hs.text.count("HANDSHAKE_FORMAT") == 1
+    assert "\n\nFORMAT\n\nHANDSHAKE_FORMAT" in bundle_hs.text
     assert "\\n" not in bundle_hs.text
     assert "\n\n" in bundle_hs.text
 
@@ -547,9 +547,8 @@ def test_default_templates():
         render_result=RenderResult(text="Game view", metadata=None),
         controller_format="FORMAT",
     )
-    assert "Game view" in bundle_turn.text
+    assert bundle_turn.text == "Game view"
     assert "\\n" not in bundle_turn.text
-    assert "\n\nFORMAT" in bundle_turn.text
 
     # Conclusion default
     bundle_conc = builder.compose(
