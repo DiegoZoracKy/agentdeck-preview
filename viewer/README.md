@@ -1,6 +1,8 @@
 # AgentDeck Replay Viewer
 
-Browser-based FFVI-style replay viewer for AgentDeck match records.
+Browser-based replay viewer for AgentDeck match records. This is a beta offline
+surface: useful for inspecting and sharing replays, but secondary to the record
+contract itself.
 
 ## Quick Start
 
@@ -62,7 +64,7 @@ viewer/index.html?match=http://example.com/match.json
 
 The viewer supports AgentDeck match records with schema version **1.3+**.
 The default renderer targets **FixedDamageGame** records; other games require
-registering a custom renderer.
+registering a custom renderer. The current viewer is offline playback only.
 
 Record files are generated automatically when running matches with AgentDeck:
 

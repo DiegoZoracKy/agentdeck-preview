@@ -70,3 +70,15 @@ def test_concurrency_works_with_other_config_fields():
     assert config.run_dir == "custom_runs"
     assert config.max_turns == 500
     assert config.concurrency == 4
+
+
+def test_max_turns_validation_rejects_zero():
+    """Verify max_turns=0 raises ValueError."""
+    with pytest.raises(ValueError, match="max_turns must be >= 1"):
+        AgentDeckConfig(max_turns=0)
+
+
+def test_max_turns_validation_rejects_negative():
+    """Verify negative max_turns raises ValueError."""
+    with pytest.raises(ValueError, match="max_turns must be >= 1"):
+        AgentDeckConfig(max_turns=-1)

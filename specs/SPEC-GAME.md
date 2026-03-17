@@ -1,8 +1,8 @@
-# SPEC-GAME: Game Author Contract v0.7.0
+# SPEC-GAME: Game Author Contract v0.7.1
 
 > Status: Final
-> Version: 0.7.0
-> Last Updated: 2026-02-03
+> Version: 0.7.1
+> Last Updated: 2026-03-17
 > Base Version: 0.6.0 (Final)
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Claude, Diego Zoracky, Codex
@@ -77,7 +77,7 @@
 - Return: JSON-serialisable dict consumed by renderers and prompt builders.
 - MUST: Avoid mutating the supplied `game_state`; MUST use deep copy or derived structures when enrichment is needed.
 - MUST: Respect `information_level` configuration ("full", "partial", or game-specific levels).
-- MUST: Explicitly document any game-specific public signals that remain visible in partial modes (e.g., global `last_action` history).
+- MUST: Explicitly document any game-specific public signals that remain visible in partial modes (e.g., global `last_action` history or a public opponent `last_action` field).
 - SHOULD: Include narrative/tutorial content by injecting into the returned view when required.
 
 ### validate_state(game_state: Dict[str, Any]) -> None
@@ -144,7 +144,7 @@ class SimultaneousAuctionGame(Game):
 
 ### get_player_order(players: List[Player], *, rng: RandomGenerator, match_context: MatchContext) -> Optional[List[Player]]
 - **Role**: Override to provide custom player ordering logic. Determines which players go first in a match.
-- **Default Behavior**: Returns `None`, indicating no preference. Console applies fair randomization (Fisher-Yates shuffle using match RNG).
+- **Default Behavior**: Returns `None`, indicating no preference. Console applies its configured fairness policy (`pairing_policy` / `first_player_policy`).
 - **When to Override**:
   - Auction/bidding systems (highest bidder goes first)
   - Asymmetric roles (attacker vs defender assignment)
@@ -152,7 +152,7 @@ class SimultaneousAuctionGame(Game):
   - Fixed role assignments (player order matters for game balance)
 - Accept: Original player list as provided to `Console.run()`, match-specific RNG for reproducibility, match context with seed/match_id/previous_match_result.
 - Return:
-  - `None`: Console applies default fair ordering (Fisher-Yates shuffle) — **recommended for 99% of games**
+  - `None`: Console applies default fair ordering from session configuration — **recommended for 99% of games**
   - `List[Player]`: Custom ordering; Console validates and uses as-is (MUST be same player instances, same length, no duplicates)
 - MUST: If returning custom list, include exact same `Player` instances from input (no additions, removals, or duplicates). Console validates and raises `ValueError` on mismatch.
 - MUST: Use provided `rng` for any random decisions (maintains reproducibility). Do NOT create own `RandomGenerator` instance.
@@ -162,9 +162,9 @@ class SimultaneousAuctionGame(Game):
 
 **Examples**:
 ```python
-# Example 1: Default (no override needed) - Console randomizes
+# Example 1: Default (no override needed) - Console applies configured fairness
 class TicTacToe(Game):
-    pass  # get_player_order() returns None → Console applies Fisher-Yates shuffle
+    pass  # get_player_order() returns None → Console applies session fairness policy
 
 # Example 2: Auction-based ordering
 class AuctionGame(Game):
@@ -407,15 +407,15 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 ### 5.7 Information Visibility (IV)
 18. **IV1**: Games MAY implement `information_level` parameter (e.g., "full", "partial") to control what players observe via `get_view()`.
 19. **IV2**: When `information_level="full"`, `get_view()` SHOULD include all observable information (opponent stats, public state, etc.).
-20. **IV3**: When `information_level="partial"`, `get_view()` SHOULD include only player's own stats and observable actions (no opponent private data).
+20. **IV3**: When `information_level="partial"`, `get_view()` SHOULD include only player's own stats and observable public actions (for example opponent `last_action` when the game defines that as public), and MUST exclude opponent private state such as hidden HP or inventory.
 21. **IV4**: Games MAY define custom information levels beyond "full"/"partial" for research purposes.
 22. **IV5**: `information_level` MUST be captured in game configuration metadata for reproducibility.
 
 ### 5.8 Player Ordering (PO)
-23. **PO1**: Games MAY override `get_player_order()` to customize pre-match player ordering; default returns `None` (Console applies fairness via Fisher-Yates shuffle).
+23. **PO1**: Games MAY override `get_player_order()` to customize pre-match player ordering; default returns `None` (Console applies session fairness policy).
 24. **PO2**: Games MUST return same `Player` instances from input if overriding (no additions, removals, or duplicates). Console validates and raises `ValueError` on mismatch.
 25. **PO3**: Games MUST use provided `rng` parameter for any random decisions in `get_player_order()` (maintains reproducibility). Games MUST NOT create own `RandomGenerator` instances.
-26. **PO4**: When `get_player_order()` returns `None`, Console MUST apply Fisher-Yates shuffle using match-specific RNG (eliminates first-player bias, guarantees reproducibility).
+26. **PO4**: When `get_player_order()` returns `None`, Console MUST apply its configured fairness policy using match-specific context and RNG where needed (eliminates hidden ordering drift and preserves reproducibility).
 
 ### 5.9 Mechanic Execution (ME)
 27. **ME1**: `run(runtime, players)` MUST be the only entry point used by the console. Games MUST treat `runtime` as the exclusive gateway for event emission, recorder writes, RNG usage, parse-failure handling, and state validation.
@@ -445,7 +445,7 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 
 ## 6. Data Flow & Interaction
 - **Session init**: Facade → Console (game, players, seed) → game.setup(players) → canonical `game_state`.
-- **Player ordering**: Console.run() → **game.get_player_order(players, rng=match_rng, match_context)** → returns None or custom list → Console applies shuffle or validates custom order → records `player_order`, `player_order_source`, `first_player` in metadata.
+- **Player ordering**: Console.run() → **game.get_player_order(players, rng=match_rng, match_context)** → returns None or custom list → Console applies configured fairness policy or validates custom order → records `player_order`, `player_order_source`, `first_player`, and fairness metadata.
 - **Handshake phase** *(updated in v0.7.0)*: Console._run_handshake() → Player.build_handshake_bundle() → PLAYER_HANDSHAKE_START → Player.execute_handshake() → Controller.validate_handshake() → **game.on_handshake_complete(state, player, handshake_result)** → updated state → PLAYER_HANDSHAKE_COMPLETE event → repeat for each player → MATCH_START.
 - **Match execution**: Console._play_match() → constructs `MatchRuntime` → **game.run(runtime, ordered_players)** → mechanic helper (TurnLoop, etc.) → (final_state, events, truncated).
 - **Turn sequencing**: TurnLoop._execute_turn() → **game.get_current_player(game_state, players)** → identify acting player → proceed with turn.
@@ -568,7 +568,7 @@ class TutorialGame(Game):
 | Domain events | OB1-OB2 | Emit sample events and confirm recorder logs metadata; ensure premature calls no-op. |
 | Validation guardrails | V1-V2 | Trigger invalid transitions; expect ValueError without state mutation. |
 | Handshake template | HT1-HT3 | Assert game provides default_handshake_template; verify console runs handshake before turn 1. |
-| Player ordering | PO1-PO4 | Run same seed twice, assert identical player_order metadata; test custom override validation (reject invalid lists); verify default None triggers Console shuffle. |
+| Player ordering | PO1-PO4 | Run same seed twice, assert identical player_order metadata; test custom override validation (reject invalid lists); verify default None triggers configured console fairness. |
 | Hook stability | HS1-HS5 | Verify FixedDamageGame produces identical results (winner, turns, events) after hook additions; assert default hooks return unchanged inputs. |
 | Lifecycle hooks | LH1-LH5 | Trigger forfeit → verify `on_match_forfeited()` called with emitter alive; verify `on_handshake_complete()` called after validation; verify conclusion hooks run only when policy-enabled and player is selected. |
 | Typed contracts | TC1-TC3 | Assert `HandshakeResult.metadata` is always dict (never None); verify safe access without defensive checks. |
@@ -581,7 +581,7 @@ class TutorialGame(Game):
 - **Always-on handshake**: LLMs need instructions to play effectively. Front-loading in handshake reduces turn prompt costs (63% token savings vs repeating instructions every turn). No policy enum needed - handshake is mandatory.
 - **run() delegation pattern**: Centralizing mechanics inside `game.run(runtime, players)` keeps the console generic while ensuring games use the shared runtime for events, recorder, RNG, and parse-failure handling. The stock `TurnBasedGame` implementation delegates to TurnLoop so all sequential games follow an identical execution lifecycle.
 - **get_current_player() override point**: Provides clean extension for custom turn order (auction bidding, simultaneous phases) while maintaining round-robin default for 90% of games. TurnLoop validates returned player name prevents runtime errors from mismatched names.
-- **get_player_order() optional hook**: Console is the source of fairness by default (Fisher-Yates shuffle), removing burden from 99% of games. Games override only when ordering is semantically meaningful (auction winners, asymmetric roles, previous-winner advantage). Optional return (None vs List) makes intent explicit and keeps game authors from feeling obligated to implement custom logic.
+- **get_player_order() optional hook**: Console is the source of fairness by default, removing burden from 99% of games. Games override only when ordering is semantically meaningful (auction winners, asymmetric roles, previous-winner advantage). Optional return (None vs List) makes intent explicit and keeps game authors from feeling obligated to implement custom logic.
 - **on_match_forfeited() hook** *(v0.7.0)*: Parse failures are terminal conditions that should be recorded accurately. Allowing games to enrich state (e.g., `resolution_status="invalid_response"`) enables filtering/analysis in benchmark datasets. Keeping emitter alive enables diagnostic events for debugging format adherence issues.
 - **Conclusion phase policy** *(v0.7.0)*: Post-match reflections capture valuable behavioral data (AI self-assessment, failure attribution, satisfaction prediction) while keeping games decoupled. Console policy controls whether conclusions run and who concludes; game hooks (requires/prompt/store) are optional overlays for domain-specific prompts and state capture.
 - **on_handshake_complete() invocation** *(v0.7.0)*: This was a bug - the hook existed in spec but Console never called it. Fixing enables games to extract metadata (personas, initial strategies) from handshake responses, critical for behavioral research (e.g., Support CS persona inference).

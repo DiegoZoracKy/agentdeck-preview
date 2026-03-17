@@ -1,8 +1,8 @@
 # SPEC-CONSOLE: Execution Engine Contract
 
 > Status: Final
-> Version: 0.6.0
-> Last Updated: 2026-02-03
+> Version: 0.7.1
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Codex, Claude
 > Audience: Core contributors, engine implementers
@@ -40,13 +40,13 @@ Console operates at two architectural layers, both mechanics-agnostic:
 
 - **Session Lifecycle**: Resolve the session seed, prepare directories, create `SessionState`, bind recorder/spectators, emit `SESSION_START` / `SESSION_END`, stamp `finished_at`, and guarantee idempotent cleanup.
 - **Execution Lifecycle**: For every `run` call emit `BATCH_START` / `BATCH_END`, derive base seeds, loop through requested matches (including size-1 runs), and scope execution spectators.
-- **Player Order Management**: Console is the source of fairness by default. Before each match, call `game.get_player_order(players, rng=match_rng, match_context)`. When game returns `None` (default), apply Fisher-Yates shuffle using match RNG. When game returns custom list, validate (same players, no duplicates, correct length) and raise `ValueError` on mismatch. Record effective order and source ("console" or "game") in all observability artifacts (MatchResult.metadata, events, logs, recorder). Log player order at DEBUG level (see §6.5 invariants).
+- **Player Order Management**: Console is the source of fairness by default. Before each match, call `game.get_player_order(players, rng=match_rng, match_context)`. When game returns `None` (default), apply console fairness policy using `AgentDeckConfig.pairing_policy` and `AgentDeckConfig.first_player_policy`. `paired_side_swap` MUST reuse the same match seed for each paired AB/BA run and MUST swap sides only after the base order is chosen. When game returns custom list, validate (same players, no duplicates, correct length) and raise `ValueError` on mismatch; non-default console fairness policies are incompatible with custom game ordering. Record effective order, actual first actor, and selected fairness policy in observability artifacts (MatchResult.metadata, events, logs, recorder). Log player order at DEBUG level (see §6.5 invariants).
 - **Match Orchestration**: Manage match-level lifecycle (handshakes → MATCH_START → `game.run(runtime, players)` → conclusion phase → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
 - **Conclusion Policy**: Apply the session conclusion policy to decide whether the conclusion phase runs and which players conclude. Game hooks may override prompts/state for a single player, but do not gate conclusion execution.
 - **Handshake Management**: Run handshake build+execute before turn 1, emit `PLAYER_HANDSHAKE_START` using the exact prompt bundle, validate acknowledgements via controller, and abort on rejection.
 - **Runtime Provisioning**: Create a fresh `MatchRuntime` per match exposing recorder, event emitter, RNG forks, parse-failure helper, and validation utilities so mechanics stay decoupled from console internals (see `SPEC-MATCH-RUNTIME.md`).
 - **Parse Failure Handling** (new in v0.5.0): When `player.decide()` raises `ActionParseError`, the console MUST capture the embedded `ParseResult`, emit a `PLAYER_ACTION_PARSE_FAILED` event, record the failure, and invoke the game's parse-failure policy hook. Console interprets the returned `ParseFailurePolicy` (abort, skip turn, forfeit, retry) and applies it deterministically.
-- **Deterministic Randomness**: Maintain session-level RNG state, derive per-match RNGs deterministically, and persist seeds in ALL observability artifacts (events, logs, recorder, MatchResult).
+- **Deterministic Randomness**: Maintain session-level RNG state, derive per-match RNGs deterministically, and persist seeds in ALL observability artifacts (events, logs, recorder, MatchResult). Pairing policies that promise side-swap parity MUST also preserve pair-level seed reuse.
 - **EventBus Lifecycle**: Create, configure, and inject EventBus into components. Subscribe/unsubscribe observers as needed. MUST NOT implement routing logic (EventBus internal responsibility).
 - **Event Emission Boundaries**:
   - **Console emits**: `SESSION_*`, `BATCH_*`, `MATCH_START`, `PLAYER_CONCLUSION`, `MATCH_END`, `CLEANUP_*` (orchestration lifecycle)
@@ -144,7 +144,7 @@ Execute batch of matches and return results.
   2. Emit `BATCH_START` (with `batch_id`, `matches_planned`, seed info).
   3. For each match index:
      - Derive match seed deterministically, build `MatchContext`.
-     - Resolve effective player order via `game.get_player_order`.
+     - Resolve effective player order via `game.get_player_order`, falling back to configured console fairness policy when the game returns `None`.
      - Execute handshakes before `MATCH_START` (build prompt → emit `PLAYER_HANDSHAKE_START` → execute LLM call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`).
      - Emit `MATCH_START` after successful handshake completion.
      - Create `MatchRuntime(console=self, game=game, match_context=ctx, recorder=..., logger=..., rng=match_rng)` and call `game.run(runtime, ordered_players)`.
@@ -230,14 +230,14 @@ Cleanup session and emit SESSION_END (context manager protocol).
 9. **X4**: MUST return a list of `MatchResult` objects whose length equals the requested `matches` count when the run completes successfully.
 
 ### 6.3 Player Order (PO)
-10. **PO1**: Before each match, console MUST call `game.get_player_order(players, rng, match_context)`; when it returns `None`, console MUST apply Fisher-Yates shuffle using the match RNG.  
+10. **PO1**: Before each match, console MUST call `game.get_player_order(players, rng, match_context)`; when it returns `None`, console MUST apply the configured fairness policy. `first_player_policy="random"` uses match-RNG shuffling, `fixed` pins the configured original index first, and `alternating` rotates the roster by match index. `pairing_policy="paired_side_swap"` overlays AB/BA swapping for exactly two players after the base order is chosen.  
 11. **PO2**: When a custom list is returned, console MUST validate it contains the exact same player instances (no additions/removals/duplicates) and raise `ValueError` on mismatch.  
-12. **PO3**: Console MUST persist the effective order, order source ("console" vs "game"), and first player in `MatchResult.metadata` and emitted events.  
+12. **PO3**: Console MUST persist the effective order, order source ("console" vs "game"), first player, and selected fairness policy in `MatchResult.metadata` and emitted events.  
 13. **PO4**: Consoles MUST log player-order decisions at DEBUG level to aid researchers (seed, permutation, custom ordering rationale).
 
 ### 6.3 Deterministic Randomness (R)
 10. **R1**: MUST resolve a session seed (constructor argument > config.seed) and generate one from system entropy when none is supplied, persisting it in `SessionState.seed`.
-11. **R2**: MUST resolve a base seed for each run (`run(seed=...)` > session seed) and derive per-match seeds deterministically (monotonic counter offset) when a base seed exists.
+11. **R2**: MUST resolve a base seed for each run (`run(seed=...)` > session seed) and derive per-match seeds deterministically when a base seed exists. Default derivation is `base_seed + match_index`; `pairing_policy="paired_side_swap"` MUST instead reuse `base_seed + pair_index` for each AB/BA pair.
 12. **R3**: MUST fall back to entropy-derived RNG when no base seed is available while still recording the actual seed chosen.
 13. **R4**: MUST persist the actual seed used for each match in ALL observability artifacts: MatchContext (runtime access), MatchResult (researcher access), MATCH_START/END event payloads (spectators/replay), Logger output (diagnostics), Recorder files (replay/analysis), BATCH_END aggregate metadata (batch-level traceability).
 
@@ -266,7 +266,7 @@ Cleanup session and emit SESSION_END (context manager protocol).
 30. **M1**: MUST populate `MatchResult.metadata` with game name, player names, duration, turn count, and truncation info.
 31. **M2**: MUST reset conversation managers and player logging hooks before each match to avoid leakage across matches.
 32. **M3**: Console MUST record player order metadata in ALL observability artifacts: MatchResult.metadata["player_names"] (ordered list post-ordering), MatchResult.metadata["player_order"] (0-based indices showing original positions), MATCH_START/END event payload (player_names ordered list), Logger output (ordered player list in match start/end logs), Recorder files (ordered player list). Rationale: Player order is objective data. Some mechanics may use this order directly, while others may select the first acting player at runtime. Console records both ordering and first-player metadata for analysis.
-33. **M4** (Player Ordering): Console MUST call `game.get_player_order(players, rng=match_rng, match_context)` before each match. If game returns `None`, Console MUST apply Fisher-Yates shuffle using match RNG. If game returns custom list, Console MUST validate (same `Player` instances, same length, no duplicates) and raise `ValueError` on mismatch. Console MUST record in `MatchResult.metadata` and events: `player_order` (List[int] of original indices, e.g., [1, 0, 2] means original player 1 is first in ordered list), `player_order_source` (Literal["console", "game"]), and `first_player` (Dict with {"name": str, "index": int}). `first_player` MUST reflect the actual first acting player when runtime selection metadata is available (for example, turn-based `_first_player_idx`), otherwise it MUST fall back to the first player in ordered list. Console MUST log player order at DEBUG level without exposing to INFO/console output.
+33. **M4** (Player Ordering): Console MUST call `game.get_player_order(players, rng=match_rng, match_context)` before each match. If game returns `None`, Console MUST apply the configured fairness policy. If game returns custom list, Console MUST validate (same `Player` instances, same length, no duplicates) and raise `ValueError` on mismatch. Console MUST record in `MatchResult.metadata` and events: `player_order` (List[int] of original indices, e.g., [1, 0, 2] means original player 1 is first in ordered list), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int, "ordered_index": int}), and `fairness_policy` (selected pairing / first-player policy metadata). `first_player` MUST reflect the actual first acting player when runtime selection metadata is available; otherwise it MUST fall back to the first player in ordered list. Console MUST log player order at DEBUG level without exposing to INFO/console output.
 
 ### 6.8 Spectator & Recorder Integration (P)
 33. **P1**: MUST subscribe recorder and all spectator instances prior to emitting `SESSION_START`.
@@ -325,16 +325,16 @@ This layered approach prevents silent failures while maintaining separation of c
   2. Resolve base seed, allocate batch identifier, subscribe execution spectators, emit `BATCH_START`.
   3. **Bind controllers to game**: For all players, call `player.controller.bind_game(game)` to provide `allowed_actions` for validation (per SPEC-CONTROLLER v1.3.0 GB1).
   4. For each match:
-     a. Derive per-match seed (base_seed + match_index)
+     a. Derive per-match seed deterministically from the configured fairness mode (`base_seed + match_index` by default, `base_seed + pair_index` for paired side-swap)
      b. Create `MatchContext` with seed, match_id, RNG, and `previous_match_result` (None for first match, previous MatchResult for subsequent matches in batch)
      c. **Determine player order**: Call `game.get_player_order(players, rng=match_rng, match_context)`
-        - If returns `None`: Apply Fisher-Yates shuffle using match RNG
+        - If returns `None`: Apply configured console fairness policy
         - If returns `List[Player]`: Validate (same players, correct length, no duplicates), raise `ValueError` on failure
-        - Record `player_order` (original indices), `player_order_source` ("console" or "game"), `first_player` (name + index)
+        - Record `player_order` (original indices), `player_order_source` ("console" or "game"), `first_player` (name + original index + ordered_index), and `fairness_policy`
         - Log at DEBUG level: "Player order determined: [names] (source: console/game)"
      d. Execute handshake phase with ordered players (build prompt → emit `PLAYER_HANDSHAKE_START` with prompt_text/prompt_blocks + controller_format → execute LLM call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`, update `MatchContext.handshake_completed`)
      e. Reset player conversations/logging
-     f. Emit `MATCH_START` (with seed, ordered player_names, player_order, player_order_source, first_player)
+     f. Emit `MATCH_START` (with seed, ordered player_names, player_order, player_order_source, first_player, fairness_policy)
      g. **Create MatchRuntime & delegate to mechanic**:
         ```python
         match_runtime = MatchRuntime(
@@ -347,7 +347,7 @@ This layered approach prevents silent failures while maintaining separation of c
         )
         final_state, mechanic_events, truncated = game.run(match_runtime, ordered_players)
         ```
-     h. Collect metadata (seed, player_names, player_order, player_order_source, first_player, handshake status, turn count, truncation, duration)
+     h. Collect metadata (seed, player_names, player_order, player_order_source, first_player, fairness_policy, handshake status, turn count, truncation, duration)
      i. Execute conclusion phase per policy (emit `PLAYER_CONCLUSION` for selected players)
      j. Emit `MATCH_END` (with same metadata as MATCH_START for correlation)
   5. Emit `BATCH_END` with accumulated results and seeds_used list, detach execution spectators, return list of `MatchResult`.
@@ -409,7 +409,7 @@ try:
     assert "player_names" in batch[0].metadata  # Ordered list (may be shuffled)
     assert "player_order" in batch[0].metadata  # Original indices, e.g., [1, 0]
     assert batch[0].metadata["player_order_source"] in ["console", "game"]
-    assert "first_player" in batch[0].metadata  # {"name": str, "index": int}
+    assert "first_player" in batch[0].metadata  # {"name": str, "index": int, "ordered_index": int}
 finally:
     console.close()
 ```
@@ -438,7 +438,7 @@ finally:
 - **EventBus integration**: Console owns EventBus instance but delegates routing logic to EventBus component, keeping spectators decoupled while preserving ordering.
 - **Null Object Pattern**: NullLogger and NullRecorder eliminate conditional logic, strengthen contracts, and simplify implementation/testing.
 - **Player Order Recording**: Always recording player order (not "when applicable") provides objective data for all game types without interpreting semantics.
-- **Player Order Fairness**: Console is the default source of fairness (Fisher-Yates shuffle), removing burden from game authors. Games override `get_player_order()` only when ordering is semantically meaningful (auction winners, asymmetric roles, state-based advantage). Recording `player_order_source` metadata enables researchers to distinguish console randomization from game-controlled ordering for analysis purposes.
+- **Player Order Fairness**: Console is the default source of fairness, removing burden from game authors. Games override `get_player_order()` only when ordering is semantically meaningful (auction winners, asymmetric roles, state-based advantage). Recording `player_order_source`, `first_player`, and `fairness_policy` enables researchers to distinguish console-managed fairness from game-controlled ordering for analysis purposes.
 
 ## 12. Open Questions / Future Work
 - Should consoles expose explicit health metrics (queue lengths, lag) for long-running sessions?

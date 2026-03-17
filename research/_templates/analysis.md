@@ -8,10 +8,16 @@
 - Win rates: {}
 - Topline winner: TBD
 - First player in first recorded match: TBD
+- Strict contract rate: TBD
+- Artifact validation: TBD
 - Average turns: TBD
 - Average duration (s): TBD
 - Total cost: TBD
 <!-- AUTO_FACTS:END -->
+
+Interpretation note: use `first_player` for position-effect claims. `player_order`
+is the effective roster order after scheduling, while `first_player` is the actor
+who actually took the first turn.
 
 ## Executive Summary
 - Primary finding:

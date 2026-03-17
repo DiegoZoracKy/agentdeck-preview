@@ -233,6 +233,8 @@ class Recorder:
                 turn_number = turn_context.get("turn_number")
             elif isinstance(metadata.get("turn_context"), dict):
                 turn_number = metadata["turn_context"].get("turn_number")
+        if phase in {"handshake", "conclusion"} or turn_number == 0:
+            turn_number = None
 
         prompt_payload: Dict[str, Any] = {
             "phase": phase,
@@ -342,6 +344,7 @@ class Recorder:
         players,
         matches: int,
         context: Optional[EventContext] = None,
+        **kwargs: Any,
     ) -> None:
         started_at = self._context_iso_timestamp(context) or datetime.now(timezone.utc).isoformat()
         metadata = {
@@ -353,6 +356,8 @@ class Recorder:
             "git_info": self._get_git_info(),
             "configuration": self._get_configuration(game, players),
         }
+        if kwargs:
+            metadata.update(copy.deepcopy(kwargs))
         self.current_batch = BatchRecording(
             batch_id=batch_id,
             schema_version=self.BATCH_SCHEMA_VERSION,
@@ -403,6 +408,20 @@ class Recorder:
                 "module": game.__class__.__module__,
             },
         }
+        match_metadata = {
+            key: copy.deepcopy(value)
+            for key, value in kwargs.items()
+            if key
+            in {
+                "seed",
+                "player_order",
+                "player_order_source",
+                "first_player",
+                "fairness_policy",
+            }
+        }
+        if match_metadata:
+            metadata["match"] = match_metadata
 
         if self.session:
             metadata.setdefault(

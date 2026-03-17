@@ -1,8 +1,8 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
 > Status: Final
-> Version: 1.3.0
-> Last Updated: 2026-02-23
+> Version: 1.3.1
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (schema v1.3 event enrichment)
 > Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers
@@ -263,22 +263,22 @@ Load match JSON from disk and normalize structure.
 9. **SV3**: MUST validate against the exact current match schema version (`1.3`) in `load_match()` (no major-version wildcard acceptance).
 
 ### 6.4 Metadata Completeness (MC)
-10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `duration_seconds`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices), `player_order_source` (console/game), `first_player` (name + index; actual first actor when available, else first ordered player).
+10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `duration_seconds`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices in effective order), `player_order_source` (console/game), `first_player` (actual first actor with original `index` and `ordered_index`), and `fairness_policy` when supplied by Console.
 10a. **MC1a**: Match payload MUST include top-level `batch_id` equal to `metadata.batch_id`.
 10b. **MC1b**: Match payload MUST expose top-level `started_at`, `ended_at`, and `duration_seconds` aligned with metadata and batch match refs for completed matches.
-10c. **MC1c**: `player_order` captures roster order before runtime first-player selection; `first_player` captures the actual first actor when runtime selects one.
+10c. **MC1c**: `player_order` MUST be stored as the list of original input indices in effective play order (for example, `[1, 0]` means original player 1 is first, original player 0 is second). `first_player` captures the actual first actor for the recorded match and MUST include both the original `index` and the in-order `ordered_index`.
 11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, `git_info` (commit, branch, dirty status).
 12. **MC3**: MUST capture player configurations: `name`, `type`, `module`, `model`, `temperature`, `max_tokens`, masked `api_key_prefix`, template sources (inline vs file paths) and persist them in recording metadata via `player_summaries` for each player.
 12a. **MC3a**: `player_summaries[].total_cost` MUST reflect finalized per-match player costs after `on_match_end()` when `metadata.match.player_costs` is available.
 12b. **MC3b**: `Recorder.on_match_start()` MUST receive `context["batch_id"]`; missing batch context is invalid for the current schema.
 13. **MC4**: MUST capture game configuration: `name`, `module`, `information_level` (when present), `allowed_actions` (when game exposes property).
-14. **MC5**: MUST capture batch context: `session_id`, `matches_planned`, `matches_completed`, `seeds_used` (list of all per-match seeds).
+14. **MC5**: MUST capture batch context: `session_id`, `matches_planned`, `matches_completed`, `seeds_used` (list of all per-match seeds), and batch-level `fairness_policy` when supplied by Console.
 
 ### 6.5 Seed & Reproducibility (SR)
 15. **SR1**: MUST persist session-level seed in batch metadata (from SessionContext).
 16. **SR2**: MUST persist per-match seed in match payloads (`MatchRecording.seed`, `metadata.seed`).
 17. **SR3**: MUST persist `seeds_used` list in batch recordings for complete traceability (per SPEC-CONSOLE T3).
-18. **SR4**: MUST record complete player ordering metadata (per SPEC-CONSOLE M4 and SPEC-OBSERVABILITY §9.1): `players` (ordered list post-ordering), `player_order` (List[int] of original indices), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int}, resolved to actual first actor when runtime data is available).
+18. **SR4**: MUST record complete player ordering metadata (per SPEC-CONSOLE M4 and SPEC-OBSERVABILITY §9.1): `players` (ordered list post-ordering), `player_order` (List[int] of original indices in effective order), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int, "ordered_index": int}, resolved to actual first actor), and `fairness_policy` when supplied by Console.
 
 ### 6.6 API Usage & Collectors (UC)
 19. **UC1**: MUST extract `usage_info` from `ActionResult.metadata` during `on_gameplay()` when present.
@@ -477,7 +477,13 @@ deck = AgentDeck(recorder=recorder, session=config)
   "players": ["Alice", "Bob"],
   "player_order": [1, 0],
   "player_order_source": "console",
-  "first_player": {"name": "Bob", "index": 1},
+  "first_player": {"name": "Bob", "index": 1, "ordered_index": 0},
+  "fairness_policy": {
+    "pairing_policy": "paired_side_swap",
+    "first_player_policy": "random",
+    "effective_player_order": [1, 0],
+    "effective_first_player": {"name": "Bob", "index": 1, "ordered_index": 0}
+  },
   "winner": "Alice",
   "seed": 42,
   "final_state": {"health": {"Alice": 60, "Bob": 0}, "potions": {"Alice": 2, "Bob": 0}},
@@ -673,6 +679,10 @@ deck = AgentDeck(recorder=recorder, session=config)
         {"name": "Alice", "type": "GPTPlayer", "module": "agentdeck.players.gpt"},
         {"name": "Bob", "type": "MockPlayer", "module": "agentdeck.players.mock"}
       ]
+    },
+    "fairness_policy": {
+      "pairing_policy": "paired_side_swap",
+      "first_player_policy": "random"
     },
     "statistics": {
       "total_matches": 3,

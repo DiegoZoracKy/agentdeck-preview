@@ -209,6 +209,10 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                         errors.append(
                             f"{experiment_name}: results.json.statistics.players must be mapping"
                         )
+                    if statistics.get("n_total") != len(matches):
+                        errors.append(
+                            f"{experiment_name}: results.json.statistics.n_total must equal matches length"
+                        )
 
             strictness = data.get("format_strictness")
             if has_matches and enforce_extended_research_metrics:
@@ -249,6 +253,90 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                     if not isinstance(position_effect.get("by_player"), dict):
                         errors.append(
                             f"{experiment_name}: results.json.position_effect.by_player must be mapping"
+                        )
+                    if position_effect.get("total_matches") != len(matches):
+                        errors.append(
+                            f"{experiment_name}: results.json.position_effect.total_matches must equal matches length"
+                        )
+
+            summary = data.get("summary")
+            if isinstance(summary, dict) and summary.get("total_matches") != len(matches):
+                errors.append(
+                    f"{experiment_name}: results.json.summary.total_matches must equal matches length"
+                )
+
+            artifact_validation = data.get("artifact_validation")
+            if has_matches and _is_int(results_schema_version) and results_schema_version >= 3:
+                if not isinstance(artifact_validation, dict):
+                    errors.append(
+                        f"{experiment_name}: results.json missing artifact_validation object"
+                    )
+                else:
+                    required_validation_keys = {
+                        "matches_checked",
+                        "all_passed",
+                        "checks",
+                        "failures",
+                    }
+                    missing_validation = sorted(
+                        required_validation_keys - set(artifact_validation.keys())
+                    )
+                    if missing_validation:
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation missing keys {missing_validation}"
+                        )
+                    if artifact_validation.get("matches_checked") != len(matches):
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation.matches_checked must equal matches length"
+                        )
+                    if not isinstance(artifact_validation.get("all_passed"), bool):
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation.all_passed must be bool"
+                        )
+                    if not isinstance(artifact_validation.get("checks"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation.checks must be mapping"
+                        )
+                    else:
+                        required_check_names = {
+                            "monotonic_gameplay_timeline",
+                            "top_level_timing_consistency",
+                            "prompt_turn_number_coherence",
+                            "winner_final_state_consistency",
+                        }
+                        missing_checks = sorted(
+                            required_check_names - set(artifact_validation["checks"].keys())
+                        )
+                        if missing_checks:
+                            errors.append(
+                                f"{experiment_name}: results.json.artifact_validation.checks missing keys {missing_checks}"
+                            )
+                        for check_name, check_payload in artifact_validation["checks"].items():
+                            if not isinstance(check_payload, dict):
+                                errors.append(
+                                    f"{experiment_name}: results.json.artifact_validation.checks.{check_name} must be mapping"
+                                )
+                                continue
+                            if not _is_int(check_payload.get("passed")):
+                                errors.append(
+                                    f"{experiment_name}: results.json.artifact_validation.checks.{check_name}.passed must be int"
+                                )
+                            if not _is_int(check_payload.get("failed")):
+                                errors.append(
+                                    f"{experiment_name}: results.json.artifact_validation.checks.{check_name}.failed must be int"
+                                )
+                    failures = artifact_validation.get("failures")
+                    if not isinstance(failures, list):
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation.failures must be list"
+                        )
+                    if artifact_validation.get("all_passed") is False:
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation.all_passed must be true for committed results"
+                        )
+                    if isinstance(failures, list) and failures:
+                        errors.append(
+                            f"{experiment_name}: results.json.artifact_validation.failures must be empty for committed results"
                         )
 
             schema_version = data.get("schema_version")

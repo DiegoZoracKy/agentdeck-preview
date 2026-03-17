@@ -13,6 +13,8 @@ Tests verify all player ordering invariants:
 Uses FixedDamageGame as reference implementation per TEST-PLAN-spec-driven.md §3.2.
 """
 
+import json
+from pathlib import Path
 from typing import Any, List, Optional
 
 import pytest
@@ -670,3 +672,64 @@ def test_three_player_ordering():
     except Exception:
         # If game doesn't support 3 players, that's also valid
         pytest.skip("Game doesn't support three-player mode")
+
+
+def test_invalid_pairing_policy_rejected():
+    with pytest.raises(ValueError, match="pairing_policy"):
+        AgentDeckConfig(pairing_policy="invalid")
+
+
+def test_paired_side_swap_reuses_seed_and_persists_policy(mock_player_pair, tmp_path):
+    game = FixedDamageGame()
+    config = AgentDeckConfig(
+        seed=42,
+        run_dir=str(tmp_path),
+        pairing_policy="paired_side_swap",
+    )
+    deck = AgentDeck(game=game, session=config)
+
+    result = deck.play(mock_player_pair, matches=4)
+
+    seeds = [match.seed for match in result.matches]
+    orders = [match.metadata["player_order"] for match in result.matches]
+
+    assert seeds == [42, 42, 43, 43]
+    assert orders[1] == list(reversed(orders[0]))
+    assert orders[3] == list(reversed(orders[2]))
+    assert result.matches[0].metadata["fairness_policy"]["pairing_policy"] == "paired_side_swap"
+
+    batch_files = list(Path(deck.session.record_directory).glob("batch_*.json"))
+    assert len(batch_files) == 1
+    batch_payload = json.loads(batch_files[0].read_text(encoding="utf-8"))
+    assert batch_payload["metadata"]["fairness_policy"]["pairing_policy"] == "paired_side_swap"
+
+
+def test_fixed_first_player_policy_respects_index(mock_player_pair):
+    game = FixedDamageGame()
+    config = AgentDeckConfig(
+        seed=42,
+        first_player_policy="fixed",
+        fixed_first_player_index=1,
+    )
+    deck = AgentDeck(game=game, session=config)
+
+    result = deck.play(mock_player_pair, matches=3)
+
+    for match in result.matches:
+        assert match.metadata["player_order"][0] == 1
+        assert match.metadata["first_player"]["index"] == 1
+        assert match.metadata["first_player"]["ordered_index"] == 0
+
+
+def test_alternating_first_player_policy_cycles_positions(mock_player_pair):
+    game = FixedDamageGame()
+    config = AgentDeckConfig(
+        seed=42,
+        first_player_policy="alternating",
+    )
+    deck = AgentDeck(game=game, session=config)
+
+    result = deck.play(mock_player_pair, matches=4)
+
+    first_player_indices = [match.metadata["first_player"]["index"] for match in result.matches]
+    assert first_player_indices == [0, 1, 0, 1]

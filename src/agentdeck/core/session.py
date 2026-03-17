@@ -45,6 +45,9 @@ class AgentDeckConfig:
     log_format: str = "simple"
     concurrency: int = 1  # Number of parallel workers (1 = sequential)
     monitors: Optional[List["Monitor"]] = None  # Console-level observers (progress, hardware, etc.)
+    pairing_policy: str = "none"  # one of: none, paired_side_swap
+    first_player_policy: str = "random"  # one of: random, fixed, alternating
+    fixed_first_player_index: int = 0
     conclusion: ConclusionPolicy = field(default_factory=ConclusionPolicy)
 
     def __post_init__(self):
@@ -54,6 +57,23 @@ class AgentDeckConfig:
                 f"concurrency must be >= 1, got {self.concurrency}. "
                 f"Use concurrency=1 for sequential execution."
             )
+        if self.max_turns < 1:
+            raise ValueError(f"max_turns must be >= 1, got {self.max_turns}.")
+        valid_pairing_policies = {"none", "paired_side_swap"}
+        if self.pairing_policy not in valid_pairing_policies:
+            raise ValueError(
+                "pairing_policy must be one of "
+                f"{sorted(valid_pairing_policies)}, got '{self.pairing_policy}'"
+            )
+
+        valid_first_player_policies = {"random", "fixed", "alternating"}
+        if self.first_player_policy not in valid_first_player_policies:
+            raise ValueError(
+                "first_player_policy must be one of "
+                f"{sorted(valid_first_player_policies)}, got '{self.first_player_policy}'"
+            )
+        if self.fixed_first_player_index < 0:
+            raise ValueError("fixed_first_player_index must be >= 0")
 
 
 @dataclass

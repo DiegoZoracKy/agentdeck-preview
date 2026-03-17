@@ -75,9 +75,31 @@ def _make_session(tmp_path: Path, *, include_model: bool = True) -> Path:
         "match_id": "match_001",
         "players": ["Alice", "Bob"],
         "winner": "Alice",
+        "final_state": {"winner": "Alice"},
         "seed": 123,
+        "started_at": "2026-01-20T00:00:00Z",
+        "ended_at": "2026-01-20T00:00:01Z",
+        "duration_seconds": 1.0,
+        "events": [
+            {
+                "type": "gameplay",
+                "timestamp": 1705708800.0,
+                "data": {
+                    "turn_context": {"turn_number": 1},
+                    "prompt": {"phase": "turn", "turn_number": 1},
+                },
+            }
+        ],
         "metadata": {
-            "match": {"turns": 3, "duration": 1.0, "cost": 0.01},
+            "winner": "Alice",
+            "match": {
+                "turns": 3,
+                "duration": 1.0,
+                "duration_seconds": 1.0,
+                "cost": 0.01,
+                "started_at": "2026-01-20T00:00:00Z",
+                "ended_at": "2026-01-20T00:00:01Z",
+            },
             "player_summaries": player_summaries,
         },
     }
@@ -159,9 +181,11 @@ def test_package_session_creates_outputs(tmp_path):
     assert "statistics" in results
     assert "format_strictness" in results
     assert "position_effect" in results
+    assert "artifact_validation" in results
     assert "players" in results["statistics"]
     assert "overall" in results["format_strictness"]
     assert "first_player_win_rate" in results["position_effect"]
+    assert results["artifact_validation"]["all_passed"] is True
     assert "Topline Winner: Alice (100.0%)" in readme
     assert "Sample size (`n`): 1" in analysis
     assert "Statistical method:" in analysis

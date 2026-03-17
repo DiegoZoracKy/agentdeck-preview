@@ -24,18 +24,30 @@ model_registry:
 
 config_registry:
   AO:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
     controller: ActionOnlyController
     prompt_builder:
+      handshake_template_mode: default
+      handshake_template: "{game_instructions}\n\n{handshake_controller_format}"
       turn_template_mode: default
       turn_template: "{game_view}\n\n{controller_format}"
   CoT-H:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
     controller: ReasoningController
     prompt_builder:
+      handshake_template_mode: default
+      handshake_template: "{game_instructions}\n\n{handshake_controller_format}"
       turn_template_mode: custom
       turn_template: "{game_view}"
   CoT-T:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
     controller: ReasoningController
     prompt_builder:
+      handshake_template_mode: default
+      handshake_template: "{game_instructions}\n\n{handshake_controller_format}"
       turn_template_mode: default
       turn_template: "{game_view}\n\n{controller_format}"
 
@@ -64,6 +76,11 @@ execution_plan:
     cell_ids: []
     interpretation: if empty, preflight is intentionally skipped
     matches_per_cell: 6
+    required_checks:
+      - fairness_policy_review
+      - handshake_vs_turn_template_split_review
+      - controller_asymmetry_review
+      - information_level_partial_last_action_review
   phases:
     - phase_id: A1
       name: Core effects
@@ -87,6 +104,11 @@ cells:
     track: 1
     phase: A1
     question: Example cell question.
+    intent: Keep causal question narrow; do not change multiple prompt/controller factors without stating why.
+    causal_factor: prompt_cadence
+    controller_asymmetry_notes: ""
+    visibility_notes: ""
+    fairness_notes: paired side-swap enabled; use position metrics before topline win-rate claims
     player_a: { model_ref: weak_model, config_ref: CoT-T }
     player_b: { model_ref: weak_model, config_ref: AO }
     pilot_matches: 24

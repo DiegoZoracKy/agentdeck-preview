@@ -54,15 +54,15 @@ Today, the project is ready for:
 - Core match execution through the `AgentDeck` facade
 - Provider-backed and mock-player experiments
 - Recording, replay, and event-driven observability
-- Research export, packaging, and post-hoc analysis workflows
+- Native fairness controls for paired side-swap and diagnostic first-player policies
+- Research export, packaging, invariant validation, and post-hoc analysis workflows
 
 It is **not** presented as a `1.0` stable platform yet. The main remaining gaps are:
-- Native fairness controls in the core API for paired side-swap / first-player policies
-- Stronger artifact-level invariant checks for recordings and telemetry
-- Full spec/doc consistency across the public surface
 - A methodologically stronger default benchmark regime for behavioral claims
+- A clean release-facing research package built from the fresh FixedDamage reset
+- A sharper public narrative connecting the engine, packaged findings, and viewer
 
-Viewer and replay UI work should currently be treated as **secondary / experimental**. The core product is the engine, record contract, and research workflow.
+Viewer and replay UI work should currently be treated as a **beta offline surface**. The core product is still the engine, record contract, and research workflow.
 
 ---
 

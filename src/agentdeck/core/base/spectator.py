@@ -42,10 +42,14 @@ class Spectator:
         players: List["Player"],
         matches: int,
         context: Optional[EventContext] = None,
+        **kwargs: Any,
     ):
         """Batch of matches starting.
 
         Context includes: session_id, timestamp, batch_id
+
+        Note: Uses **kwargs for forward compatibility with batch-level metadata
+        such as fairness policy.
         """
 
     def on_batch_end(

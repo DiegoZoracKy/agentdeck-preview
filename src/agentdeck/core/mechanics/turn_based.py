@@ -292,8 +292,11 @@ class TurnLoop:
         """
         from ..types import MatchForfeitedError
 
-        # Make factory and emitter available for custom game hooks
-        # Note: This maintains backward compatibility with games using emit_event()
+        # Make factory and emitter available for custom game hooks.
+        # Each match owns its own game instance during normal AgentDeck execution:
+        # sequential runs reuse one game object serially, and parallel workers deep-copy
+        # the game before invoking the mechanic. These bindings are therefore scoped to
+        # a single in-flight match.
         emitter = GameEventEmitter(
             self.runtime._console.event_bus,  # Access via runtime's console
             self.runtime.match_id,
@@ -399,9 +402,11 @@ class TurnLoop:
         Updates state with _first_player_idx for round-robin sequencing.
         Emits FIRST_PLAYER_SELECTED event via runtime.
         """
-        # Fork RNG for first player selection (TL1)
-        first_player_rng = self.runtime.fork_rng("first_player_selection")
-        first_idx = first_player_rng.randint(0, len(self.players) - 1)
+        first_idx = state.get("_first_player_idx")
+        if not isinstance(first_idx, int) or not (0 <= first_idx < len(self.players)):
+            # Fork RNG for first player selection (TL1)
+            first_player_rng = self.runtime.fork_rng("first_player_selection")
+            first_idx = first_player_rng.randint(0, len(self.players) - 1)
         state["_first_player_idx"] = first_idx
 
         # Store in console for metadata (accessed via runtime's console reference)
@@ -593,7 +598,10 @@ class TurnLoop:
 
         # Increment turn counter if game not over
         if not status.is_over:
-            final_state["_turn_count"] = adapter.before.get("_turn_count", 1) + 1
+            next_turn_count = adapter.before.get("_turn_count", 1) + 1
+            current_turn_count = final_state.get("_turn_count")
+            if not isinstance(current_turn_count, int) or current_turn_count < next_turn_count:
+                final_state["_turn_count"] = next_turn_count
 
         # Clear phase index
         if self.game.event_emitter is not None:

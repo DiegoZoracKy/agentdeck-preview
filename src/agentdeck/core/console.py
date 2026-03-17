@@ -287,7 +287,11 @@ class _MatchWorker:
         # Determine player order using Console's extracted helper
         ordered_players, player_order, player_order_source, first_player, cost_baseline = (
             self.console._determine_player_order_and_baseline(
-                self.game, self.players, runtime, self.previous_match_result
+                self.game,
+                self.players,
+                runtime,
+                self.previous_match_result,
+                match_index=self.match_index,
             )
         )
 
@@ -316,6 +320,7 @@ class _MatchWorker:
                     f"{self.game.__class__.__name__}.setup() must return a dict, got {type(state).__name__}"
                 )
             state.setdefault("_turn_count", 1)
+            state["_first_player_idx"] = 0
             infra_runtime.validate_state(state)
 
             state = self._run_handshake(ordered_players, runtime, infra_runtime, state)
@@ -337,6 +342,11 @@ class _MatchWorker:
             player_order=player_order,
             player_order_source=player_order_source,
             first_player=first_player,
+            fairness_policy=self.console._build_fairness_policy_metadata(
+                match_index=self.match_index,
+                player_order=player_order,
+                first_player=first_player,
+            ),
         )
 
         from .types import MatchAbortedError, MatchForfeitedError
@@ -1308,6 +1318,7 @@ class Console:
             game=game,  # Pass game object (Recorder expects this)
             players=players,  # Pass player objects (Recorder expects this, not names)
             matches=matches,  # Use 'matches' keyword per Recorder signature
+            fairness_policy=self._build_fairness_policy_metadata(),
         )
 
         # Track all match seeds for BATCH_END (T3/R3)
@@ -1879,6 +1890,8 @@ class Console:
         players: List[Player],
         runtime: MatchExecutionContext,
         previous_match_result: Optional[MatchResult],
+        *,
+        match_index: int,
     ) -> tuple[List[Player], List[int], str, Dict[str, Any], Dict[str, float]]:
         """
         Determine player order and capture cost baseline.
@@ -1910,18 +1923,28 @@ class Console:
         # Determine ordered players and source
         original_players = list(players)  # Keep original for metadata
         if game_ordered is not None:
+            if not self._is_default_fairness_policy():
+                raise ValueError(
+                    "Custom game.get_player_order() is incompatible with non-default console fairness policies. "
+                    "Use pairing_policy='none' and first_player_policy='random', or remove the game override."
+                )
             # Game overrode ordering - validate (H4)
             self._validate_player_list(players, game_ordered)
             ordered_players = game_ordered
             player_order_source = "game"
         else:
-            # Console applies Fisher-Yates shuffle (PO4)
-            ordered_players = self._shuffle_players(players, runtime.rng)
+            ordered_players = self._apply_console_fairness_policy(
+                players, runtime.rng, match_index=match_index
+            )
             player_order_source = "console"
 
         # Calculate player_order indices and first_player metadata
         player_order = [original_players.index(p) for p in ordered_players]
-        first_player = {"name": ordered_players[0].name, "index": player_order[0]}
+        first_player = {
+            "name": ordered_players[0].name,
+            "index": player_order[0],
+            "ordered_index": 0,
+        }
 
         # Track per-player API cost baseline prior to handshake/turns
         cost_baseline = {
@@ -1996,6 +2019,10 @@ class Console:
             "player_order": player_order,  # Original indices (M4)
             "player_order_source": player_order_source,  # "console" or "game" (M4)
             "first_player": first_player,  # {"name": str, "index": int} (M4)
+            "fairness_policy": self._build_fairness_policy_metadata(
+                player_order=player_order,
+                first_player=first_player,
+            ),
             "duration": match_duration,
             "duration_seconds": match_duration,
             "started_at": started_iso,
@@ -2050,7 +2077,11 @@ class Console:
             if isinstance(player_order, list) and 0 <= ordered_index < len(player_order)
             else ordered_index
         )
-        return {"name": ordered_players[ordered_index].name, "index": original_index}
+        return {
+            "name": ordered_players[ordered_index].name,
+            "index": original_index,
+            "ordered_index": ordered_index,
+        }
 
     def play_match(
         self,
@@ -2068,7 +2099,13 @@ class Console:
 
         # Determine player order using extracted helper
         ordered_players, player_order, player_order_source, first_player, cost_baseline = (
-            self._determine_player_order_and_baseline(game, players, runtime, previous_match_result)
+            self._determine_player_order_and_baseline(
+                game,
+                players,
+                runtime,
+                previous_match_result,
+                match_index=match_index,
+            )
         )
 
         player_names = [player.name for player in ordered_players]
@@ -2094,6 +2131,7 @@ class Console:
                     f"{game.__class__.__name__}.setup() must return a dict, got {type(state).__name__}"
                 )
             state.setdefault("_turn_count", 1)
+            state["_first_player_idx"] = 0
             infra_runtime.validate_state(state)
 
             state = self._run_handshake(game, ordered_players, runtime, infra_runtime, state)
@@ -2115,6 +2153,11 @@ class Console:
             player_order=player_order,  # Original indices
             player_order_source=player_order_source,  # "console" or "game"
             first_player=first_player,  # {"name": str, "index": int}
+            fairness_policy=self._build_fairness_policy_metadata(
+                match_index=match_index,
+                player_order=player_order,
+                first_player=first_player,
+            ),
         )
 
         from .types import MatchAbortedError, MatchForfeitedError
@@ -2742,9 +2785,42 @@ class Console:
     def _next_batch_id(self) -> str:
         return f"batch_{uuid.uuid4().hex[:8]}"
 
+    def _is_default_fairness_policy(self) -> bool:
+        return (
+            self.config.pairing_policy == "none"
+            and self.config.first_player_policy == "random"
+            and self.config.fixed_first_player_index == 0
+        )
+
+    def _build_fairness_policy_metadata(
+        self,
+        *,
+        match_index: Optional[int] = None,
+        player_order: Optional[List[int]] = None,
+        first_player: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        metadata: Dict[str, Any] = {
+            "pairing_policy": self.config.pairing_policy,
+            "first_player_policy": self.config.first_player_policy,
+        }
+        if self.config.first_player_policy == "fixed":
+            metadata["fixed_first_player_index"] = self.config.fixed_first_player_index
+        if match_index is not None:
+            metadata["match_index"] = match_index
+        if self.config.pairing_policy == "paired_side_swap" and match_index is not None:
+            metadata["pair_index"] = match_index // 2
+            metadata["side_swap"] = bool(match_index % 2)
+        if player_order is not None:
+            metadata["effective_player_order"] = list(player_order)
+        if first_player is not None:
+            metadata["effective_first_player"] = copy.deepcopy(first_player)
+        return metadata
+
     def _derive_match_seed(self, base_seed: Optional[int], index: int) -> Optional[int]:
         if base_seed is None:
             return None
+        if self.config.pairing_policy == "paired_side_swap":
+            return base_seed + (index // 2)
         return base_seed + index
 
     def _validate_player_list(self, original: List[Player], game_returned: List[Player]) -> None:
@@ -2798,6 +2874,39 @@ class Console:
             j = rng.randint(0, i)  # RandomGenerator.randint(a, b) inclusive
             shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
         return shuffled
+
+    def _apply_console_fairness_policy(
+        self,
+        players: List[Player],
+        rng: RandomGenerator,
+        *,
+        match_index: int,
+    ) -> List[Player]:
+        if not players:
+            return []
+
+        if self.config.first_player_policy == "random":
+            ordered_players = self._shuffle_players(players, rng)
+        elif self.config.first_player_policy == "fixed":
+            if self.config.fixed_first_player_index >= len(players):
+                raise ValueError(
+                    "fixed_first_player_index must be less than the number of players"
+                )
+            fixed_player = players[self.config.fixed_first_player_index]
+            ordered_players = [fixed_player] + [
+                player for idx, player in enumerate(players) if idx != self.config.fixed_first_player_index
+            ]
+        else:  # alternating
+            offset = match_index % len(players)
+            ordered_players = list(players[offset:]) + list(players[:offset])
+
+        if self.config.pairing_policy == "paired_side_swap":
+            if len(players) != 2:
+                raise ValueError("pairing_policy='paired_side_swap' requires exactly 2 players")
+            if match_index % 2 == 1:
+                ordered_players = [ordered_players[1], ordered_players[0]]
+
+        return ordered_players
 
     def _create_match_runtime(self, seed: Optional[int]) -> MatchExecutionContext:
         """Create lightweight execution context for tracking match metadata."""

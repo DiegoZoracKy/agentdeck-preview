@@ -36,6 +36,11 @@ except ImportError:
     compute_inferential_statistics = None
     compute_position_effect = None
 
+from agentdeck.research.artifact_validation import (
+    format_artifact_validation_errors,
+    validate_artifact_invariants,
+)
+
 
 def _iso_timestamp() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -65,7 +70,11 @@ def _load_match(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, A
         "turns": match_meta.get("turns"),
         "outcome": outcome,
         "seed": data.get("seed") or match_meta.get("seed"),
-        "duration": match_meta.get("duration"),
+        "duration": (
+            match_meta.get("duration")
+            if match_meta.get("duration") is not None
+            else match_meta.get("duration_seconds", data.get("duration_seconds"))
+        ),
         "cost": match_meta.get("cost"),
         "player_costs": match_meta.get("player_costs", {}),
         "player_order_source": match_meta.get("player_order_source"),
@@ -132,6 +141,8 @@ def _fallback_statistics(
         per_player[name] = {
             "wins": wins[name],
             "win_rate": win_rate,
+            # Placeholder band only. When the statistical backend is unavailable we keep
+            # schema compatibility, but this is not a real inferential confidence interval.
             "ci": [max(0.0, win_rate - 0.1), min(1.0, win_rate + 0.1)],
             "p_value": 1.0,
             "effect_size": 0.0,
@@ -153,7 +164,10 @@ def _fallback_statistics(
             "n_decisive": decisive,
             "min_recommended": 10,
             "is_actionable": decisive >= 10,
-            "quality_note": "Statistical backend unavailable; fallback values applied",
+            "quality_note": (
+                "Statistical backend unavailable; placeholder +/-10pp CI bands applied "
+                "for schema compatibility"
+            ),
         },
     }
 
@@ -252,6 +266,12 @@ def export_results(
         match_payloads.append(payload)
         metadata_list.append(metadata)
 
+    artifact_validation = validate_artifact_invariants(match_payloads)
+    if not artifact_validation["all_passed"]:
+        formatted_failures = format_artifact_validation_errors(artifact_validation)
+        detail = f"\n{formatted_failures}" if formatted_failures else ""
+        raise ValueError(f"Artifact invariant validation failed.{detail}")
+
     players = _collect_players(metadata_list)
 
     wins = {player["name"]: 0 for player in players}
@@ -310,13 +330,14 @@ def export_results(
         source["recordings_dirs"] = [str(path) for path in normalized_dirs]
 
     results: Dict[str, Any] = {
-        "schema_version": 2,
+        "schema_version": 3,
         "experiment_id": experiment_id,
         "source": source,
         "summary": summary,
         "statistics": statistics,
         "format_strictness": format_strictness,
         "position_effect": position_effect,
+        "artifact_validation": artifact_validation,
         "players": players,
         "matches": matches,
     }

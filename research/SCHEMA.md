@@ -120,6 +120,9 @@ For `results.json.schema_version >= 2`, the following are additionally required:
 - `format_strictness` (object; contract compliance metrics)
 - `position_effect` (object; first-player and upset metrics)
 
+For `results.json.schema_version >= 3`, the following is additionally required:
+- `artifact_validation` (object; game-agnostic recording invariant summary)
+
 ### Summary Fields
 - `total_matches`
 - `decisive_matches`
@@ -169,6 +172,25 @@ Per player:
 These metrics MUST be game-agnostic and derived only from `first_player` metadata
 and `winner` fields in recorded matches.
 
+### artifact_validation Fields (Minimum)
+- `matches_checked`
+- `all_passed`
+- `checks`
+- `failures`
+
+Required checks:
+- `monotonic_gameplay_timeline`
+- `top_level_timing_consistency`
+- `prompt_turn_number_coherence`
+- `winner_final_state_consistency`
+
+Each check entry should contain:
+- `passed`
+- `failed`
+
+Exports SHOULD fail fast when any artifact invariant fails. Committed public
+results should therefore have `all_passed: true` and `failures: []`.
+
 ### Match Fields (per entry)
 - `match_id`
 - `players` (ordered list)
@@ -181,6 +203,11 @@ and `winner` fields in recorded matches.
 - `player_costs`
 - `player_order_source`
 - `first_player`
+
+`first_player` should be an object containing:
+- `name`
+- `index` (original roster index)
+- `ordered_index` (slot within the effective ordered player list)
 
 ## matrix.yaml (Optional, Recommended for Benchmark Grids)
 
@@ -195,14 +222,27 @@ Suggested top-level sections:
 ### config_registry.prompt_builder
 
 Recommended fields for reproducible cadence tests:
+- `handshake_template_mode` (`default` | `custom`)
+- `handshake_template` (rendered handshake template string used for acknowledgements)
 - `turn_template_mode` (`default` | `custom`)
 - `turn_template` (rendered template string used for turn prompts)
+
+Recommended session-fairness fields for benchmark grids:
+- `pairing_policy` (`none` | `paired_side_swap`)
+- `first_player_policy` (`random` | `fixed` | `alternating`)
+- `fixed_first_player_index` (required when `first_player_policy: fixed`)
+
+Recommended cell/preflight notes:
+- keep handshake and turn templates explicit as separate concerns
+- document controller asymmetry when the compared players use different controllers
+- note any `information_level="partial"` assumptions about public `last_action`
 
 ### execution_plan.preflight
 
 Recommended fields:
 - `cell_ids` (list of benchmark cell IDs to run in reduced scale preflight)
 - `matches_per_cell`
+- `required_checks` (list of explicit causal / contract checks reviewed before scale-up)
 
 If `cell_ids` is empty, preflight is treated as intentionally skipped.
 

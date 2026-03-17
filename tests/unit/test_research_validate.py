@@ -32,7 +32,9 @@ def _write_results_files(
     *,
     include_statistics: bool,
     include_position_effect: bool = True,
-    schema_version: int = 2,
+    include_artifact_validation: bool = True,
+    artifact_validation_all_passed: bool = True,
+    schema_version: int = 3,
 ) -> None:
     results_payload: Dict[str, Any] = {
         "schema_version": schema_version,
@@ -64,6 +66,19 @@ def _write_results_files(
 
     if not include_position_effect:
         results_payload.pop("position_effect", None)
+
+    if include_artifact_validation:
+        results_payload["artifact_validation"] = {
+            "matches_checked": 1,
+            "all_passed": artifact_validation_all_passed,
+            "checks": {
+                "monotonic_gameplay_timeline": {"passed": 1, "failed": 0},
+                "top_level_timing_consistency": {"passed": 1, "failed": 0},
+                "prompt_turn_number_coherence": {"passed": 1, "failed": 0},
+                "winner_final_state_consistency": {"passed": 1, "failed": 0},
+            },
+            "failures": [] if artifact_validation_all_passed else [{"message": "bad"}],
+        }
 
     (experiment_dir / "results.json").write_text(json.dumps(results_payload), encoding="utf-8")
     (experiment_dir / "results.csv").write_text(
@@ -148,7 +163,7 @@ def test_complete_results_with_statistics_block_pass(tmp_path):
     validator = _load_validator_module()
     experiment_dir = tmp_path / "exp"
     experiment_dir.mkdir()
-    _write_results_files(experiment_dir, include_statistics=True, schema_version=2)
+    _write_results_files(experiment_dir, include_statistics=True, schema_version=3)
 
     manifest = {
         "status": "complete",
@@ -166,7 +181,7 @@ def test_complete_results_require_position_effect_block(tmp_path):
         experiment_dir,
         include_statistics=True,
         include_position_effect=False,
-        schema_version=2,
+        schema_version=3,
     )
 
     manifest = {
@@ -189,6 +204,45 @@ def test_schema_v1_results_do_not_require_extended_metrics(tmp_path):
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []
+
+
+def test_schema_v3_results_require_artifact_validation_block(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        include_artifact_validation=False,
+        schema_version=3,
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("missing artifact_validation object" in e for e in errors)
+
+
+def test_schema_v3_results_reject_failed_artifact_validation(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        include_artifact_validation=True,
+        artifact_validation_all_passed=False,
+        schema_version=3,
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("all_passed must be true" in e for e in errors)
 
 
 def test_empty_research_tree_is_valid(tmp_path):

@@ -700,6 +700,9 @@ class Game(ABC):
         Note:
             TurnLoop (turn-based helper) validates returned player name and raises
             ValueError if not in players list.
+            `_first_player_idx` and `_turn_count` are mechanic-owned internal
+            bookkeeping keys used by the stock turn-based helper. Games may read
+            them for sequencing but should not treat them as mutable domain state.
         """
         first_player_idx = game_state.get("_first_player_idx", 0)
         turn_count = game_state.get("_turn_count", 1)

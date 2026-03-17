@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
 > Status: Final
-> Version: 1.4.0
-> Last Updated: 2026-03-05
+> Version: 1.5.0
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
 > Authors: Diego ZoracKy, Codex
 > Audience: Research engineers, contributors, experiment authors
@@ -83,6 +83,9 @@ Extended required fields for `schema_version >= 2`:
 - `format_strictness` (object; response format compliance metrics)
 - `position_effect` (object; first-player and upset metrics)
 
+Extended required fields for `schema_version >= 3`:
+- `artifact_validation` (object; game-agnostic recording invariant summary)
+
 ### 4.4 statistics (Generated in results.json)
 Minimum contract:
 - `method` (string; e.g., `exact_binomial`)
@@ -143,14 +146,42 @@ Per-player required fields:
 Position metrics MUST be computed from match-level first-player metadata and winner fields,
 without game-specific assumptions.
 
-### 4.7 results.csv (Generated)
+### 4.7 artifact_validation (Generated in results.json)
+Minimum contract:
+- `matches_checked` (int)
+- `all_passed` (bool)
+- `checks` (object keyed by invariant name)
+- `failures` (array)
+
+Required invariant keys:
+- `monotonic_gameplay_timeline`
+- `top_level_timing_consistency`
+- `prompt_turn_number_coherence`
+- `winner_final_state_consistency`
+
+Per-invariant summary fields:
+- `passed` (int)
+- `failed` (int)
+
+Artifact validation MUST remain game-agnostic. It validates recording integrity rather
+than gameplay correctness. Public committed exports SHOULD have `all_passed: true`.
+
+### 4.8 results.csv (Generated)
 Minimum columns:
 `match_id`, `winner`, `turns`, `outcome`, `seed`, `duration`, `cost`,
 `player_order_source`, `first_player`, `players`, `player_costs`.
 
-### 4.8 research/INDEX.md (Generated)
+### 4.9 research/INDEX.md (Generated)
 A registry table for all experiments. It is generated from manifests using
 `scripts/research_index.py` and MUST match the script output.
+
+Minimum table shape:
+
+```markdown
+| Experiment | Status | Game | Players | Matches | Results |
+|---|---|---|---|---|---|
+| 2026-03-17-example | complete | FixedDamageGame | gpt-4o-mini vs claude-haiku-4.5 | 80/80 | A 57.5% |
+```
 
 ## 5. Public API
 
@@ -192,6 +223,9 @@ A registry table for all experiments. It is generated from manifests using
 - **RE12**: For `results.json.schema_version >= 2`, `results.json.format_strictness` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from recorder events only (game-agnostic).
 - **RE13**: For `results.json.schema_version >= 2`, `results.json.position_effect` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from first-player metadata and winners only (game-agnostic).
 - **RE14**: `results.json.source` MUST include either a non-empty `recordings_dir` string or a non-empty `recordings_dirs` array. When `recordings_dirs` is present, `recordings_dir` SHOULD point to the first source directory for backward compatibility.
+- **RE15**: For `results.json.schema_version >= 3`, `results.json.artifact_validation` MUST be produced by `research_export.py` for every exported dataset with one or more matches.
+- **RE16**: `artifact_validation` MUST cover monotonic gameplay timeline, top-level timing consistency, prompt payload turn-number coherence, and winner/final-state consistency using only recorder payloads (game-agnostic).
+- **RE17**: `research_export.py` MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
 
 ## 7. Data Flow & Interaction
 - Export: `recordings/ -> research_export.py -> results.json + results.csv`

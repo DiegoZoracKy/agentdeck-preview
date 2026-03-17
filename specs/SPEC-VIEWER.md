@@ -1,9 +1,9 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
-> **Status**: Draft
-> **Version**: 0.1.0
-> **Last Updated**: 2026-01-20
-> **Implementation**: 🚧 Phase 1 (in progress)
+> **Status**: Final
+> **Version**: 0.2.0
+> **Last Updated**: 2026-03-17
+> **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check)
 > **Authors**: Diego Zoracky, Claude
 > **Audience**: Viewer developers, skin authors, integration engineers
 
@@ -19,7 +19,7 @@
 - Upholds `SPEC.md` §3.2 separation: Viewer consumes records, never affects gameplay
 - Supports `CONTRIBUTING.md` modularity: Timeline engine, renderers, and UI are independent
 - Aligns with design doc principle: **"The product is the record contract, not the UI"**
-- Non-goals: Live streaming, video export, sound, mobile optimization (v1)
+- Non-goals: Live streaming, video export, sound, and broadcast orchestration. The current viewer is an offline replay surface.
 
 ## 3. Responsibilities
 
@@ -195,7 +195,7 @@ RendererRegistry.get(gameName: string, skin: string): Function | null
 ## 6. Invariants & Guarantees
 
 ### 6.1 Record Compatibility (RC)
-1. **RC1**: Viewer MUST support schema v1.3 records from SPEC-RECORDER
+1. **RC1**: Viewer MUST support schema v1.3+ records from SPEC-RECORDER
 2. **RC2**: Viewer MUST fail fast with clear error on unsupported schema
 3. **RC3**: Unknown event types MUST be skipped, not crash playback
 4. **RC4**: Missing optional fields MUST use sensible defaults

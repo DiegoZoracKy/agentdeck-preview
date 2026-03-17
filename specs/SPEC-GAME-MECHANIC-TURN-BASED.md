@@ -115,6 +115,11 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 
 ## 5. Invariants & Guarantees
 
+### TL0 – Mechanic-Owned State Keys
+- TurnLoop MAY store execution bookkeeping in canonical state using underscore-prefixed keys such as `_turn_count` and `_first_player_idx`.
+- These keys are mechanic-owned internal fields. Game authors SHOULD treat them as read-only sequencing metadata rather than domain state.
+- TurnLoop MUST preserve a game-supplied value when it is already equal to or ahead of the mechanic's expected next turn count, but games SHOULD NOT rely on mutating these fields directly for gameplay semantics.
+
 ### TL1 – Deterministic Setup
 - TurnLoop MUST call `runtime.fork_rng("setup")` before invoking `game.setup`.  
 - `game.setup` MUST NOT touch global randomness; any randomness comes from the forked RNG passed in.

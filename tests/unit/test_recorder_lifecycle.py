@@ -92,6 +92,7 @@ class TestHandshakeEventBuffering:
                     "controller_metadata": {"allowed": ["OK", "READY", "YES"]},
                     "renderer_output": None,
                     "usage_info": {"tokens": 10, "cost": 0.0001},
+                    "metadata": {"turn_number": 0},
                 },
                 context={"session_id": "test_session"},
             )
@@ -138,6 +139,7 @@ class TestHandshakeEventBuffering:
         # Verify prompt payload (PM1-PM6)
         prompt = handshake_event["data"]["prompt"]
         assert prompt["phase"] == "handshake"
+        assert prompt["turn_number"] is None
         assert prompt["prompt_text"] == "You are playing TestGame. Reply OK to start."  # PM1
         assert prompt["response_text"] == "OK"  # PM3
         assert "prompt_blocks" in prompt  # PM2

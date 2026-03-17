@@ -5,9 +5,9 @@ Utility scripts for validation, packaging, and viewer support.
 ## Research Workflow
 
 - `research_package.py` promotes an `agentdeck_runs/<session>/` folder into a standardized package under `research/`.
-- `research_export.py` generates `results.json` and `results.csv` from match recordings.
+- `research_export.py` generates `results.json` and `results.csv` from match recordings and fails fast on recording invariant violations.
 - `research_index.py` regenerates `research/INDEX.md` from experiment manifests.
-- `research_validate.py` validates package structure, generated artifacts, and index consistency.
+- `research_validate.py` validates package structure, generated artifacts, exported invariant summaries, and index consistency.
 
 ### Typical flow
 
