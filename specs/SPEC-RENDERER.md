@@ -1,8 +1,8 @@
 # SPEC-RENDERER: Game View Formatting Contract
 
 > Status: Final
-> Version: 0.3.0
-> Last Updated: 2026-02-03
+> Version: 0.3.1
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Codex, Diego Zoracky
 > Audience: Renderer implementers, player authors, observability contributors
@@ -13,7 +13,7 @@
 - Enable reproducible research by standardising renderer metadata capture for recorder and spectator tooling.
 
 ## 2. Scope & Philosophy Alignment
-- Follows `AGENTS.md` §2.1 separation: Game decides what each player can see; Renderer formats that view without injecting logic.
+- Follows `SPEC.md` §3.1 separation: Game decides what each player can see; Renderer formats that view without injecting logic.
 - Reinforces `SPEC.md` §2.4 reproducibility: deterministic rendering given identical inputs; renderer configuration captured for every turn.
 - Applies lean-spec guidance (`GUIDELINES.md` §2c): concise contracts, arrow-style data flows, numbered invariants.
 - Non-goals: Prompt assembly (SPEC-PLAYER), action parsing (SPEC-CONTROLLER), or state mutation (SPEC-GAME).
@@ -97,17 +97,14 @@ class TextRenderer(Renderer):
     Generic text renderer for turn-based games.
 
     Renders state dicts without game-specific assumptions:
-    - Handles common patterns (health, scores, boards) with sensible defaults
-    - Renders unknown keys generically (sorted, with type-based formatting)
-    - Conditional rendering (skips None/empty values by default)
-    - Parameterizable via show_empty flag
+    - Preserves game-provided insertion order
+    - Renders unknown keys generically with type-based formatting
+    - Avoids filtering underscore or empty fields from game-provided views
+    - Exposes simple renderer metadata for observability
 
     Games requiring richer output (ASCII diagrams, combat logs, card displays)
     can provide custom renderers in their game module.
     """
-
-    def __init__(self, show_empty: bool = False):
-        self.show_empty = show_empty
 
     def render(self, game_view, player, *, turn_context=None):
         lines = ["=== Current Game State ==="]
@@ -122,12 +119,10 @@ class TextRenderer(Renderer):
         # Render common patterns: health, scores, board, etc.
         # (See src/agentdeck/renderers/text.py for full implementation)
 
-        # Handle unknown keys generically (sorted order)
-        for key in sorted(game_view.keys()):
-            if key not in handled_keys and not key.startswith("_"):
-                value = game_view[key]
-                if self.show_empty or value:
-                    lines.append(f"\n{key.title()}: {value}")
+        # Preserve insertion order from the game view.
+        for key, value in game_view.items():
+            if key != "turn":
+                lines.append(f"\n{key.title()}: {value}")
 
         lines.append("=" * 25)
 
@@ -141,7 +136,7 @@ class TextRenderer(Renderer):
         return {
             "name": "TextRenderer",
             "version": "1.0.0",
-            "metadata": {"show_empty": self.show_empty},
+            "metadata": {"style": "generic"},
         }
 ```
 

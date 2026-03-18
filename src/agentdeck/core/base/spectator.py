@@ -12,6 +12,13 @@ class Spectator:
 
     Spectators should treat all incoming state as read-only and prefer logging
     over stdout unless explicitly emitting structured summaries.
+
+    Preferred extension style for new spectators:
+    - implement `on_<event_name>(event: Event)` for the events you care about
+
+    The unpacked lifecycle helpers on this base class remain available when
+    named parameters are more convenient, but those handlers should accept
+    `**kwargs` because Console may attach additive lifecycle metadata.
     """
 
     def __init__(self, *, logger: Any = None) -> None:
@@ -22,8 +29,7 @@ class Spectator:
 
         Context includes: session_id, timestamp
 
-        Note: Per SPEC-SPECTATOR v1.0.0, uses **kwargs for forward compatibility.
-        Console may emit additional fields (session_id, seed, log_directory, etc.)
+        Note: uses **kwargs so lifecycle observers can tolerate additive session metadata.
         """
 
     def on_session_end(self, context: Optional[EventContext] = None, **kwargs: Any):
@@ -31,8 +37,7 @@ class Spectator:
 
         Context includes: session_id, timestamp
 
-        Note: Per SPEC-SPECTATOR v1.0.0, uses **kwargs for forward compatibility.
-        Console may emit additional fields (session_id, etc.)
+        Note: uses **kwargs so lifecycle observers can tolerate additive session metadata.
         """
 
     def on_batch_start(
@@ -48,7 +53,7 @@ class Spectator:
 
         Context includes: session_id, timestamp, batch_id
 
-        Note: Uses **kwargs for forward compatibility with batch-level metadata
+        Note: uses **kwargs so batch observers can tolerate additive metadata
         such as fairness policy.
         """
 

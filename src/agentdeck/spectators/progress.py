@@ -51,7 +51,13 @@ class ProgressDisplay(Spectator):
         self.match_durations: List[float] = []
 
     def on_batch_start(
-        self, batch_id: str, game, players, matches: int, context: Optional[EventContext] = None
+        self,
+        batch_id: str,
+        game,
+        players,
+        matches: int,
+        context: Optional[EventContext] = None,
+        **kwargs: Any,
     ) -> None:
         """Reset state and display batch start. Per SS3: explicit state reset."""
         self.batch_id = batch_id

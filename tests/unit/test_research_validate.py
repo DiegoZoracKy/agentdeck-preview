@@ -35,6 +35,7 @@ def _write_results_files(
     include_artifact_validation: bool = True,
     artifact_validation_all_passed: bool = True,
     schema_version: int = 3,
+    include_generated_at: bool = True,
 ) -> None:
     results_payload: Dict[str, Any] = {
         "schema_version": schema_version,
@@ -53,6 +54,8 @@ def _write_results_files(
             "by_player": {"Alice": {}},
         },
     }
+    if include_generated_at:
+        results_payload["generated_at"] = "2026-03-17T00:00:00Z"
     if include_statistics:
         results_payload["statistics"] = {
             "method": "exact_binomial",
@@ -243,6 +246,25 @@ def test_schema_v3_results_reject_failed_artifact_validation(tmp_path):
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert any("all_passed must be true" in e for e in errors)
+
+
+def test_results_without_generated_at_are_valid_for_deterministic_exports(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        schema_version=3,
+        include_generated_at=False,
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert errors == []
 
 
 def test_empty_research_tree_is_valid(tmp_path):

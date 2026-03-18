@@ -52,14 +52,15 @@ Prepare AgentDeck for a disciplined public beta release by:
 - Ongoing spec-compliance discipline built into normal development, not only pre-release cleanup
 
 ## Audit Order
-1. Hub and cross-spec coherence
-2. Core execution kernel
-3. Player pipeline and prompt contracts
-4. Observability, recorder, replay, and viewer
-5. Research stack and package contracts
-6. Public docs, examples, and release narrative alignment
+- [x] Wave 0. Audit framework
+- [x] Wave 1. Hub and cross-spec coherence
+- [x] Wave 2. Core execution kernel
+- [x] Wave 3. Player pipeline and prompt contracts
+- [x] Wave 4. Observability, recorder, replay, and viewer
+- [x] Wave 5. Research stack and package contracts
+- [x] Wave 6. Public docs, examples, and release narrative alignment
 
 ## Immediate Next Steps
-1. Execute the spec-compliance assessment plan in [docs/spec-compliance-audit-plan.md](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance-audit-plan.md).
-2. Fix any blocker/high-severity drifts discovered in the first audit wave.
-3. Only then lock the release-facing FixedDamage matrix and start the new experiment runs.
+1. Lock the release-facing FixedDamage plan and encode it as an AgentDeck-native experiment package.
+2. Run the new calibration and baseline cells on the audited codebase.
+3. Package the first public showcase experiment and viewer-supported replay set.

@@ -8,13 +8,6 @@
 > Authors: Claude, Diego Zoracky, Codex
 > Approvals: ✅ Diego, ✅ Codex, ✅ Claude
 > Audience: Game authors, framework contributors, researcher tool builders
->
-> **Changes in v0.7.0**:
-> - Add `on_match_forfeited()` hook for enriching terminal state after parse failures
-> - Add conclusion phase orchestration (policy-driven; game hooks optional)
-> - Add `on_handshake_complete()` hook (fixes bug - was documented but not called)
-> - Add `HandshakeResult` typed dataclass for type safety
-> - Document Hook Stability Guarantee principle (backward compatibility)
 
 ## 1. Purpose
 - Define the canonical contract for games plugged into AgentDeck’s console-driven execution loop.
@@ -29,7 +22,7 @@
 
 ## 3. Responsibilities
 - Own the complete game state machine: initialisation, action application, terminal evaluation.
-- Control all instructional and narrative content by mutating `game_state` and views; console never times or delivers narrative.
+- Own all instructional and narrative content. Console may deliver `instructions` and `default_handshake_template` during onboarding, but games define that content and how views evolve across play.
 - Emit domain events describing game semantics through the injected `GameEventEmitter`.
 - Provide deterministic outputs by consuming console-provided RNG forks only.
 - Expose filtered per-player views without leaking hidden information.
@@ -39,10 +32,10 @@
 ## 4. Public API
 
 ### instructions -> str
-- Role: Reference-only description of rules, objectives, and research notes.
+- Role: Canonical description of rules, objectives, and research notes.
 - Return: Plain string suitable for docs, lobby UIs, or researcher tooling (may be empty).
 - MUST: Avoid exposing hidden information that is not also surfaced via `get_view`.
-- NOTE: Console never reads or delivers this property; games decide when to surface narrative through state.
+- NOTE: Console may inject this property into handshake prompt composition via `{game_instructions}`. Games still own the content and may additionally surface instructional/narrative material through state and views.
 
 ### allowed_actions -> List[str]
 - Role: Canonical list of valid action strings for this game.
@@ -50,12 +43,13 @@
 - MUST: Return all actions that players may legally attempt during gameplay.
 - Usage: Console binds this to action controllers during match setup via `controller.bind_game(game)`.
 
-### setup(players: List[str]) -> Dict[str, Any]
+### setup(players: List[str], seed: int) -> Dict[str, Any]
 - Accept: Ordered player roster as negotiated by the console.
-- Perform: Build canonical `game_state` dictionary containing all data required for subsequent turns.
+- Perform: Build canonical `game_state` dictionary containing all data required for handshake, subsequent turns, and final observability.
 - Return: JSON-serialisable dict (keys/values ready for recorder, renderer, and replay).
 - Emit: MAY emit domain events via `emit_event` during setup.
 - MUST: Persist deterministic seed usage or derived randomness in `game_state` when relevant.
+- NOTE: Console may call `setup()` before the handshake phase so the initial state can inform onboarding. Mechanics may later receive that same state via `runtime.initial_state`.
 
 ### update(game_state: Dict[str, Any], player: str, action: ActionResult, *, rng: RandomGenerator) -> Dict[str, Any]
 - Accept: Current `game_state`, acting player name, parsed action, deterministic RNG fork.
@@ -444,7 +438,7 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 44. **TC3**: Controllers producing `HandshakeResult` MUST populate `metadata` field (empty dict if no metadata).
 
 ## 6. Data Flow & Interaction
-- **Session init**: Facade → Console (game, players, seed) → game.setup(players) → canonical `game_state`.
+- **Session init**: Facade → Console (game, players, seed) → game.setup(players, seed) → canonical `game_state`.
 - **Player ordering**: Console.run() → **game.get_player_order(players, rng=match_rng, match_context)** → returns None or custom list → Console applies configured fairness policy or validates custom order → records `player_order`, `player_order_source`, `first_player`, and fairness metadata.
 - **Handshake phase** *(updated in v0.7.0)*: Console._run_handshake() → Player.build_handshake_bundle() → PLAYER_HANDSHAKE_START → Player.execute_handshake() → Controller.validate_handshake() → **game.on_handshake_complete(state, player, handshake_result)** → updated state → PLAYER_HANDSHAKE_COMPLETE event → repeat for each player → MATCH_START.
 - **Match execution**: Console._play_match() → constructs `MatchRuntime` → **game.run(runtime, ordered_players)** → mechanic helper (TurnLoop, etc.) → (final_state, events, truncated).
@@ -473,8 +467,8 @@ class CoinFlipGame(Game):
     def instructions(self) -> str:
         return "Guess heads or tails. First correct guess wins."
 
-    def setup(self, players):
-        return {"round": 0, "coin": None, "winner": None}
+    def setup(self, players, seed):
+        return {"round": 0, "coin": None, "winner": None, "seed": seed}
 
     def update(self, game_state, player, action, *, rng):
         game_state = dict(game_state)  # copy for clarity
@@ -496,12 +490,13 @@ class FixedDamageGame(Game):
         self.attack_damage = attack_damage
         self.information_level = information_level  # "full" or "partial"
 
-    def setup(self, players):
+    def setup(self, players, seed):
         return {
             "health": {p: self.max_health for p in players},
             "potions": {p: 3 for p in players},
             "last_action": {p: None for p in players},
-            "turn": 1
+            "turn": 1,
+            "seed": seed,
         }
 
     def get_view(self, game_state, player):
@@ -532,8 +527,8 @@ class TutorialGame(Game):
         "Advanced tip: control the center squares.",
     ]
 
-    def setup(self, players):
-        return {"phase": 0, "board": empty_board(), "last_action": None}
+    def setup(self, players, seed):
+        return {"phase": 0, "board": empty_board(), "last_action": None, "seed": seed}
 
     def get_view(self, game_state, player):
         view = copy.deepcopy(game_state)

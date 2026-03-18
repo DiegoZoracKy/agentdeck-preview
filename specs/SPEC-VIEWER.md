@@ -60,6 +60,13 @@ interface MatchData {
   frames: GameplayFrame[];      // Extracted from events
   finalState: GameState;
   metadata: MatchMetadata;
+  lifecycle: {
+    handshakes: object[];
+    conclusions: object[];
+  };
+  outcome: string;
+  forfeitReason: string | null;
+  forfeitingPlayer: string | null;
 }
 ```
 
@@ -70,11 +77,12 @@ interface GameplayFrame {
   index: number;                // 0-based frame index
   turnNumber: number;           // Game turn (1-based)
   player: string;               // Acting player
-  action: string;               // "ATTACK" | "POTION" | ...
+  action: string | object;      // "ATTACK" | "POTION" | ... or normalized action payload
   stateBefore: GameState;
   stateAfter: GameState;
   timestamp: number;            // Original event timestamp
   prompt?: PromptData;          // Optional prompt/response data
+  reasoning?: string | null;
 }
 ```
 
@@ -134,12 +142,16 @@ class Timeline {
   readonly totalFrames: number
   readonly isPlaying: boolean
   readonly speed: number
+  readonly currentFrameData: GameplayFrame | null
+  readonly matchData: MatchData
 
   // Events
   onFrame(callback: (frame: GameplayFrame) => void): void
   onEnd(callback: (winner: string | null) => void): void
+  onStateChange(callback: () => void): void
   offFrame(callback): void
   offEnd(callback): void
+  offStateChange(callback): void
 }
 ```
 
@@ -161,7 +173,11 @@ interface Renderer {
   renderFrame(frame: GameplayFrame): void
 
   // Render match conclusion
-  renderVictory(winner: string | null, finalState: GameState): void
+  renderVictory(
+    winner: string | null,
+    finalState: GameState,
+    extras?: { outcome?: string; forfeitReason?: string | null; forfeitingPlayer?: string | null }
+  ): void
 
   // Cleanup resources
   destroy(): void

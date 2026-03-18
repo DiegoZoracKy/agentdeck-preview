@@ -17,7 +17,7 @@ This specification locks down AgentDeck’s event model so researchers can build
 - **Replay fidelity** (events replay exactly as recorded)  
 - **Tiny games** (rules only) and **composable spectators**
 
-It merges prior drafts into a single consensus document aligned with the philosophy in `SPEC.md` and `AGENTS.md`.
+It merges prior drafts into a single consensus document aligned with the philosophy in `SPEC.md` and `CONTRIBUTING.md`.
 
 ---
 
@@ -52,13 +52,13 @@ AgentDeck distinguishes three tiers of events. Ownership indicates which layer e
 | `MATCH_START` / `MATCH_END` | Console | All spectators | Include match metadata, final `MatchResult`, per-match seed, and ordered player list. |
 | `PLAYER_HANDSHAKE_START` / `PLAYER_HANDSHAKE_COMPLETE` / `PLAYER_HANDSHAKE_ABORT` | Console | All spectators | Player handshake phase events (before first turn). Include prompt metadata for reproducibility. |
 | `PLAYER_CONCLUSION` | Console | All spectators | Optional post-match reflection phase. Include prompt metadata when conclusion executed. |
-| `PLAYER_ACTION_PARSE_FAILED` | Console | All spectators | **New in v1.2.0**. Emitted when controller parsing fails. Includes raw response, candidates, metadata, and policy outcome. |
+| `PLAYER_ACTION_PARSE_FAILED` | Console | All spectators | Emitted when controller parsing fails. Includes raw response, candidates, metadata, and policy outcome. |
 
 > **Note:** `RUN_START` / `RUN_END` events are not currently implemented. Use `BATCH_START`/`END` for run-level boundaries when needed, or `SESSION_START`/`END` for session-level tracking.
 
 #### 3.1.1 Player Lifecycle Events
 
-Player lifecycle events track the three-phase player model (handshake → turn → conclusion) defined in SPEC-PLAYER v0.4.0.
+Player lifecycle events track the three-phase player model (handshake → turn → conclusion) defined in `SPEC-PLAYER.md`.
 
 **Handshake Phase Events** (emitted before first turn):
 
@@ -456,7 +456,7 @@ for event in custom_events:
 
 Console records ordering metadata and, when available, runtime-selected first-actor metadata. Research utilities can use `player_order_source` to distinguish console randomization from game-controlled ordering.
 
-**MatchResult.metadata Schema**: The `result` field in MATCH_END events contains a MatchResult object with standardized metadata structure (per SPEC-CONSOLE M1-M4):
+**MatchResult.metadata Schema**: The `result` field in MATCH_END events carries a `MatchResult` payload with standardized metadata structure (per SPEC-CONSOLE M1-M4):
 
 ```python
 {
@@ -584,7 +584,7 @@ Both styles work identically. The EventBus automatically detects the signature v
 
 ### Logger Injection
 
-Per SPEC-SPECTATOR v1.2.0 §5.5 (LI1-LI5), Console and ReplayEngine automatically inject logger into spectators:
+Per `SPEC-SPECTATOR.md` §5.5 (LI1-LI5), Console and ReplayEngine automatically inject logger into spectators:
 
 - Console/ReplayEngine inject `spectator.logger = self.logger` before EventBus subscription if `spectator.logger is None`
 - Spectators can use `self.logger.info()`, `self.logger.debug()`, etc. to write to core log streams (info.log, debug.log, console)
@@ -781,11 +781,11 @@ Automated tests should cover:
 ## 17. References
 
 - `SPEC.md` — Vision, architecture overview, success criteria.
-- `AGENTS.md` — Engineering philosophy, workflow guidelines.
-- `SPEC-GAME-MECHANIC-TURN-BASED.md` v1.1.0 — TurnLoop orchestration, EventFactory integration, StateAdapter, parse failure propagation.
-- `SPEC-CONSOLE.md` v0.5.0 — Match orchestration, lifecycle event emission, parse failure handling, §6.8 P4 (Logger injection).
-- `SPEC-SPECTATOR.md` v1.2.0 — Spectator contract, logger injection §5.5 (LI1-LI5), error isolation.
-- `SPEC-GAME.md` v0.7.0 — Game base classes, domain event emission via GameEventEmitter, parse-failure policy hook.
+- `CONTRIBUTING.md` — Engineering philosophy and workflow guidelines.
+- `SPEC-GAME-MECHANIC-TURN-BASED.md` — TurnLoop orchestration, EventFactory integration, StateAdapter, parse failure propagation.
+- `SPEC-CONSOLE.md` — Match orchestration, lifecycle event emission, parse failure handling, logger injection.
+- `SPEC-SPECTATOR.md` — Spectator contract, logger injection, error isolation.
+- `SPEC-GAME.md` — Game base classes, domain event emission via GameEventEmitter, parse-failure policy hook.
 - `src/agentdeck/core/event_bus.py` — EventBus implementation.
 - `src/agentdeck/core/turn_loop.py` — TurnLoop execution helper with EventFactory.
 - `src/agentdeck/core/event_factory.py` — EventFactory for standardized GAMEPLAY events.

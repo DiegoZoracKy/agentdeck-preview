@@ -55,20 +55,25 @@ class MatchRuntime:
         >>> runtime = MatchRuntime(
         ...     console=console,
         ...     game=game,
-        ...     match_context=match_ctx,
+        ...     match_id="match_1234",
+        ...     session_id="session_1234",
+        ...     batch_id="batch_1234",
+        ...     seed=42,
+        ...     max_turns=1000,
         ...     recorder=console.recorder,
         ...     logger=console.logger,
-        ...     rng=match_ctx.rng,
+        ...     rng=match_rng,
         ... )
         >>> # Emit events
         >>> runtime.emit_event(EventType.TURN_START, player=player_name, turn=1)
         >>> # Record turn
         >>> runtime.record_turn(
         ...     player=player_name,
-        ...     prompt_blocks=prompt_blocks,
-        ...     response_text=response,
+        ...     state_before=state_before,
+        ...     state_after=state_after,
         ...     action=action_result,
         ...     turn_context=turn_ctx,
+        ...     prompt_blocks=prompt_blocks,
         ... )
         >>> # Fork RNG
         >>> turn_rng = runtime.fork_rng(f"turn_{turn_number}")
@@ -416,7 +421,7 @@ class MatchRuntime:
 
         Example:
             >>> setup_rng = runtime.fork_rng("setup")
-            >>> state = game.setup(players, rng=setup_rng)
+            >>> state = game.setup(players, seed=setup_rng.seed)
             >>> for turn in range(1, max_turns + 1):
             ...     turn_rng = runtime.fork_rng(f"turn_{turn}")
             ...     state = game.update(state, player, action, rng=turn_rng)
@@ -444,7 +449,7 @@ class MatchRuntime:
             ValueError: If game.validate_state() raises or validation fails
 
         Example:
-            >>> state = game.setup(players)
+            >>> state = game.setup(players, seed=runtime.fork_rng("setup").seed)
             >>> runtime.validate_state(state)  # Validate initial state
             >>> state = game.update(state, player, action, rng=turn_rng)
             >>> runtime.validate_state(state)  # Validate after update

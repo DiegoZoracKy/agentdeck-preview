@@ -1,4 +1,4 @@
-"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP12)."""
+"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP14)."""
 
 import json
 import shutil
@@ -18,22 +18,34 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def _make_session(tmp_path: Path, *, include_model: bool = True) -> Path:
+def _make_session(
+    tmp_path: Path,
+    *,
+    session_name: str = "session_20260120_000000_abcd12",
+    batch_id: str = "batch_test",
+    match_id: str = "match_001",
+    seed: int = 123,
+    include_model: bool = True,
+    alice_model: str = "gpt-4o-mini",
+    bob_model: str = "gpt-4o-mini",
+    alice_module: str = "agentdeck.players.openai_player",
+    bob_module: str = "agentdeck.players.openai_player",
+) -> Path:
     run_dir = tmp_path / "agentdeck_runs"
-    session_dir = run_dir / "session_20260120_000000_abcd12"
+    session_dir = run_dir / session_name
     records_dir = session_dir / "records"
     records_dir.mkdir(parents=True)
 
     player_summaries = [
         {
             "name": "Alice",
-            "model": "gpt-4o-mini" if include_model else None,
+            "model": alice_model if include_model else None,
             "controller": "ActionOnlyController",
             "renderer": "TextRenderer",
         },
         {
             "name": "Bob",
-            "model": "gpt-4o-mini",
+            "model": bob_model,
             "controller": "ActionOnlyController",
             "renderer": "TextRenderer",
         },
@@ -42,11 +54,11 @@ def _make_session(tmp_path: Path, *, include_model: bool = True) -> Path:
     batch_data = {
         "schema_version": "1.3",
         "schema_type": "batch",
-        "batch_id": "batch_test",
+        "batch_id": batch_id,
         "match_refs": [
             {
-                "match_id": "match_001",
-                "filename": "match_001.json",
+                "match_id": match_id,
+                "filename": f"{match_id}.json",
                 "winner": "Alice",
                 "turns": 3,
                 "player_summaries": player_summaries,
@@ -60,23 +72,23 @@ def _make_session(tmp_path: Path, *, include_model: bool = True) -> Path:
             "matches_completed": 1,
             "started_at": "2026-01-20T00:00:00Z",
             "ended_at": "2026-01-20T00:01:00Z",
-            "seeds_used": [123],
+            "seeds_used": [seed],
             "configuration": {
                 "game": {"name": "FixedDamageGame"},
                 "players": [
-                    {"name": "Alice", "module": "agentdeck.players.openai_player"},
-                    {"name": "Bob", "module": "agentdeck.players.openai_player"},
+                    {"name": "Alice", "module": alice_module},
+                    {"name": "Bob", "module": bob_module},
                 ],
             },
         },
     }
 
     match_data = {
-        "match_id": "match_001",
+        "match_id": match_id,
         "players": ["Alice", "Bob"],
         "winner": "Alice",
         "final_state": {"winner": "Alice"},
-        "seed": 123,
+        "seed": seed,
         "started_at": "2026-01-20T00:00:00Z",
         "ended_at": "2026-01-20T00:00:01Z",
         "duration_seconds": 1.0,
@@ -104,8 +116,8 @@ def _make_session(tmp_path: Path, *, include_model: bool = True) -> Path:
         },
     }
 
-    _write_json(records_dir / "batch_batch_test.json", batch_data)
-    _write_json(records_dir / "match_001.json", match_data)
+    _write_json(records_dir / f"batch_{batch_id}.json", batch_data)
+    _write_json(records_dir / f"{match_id}.json", match_data)
 
     return session_dir
 
@@ -305,3 +317,91 @@ def test_load_batch_data_aggregates_multiple_batch_files(tmp_path):
     assert metadata["seeds_used"] == [123, 124]
     assert metadata["started_at"] == "2026-01-20T00:00:00Z"
     assert metadata["ended_at"] == "2026-01-20T00:03:00Z"
+
+
+def test_package_session_multi_session_aggregates_sources(tmp_path):
+    """RP13: Multi-session packaging aggregates checkpoints and records all sources."""
+    session_a = _make_session(
+        tmp_path,
+        session_name="session_20260120_000000_abcd12",
+        batch_id="batch_a",
+        match_id="match_001",
+        seed=123,
+    )
+    session_b = _make_session(
+        tmp_path,
+        session_name="session_20260120_000100_ef3456",
+        batch_id="batch_b",
+        match_id="match_002",
+        seed=124,
+    )
+    research_dir = _prepare_research_dir(tmp_path)
+
+    result = package_session(
+        session_dirs=[session_a, session_b],
+        session_dir=None,
+        session_id=None,
+        session_ids=None,
+        run_dir=tmp_path / "agentdeck_runs",
+        research_dir=research_dir,
+        experiment_id="2026-01-20-checkpoint-demo",
+        question="Do Alice and Bob remain stable across checkpoints?",
+        status="complete",
+        title="Checkpoint Demo",
+        include_matrix=False,
+        dry_run=False,
+    )
+
+    experiment_dir = Path(result["experiment_dir"])
+    manifest = yaml.safe_load((experiment_dir / "manifest.yaml").read_text(encoding="utf-8"))
+    results = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+    recordings_readme = (experiment_dir / "recordings" / "README.md").read_text(encoding="utf-8")
+
+    assert manifest["run"]["source_sessions"] == [
+        "session_20260120_000000_abcd12",
+        "session_20260120_000100_ef3456",
+    ]
+    assert results["source"]["recordings_dir"].endswith(
+        "session_20260120_000000_abcd12/records"
+    )
+    assert len(results["source"]["recordings_dirs"]) == 2
+    assert "session_20260120_000000_abcd12" in recordings_readme
+    assert "session_20260120_000100_ef3456" in recordings_readme
+    assert len(results["matches"]) == 2
+
+
+def test_package_session_multi_session_incompatible_fails(tmp_path):
+    """RP14: Multi-session packaging fails fast on incompatible checkpoints."""
+    session_a = _make_session(
+        tmp_path,
+        session_name="session_20260120_000000_abcd12",
+        batch_id="batch_a",
+        match_id="match_001",
+        seed=123,
+    )
+    session_b = _make_session(
+        tmp_path,
+        session_name="session_20260120_000100_ef3456",
+        batch_id="batch_b",
+        match_id="match_002",
+        seed=124,
+        bob_model="claude-haiku-4.5",
+        bob_module="agentdeck.players.anthropic_player",
+    )
+    research_dir = _prepare_research_dir(tmp_path)
+
+    with pytest.raises(ValueError, match="Incompatible sessions for checkpoint aggregation"):
+        package_session(
+            session_dirs=[session_a, session_b],
+            session_dir=None,
+            session_id=None,
+            session_ids=None,
+            run_dir=tmp_path / "agentdeck_runs",
+            research_dir=research_dir,
+            experiment_id="2026-01-20-checkpoint-demo",
+            question="Do Alice and Bob remain stable across checkpoints?",
+            status=None,
+            title=None,
+            include_matrix=False,
+            dry_run=False,
+        )

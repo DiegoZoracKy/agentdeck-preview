@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 2.0.0
-> Last Updated: 2026-02-03
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Codex, Diego Zoracky, Claude
 > Audience: Game authors implementing turn-based mechanics, core contributors, tooling authors
@@ -84,7 +84,7 @@ class TurnLoop:
 
 **Contract**:
 1. `run()` MUST perform the following steps:
-   1.1 Call `game.setup()` with ordered player names.  
+   1.1 Resolve the initial state: if `runtime.initial_state` is present, use it; otherwise fork `runtime.fork_rng("setup")` and call `game.setup(ordered_player_names, seed=setup_rng.seed)`.  
    1.2 Call `game.validate_state(initial_state)` if implemented.  
    1.3 Loop until `game.status(state).is_over` or runtime signals truncation:  
        - Build `TurnContext` (turn_number, acting player, RNG fork, timestamps).  
@@ -92,8 +92,7 @@ class TurnLoop:
        - Invoke `player.decide(...)` and pass transcripts maintained by runtime.  
        - On `ActionParseError`, call `runtime.handle_parse_failure` and follow returned policy.  
        - On success, call `game.update(state, player_name, action, rng=turn_rng)`; state MAY mutate in place or return new dict.  
-       - Emit GAMEPLAY event via `runtime.emit_event` before applying domain events.  
-       - Call `runtime.record_turn` with prompt/response/action metadata.  
+       - Call `runtime.record_turn` with prompt/response/action metadata; `runtime.record_turn` emits the canonical `GAMEPLAY` event.  
        - Call `game.get_events(...)` and emit each via runtime.  
        - Call `game.validate_state` after update.  
    1.4 Return `TurnResult(final_state, events, truncated_by_max_turns)`.
@@ -121,8 +120,8 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 - TurnLoop MUST preserve a game-supplied value when it is already equal to or ahead of the mechanic's expected next turn count, but games SHOULD NOT rely on mutating these fields directly for gameplay semantics.
 
 ### TL1 – Deterministic Setup
-- TurnLoop MUST call `runtime.fork_rng("setup")` before invoking `game.setup`.  
-- `game.setup` MUST NOT touch global randomness; any randomness comes from the forked RNG passed in.
+- When TurnLoop is responsible for creating the initial state, it MUST call `runtime.fork_rng("setup")` before invoking `game.setup`.  
+- `game.setup` MUST NOT touch global randomness; any randomness comes from the forked seed passed into setup or from subsequent runtime RNG forks.
 
 ### TL2 – Single Acting Player Per Turn
 - `get_current_player` MUST return a name present in `player_names`.  

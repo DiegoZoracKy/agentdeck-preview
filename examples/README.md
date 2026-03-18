@@ -53,10 +53,11 @@ python examples/minimal_experiment.py
 ```
 
 **Smart Defaults Used**:
-- `handshake_controller`: HandshakeController()
 - `renderer`: TextRenderer()
 - `prompt_builder`: PromptBuilder() with default templates
-- Templates: System-provided defaults for handshake, turn, conclusion
+- Handshake template: game instructions + gameplay format + handshake acknowledgement format
+- Turn template: `{game_view}`
+- Conclusion template: omitted unless explicitly provided
 
 ---
 
@@ -91,7 +92,7 @@ python examples/spectator_example.py
 - Deterministic seeding for reproducible results
 - Event replay in match_index order
 - Automatic progress monitoring with ProgressMonitor
-- 10× speedup with concurrency=10
+- How concurrency changes throughput on a provider-limited workload
 
 **Usage**:
 ```bash
@@ -123,7 +124,7 @@ python examples/test_parallel_execution.py
 python examples/replay_minimal.py
 
 # Replay specific recording
-python examples/replay_minimal.py --recording agentdeck_records/session_XXX/match_YYY.json --speed 1.0
+python examples/replay_minimal.py --recording agentdeck_runs/session_XXX/records/match_YYY.json --speed 1.0
 ```
 
 **Replay Features**:
@@ -229,8 +230,7 @@ from agentdeck.core.types import LogLevel
 config = AgentDeckConfig(
     seed=42,                      # Deterministic RNG
     concurrency=1,                # Parallel workers (default: 1 = sequential)
-    log_dir="./logs",             # Log directory
-    record_dir="./recordings",    # Recording directory
+    run_dir="./agentdeck_runs",   # Session root; logs/ and records/ live under it
     log_level=LogLevel.INFO,      # Log verbosity
     max_turns=100,                # Turn limit per match
 )

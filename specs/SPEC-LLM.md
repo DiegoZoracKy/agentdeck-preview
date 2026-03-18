@@ -1,8 +1,8 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.1.2
-> Last Updated: 2026-02-24
+> Version: 1.1.3
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
@@ -28,11 +28,11 @@
 - **Prompt hygiene**: For template-driven conclusion prompts, sanitize engine bookkeeping keys from rendered final-state views before LLM invocation.
 
 ## 4. Public API
-- `LLMPlayer(name, *, api_key=None, model=None, temperature=1.0, max_tokens=None, prompt=None, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, max_retries=3, retry_delay=1.0, **kwargs)`
+- `LLMPlayer(name, *, api_key=None, model=None, temperature=1.0, max_tokens=None, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, max_retries=3, retry_delay=1.0, **kwargs)`
   - **Note**: Single `controller` parameter per SPEC-PLAYER v1.2.0 / SPEC-CONTROLLER v1.3.0.
   - `conclusion_template=None` disables conclusion prompt composition; player SHOULD still record minimal conclusion prompt metadata for observability.
-  - `kwargs` forwarded to provider (top_p, penalties, etc.).
-  - Defaults: Null handshake/turn templates, TextRenderer. Controller parameter is required.
+  - `kwargs` forwarded to provider (top_p, penalties, optional `prompt`, etc.).
+  - Defaults: PromptBuilder handshake/turn defaults and `TextRenderer`. Controller parameter is required.
 - Subclass responsibilities:
   - `_initialize_client() -> None`: Setup provider SDK; raise informative errors if missing.
   - `_make_api_call(messages: List[Dict[str, str]]) -> Tuple[str, Dict]`: Perform single API call, returning response text and metadata (tokens, cost, provider model, etc.).
@@ -58,7 +58,7 @@
         )
     ```
 - Provided helpers:
-  - `_invoke_model(bundle, turn_context, *, phase: LifecyclePhase)` handles retry/backoff, logging, metadata packaging.
+  - `_invoke_model(bundle, turn_context)` handles retry/backoff, logging, and metadata packaging. Phase context is derived from the active lifecycle call.
   - `reset_conversation()`, `_history_source()`, `_append_history()` manage conversation state when no manager bound.
   - `get_stats()`, `get_summary()` expose cumulative usage metrics.
 
@@ -75,13 +75,13 @@
 
 ### 5.3 Metadata & Accounting (MA)
 7. **MA1**: MUST populate `usage_info` with tokens, prompt/completion tokens (when available), cost, latency_ms, model, provider identifiers.
-8. **MA2**: MUST accumulate `total_tokens`, `total_cost`, and `response_times` across calls for `get_stats()`.
+8. **MA2**: MUST accumulate `total_tokens`, `total_cost`, and latency samples across calls. `get_stats()` MUST expose `total_tokens`, `total_cost`, `avg_response_time`, and `model`.
 9. **MA3**: MUST attach retry counters (`retries`, `retry_durations`, `attempt_durations`) to metadata for recorder.
 10. **MA4**: SHOULD flag estimated metrics (`estimated=True`) when providers return approximations.
 
 ### 5.4 Conversation & History (CH)
 11. **CH1**: When `ConversationManager` is bound, MUST delegate history logging (handshake, turns, conclusion) to the manager.
-12. **CH2**: When manager absent, MUST append to `_local_history` (user/assistant pairs) and include handshake exchanges.
+12. **CH2**: When manager absent, player lifecycle recording MUST append to `_local_history` (user/assistant pairs) and include handshake exchanges.
 13. **CH3**: `reset_conversation()` MUST clear local history between matches regardless of handshake policy.
 14. **CH4**: For template-driven conclusion composition (no explicit `match_context.conclusion_prompt` override), LLM players MUST sanitize engine bookkeeping keys from final-state prompt views before invoking the model. At minimum `_turn_count` and `_first_player_idx` MUST be removed.
 
@@ -106,13 +106,15 @@
 26. **OR3**: OpenAI-backed players MUST normalize token-limit aliases (`max_tokens`, `max_completion_tokens`, `max_output_tokens`) to `max_output_tokens` before request dispatch, and MUST reject conflicting alias values with a clear `ValueError`.
 27. **OR4**: OpenAI-backed players MUST map usage fields `usage.input_tokens` / `usage.output_tokens` into internal metadata keys `prompt_tokens` / `completion_tokens` to keep pricing and spectator contracts stable.
 28. **OR5**: Until explicit server-history mode is introduced, OpenAI-backed players MUST send `store=False` on Responses API calls so match reproducibility remains grounded in local conversation history.
+29. **AR1**: Anthropic-backed players MUST supply `max_tokens` on every request. When callers leave `max_tokens` unset, implementations MUST apply a documented fallback.
+30. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, pass credentials into `vertexai.init(...)`, and infer `project_id` from the payload when possible.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:
-  1. **Handshake**: Build handshake messages → `_invoke_model(..., phase=HANDSHAKE)` → provider metadata stored in handshake extras.
-  2. **Turn**: Build turn messages → `_invoke_model(..., phase=TURN)` → action controller parse.
-  3. **Conclusion**: Optional reflection messages → `_invoke_model(..., phase=CONCLUSION)`.
-- `_invoke_model` collects metadata, updates totals, appends to history, and returns `(response_text, metadata)` to player.
+  1. **Handshake**: Build handshake messages → `_invoke_model(...)` → provider metadata stored in handshake extras.
+  2. **Turn**: Build turn messages → `_invoke_model(...)` → action controller parse.
+  3. **Conclusion**: Optional reflection messages → `_invoke_model(...)`.
+- `_invoke_model` collects metadata, updates totals, and returns `(response_text, metadata)` to the player lifecycle method. Prompt/response history is then recorded by `Player._record_exchange()`.
 - Recorder/spectators consume usage metadata from `HandshakeResult` / `ActionResult` extras.
 
 ## 7. Error Handling & Edge Cases
@@ -204,7 +206,7 @@ for player in players:
     print(f"{player.name}:")
     print(f"  Total cost: ${stats['total_cost']:.4f}")
     print(f"  Total tokens: {stats['total_tokens']}")
-    print(f"  Avg latency: {sum(stats['response_times']) / len(stats['response_times']):.0f}ms")
+    print(f"  Avg latency: {stats['avg_response_time'] * 1000:.0f}ms")
 ```
 
 ### Extended Example: Conversation Manager Integration
@@ -288,7 +290,6 @@ def test_retry_exponential_backoff():
             player._invoke_model(
                 bundle=MagicMock(messages=[{"role": "user", "content": "test"}]),
                 turn_context=None,
-                phase=LifecyclePhase.TURN
             )
 
     # Verify exponential backoff: delays should be ~0.1s, ~0.2s, ~0.4s
@@ -316,10 +317,10 @@ def test_usage_metadata_accumulation():
 
     with patch.object(player, '_make_api_call', side_effect=mock_api_call):
         # Call 1: Handshake
+        player._active_phase = "handshake"
         response1, meta1 = player._invoke_model(
             bundle=MagicMock(messages=[{"role": "user", "content": "handshake"}]),
             turn_context=None,
-            phase=LifecyclePhase.HANDSHAKE
         )
         assert meta1["usage_info"]["tokens_used"] == 100
         assert meta1["usage_info"]["cost"] == 0.002
@@ -328,14 +329,13 @@ def test_usage_metadata_accumulation():
         response2, meta2 = player._invoke_model(
             bundle=MagicMock(messages=[{"role": "user", "content": "turn"}]),
             turn_context=TurnContext(turn_number=1),
-            phase=LifecyclePhase.TURN
         )
 
     # Verify cumulative stats
     stats = player.get_stats()
     assert stats["total_tokens"] == 200  # 100 + 100
     assert stats["total_cost"] == 0.004  # 0.002 + 0.002
-    assert len(stats["response_times"]) == 2
+    assert stats["avg_response_time"] >= 0
 ```
 
 #### Test 4: Conversation history management with manager (CH1)
@@ -393,7 +393,6 @@ def test_prompt_metadata_capture():
         response, metadata = player._invoke_model(
             bundle=MagicMock(messages=[{"role": "user", "content": "Your turn"}]),
             turn_context=TurnContext(turn_number=1),
-            phase=LifecyclePhase.TURN
         )
 
     # Verify PM requirements

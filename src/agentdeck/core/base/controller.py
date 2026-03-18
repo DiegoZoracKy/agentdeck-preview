@@ -2,8 +2,8 @@
 Controller base class for AgentDeck framework.
 
 Implements unified controller architecture per:
-- SPEC-CONTROLLER v1.3.0 §4 (Public API - Single Controller)
-- SPEC-CONTROLLER v1.3.0 §5 (Invariants & Guarantees)
+- SPEC-CONTROLLER v1.3.2 §4 (Public API - Single Controller)
+- SPEC-CONTROLLER v1.3.2 §5 (Invariants & Guarantees)
 
 Key responsibilities:
 - Controller handles ALL player-game interaction phases:
@@ -21,7 +21,7 @@ Critical invariants:
 - MI1-MI2: Metadata integrity (JSON-serializable, debug aids)
 - DS1-DS2: Determinism & safety (no side effects, repeatable)
 
-Architecture note (v1.3.0):
+Architecture note (v1.3.2):
 - Handshake is lifecycle method with default implementation (accepts OK/READY/YES)
 - Subclasses override validate_handshake() for custom validation
 - Parallel pattern with Renderer (multiple methods, one object)
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 class Controller(ABC):
     """
-    Unified controller handling all player-game interaction phases (per SPEC-CONTROLLER v1.3.0 §4).
+    Unified controller handling all player-game interaction phases (per SPEC-CONTROLLER v1.3.2 §4).
 
     Controllers handle three lifecycle phases:
     1. **Handshake validation** - Default implementation (accepts OK/READY/YES), overridable
@@ -50,7 +50,8 @@ class Controller(ABC):
     Lifecycle:
         **Handshake Phase**:
         1. Console calls controller.get_handshake_format_instructions()
-        2. PromptBuilder injects instructions via {controller_format}
+        2. Player populates {controller_format} with get_format_instructions()
+           and {handshake_controller_format} with get_handshake_format_instructions()
         3. Player invokes LLM → raw acknowledgement string
         4. Console calls controller.validate_handshake(raw, context) → HandshakeResult
         5. Console enforces policy: accepted=True → proceed, accepted=False → abort
@@ -189,8 +190,9 @@ class Controller(ABC):
             ...     def get_handshake_format_instructions(self):
             ...         return "Reply with 'I confirm' to acknowledge."
 
-        Usage: PromptBuilder inserts this into handshake templates via
-               {controller_format} placeholder.
+        Usage: Player inserts this into handshake templates via
+               {handshake_controller_format}. Gameplay instructions still come
+               from get_format_instructions() via {controller_format}.
         """
         return "Reply with 'OK' if you understand and are ready to begin."
 
@@ -223,8 +225,8 @@ class Controller(ABC):
             >>> def bind_game(self, game: Game) -> None:
             ...     self._allowed_actions = {action.upper() for action in game.allowed_actions}
 
-        Note: Binding happens once per match. Controllers maintain binding state
-              for duration of match.
+        Note: Binding happens once per batch. Controllers maintain binding state
+              across matches in that batch.
         """
         pass  # Default no-op for controllers that don't validate
 
@@ -260,7 +262,7 @@ class Controller(ABC):
     @abstractmethod
     def parse(self, response: str) -> ParseResult:
         """
-        Parse turn action response (per SPEC-CONTROLLER v1.1.0 §4).
+        Parse turn action response (per SPEC-CONTROLLER v1.3.2 §4).
 
         Args:
             response: Raw LLM response string
@@ -297,12 +299,12 @@ class Controller(ABC):
 
         Caller conversion pattern:
             >>> parse_result = controller.parse(raw_response)
-            >>> action_result = parse_result.to_action_result(fallback="UNKNOWN")
+            >>> action_result = parse_result.to_action_result()
 
         Note: This method is called by Player.decide() during turn phase. Console
               never calls this directly - it only binds the game before handshake.
-              The caller is responsible for converting ParseResult to ActionResult
-              via to_action_result(fallback) to apply fallback semantics.
+              Parse failures must surface via ActionParseError rather than fallback
+              actions so artifacts preserve instruction-following failures.
         """
 
     # -------------------------------------------------------------------------
@@ -313,7 +315,7 @@ class Controller(ABC):
         self, response: str, *, context: Optional[TurnContext] = None
     ) -> Dict[str, Any]:
         """
-        Parse conclusion-phase response (per SPEC-CONTROLLER v1.3.0 §4).
+        Parse conclusion-phase response (per SPEC-CONTROLLER v1.3.2 §4).
 
         Default implementation returns {"reflection": response.strip()}. Override for
         custom conclusion parsing (e.g., extracting lessons_learned, strategy_adjustments).

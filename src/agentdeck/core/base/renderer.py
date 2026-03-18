@@ -2,8 +2,8 @@
 Renderer base class for AgentDeck v1.0.0 framework.
 
 Implements rendering contract per:
-- SPEC-RENDERER v0.3.0 §4 (Public API)
-- SPEC-RENDERER v0.3.0 §5 (Invariants & Guarantees)
+- SPEC-RENDERER v0.3.1 §4 (Public API)
+- SPEC-RENDERER v0.3.1 §5 (Invariants & Guarantees)
 - SPEC.md §5.7
 
 Key responsibilities:
@@ -29,7 +29,7 @@ from ..types import RenderResult, TurnContext
 
 class Renderer(ABC):
     """
-    Abstract base for game view renderers (per SPEC-RENDERER v0.3.0 §4).
+    Abstract base for game view renderers (per SPEC-RENDERER v0.3.1 §4).
 
     Renderers transform per-player game views (returned by Game.get_view()) into
     text or structured outputs for PromptBuilder, spectators, or UIs.
@@ -87,7 +87,8 @@ class Renderer(ABC):
         Requirements (MO1-MO3, EH1-EH2):
             - MO1: RenderResult.metadata MUST be JSON-serializable
             - MO3: SHOULD expose turn_context fields in metadata when provided
-            - EH1: MUST raise ValueError for missing required fields in game_view
+            - EH1: Generic renderers SHOULD tolerate arbitrary game_view shapes;
+              schema-specific renderers MAY raise descriptive errors for missing required fields
             - EH2: MUST tolerate absent turn_context (use defaults)
 
         Example:

@@ -72,10 +72,10 @@ Record files are generated automatically when running matches with AgentDeck:
 from agentdeck import AgentDeck, MockPlayer
 from agentdeck.games.examples import FixedDamageGame
 
-with AgentDeck() as deck:
-    result = deck.play(
-        game=FixedDamageGame(),
-        players=[MockPlayer("Alice"), MockPlayer("Bob")]
+with AgentDeck(game=FixedDamageGame()) as deck:
+    results = deck.play(
+        players=[MockPlayer("Alice"), MockPlayer("Bob")],
+        matches=1,
     )
 
 # Records saved to: agentdeck_runs/{session_id}/records/match_*.json

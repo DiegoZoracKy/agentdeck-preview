@@ -1,7 +1,7 @@
 # SPEC-RESEARCH-PACKAGER: Session to Experiment Packager
 
 > Status: Final
-> Version: 0.3.0
+> Version: 0.3.1
 > Last Updated: 2026-03-05
 > Implementation: ✅ Complete (packager module + CLI wrapper)
 > Authors: Codex, Diego ZoracKy
@@ -78,7 +78,7 @@ python scripts/research_package.py \
 5. **RP5**: Tool MUST update `research/INDEX.md` by calling `scripts/research_index.py`.
 6. **RP6**: Tool MUST fail if the experiment directory already exists (no implicit overwrite).
 7. **RP7**: Tool MUST fail fast if required fields cannot be inferred and no CLI override is supplied.
-8. **RP8**: Provider inference MUST reuse the same mapping as `scripts/research_export.py` (`_provider_from_module`).
+8. **RP8**: Provider inference MUST reuse the same mapping as `agentdeck.research.provider_utils.provider_from_module`.
 9. **RP9**: `matrix.yaml` MUST be optional by default; it is included only when explicitly requested.
 10. **RP10**: If `matrix.yaml` is not included, manifest MUST omit `run.matrix_source` and `artifacts.matrix_yaml`.
 11. **RP11**: Tool MUST auto-populate factual markdown blocks in `README.md` and `analysis.md`, and MUST NOT overwrite narrative sections outside marker blocks.

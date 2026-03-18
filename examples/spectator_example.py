@@ -22,16 +22,8 @@ def main():
     # Configure session
     config = AgentDeckConfig(
         seed=42,
-        log_dir="./logs",
-        record_dir="./recordings",
+        run_dir="./agentdeck_runs",
         log_level=None,  # Quiet mode
-    )
-
-    # Create deck with spectators
-    deck = AgentDeck(
-        game=FixedDamageGame(),
-        spectators=[stats, progress, tokens],  # Session spectators
-        session=config,
     )
 
     # Create players
@@ -45,7 +37,12 @@ def main():
     print("="*60)
 
     # Run matches - spectators will display progress automatically
-    results = deck.play(players, matches=10)
+    with AgentDeck(
+        game=FixedDamageGame(),
+        spectators=[stats, progress, tokens],
+        session=config,
+    ) as deck:
+        results = deck.play(players, matches=10)
 
     print("\n" + "="*60)
     print("Detailed Statistics")
@@ -66,7 +63,6 @@ def main():
         print(f"  Losses: {player_stats['losses']}")
         print(f"  Win Rate: {player_stats['win_rate']:.1%}")
         print(f"  Total Turns: {player_stats['total_turns']}")
-        print(f"  Actions: {player_stats['actions']}")
 
     # Token usage (would show data if using real LLM players)
     token_summary = tokens.get_summary()

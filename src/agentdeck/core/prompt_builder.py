@@ -1,7 +1,7 @@
 """
 Template-driven prompt composition for AgentDeck v1.0.0.
 
-This module implements the PromptBuilder class per SPEC-PROMPT-BUILDER v0.4.0,
+This module implements the PromptBuilder class per SPEC-PROMPT-BUILDER v0.4.1,
 providing deterministic, template-driven prompt composition for handshake, turn,
 and conclusion phases.
 
@@ -52,7 +52,7 @@ class PromptBuilder:
     """
     Template-driven prompt builder for three-phase player lifecycle.
 
-    Per SPEC-PROMPT-BUILDER v0.4.0, this class provides deterministic prompt
+    Per SPEC-PROMPT-BUILDER v0.4.1, this class provides deterministic prompt
     composition using Python str.format() templates for handshake, turn, and
     conclusion phases.
 
@@ -61,7 +61,7 @@ class PromptBuilder:
     - CD1-CD3: Deterministic composition (same inputs → same output)
     - MC1-MC3: Metadata capture (template_id, blocks_rendered, phase, turn_number)
     - PS1-PS3: Provider safety (immutable context, memoization, exception wrapping)
-    - EH1-EH3: Error handling (undefined placeholders, missing templates, provider errors)
+    - EH1-EH3: Error handling (optional placeholders, missing templates, provider errors)
 
     Example:
         # Inline templates
@@ -267,7 +267,7 @@ class PromptBuilder:
         """
         Render prompt for given phase with metadata capture.
 
-        Per SPEC-PROMPT-BUILDER v0.4.0 §4, this method:
+        Per SPEC-PROMPT-BUILDER v0.4.1 §4, this method:
         1. Selects template based on phase
         2. Evaluates custom providers (if any)
         3. Substitutes all placeholders
@@ -290,14 +290,14 @@ class PromptBuilder:
             PromptBundle with rendered text, blocks, and metadata
 
         Raises:
-            TemplateError: If placeholder undefined or provider fails
-            ValueError: If unsupported phase
+            TemplateError: If a custom provider fails
+            ValueError: If the phase is unsupported or conclusion composition is disabled
 
         Available auto-bound placeholders:
             - {game_view}: render_result.text
             - {controller_format}: controller_format
             - {handshake_controller_format}: handshake_controller_format (handshake only)
-            - Any key from extras dict (renders as empty string if not provided)
+            - Any key from extras dict
             - Any custom provider registered via bind()
 
         Example:
@@ -358,9 +358,9 @@ class PromptBuilder:
         # Extract placeholder names from template
         placeholder_names = self._extract_placeholders(template)
 
-        # Render template with substitutions (EH1)
-        # Use a default dict that returns empty string for missing keys (per SPEC §4 EH1)
-        # This allows extras keys and optional placeholders to render as empty when not provided
+        # Render template with substitutions.
+        # Missing placeholders intentionally render as empty strings so templates
+        # can express optional blocks without a parallel policy/config layer.
         class DefaultEmptyDict(dict):
             """Dict that returns empty string for missing keys."""
 

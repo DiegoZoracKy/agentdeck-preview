@@ -1,8 +1,8 @@
 # SPEC-PARALLEL: Console Parallel Match Execution
 
 > Status: Final
-> Version: 0.1.0
-> Last Updated: 2026-02-03
+> Version: 1.0.0
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Codex, Claude, Diego
 > Audience: Contributors, Research Engineers, Observability Maintainers
@@ -51,7 +51,7 @@
 - **Deterministic seeding:** worker scheduler MUST derive per-match seeds from `(base_seed + match_index)`; absence of seed keeps prior entropy semantics.  
 - **Event ordering:** spectators and recorder observe events replayed strictly by `match_index` (MATCH 0 → MATCH 1 → …) regardless of worker completion. Console MAY buffer early-completing matches until preceding indices have replayed, preserving live progress semantics.
 - **Session integrity:** console emits a single `SESSION_START`/`BATCH_START`/`MATCH_*` sequence even when matches execute in parallel.  
-- **Player order hook (v1.0 limitation):** games that depend on `previous_match_result` inside an overridden `get_player_order` are incompatible with parallel execution. Console MUST detect overrides of the base implementation and fall back to sequential execution with a warning.  
+- **Player order hook (v1.0 limitation):** the current beta implementation conservatively treats any game override of `get_player_order` as incompatible with parallel execution. Console MUST detect overrides of the base implementation and fall back to sequential execution with a warning.  
 - **Isolation:** each worker runs on deep-copied game and player instances with dedicated RNG; no mutable state is shared across matches.  
 - **Failure propagation:** first worker failure emits `BATCH_END` with partial results + error payload, and raises to caller. Best-effort cancellation of remaining workers is attempted but not guaranteed; results from failed matches are not counted.  
 - **Cloning failure:** if deep-copy fails for game or any player, console raises `ParallelExecutionError` before launching workers.
@@ -78,7 +78,7 @@
     3. (Future) Implement custom cloning support when available.
   ```
 - **Worker exception:** cancel outstanding futures, emit `BATCH_END` with `error`, rethrow root exception.  
-- **Parallel-incompatible game:** when `get_player_order` is present, log a warning and execute batch sequentially (effective concurrency=1) without raising.  
+- **Parallel-incompatible game:** when the game overrides `get_player_order`, log a warning and execute batch sequentially (effective concurrency=1) without raising.  
 - **Spectator exceptions:** no change—EventBus still isolates them.  
 - **Low match counts (< concurrency):** scheduler clamps worker count to number of matches; events replay once per completed match.  
 - **No seed:** matches inherit entropy-driven seeds as today; scheduler preserves recorded seeds in artifacts.  
@@ -87,12 +87,10 @@
 ## 9. Examples
 1. **Opt-in via session config**
    ```python
-   from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, GPTPlayer
-   from agentdeck.controllers import ActionOnlyController
+   from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, MockPlayer
 
    config = AgentDeckConfig(seed=42, concurrency=4)
-   players = [GPTPlayer("A", controller=ActionOnlyController()),
-              GPTPlayer("B", controller=ActionOnlyController())]
+   players = [MockPlayer("A"), MockPlayer("B")]
 
    with AgentDeck(game=FixedDamageGame(), session=config) as deck:
        results = deck.play(players, matches=40)

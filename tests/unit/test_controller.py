@@ -508,6 +508,15 @@ def test_reasoning_controller_to_action_result():
     assert exc_info.value.parse_result.error is not None
 
 
+def test_CP2_parse_conclusion_default_passthrough():
+    """Default conclusion parsing should return a reflection dict."""
+    controller = ActionOnlyController()
+
+    parsed = controller.parse_conclusion("  Good game!  ")
+
+    assert parsed == {"reflection": "Good game!"}
+
+
 # ============================================================================
 # FI1-FI2: Format Instructions Tests
 # ============================================================================

@@ -1,7 +1,8 @@
 # SPEC-PROMPT-BUILDER: Template-Driven Prompt Composition
 
 > Status: Final
-> Last Updated: 2026-02-03
+> Version: 0.4.1
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego ZoracKy, Codex, Claude
 > Audience: Researchers, player implementers, prompt engineers
@@ -26,12 +27,12 @@
 
 ## 4. Public API
 
-### PromptBuilder(*, handshake_template=None, turn_template=None, conclusion_template=None, renderer=None, controller=None)
+### PromptBuilder(*, handshake_template=None, turn_template=None, conclusion_template=None)
 
 Create PromptBuilder instance with phase-specific templates.
 
 **Contract**:
-- Accept: Optional template strings OR Path objects for each phase, optional renderer/controller for default blocks
+- Accept: Optional template strings OR Path objects for each phase
 - Perform: Store templates (loading from files if Path provided), prepare placeholder bindings
 - Templates use Python `str.format()` syntax: `"{placeholder_name}"`
 - Template parameters accept:
@@ -115,15 +116,14 @@ Render prompt for given phase by substituting template placeholders and capturin
 **Contract**:
 - Accept: Lifecycle phase (HANDSHAKE/TURN/CONCLUSION), renderer output, action controller format instructions, optional handshake controller format instructions, optional turn context, optional extras dict
 - Perform: Select template for phase, evaluate custom providers, substitute all placeholders, capture metadata, return PromptBundle
-- Raise: `TemplateError` if placeholder undefined, `ValueError` if unsupported phase
+- Raise: `TemplateError` if a custom provider fails, `ValueError` if unsupported phase or conclusion composition is disabled
 - Return: PromptBundle containing rendered prompt text, block metadata, and template info
 
 **Available placeholders** (automatically bound unless overridden):
-- `{game_name}`: Game name (from Game.name property)
 - `{game_view}`: Renderer output (RenderResult.text)
 - `{controller_format}`: Action controller format instructions
 - `{handshake_controller_format}`: Handshake controller format instructions (for handshake templates)
-- Any key from `extras` dict (renders empty string if key not provided)
+- Any key from `extras` dict (including values like `game_name`, `game_instructions`, or `player_instructions`)
 - Any custom provider registered via `bind()`
 
 **Note**: Placeholders from `extras` render as empty string when key not provided, allowing optional content without template changes.
@@ -187,7 +187,7 @@ builder = PromptBuilder.from_function(custom_compose)
 12. **PS3**: Provider exceptions MUST surface as `TemplateError` with block name and phase context for debugging.
 
 ### 5.5 Error Handling (EH)
-13. **EH1**: Undefined placeholder in template (not provided by auto-bound sources, extras, or custom providers) MUST raise `TemplateError` with placeholder name and template identifier. Missing keys from `extras` dict render as empty string (allowing optional placeholders).
+13. **EH1**: Missing placeholders MUST render as empty strings. PromptBuilder MUST NOT maintain a separate required/optional placeholder policy layer.
 14. **EH2**: Missing template for active phase MUST fall back to minimal default template (never fail silently).
 15. **EH3**: Providers raising exceptions MUST be wrapped in `TemplateError` with provider name and phase context.
 
@@ -247,7 +247,7 @@ class PromptBundle:
 ### TemplateError (Exception)
 ```python
 class TemplateError(Exception):
-    """Raised when template rendering fails (undefined placeholder, provider exception, etc.)"""
+    """Raised when provider-backed template rendering fails."""
     def __init__(self, message: str, placeholder: str = None, template_id: str = None, phase: str = None):
         self.placeholder = placeholder
         self.template_id = template_id
@@ -297,22 +297,22 @@ builder.compose(
 # Final prompt: "{game_instructions}\n\n\n\n{handshake_controller_format}"
 ```
 
-**Truly undefined placeholder (raises error)**:
+**Missing placeholder (renders as empty string)**:
 ```python
 # Template references {unknown_block} that's not in any source
 turn_template = "{game_view}\n{unknown_block}\n{controller_format}"
 builder.compose(phase=TURN, render_result=..., controller_format=..., extras={})
-# Raises: TemplateError("Undefined placeholder: 'unknown_block'", placeholder="unknown_block", template_id="turn")
+# Result: unknown_block renders as ""
 ```
 
-**Solution**: For optional content, use `extras` keys (render as empty when missing). For required content, ensure placeholders are provided.
+**Solution**: If a block is semantically required, enforce that in the caller or a provider. PromptBuilder itself stays permissive and template-driven.
 
 ### Missing Template for Phase
 ```python
 # Builder only has turn_template, but handshake phase requested
 builder = PromptBuilder(turn_template="{game_view}")
 builder.compose(phase=HANDSHAKE, ...)
-# Falls back to default: "Respond with OK"
+# Falls back to the built-in handshake default
 ```
 
 **Solution**: Provide templates for all phases you intend to use, or rely on defaults.
@@ -350,7 +350,7 @@ handshake_bundle = builder.compose(
     phase=LifecyclePhase.HANDSHAKE,
     render_result=RenderResult(text=""),  # No game state yet
     controller_format=controller.get_format_instructions(),
-    handshake_controller_format=handshake_controller.get_format_instructions(),
+    handshake_controller_format=controller.get_handshake_format_instructions(),
     extras={
         "game_instructions": game.instructions,
         "strategy": "Attack relentlessly...",
@@ -438,7 +438,7 @@ builder = PromptBuilder(
 | Determinism | CD1-CD3 | Compose twice with identical inputs; assert identical PromptBundle (text, blocks, metadata). |
 | Metadata capture | MC1-MC3 | Compose prompts; assert metadata includes template_id, phase, blocks_rendered; verify PromptBlock ordering. |
 | Provider safety | PS1-PS3 | Register provider raising exception; confirm TemplateError surfaces with context. |
-| Error handling | EH1-EH3 | Trigger undefined placeholder, missing template, provider exception; assert proper errors. |
+| Error handling | EH1-EH3 | Verify missing placeholders render empty strings, missing templates fall back to defaults, and provider exceptions surface as `TemplateError`. |
 | Phase selection | CD3 | Compose for each phase; assert correct template selected. |
 
 ## 11. Design Rationale

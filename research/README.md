@@ -52,6 +52,9 @@ python scripts/research_export.py \
   --output-dir research/YYYY-MM-DD-your-experiment
 ```
 
+Repeat `--recordings-dir` to aggregate multiple checkpoint/session directories
+into one export. Add `--no-generated-at` when you need deterministic diffs.
+
 5) Update the index:
 ```
 python scripts/research_index.py
@@ -64,6 +67,13 @@ research package in one step:
 ```
 python scripts/research_package.py \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
+  --question "Your research question here"
+```
+
+For checkpoint aggregation across multiple compatible sessions:
+```
+python scripts/research_package.py \
+  --session-ids session_A session_B \
   --question "Your research question here"
 ```
 

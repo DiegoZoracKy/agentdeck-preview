@@ -1,17 +1,11 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
 > Status: Final
-> Version: 1.3.2
-> Last Updated: 2026-02-24
+> Version: 1.3.3
+> Last Updated: 2026-03-17
 > Implementation: ✅ Implemented
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Game authors, LLM player implementers, research engineers
->
-> **Changes in v1.3.2**: Clarify that replay/research artifacts MUST remain grounded in local ConversationManager/player history, even when providers offer optional server-side conversation state features.
->
-> **Changes in v1.3.1**: Clarify that default conclusion prompt rendering MUST sanitize engine bookkeeping keys (e.g., `_turn_count`, `_first_player_idx`) from LLM-facing prompt text.
->
-> **Changes in v1.3.0**: Split handshake into build + execute steps so Console can emit `PLAYER_HANDSHAKE_START` with the exact prompt before the LLM call, restoring SPEC-OBSERVABILITY compliance.
 
 ## 1. Purpose
 - Define the contract every player must satisfy across the three lifecycle phases: **handshake**, **turn decisions**, and **conclusion**.
@@ -28,14 +22,14 @@
 ## 3. Responsibilities
 - **Handshake phase (two-step)**: Build a deterministic handshake prompt bundle without invoking the LLM, then execute the LLM call using that bundle and return the raw acknowledgement string for console validation while preserving the exchange in history.
 - **Turn phase**: Compose deterministic prompts via `PromptBuilder`, invoke the LLM, parse actions with the bound controller, and return `ActionResult` with metadata.
-- **Conclusion phase** *(policy-driven)*: Render post-match reflection template when enabled, invoke LLM, return reflection text (or `None`), and hide engine-only bookkeeping keys from default LLM-facing conclusion state views.
-- **Component management**: Provide controller, renderer, prompt builder, and (optionally) conversation manager. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER v1.3.0.
+- **Conclusion phase** *(policy-driven)*: Base `Player` implementations MUST record conclusion prompt metadata and MAY return `None`; provider-backed subclasses MAY additionally invoke an LLM and return reflection text while keeping the same metadata contract. Template-driven conclusion prompts MUST hide engine-only bookkeeping keys from default LLM-facing views.
+- **Component management**: Provide controller, renderer, prompt builder, and (optionally) conversation manager. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER.
 - **Metadata capture**: Attach prompt blocks, usage info (tokens, cost, latency), retry metrics, lifecycle phase, and controller metadata to the returned results.
 
 ## 4. Public API
-- `Player(name, *, controller, renderer=None, prompt=None, handshake_template=None, turn_template=None, conclusion_template=None, model="gpt-4", **config)`
+- `Player(name, *, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, model="gpt-4", **config)`
   - **v1.3.0 change**: Handshake is split into build + execute steps so Console can emit `PLAYER_HANDSHAKE_START` before the LLM call.
-  - **v1.2.0 change**: Single `controller` parameter (required) replaces `handshake_controller` plus a separate turn controller. Controller handles all lifecycle phases per SPEC-CONTROLLER v1.3.0.
+  - **v1.2.0 change**: Single `controller` parameter (required) replaces `handshake_controller` plus a separate turn controller. Controller handles all lifecycle phases per SPEC-CONTROLLER.
   - Defaults: `renderer` defaults to `TextRenderer()`.
   - Default templates:
     - `handshake_template`: `"You are playing {game_name}.\n\n{game_instructions}\n\n{player_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"` (front-loads all instructions)
@@ -46,16 +40,16 @@
     - **Path objects**: File path to load (e.g., `Path("prompts/handshake.txt")`)
     - When `Path` provided, player loads file contents (UTF-8) before use
     - Raises `FileNotFoundError` if path doesn't exist, `UnicodeDecodeError` if not valid UTF-8
-  - Note: `{player_instructions}` renders empty string when not provided in extras, so default template works with or without it.
+  - Note: `{player_instructions}` renders empty string when not provided in handshake metadata, so the default template works with or without it.
   - `controller` is required. Controller provides handshake validation (default accepts OK/READY/YES), turn parsing, and optional conclusion parsing.
   - Templates control what appears in each phase—researchers choose which placeholders to include.
 - `build_handshake_bundle(context: HandshakeContext) -> PromptBundle`
   - MUST render the handshake template (player override > game default > minimal built-in) and return the exact `PromptBundle` that will be sent to the LLM.
   - MUST NOT invoke the LLM or mutate conversation history.
-  - MUST populate `{controller_format}` and `{handshake_controller_format}` using `controller.get_handshake_format_instructions()`.
+  - MUST populate `{controller_format}` using `controller.get_format_instructions()` and `{handshake_controller_format}` using `controller.get_handshake_format_instructions()`.
 - `execute_handshake(bundle: PromptBundle, context: HandshakeContext) -> HandshakeResponse`
   - MUST invoke the LLM using `bundle.text`, return raw acknowledgement text, and preserve the exchange in history.
-  - MUST NOT validate; console calls `controller.validate_handshake(raw_response, context)` per SPEC-CONTROLLER v1.3.0.
+  - MUST NOT validate; console calls `controller.validate_handshake(raw_response, context)` per SPEC-CONTROLLER.
 - `decide(game_state: dict, *, turn_context: TurnContext) -> ActionResult`
   - MUST keep `game_state` immutable, build prompt via `PromptBuilder`, invoke LLM, parse response via `controller.parse()`, and return `ActionResult` with metadata.
 - `conclude(result: MatchResult, *, match_context: MatchContext) -> Optional[str]`
@@ -71,7 +65,7 @@
   - Abstract hook used by all lifecycle methods; subclasses MUST implement provider transport.
 - `bind_conversation_manager(manager)` / `reset_conversation()`
   - Integrate with console-injected `ConversationManager` and ensure history resets per match.
-- Introspection helpers: `describe()`, `get_summary()`, `get_stats()` SHOULD enumerate controllers, renderer, templates, and relevant LLM configuration.
+- Introspection helpers: base `Player` exposes `describe()` and `get_summary()`. Provider-backed subclasses such as `LLMPlayer` MAY additionally expose `get_stats()` for cumulative usage metrics.
 
 ## 5. Invariants & Guarantees
 ### 5.1 Handshake (HS)
@@ -79,7 +73,7 @@
 2. **HS2**: `build_handshake_bundle` MUST be deterministic for identical inputs (same `HandshakeContext` → same `PromptBundle`).
 3. **HS3**: Console MUST call `execute_handshake` with the exact `PromptBundle` returned by `build_handshake_bundle` (no re-rendering).
 4. **HS4**: Players MUST preserve handshake prompts/responses in conversation history unless researcher explicitly opts out.
-5. **HS5**: Players MUST return raw handshake responses in `HandshakeResponse.response_text`; console performs validation via `controller.validate_handshake()` per SPEC-CONTROLLER v1.3.0.
+5. **HS5**: Players MUST return raw handshake responses in `HandshakeResponse.response_text`; console performs validation via `controller.validate_handshake()` per SPEC-CONTROLLER.
 6. **HS6**: Players SHOULD use the default handshake template; controller's default validation accepts OK/READY/YES.
 
 ### 5.2 Prompt Pipeline (PP)
@@ -88,9 +82,9 @@
 8. **PP3**: Templates control which content appears in each phase; if a placeholder is in the template, it MUST be rendered; if absent, it MUST NOT appear.
 
 ### 5.3 Decision Semantics (DS)
-9. **DS1**: Turn controller `parse` MUST be called exactly once per decision; fallback semantics MUST be honoured.
+9. **DS1**: Turn controller `parse` MUST be called exactly once per decision; parse failures MUST surface via `ActionParseError` rather than fallback actions.
 10. **DS2**: Returned `ActionResult.metadata` MUST include raw prompt, prompt blocks, raw response, retries, attempt durations, usage info (if available), and controller metadata.
-11. **DS3**: Players MUST log controller failures via bound logger (if present) and propagate fallback actions without mutating state.
+11. **DS3**: Players MUST log controller failures via bound logger (if present) and propagate parsing failures without mutating state.
 12. **DS4**: LLM players MUST capture `usage_info` in `ActionResult.metadata` with `prompt_tokens` and `completion_tokens` fields for cost calculation (SPEC-PRICING § 7.1 M1-M2).
 
 ### 5.4 Conversation & State (CS)
@@ -101,7 +95,7 @@
 17. **CS5**: Replay/research reproducibility MUST remain based on locally recorded conversation history (ConversationManager or `_local_history`). Provider-managed history features MAY be added, but MUST be explicit opt-in and MUST NOT replace local prompt/response recording required by recorder/replay contracts.
 
 ### 5.5 Component Integrity (CI)
-18. **CI1** (v1.2.0): Controller MUST be pluggable; MUST be deterministic and stateless. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER v1.3.0.
+18. **CI1** (v1.2.0): Controller MUST be pluggable; MUST be deterministic and stateless. Controller handles all lifecycle phases (handshake, turn, conclusion) per SPEC-CONTROLLER.
 19. **CI2**: Players MUST expose `describe()` / `get_summary()` including controller name, renderer, model, temperature, and prompt strategy (with truncation for large strings).
 20. **CI3**: Players intended for parallel execution MUST supply a `clone()` implementation when default `copy.deepcopy` is insufficient (e.g., presence of LLM clients, sockets, thread locks). Implementations MUST recreate external resources while preserving configuration and aggregate metrics so worker clones behave identically to the original instance (see SPEC-PARALLEL §5).
 
@@ -157,6 +151,7 @@ class AggressiveBot(Player):
     def __init__(self, name: str, *, coaching: str):
         super().__init__(
             name=name,
+            controller=ActionOnlyController(),
             # Handshake includes instructions and coaching
             handshake_template="{game_instructions}\n{coaching}\n\nRespond 'OK' if ready.",
             # Turns only include game state and format (coaching remembered from handshake)
@@ -260,7 +255,7 @@ player = GPTPlayer(
 |-------|------------|--------------|
 | Handshake validation | HS1-HS6 | Ensure build+execute runs before turn 1, raw responses returned, defaults acknowledged, history preserved. |
 | Prompt composition | PP1-PP3 | Run multi-turn match with different templates; assert correct placeholders rendered and renderer metadata preserved. |
-| Controller fallback | DS1-DS3 | Mock controller parsing failure; check fallback action, metadata, and logger warning. |
+| Parse failure propagation | DS1-DS3 | Mock controller parsing failure; ensure `ActionParseError` surfaces, metadata is preserved, and logger warnings remain informative. |
 | Conversation logging | CS2-CS3 | Bind mock manager, run handshake + turns, ensure history entries recorded/reset. |
 | Component defaults | CI1-CI2 | Instantiate without components; assert defaults and describe/get_summary content. |
 
@@ -387,10 +382,10 @@ def test_conversation_reset():
 - Template-driven prompt composition keeps researchers in control—what you write is what gets sent to the LLM.
 - Two-step handshake preserves separation of concerns: Console emits lifecycle events before/after the LLM call; Player owns LLM interactions; Controller validates.
 - **Smart defaults (v1.2.0)**:
-  - `controller` parameter is required. Controller provides default handshake validation (accepts OK/READY/YES) per SPEC-CONTROLLER v1.3.0.
-  - Default `handshake_template` front-loads ALL instructions (game name, rules, player coaching, action format, acknowledgement format).
+  - `controller` parameter is required. Controller provides default handshake validation (accepts OK/READY/YES) per SPEC-CONTROLLER.
+  - Default `handshake_template` front-loads ALL instructions (game name, rules, player coaching, gameplay format, acknowledgement format).
     - Includes: `{game_name}`, `{game_instructions}`, `{player_instructions}` (optional), `{controller_format}`, `{handshake_controller_format}`.
-    - Researchers can pass `player_instructions` via extras without reconfiguring templates.
+    - Researchers can pass `player_instructions` via handshake metadata without reconfiguring templates.
     - When `player_instructions` not provided, placeholder renders as empty string (no template change needed).
   - Default `turn_template` is minimal: just `{game_view}` (current state only).
     - LLM remembers game name, rules, and action format from handshake via conversation history.

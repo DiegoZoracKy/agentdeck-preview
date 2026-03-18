@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 1.1.0
 > Last Updated: 2026-02-03
-> Implementation: ✅ Complete (Recorder schema v1.3 alignment)
+> Implementation: ✅ Complete (Recorder v1.x alignment)
 > Authors: Codex, Claude (consensus)
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors
 
@@ -16,18 +16,18 @@
 - Grounded in `SPEC.md` §2.4: reproducibility requires perfect replay parity for research validity.
 - Upholds `SPEC-OBSERVABILITY.md`: Replay emits same event types with same payloads as live execution for spectator compatibility.
 - Reinforces `SPEC.md` §2.4: enable data-driven iteration via replay analysis tools that behave identically to live spectators.
-- **Clean slate design**: v1.1 spec targets SPEC-RECORDER v1.3 format only—no backward compatibility, no legacy shims.
-- **Event parity over inference**: Refuse to synthesize missing data; replay is playback, not re-execution.
+- **Current-schema design**: replay targets Recorder v1.x artifacts and the current in-memory `MatchResult` surface.
+- **Replay-first parity**: Prefer recorded payloads as the source of truth. Replay MAY synthesize missing handshake-start events only when needed to restore the live lifecycle ordering from a valid recording.
 - Non-goals: Recording logic (`SPEC-RECORDER.md`), spectator implementations (`SPEC-SPECTATOR.md`), live execution (`SPEC-CONSOLE.md`).
 
 ## 3. Responsibilities
-- **Artifact Ingestion**: Load SPEC-RECORDER v1.3 artifacts (JSON schema 1.x) and hydrate deterministic event timeline including three-phase lifecycle.
-- **Prompt Replay**: Consume Recorder's enriched `events` stream (schema v1.3) and emit lifecycle events with embedded prompt payloads so prompt metadata survives round-trip without a separate dialogue transcript.
+- **Artifact Ingestion**: Load Recorder v1.x artifacts and hydrate deterministic event timelines including the three-phase lifecycle.
+- **Prompt Replay**: Consume Recorder's enriched `events` stream and emit lifecycle events with embedded prompt payloads so prompt metadata survives round-trip without a separate dialogue transcript.
 - **Context Reconstruction**: Rebuild EventContext from stored metadata (session_id, batch_id, match_id, phase_index, timestamp) without recomputation.
 - **Event Emission**: Emit PLAYER_HANDSHAKE_* → MATCH_START → recorded events → PLAYER_CONCLUSION (when present) → MATCH_END through EventBus for spectator consumption (matches live execution order per SPEC-CONSOLE §6.6 E1).
 - **Playback Control**: Support speed multiplier (2.0 = 2x speed, 0.5 = half speed, 0.0 = instant) via ReplayScheduler for time-based delays.
 - **Spectator Binding**: Subscribe spectators to isolated EventBus before replay, unsubscribe after (same semantics as live execution).
-- **State Tracking**: Maintain state_before/state_after continuity during gameplay event replay using recorded turn metadata (no on-the-fly recomputation).
+- **State Preservation**: Re-emit recorded `state_before` / `state_after` payloads without recomputation.
 - **Parity Guarantees**: Ensure replayed events match recorded events (type, data, context, ordering) for analysis validity.
 
 ## 4. Data Structures
@@ -38,7 +38,7 @@
 class ReplayEngine:
     def __init__(
         self,
-        match_artifact: Union[MatchResult, Dict[str, Any]],
+        match_result: Union[MatchResult, Dict[str, Any]],
         *,
         scheduler: Optional[ReplayScheduler] = None,
     ):
@@ -46,8 +46,8 @@ class ReplayEngine:
         Load match for replay.
 
         Args:
-            match_artifact: MatchResult object or dict (from Recorder.load_match()).
-                           MUST conform to SPEC-RECORDER v1.3 schema.
+            match_result: MatchResult object or dict (from Recorder.load_match()).
+                         MUST conform to Recorder v1.x schema expectations.
             scheduler: Playback scheduler (defaults to ReplayScheduler()).
 
         Raises:
@@ -63,7 +63,7 @@ class ReplayEngine:
         self.scheduler = scheduler or ReplayScheduler()
 ```
 
-**Guarantees**: MUST deserialize Recorder schema v1.3 artifacts. MUST hydrate events (with embedded prompt payloads) and metadata. MUST initialize isolated EventBus. MUST raise ValueError if schema invalid.
+**Guarantees**: MUST deserialize Recorder v1.x artifacts. MUST hydrate events (with embedded prompt payloads) and metadata. MUST initialize isolated EventBus. MUST raise ValueError if schema invalid.
 
 ### ReplayScheduler
 
@@ -83,23 +83,22 @@ class ReplayScheduler:
         Calculate delay between events based on timestamps and speed multiplier.
 
         Returns:
-            Delay in seconds (0.0 if speed <= 0 or NaN)
+            Delay in seconds (0.0 if speed <= 0)
         """
 ```
 
-**Guarantees**: MUST compute delays from event timestamps. MUST respect speed multiplier (speed=2.0 → half delay). MUST treat speed <= 0 or NaN as zero delay (instant replay).
+**Guarantees**: MUST compute delays from event timestamps. MUST respect speed multiplier (speed=2.0 → half delay). Zero or negative speed MUST behave as instant replay.
 
 ## 5. Public API
 
-### ReplayEngine(match_artifact, *, scheduler=None)
+### ReplayEngine(match_result, *, scheduler=None)
 
 Create ReplayEngine from recorded match.
 
 **Contract**:
-- Accept: MatchResult or dict from `Recorder.load_match()` conforming to Recorder schema v1.3 (enriched events), optional ReplayScheduler
+- Accept: MatchResult or dict from `Recorder.load_match()` conforming to Recorder schema v1.x (enriched events), optional ReplayScheduler
 - Perform: Deserialize events into Event objects, rehydrate metadata (match_id, session_id, players, game, seed), initialize isolated EventBus
-- Raise: ValueError if `schema_version` missing or not compatible with v1.3, ValueError if mandatory sections (`events`, `metadata`) missing
-- MUST: Validate event prompt payloads follow SPEC-RECORDER §6.7 (PM1-PM6) structure
+- Raise: ValueError if `schema_version` missing or not compatible with Recorder v1.x
 - MUST: Initialize ReplayScheduler (use provided or create default)
 
 ### replay(spectators: List[Spectator], speed: Optional[float] = None) -> None
@@ -107,10 +106,9 @@ Create ReplayEngine from recorded match.
 Execute replay with spectators.
 
 **Contract**:
-- Accept: List of spectator instances, optional speed override (overrides scheduler's default speed)
+- Accept: List of spectator instances, optional numeric speed override (overrides scheduler's default speed)
 - Perform: Subscribe spectators to EventBus, emit lifecycle and recorded events with computed delays, unsubscribe spectators
 - Emit: Event sequence per LC1-LC5 (PLAYER_HANDSHAKE_* → MATCH_START → recorded events → PLAYER_CONCLUSION → MATCH_END)
-- Raise: ValueError if speed is invalid type
 - MUST: Catch and log spectator exceptions per SPEC-SPECTATOR §5.3 EI1 (error isolation), continue replay with remaining spectators
 - MUST: Respect speed multiplier for delays (0.0 = instant, 2.0 = 2x speed)
 - MUST: Replay events in exact recorded order
@@ -120,9 +118,8 @@ Execute replay with spectators.
 ## 6. Invariants & Guarantees
 
 ### 6.1 Input Normalization (IN)
-1. **IN1**: MUST accept only SPEC-RECORDER schema v1.3 artifacts (raise ValueError if `schema_version` missing or incompatible with v1.3).
-2. **IN2**: MUST accept dict artifacts from `Recorder.load_match()` (JSON schema v1.3). MAY accept `MatchResult` objects for convenience, but MUST require `match_result.metadata["events"]` to contain recorded events serialized by Recorder.
-3. **IN3**: MUST validate that every event requiring prompt metadata (handshake, gameplay, conclusion, parse_failure) includes a well-formed `prompt` payload per SPEC-RECORDER §6.7. Raise ValueError if any prompt payload is missing required fields.
+1. **IN1**: MUST accept Recorder v1.x artifacts (raise `ValueError` if `schema_version` missing or incompatible with v1.x).
+2. **IN2**: MUST accept dict artifacts from `Recorder.load_match()`. MAY also accept `MatchResult` objects for convenience, using `match_result.events` as the replay stream and `match_result.metadata` for replay metadata.
 
 ### 6.2 Event Parity (EP)
 4. **EP1**: MUST replay every recorded event exactly once, in recorded order, with identical event type and data payload.
@@ -131,16 +128,16 @@ Execute replay with spectators.
 
 ### 6.3 Timing & Ordering (TO)
 7. **TO1**: MUST replay events sequentially in recorded order; no reordering allowed.
-8. **TO2**: MUST compute inter-event delays via ReplayScheduler and apply speed multiplier (delay = recorded_delta / speed).
-9. **TO3**: MUST treat speed <= 0 or NaN as zero delay (instant replay, skip all waits).
+8. **TO2**: MUST compute inter-event delays via `ReplayScheduler` and apply speed multiplier (`delay = recorded_delta / speed`).
+9. **TO3**: MUST treat speed <= 0 as zero delay (instant replay, skip all waits).
 
 ### 6.4 Context Reconstruction (CR)
 10. **CR1**: MUST extract session_id, batch_id, match_id from metadata when not present in event context.
 11. **CR2**: MUST preserve phase_index from recorded events as read-only (do not recompute from turn_number or other fields).
 
 ### 6.5 Lifecycle Events (LC)
-12. **LC1**: MUST emit events in exact order: **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per player) → **MATCH_START** → **GAMEPLAY** events → **PLAYER_CONCLUSION** (per player when present) → **MATCH_END**. This matches live execution order per SPEC-CONSOLE §6.6 E1.
-13. **LC2**: MUST emit recorded PLAYER_HANDSHAKE_* events (with embedded prompt payloads) before MATCH_START to match live execution ordering.
+12. **LC1**: MUST emit events in exact order: **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per player) → **MATCH_START** → recorded events → **PLAYER_CONCLUSION** (per player when present) → **MATCH_END**. This matches live execution order per SPEC-CONSOLE §6.6 E1.
+13. **LC2**: MUST emit handshake lifecycle events before `MATCH_START` to match live execution ordering. When a valid recording contains `PLAYER_HANDSHAKE_COMPLETE|ABORT` without an explicit `PLAYER_HANDSHAKE_START`, ReplayEngine MAY synthesize the missing START event from the recorded prompt payload.
 14. **LC3**: MUST emit MATCH_START after handshake phase completes, with rehydrated game/player metadata.
 15. **LC4**: MUST emit MATCH_END after all recorded gameplay/domain events AND any PLAYER_CONCLUSION events, with MatchResult containing winner, final_state, seed.
 16. **LC5**: MUST emit recorded PLAYER_CONCLUSION events before MATCH_END when present (prompt payload `phase="conclusion"`).
@@ -151,8 +148,8 @@ Execute replay with spectators.
 19. **PM3**: MUST treat the recorded event payload (`event.data["prompt"]`) as the canonical source for prompt metadata (never synthesize or recompute prompt data).
 
 ### 6.7 State Tracking (ST)
-20. **ST1**: MUST maintain state_before/state_after continuity across GAMEPLAY events (state_after from event N becomes state_before for event N+1).
-21. **ST2**: MUST use recorded turn_number and phase_index without recomputation (playback, not re-execution).
+20. **ST1**: MUST preserve recorded `state_before` / `state_after` payloads exactly as stored in gameplay events.
+21. **ST2**: MUST use recorded `turn_number` and `phase_index` metadata without recomputation (playback, not re-execution).
 
 ### 6.8 Spectator Isolation (SI)
 22. **SI1**: MUST emit events through a dedicated EventBus instance, preventing interference with live sessions or other replays.
@@ -163,18 +160,17 @@ Execute replay with spectators.
 ## 7. Data Flow & Interaction
 
 ### Replay Initialization
-1. ReplayEngine receives match_artifact (MatchResult or dict).
-2. Validate schema_version is compatible with Recorder v1.3 (raise ValueError otherwise).
+1. ReplayEngine receives `match_result` (MatchResult or dict).
+2. Validate `schema_version` is compatible with Recorder v1.x (raise `ValueError` otherwise).
 3. Deserialize events into Event objects (including prompt payloads).
 4. Extract metadata (match_id, session_id, batch_id, players, game, seed).
 5. Initialize isolated EventBus and ReplayScheduler.
 
 ### Replay Execution
 1. Subscribe spectators to EventBus.
-2. Emit PLAYER_HANDSHAKE_START for each player.
-3. Emit recorded PLAYER_HANDSHAKE_COMPLETE|ABORT events (prompt payload phase="handshake").
-4. Emit MATCH_START with reconstructed game/player metadata (AFTER handshake phase, matching live execution order per SPEC-CONSOLE §6.6 E1).
-5. For each recorded event in chronological order (including PLAYER_CONCLUSION when present):
+2. Emit recorded handshake events before `MATCH_START`, synthesizing missing `PLAYER_HANDSHAKE_START` events only when required to restore the live lifecycle ordering.
+3. Emit `MATCH_START` with reconstructed game/player metadata after handshake phase completes.
+4. For each remaining recorded event in chronological order (including `PLAYER_CONCLUSION` when present):
    - Compute delay from timestamps via scheduler.
    - Sleep delay (unless speed == 0.0).
    - Rehydrate EventContext (match_id, session_id, phase_index, timestamp).
@@ -195,13 +191,11 @@ Execute replay with spectators.
 ## 8. Error Handling & Edge Cases
 
 **Input Validation**:
-- Missing `schema_version` or `schema_version != 1.x` → **MUST raise ValueError** with descriptive message stating required schema version.
-- Missing mandatory sections (`events`, `metadata`) → **MUST raise ValueError** listing missing fields.
-- Malformed prompt payload (`event.data["prompt"]` missing required PM fields per SPEC-RECORDER §6.7) → **MUST raise ValueError** with specific validation error.
+- Missing `schema_version` or unsupported major schema version → **MUST raise `ValueError`** with a descriptive message.
 
 **Playback Control**:
-- `speed < 0` or `speed == NaN` → **MUST treat as 0.0** (instant replay, skip all delays).
-- Invalid `speed` type (e.g., string) → **MUST raise ValueError**.
+- `speed < 0` → **MUST treat as 0.0** (instant replay, skip all delays).
+- Non-numeric `speed` values are invalid input and are outside the public contract.
 
 **Spectator Exceptions**:
 - Spectator raises exception during event handling → **MUST catch and log** per SPEC-SPECTATOR §5.3 EI1 (error isolation).
@@ -210,7 +204,7 @@ Execute replay with spectators.
 
 **Context Reconstruction**:
 - Missing context fields in recorded events → **MUST fallback to metadata** (session_id, match_id from metadata.session_id, metadata.match_id).
-- Missing `phase_index` in recorded event → **MUST raise ValueError** (required field for deterministic turn ordering).
+- Missing `phase_index` in a recorded event is tolerated when the artifact provides no phase metadata; replay preserves whatever context was recorded and falls back to event order where necessary.
 
 ## 9. Examples
 
@@ -388,13 +382,13 @@ viewer.print_summary()
 
 - `specs/SPEC.md` §2.4 (Reproducibility, replay parity)
 - `specs/SPEC-OBSERVABILITY.md` §3.1.1 (Player lifecycle events), §8.1 (Event payload schemas)
-- `specs/SPEC-RECORDER.md` v1.3.0 §6.7 (Prompt payload structure within events)
-- `specs/SPEC-PLAYER.md` v0.4.0 (Three-phase player model: handshake → turn → conclusion)
-- `specs/SPEC-CONSOLE.md` v0.3.0 (Live execution lifecycle for comparison), §6.8 P4 (Logger injection pattern)
-- `specs/SPEC-SPECTATOR.md` v1.2.0 (Logger injection contract §5.5 LI1-LI5, spectator lifecycle, error isolation)
-- `specs/AGENTS.md` §2.3 (Data-driven iteration philosophy)
+- `SPEC-RECORDER.md` §6.7 (prompt payload structure within events)
+- `SPEC-PLAYER.md` (three-phase player model: handshake → turn → conclusion)
+- `SPEC-CONSOLE.md` (live execution lifecycle for comparison, logger injection pattern)
+- `SPEC-SPECTATOR.md` (logger injection contract, spectator lifecycle, error isolation)
+- `CONTRIBUTING.md` §2-3 (data-driven iteration and workflow philosophy)
 
 ---
 
 **Ready for implementation.**
-This specification defines the v1.1.0 contract for replay with complete lifecycle support (handshake, turns, conclusion, parse failures) using Recorder v1.3's enriched event payloads as the single source of prompt metadata.
+This specification defines the current replay contract for complete lifecycle support (handshake, turns, conclusion, parse failures) using Recorder v1.x enriched event payloads as the single source of prompt metadata.

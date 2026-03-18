@@ -1,14 +1,11 @@
 # SPEC-CONTROLLER: Unified Controller Contract
 
 > Status: Final
-> Version: 1.3.1
-> Last Updated: 2026-02-19
+> Version: 1.3.2
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
 > Authors: Diego ZoracKy, Codex, Claude
 > Audience: Player authors, controller implementers, validation tooling
->
-> **Changes in v1.3.0**: Unified single-controller architecture. Controllers now handle all lifecycle phases (handshake, turn, conclusion) via lifecycle methods instead of separate controller classes. See §14 Migration Guide for dual-controller → single-controller transition.
-> **Changes in v1.3.1**: Clarified bound parsing behavior for built-in controllers: `ACTION:` extraction is line-anchored (avoids matching narration labels like `Last Action:`), and when bound to a game they deterministically prioritize game-allowed actions from candidates/mentions before returning parse failure.
 
 ## 1. Purpose
 - Define controller responsibilities for **all player-game interaction phases**: handshake validation, turn action parsing, and optional conclusion parsing.
@@ -40,7 +37,7 @@
 ```python
 class Controller(ABC):
     """
-    Unified controller handling all player-game interaction phases (v1.3.0).
+    Unified controller handling all player-game interaction phases (v1.3.2).
 
     Lifecycle phases:
     1. Handshake: validate_handshake() - Default accepts OK/READY/YES
@@ -54,11 +51,10 @@ class Controller(ABC):
         """
         Return handshake format instructions for PromptBuilder template injection.
 
-        Template placeholders (backward compatibility):
-        - {handshake_controller_format}: New placeholder (recommended)
-        - {controller_format}: Legacy placeholder during handshake phase
-
-        Player populates both placeholders with this method's output during handshake.
+        Template placeholders during handshake:
+        - {handshake_controller_format}: populated from this method
+        - {controller_format}: populated from get_format_instructions() so the
+          handshake can front-load gameplay instructions
 
         Default: "Reply with 'OK' if you understand and are ready to begin."
         Override for custom instructions.
@@ -145,14 +141,14 @@ class Controller(ABC):
         """
         Parse conclusion reflection (optional, default passthrough).
 
-        Default implementation: {"reflection_text": response.strip()}
+        Default implementation: {"reflection": response.strip()}
         Override for structured parsing (e.g., extract lessons_learned, strategy_adjustments).
 
         Args:
             response: Raw LLM conclusion string
 
         Returns:
-            Dictionary with parsed conclusion metadata (e.g., reflection_text)
+            Dictionary with parsed conclusion metadata (e.g., reflection)
         """
 ```
 
@@ -403,7 +399,7 @@ class StrictReasoningController(ReasoningController):
         else:
             return HandshakeResult(
                 accepted=False,
-                normalized_response="",
+                normalized_response=None,
                 raw_response=raw,
                 reason=f"Must include phrase: '{required_phrase}'",
                 metadata={"validation_mode": "strict", "required_phrase": required_phrase}

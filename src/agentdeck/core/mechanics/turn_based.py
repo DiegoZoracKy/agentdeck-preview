@@ -11,7 +11,7 @@ Key components:
 - TurnLoop: Helper that executes deterministic turns using MatchRuntime
 
 Critical invariants:
-- TL1: Deterministic Setup - fork RNG before game.setup()
+- TL1: Deterministic Setup - reuse runtime.initial_state or fork RNG before game.setup()
 - TL2: Single Acting Player - get_current_player must return valid player
 - TL3: Runtime Usage - MUST use runtime for all infrastructure
 - TL4: Prompt/Response Capture - every decide() → record_turn()
@@ -84,8 +84,8 @@ class TurnBasedGame(Game):
 
     Example:
         >>> class MyGame(TurnBasedGame):
-        ...     def setup(self, players):
-        ...         return {"health": {p: 100 for p in players}}
+        ...     def setup(self, players, seed):
+        ...         return {"health": {p: 100 for p in players}, "seed": seed}
         ...
         ...     def update(self, state, player, action, *, rng):
         ...         # Apply action
@@ -264,7 +264,7 @@ class TurnLoop:
         Execute turn-based game flow with MatchRuntime infrastructure.
 
         Steps (per SPEC-GAME-MECHANIC-TURN-BASED §4.2):
-            1. Fork RNG and call game.setup() (TL1)
+            1. Reuse runtime.initial_state or fork RNG and call game.setup(..., seed=...) (TL1)
             2. Validate initial state via runtime
             3. Select first player and emit event
             4. Loop until game.status().is_over or max_turns:

@@ -1,19 +1,4 @@
-"""Research module for AgentDeck - Kaggle-inspired statistical tools.
-
-Per SPEC-RESEARCH v1.0.0:
-- compare_models(): Head-to-head comparison with SR3 alternation, SR1 test selection
-- compare_models_progressive(): Progressive testing with early stopping (PT1-PT4)
-- run_benchmark(): Execute benchmark suites with versioned reproducibility
-- statistical_test(): Auto-select t-test, Mann-Whitney, or bootstrap
-- aggregate_metrics(): Extract and aggregate match metrics with CIs
-- ResultsAnalyzer: Analyze MatchResults with summary stats and CSV export
-
-Per SPEC-RESEARCH v1.1.0:
-- StatisticalAnalysis: Post-hoc analysis from recordings (win rates, CIs, p-values, effect sizes)
-- PerformanceAnalysis: Performance metrics from recordings (duration, throughput, speedup)
-- CostAnalysis: Cost metrics from recordings (breakdown, efficiency, savings)
-- ComparisonAnalysis: Multi-session comparison and meta-analysis
-"""
+"""Research utilities for live comparisons, post-hoc analysis, and packaging support."""
 
 from .analysis import ResultsAnalyzer
 from .comparison import (

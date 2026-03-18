@@ -1,7 +1,7 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
 > Status: Final
-> Version: 1.5.0
+> Version: 1.6.0
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
 > Authors: Diego ZoracKy, Codex
@@ -69,14 +69,14 @@ The canonical schema and examples live in `research/SCHEMA.md`.
 Required fields:
 - `schema_version` (int)
 - `experiment_id` (string)
-- `generated_at` (ISO-8601)
-- `source.recordings_dir` (string; canonical single-source pointer)
+- `source.recordings_dir` (string; primary source pointer)
 - `summary` (object)
 - `players` (array)
 - `matches` (array)
 
 Optional source-provenance extension:
 - `source.recordings_dirs` (array of strings) for checkpoint aggregation from multiple sessions.
+- `generated_at` (ISO-8601) unless export was run with `--no-generated-at` for deterministic output.
 
 Extended required fields for `schema_version >= 2`:
 - `statistics` (object; inferential statistics)
@@ -188,6 +188,7 @@ Minimum table shape:
 ### 5.1 Export Results
 `scripts/research_export.py`
 - `--recordings-dir` (Path, required)
+  - Repeat the flag to aggregate multiple source directories into one export.
 - `--output-dir` (Path, required)
 - `--experiment-id` (string, optional; defaults to output-dir name)
 - `--no-generated-at` (flag, optional; omit timestamp for deterministic exports)
@@ -222,7 +223,7 @@ Minimum table shape:
 - **RE11**: For `results.json.schema_version >= 2`, `results.json.statistics` MUST be produced by `research_export.py` for every exported dataset with one or more matches.
 - **RE12**: For `results.json.schema_version >= 2`, `results.json.format_strictness` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from recorder events only (game-agnostic).
 - **RE13**: For `results.json.schema_version >= 2`, `results.json.position_effect` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from first-player metadata and winners only (game-agnostic).
-- **RE14**: `results.json.source` MUST include either a non-empty `recordings_dir` string or a non-empty `recordings_dirs` array. When `recordings_dirs` is present, `recordings_dir` SHOULD point to the first source directory for backward compatibility.
+- **RE14**: `results.json.source.recordings_dir` MUST be a non-empty primary source string. When aggregating multiple source directories, `results.json.source.recordings_dirs` MUST be a non-empty array and `recordings_dir` MUST equal its first entry.
 - **RE15**: For `results.json.schema_version >= 3`, `results.json.artifact_validation` MUST be produced by `research_export.py` for every exported dataset with one or more matches.
 - **RE16**: `artifact_validation` MUST cover monotonic gameplay timeline, top-level timing consistency, prompt payload turn-number coherence, and winner/final-state consistency using only recorder payloads (game-agnostic).
 - **RE17**: `research_export.py` MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.

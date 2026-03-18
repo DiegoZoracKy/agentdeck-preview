@@ -262,7 +262,7 @@ class EventBus:
                 handler(event)
             else:
                 # Legacy signature: on_match_start(**kwargs)
-                # Include context in kwargs for backward compatibility
+                # Include context in kwargs for lifecycle/domain handler parity.
                 kwargs = {**data, "context": event.context}
                 handler(**kwargs)
             return

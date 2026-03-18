@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 0.3.0
-> Last Updated: 2026-02-03
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego Zoracky, Codex, Claude
 > Audience: Researchers, framework contributors
@@ -19,12 +19,12 @@
 - Non-goals: Match orchestration internals (`SPEC-CONSOLE`), recorder persistence rules (`SPEC-RECORDER`), or spectator behavior beyond attachment semantics.
 
 ## 3. Responsibilities
-- **Engine Negotiation**: Resolve the execution console implementation (default or override), pass the configuration object unchanged, and retain the console session handle.
+- **Engine Construction**: Construct the default execution console, pass the resolved session context into it, and retain the console/session handles.
 - **Input Validation & Delegation**: Validate researcher inputs (games, players, matches, seeds), resolve spectator scopes/seeds, then delegate batch execution to the console which owns lifecycle events, player ordering, and match aggregation. Player order is randomized per match (Console applies Fisher-Yates shuffle by default, games may override via `get_player_order()` hook per SPEC-GAME §4).
 - **Spectator Scoping**: Maintain additive session vs execution spectator scopes and forward them to the console for both live play and replay. When researchers omit the spectator list, AgentDeck MUST rely on the console's default auto-attachment (MatchNarrator) so turn-by-turn narration is available out of the box. Supplying any spectator list (including `[]`) MUST override the default.
 - **Result Aggregation**: Collect `MatchResult` outputs from the console into `MatchResults` and surface researcher-facing helpers (win rates, summaries, stats).
-- **Metrics Exposure**: Surface session metadata and live counters through read-only properties (`session`, `total_matches`, `elapsed_time`).
-- **Safe Shutdown**: Provide deterministic teardown via context manager exit and explicit `close()`/`off()` helpers.
+- **Metrics Exposure**: Surface session metadata and live counters through read-only properties (`session`, `total_matches`, `elapsed_time`) plus lightweight snapshot helpers.
+- **Safe Shutdown**: Provide deterministic teardown via context manager exit and best-effort cleanup on destruction.
 - **Error Surfacing**: Translate validation failures into documented exceptions and enrich console-raised errors with researcher-relevant context.
 
 ## 4. Data Structures
@@ -33,12 +33,18 @@
 ```python
 @dataclass
 class SessionConfig:
+    seed: Optional[int] = None
     run_dir: str = "agentdeck_runs"
     max_turns: int = 1000
     log_level: Optional[LogLevel] = LogLevel.INFO
     log_file_levels: Optional[List[LogLevel]] = None
     log_format: str = "simple"
-    conclusion: ConclusionPolicy = ConclusionPolicy()
+    concurrency: int = 1
+    monitors: Optional[List[Monitor]] = None
+    pairing_policy: str = "none"
+    first_player_policy: str = "random"
+    fixed_first_player_index: int = 0
+    conclusion: ConclusionPolicy = field(default_factory=ConclusionPolicy)
 
 @dataclass
 class ConclusionPolicy:
@@ -49,7 +55,7 @@ class ConclusionPolicy:
     player: Optional[str] = None  # required when mode == "specific"
 ```
 
-**Guarantees**: Immutable input. `run_dir` is the console template for per-session directories. Console MUST create a run root at `{run_dir}/{session_id}/` and provision `logs/` + `records/` subdirectories within it. Custom recording/logging paths come from injecting alternative Recorder/Logger implementations. Session seeds are supplied via the `AgentDeck` constructor. `conclusion` controls whether and which players participate in the conclusion phase (SPEC-CONSOLE).
+**Guarantees**: `run_dir` is the console template for per-session directories. Console MUST create a run root at `{run_dir}/{session_id}/` and provision `logs/` + `records/` subdirectories within it. Custom recording/logging paths come from injecting alternative Recorder implementations. Session seeds are supplied through `session=AgentDeckConfig(...)` and may be overridden per batch via `play(..., seed=...)`. `conclusion` controls whether and which players participate in the conclusion phase (SPEC-CONSOLE).
 
 **Logging Defaults**:
 - `log_level`: Controls stdout/console output. Defaults to `LogLevel.INFO` (match summaries, turn progress).
@@ -110,14 +116,13 @@ class MatchResults:
 **Guarantees**: `MatchResult` MUST capture per-match seed, events, and metadata. `MatchResults` MUST retain all matches and expose helper accessors (`single`, `win_rates`, `summary`) for downstream analysis.
 
 ## 5. Public API
-- `AgentDeck(game=None, spectators=None, recorder=None, session=None, console=None)`
+- `AgentDeck(game=None, spectators=None, recorder=None, session=None)`
   - `game`: Optional default game used when `play()` omits `game`.
   - `spectators`: Session-wide spectators for every execution.
   - `recorder`: Recorder instance (console default when `None`).
   - `session`: `AgentDeckConfig` for seeding/logging/limits (set seed here, not on the facade).
-  - `console`: Console class override for engine swapping.
   - Guarantees:
-    - MUST resolve the console implementation (default or overridden) and pass the configuration unchanged (including `session.seed`).
+    - MUST construct the default console and pass the resolved session context into it.
     - MUST obtain the console's session handle and only return once the console signals readiness (including `SESSION_START` emission).
     - MUST register session-level spectators with the console so they participate in all subsequent executions.
 - `play(players, game=None, matches=1, seed=None, spectators=None) -> MatchResults`
@@ -140,7 +145,16 @@ class MatchResults:
     - MUST load/normalise into a single match and replay it sequentially.
     - MUST raise `TypeError` / `ValueError` when inputs are of an unsupported type.
     - MUST stream recorded events in order using provided or session spectators, respecting the supplied `speed`.
-  - Read-only properties
+- `replay_batch(matches, spectators=None, speed=1.0) -> None`
+  - `matches`: Ordered list of recorded matches (`MatchResult` or serialized dict payloads).
+  - `spectators`: Execution-level spectators observing the replay.
+  - `speed`: Playback speed multiplier.
+  - Guarantees:
+    - MUST replay the supplied matches sequentially by delegating to `replay(...)`.
+- `get_session_stats() -> Dict[str, Any]`
+  - Guarantees:
+    - MUST return a lightweight snapshot containing `session_id`, `total_matches`, `elapsed_time`, output directories, seed, and max-turns configuration.
+- Read-only properties
   - `session -> SessionState`: MUST expose the console-supplied session state without allowing mutation.
   - `total_matches -> int`: MUST reflect the cumulative number of matches executed during the session.
   - `elapsed_time -> float`: MUST report wall-clock seconds since `SESSION_START` using the session timestamp.
@@ -148,13 +162,11 @@ class MatchResults:
   - Guarantees:
     - MUST return the AgentDeck instance on entry.
     - MUST delegate cleanup to the console on exit, ensuring `SESSION_END` is emitted while allowing exceptions to propagate.
-- Shutdown helpers
-  - `close()`, `off()`: MUST provide explicit session teardown that delegates to the console cleanup routine. `off()` is an alias for `close()` to reinforce the console metaphor.
 
 ## 6. Invariants & Guarantees
 ### 6.1 Engine Integration (E)
-1. **E1**: MUST select the default console when none is supplied and honour explicit console overrides when provided.
-2. **E2**: MUST pass the `SessionConfig` object and optional seed to the console without mutation and retain the console-provided session handle.
+1. **E1**: MUST construct the default console from the resolved session configuration and retain the console-provided session handle.
+2. **E2**: MUST pass the resolved `SessionContext` and recorder/spectator dependencies to the console and retain the console-provided session handle.
 3. **E3**: MUST surface console-supplied session metadata (identifier, directories, seed, duration) via researcher-facing helpers without alteration. The seed MUST always be present in SessionState, whether provided by researcher or generated by console.
 
 ### 6.2 Lifecycle (L)
@@ -177,16 +189,16 @@ class MatchResults:
 16. **S4**: MUST allow the console to auto-attach default session spectators when the caller omits the spectator list (`spectators is None`), and MUST ensure that supplying any explicit spectator list (including `[]`) bypasses the default attachment.
 
 ### 6.5 Replay (R)
-16. **R1**: MUST accept exactly one of `match` (MatchResult/dict) or `path` (single match file path) and reject unsupported or combined inputs with a descriptive error.
-17. **R2**: MUST reproduce recorded events in their original order for every replayed match by delegating to the console/replay engine.
+17. **R1**: MUST accept exactly one of `match` (MatchResult/dict) or `path` (single match file path) and reject unsupported or combined inputs with a descriptive error.
+18. **R2**: MUST reproduce recorded events in their original order for every replayed match by delegating to the console/replay engine.
 
 ## 7. Data Flow & Interaction
-- **Session init**: Facade selects console, passes seed/config/recorder/spectators → console creates `SessionState`, ensures directories, binds observers, emits `SESSION_START`.
+- **Session init**: Facade resolves session configuration, creates `SessionContext`, passes session/recorder/spectators to the default console → console creates `SessionState`, binds observers, emits `SESSION_START`.
 - **Batch execution**: Facade validates inputs, resolves spectators/seed → calls `console.run` with matches count → console emits `BATCH_START`, loops through matches with `MATCH_*` events, emits `BATCH_END`, returns list of `MatchResult` → facade wraps into `MatchResults` and updates counters.
 - **Replay**: Facade loads matches/paths → console/replay engine streams events to active spectators.
-- **Metrics**: Facade exposes console counters via `session`, `total_matches`, and `elapsed_time` properties.
+- **Metrics**: Facade exposes console counters via `session`, `total_matches`, `elapsed_time`, and `get_session_stats()`.
 
-## 7. Error Handling & Edge Cases
+## 8. Error Handling & Edge Cases
 - Error contracts are summarized below:
 
 | Condition | Exception | Guarantee | Message Characteristics |
@@ -200,41 +212,38 @@ class MatchResults:
 
 - MUST suppress cleanup errors so destruction never propagates exceptions.
 
-## 8. Examples
+## 9. Examples
 ```python
 # Minimal experiment (game passed at play time)
-from agentdeck import AgentDeck, AgentDeckConfig, MockPlayer
-from agentdeck.examples import CombatGame
+from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, MockPlayer
 
 config = AgentDeckConfig()
 with AgentDeck(session=config) as deck:
-    result = deck.play(game=CombatGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")])
+    result = deck.play(game=FixedDamageGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")])
     print(result.single.winner)
 ```
 ```python
 # Reproducible batch with custom spectators
-from agentdeck import AgentDeck, AgentDeckConfig, MockPlayer
-from agentdeck.examples import CombatGame
+from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, MockPlayer
 from agentdeck.spectators import StatsTracker
 
 players = [MockPlayer("Alpha"), MockPlayer("Beta")]
 config = AgentDeckConfig(seed=42)
 
 with AgentDeck(session=config, spectators=[StatsTracker()]) as deck:
-    batch = deck.play(game=CombatGame(), players=players, matches=10)
+    batch = deck.play(game=FixedDamageGame(), players=players, matches=10)
     print(batch.win_rates)
 ```
 ```python
 # Replay recorded matches from disk
 from pathlib import Path
-from agentdeck import AgentDeck, AgentDeckConfig, MockPlayer
-from agentdeck.examples import CombatGame
+from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, MockPlayer
 
 players = [MockPlayer("Red"), MockPlayer("Blue")]
 config = AgentDeckConfig(seed=7)
 
 with AgentDeck(session=config) as deck:
-    results = deck.play(game=CombatGame(), players=players, matches=3)
+    results = deck.play(game=FixedDamageGame(), players=players, matches=3)
     recording_dir = Path(deck.session.record_directory)
     match_files = sorted(recording_dir.glob("match_*.json"))
     print(f"Ran {deck.total_matches} matches")
@@ -244,30 +253,30 @@ deck.replay(path=match_files[-1], speed=1.5)  # Replay a single recorded match
 ```
 ```python
 # Logging configurations
-from agentdeck.core import AgentDeck, AgentDeckConfig, LogLevel
+from agentdeck import AgentDeck, AgentDeckConfig, LogLevel
 
 # Default: INFO on stdout, both info.log and debug.log created
 config = AgentDeckConfig()  # log_level=LogLevel.INFO, log_file_levels=None
-deck = AgentDeck(config=config)
+deck = AgentDeck(session=config)
 
 # Quiet stdout, but still create debug files (useful for batch experiments)
 config = AgentDeckConfig(log_level=None)  # Creates info.log + debug.log by default
-deck = AgentDeck(config=config)
+deck = AgentDeck(session=config)
 
 # Verbose console output with API call details
 config = AgentDeckConfig(log_level=LogLevel.DEBUG)
-deck = AgentDeck(config=config)
+deck = AgentDeck(session=config)
 
 # Quiet stdout, only debug.log file (no info.log)
 config = AgentDeckConfig(log_level=None, log_file_levels=[LogLevel.DEBUG])
-deck = AgentDeck(config=config)
+deck = AgentDeck(session=config)
 
 # Totally silent (no console, no files) - not recommended
 config = AgentDeckConfig(log_level=None, log_file_levels=[])
-deck = AgentDeck(config=config)
+deck = AgentDeck(session=config)
 ```
 
-## 9. Testing Strategy
+## 10. Testing Strategy
 
 | Focus | Invariants | Verification Goal |
 |-------|------------|-------------------|
@@ -281,7 +290,7 @@ deck = AgentDeck(config=config)
 | Metrics exposure | E3, L4 | Verify `session`, `total_matches`, and `elapsed_time` mirror console state (including finished timestamps) and remain read-only. |
 | Failure propagation | Runtime error guarantee | Inject Console failure to verify enriched `RuntimeError` message and retention of completed matches. |
 
-## 10. Design Rationale
+## 11. Design Rationale
 - **Seed as first-class**: Keeps reproducibility obvious while advanced knobs stay in `SessionConfig`.
 - **Always-present seed**: Console generates one when absent so `deck.session.seed` always enables replay.
 - **SessionConfig focus**: Bundles logging/directories/limits, leaving constructor parameters lean.
@@ -289,11 +298,11 @@ deck = AgentDeck(config=config)
 - **Additive spectators**: Preserves persistent observers while allowing per-run instrumentation.
 - **Player ordering delegation**: AgentDeck delegates player ordering to Console (Fisher-Yates shuffle) and Game hook (`get_player_order()`), removing ordering concerns from researcher code. Seed controls shuffling for reproducibility. Metadata (`player_order_source`) enables analysis of ordering strategies.
 
-## 11. Open Questions / Future Work
+## 12. Open Questions / Future Work
 - Do we need first-class hooks for progress callbacks during long batches, or should observers rely on spectators alone?
 - What policy governs session metrics persistence beyond in-memory inspection (e.g., exposing a structured metrics endpoint)?
 
-## 12. References
+## 13. References
 - `SPEC.md` §1.1, §1.2, §2.4
 - `AGENTS.md` §2.1–§2.3
 - `SPEC-OBSERVABILITY.md`

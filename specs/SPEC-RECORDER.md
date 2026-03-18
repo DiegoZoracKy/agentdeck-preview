@@ -20,55 +20,16 @@
 - Non-goals: Replay logic (`SPEC-REPLAY.md`), data analysis (`SPEC-RESEARCH.md`), or custom storage backends (future extension).
 
 ## 3. Responsibilities
-- **Event Capture**: Subscribe to all event types (SESSION, BATCH, MATCH, GAMEPLAY, domain events) and serialize them into match recordings.
+- **Event Capture**: Subscribe to batch, match, gameplay, lifecycle, and domain events that are relevant to persisted match artifacts, and serialize them into match recordings.
 - **Progressive Persistence**: Write match data incrementally (after each gameplay event) to enable crash recovery and mid-match inspection.
 - **Atomic Writes**: Use atomic file replacement to prevent corruption from interrupted writes or concurrent access.
 - **Metadata Collection**: Capture match context (players, game config, environment, git state, timestamps) automatically.
 - **Game Configuration Capture**: Record game settings (`information_level`, `allowed_actions`) and persist player configuration snapshots (model, controller, key parameters) via `player_summaries` for reproducibility and provenance.
-- **API Usage Tracking**: Aggregate token counts, costs, latencies across LLM calls via `RecorderCollector` protocol.
+- **API Usage Tracking**: Aggregate token counts, costs, latencies across LLM calls via the built-in `APIUsageTracker`.
 - **Batch Aggregation**: Produce batch summary files with match references and aggregate statistics (win rates, turn counts).
 - **Schema Versioning**: Tag recordings with schema version (`1.3` for match recordings, `1.0` for batches) and enforce exact version checks in `load_match()` for current-only validation.
 - **Normalization**: Provide `load_match()` utility that normalizes current schema artifacts into a consistent structure.
-- **Null Object Pattern**: Provide `NullRecorder` implementation so Console always has a valid Recorder instance (never `None`).
-
 ## 4. Data Structures
-
-### NullRecorder (No-op Implementation)
-
-```python
-class NullRecorder:
-    """No-op recorder for when recording is disabled.
-
-    Implements Recorder interface with all methods as pass-through no-ops.
-    Console always has a valid Recorder instance (real or NullRecorder).
-    """
-
-    def on_session_start(self, deck, context=None) -> None:
-        pass  # No-op
-
-    def on_batch_start(self, batch_id, game, players, matches, context=None) -> None:
-        pass  # No-op
-
-    def on_match_start(self, game, players, match_id=None, context=None) -> None:
-        pass  # No-op
-
-    def on_gameplay(self, event: Event) -> None:
-        pass  # No-op
-
-    def on_event(self, event: Event, context=None) -> None:
-        pass  # No-op
-
-    def on_match_end(self, result: MatchResult, context=None) -> None:
-        pass  # No-op
-
-    def on_batch_end(self, batch_id, results, context=None) -> None:
-        pass  # No-op
-
-    def flush(self) -> None:
-        pass  # No-op
-```
-
-**Guarantees**: NullRecorder MUST implement all Recorder event handlers as no-ops. Console MUST use NullRecorder when recording is disabled (never None). See SPEC-CONSOLE.md §6.8 (L1) for Null Object pattern requirements.
 
 ### MatchRecording (Internal)
 
@@ -142,7 +103,7 @@ class RecorderCollector(Protocol):
 
 ## 5. Public API
 
-### Recorder(output_dir="records", *, session=None, collectors=None, schema_version="1.3")
+### Recorder(output_dir="agentdeck_records", *, session=None, collectors=None, schema_version="1.3")
 
 Create Recorder instance with optional session binding and custom collectors.
 
@@ -154,7 +115,7 @@ Create Recorder instance with optional session binding and custom collectors.
 
 **Guarantees**:
 - MUST create output directory if missing (uses `session.record_directory` when session bound).
-- MUST subscribe to Console EventBus as session-scoped spectator (receives all events).
+- MUST be subscribable to the match EventBus as a session-scoped spectator when recording is enabled.
 - MUST tolerate being constructed before session is available (late-binding via `bind_session()`).
 
 ### bind_session(session: SessionContext)
@@ -290,7 +251,7 @@ Load match JSON from disk and normalize structure.
 
 ### 6.7 Prompt Metadata Capture (PM)
 
-**Status**: Finalized for schema v1.3.0.
+**Status**: Finalized for schema `1.3`.
 
 Recorder embeds prompt metadata directly inside the lifecycle events captured in the `events` array. Handshake, turn, conclusion, and parse-failure events each carry a `prompt` payload describing the full exchange (no separate dialogue array).
 
@@ -341,9 +302,9 @@ Recorder stores prompt metadata under a `prompt` object within each recorded eve
 - `renderer_output`, `usage_info`, and `retries` are optional but SHOULD be included when provided by upstream components.
 - `call_id` is optional but SHOULD be included when exposed by upstream player metadata.
 
-**Metadata Sources**: Per SPEC-PLAYER v1.0.0 DS2 and SPEC-OBSERVABILITY §3.1.1, lifecycle events already expose the required fields. Recorder MUST deep-copy these payloads to avoid later mutation.
+**Metadata Sources**: Per `SPEC-PLAYER.md` and `SPEC-OBSERVABILITY.md` §3.1.1, lifecycle events already expose the required fields. Recorder MUST deep-copy these payloads to avoid later mutation.
 
-### Parse Failure Capture (PF) — *Updated in v1.3.0*
+### Parse Failure Capture (PF)
 31. **PF1**: Recorder MUST persist `PLAYER_ACTION_PARSE_FAILED` events with full context (`parse_result`, `policy_outcome`, optional prompt snapshot) exactly as emitted by Console (SPEC-OBSERVABILITY §3.1.2).
 32. **PF2**: Recorded parse-failure events MUST include a `prompt` payload with `phase="parse_failure"`, `turn_number`, `prompt_text`, `prompt_blocks`, and raw `response_text` so downstream tools can analyze the failing exchange without a separate transcript structure.
 
@@ -352,7 +313,7 @@ Recorder stores prompt metadata under a `prompt` object within each recorded eve
 - Controller format instructions (strict parser expectations)
 - Game-specific `allowed_actions` bound to controller
 
-**Alignment**: Player lifecycle events are fully defined in SPEC-OBSERVABILITY v1.2.0 §3.1.1-3.1.2. This spec defines the event serialization contract (prompt payload embedding, parse-failure capture) for Recorder schema v1.3. See SPEC-REPLAY for how replays reconstruct lifecycle events from the enriched `events` stream.
+**Alignment**: Player lifecycle events are fully defined in `SPEC-OBSERVABILITY.md` §3.1.1-3.1.2. This spec defines the event serialization contract (prompt payload embedding, parse-failure capture) for Recorder schema `1.3`. See `SPEC-REPLAY.md` for how replays reconstruct lifecycle events from the enriched `events` stream.
 
 ## 7. Data Flow & Interaction
 
@@ -714,7 +675,7 @@ deck = AgentDeck(recorder=recorder, session=config)
 ## 11. Recommended Practices
 
 ### Template Provenance
-- When players use Path-based templates (per SPEC-PLAYER v0.4.0), record file paths in player configurations.
+- When players use path-based templates (per `SPEC-PLAYER.md`), record file paths in player configurations.
 - **Recommended**: Version-control match artifacts alongside template files so experiments can be replayed faithfully.
 - Example: Store templates in `prompts/` directory and recordings in `recordings/` with shared git history.
 
@@ -767,12 +728,12 @@ For perfect reproducibility, recordings MUST capture:
 ## 15. References
 
 - `SPEC.md` §1.1 (Research platform focus), §2.4 (Reproducibility)
-- `SPEC-OBSERVABILITY.md` v1.2.0 (Event types, lifecycle events, player lifecycle events §3.1.1, parse failure events §3.1.2, payload guidelines §9)
-- `SPEC-CONSOLE.md` v0.5.0 (Execution lifecycle, parse failure handling, BATCH events, seed traceability, TurnLoop delegation)
-- `SPEC-PLAYER.md` v1.0.0 (Three-phase lifecycle, metadata capture DS2, template-driven prompts)
-- `SPEC-CONTROLLER.md` v1.2.0 (Controller binding, format instructions, metadata, ActionParseError semantics)
-- `SPEC-GAME-MECHANIC-TURN-BASED.md` v1.1.0 (Turn execution, EventFactory integration, parse failure propagation)
+- `SPEC-OBSERVABILITY.md` (event types, lifecycle events, player lifecycle events, parse failure events, payload guidelines)
+- `SPEC-CONSOLE.md` (execution lifecycle, parse failure handling, batch events, seed traceability, TurnLoop delegation)
+- `SPEC-PLAYER.md` (three-phase lifecycle, metadata capture, template-driven prompts)
+- `SPEC-CONTROLLER.md` (controller binding, format instructions, metadata, `ActionParseError` semantics)
+- `SPEC-GAME-MECHANIC-TURN-BASED.md` (turn execution, EventFactory integration, parse failure propagation)
 - `SPEC-AGENTDECK.md` (SessionState, MatchResult structures)
-- `SPEC-GAME.md` v0.6.0 (Game configuration, `information_level`, `allowed_actions`, parse-failure policy hook)
+- `SPEC-GAME.md` (game configuration, `information_level`, `allowed_actions`, parse-failure policy hook)
 - `SPEC-REPLAY.md` (Replay requirements using enriched event prompt metadata)
 - Implementation: `src/agentdeck/core/recorder.py`

@@ -106,14 +106,14 @@ notes: ""
 ### Required Fields
 - `schema_version` (int)
 - `experiment_id` (string)
-- `generated_at` (ISO-8601)
-- `source.recordings_dir` (string; canonical source pointer)
+- `source.recordings_dir` (string; primary source pointer)
 - `summary` (object)
 - `players` (array of player metadata)
 - `matches` (array of match summaries)
 
 Optional source extension:
 - `source.recordings_dirs` (array of strings) for multi-session checkpoint aggregation.
+- `generated_at` (ISO-8601) unless the export intentionally omitted it via `--no-generated-at`.
 
 For `results.json.schema_version >= 2`, the following are additionally required:
 - `statistics` (object; inferential metrics)
@@ -128,7 +128,6 @@ For `results.json.schema_version >= 3`, the following is additionally required:
 - `decisive_matches`
 - `draws`
 - `win_rates` (per player)
-- `forfeit_rate` (recommended)
 - `total_cost`
 - `avg_turns`, `avg_duration`, `avg_cost`
 

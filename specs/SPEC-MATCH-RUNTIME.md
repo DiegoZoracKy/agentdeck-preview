@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 1.0.0
-> Last Updated: 2026-02-03
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Codex, Diego Zoracky, Claude
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
@@ -33,24 +33,48 @@ class MatchRuntime:
         *,
         console: Console,
         game: Game,
-        match_context: MatchContext,
+        match_id: str,
+        session_id: str,
+        batch_id: str,
+        seed: int,
+        max_turns: int,
         recorder: Recorder,
         logger: AgentDeckLogger,
         rng: RandomGenerator,
+        previous_match_result: Optional[MatchResult] = None,
+        events_list: Optional[list[Event]] = None,
+        initial_state: Optional[dict[str, Any]] = None,
     ): ...
 
     @property
-    def context(self) -> MatchContext: ...
+    def match_id(self) -> str: ...
+    @property
+    def session_id(self) -> str: ...
+    @property
+    def batch_id(self) -> str: ...
+    @property
+    def seed(self) -> int: ...
+    @property
+    def max_turns(self) -> int: ...
+    @property
+    def previous_match_result(self) -> Optional[MatchResult]: ...
+    @property
+    def events(self) -> list[Event]: ...
+    @property
+    def initial_state(self) -> Optional[dict[str, Any]]: ...
+    @initial_state.setter
+    def initial_state(self, state: Optional[dict[str, Any]]) -> None: ...
 
     def emit_event(self, event_type: str, /, **data) -> None: ...
     def record_turn(
         self,
         *,
         player: str,
-        prompt_blocks: list[PromptBlock],
-        response_text: str,
+        state_before: dict[str, Any],
+        state_after: dict[str, Any],
         action: ActionResult,
         turn_context: TurnContext,
+        prompt_blocks: Optional[list[PromptBlock]] = None,
     ) -> None: ...
     def handle_parse_failure(self, player: Player, error: ActionParseError, *, turn_context: TurnContext) -> ParseFailurePolicy: ...
     def fork_rng(self, label: str) -> RandomGenerator: ...
@@ -61,10 +85,11 @@ class MatchRuntime:
 
 ### 4.1 Constructor
 - Console creates a new runtime per match.  
-- MUST be immutable from mechanic perspective (no public mutation of match_context).  
+- MUST be immutable from mechanic perspective apart from the explicit `initial_state` handoff used between handshake and mechanic execution.  
 - MUST capture:
-  - `match_context`: includes `session_id`, `batch_id`, `match_id`, `seed`, `max_turns`, `previous_match_result`.  
+  - flattened match metadata (`session_id`, `batch_id`, `match_id`, `seed`, `max_turns`, `previous_match_result`) rather than a single `MatchContext` wrapper.  
   - `recorder`, `logger`, `rng`, and a reference back to the console for EventBus routing / parse-failure handling. Mechanics never touch EventBus directly—runtime forwards everything via console.
+  - optional `events_list` for replay parity and optional `initial_state` when Console has already executed setup + handshake before calling `game.run(...)`.
 
 ### 4.2 `emit_event`
 - Wraps console `_emit_event` with pre-populated context (session_id/batch_id/match_id, timestamps, mechanic info).  
@@ -76,11 +101,12 @@ class MatchRuntime:
 - Ensures JSON-serialisability and guarantees that Recorder/spectators receive the full prompt/response/action transcript via events (aligned with `SPEC-RECORDER v1.3.0`).  
 - Mechanics MUST call this whenever an LLM player produces a response that leads to an action (even if the action later fails validation or gets skipped).  
 - `TurnContext` contains `turn_number`, `player_name`, `phase_index`, `rng_label`, `started_at`, `duration`, `match_id` (see `SPEC-GAME-MECHANIC-TURN-BASED.md` §4.2). Mechanics supply the context; runtime includes it in the emitted event for downstream consumers.
+- `state_before` and `state_after` are the canonical state snapshots associated with the action. `response_text` is derived from `action.raw_response`; prompt metadata is derived from `action.metadata` plus any explicit `prompt_blocks`.
 
 ### 4.4 `handle_parse_failure`
 - Invokes the shared parse-failure policy pipeline (events, recorder, logging, `game.on_action_parse_failure`).  
 - Returns a `ParseFailurePolicy` enum so the mechanic can decide whether to retry, skip, forfeit, or abort.  
-- Mechanics MUST NOT call console helpers directly; runtime guarantees consistent behaviour.
+- Mechanics MUST use the runtime helper rather than reaching into console internals themselves. Runtime may delegate to an internal console helper as part of that implementation.
 
 ### 4.5 `fork_rng`
 - Returns a deterministic RNG fork (child of match RNG) tagged by label for debugging.  
@@ -111,14 +137,20 @@ class MatchRuntime:
 ## 6. Usage Pattern
 ```python
 # Console._play_match (simplified)
-match_ctx = MatchContext(..., rng=session_rng.fork(f"match_{idx}"))
 runtime = MatchRuntime(
     console=self,
     game=game,
-    match_context=match_ctx,
+    match_id=match_id,
+    session_id=session_id,
+    batch_id=batch_id,
+    seed=match_seed,
+    max_turns=max_turns,
     recorder=self.recorder,
     logger=self.logger,
-    rng=match_ctx.rng,
+    rng=match_rng,
+    previous_match_result=previous_match_result,
+    events_list=events,
+    initial_state=handshake_state,
 )
 final_state, mechanic_events, truncated = game.run(runtime, ordered_players)
 ```

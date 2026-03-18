@@ -16,7 +16,7 @@
 - Upholds `SPEC.md` §3.2 separation: spectators observe, never mutate. Framework owns execution, spectators own analysis.
 - Reinforces `SPEC-OBSERVABILITY.md`: spectators consume Event objects with EventContext envelopes for consistent metadata access.
 - Aligns with `SPEC.md` §1.2: enable custom spectators in <20 lines while scaling to production dashboards and analytics pipelines.
-- **Clean slate design**: v1.0.0 assumes modern event system (SPEC-OBSERVABILITY §3) with three-phase player lifecycle—no legacy event formats, no backward compatibility shims.
+- **Clean-slate design**: assumes the modern event system (`SPEC-OBSERVABILITY.md` §3) with three-phase player lifecycle and no legacy dialogue callback dependency.
 - **Error isolation**: Spectator exceptions MUST NOT crash matches. Framework logs errors and continues execution.
 - Non-goals: event emission (`SPEC-CONSOLE.md`, `SPEC-GAME.md`), recording (`SPEC-RECORDER.md`), or replay logic (`SPEC-REPLAY.md`).
 
@@ -31,14 +31,18 @@
 ## 4. Public API
 - `class Spectator`
   - Constructor: `__init__(*, logger=None)` accepts optional logger (framework may inject late-bound).
-  - Event handlers (all optional, duck-typed):
-    - **Session lifecycle**: `on_session_start(deck, context=None)`, `on_session_end(deck, context=None)`
-    - **Batch lifecycle**: `on_batch_start(batch_id, game, players, matches, context=None)`, `on_batch_end(batch_id, results, context=None)`
-    - **Match lifecycle**: `on_match_start(game, players, match_id=None, context=None)`, `on_match_end(result, context=None)`
-    - **Player lifecycle** (Recorder schema v1.3): `on_player_handshake_start(event: Event)`, `on_player_handshake_complete(event: Event)`, `on_player_handshake_abort(event: Event)`, `on_player_conclusion(event: Event)`
+  - Supported handler styles:
+    - **Preferred / simplest**: `on_<event_name>(event: Event)` for any event type, including lifecycle events such as `batch_start` or `match_end`
+    - **Optional unpacked lifecycle style**: use the base lifecycle helper signatures below when direct named parameters are more convenient
+  - Base lifecycle helpers implemented on `Spectator`:
+    - **Session lifecycle**: `on_session_start(context=None, **kwargs)`, `on_session_end(context=None, **kwargs)`
+    - **Batch lifecycle**: `on_batch_start(batch_id, game, players, matches, context=None, **kwargs)`, `on_batch_end(batch_id, results, context=None, **kwargs)`
+    - **Match lifecycle**: `on_match_start(game, players, match_id=None, context=None, **kwargs)`, `on_match_end(result, context=None)`
     - **Gameplay**: `on_gameplay(event: Event)` (Event contains data + context)
     - **Domain events**: `on_event(event: Event, context=None)`, `on_<custom_event>(event: Event)` (game-specific)
     - **Logging**: `on_log(message, level, log_context, context=None)`
+  - Optional event-specific handlers routed by `EventBus` / replay:
+    - **Player lifecycle** (Recorder schema v1.3): `on_player_handshake_start(event: Event)`, `on_player_handshake_complete(event: Event)`, `on_player_handshake_abort(event: Event)`, `on_player_conclusion(event: Event)`
   - Helper: `context_from(context) -> SpectatorContext` (convert EventContext dict to typed object)
 - Spectators MAY override any subset of handlers; unimplemented handlers are silently skipped (duck-typing).
 - Prompt metadata for handshake/turn/conclusion/parse_failure events is exposed via `event.data["prompt"]` (Recorder schema v1.3). Spectators SHOULD read prompt transcripts from this payload rather than expecting separate dialogue callbacks.
@@ -50,9 +54,9 @@
 - **Purpose**: Provide turn-by-turn narration (handshake, actions, state deltas, reflections) so researchers see the full story of each match without needing to attach spectators manually.
 - **Default Behavior**: When callers omit the `spectators` parameter, Console auto-attaches `MatchNarrator` (see SPEC-CONSOLE §5 "Default Session Spectators"). Output flows through the session logger at INFO level, appearing in the console and `info.log`.
 - **Opt-Out**: Researchers silence the narration by supplying their own spectator list. Passing `spectators=[]` yields a quiet run; passing `spectators=[CustomSpectator(...)]` entirely replaces the default narrator.
-- **Usage**: MatchNarrator remains available for explicit attachment (`spectators=[MatchNarrator(mode=...)]`) when researchers want to control verbosity, enrich output, or use it alongside other observers.
+- **Usage**: MatchNarrator remains available for explicit attachment (`spectators=[MatchNarrator()]`) when researchers want to enrich output or use it alongside other observers.
 
-### [v1.1.0] Research Spectators (SPEC-RESEARCH.md v1.1.0)
+### Research Spectators (`SPEC-RESEARCH.md`)
 
 **StatisticalAnalysisSpectator**
 - **Purpose**: Auto-run post-hoc statistical analysis when batch completes.
@@ -75,7 +79,7 @@
 ## 6. Invariants & Guarantees
 ### 6.1 Handler Contract (HC)
 1. **HC1**: All event handlers MUST be optional (default no-op in base class). Framework routes via duck-typing (`hasattr` check), not `isinstance`.
-2. **HC2**: Handlers MUST accept the exact signature documented (extra positional args not passed). Lifecycle handlers accept individual parameters; event-based handlers accept `Event` object.
+2. **HC2**: Spectators MAY implement either `on_<event_name>(event: Event)` or the documented unpacked lifecycle signatures. If they choose the unpacked lifecycle style, they MUST accept `**kwargs` so additive lifecycle metadata does not break observers.
 3. **HC3**: Handlers MUST NOT mutate event payloads or context dictionaries (treat as read-only). Framework may reuse objects across spectators.
 4. **HC4**: Handlers SHOULD complete quickly. Long-running work SHOULD defer to external workers to avoid blocking console/replay.
 
@@ -229,7 +233,7 @@ class BatchLogger(Spectator):
         )
 ```
 
-### Example 5: Player Lifecycle Tracker (v1.0.0)
+### Example 5: Player Lifecycle Tracker
 ```python
 class PlayerLifecycleTracker(Spectator):
     def __init__(self):
@@ -811,10 +815,10 @@ def test_logger_writes_to_core_streams():
 ### Specifications
 - [SPEC.md](./SPEC.md) §1.2 (Ease of use), §2.4 (Observability)
 - [SPEC.md](./SPEC.md) §3.2 (Separation of concerns: observers never mutate)
-- [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) v1.0.0 (Event types, EventContext structure, player lifecycle events §3.1.1)
-- [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) v0.3.0 (Spectator attachment scopes, session vs execution)
-- [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.3.0 (Event emission timing, match orchestration)
-- [SPEC-RECORDER.md](./SPEC-RECORDER.md) v1.0.0 (Recording is a special spectator implementation)
-- [SPEC-REPLAY.md](./SPEC-REPLAY.md) v1.0.0 (ReplayEngine reuses spectator API with isolated EventBus)
-- [SPEC-PLAYER.md](./SPEC-PLAYER.md) v1.0.0 (Three-phase lifecycle: handshake → turn → conclusion)
-- [SPEC-PRICING.md](./SPEC-PRICING.md) v1.0.0 (TokenUsageTracker pricing integration requirements § 8)
+- [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) (Event types, EventContext structure, player lifecycle events)
+- [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) (Spectator attachment scopes, session vs execution)
+- [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) (Event emission timing, match orchestration)
+- [SPEC-RECORDER.md](./SPEC-RECORDER.md) (Recording as a special spectator implementation)
+- [SPEC-REPLAY.md](./SPEC-REPLAY.md) (ReplayEngine reuses the spectator API with an isolated EventBus)
+- [SPEC-PLAYER.md](./SPEC-PLAYER.md) (Three-phase lifecycle: handshake → turn → conclusion)
+- [SPEC-PRICING.md](./SPEC-PRICING.md) (TokenUsageTracker pricing integration requirements)

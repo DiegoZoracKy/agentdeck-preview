@@ -1,8 +1,8 @@
 # AgentDeck Pricing System Specification
 
 > Status: Final
-> Version: 1.0.0
-> Last Updated: 2026-02-03
+> Version: 1.0.1
+> Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego & Claude (from main branch analysis)
 > Audience: Core developers, LLM integration authors, cost tracking spectators
@@ -87,7 +87,9 @@ TokenUsageTracker (spectator)
 
 metadata:    # Optional: YAML-level metadata
   last_updated: "<YYYY-MM-DD>"
-  source: "<string>"
+  updated_at: "<YYYY-MM-DD>"
+  sources:
+    - "<string>"
 ```
 
 ### 4.3 Validation Rules
@@ -158,8 +160,10 @@ google:
     tier: "experimental"
 
 metadata:
+  updated_at: "2025-01-23"
   last_updated: "2025-01-23"
-  source: "Official provider pricing pages"
+  sources:
+    - "Official provider pricing pages"
 ```
 
 ---
@@ -249,16 +253,17 @@ def load_pricing_data() -> Dict[str, Any]:
         - Caches data globally on first call (singleton pattern)
         - Validates YAML structure before caching
         - Returns empty dict if file not found (logs WARNING)
-        - **Raises ValueError if YAML structure invalid** (does NOT return empty dict)
+        - Raises ValueError if validation fails
+        - Returns empty dict for generic load/parsing errors after logging
 
     Error Handling:
         - File not found: Returns {}, logs WARNING
-        - YAML parsing error: Raises ValueError, logs ERROR
+        - YAML parsing error or other unexpected load failure: Returns {}, logs ERROR
         - Validation error (V0-V6): Raises ValueError, logs ERROR
 
         The function raises ValueError for any structural issues (malformed YAML
-        or failed validation). It only returns {} for missing file (acceptable
-        scenario where costs default to zero).
+        or failed validation). It returns {} for missing files and generic load
+        failures where costs can safely default to zero.
 
     Raises:
         ValueError: If YAML structure is invalid (malformed YAML or validation failed)
@@ -331,7 +336,7 @@ def calculate_cost(provider: str, model: str, prompt_tokens: int, completion_tok
     Behavior:
         - Calls get_model_pricing(provider, model, allow_missing=False)
         - If ValueError raised (unknown provider/model):
-          * Logs ERROR with helpful message
+          * Logs WARNING with helpful message
           * Returns 0.0 (backward compatibility)
           * Error repeats on every call (not cached, ensures visibility)
 
@@ -345,7 +350,7 @@ def calculate_cost(provider: str, model: str, prompt_tokens: int, completion_tok
         0.00045  # (1000/1M * 0.15) + (500/1M * 0.60) = 0.00015 + 0.0003
 
         >>> calculate_cost("openai", "typo-model", 1000, 500)
-        0.0  # Logs ERROR, returns 0.0 for backward compatibility
+        0.0  # Logs WARNING, returns 0.0 for backward compatibility
     """
 ```
 
@@ -517,7 +522,7 @@ WARNING: pricing.yaml not found at /path/to/pricing.yaml - costs will be zero
 ERROR: pricing.yaml validation failed: Missing 'input_cost_per_million' for openai/gpt-4o
 ```
 
-**Impact**: ValueError propagates to caller. Costs cannot be calculated. This is INTENTIONAL - malformed pricing data should fail loudly, not silently default to $0.00.
+**Impact**: ValueError propagates to caller. Costs cannot be calculated. This is INTENTIONAL - validation failures should fail loudly rather than silently default to $0.00.
 
 **Rationale**: Unlike missing file (acceptable scenario), malformed YAML indicates a configuration error that should be fixed immediately. Failing loudly ensures the issue is noticed and corrected.
 
@@ -601,7 +606,7 @@ def test_calculate_cost_valid():
     """Calculate cost correctly for known provider/model."""
 
 def test_calculate_cost_unknown_model():
-    """Return 0.0 for unknown model (logs ERROR)."""
+    """Return 0.0 for unknown model (logs WARNING)."""
 
 def test_reload_pricing():
     """Force reload clears cache and reloads data."""

@@ -44,6 +44,7 @@ class MockGame(TurnBasedGame):
         super().__init__()
         self._parse_failure_policy = parse_failure_policy
 
+    @property
     def default_handshake_template(self):
         return "Ready to play? (Reply OK)"
 

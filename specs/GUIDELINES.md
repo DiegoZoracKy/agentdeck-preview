@@ -50,6 +50,7 @@ AgentDeck is a research platform for studying AI behavior. Specs must support:
    - Fill sections in order; they build context progressively.
    - Keep language user-facing first, engineering second.
    - Populate the header metadata (Status, Version, Last Updated, Implementation, Authors, Audience).
+   - Keep the spec header contract-only. Do not add rolling `Changes in v...` blocks inside specs; version history belongs in git/audit notes, not in the source-of-truth contract.
    - In §1 Purpose, name the primary audience (researcher, contributor, game author, etc.).
    - Use §4 Data Structures when the component exposes reusable schemas (contexts, payloads, results); omit if not applicable.
 

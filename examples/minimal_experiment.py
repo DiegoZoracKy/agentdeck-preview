@@ -18,12 +18,14 @@ What This Demonstrates:
     ✓ Automatic cost tracking
 
 Smart Defaults Used (SPEC-PLAYER v1.0.0):
-    handshake_controller: HandshakeController(accepted=["OK", "READY", "YES"])
     renderer: TextRenderer()
     prompt_builder: PromptBuilder() with default templates
-    handshake_template: System-provided default
+    handshake_template: "{game_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"
     turn_template: "{game_view}"
     conclusion_template: None (optional phase)
+
+Handshake acceptance is handled by the base Controller contract; there is no
+separate public HandshakeController to configure in the minimal path.
 
 Note: {player_instructions} renders as empty string when not in extras (no error).
 """
@@ -78,17 +80,15 @@ def main():
     # Session configuration
     config = AgentDeckConfig(
         seed=42,
-        log_dir="./logs",
-        record_dir="./recordings",
+        run_dir="./agentdeck_runs",
         # log_level defaults to LogLevel.INFO (stdout summaries)
         # log_file_levels defaults to None (creates both info.log and debug.log)
     )
 
     # Minimal players - only required: name, model, controller
     # All other components use smart defaults:
-    # - handshake_controller: HandshakeController()
     # - renderer: TextRenderer()
-    # - prompt_builder: PromptBuilder() with default templates
+    # - prompt_builder: PromptBuilder() with default handshake/turn templates
     players = [
         GPTPlayer(
             name="Alice",
@@ -169,7 +169,7 @@ def main():
     print("\n✓ Experiment complete!")
     print("✓ All components used smart defaults")
     print("✓ Zero template configuration required")
-    print("✓ Recordings saved to ./recordings/")
+    print("✓ Recordings saved under ./agentdeck_runs/<session_id>/records/")
     print("\n" + "="*60)
 
 

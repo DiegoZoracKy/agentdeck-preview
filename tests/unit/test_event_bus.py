@@ -175,6 +175,40 @@ def test_ES2_on_event_only_when_no_specific_handler(event_bus):
     assert not spectator.on_event.called
 
 
+def test_ES3_legacy_handler_with_var_kwargs_receives_additive_metadata(event_bus):
+    """Legacy handlers with **kwargs should still receive the full payload."""
+
+    class ExtensibleSpectator:
+        def __init__(self):
+            self.received = None
+
+        def on_match_start(self, game, players, match_id=None, context=None, **kwargs):
+            self.received = {
+                "game": game,
+                "players": players,
+                "match_id": match_id,
+                "context": context,
+                "extras": kwargs,
+            }
+
+    spectator = ExtensibleSpectator()
+    event_bus.subscribe(spectator)
+
+    event_bus.emit(
+        EventType.MATCH_START,
+        game="TestGame",
+        players=["Alice", "Bob"],
+        match_id="match-1",
+        seed=42,
+        fairness_policy="paired_side_swap",
+    )
+
+    assert spectator.received is not None
+    assert spectator.received["match_id"] == "match-1"
+    assert spectator.received["extras"]["seed"] == 42
+    assert spectator.received["extras"]["fairness_policy"] == "paired_side_swap"
+
+
 # ============================================================================
 # EP1-EP2: Payload Cloning Tests
 # ============================================================================

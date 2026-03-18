@@ -29,14 +29,14 @@ class LoggingSpectator(Spectator):
         self.logger_injected = False
         self.log_calls = []
 
-    def on_batch_start(self, batch_id, game, players, matches, context=None):
+    def on_batch_start(self, batch_id, game, players, matches, context=None, **kwargs):
         """Verify logger was injected."""
         self.logger_injected = self.logger is not None
         if self.logger:
             self.logger.info(f"Batch {batch_id} starting")
             self.log_calls.append(f"batch_start:{batch_id}")
 
-    def on_match_start(self, game, players, match_id=None, context=None):
+    def on_match_start(self, game, players, match_id=None, context=None, **kwargs):
         """Log match start."""
         if self.logger:
             self.logger.info(f"Match {match_id} starting")
@@ -51,7 +51,7 @@ class PreConfiguredSpectator(Spectator):
         self.original_logger = logger
         self.logger_changed = False
 
-    def on_batch_start(self, batch_id, game, players, matches, context=None):
+    def on_batch_start(self, batch_id, game, players, matches, context=None, **kwargs):
         """Check if logger was replaced."""
         self.logger_changed = self.logger != self.original_logger
 
@@ -59,7 +59,7 @@ class PreConfiguredSpectator(Spectator):
 class InfoLoggingSpectator(Spectator):
     """Test spectator that writes to INFO log stream."""
 
-    def on_batch_start(self, batch_id, game, players, matches, context=None):
+    def on_batch_start(self, batch_id, game, players, matches, context=None, **kwargs):
         if self.logger:
             self.logger.info(f"[SPECTATOR] Batch {batch_id} starting")
 
@@ -315,7 +315,7 @@ def test_spectator_without_logger_attribute_doesnt_crash():
     class MinimalSpectator:
         """Spectator without inheriting from base Spectator class."""
 
-        def on_batch_start(self, batch_id, game, players, matches, context=None):
+        def on_batch_start(self, batch_id, game, players, matches, context=None, **kwargs):
             pass
 
     spectator = MinimalSpectator()

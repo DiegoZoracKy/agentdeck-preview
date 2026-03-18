@@ -2,8 +2,8 @@
 Game base class for AgentDeck v1.0.0 framework.
 
 Implements the canonical contract per:
-- SPEC-GAME v0.5.0 §4 (Public API)
-- SPEC-GAME v0.5.0 §5 (Invariants & Guarantees)
+- SPEC-GAME v0.7.1 §4 (Public API)
+- SPEC-GAME v0.7.1 §5 (Invariants & Guarantees)
 - SPEC.md §5.5
 
 Key responsibilities:
@@ -17,7 +17,7 @@ Key responsibilities:
 Critical invariants:
 - GS1-GS4: State must be JSON-serializable dict
 - DT1-DT3: Deterministic behavior (use rng, pure get_view)
-- G15-G16: Games own narrative (Console never delivers instructions)
+- G15-G16: Games own instructional and narrative content
 - OB1-OB3: Events JSON-serializable, hide hidden info in views
 - V1-V2: Validation side-effect free, raises on violations
 - HT1-HT3: Default handshake template mandatory
@@ -39,13 +39,13 @@ if TYPE_CHECKING:
 
 class Game(ABC):
     """
-    Abstract base for all games (per SPEC-GAME v0.5.0).
+    Abstract base for all games (per SPEC-GAME v0.7.1).
 
     Games own state machine, rules, and narrative. Console orchestrates
     without interpreting mechanics.
 
     Lifecycle:
-        1. Console → game.setup(players) → canonical game_state
+        1. Console → game.setup(players, seed) → canonical game_state
         2. Loop: Console → game.update(state, player, action, rng=fork) → new_state
         3. Console → game.status(state) → GameStatus(is_over, winner)
         4. Console → game.get_view(state, player) → filtered view
@@ -62,10 +62,14 @@ class Game(ABC):
         ...
         ...     @property
         ...     def default_handshake_template(self) -> str:
-        ...         return "{game_instructions}\\n\\nRespond 'OK' to begin."
+        ...         return (
+        ...             "{game_instructions}\\n\\n"
+        ...             "{controller_format}\\n\\n"
+        ...             "{handshake_controller_format}"
+        ...         )
         ...
-        ...     def setup(self, players: List[str]) -> Dict[str, Any]:
-        ...         return {"round": 0, "coin": None, "winner": None}
+        ...     def setup(self, players: List[str], seed: int) -> Dict[str, Any]:
+        ...         return {"round": 0, "coin": None, "winner": None, "seed": seed}
         ...
         ...     def update(self, game_state, player, action, *, rng):
         ...         state = dict(game_state)  # Copy for clarity
@@ -105,13 +109,14 @@ class Game(ABC):
     @abstractmethod
     def instructions(self) -> str:
         """
-        Reference-only description of rules and objectives.
+        Canonical description of rules and objectives.
 
         Returns:
             Plain string for docs/lobby UIs (may be empty)
 
-        Note: Console never reads or delivers this property.
-              Games decide when to surface narrative through state/views.
+        Note: Console may inject this property into handshake composition via
+              {game_instructions}. Games still own the content and may also
+              surface narrative or tutorial text through state/views.
 
         Example:
             >>> @property

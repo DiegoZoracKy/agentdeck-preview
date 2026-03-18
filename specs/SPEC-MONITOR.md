@@ -8,7 +8,7 @@
 > Audience: Monitor authors, system observability engineers, core contributors
 
 ## 1. Purpose
-- Define the observer interface for monitoring console/system-level events (progress, worker status, hardware metrics) independent of match narrative.
+- Define the observer interface for monitoring console/system-level events (progress, worker status, execution health) independent of match narrative.
 - Establish a two-tier observation system: **Spectators** (match events) and **Monitors** (console events).
 - Enable researchers to track execution progress during parallel batch runs without modifying existing spectator semantics.
 - Preserve the gaming console analogy: spectators watch matches (fans in arena), monitors watch system (production crew/scoreboard).
@@ -53,7 +53,7 @@
 | Layer | Observes | Event Timing | Examples |
 |-------|----------|--------------|----------|
 | **Spectators** | Match narrative (handshakes, turns, conclusions) | Buffered, replayed in order (preserves determinism) | MatchNarrator, StatsTracker, TokenUsageTracker |
-| **Monitors** | Console/system events (progress, workers, hardware) | Live, immediate (enables real-time feedback) | ProgressMonitor, HardwareMonitor, CheckpointMonitor |
+| **Monitors** | Console/system events (progress, workers, execution health) | Live, immediate (enables real-time feedback) | ProgressMonitor, custom console monitors |
 
 ### 3.2 Monitor Base Class
 - Provides duck-typed `on_console_*` event handlers (similar to Spectator's `on_*` handlers).
@@ -248,8 +248,7 @@ config = AgentDeckConfig(
     concurrency=10,
     monitors=[
         ProgressMonitor(mode="verbose"),
-        HardwareMonitor(poll_interval=5),
-        SlackNotifier(webhook_url="...")
+        CustomMonitor()
     ]
 )
 
@@ -505,18 +504,17 @@ with AgentDeck(game=FixedDamageGame(), session=config) as deck:
 # 🎉 Batch complete: 50/50 matches | Duration: 2m 30s | Avg: 3.0s/match
 ```
 
-### Example 2: Custom Monitor (Slack Notifications)
+### Example 2: Custom Monitor (Notifications)
 ```python
 from agentdeck.monitors import Monitor
 from agentdeck.core.types import Event
-import requests
 
-class SlackMonitor(Monitor):
-    """Send batch progress to Slack webhook."""
+class NotificationMonitor(Monitor):
+    """Send batch progress to an external notifier."""
 
-    def __init__(self, webhook_url: str):
+    def __init__(self, notifier):
         super().__init__()
-        self.webhook_url = webhook_url
+        self.notifier = notifier
 
     def on_console_batch_start(self, event: Event) -> None:
         data = event.data
@@ -536,17 +534,17 @@ class SlackMonitor(Monitor):
 
     def _send_message(self, text: str) -> None:
         try:
-            requests.post(self.webhook_url, json={"text": text}, timeout=5)
+            self.notifier.send(text)
         except Exception as e:
             if self.logger:
-                self.logger.warning(f"Failed to send Slack notification: {e}")
+                self.logger.warning(f"Failed to send notification: {e}")
 
 # Usage
 config = AgentDeckConfig(
     concurrency=10,
     monitors=[
         ProgressMonitor(mode="quiet"),  # Console progress bar
-        SlackMonitor(webhook_url="https://hooks.slack.com/...")
+        NotificationMonitor(notifier=my_notifier)
     ]
 )
 
@@ -565,20 +563,22 @@ results = deck.play(players, matches=100)
 # Output: (none - silent execution)
 ```
 
-### Example 4: Hardware Monitoring (Future)
+### Example 4: Additional Custom Monitor
 ```python
-from agentdeck.monitors import ProgressMonitor, HardwareMonitor
+from agentdeck.monitors import ProgressMonitor, Monitor
+
+
+class MatchFailureMonitor(Monitor):
+    def on_console_worker_failed(self, event):
+        print(f"Worker {event.data['worker_id']} failed: {event.data['error_message']}")
 
 config = AgentDeckConfig(
     concurrency=20,
     monitors=[
         ProgressMonitor(mode="normal"),
-        HardwareMonitor(poll_interval=10)  # Log CPU/GPU/memory every 10s
+        MatchFailureMonitor()
     ]
 )
-
-# HardwareMonitor emits custom events (e.g., CONSOLE_HARDWARE_SAMPLE)
-# that can be captured by other monitors or logged
 ```
 
 ### Example 5: Sequential Execution (No Progress by Default)
@@ -797,37 +797,7 @@ def test_monitor_exception_isolation():
     assert healthy.events_received > 0
 ```
 
-## 11. Open Questions / Future Work
-
-### Hardware Monitoring
-- Should framework provide built-in `HardwareMonitor` for CPU/GPU/memory tracking?
-- What polling interval and event format best serve researchers?
-
-### Checkpoint Integration
-- Should `CheckpointMonitor` handle save/resume automatically, or require explicit user hooks?
-- How to represent partial batch progress for resumption?
-
-### Distributed Execution
-- How should monitors aggregate progress across distributed workers (multi-host)?
-- Should console emit distributed-specific events (NODE_START, NODE_FAILED)?
-
-### Monitor Composition
-- Should framework support monitor pipelines (one monitor feeds another)?
-- How to handle inter-monitor dependencies?
-
-### Dynamic Attach/Detach
-- Should monitors be attachable mid-batch (e.g., attach HardwareMonitor after 50 matches)?
-- What semantics govern late-attached monitors (receive backlog vs start fresh)?
-
-### Progress Persistence
-- Should ProgressMonitor write progress to file for external monitoring tools?
-- What format (JSON lines, structured logs, custom)?
-
-### Console Event Filtering
-- Should monitors declare which console events they care about (avoid unnecessary calls)?
-- Performance impact assessment needed.
-
-## 12. Design Rationale
+## 11. Design Rationale
 
 ### Two-Tier Event System
 - **Separation preserves existing semantics:** Match EventBus (buffered, replayed) unchanged; console EventBus (live, immediate) added without conflict.
@@ -862,9 +832,9 @@ def test_monitor_exception_isolation():
 ## 13. References
 
 ### Specifications
-- [SPEC-SPECTATOR.md](./SPEC-SPECTATOR.md) v1.2.0 (Match-level observation contract, logger injection pattern)
-- [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) v0.4.0 (Console responsibilities, EventBus ownership, lifecycle events)
-- [SPEC-PARALLEL.md](./SPEC-PARALLEL.md) v0.1.0 (Parallel execution semantics, worker lifecycle, event replay)
+- [SPEC-SPECTATOR.md](./SPEC-SPECTATOR.md) (Match-level observation contract, logger injection pattern)
+- [SPEC-CONSOLE.md](./SPEC-CONSOLE.md) (Console responsibilities, EventBus ownership, lifecycle events)
+- [SPEC-PARALLEL.md](./SPEC-PARALLEL.md) (Parallel execution semantics, worker lifecycle, event replay)
 - [SPEC-OBSERVABILITY.md](./SPEC-OBSERVABILITY.md) (Event types, EventContext structure, emission boundaries)
 - [SPEC-AGENTDECK.md](./SPEC-AGENTDECK.md) (Facade contract, spectator attachment scopes)
 - [SPEC.md](./SPEC.md) §1 (Research-first design), §2.4 (Observability), §3.1 (Simplicity), §3.2 (Separation of concerns)

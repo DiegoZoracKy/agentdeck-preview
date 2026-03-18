@@ -57,6 +57,7 @@ The goal is to prevent more of that from hiding in other surfaces.
 - Tests are evidence, not truth. Tests can drift too.
 - Prefer narrow, contract-based fixes over opportunistic refactors.
 - Do not blur implementation drift and spec drift into the same bucket.
+- Keep audited specs contract-focused. Do not add rolling in-spec changelog blocks during remediation; use git history and the audit notes for change narrative.
 
 ## Finding Taxonomy
 
