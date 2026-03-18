@@ -43,6 +43,8 @@ Supported `information_level` values for this spec are:
 - `"full"`: all players' HP and potion counts are visible in `get_view()`
 - `"partial"`: only the requesting player's HP and potion counts are visible in `get_view()`
 
+Unsupported `information_level` values MUST raise `ValueError` at construction time.
+
 ### 4.2 Game-Owned Canonical State
 `setup()` and `update()` produce a JSON-serializable state with these game-owned keys:
 
@@ -98,6 +100,7 @@ The `health` and `potions` sub-dicts are filtered by `information_level`. `last_
 - MUST front-load gameplay response instructions during handshake so the default turn prompt can remain state-focused.
 
 ### 5.4 `setup(players: List[str], seed: int) -> Dict[str, Any]`
+- MUST reject any roster whose length is not exactly `2` by raising `ValueError`.
 - MUST return a JSON-serializable canonical state using the structure in §4.2.
 - MUST initialize every listed player to:
   - `health[player] = max_health`
@@ -161,14 +164,12 @@ Action semantics:
 6. `status()` determines whether the match continues or ends.
 
 ## 8. Error Handling & Edge Cases
+- Unsupported `information_level` values MUST raise `ValueError` at construction time.
 - Invalid action strings MUST raise `ValueError`.
 - `ATTACK` with no available opponent MUST raise `ValueError`.
-- This spec defines release-supported behavior for two-player matches only.
-  - `setup()` can initialize larger rosters.
-  - Multi-player target-selection semantics are not part of this public contract and MUST NOT be relied on.
+- `setup()` MUST reject any roster whose length is not exactly `2`.
 - Supported visibility modes for public use are `"full"` and `"partial"`.
-  - In the current implementation, only `"full"` reveals opponent stats; other values behave like non-full/partial visibility.
-  - Research packages and examples SHOULD use explicit supported values.
+- Research packages and examples SHOULD use explicit supported values.
 
 ## 9. Examples
 
@@ -234,8 +235,6 @@ Expected properties:
 - Handshake-heavy, turn-light prompting keeps the default runtime simple and makes turn-level reinforcement an explicit experimental variable instead of a hidden baseline behavior.
 
 ## 12. Open Questions / Future Work
-- Should the game enforce exactly two players at `setup()` time instead of merely documenting two-player support?
-- Should unsupported `information_level` values raise at construction time?
 - Should exhausted-potion no-ops emit an explicit event or remain silent?
 
 ## 13. References

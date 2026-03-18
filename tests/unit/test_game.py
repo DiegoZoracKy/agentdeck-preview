@@ -18,9 +18,11 @@ from unittest.mock import Mock
 
 import pytest
 
+from agentdeck.core.base.game import Game
 from agentdeck.core.game_event_emitter import GameEventEmitter
+from agentdeck.core.mechanics.turn_based import TurnBasedGame
 from agentdeck.core.types import ActionResult, GameStatus, RandomGenerator
-from agentdeck.games.examples import FixedDamageGame
+from agentdeck.games.examples.fixed_damage.game import FixedDamageGame
 
 # ============================================================================
 # GS1-GS4: Game State Data Tests
@@ -332,6 +334,23 @@ def test_OB3_recorder_gets_full_canonical_state():
     assert game_state["health"]["Bob"] == 100
 
 
+def test_fixed_damage_rejects_invalid_information_level():
+    """FixedDamageGame should fail fast on unsupported information_level values."""
+    with pytest.raises(ValueError, match="information_level must be 'full' or 'partial'"):
+        FixedDamageGame(information_level="parital")
+
+
+def test_fixed_damage_requires_exactly_two_players():
+    """FixedDamageGame is a two-player game and should reject other roster sizes."""
+    game = FixedDamageGame()
+
+    with pytest.raises(ValueError, match="requires exactly 2 players"):
+        game.setup(["Alice"], seed=42)
+
+    with pytest.raises(ValueError, match="requires exactly 2 players"):
+        game.setup(["Alice", "Bob", "Charlie"], seed=42)
+
+
 # ============================================================================
 # HT1-HT3: Handshake Template Tests
 # ============================================================================
@@ -507,7 +526,32 @@ def test_get_current_player_round_robin():
     Verify that the default get_current_player() implementation cycles
     through players in order.
     """
-    game = FixedDamageGame()
+    class RoundRobinReferenceGame(TurnBasedGame):
+        @property
+        def instructions(self) -> str:
+            return ""
+
+        @property
+        def allowed_actions(self):
+            return ["WAIT"]
+
+        @property
+        def default_handshake_template(self) -> str:
+            return "{handshake_controller_format}"
+
+        def setup(self, players, seed):
+            return {"players": players}
+
+        def update(self, game_state, player, action, *, rng):
+            return game_state
+
+        def status(self, game_state):
+            return GameStatus(is_over=False, winner=None)
+
+        def get_view(self, game_state, player):
+            return {"player": player}
+
+    game = RoundRobinReferenceGame()
     players = ["Alice", "Bob", "Charlie"]
     seed = 12345
 

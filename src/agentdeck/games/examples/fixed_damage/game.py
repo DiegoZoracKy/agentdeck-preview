@@ -51,6 +51,8 @@ class FixedDamageGame(TurnBasedGame):
         }
     """
 
+    SUPPORTED_INFORMATION_LEVELS = {"full", "partial"}
+
     def __init__(
         self,
         max_health: int = 100,
@@ -71,8 +73,13 @@ class FixedDamageGame(TurnBasedGame):
 
         Note: information_level per SPEC-GAME §5 IV1-IV5 is optional;
               perfect-information games can omit this parameter.
+
+        Raises:
+            ValueError: If information_level is not "full" or "partial"
         """
         super().__init__()
+        if information_level not in self.SUPPORTED_INFORMATION_LEVELS:
+            raise ValueError("information_level must be 'full' or 'partial'")
         self.max_health = max_health
         self.attack_damage = attack_damage
         self.potion_heal = potion_heal
@@ -151,6 +158,9 @@ Information Level: {self.information_level}
         Returns:
             JSON-serializable dict with all required keys
 
+        Raises:
+            ValueError: If players does not contain exactly two player names
+
         Example:
             >>> game = FixedDamageGame()
             >>> state = game.setup(["Alice", "Bob"], seed=42)
@@ -160,6 +170,8 @@ Information Level: {self.information_level}
         Note: FixedDamageGame is deterministic, so seed is not used during setup.
               More complex games might use seed to initialize starting positions.
         """
+        if len(players) != 2:
+            raise ValueError("FixedDamageGame requires exactly 2 players")
         return {
             "health": {p: self.max_health for p in players},
             "potions": {p: self.starting_potions for p in players},
