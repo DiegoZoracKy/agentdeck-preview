@@ -29,7 +29,7 @@ config_registry:
     controller: ActionOnlyController
     prompt_builder:
       handshake_template_mode: default
-      handshake_template: "{game_instructions}\n\n{handshake_controller_format}"
+      handshake_template: "{game_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"
       turn_template_mode: default
       turn_template: "{game_view}\n\n{controller_format}"
   CoT-H:
@@ -38,7 +38,7 @@ config_registry:
     controller: ReasoningController
     prompt_builder:
       handshake_template_mode: default
-      handshake_template: "{game_instructions}\n\n{handshake_controller_format}"
+      handshake_template: "{game_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"
       turn_template_mode: custom
       turn_template: "{game_view}"
   CoT-T:
@@ -47,7 +47,7 @@ config_registry:
     controller: ReasoningController
     prompt_builder:
       handshake_template_mode: default
-      handshake_template: "{game_instructions}\n\n{handshake_controller_format}"
+      handshake_template: "{game_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"
       turn_template_mode: default
       turn_template: "{game_view}\n\n{controller_format}"
 

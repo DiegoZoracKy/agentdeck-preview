@@ -272,11 +272,10 @@ class TurnLoop:
                 b. Build TurnContext
                 c. Get player view and call player.decide()
                 d. Apply action via game.update()
-                e. Emit GAMEPLAY event via runtime
-                f. Record turn via runtime
-                g. Emit custom events from game.get_events()
-                h. Validate state via runtime
-                i. Check game status
+                e. Record turn via runtime
+                f. Emit custom events from game.get_events()
+                g. Validate state via runtime
+                h. Check game status
             5. Return TurnResult
 
         Returns:
