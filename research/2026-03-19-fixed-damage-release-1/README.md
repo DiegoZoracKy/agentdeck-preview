@@ -7,7 +7,7 @@
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
 - Status: running
-- Matches: 48/96
+- Matches: 72/96
 - Game: FixedDamageGame
 - Players: local:AttackBot, local:PotionAt80Bot, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001
 - Seed Base: 4242
