@@ -25,12 +25,10 @@ who actually took the first turn.
 - Practical recommendation:
 
 ## Phase 0 Calibration
-- `AttackBot` vs `AttackBot`: paired side-swap worked as intended; each named bot finished 12-12 overall, but the first player won 24/24 matches and every match ended in 9 turns.
-- `AttackBot` vs `PotionAt80Bot`: paired side-swap again produced a 24/24 first-player win rate, so the weaker policy does not show up in topline wins; it shows up in trajectory length instead, with every match stretching to 15 turns because `PotionAt80Bot` heals at 80 HP.
+- Pending fresh run.
 
 ## Phase 1 Cadence Pilot
-- `gpt-4o-mini`: no cadence separation at `N=24` on topline wins; `Mini-HO` and `Mini-TR` both finish `12-12`, both remain strictly compliant (`552/552` strict contract passes), and first-player wins remain `24/24`.
-- `claude-haiku-4-5-20251001`: no gameplay data yet because the model failed the handshake gate by returning `OK` plus extra explanation instead of a bare acknowledgement token.
+- Pending fresh run.
 
 ## Statistical Summary
 - Sample size (`n`):
@@ -54,5 +52,6 @@ who actually took the first turn.
 - Position effects remain important even with paired side-swap.
 
 ## Next Steps
+- Run `P0` and `P1` from the final audited codebase.
 - Expand cells only if the pilot supports a clean causal story.
 - Keep the public release narrative behavior-first rather than leaderboard-first.

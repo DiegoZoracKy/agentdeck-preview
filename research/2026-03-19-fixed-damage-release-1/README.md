@@ -6,8 +6,8 @@
 
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
-- Status: running
-- Matches: 72/96
+- Status: planned
+- Matches: 0/96
 - Game: FixedDamageGame
 - Players: local:AttackBot, local:PotionAt80Bot, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001
 - Seed Base: 4242
@@ -49,7 +49,8 @@
   - raw recordings remain uncommitted and are referenced later from `recordings/`
 
 ## Results
-- Cell-level exports live under `artifacts/<cell-id>/results.json` and `results.csv` while the study is still in progress.
+- No findings are committed yet. This package was reset to ensure all release-facing runs come from the final audited codebase and final handshake contract.
+- Cell-level exports should be generated under `artifacts/<cell-id>/results.json` and `results.csv` only after fresh runs complete.
 - A top-level `results.json` should only be generated once the package has a meaningful study-level synthesis rather than a misleading mixed-cell aggregate.
 
 ## Artifacts
