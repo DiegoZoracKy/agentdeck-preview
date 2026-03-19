@@ -27,7 +27,7 @@ research/<experiment-id>/
 ├── results.csv        # Match-level results (generated)
 ├── analysis.md        # Interpretation (optional)
 ├── artifacts/         # Plots/tables (optional)
-├── logs/              # Narrative logs (optional)
+├── notes/             # Human run notes (optional)
 ├── recordings/        # External pointers only (no raw JSON)
 └── scripts/           # Experiment scripts (optional)
 ```

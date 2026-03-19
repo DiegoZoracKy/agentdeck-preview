@@ -1,0 +1,74 @@
+schema_version: 1
+experiment_id: 2026-03-19-fixed-damage-release-1
+title: FixedDamage Release 1
+status: running
+question: >-
+  How sensitive is model behavior in FixedDamage to prompt cadence, and can
+  AgentDeck make that sensitivity legible through validated artifacts and replay?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: attack_bot
+    provider: local
+    model: AttackBot
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: potion_at_80_bot
+    provider: local
+    model: PotionAt80Bot
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_4o_mini
+    provider: openai
+    model: gpt-4o-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: claude_haiku_4_5_20251001
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - AttackBot
+    - PotionAt80Bot
+    - gpt-4o-mini
+    - claude-haiku-4-5-20251001
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+    - turn_reinforced
+run:
+  seed_base: 4242
+  matches_planned: 96
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-19-fixed-damage-release-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-19-fixed-damage-release-1
+  viewer_curation:
+    repo_path: research/2026-03-19-fixed-damage-release-1/artifacts
+notes: >-
+  This package starts with Phase 0 calibration and Phase 1 cadence pilot only.
+  Expansion to larger sample sizes should happen only after a clean pilot result.

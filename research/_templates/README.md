@@ -42,7 +42,7 @@
 - `results.json` / `results.csv` (objective outputs)
 - `analysis.md` (interpretation)
 - `artifacts/` (derived tables/plots/highlights)
-- `logs/` (narrative logs)
+- `notes/` (human run notes)
 - `recordings/` (external pointers only)
 - `scripts/` (execution scripts)
 
