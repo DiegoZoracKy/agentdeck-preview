@@ -1,8 +1,8 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.1.3
-> Last Updated: 2026-03-17
+> Version: 1.1.4
+> Last Updated: 2026-03-19
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
@@ -108,7 +108,7 @@
 28. **OR5**: Until explicit server-history mode is introduced, OpenAI-backed players MUST send `store=False` on Responses API calls so match reproducibility remains grounded in local conversation history.
 29. **AR1**: Anthropic-backed players MUST supply `max_tokens` on every request. When callers leave `max_tokens` unset, implementations MUST apply a documented fallback.
 30. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, create scoped Google credentials suitable for Vertex (`cloud-platform`), construct the provider client in Vertex mode, and infer `project_id` from the payload when possible.
-31. **GR2**: Current beta Gemini-backed players MUST serialize conversation history into a single labeled text prompt (for example `User:` / `Assistant:` blocks) before submission. Native structured Gemini multi-turn contents are out of scope for the beta contract and MUST be treated as a future improvement rather than assumed behavior.
+31. **GR2**: Gemini-backed players MUST preserve multi-turn role structure using the provider's native content model rather than flattening history into a labeled transcript. User messages MUST be sent as user-role content, assistant messages MUST be sent as model-role content, and system instructions SHOULD use the provider-native system-instruction field when available.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:
@@ -123,7 +123,7 @@
 - MUST raise `ValueError` for missing API key/model.
 - MUST catch provider exceptions inside retry loop, log retry attempt, and backoff before retrying.
 - MUST ensure handshake failures propagate so console can enforce policy.
-- SHOULD support provider-specific quirks (e.g., OpenAI Responses API instructions/input mapping and max_output_tokens, Anthropic role mapping, Gemini token estimates) while keeping metadata shape consistent.
+- SHOULD support provider-specific quirks (e.g., OpenAI Responses API instructions/input mapping and max_output_tokens, Anthropic role mapping, Gemini token estimates and structured role mapping) while keeping metadata shape consistent.
 
 ## 8. Examples
 ```python

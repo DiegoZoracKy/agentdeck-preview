@@ -49,6 +49,9 @@ def _format_results(results_path: Path) -> str:
     if not results_path.exists():
         return "TBD"
     data = json.loads(results_path.read_text(encoding="utf-8"))
+    players = data.get("players") or []
+    if len(players) > 2:
+        return "See README"
     summary = data.get("summary", {})
     win_rates = summary.get("win_rates", {})
     if not win_rates:

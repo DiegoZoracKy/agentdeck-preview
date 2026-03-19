@@ -141,16 +141,25 @@ def test_gemini_player_passes_generation_config_to_google_sdk(monkeypatch):
     )
 
     response_text, metadata = player._make_api_call(
-        [{"role": "user", "content": "Reply with ACTION: ATTACK"}]
+        [
+            {"role": "system", "content": "Follow the format exactly."},
+            {"role": "user", "content": "Reply with ACTION: ATTACK"},
+            {"role": "assistant", "content": "ACTION: ATTACK"},
+            {"role": "user", "content": "Reply with ACTION: POTION"},
+        ]
     )
 
     assert response_text == "ACTION: ATTACK"
     assert captured["generate_kwargs"]["model"] == "gemini-2.5-flash"
-    assert captured["generate_kwargs"]["contents"] == "User: Reply with ACTION: ATTACK"
-    assert captured["generate_kwargs"]["config"]["temperature"] == 1.0
-    assert captured["generate_kwargs"]["config"]["thinking_config"] == {
-        "thinking_budget": 0
-    }
+    contents = captured["generate_kwargs"]["contents"]
+    assert [content.role for content in contents] == ["user", "model", "user"]
+    assert contents[0].parts[0].text == "Reply with ACTION: ATTACK"
+    assert contents[1].parts[0].text == "ACTION: ATTACK"
+    assert contents[2].parts[0].text == "Reply with ACTION: POTION"
+    config = captured["generate_kwargs"]["config"]
+    assert config.temperature == 1.0
+    assert config.thinking_config.thinking_budget == 0
+    assert config.system_instruction == "Follow the format exactly."
     assert metadata["prompt_tokens"] == 12
     assert metadata["completion_tokens"] == 4
     assert metadata["tokens_used"] == 16

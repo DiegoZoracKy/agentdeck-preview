@@ -121,26 +121,41 @@ class GeminiPlayer(LLMPlayer):
 
     def _make_api_call(self, messages: List[Dict[str, str]]) -> Tuple[str, Dict]:
         """Call Gemini through the Google Gen AI SDK using Vertex credentials."""
-        prompt_parts: List[str] = []
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            role_label = role.capitalize()
-            prompt_parts.append(f"{role_label}: {content}")
-        prompt = "\n\n".join(prompt_parts)
+        from google.genai import types
 
-        generation_config = {
+        contents = []
+        system_parts: List[str] = []
+        for msg in messages:
+            role = str(msg.get("role", "user")).strip().lower()
+            content = str(msg.get("content", "")).strip()
+            if not content:
+                continue
+
+            if role == "system":
+                system_parts.append(content)
+                continue
+
+            if role == "assistant":
+                contents.append(types.ModelContent(parts=[types.Part.from_text(text=content)]))
+                continue
+
+            contents.append(types.UserContent(parts=[types.Part.from_text(text=content)]))
+
+        generation_config_dict = {
             "temperature": self.temperature,
         }
         if self.max_tokens:
-            generation_config["max_output_tokens"] = self.max_tokens
+            generation_config_dict["max_output_tokens"] = self.max_tokens
 
         # Allow users to override Vertex generation settings via kwargs
-        generation_config.update(self._generation_overrides or {})
+        generation_config_dict.update(self._generation_overrides or {})
+        if system_parts:
+            generation_config_dict["system_instruction"] = "\n\n".join(system_parts)
+        generation_config = types.GenerateContentConfig.model_validate(generation_config_dict)
 
         response = self.client.models.generate_content(
             model=self.model,
-            contents=prompt,
+            contents=contents,
             config=generation_config,
         )
 
@@ -154,7 +169,8 @@ class GeminiPlayer(LLMPlayer):
             estimated = False
         else:
             # Fallback estimate: 1 token ≈ 4 characters
-            prompt_tokens = len(prompt) // 4
+            serialized_prompt = "\n\n".join(system_parts + [str(content) for content in contents])
+            prompt_tokens = len(serialized_prompt) // 4
             completion_tokens = len(response_text) // 4
             total_tokens = prompt_tokens + completion_tokens
             estimated = True
