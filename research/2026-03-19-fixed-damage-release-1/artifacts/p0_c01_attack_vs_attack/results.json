@@ -1,0 +1,739 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-19-fixed-damage-release-1::p0_c01_attack_vs_attack",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-19-fixed-damage-release-1/agentdeck_runs/p0_c01_attack_vs_attack/session_20260319_132932_3fd3d3/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "Attack-B": 0.5,
+      "Attack-A": 0.5
+    },
+    "total_cost": 0.0,
+    "avg_turns": 9.0,
+    "avg_duration": 0.10907438397407532,
+    "avg_cost": 0.0
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "Attack-B": {
+        "wins": 12,
+        "win_rate": 0.5,
+        "ci": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "Attack-A": {
+        "wins": 12,
+        "win_rate": 0.5,
+        "ci": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Attack-B_vs_Attack-A": {
+        "player_a": "Attack-B",
+        "player_b": "Attack-A",
+        "wins_a": 12,
+        "wins_b": 12,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.5,
+        "ci_a": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 216,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 216,
+      "strict_contract_passes": 216,
+      "strict_contract_rate": 1.0,
+      "recoverable_non_strict": 0,
+      "recoverable_non_strict_rate": 0.0,
+      "action_line_rate": 1.0,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "Attack-A": {
+        "turn_attempts": 108,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 108,
+        "strict_contract_passes": 108,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      },
+      "Attack-B": {
+        "turn_attempts": 108,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 108,
+        "strict_contract_passes": 108,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 24,
+    "first_player_win_rate": 1.0,
+    "second_player_wins": 0,
+    "upset_rate": 0.0,
+    "by_player": {
+      "Attack-B": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 12,
+        "wins_as_second": 0,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.0
+      },
+      "Attack-A": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 12,
+        "wins_as_second": 0,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.0
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 24,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 24,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 24,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 24,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 24,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Attack-B",
+      "provider": "unknown",
+      "model": "fixed-damage-policy",
+      "type": "AttackBot",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer"
+    },
+    {
+      "name": "Attack-A",
+      "provider": "unknown",
+      "model": "fixed-damage-policy",
+      "type": "AttackBot",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer"
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_13c6c44a",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4249,
+      "duration": 0.1051030158996582,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_1d21f328",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4253,
+      "duration": 0.08950042724609375,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_24d31507",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4248,
+      "duration": 0.0900416374206543,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_30894e25",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4242,
+      "duration": 0.11798214912414551,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_44cc014a",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4248,
+      "duration": 0.09319067001342773,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_58b6f51a",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4251,
+      "duration": 0.12424397468566895,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_6e1d262b",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4243,
+      "duration": 0.0804750919342041,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_73b04ce8",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4253,
+      "duration": 0.09548759460449219,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_77631a8b",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4247,
+      "duration": 0.088775634765625,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8630111e",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4250,
+      "duration": 0.13418936729431152,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_991638cf",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4244,
+      "duration": 0.2276928424835205,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a59475d0",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4243,
+      "duration": 0.08200526237487793,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_af0e7940",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4246,
+      "duration": 0.09726953506469727,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bf7dcefb",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4251,
+      "duration": 0.09801030158996582,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c2b98e28",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4242,
+      "duration": 0.10903334617614746,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c4607b9a",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4252,
+      "duration": 0.09448742866516113,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c46b98f6",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4250,
+      "duration": 0.11019110679626465,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ccbd2fe6",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4247,
+      "duration": 0.09599184989929199,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_db98b965",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4246,
+      "duration": 0.08784914016723633,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_de150fc7",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4245,
+      "duration": 0.11970090866088867,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e24f521b",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4249,
+      "duration": 0.11379718780517578,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e5d0cf9d",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4252,
+      "duration": 0.09059500694274902,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e885c77f",
+      "players": [
+        "Attack-B",
+        "Attack-A"
+      ],
+      "winner": "Attack-B",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4245,
+      "duration": 0.10090160369873047,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-B": 0.0,
+        "Attack-A": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-B",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f19acf67",
+      "players": [
+        "Attack-A",
+        "Attack-B"
+      ],
+      "winner": "Attack-A",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 4244,
+      "duration": 0.17127013206481934,
+      "cost": 0.0,
+      "player_costs": {
+        "Attack-A": 0.0,
+        "Attack-B": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Attack-A",
+        "index": 0,
+        "ordered_index": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,741 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-19-fixed-damage-release-1::p1_c01_mini_ho_vs_tr",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-19-fixed-damage-release-1/agentdeck_runs/p1_c01_mini_ho_vs_tr/session_20260319_133047_8ba9d0/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "Mini-TR": 0.5,
+      "Mini-HO": 0.5
+    },
+    "total_cost": 0.060282,
+    "avg_turns": 23.0,
+    "avg_duration": 30.04370567202568,
+    "avg_cost": 0.00251175
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "Mini-TR": {
+        "wins": 12,
+        "win_rate": 0.5,
+        "ci": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "Mini-HO": {
+        "wins": 12,
+        "win_rate": 0.5,
+        "ci": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Mini-TR_vs_Mini-HO": {
+        "player_a": "Mini-TR",
+        "player_b": "Mini-HO",
+        "wins_a": 12,
+        "wins_b": 12,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.5,
+        "ci_a": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 552,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 552,
+      "strict_contract_passes": 552,
+      "strict_contract_rate": 1.0,
+      "recoverable_non_strict": 0,
+      "recoverable_non_strict_rate": 0.0,
+      "action_line_rate": 1.0,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "Mini-HO": {
+        "turn_attempts": 276,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 276,
+        "strict_contract_passes": 276,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      },
+      "Mini-TR": {
+        "turn_attempts": 276,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 276,
+        "strict_contract_passes": 276,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 24,
+    "first_player_win_rate": 1.0,
+    "second_player_wins": 0,
+    "upset_rate": 0.0,
+    "by_player": {
+      "Mini-TR": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 12,
+        "wins_as_second": 0,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.0
+      },
+      "Mini-HO": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 12,
+        "wins_as_second": 0,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.0
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 24,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 24,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 24,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 24,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 24,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Mini-TR",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "type": "GPTPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "Mini-HO",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "type": "GPTPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_035c721b",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5246,
+      "duration": 41.590723514556885,
+      "cost": 0.002585249999999999,
+      "player_costs": {
+        "Mini-TR": 0.001592849999999998,
+        "Mini-HO": 0.000992400000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_062f0245",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5242,
+      "duration": 37.32200741767883,
+      "cost": 0.0025660499999999994,
+      "player_costs": {
+        "Mini-HO": 0.0012337499999999998,
+        "Mini-TR": 0.0013322999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_15464fa1",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5252,
+      "duration": 28.89341711997986,
+      "cost": 0.002536649999999991,
+      "player_costs": {
+        "Mini-HO": 0.0013345499999999934,
+        "Mini-TR": 0.0012020999999999976
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_16566165",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5252,
+      "duration": 33.08559036254883,
+      "cost": 0.002614050000000003,
+      "player_costs": {
+        "Mini-TR": 0.0015880500000000006,
+        "Mini-HO": 0.0010260000000000026
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_20881974",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5244,
+      "duration": 27.59590196609497,
+      "cost": 0.002548650000000002,
+      "player_costs": {
+        "Mini-HO": 0.001302150000000001,
+        "Mini-TR": 0.001246500000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2ac13f0c",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5243,
+      "duration": 28.52169132232666,
+      "cost": 0.0024982500000000018,
+      "player_costs": {
+        "Mini-TR": 0.0015058500000000013,
+        "Mini-HO": 0.0009924000000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2e866606",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5253,
+      "duration": 29.386844635009766,
+      "cost": 0.00252405,
+      "player_costs": {
+        "Mini-HO": 0.0012331500000000023,
+        "Mini-TR": 0.0012908999999999976
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_309c6705",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5250,
+      "duration": 34.55152773857117,
+      "cost": 0.0025768499999999916,
+      "player_costs": {
+        "Mini-HO": 0.001330949999999994,
+        "Mini-TR": 0.0012458999999999977
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_32c81813",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5248,
+      "duration": 27.287535667419434,
+      "cost": 0.0024148499999999996,
+      "player_costs": {
+        "Mini-HO": 0.0012373499999999982,
+        "Mini-TR": 0.0011775000000000015
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_3556552c",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5251,
+      "duration": 29.210087299346924,
+      "cost": 0.0025264499999999995,
+      "player_costs": {
+        "Mini-HO": 0.0012367499999999983,
+        "Mini-TR": 0.0012897000000000013
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_47d4382e",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5249,
+      "duration": 29.051169633865356,
+      "cost": 0.002514450000000005,
+      "player_costs": {
+        "Mini-TR": 0.0014578500000000001,
+        "Mini-HO": 0.0010566000000000048
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4f905660",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5250,
+      "duration": 25.361820459365845,
+      "cost": 0.0024034500000000014,
+      "player_costs": {
+        "Mini-TR": 0.0013780499999999987,
+        "Mini-HO": 0.0010254000000000027
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_552bc2e5",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5248,
+      "duration": 22.42240285873413,
+      "cost": 0.0024148499999999996,
+      "player_costs": {
+        "Mini-TR": 0.0014224499999999987,
+        "Mini-HO": 0.000992400000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5809a038",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5253,
+      "duration": 28.75873374938965,
+      "cost": 0.00256785,
+      "player_costs": {
+        "Mini-TR": 0.001508849999999999,
+        "Mini-HO": 0.001059000000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_587a6aeb",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5251,
+      "duration": 26.67992401123047,
+      "cost": 0.0024562500000000036,
+      "player_costs": {
+        "Mini-TR": 0.0014638499999999992,
+        "Mini-HO": 0.0009924000000000044
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5fdeb613",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5249,
+      "duration": 28.608704805374146,
+      "cost": 0.0024382499999999994,
+      "player_costs": {
+        "Mini-HO": 0.0012331499999999988,
+        "Mini-TR": 0.0012051000000000006
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_675943e0",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5247,
+      "duration": 29.197720527648926,
+      "cost": 0.0025036499999999996,
+      "player_costs": {
+        "Mini-TR": 0.0015112499999999987,
+        "Mini-HO": 0.000992400000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_69dbf2b0",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5246,
+      "duration": 33.91774606704712,
+      "cost": 0.002615850000000001,
+      "player_costs": {
+        "Mini-HO": 0.00136935,
+        "Mini-TR": 0.001246500000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_73b935c8",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5245,
+      "duration": 32.66712141036987,
+      "cost": 0.00253905,
+      "player_costs": {
+        "Mini-HO": 0.0013291499999999986,
+        "Mini-TR": 0.0012099000000000016
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7eb5b7de",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5245,
+      "duration": 33.23829007148743,
+      "cost": 0.002534849999999998,
+      "player_costs": {
+        "Mini-TR": 0.0015112499999999987,
+        "Mini-HO": 0.0010235999999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c6a32e4e",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5247,
+      "duration": 29.296875476837158,
+      "cost": 0.0024760500000000005,
+      "player_costs": {
+        "Mini-HO": 0.001265549999999999,
+        "Mini-TR": 0.0012105000000000015
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f2046c39",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5242,
+      "duration": 28.079719305038452,
+      "cost": 0.00245625,
+      "player_costs": {
+        "Mini-TR": 0.00146385,
+        "Mini-HO": 0.0009923999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f3b72884",
+      "players": [
+        "Mini-HO",
+        "Mini-TR"
+      ],
+      "winner": "Mini-HO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5243,
+      "duration": 32.16253328323364,
+      "cost": 0.0025510500000000005,
+      "player_costs": {
+        "Mini-HO": 0.0013015499999999998,
+        "Mini-TR": 0.0012495000000000006
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f66767aa",
+      "players": [
+        "Mini-TR",
+        "Mini-HO"
+      ],
+      "winner": "Mini-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5244,
+      "duration": 24.160847425460815,
+      "cost": 0.002419049999999999,
+      "player_costs": {
+        "Mini-TR": 0.001426649999999999,
+        "Mini-HO": 0.0009924
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Mini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,741 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-19-fixed-damage-release-1::p1_c02_haiku_ho_vs_tr",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-19-fixed-damage-release-1/agentdeck_runs/p1_c02_haiku_ho_vs_tr/session_20260319_134251_8a7b63/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "Haiku-TR": 0.5,
+      "Haiku-HO": 0.5
+    },
+    "total_cost": 0.46135799999999927,
+    "avg_turns": 24.0,
+    "avg_duration": 28.724051247040432,
+    "avg_cost": 0.01922324999999997
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "Haiku-TR": {
+        "wins": 12,
+        "win_rate": 0.5,
+        "ci": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "Haiku-HO": {
+        "wins": 12,
+        "win_rate": 0.5,
+        "ci": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Haiku-TR_vs_Haiku-HO": {
+        "player_a": "Haiku-TR",
+        "player_b": "Haiku-HO",
+        "wins_a": 12,
+        "wins_b": 12,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.5,
+        "ci_a": [
+          0.3142742581957335,
+          0.6857257418042665
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 576,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 576,
+      "strict_contract_passes": 576,
+      "strict_contract_rate": 1.0,
+      "recoverable_non_strict": 0,
+      "recoverable_non_strict_rate": 0.0,
+      "action_line_rate": 1.0,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "Haiku-HO": {
+        "turn_attempts": 288,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 288,
+        "strict_contract_passes": 288,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      },
+      "Haiku-TR": {
+        "turn_attempts": 288,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 288,
+        "strict_contract_passes": 288,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 0,
+    "first_player_win_rate": 0.0,
+    "second_player_wins": 24,
+    "upset_rate": 1.0,
+    "by_player": {
+      "Haiku-TR": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 0,
+        "wins_as_second": 12,
+        "win_rate_as_first": 0.0,
+        "win_rate_as_second": 1.0
+      },
+      "Haiku-HO": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 0,
+        "wins_as_second": 12,
+        "win_rate_as_first": 0.0,
+        "win_rate_as_second": 1.0
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 24,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 24,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 24,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 24,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 24,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Haiku-TR",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "type": "ClaudePlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "Haiku-HO",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "type": "ClaudePlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_00c1a133",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5348,
+      "duration": 32.09940433502197,
+      "cost": 0.019225999999999965,
+      "player_costs": {
+        "Haiku-TR": 0.010425999999999963,
+        "Haiku-HO": 0.008800000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2139dc83",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5344,
+      "duration": 18.73720383644104,
+      "cost": 0.019226000000000007,
+      "player_costs": {
+        "Haiku-TR": 0.010426000000000005,
+        "Haiku-HO": 0.008800000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_25e7ea23",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5346,
+      "duration": 32.39072012901306,
+      "cost": 0.019226000000000007,
+      "player_costs": {
+        "Haiku-TR": 0.010426000000000005,
+        "Haiku-HO": 0.008800000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_28751f57",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5351,
+      "duration": 31.765326738357544,
+      "cost": 0.01921999999999996,
+      "player_costs": {
+        "Haiku-HO": 0.008781999999999984,
+        "Haiku-TR": 0.010437999999999975
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2e645f21",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5346,
+      "duration": 30.216164112091064,
+      "cost": 0.019216999999999998,
+      "player_costs": {
+        "Haiku-HO": 0.008781999999999998,
+        "Haiku-TR": 0.010435
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_39fb651d",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5345,
+      "duration": 31.671860694885254,
+      "cost": 0.019226000000000014,
+      "player_costs": {
+        "Haiku-TR": 0.010426000000000005,
+        "Haiku-HO": 0.00880000000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5007c63d",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5349,
+      "duration": 30.43268394470215,
+      "cost": 0.01922599999999991,
+      "player_costs": {
+        "Haiku-TR": 0.010425999999999963,
+        "Haiku-HO": 0.008799999999999947
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5ea31d76",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5343,
+      "duration": 23.84930992126465,
+      "cost": 0.019226000000000004,
+      "player_costs": {
+        "Haiku-TR": 0.010426000000000005,
+        "Haiku-HO": 0.008799999999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_76812b51",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5347,
+      "duration": 35.04867243766785,
+      "cost": 0.019225999999999993,
+      "player_costs": {
+        "Haiku-TR": 0.01042599999999999,
+        "Haiku-HO": 0.008800000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7acc4346",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5342,
+      "duration": 22.892096996307373,
+      "cost": 0.019226000000000004,
+      "player_costs": {
+        "Haiku-TR": 0.010426000000000001,
+        "Haiku-HO": 0.008800000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7e1ef77b",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5352,
+      "duration": 31.29736828804016,
+      "cost": 0.019222999999999907,
+      "player_costs": {
+        "Haiku-TR": 0.01042299999999996,
+        "Haiku-HO": 0.008799999999999947
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8096ad7b",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5350,
+      "duration": 32.0862135887146,
+      "cost": 0.019223000000000018,
+      "player_costs": {
+        "Haiku-HO": 0.008787000000000017,
+        "Haiku-TR": 0.010436
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_82d682ab",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5352,
+      "duration": 30.876569986343384,
+      "cost": 0.01921999999999996,
+      "player_costs": {
+        "Haiku-HO": 0.008781999999999984,
+        "Haiku-TR": 0.010437999999999975
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_87d01e77",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5345,
+      "duration": 30.9638934135437,
+      "cost": 0.019217000000000005,
+      "player_costs": {
+        "Haiku-HO": 0.008782000000000005,
+        "Haiku-TR": 0.010435
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8d206302",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5349,
+      "duration": 30.842069387435913,
+      "cost": 0.019219999999999973,
+      "player_costs": {
+        "Haiku-HO": 0.008781999999999998,
+        "Haiku-TR": 0.010437999999999975
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8e83bcd7",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5344,
+      "duration": 21.280683517456055,
+      "cost": 0.019222999999999997,
+      "player_costs": {
+        "Haiku-HO": 0.008787000000000003,
+        "Haiku-TR": 0.010435999999999994
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a8f36cd8",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5343,
+      "duration": 21.533885717391968,
+      "cost": 0.019222999999999994,
+      "player_costs": {
+        "Haiku-HO": 0.008786999999999996,
+        "Haiku-TR": 0.010435999999999997
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b44340fe",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5348,
+      "duration": 26.664933681488037,
+      "cost": 0.019222999999999976,
+      "player_costs": {
+        "Haiku-HO": 0.008786999999999975,
+        "Haiku-TR": 0.010436
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bbca8385",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5353,
+      "duration": 31.28881573677063,
+      "cost": 0.01922599999999991,
+      "player_costs": {
+        "Haiku-TR": 0.010425999999999963,
+        "Haiku-HO": 0.008799999999999947
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d04d28fc",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5350,
+      "duration": 30.098762035369873,
+      "cost": 0.01922599999999991,
+      "player_costs": {
+        "Haiku-TR": 0.010425999999999963,
+        "Haiku-HO": 0.008799999999999947
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d9c3bd7f",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5347,
+      "duration": 30.704920768737793,
+      "cost": 0.019222999999999976,
+      "player_costs": {
+        "Haiku-HO": 0.008786999999999975,
+        "Haiku-TR": 0.010436
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e12a2dbd",
+      "players": [
+        "Haiku-TR",
+        "Haiku-HO"
+      ],
+      "winner": "Haiku-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5351,
+      "duration": 31.33968210220337,
+      "cost": 0.01922599999999991,
+      "player_costs": {
+        "Haiku-TR": 0.010425999999999963,
+        "Haiku-HO": 0.008799999999999947
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f1409bc1",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5342,
+      "duration": 20.642495155334473,
+      "cost": 0.019223,
+      "player_costs": {
+        "Haiku-HO": 0.008787,
+        "Haiku-TR": 0.010436
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_fffe1a8b",
+      "players": [
+        "Haiku-HO",
+        "Haiku-TR"
+      ],
+      "winner": "Haiku-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5353,
+      "duration": 30.653493404388428,
+      "cost": 0.019216999999999956,
+      "player_costs": {
+        "Haiku-HO": 0.008781999999999984,
+        "Haiku-TR": 0.010434999999999972
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    }
+  ]
+}

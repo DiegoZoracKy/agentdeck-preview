@@ -6,15 +6,15 @@
 
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
-- Status: planned
-- Matches: 0/96
+- Status: complete
+- Matches: 96/96
 - Game: FixedDamageGame
 - Players: local:AttackBot, local:PotionAt80Bot, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001
 - Seed Base: 4242
-- Topline Winner: TBD
-- Avg Turns: TBD
-- Avg Duration (s): TBD
-- Total Cost: TBD
+- Topline Winner: none; all paired cells split 12-12 under side-swap
+- Avg Turns: 17.75
+- Avg Duration (s): 14.76
+- Total Cost: 0.52164
 <!-- AUTO_FACTS:END -->
 
 ## Why This Exists
@@ -49,9 +49,11 @@
   - raw recordings remain uncommitted and are referenced later from `recordings/`
 
 ## Results
-- No findings are committed yet. This package was reset to ensure all release-facing runs come from the final audited codebase and final handshake contract.
-- Cell-level exports should be generated under `artifacts/<cell-id>/results.json` and `results.csv` only after fresh runs complete.
-- A top-level `results.json` should only be generated once the package has a meaningful study-level synthesis rather than a misleading mixed-cell aggregate.
+- Phase 0 calibration exports are committed under `artifacts/`.
+- Phase 1 provider findings are also committed. Neither provider showed a cadence delta in topline wins at `N=24`; both cells split `12-12` with `0` parse failures and `100%` strict contract rate.
+- Turn reinforcement increased cost without changing outcomes in both provider cells: `Mini-TR` cost about `19%` more than `Mini-HO`, and `Haiku-TR` cost about `19%` more than `Haiku-HO`.
+- The most interesting behavioral difference was not cadence but policy regime: Mini remained fully first-player dominated, while Haiku inverted that pattern and the second player won all `24/24` matches.
+- Top-level `results.json` and `results.csv` are present for package validation and bookkeeping, but the analytic units for this study remain the per-cell exports under `artifacts/`.
 
 ## Artifacts
 - `matrix.yaml` defines cells, phases, and cadence conditions

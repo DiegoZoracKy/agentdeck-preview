@@ -1,7 +1,7 @@
 schema_version: 1
 experiment_id: 2026-03-19-fixed-damage-release-1
 title: FixedDamage Release 1
-status: planned
+status: complete
 question: >-
   How sensitive is model behavior in FixedDamage to prompt cadence, and can
   AgentDeck make that sensitivity legible through validated artifacts and replay?
@@ -48,7 +48,7 @@ variants:
 run:
   seed_base: 4242
   matches_planned: 96
-  matches_completed: 0
+  matches_completed: 96
   concurrency: 1
   max_turns: 30
   matrix_source: matrix.yaml
@@ -71,4 +71,6 @@ storage:
     repo_path: research/2026-03-19-fixed-damage-release-1/artifacts
 notes: >-
   This package starts with Phase 0 calibration and Phase 1 cadence pilot only.
-  Expansion to larger sample sizes should happen only after a clean pilot result.
+  The cadence pilot completed cleanly on the final audited codebase. No expansion
+  is planned for this release package because the cadence contrast showed no
+  topline outcome delta at N=24.
