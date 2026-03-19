@@ -41,7 +41,7 @@
     - When `Path` provided, player loads file contents (UTF-8) before use
     - Raises `FileNotFoundError` if path doesn't exist, `UnicodeDecodeError` if not valid UTF-8
   - Note: `{player_instructions}` renders empty string when not provided in handshake metadata, so the default template works with or without it.
-  - `controller` is required. Controller provides handshake validation (default accepts OK/READY/YES), turn parsing, and optional conclusion parsing.
+  - `controller` is required. Controller provides handshake validation (default accepts only `OK`), turn parsing, and optional conclusion parsing.
   - Templates control what appears in each phase—researchers choose which placeholders to include.
 - `build_handshake_bundle(context: HandshakeContext) -> PromptBundle`
   - MUST render the handshake template (player override > game default > minimal built-in) and return the exact `PromptBundle` that will be sent to the LLM.
@@ -74,7 +74,7 @@
 3. **HS3**: Console MUST call `execute_handshake` with the exact `PromptBundle` returned by `build_handshake_bundle` (no re-rendering).
 4. **HS4**: Players MUST preserve handshake prompts/responses in conversation history unless researcher explicitly opts out.
 5. **HS5**: Players MUST return raw handshake responses in `HandshakeResponse.response_text`; console performs validation via `controller.validate_handshake()` per SPEC-CONTROLLER.
-6. **HS6**: Players SHOULD use the default handshake template; controller's default validation accepts OK/READY/YES.
+6. **HS6**: Players SHOULD use the default handshake template; controller's default validation accepts only `OK`.
 
 ### 5.2 Prompt Pipeline (PP)
 6. **PP1**: PromptBuilder MUST substitute placeholders deterministically based on template and provided data (same inputs → same prompt).
@@ -329,7 +329,7 @@ def test_conclusion_returns_reflection():
 def test_default_handshake_validation():
     player = Player("Dave", controller=ActionOnlyController())
 
-    # Controller has default validate_handshake() that accepts OK/READY/YES
+    # Controller has default validate_handshake() that accepts only OK
     assert player.controller is not None
 
     # Mock handshake returns "OK"
@@ -382,7 +382,7 @@ def test_conversation_reset():
 - Template-driven prompt composition keeps researchers in control—what you write is what gets sent to the LLM.
 - Two-step handshake preserves separation of concerns: Console emits lifecycle events before/after the LLM call; Player owns LLM interactions; Controller validates.
 - **Smart defaults (v1.2.0)**:
-  - `controller` parameter is required. Controller provides default handshake validation (accepts OK/READY/YES) per SPEC-CONTROLLER.
+  - `controller` parameter is required. Controller provides default handshake validation (accepts only `OK`) per SPEC-CONTROLLER.
   - Default `handshake_template` front-loads ALL instructions (game name, rules, player coaching, gameplay format, acknowledgement format).
     - Includes: `{game_name}`, `{game_instructions}`, `{player_instructions}` (optional), `{controller_format}`, `{handshake_controller_format}`.
     - Researchers can pass `player_instructions` via handshake metadata without reconfiguring templates.

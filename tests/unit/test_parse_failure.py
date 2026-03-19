@@ -124,7 +124,7 @@ class MockPlayer(Player):
 
     def get_response(self, prompt: str) -> str:
         """Mock LLM response."""
-        return "READY"
+        return "OK"
 
     def decide(self, observation, **kwargs):
         # Simple mock: just return "raw" and let controller parse
@@ -631,7 +631,7 @@ def test_parse_failure_retry_once_exhausted():
                 super().__init__(name=name, controller=controller)
 
             def get_response(self, prompt: str) -> str:
-                return "READY"
+                return "OK"
 
             def decide(self, observation, **kwargs):
                 raw_response = f"Player {self.name} choosing action"

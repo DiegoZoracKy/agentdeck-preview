@@ -22,7 +22,7 @@ Critical invariants:
 - DS1-DS2: Determinism & safety (no side effects, repeatable)
 
 Architecture note (v1.3.2):
-- Handshake is lifecycle method with default implementation (accepts OK/READY/YES)
+- Handshake is lifecycle method with default implementation (accepts only OK)
 - Subclasses override validate_handshake() for custom validation
 - Parallel pattern with Renderer (multiple methods, one object)
 """
@@ -43,7 +43,7 @@ class Controller(ABC):
     Unified controller handling all player-game interaction phases (per SPEC-CONTROLLER v1.3.2 §4).
 
     Controllers handle three lifecycle phases:
-    1. **Handshake validation** - Default implementation (accepts OK/READY/YES), overridable
+    1. **Handshake validation** - Default implementation (accepts only OK), overridable
     2. **Turn action parsing** - Abstract method (must implement)
     3. **Conclusion parsing** - Default passthrough, overridable
 
@@ -69,7 +69,7 @@ class Controller(ABC):
         ...     def __init__(self):
         ...         self._allowed_actions = None
         ...
-        ...     # Inherits default validate_handshake() - accepts OK/READY/YES
+        ...     # Inherits default validate_handshake() - accepts only OK
         ...
         ...     def bind_game(self, game):
         ...         self._allowed_actions = {a.upper() for a in game.allowed_actions}
@@ -116,7 +116,7 @@ class Controller(ABC):
         """
         Validate handshake acknowledgement (per HV1-HV5).
 
-        Default implementation accepts {"OK", "READY", "YES"} (case-insensitive,
+        Default implementation accepts {"OK"} only (case-insensitive,
         punctuation-tolerant). Override for custom validation logic.
 
         Args:
@@ -130,7 +130,7 @@ class Controller(ABC):
             - HV1: MUST be deterministic and side-effect free
             - HV2: MUST normalize whitespace/punctuation, preserve raw response
             - HV3: Rejection MUST set accepted=False and populate reason
-            - HV4: Default implementation accepts {"OK", "READY", "YES"}
+            - HV4: Default implementation accepts {"OK"}
             - HV5: Subclasses MAY override but MUST maintain HV1-HV3
 
         Example (default behavior):
@@ -150,7 +150,7 @@ class Controller(ABC):
         raw = response.strip()
         normalized = raw.upper().rstrip("!.")
 
-        allowed = {"OK", "READY", "YES"}
+        allowed = {"OK"}
         accepted = normalized in allowed
 
         reason = None if accepted else f"Expected one of {sorted(allowed)}, got '{raw}'"
@@ -171,7 +171,7 @@ class Controller(ABC):
         """
         Return format instructions for handshake phase (per FI1-FI2).
 
-        Default: Simple "Reply with OK" instruction.
+        Default: Strict single-token acknowledgement.
         Override to match custom validate_handshake() logic.
 
         Returns:
@@ -183,7 +183,7 @@ class Controller(ABC):
 
         Example (default):
             >>> controller.get_handshake_format_instructions()
-            "Reply with 'OK' if you understand and are ready to begin."
+            "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
 
         Example (custom override):
             >>> class StrictController(ActionOnlyController):
@@ -194,7 +194,7 @@ class Controller(ABC):
                {handshake_controller_format}. Gameplay instructions still come
                from get_format_instructions() via {controller_format}.
         """
-        return "Reply with 'OK' if you understand and are ready to begin."
+        return "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
 
     # -------------------------------------------------------------------------
     # Turn Phase (Abstract - Must Implement)

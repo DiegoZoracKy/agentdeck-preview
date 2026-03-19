@@ -88,8 +88,8 @@ class TestHandshakeEventBuffering:
                             "metadata": {},
                         }
                     ],
-                    "controller_format": "Reply with OK, READY, or YES",
-                    "controller_metadata": {"allowed": ["OK", "READY", "YES"]},
+                    "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+                    "controller_metadata": {"allowed": ["OK"]},
                     "renderer_output": None,
                     "usage_info": {"tokens": 10, "cost": 0.0001},
                     "metadata": {"turn_number": 0},
@@ -143,7 +143,10 @@ class TestHandshakeEventBuffering:
         assert prompt["prompt_text"] == "You are playing TestGame. Reply OK to start."  # PM1
         assert prompt["response_text"] == "OK"  # PM3
         assert "prompt_blocks" in prompt  # PM2
-        assert prompt["controller_format"] == "Reply with OK, READY, or YES"  # PM5
+        assert (
+            prompt["controller_format"]
+            == "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
+        )  # PM5
         assert "usage_info" in prompt  # PM4
 
     def test_clears_buffer_on_match_end(self, recorder, temp_recorder_dir):
@@ -279,7 +282,7 @@ class TestHandshakeMetadata:
                         "cost": 0.0005,
                         "model": "gpt-4o-mini",
                     },
-                    "controller_format": "Reply with OK, READY, or YES",  # PM5
+                    "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",  # PM5
                     "controller_metadata": {"accepted": True},  # PM6
                     "renderer_output": None,
                 },
@@ -305,7 +308,10 @@ class TestHandshakeMetadata:
         assert prompt["response_text"] == "OK"  # PM3
         assert prompt["usage_info"]["tokens"] == 50  # PM4
         assert prompt["usage_info"]["model"] == "gpt-4o-mini"
-        assert prompt["controller_format"] == "Reply with OK, READY, or YES"  # PM5
+        assert (
+            prompt["controller_format"]
+            == "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
+        )  # PM5
         assert prompt["controller_metadata"]["accepted"] is True  # PM6
 
         # Verify accepted flag

@@ -177,6 +177,10 @@ class LLMPlayer(Player, ABC):
             metadata should include: tokens_used, cost, model_used
         """
 
+    def _effective_max_tokens_for_request(self) -> int | None:
+        """Return the provider-effective max_tokens value for logging/observability."""
+        return self.max_tokens
+
     def _invoke_model(self, bundle, turn_context):
         user_prompt = bundle.text
 
@@ -206,16 +210,16 @@ class LLMPlayer(Player, ABC):
         logger = getattr(self, "logger", None)
         if logger:
             logger.api_request(
-                player=self.name,
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                phase=phase,
-                match_id=match_id,
-                turn_number=turn_number,
-                call_id=call_id,
-            )
+                    player=self.name,
+                    model=self.model,
+                    messages=messages,
+                    temperature=self.temperature,
+                    max_tokens=self._effective_max_tokens_for_request(),
+                    phase=phase,
+                    match_id=match_id,
+                    turn_number=turn_number,
+                    call_id=call_id,
+                )
 
         retry_durations: List[float] = []
         attempt_durations: List[float] = []

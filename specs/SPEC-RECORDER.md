@@ -461,13 +461,13 @@ deck = AgentDeck(recorder=recorder, session=config)
         "prompt": {
           "phase": "handshake",
           "turn_number": null,
-          "prompt_text": "You are playing FixedDamageGame...\n\nReply with OK to confirm.",
+          "prompt_text": "You are playing FixedDamageGame...\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
           "prompt_blocks": [
             {"key": "game_instructions", "content": "You are playing...", "length": 45},
-            {"key": "controller_format", "content": "Reply with OK", "length": 14}
+            {"key": "controller_format", "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.", "length": 80}
           ],
           "response_text": "OK",
-          "controller_format": "Reply with OK, READY, or YES to confirm",
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
           "controller_metadata": {"accepted": true, "normalized_response": "OK"},
           "renderer_output": null,
           "usage_info": {"tokens": 12, "cost": 0.0001, "latency_ms": 234},

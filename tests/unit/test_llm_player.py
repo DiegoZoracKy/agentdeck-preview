@@ -175,7 +175,7 @@ def test_llmplayer_handshake_uses_game_default_template_and_frontloads_action_fo
     assert "Gameplay format:" in bundle.text
     assert "Respond with: ACTION: <action>" in bundle.text
     assert "Allowed actions: ATTACK, POTION" in bundle.text
-    assert "Reply with 'OK' if you understand and are ready to begin." in bundle.text
+    assert "Reply with exactly 'OK' and nothing else if you understand and are ready to begin." in bundle.text
 
 
 # Test clone()
@@ -299,6 +299,7 @@ def test_claude_player_uses_high_fallback_max_tokens(monkeypatch):
         player.client.messages.last_kwargs["max_tokens"]
         == ClaudePlayer.REQUIRED_MAX_TOKENS_FALLBACK
     )
+    assert player._effective_max_tokens_for_request() == ClaudePlayer.REQUIRED_MAX_TOKENS_FALLBACK
 
 
 def test_claude_player_preserves_explicit_max_tokens(monkeypatch):
@@ -342,6 +343,7 @@ def test_claude_player_preserves_explicit_max_tokens(monkeypatch):
 
     player._make_api_call([{"role": "user", "content": "test"}])
     assert player.client.messages.last_kwargs["max_tokens"] == 1234
+    assert player._effective_max_tokens_for_request() == 1234
 
 
 def test_reset_conversation_clears_conversation_manager():

@@ -40,7 +40,14 @@ def _iter_selected_cells(matrix: Dict[str, Any], *, phase: str | None, cell_ids:
 
 def _recordings_dirs_for_cell(cell_id: str) -> List[Path]:
     cell_run_dir = EXPERIMENT_DIR / "agentdeck_runs" / cell_id
-    return sorted(path for path in cell_run_dir.glob("session_*/records") if path.is_dir())
+    usable_dirs: List[Path] = []
+    for path in sorted(cell_run_dir.glob("session_*/records")):
+        if not path.is_dir():
+            continue
+        if not any(path.glob("match_*.json")):
+            continue
+        usable_dirs.append(path)
+    return usable_dirs
 
 
 def main() -> None:

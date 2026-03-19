@@ -203,8 +203,9 @@ def test_action_only_is_game_agnostic_for_allowed_actions():
         (" ok ", True, "OK"),
         ("ok!", True, "OK"),
         ("OK!!!", True, "OK"),
-        ("  YES  ", True, "YES"),
-        ("READY.", True, "READY"),
+        ("  YES  ", False, None),
+        ("READY.", False, None),
+        ("OK\nI am ready.", False, None),
         ("maybe", False, None),  # Rejected -> normalized_response = None
         ("nope", False, None),  # Rejected -> normalized_response = None
         ("", False, None),  # Rejected -> normalized_response = None

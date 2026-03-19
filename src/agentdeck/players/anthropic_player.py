@@ -27,6 +27,10 @@ class ClaudePlayer(LLMPlayer):
 
         self.client = Anthropic(api_key=self.api_key)
 
+    def _effective_max_tokens_for_request(self) -> int | None:
+        """Anthropic requires an explicit max_tokens on every request."""
+        return self.max_tokens or self.REQUIRED_MAX_TOKENS_FALLBACK
+
     def _make_api_call(self, messages: List[Dict[str, str]]) -> Tuple[str, Dict]:
         """Make API call to Anthropic."""
         # Convert messages to Claude format

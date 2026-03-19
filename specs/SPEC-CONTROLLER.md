@@ -22,7 +22,7 @@
 - Non-goals: prompt composition (`SPEC-PROMPT-BUILDER.md`), LLM transport (`SPEC-LLM.md`), or console orchestration (`SPEC-CONSOLE.md`).
 
 ## 3. Responsibilities
-- **Handshake validation**: Default implementation accepts OK/READY/YES. Override `validate_handshake()` for custom validation. Report acceptance/rejection with reasons.
+- **Handshake validation**: Default implementation accepts only `OK`. Override `validate_handshake()` for custom validation. Report acceptance/rejection with reasons.
 - **Turn action parsing**: Abstract `parse()` method converts LLM responses into actions/reasoning. Validate against allowed sets. **Fail explicitly on parsing errors** (v1.2.0: no fallbacks).
 - **Bound action resolution** (built-ins): When `bind_game()` is active, controllers SHOULD deterministically prefer actions present in `game.allowed_actions` (from explicit `ACTION:`, extracted candidates, or clear mentions) before failing.
 - **Conclusion parsing** (optional): Default passthrough implementation. Override `parse_conclusion()` for structured reflection parsing.
@@ -40,7 +40,7 @@ class Controller(ABC):
     Unified controller handling all player-game interaction phases (v1.3.2).
 
     Lifecycle phases:
-    1. Handshake: validate_handshake() - Default accepts OK/READY/YES
+    1. Handshake: validate_handshake() - Default accepts only OK
     2. Turn: parse() - Abstract, must implement
     3. Conclusion: parse_conclusion() - Default passthrough
     """
@@ -56,7 +56,7 @@ class Controller(ABC):
         - {controller_format}: populated from get_format_instructions() so the
           handshake can front-load gameplay instructions
 
-        Default: "Reply with 'OK' if you understand and are ready to begin."
+        Default: "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
         Override for custom instructions.
         """
 
@@ -70,7 +70,7 @@ class Controller(ABC):
         Validate handshake acknowledgement (HV1-HV4).
 
         Default implementation:
-        - Accepts: "OK", "READY", "YES" (case-insensitive, ignores punctuation)
+        - Accepts: "OK" only (case-insensitive, ignores punctuation)
         - Normalizes: Uppercases and strips whitespace/punctuation
         - Returns: HandshakeResult(accepted, normalized_response, raw_response, reason?, metadata)
 
@@ -202,7 +202,7 @@ class ActionParseError(Exception):
 class ActionOnlyController(Controller):
     """
     Parses simple ACTION: <value> format with action validation.
-    Inherits default handshake validation (accepts OK/READY/YES).
+    Inherits default handshake validation (accepts only OK).
     """
 
 # ReasoningController - Parses "REASONING:\nACTION:" format
@@ -221,7 +221,7 @@ class ReasoningController(Controller):
 2. **HV2**: Controllers MUST normalise whitespace/punctuation, preserve raw response, and return upper-cased or canonical acknowledgement in `normalized_response` when `accepted=True`. When `accepted=False`, `normalized_response` MAY be `None` or a normalized form of the rejected token.
 3. **HV3**: Rejection MUST set `accepted=False` and populate `reason` with a human-readable explanation.
 4. **HV4**: Accepted acknowledgements SHOULD populate `metadata` (e.g., allowed tokens, player) for recorder.
-5. **HV5**: Default implementation MUST accept {"OK", "READY", "YES"} (case-insensitive, punctuation-tolerant).
+5. **HV5**: Default implementation MUST accept only {"OK"} (case-insensitive, punctuation-tolerant).
 
 ### 5.2 Format Instructions (FI)
 6. **FI1**: `get_format_instructions()` MUST align with parsing expectations (e.g., mention `ACTION:` prefix if parser requires it).
@@ -309,12 +309,12 @@ import re
 from agentdeck import Controller, Game, ParseResult
 
 class ActionOnlyController(Controller):
-    """Parses ACTION: <value> format. Inherits default handshake (OK/READY/YES)."""
+    """Parses ACTION: <value> format. Inherits default handshake (OK only)."""
 
     def __init__(self) -> None:
         self._allowed_actions = None  # Bound by console via bind_game()
 
-    # Handshake: Inherits default validate_handshake() - accepts OK/READY/YES
+    # Handshake: Inherits default validate_handshake() - accepts only OK
     # Handshake format: Inherits default get_handshake_format_instructions()
 
     def bind_game(self, game: Game) -> None:
@@ -374,7 +374,7 @@ from agentdeck import Controller, HandshakeResult, HandshakeContext
 class StrictReasoningController(ReasoningController):
     """
     Extends ReasoningController with custom handshake validation.
-    Requires explicit confirmation phrase instead of default OK/READY/YES.
+    Requires explicit confirmation phrase instead of default OK-only handshake.
     """
 
     def validate_handshake(
@@ -496,7 +496,7 @@ ACTION: <your_action>{actions_note}"""
 
 | Focus | Invariants | Verification |
 |-------|------------|--------------|
-| Default handshake | HV1-HV5 | Feed OK/READY/YES/invalid; verify deterministic results, normalization, defaults. |
+| Default handshake | HV1-HV5 | Feed OK/invalid; verify deterministic results, normalization, defaults. |
 | Custom handshake | HV1-HV4 | Override validate_handshake(); test custom validation logic. |
 | Action parsing | AP1-AP3 | Provide valid/invalid responses; inspect `ParseResult` success/error fields. |
 | Validation & failure propagation | VF1-VF4 | Configure allowed set; trigger invalid action; assert `ParseResult` metadata populated and `ActionParseError` raised. |
@@ -506,15 +506,15 @@ ACTION: <your_action>{actions_note}"""
 
 ### Concrete Test Examples
 
-#### Test 1: Default handshake accepts OK/READY/YES (HV5)
+#### Test 1: Default handshake accepts only OK (HV5)
 ```python
 def test_default_handshake_accepts_standard_tokens():
     controller = ActionOnlyController()  # Inherits default validate_handshake()
 
-    for token in ["OK", "ready", "YES!!!", "  ok  "]:
+    for token in ["OK", "  ok  ", "OK!!!"]:
         result = controller.validate_handshake(token)
         assert result.accepted == True
-        assert result.normalized_response in {"OK", "READY", "YES"}
+        assert result.normalized_response == "OK"
 ```
 
 #### Test 2: Default handshake rejects invalid tokens (HV3)
@@ -525,7 +525,7 @@ def test_default_handshake_rejects_invalid():
     result = controller.validate_handshake("maybe")
 
     assert result.accepted == False
-    assert "OK" in result.reason or "READY" in result.reason or "YES" in result.reason
+    assert "OK" in result.reason
 ```
 
 #### Test 3: Custom handshake override works
@@ -597,13 +597,13 @@ def test_controller_raises_on_failure():
 - ❌ Mental model complexity: "Why do I need two controllers for one player?"
 - ❌ API verbosity: Two imports, two parameters for 99% of use cases
 - ❌ Semantic confusion: Separate turn controllers sounded like they controlled actions rather than parsing responses
-- ❌ Asymmetric importance: Handshake rarely customized (default OK/READY/YES), turn parsing is core
+- ❌ Asymmetric importance: Handshake rarely customized (default OK), turn parsing is core
 
 **Benefits of single-controller pattern**:
 - ✅ Simpler mental model: One player, one controller (parallel to one player, one renderer)
 - ✅ Cleaner API: One import, one parameter (`controller=ReasoningController()`)
 - ✅ Semantic clarity: "Controller controls all player-game interactions"
-- ✅ Default handshake "just works": Accepts OK/READY/YES without configuration
+- ✅ Default handshake "just works": Accepts only OK without configuration
 - ✅ Customization via standard OOP: Override `validate_handshake()` method when needed
 - ✅ Parallel with Renderer pattern: Multiple methods, one object
 
@@ -611,7 +611,7 @@ def test_controller_raises_on_failure():
 
 ### Other Design Decisions
 
-- **Default handshake implementation**: Accepts {"OK", "READY", "YES"} so 99% of cases work without customization.
+- **Default handshake implementation**: Accepts only {"OK"} so the prompt and validator stay fully aligned without customization.
 - **Lifecycle methods** (validate_handshake, parse, parse_conclusion): Mirrors player lifecycle, makes controller behavior explicit.
 - **Metadata-first design**: Gives recorder/spectators visibility into parsing decisions without re-running controllers.
 - **Format instructions via placeholders**: `get_handshake_format_instructions()` and `get_format_instructions()` enable template injection, keeping prompts in sync with controller expectations.
@@ -625,7 +625,7 @@ def test_controller_raises_on_failure():
 **Breaking Changes**:
 1. Removed `HandshakeController` abstract class. Handshake validation is now a lifecycle method on `Controller`.
 2. Player constructor now accepts single `controller` parameter instead of `handshake_controller` plus a separate turn controller.
-3. Default handshake implementation built into `Controller.validate_handshake()` (accepts OK/READY/YES).
+3. Default handshake implementation built into `Controller.validate_handshake()` (accepts only OK).
 4. Controllers override `validate_handshake()` for custom handshake logic instead of creating separate handshake controller.
 
 **Migration Guide**: See §14.
@@ -726,7 +726,7 @@ player = GPTPlayer(
 
 ### Default Handshake Behavior
 
-**v1.3.0 Default**: All controllers inherit default `validate_handshake()` that accepts {"OK", "READY", "YES"}.
+**v1.3.0 Default**: All controllers inherit default `validate_handshake()` that accepts only {"OK"}.
 
 **No change needed** if you were using `AcceptOKHandshakeController()` - just remove it!
 
