@@ -34,6 +34,7 @@ who actually took the first turn.
 - `claude-haiku-4-5-20251001`: no cadence delta at `N=24`. `Haiku-HO` and `Haiku-TR` also split `12-12` with `0` parse failures and `100%` strict contract rate, but unlike Mini they inverted the game and the second player won `24/24`.
 - `gemini-2.5-flash-lite`: no cadence delta at `N=24`. `Gemini-HO` finished `13-11` over `Gemini-TR` with negligible effect size and no parse failures, but strict ActionOnly compliance was only `0.182` overall. Flash-Lite also broke the earlier position patterns, landing close to balanced with a slight second-player lean (`13/24` second-player wins).
 - `gemini-2.5-flash`: no cadence delta at `N=24`. `GeminiFlash-TR` finished `14-10` over `GeminiFlash-HO`, again with negligible effect size and no parse failures. Flash was much stricter than Flash-Lite (`0.902` strict contract rate) and strongly first-player dominated (`22/24` first-player wins).
+- Within the Flash cell, reinforcement reduced strict ActionOnly compliance rather than improving it: `GeminiFlash-HO` was `0.937` strict while `GeminiFlash-TR` was `0.868`. At this pilot size the delta is descriptive, not inferential, but it runs against the intuition that repeated format instructions tighten contract adherence.
 - Reinforcement increased spend without changing the causal picture. `Mini-TR` cost `0.03274` vs `Mini-HO` `0.02754`, `Haiku-TR` `0.25034` vs `Haiku-HO` `0.21101`, `Gemini-TR` `0.01362` vs `Gemini-HO` `0.01196`, and `GeminiFlash-TR` `0.06471` vs `GeminiFlash-HO` `0.05575`.
 - Trajectory structure split by provider family. Mini and Haiku were fully deterministic in turn count (`23` and `24` turns respectively in every match), while the Gemini cells showed real spread. Flash-Lite ranged from `11` to `24` turns, and Flash ranged from `13` to `25` turns with most matches ending at `25`.
 - The earlier aborted Haiku pilot is no longer part of the result set. After tightening the handshake contract to require exactly `OK`, the rerun completed cleanly and is the only release-facing Haiku data.
@@ -63,6 +64,7 @@ who actually took the first turn.
 ## Limitations
 - FixedDamage is a behavioral microscope, not a broad benchmark.
 - Position effects remain important even with paired side-swap.
+- The current Gemini adapter serializes conversation history into a labeled text transcript (`User:` / `Assistant:`) before submission rather than using native structured multi-turn contents. This likely contributes to `Assistant: ACTION: ...` outputs being counted as recoverable non-strict instead of strict contract passes, especially in the Flash-Lite cell.
 
 ## Next Steps
 - `P0` is complete on the final audited codebase.
