@@ -1,11 +1,9 @@
-"""Unit tests for GeminiPlayer credential resolution."""
+"""Unit tests for GeminiPlayer credential resolution and request wiring."""
 
 from __future__ import annotations
 
 import base64
 import json
-import sys
-import types
 
 import pytest
 from google.oauth2 import service_account
@@ -58,28 +56,11 @@ def test_gemini_player_passes_b64_credentials_to_vertex_init(monkeypatch):
 
     captured = {}
 
-    vertexai_module = types.ModuleType("vertexai")
-
-    def fake_init(**kwargs):
-        captured["init_kwargs"] = kwargs
-
-    vertexai_module.init = fake_init
-
-    generative_models_module = types.ModuleType("vertexai.generative_models")
-
-    class DummyGenerativeModel:
-        def __init__(self, model):
-            captured["model"] = model
-
-    generative_models_module.GenerativeModel = DummyGenerativeModel
-
-    monkeypatch.setitem(sys.modules, "vertexai", vertexai_module)
-    monkeypatch.setitem(sys.modules, "vertexai.generative_models", generative_models_module)
-
     fake_credentials = object()
 
-    def fake_from_service_account_info(info):
+    def fake_from_service_account_info(info, scopes=None):
         captured["service_account_info"] = info
+        captured["scopes"] = scopes
         return fake_credentials
 
     monkeypatch.setattr(
@@ -87,6 +68,13 @@ def test_gemini_player_passes_b64_credentials_to_vertex_init(monkeypatch):
         "from_service_account_info",
         staticmethod(fake_from_service_account_info),
     )
+    import google.genai
+
+    class DummyClient:
+        def __init__(self, **kwargs):
+            captured["client_kwargs"] = kwargs
+
+    monkeypatch.setattr(google.genai, "Client", DummyClient)
 
     GeminiPlayer(
         name="Gemini",
@@ -96,10 +84,11 @@ def test_gemini_player_passes_b64_credentials_to_vertex_init(monkeypatch):
     )
 
     assert captured["service_account_info"] == payload
-    assert captured["init_kwargs"]["project"] == payload["project_id"]
-    assert captured["init_kwargs"]["location"] == "us-central1"
-    assert captured["init_kwargs"]["credentials"] is fake_credentials
-    assert captured["model"] == "gemini-2.5-flash"
+    assert captured["scopes"] == [GeminiPlayer._VERTEX_SCOPE]
+    assert captured["client_kwargs"]["vertexai"] is True
+    assert captured["client_kwargs"]["project"] == payload["project_id"]
+    assert captured["client_kwargs"]["location"] == "us-central1"
+    assert captured["client_kwargs"]["credentials"] is fake_credentials
 
 
 def test_gemini_player_rejects_invalid_b64_credentials(monkeypatch):
@@ -116,3 +105,52 @@ def test_gemini_player_rejects_invalid_b64_credentials(monkeypatch):
             location="us-central1",
             controller=ActionOnlyController(),
         )
+
+
+def test_gemini_player_passes_generation_config_to_google_sdk(monkeypatch):
+    monkeypatch.setenv("VERTEX_PROJECT_ID", "agentdeck-gcp-project")
+    monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS_B64", raising=False)
+
+    captured = {}
+
+    class DummyUsage:
+        prompt_token_count = 12
+        candidates_token_count = 4
+        total_token_count = 16
+
+    class DummyResponse:
+        text = "ACTION: ATTACK"
+        usage_metadata = DummyUsage()
+
+    class DummyModels:
+        def generate_content(self, **kwargs):
+            captured["generate_kwargs"] = kwargs
+            return DummyResponse()
+
+    def fake_init_client(self):
+        self.client = type("DummyClient", (), {"models": DummyModels()})()
+
+    monkeypatch.setattr(GeminiPlayer, "_initialize_client", fake_init_client)
+
+    player = GeminiPlayer(
+        name="Gemini",
+        model="gemini-2.5-flash",
+        location="us-central1",
+        controller=ActionOnlyController(),
+        generation_config={"thinking_config": {"thinking_budget": 0}},
+    )
+
+    response_text, metadata = player._make_api_call(
+        [{"role": "user", "content": "Reply with ACTION: ATTACK"}]
+    )
+
+    assert response_text == "ACTION: ATTACK"
+    assert captured["generate_kwargs"]["model"] == "gemini-2.5-flash"
+    assert captured["generate_kwargs"]["contents"] == "User: Reply with ACTION: ATTACK"
+    assert captured["generate_kwargs"]["config"]["temperature"] == 1.0
+    assert captured["generate_kwargs"]["config"]["thinking_config"] == {
+        "thinking_budget": 0
+    }
+    assert metadata["prompt_tokens"] == 12
+    assert metadata["completion_tokens"] == 4
+    assert metadata["tokens_used"] == 16

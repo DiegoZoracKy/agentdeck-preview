@@ -17,7 +17,7 @@ if str(REPO_ROOT) not in sys.path:
 from agentdeck import AgentDeck, AgentDeckConfig, ConclusionPolicy, FixedDamageGame
 from agentdeck.controllers import ActionOnlyController
 from agentdeck.games.examples.fixed_damage import AttackBot, PotionAt80Bot
-from agentdeck.players import ClaudePlayer, GPTPlayer
+from agentdeck.players import ClaudePlayer, GPTPlayer, GeminiPlayer
 
 
 EXPERIMENT_DIR = Path(__file__).resolve().parents[1]
@@ -48,6 +48,8 @@ def _llm_from_provider(provider: str):
         return GPTPlayer
     if provider == "anthropic":
         return ClaudePlayer
+    if provider == "google":
+        return GeminiPlayer
     raise ValueError(f"Unsupported provider in matrix: {provider}")
 
 
@@ -79,7 +81,13 @@ def _build_player(
 
     if kind == "llm":
         player_cls = _llm_from_provider(player_spec["provider"])
-        return player_cls(model=player_spec["model"], **common_kwargs)
+        llm_kwargs = {"model": player_spec["model"], **common_kwargs}
+        for key in ("temperature", "max_tokens", "max_retries", "retry_delay"):
+            if player_spec.get(key) is not None:
+                llm_kwargs[key] = player_spec[key]
+        if player_spec.get("generation_config") is not None:
+            llm_kwargs["generation_config"] = dict(player_spec["generation_config"])
+        return player_cls(**llm_kwargs)
 
     raise ValueError(f"Unsupported player kind in matrix: {kind}")
 

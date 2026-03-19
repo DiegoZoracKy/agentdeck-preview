@@ -3,7 +3,8 @@ experiment_id: 2026-03-19-fixed-damage-release-1
 created_at: "2026-03-19T00:00:00Z"
 purpose: >-
   Release-facing FixedDamage study demonstrating calibration, fairness, replay,
-  and prompt-cadence sensitivity using AgentDeck-native configuration only.
+  and prompt-cadence sensitivity across the weak-tier models from the three big
+  providers using AgentDeck-native configuration only.
 
 frozen_inputs:
   git_tag: null
@@ -35,6 +36,24 @@ player_registry:
     provider: anthropic
     model: claude-haiku-4-5-20251001
     tier: weak
+  gemini_2_5_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 8
+    retry_delay: 2.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
 
 config_registry:
   AO_handshake_only:
@@ -91,6 +110,8 @@ execution_plan:
       cell_ids:
         - p1_c01_mini_ho_vs_tr
         - p1_c02_haiku_ho_vs_tr
+        - p1_c03_gemini_ho_vs_tr
+        - p1_c04_gemini_flash_ho_vs_tr
 
 cells:
   - id: p0_c01_attack_vs_attack
@@ -175,3 +196,44 @@ cells:
     expansion_target_matches: 80
     viewer_priority: true
 
+  - id: p1_c03_gemini_ho_vs_tr
+    phase: P1
+    question: Does turn-level format reinforcement change Gemini Flash-Lite behavior in FixedDamage?
+    intent: Within-model cadence comparison using identical model and game configuration.
+    causal_factor: prompt_cadence
+    fairness_notes: paired side-swap enabled; same model, differing turn-template cadence
+    seed_offset: 1200
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: AO_handshake_only
+      name: Gemini-HO
+    player_b:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: AO_turn_reinforced
+      name: Gemini-TR
+    matches: 24
+    expansion_target_matches: 80
+    viewer_priority: true
+
+  - id: p1_c04_gemini_flash_ho_vs_tr
+    phase: P1
+    question: Does turn-level format reinforcement change Gemini Flash behavior in FixedDamage?
+    intent: Within-model cadence comparison using identical model and game configuration.
+    causal_factor: prompt_cadence
+    fairness_notes: paired side-swap enabled; same model, differing turn-template cadence
+    seed_offset: 1300
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: GeminiFlash-HO
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_turn_reinforced
+      name: GeminiFlash-TR
+    matches: 24
+    expansion_target_matches: 80
+    viewer_priority: true

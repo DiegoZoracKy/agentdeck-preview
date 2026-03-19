@@ -107,7 +107,7 @@
 27. **OR4**: OpenAI-backed players MUST map usage fields `usage.input_tokens` / `usage.output_tokens` into internal metadata keys `prompt_tokens` / `completion_tokens` to keep pricing and spectator contracts stable.
 28. **OR5**: Until explicit server-history mode is introduced, OpenAI-backed players MUST send `store=False` on Responses API calls so match reproducibility remains grounded in local conversation history.
 29. **AR1**: Anthropic-backed players MUST supply `max_tokens` on every request. When callers leave `max_tokens` unset, implementations MUST apply a documented fallback.
-30. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, pass credentials into `vertexai.init(...)`, and infer `project_id` from the payload when possible.
+30. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, create scoped Google credentials suitable for Vertex (`cloud-platform`), construct the provider client in Vertex mode, and infer `project_id` from the payload when possible.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:

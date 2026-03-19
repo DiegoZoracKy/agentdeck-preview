@@ -149,7 +149,7 @@ pip install agentdeck-ai
 # With provider SDKs
 pip install agentdeck-ai[openai]      # OpenAI SDK
 pip install agentdeck-ai[anthropic]   # Anthropic SDK
-pip install agentdeck-ai[google]      # Google Vertex SDK
+pip install agentdeck-ai[google]      # Google Gen AI SDK (Vertex mode)
 pip install agentdeck-ai[providers]   # All provider SDKs
 
 # With research stack (statistics/plotting)

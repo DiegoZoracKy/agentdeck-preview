@@ -169,7 +169,7 @@ from agentdeck.players.google_player import GeminiPlayer
 
 player = GeminiPlayer(
     name="Charlie",
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash-lite",
     project_id="your-gcp-project-id",
     location="us-central1",
     temperature=0.7,
@@ -177,9 +177,9 @@ player = GeminiPlayer(
 )
 ```
 
-Gemini uses Vertex AI credentials. You can provide them through standard ADC or
-through `GOOGLE_APPLICATION_CREDENTIALS_B64` when your environment injects
-secrets as base64.
+Gemini uses the Google Gen AI SDK in Vertex mode. You can provide credentials
+through standard ADC or through `GOOGLE_APPLICATION_CREDENTIALS_B64` when your
+environment injects secrets as base64.
 
 ### Using Context Manager (Recommended)
 

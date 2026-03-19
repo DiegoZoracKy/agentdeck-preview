@@ -1,0 +1,741 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-19-fixed-damage-release-1::p1_c04_gemini_flash_ho_vs_tr",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-19-fixed-damage-release-1/agentdeck_runs/p1_c04_gemini_flash_ho_vs_tr/session_20260319_151139_d2f1fd/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "GeminiFlash-HO": 0.4166666666666667,
+      "GeminiFlash-TR": 0.5833333333333334
+    },
+    "total_cost": 0.1204635,
+    "avg_turns": 22.583333333333332,
+    "avg_duration": 29.603713750839233,
+    "avg_cost": 0.0050193125
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "GeminiFlash-HO": {
+        "wins": 10,
+        "win_rate": 0.4166666666666667,
+        "ci": [
+          0.24467602609811764,
+          0.6116533413477124
+        ],
+        "p_value": 0.5412561893463135,
+        "effect_size": -0.16744807921968952,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "GeminiFlash-TR": {
+        "wins": 14,
+        "win_rate": 0.5833333333333334,
+        "ci": [
+          0.3883466586522876,
+          0.7553239739018824
+        ],
+        "p_value": 0.5412561893463135,
+        "effect_size": 0.1674480792196893,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "GeminiFlash-HO_vs_GeminiFlash-TR": {
+        "player_a": "GeminiFlash-HO",
+        "player_b": "GeminiFlash-TR",
+        "wins_a": 10,
+        "wins_b": 14,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.4166666666666667,
+        "ci_a": [
+          0.24467602609811764,
+          0.6116533413477124
+        ],
+        "p_value": 0.5412561893463135,
+        "effect_size": -0.16744807921968952,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 542,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 542,
+      "strict_contract_passes": 489,
+      "strict_contract_rate": 0.9022140221402214,
+      "recoverable_non_strict": 53,
+      "recoverable_non_strict_rate": 0.09778597785977859,
+      "action_line_rate": 0.9022140221402214,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "GeminiFlash-HO": {
+        "turn_attempts": 270,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 270,
+        "strict_contract_passes": 253,
+        "strict_contract_rate": 0.937037037037037,
+        "recoverable_non_strict": 17,
+        "recoverable_non_strict_rate": 0.06296296296296296,
+        "action_line_rate": 0.937037037037037,
+        "reasoning_line_rate": 0.0
+      },
+      "GeminiFlash-TR": {
+        "turn_attempts": 272,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 272,
+        "strict_contract_passes": 236,
+        "strict_contract_rate": 0.8676470588235294,
+        "recoverable_non_strict": 36,
+        "recoverable_non_strict_rate": 0.1323529411764706,
+        "action_line_rate": 0.8676470588235294,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 22,
+    "first_player_win_rate": 0.9166666666666666,
+    "second_player_wins": 2,
+    "upset_rate": 0.08333333333333333,
+    "by_player": {
+      "GeminiFlash-HO": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 10,
+        "wins_as_second": 0,
+        "win_rate_as_first": 0.8333333333333334,
+        "win_rate_as_second": 0.0
+      },
+      "GeminiFlash-TR": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 12,
+        "wins_as_second": 2,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.16666666666666666
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 24,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 24,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 24,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 24,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 24,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "GeminiFlash-HO",
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "GeminiFlash-TR",
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_0365238f",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5553,
+      "duration": 20.46166467666626,
+      "cost": 0.0057556000000000065,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0028378000000000084,
+        "GeminiFlash-TR": 0.002917799999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_06870adb",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 13,
+      "outcome": "win",
+      "seed": 5549,
+      "duration": 9.134076118469238,
+      "cost": 0.0021305999999999964,
+      "player_costs": {
+        "GeminiFlash-TR": 0.0012469999999999981,
+        "GeminiFlash-HO": 0.0008835999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_072800f8",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5548,
+      "duration": 18.71539068222046,
+      "cost": 0.004419599999999996,
+      "player_costs": {
+        "GeminiFlash-TR": 0.0025540000000000077,
+        "GeminiFlash-HO": 0.001865599999999988
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_0e2bc779",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5549,
+      "duration": 22.12732219696045,
+      "cost": 0.005775600000000013,
+      "player_costs": {
+        "GeminiFlash-HO": 0.002837200000000012,
+        "GeminiFlash-TR": 0.0029384000000000007
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_186ad85f",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5553,
+      "duration": 24.662240266799927,
+      "cost": 0.005811799999999992,
+      "player_costs": {
+        "GeminiFlash-TR": 0.003325599999999998,
+        "GeminiFlash-HO": 0.002486199999999994
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_21c54792",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5550,
+      "duration": 18.425869703292847,
+      "cost": 0.005809399999999999,
+      "player_costs": {
+        "GeminiFlash-TR": 0.0033232000000000053,
+        "GeminiFlash-HO": 0.002486199999999994
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2256537c",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5551,
+      "duration": 15.142334461212158,
+      "cost": 0.005755000000000017,
+      "player_costs": {
+        "GeminiFlash-HO": 0.002837200000000012,
+        "GeminiFlash-TR": 0.002917800000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_383e27c8",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5551,
+      "duration": 12.854462146759033,
+      "cost": 0.004394799999999997,
+      "player_costs": {
+        "GeminiFlash-TR": 0.002519400000000005,
+        "GeminiFlash-HO": 0.0018753999999999924
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4307daf6",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5552,
+      "duration": 18.998244762420654,
+      "cost": 0.005086100000000003,
+      "player_costs": {
+        "GeminiFlash-TR": 0.002527500000000009,
+        "GeminiFlash-HO": 0.002558599999999994
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4c128137",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5544,
+      "duration": 18.303035736083984,
+      "cost": 0.005761799999999999,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0028377999999999997,
+        "GeminiFlash-TR": 0.0029239999999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_57c928b4",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5544,
+      "duration": 55.68842124938965,
+      "cost": 0.005822399999999997,
+      "player_costs": {
+        "GeminiFlash-TR": 0.0033311999999999977,
+        "GeminiFlash-HO": 0.002491199999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_623217e6",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5547,
+      "duration": 21.161559581756592,
+      "cost": 0.0043850000000000035,
+      "player_costs": {
+        "GeminiFlash-TR": 0.0025194000000000015,
+        "GeminiFlash-HO": 0.001865600000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_82cbc31a",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5550,
+      "duration": 18.133153676986694,
+      "cost": 0.0057556000000000135,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0028378000000000084,
+        "GeminiFlash-TR": 0.002917800000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8a526497",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 5545,
+      "duration": 14.049020767211914,
+      "cost": 0.003772899999999999,
+      "player_costs": {
+        "GeminiFlash-TR": 0.002176000000000001,
+        "GeminiFlash-HO": 0.0015968999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a4b516b5",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5546,
+      "duration": 25.58678102493286,
+      "cost": 0.0057769999999999835,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0028591999999999854,
+        "GeminiFlash-TR": 0.002917799999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a581a3e9",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5546,
+      "duration": 15.751714944839478,
+      "cost": 0.005086400000000001,
+      "player_costs": {
+        "GeminiFlash-TR": 0.002921299999999998,
+        "GeminiFlash-HO": 0.002165100000000003
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_adf74864",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5543,
+      "duration": 30.663217544555664,
+      "cost": 0.005829600000000001,
+      "player_costs": {
+        "GeminiFlash-TR": 0.003332400000000001,
+        "GeminiFlash-HO": 0.0024971999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b95d5f30",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5543,
+      "duration": 76.5093994140625,
+      "cost": 0.005755199999999997,
+      "player_costs": {
+        "GeminiFlash-HO": 0.002832399999999999,
+        "GeminiFlash-TR": 0.002922799999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bab5dd2a",
+      "players": [
+        "GeminiFlash-TR",
+        "GeminiFlash-HO"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 5542,
+      "duration": 50.81647300720215,
+      "cost": 0.0050814,
+      "player_costs": {
+        "GeminiFlash-TR": 0.0029163,
+        "GeminiFlash-HO": 0.0021651
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c1aa60d6",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5548,
+      "duration": 38.491589307785034,
+      "cost": 0.005764399999999989,
+      "player_costs": {
+        "GeminiFlash-HO": 0.002831199999999992,
+        "GeminiFlash-TR": 0.002933199999999997
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_cb571269",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5542,
+      "duration": 145.58531832695007,
+      "cost": 0.005747200000000003,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0028262000000000005,
+        "GeminiFlash-TR": 0.0029210000000000017
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ccb37151",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 5552,
+      "duration": 11.825847148895264,
+      "cost": 0.002864600000000002,
+      "player_costs": {
+        "GeminiFlash-HO": 0.001338800000000001,
+        "GeminiFlash-TR": 0.0015258000000000008
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d0b224ee",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-HO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 5547,
+      "duration": 18.671573162078857,
+      "cost": 0.005762999999999987,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0028377999999999876,
+        "GeminiFlash-TR": 0.0029251999999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d404e373",
+      "players": [
+        "GeminiFlash-HO",
+        "GeminiFlash-TR"
+      ],
+      "winner": "GeminiFlash-TR",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 5545,
+      "duration": 8.730420112609863,
+      "cost": 0.0023584999999999925,
+      "player_costs": {
+        "GeminiFlash-HO": 0.0011031999999999952,
+        "GeminiFlash-TR": 0.0012552999999999974
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GeminiFlash-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    }
+  ]
+}

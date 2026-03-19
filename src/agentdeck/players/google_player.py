@@ -6,7 +6,6 @@ import base64
 import binascii
 import json
 import os
-import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
 from ..utils.pricing import calculate_cost
@@ -14,12 +13,13 @@ from .llm_player import LLMPlayer
 
 
 class GeminiPlayer(LLMPlayer):
-    """Google Gemini player backed by Vertex AI."""
+    """Google Gemini player backed by the Google Gen AI SDK in Vertex mode."""
 
     PROVIDER = "google"
     default_model = None
     api_key_env_var = None  # Vertex AI uses ADC/Project configuration instead of API keys
     _SERVICE_ACCOUNT_B64_ENV_VAR = "GOOGLE_APPLICATION_CREDENTIALS_B64"
+    _VERTEX_SCOPE = "https://www.googleapis.com/auth/cloud-platform"
 
     def __init__(
         self,
@@ -52,38 +52,29 @@ class GeminiPlayer(LLMPlayer):
         return ""
 
     def _initialize_client(self):
-        """Initialize Vertex AI GenerativeModel client."""
+        """Initialize Google Gen AI client in Vertex mode."""
         try:
-            import vertexai
+            from google import genai
             from google.oauth2 import service_account
-            from vertexai.generative_models import GenerativeModel
         except ImportError as exc:
             raise ImportError(
-                "google-cloud-aiplatform is not installed. "
+                "google-genai is not installed. "
                 'Install it via the optional extra: pip install "agentdeck-ai[google]"'
             ) from exc
 
         credentials = None
         if self._service_account_info is not None:
             credentials = service_account.Credentials.from_service_account_info(
-                self._service_account_info
+                self._service_account_info,
+                scopes=[self._VERTEX_SCOPE],
             )
 
-        # Reinitialize Vertex per player so auth/project overrides remain explicit.
-        vertexai.init(
+        self.client = genai.Client(
+            vertexai=True,
             project=self._project_id,
             location=self._location,
             credentials=credentials,
         )
-
-        warnings.filterwarnings(
-            "ignore",
-            message="This feature is deprecated as of June 24, 2025",
-            category=UserWarning,
-            module="vertexai.generative_models._generative_models",
-        )
-
-        self.client = GenerativeModel(self.model)
 
     @classmethod
     def _project_id_from_service_account(
@@ -129,7 +120,7 @@ class GeminiPlayer(LLMPlayer):
         return payload
 
     def _make_api_call(self, messages: List[Dict[str, str]]) -> Tuple[str, Dict]:
-        """Call Vertex AI Gemini model."""
+        """Call Gemini through the Google Gen AI SDK using Vertex credentials."""
         prompt_parts: List[str] = []
         for msg in messages:
             role = msg.get("role", "user")
@@ -147,9 +138,10 @@ class GeminiPlayer(LLMPlayer):
         # Allow users to override Vertex generation settings via kwargs
         generation_config.update(self._generation_overrides or {})
 
-        response = self.client.generate_content(
-            [prompt],
-            generation_config=generation_config,
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config=generation_config,
         )
 
         response_text = getattr(response, "text", "") or ""

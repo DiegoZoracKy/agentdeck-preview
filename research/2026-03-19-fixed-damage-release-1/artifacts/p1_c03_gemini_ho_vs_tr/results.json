@@ -1,0 +1,741 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-19-fixed-damage-release-1::p1_c03_gemini_ho_vs_tr",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-19-fixed-damage-release-1/agentdeck_runs/p1_c03_gemini_ho_vs_tr/session_20260319_150524_5e9cfe/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "Gemini-HO": 0.5416666666666666,
+      "Gemini-TR": 0.4583333333333333
+    },
+    "total_cost": 0.025579499999999998,
+    "avg_turns": 17.208333333333332,
+    "avg_duration": 13.127398014068604,
+    "avg_cost": 0.0010658125
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "Gemini-HO": {
+        "wins": 13,
+        "win_rate": 0.5416666666666666,
+        "ci": [
+          0.3507486535891948,
+          0.72108666268789
+        ],
+        "p_value": 0.8388197422027588,
+        "effect_size": 0.0834300866106148,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "Gemini-TR": {
+        "wins": 11,
+        "win_rate": 0.4583333333333333,
+        "ci": [
+          0.2789133373121099,
+          0.6492513464108051
+        ],
+        "p_value": 0.8388197422027588,
+        "effect_size": -0.08343008661061524,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Gemini-HO_vs_Gemini-TR": {
+        "player_a": "Gemini-HO",
+        "player_b": "Gemini-TR",
+        "wins_a": 13,
+        "wins_b": 11,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.5416666666666666,
+        "ci_a": [
+          0.3507486535891948,
+          0.72108666268789
+        ],
+        "p_value": 0.8388197422027588,
+        "effect_size": 0.0834300866106148,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 413,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 413,
+      "strict_contract_passes": 75,
+      "strict_contract_rate": 0.18159806295399517,
+      "recoverable_non_strict": 338,
+      "recoverable_non_strict_rate": 0.8184019370460048,
+      "action_line_rate": 0.18159806295399517,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "Gemini-HO": {
+        "turn_attempts": 207,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 207,
+        "strict_contract_passes": 32,
+        "strict_contract_rate": 0.15458937198067632,
+        "recoverable_non_strict": 175,
+        "recoverable_non_strict_rate": 0.8454106280193237,
+        "action_line_rate": 0.15458937198067632,
+        "reasoning_line_rate": 0.0
+      },
+      "Gemini-TR": {
+        "turn_attempts": 206,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 206,
+        "strict_contract_passes": 43,
+        "strict_contract_rate": 0.2087378640776699,
+        "recoverable_non_strict": 163,
+        "recoverable_non_strict_rate": 0.7912621359223301,
+        "action_line_rate": 0.2087378640776699,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 11,
+    "first_player_win_rate": 0.4583333333333333,
+    "second_player_wins": 13,
+    "upset_rate": 0.5416666666666666,
+    "by_player": {
+      "Gemini-HO": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 6,
+        "wins_as_second": 7,
+        "win_rate_as_first": 0.5,
+        "win_rate_as_second": 0.5833333333333334
+      },
+      "Gemini-TR": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 5,
+        "wins_as_second": 6,
+        "win_rate_as_first": 0.4166666666666667,
+        "win_rate_as_second": 0.5
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 24,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 24,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 24,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 24,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 24,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Gemini-HO",
+      "provider": "google",
+      "model": "gemini-2.5-flash-lite",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "Gemini-TR",
+      "provider": "google",
+      "model": "gemini-2.5-flash-lite",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_10610943",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 5449,
+      "duration": 10.970534563064575,
+      "cost": 0.0010116000000000005,
+      "player_costs": {
+        "Gemini-HO": 0.0005157,
+        "Gemini-TR": 0.0004959000000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_240c7348",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5442,
+      "duration": 21.73431134223938,
+      "cost": 0.0017724,
+      "player_costs": {
+        "Gemini-TR": 0.0009520999999999999,
+        "Gemini-HO": 0.0008203
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_29d1f9c5",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 12,
+      "outcome": "win",
+      "seed": 5445,
+      "duration": 8.611982107162476,
+      "cost": 0.0006079999999999996,
+      "player_costs": {
+        "Gemini-HO": 0.0002858000000000001,
+        "Gemini-TR": 0.0003221999999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2f40237c",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 5444,
+      "duration": 16.935517072677612,
+      "cost": 0.0017671999999999996,
+      "player_costs": {
+        "Gemini-HO": 0.0008108999999999998,
+        "Gemini-TR": 0.0009562999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_3224e339",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 5447,
+      "duration": 13.135062217712402,
+      "cost": 0.0010266,
+      "player_costs": {
+        "Gemini-TR": 0.0005944999999999995,
+        "Gemini-HO": 0.00043210000000000037
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_397a11b0",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 18,
+      "outcome": "win",
+      "seed": 5445,
+      "duration": 14.147452592849731,
+      "cost": 0.0011168999999999988,
+      "player_costs": {
+        "Gemini-TR": 0.0006006999999999992,
+        "Gemini-HO": 0.0005161999999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5f24680b",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 18,
+      "outcome": "win",
+      "seed": 5443,
+      "duration": 22.86260151863098,
+      "cost": 0.0011077000000000005,
+      "player_costs": {
+        "Gemini-TR": 0.0005953000000000004,
+        "Gemini-HO": 0.0005124000000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_6128b9d1",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 11,
+      "outcome": "win",
+      "seed": 5452,
+      "duration": 10.139919757843018,
+      "cost": 0.0005465999999999995,
+      "player_costs": {
+        "Gemini-TR": 0.0003236000000000003,
+        "Gemini-HO": 0.00022299999999999924
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_6418a511",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 5451,
+      "duration": 10.250537157058716,
+      "cost": 0.000758700000000001,
+      "player_costs": {
+        "Gemini-TR": 0.0004035000000000011,
+        "Gemini-HO": 0.00035519999999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_71705388",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 5450,
+      "duration": 10.039750576019287,
+      "cost": 0.0007599000000000009,
+      "player_costs": {
+        "Gemini-TR": 0.0004035000000000011,
+        "Gemini-HO": 0.00035639999999999977
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7593232a",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 5446,
+      "duration": 11.71908450126648,
+      "cost": 0.0010306000000000013,
+      "player_costs": {
+        "Gemini-TR": 0.0005967000000000012,
+        "Gemini-HO": 0.0004339000000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_78313990",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 5448,
+      "duration": 14.459577083587646,
+      "cost": 0.0009284999999999996,
+      "player_costs": {
+        "Gemini-TR": 0.0004981999999999999,
+        "Gemini-HO": 0.0004302999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7f737001",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 5443,
+      "duration": 10.24307632446289,
+      "cost": 0.0007596999999999999,
+      "player_costs": {
+        "Gemini-HO": 0.0003558999999999997,
+        "Gemini-TR": 0.00040380000000000017
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_88cc4337",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 5448,
+      "duration": 16.655916690826416,
+      "cost": 0.0012084,
+      "player_costs": {
+        "Gemini-HO": 0.0006134000000000001,
+        "Gemini-TR": 0.000595
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_93fad6af",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 5451,
+      "duration": 10.760979652404785,
+      "cost": 0.0009323999999999999,
+      "player_costs": {
+        "Gemini-HO": 0.0004355000000000001,
+        "Gemini-TR": 0.0004968999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a5b3847d",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 12,
+      "outcome": "win",
+      "seed": 5453,
+      "duration": 7.352122783660889,
+      "cost": 0.0006069999999999999,
+      "player_costs": {
+        "Gemini-HO": 0.0002853000000000005,
+        "Gemini-TR": 0.0003216999999999994
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b3934dc7",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 5447,
+      "duration": 14.124030351638794,
+      "cost": 0.0012018999999999997,
+      "player_costs": {
+        "Gemini-HO": 0.0006068999999999996,
+        "Gemini-TR": 0.000595
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b6f30a0e",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5453,
+      "duration": 11.887566328048706,
+      "cost": 0.0014255000000000014,
+      "player_costs": {
+        "Gemini-TR": 0.0008224000000000009,
+        "Gemini-HO": 0.0006031000000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bc538431",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 12,
+      "outcome": "win",
+      "seed": 5444,
+      "duration": 7.648522615432739,
+      "cost": 0.0006054000000000003,
+      "player_costs": {
+        "Gemini-TR": 0.00032150000000000017,
+        "Gemini-HO": 0.0002839000000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c00abe5d",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5446,
+      "duration": 15.090945720672607,
+      "cost": 0.0014122999999999991,
+      "player_costs": {
+        "Gemini-HO": 0.0007081999999999991,
+        "Gemini-TR": 0.0007041
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c7dc5612",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 5452,
+      "duration": 16.171542644500732,
+      "cost": 0.001527500000000001,
+      "player_costs": {
+        "Gemini-HO": 0.0007053000000000007,
+        "Gemini-TR": 0.0008222000000000004
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d658c1a4",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 5442,
+      "duration": 16.252546310424805,
+      "cost": 0.0012057,
+      "player_costs": {
+        "Gemini-HO": 0.0006106999999999999,
+        "Gemini-TR": 0.0005950000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_dc9976a0",
+      "players": [
+        "Gemini-TR",
+        "Gemini-HO"
+      ],
+      "winner": "Gemini-TR",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 5449,
+      "duration": 9.773706674575806,
+      "cost": 0.0008473999999999999,
+      "player_costs": {
+        "Gemini-TR": 0.0004951999999999995,
+        "Gemini-HO": 0.00035220000000000043
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-TR",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_dd7ddfef",
+      "players": [
+        "Gemini-HO",
+        "Gemini-TR"
+      ],
+      "winner": "Gemini-HO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 5450,
+      "duration": 14.09026575088501,
+      "cost": 0.0014116000000000007,
+      "player_costs": {
+        "Gemini-HO": 0.0007074999999999998,
+        "Gemini-TR": 0.0007041000000000009
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini-HO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    }
+  ]
+}

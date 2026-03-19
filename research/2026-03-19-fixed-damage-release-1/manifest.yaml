@@ -4,7 +4,8 @@ title: FixedDamage Release 1
 status: complete
 question: >-
   How sensitive is model behavior in FixedDamage to prompt cadence, and can
-  AgentDeck make that sensitivity legible through validated artifacts and replay?
+  AgentDeck make that sensitivity legible through validated artifacts and replay
+  across the weak-tier models from the three big providers?
 game:
   name: FixedDamageGame
   config:
@@ -34,12 +35,24 @@ players:
     model: claude-haiku-4-5-20251001
     controller: ActionOnlyController
     renderer: TextRenderer
+  - id: gemini_2_5_flash_lite
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
 variants:
   models:
     - AttackBot
     - PotionAt80Bot
     - gpt-4o-mini
     - claude-haiku-4-5-20251001
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
   controllers:
     - ActionOnlyController
   prompt_cadence:
@@ -47,8 +60,8 @@ variants:
     - turn_reinforced
 run:
   seed_base: 4242
-  matches_planned: 96
-  matches_completed: 96
+  matches_planned: 144
+  matches_completed: 144
   concurrency: 1
   max_turns: 30
   matrix_source: matrix.yaml
@@ -70,7 +83,6 @@ storage:
   viewer_curation:
     repo_path: research/2026-03-19-fixed-damage-release-1/artifacts
 notes: >-
-  This package starts with Phase 0 calibration and Phase 1 cadence pilot only.
-  The cadence pilot completed cleanly on the final audited codebase. No expansion
-  is planned for this release package because the cadence contrast showed no
-  topline outcome delta at N=24.
+  This package is complete on the audited pre-release codebase. It includes
+  Phase 0 calibration plus four Phase 1 cadence pilot cells covering OpenAI
+  Mini, Anthropic Haiku, Gemini Flash-Lite, and Gemini Flash.
