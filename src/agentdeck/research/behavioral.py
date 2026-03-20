@@ -76,6 +76,8 @@ def get_behavioral_scorer(
     if normalized_profile == "none":
         return None
 
+    # v0.1.0 intentionally ships with a single bundled scorer. Promote this
+    # to a real registry once a second game-specific scorer lands.
     from agentdeck.games.examples.fixed_damage.behavioral import (
         FixedDamageBehavioralScorer,
     )

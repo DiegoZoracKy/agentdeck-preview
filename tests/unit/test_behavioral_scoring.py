@@ -174,6 +174,69 @@ def _sample_payloads() -> list[dict]:
     ]
 
 
+def _cross_match_boundary_payloads() -> list[dict]:
+    return [
+        {
+            "match_id": "m1",
+            "game": "FixedDamageGame",
+            "players": ["Alpha", "Beta"],
+            "winner": "Beta",
+            "final_state": {
+                "health": {"Alpha": 0, "Beta": 20},
+                "potions": {"Alpha": 1, "Beta": 1},
+                "last_action": {"Alpha": "ATTACK", "Beta": "ATTACK"},
+                "turn": 2,
+            },
+            "events": [
+                _gameplay_event(
+                    player="Alpha",
+                    opponent="Beta",
+                    turn_number=1,
+                    own_hp=40,
+                    own_potions=1,
+                    action="ATTACK",
+                    opponent_last_action=None,
+                )
+            ],
+            "metadata": {
+                "match": {
+                    "players": ["Alpha", "Beta"],
+                    "first_player": {"name": "Alpha"},
+                },
+            },
+        },
+        {
+            "match_id": "m2",
+            "game": "FixedDamageGame",
+            "players": ["Alpha", "Beta"],
+            "winner": "Alpha",
+            "final_state": {
+                "health": {"Alpha": 20, "Beta": 0},
+                "potions": {"Alpha": 0, "Beta": 1},
+                "last_action": {"Alpha": "POTION", "Beta": "ATTACK"},
+                "turn": 2,
+            },
+            "events": [
+                _gameplay_event(
+                    player="Alpha",
+                    opponent="Beta",
+                    turn_number=1,
+                    own_hp=40,
+                    own_potions=1,
+                    action="POTION",
+                    opponent_last_action=None,
+                )
+            ],
+            "metadata": {
+                "match": {
+                    "players": ["Alpha", "Beta"],
+                    "first_player": {"name": "Alpha"},
+                },
+            },
+        },
+    ]
+
+
 def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     players = [{"name": "Alpha"}, {"name": "Beta"}]
     profile = compute_behavioral_profile(
@@ -231,10 +294,30 @@ def test_fixed_damage_behavioral_profile_marks_heuristics_unsupported_without_co
 
 def test_fixed_damage_behavioral_scorer_canonical_json_is_stable() -> None:
     scorer = FixedDamageBehavioralScorer()
-    payload = scorer.score(
+    first_payload = scorer.score(
+        players=[{"name": "Alpha"}, {"name": "Beta"}],
+        match_payloads=_sample_payloads(),
+        config={"attack_damage": 20, "max_health": 100},
+    )
+    second_payload = scorer.score(
         players=[{"name": "Alpha"}, {"name": "Beta"}],
         match_payloads=_sample_payloads(),
         config={"attack_damage": 20, "max_health": 100},
     )
 
-    assert scorer.canonical_json(payload) == scorer.canonical_json(payload)
+    assert scorer.canonical_json(first_payload) == scorer.canonical_json(second_payload)
+
+
+def test_error_recovery_rate_does_not_cross_match_boundaries() -> None:
+    scorer = FixedDamageBehavioralScorer()
+    payload = scorer.score(
+        players=[{"name": "Alpha"}, {"name": "Beta"}],
+        match_payloads=_cross_match_boundary_payloads(),
+        config={"attack_damage": 20, "max_health": 100},
+    )
+
+    alpha = payload["per_player"]["Alpha"]
+    assert alpha["critical_potion_response_rate"]["support_turns"] == 2
+    assert alpha["error_recovery_rate"]["missed_events"] == 1
+    assert alpha["error_recovery_rate"]["support_events"] == 0
+    assert alpha["error_recovery_rate"]["recovered_events"] == 0

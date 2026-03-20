@@ -117,7 +117,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
         if max_health is None:
             unsupported_metrics.add("wasted_full_health_potion_rate")
 
-        player_names = {name for name in roster}
+        player_names = set(roster)
         match_list = list(match_payloads)
         turns: List[NormalizedTurn] = []
         matches_total = len(match_list)
@@ -230,6 +230,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                         losses_with_unused_potions[player] += 1
 
         turns_total = len(turns)
+        # v0.1.0 excludes no gameplay turns once a match is deemed evaluable.
         turns_evaluable = turns_total
 
         per_player_results: Dict[str, Dict[str, Any]] = {}
@@ -437,6 +438,8 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 eligible = 0
                 for index in missed_indices:
                     for next_turn in player_turn_list[index + 1 :]:
+                        if next_turn["match_id"] != player_turn_list[index]["match_id"]:
+                            break
                         if (
                             next_turn["own_potions"] > 0
                             and next_turn["own_hp"] <= critical_threshold
