@@ -100,6 +100,11 @@
   - reinforced cell: first player won `21/24`
   - `FlashLite-RC-TR` won `12/12` as first player but only `3/12` as second
   - `Flash-AO` won `9/12` as first player and `0/12` as second in the reinforced cell
+  - so the `15-9` reinforced result is not only a Flash-Lite improvement story; position advantage explains a substantial fraction of that cell independent of model or strategy
+- The reinforced cell carries a mild strictness confound on the plain-Flash side.
+  - `FlashLite-RC-TR` stayed `100%` strict with `0` parse failures
+  - `Flash-AO` remained fully parseable, but strictness fell to `89.5%` with `26` recoverable non-strict turns
+  - future parity cells should check whether that strictness regression clusters by turn count or by specific HP / potion states
 
 ### Directional Signals
 - Turn reinforcement appears to help Flash-Lite more than it helps plain Flash in this matchup.
@@ -115,3 +120,4 @@
 - That makes the next experiment precise:
   - if we expand, the question is no longer “does reinforcement help at all?”
   - it is “does reinforcement help enough, and is the remaining second-player gap real or just pilot noise?”
+  - if we target mechanism directly, the next prompt should anchor to HP-survival thresholds, not to `POTION` specifically

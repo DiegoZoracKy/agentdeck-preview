@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-20T16:57:39.462373Z
+Last updated: 2026-03-20T18:03:49.316737Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -8,3 +8,4 @@ Last updated: 2026-03-20T16:57:39.462373Z
 | [FixedDamage Release 1](2026-03-19-fixed-damage-release-1/README.md) | complete | FixedDamageGame | local:AttackBot, local:PotionAt80Bot, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 144/144 | See README |
 | [FixedDamage Parity 1](2026-03-20-fixed-damage-parity-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
 | [FixedDamage Parity 2](2026-03-20-fixed-damage-parity-2/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
+| [FixedDamage Threshold 1](2026-03-20-fixed-damage-threshold-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |

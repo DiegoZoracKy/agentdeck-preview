@@ -1,0 +1,148 @@
+schema_version: 1
+experiment_id: 2026-03-20-fixed-damage-threshold-1
+created_at: "2026-03-20T00:00:00Z"
+purpose: >-
+  FixedDamage mechanism follow-up testing whether HP-threshold grounding on top
+  of turn-reinforced ReasoningController can fix Flash-Lite's residual
+  second-player hesitation against plain Gemini Flash under the same audited
+  game and fairness settings.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_threshold_turn_modes
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first public release writeup if a frozen repo hash is required.
+
+player_registry:
+  gemini_2_5_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 8
+    retry_delay: 2.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_turn_reinforced:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}\n\n{controller_format}"
+  RC_turn_reinforced_hp_grounded:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: |-
+        {game_view}
+
+        {controller_format}
+
+        Before acting, calculate: does your current HP minus one ATTACK (20 damage) leave you alive? Let that determine your choice.
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - hp_grounding_reduces_second_player_critical_hesitation
+    - hp_grounding_preserves_or_improves_reinforced_flash_lite_competitiveness
+    - weaker_model_remains_cost_advantaged
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package reuses the audited FixedDamage substrate and the reinforced
+      parity baseline from Parity 2. The new causal factor is a turn-time
+      survival calculation instruction, so analysis must report position-
+      controlled results and state-level evidence around the healthy and
+      critical healing thresholds.
+    matches_per_cell: 0
+    required_checks:
+      - mechanism_question_review
+      - hp_grounding_prompt_review
+      - cross_model_position_control_review
+      - behavioral_endpoints_review
+      - paired_side_swap_review
+      - gemini_thinking_budget_zero_review
+  phases:
+    - phase_id: P1
+      name: HP-Threshold Mechanism Pilot
+      cell_ids:
+        - p1_c01_flash_lite_rc_tr_vs_flash_ao
+        - p1_c02_flash_lite_rc_tr_hp_vs_flash_ao
+
+cells:
+  - id: p1_c01_flash_lite_rc_tr_vs_flash_ao
+    phase: P1
+    question: Does the reinforced reasoning baseline remain short of a clean parity claim against plain Flash on a fresh seed family?
+    intent: Provide a within-package reinforced baseline before adding HP-threshold grounding.
+    causal_factor: instruction_reinforcement
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_turn_reinforced
+      name: FlashLite-RC-TR
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true
+
+  - id: p1_c02_flash_lite_rc_tr_hp_vs_flash_ao
+    phase: P1
+    question: Does HP-threshold grounding on top of reinforced reasoning reduce the residual second-player hesitation enough to improve Flash-Lite's reinforced parity profile?
+    intent: Test whether an explicit one-more-hit survival calculation fixes the remaining seat-conditioned threshold error.
+    causal_factor: hp_threshold_grounding
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_turn_reinforced_hp_grounded
+      name: FlashLite-RC-TR-HP
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true

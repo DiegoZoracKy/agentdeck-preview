@@ -103,6 +103,7 @@ who actually took the first turn.
   - reinforced cell first-player wins: `21/24`
   - `FlashLite-RC-TR` won `12/12` as first player and `3/12` as second
   - `Flash-AO` won `9/12` as first player and `0/12` as second in the reinforced cell
+  - so the reinforced `15-9` result reflects both Flash-Lite improvement and a much more position-dominated cell; position advantage explains a substantial share of the win split independent of model or strategy
 - Cost per match:
   - control cell: `0.00319`
   - reinforced cell: `0.00355`
@@ -110,7 +111,8 @@ who actually took the first turn.
 - Parse / strictness notes:
   - `0` parse failures in both cells
   - `FlashLite-RC-HO` and `FlashLite-RC-TR` stayed `100%` strict
-  - `Flash-AO` drifted to `89.5%` strict in the reinforced cell with `26` recoverable non-strict turns, but remained fully parseable
+  - `Flash-AO` drifted to `89.5%` strict in the reinforced cell with `26` recoverable non-strict turns
+  - that is a mild candidate confound in the reinforced cell, not just a formatting footnote, and future follow-ups should check whether the regression correlates with turn count or specific HP / potion states
 - Latency notes:
   - control cell average duration: `18.14s` per match
   - reinforced cell average duration: `19.18s` per match
@@ -139,4 +141,5 @@ who actually took the first turn.
 ## Next Steps
 - If the next question is competitive parity, expand both `RC-HO` and `RC-TR` to `N=48` so the reinforcement effect stays interpretable against an equally sized control.
 - If the next question is mechanism, keep the current result and design a tighter reinforcement or reasoning contract aimed specifically at second-player critical-state hesitation.
+- That follow-up should anchor to HP-survival thresholds, not to `POTION` directly, so it targets the inverted threshold instead of simply nudging the model toward more healing.
 - Do not frame the current package as “Lite beats Flash with reinforcement.” The honest conclusion is narrower: reinforcement is a promising equalizer that materially improves behavior and may be moving outcomes in the right direction.
