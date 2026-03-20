@@ -1,0 +1,126 @@
+schema_version: 1
+experiment_id: 2026-03-19-fixed-damage-controller-1
+created_at: "2026-03-19T00:00:00Z"
+purpose: >-
+  FixedDamage controller-intervention pilot comparing ActionOnlyController and
+  ReasoningController on the Gemini Flash-family models using the same audited
+  game, fairness settings, and handshake-only turn cadence.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_handshake_only_turns
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first public release writeup if a frozen repo hash is required.
+
+player_registry:
+  gemini_2_5_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 8
+    retry_delay: 2.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - behavioral_delta_is_legible
+    - outcome_delta_is_directionally_interesting
+    - cost_delta_is_actionable
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      No dedicated calibration rerun. This experiment reuses the audited
+      FixedDamage substrate already established in Release 1 and focuses only on
+      the controller intervention.
+    matches_per_cell: 0
+    required_checks:
+      - reasoning_controller_format_review
+      - behavioral_endpoints_review
+      - paired_side_swap_review
+      - gemini_thinking_budget_zero_review
+  phases:
+    - phase_id: P1
+      name: Controller Pilot
+      cell_ids:
+        - p1_c01_flash_lite_ao_vs_rc
+        - p1_c02_flash_ao_vs_rc
+
+cells:
+  - id: p1_c01_flash_lite_ao_vs_rc
+    phase: P1
+    question: Does requiring explicit reasoning improve Gemini Flash-Lite decision quality in FixedDamage?
+    intent: Compare controller type while holding game, model, fairness, and turn cadence fixed.
+    causal_factor: controller_type
+    fairness_notes: paired side-swap enabled; compare behavioral endpoints before topline win-rate claims
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: AO_handshake_only
+      name: FlashLite-AO
+    player_b:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_handshake_only
+      name: FlashLite-RC
+    matches: 24
+    viewer_priority: true
+
+  - id: p1_c02_flash_ao_vs_rc
+    phase: P1
+    question: Does requiring explicit reasoning improve Gemini Flash decision quality in FixedDamage?
+    intent: Compare controller type while holding game, model, fairness, and turn cadence fixed.
+    causal_factor: controller_type
+    fairness_notes: paired side-swap enabled; compare behavioral endpoints before topline win-rate claims
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: RC_handshake_only
+      name: Flash-RC
+    matches: 24
+    viewer_priority: true

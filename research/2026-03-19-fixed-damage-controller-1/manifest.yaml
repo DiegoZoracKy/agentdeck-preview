@@ -1,0 +1,75 @@
+schema_version: 1
+experiment_id: 2026-03-19-fixed-damage-controller-1
+title: FixedDamage Controller 1
+status: complete
+question: >-
+  Does requiring explicit reasoning improve FixedDamage decision quality for the
+  Gemini Flash-family models relative to ActionOnly output, and are any
+  behavioral gains worth the added cost and latency?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_ao
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_lite_rc
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_rc
+    provider: google
+    model: gemini-2.5-flash
+    controller: ReasoningController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 5242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-19-fixed-damage-controller-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-19-fixed-damage-controller-1
+  viewer_curation:
+    repo_path: research/2026-03-19-fixed-damage-controller-1/artifacts
+notes: >-
+  This package is the first controller-intervention follow-up after FixedDamage
+  Release 1. It keeps the audited game, fairness, and Gemini runtime settings
+  fixed while changing only the controller contract: ActionOnly versus
+  ReasoningController.
