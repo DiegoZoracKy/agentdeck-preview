@@ -355,6 +355,7 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                         "aggregate_metrics",
                         "per_player",
                         "state_metrics",
+                        "evidence",
                         "quality_flags",
                     }
                     missing_behavioral = sorted(
@@ -392,6 +393,21 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                         errors.append(
                             f"{experiment_name}: results.json.behavioral_profile.state_metrics must be mapping"
                         )
+                    evidence = behavioral_profile.get("evidence")
+                    if not isinstance(evidence, dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile.evidence must be mapping"
+                        )
+                    else:
+                        for key in (
+                            "aggregate_metrics",
+                            "per_player",
+                            "state_metrics",
+                        ):
+                            if not isinstance(evidence.get(key), dict):
+                                errors.append(
+                                    f"{experiment_name}: results.json.behavioral_profile.evidence.{key} must be mapping"
+                                )
                     quality_flags = behavioral_profile.get("quality_flags")
                     if not isinstance(quality_flags, dict):
                         errors.append(

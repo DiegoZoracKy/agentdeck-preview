@@ -78,13 +78,14 @@
   - Flash kept a moderate first-player lean (`16/24` first-player wins)
 - Haiku's inversion now has a measurable mechanism:
   - both `Haiku-HO` and `Haiku-TR` scored `1.0` on `position_policy_delta`
+  - at the shared `80 HP / 3 potions` state, Haiku heals as first player and attacks as second player
   - this is the strongest policy-by-position split in the package, not just the strongest outcome split
 
 ### Directional Signals
 - No cadence comparison was significant at `N=24`. Mini, Haiku, and Flash-Lite all split `12-12`; Flash landed `10-14`. This is a strong baseline against large effects, but not enough to rule out moderate ones.
 - Cadence moved decision-level behavior in the Gemini cells even when it did not move wins:
-  - Flash-Lite reduced all-attack matches from `37.5%` to `25.0%` and improved heuristic recovery from `0.25` to `0.34`
-  - Flash reduced all-attack matches from `20.8%` to `0.0%` and improved heuristic recovery from `0.45` to `0.64`
+  - Flash-Lite reduced all-attack matches from `37.5%` to `25.0%` and improved heuristic recovery from `0.34` to `0.36`
+  - Flash reduced all-attack matches from `20.8%` to `0.0%` and improved heuristic recovery from `0.32` to `0.63`
   - those are descriptive pilot-scale shifts, not yet a confirmed causal claim
 
 ### What AgentDeck Made Visible
@@ -96,6 +97,7 @@
   - the Mini/Haiku/Gemini cells make deterministic vs variable policy regimes visible through turn-count distributions and the new scorer output
 - Cost, latency, fairness, and behavior live in the same validated package, so the tradeoff between contract reinforcement and spend is measurable rather than anecdotal.
 - Top-level `results.json` now includes a `behavioral_profile` block in addition to the baseline game-agnostic metrics, while the analytic units for this study remain the per-cell exports under `artifacts/`.
+  - that `behavioral_profile` now carries structured `evidence` examples for derived metrics such as `position_policy_delta` and `state_action_consistency`
 
 ## Artifacts
 - `matrix.yaml` defines cells, phases, and cadence conditions

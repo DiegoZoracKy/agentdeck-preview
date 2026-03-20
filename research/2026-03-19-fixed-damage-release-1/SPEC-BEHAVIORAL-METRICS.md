@@ -1,9 +1,9 @@
 # SPEC-BEHAVIORAL-METRICS: FixedDamage Behavioral Profile
 
-> Status: Draft v0.1.0
-> Version: 0.1.0
+> Status: Draft v0.2.0
+> Version: 0.2.0
 > Last Updated: 2026-03-19
-> Implementation: ⬜ Not Started
+> Implementation: ✅ Existing component (`src/agentdeck/games/examples/fixed_damage/behavioral.py`)
 > Authors: Codex (draft)
 > Audience: Research engineers, experiment authors, contributors
 
@@ -25,7 +25,7 @@
 ## 3. Responsibilities
 - Define the normalized state buckets this profile uses.
 - Define which FixedDamage behavioral metrics are required for the first scorer implementation.
-- Define which FixedDamage metrics are heuristic extensions and therefore optional in v0.1.0.
+- Define which FixedDamage metrics are heuristic extensions and therefore optional in v0.2.0.
 - Keep every metric grounded in recorder payloads and the published FixedDamage rules.
 
 ## 4. Data Structures
@@ -33,7 +33,7 @@
 ### 4.1 Profile Identity
 - `game_id = "fixed_damage"`
 - `profile_id = "fixed_damage_behavioral"`
-- `profile_version = "0.1.0"`
+- `profile_version = "0.2.0"`
 
 ### 4.2 Normalized Turn Record
 The scorer derives one normalized turn record per `gameplay` event.
@@ -70,6 +70,8 @@ The scorer MUST document which metrics use coarse state and which use the decisi
   - Per-count buckets keyed by `own_potions` at decision time.
 - `CRITICAL_POTION_HP_MULTIPLIER = 2`
   - Used by heuristic defensive-response metrics.
+- `EVIDENCE_MAX_EXAMPLES = 3`
+  - Maximum number of deterministic evidence examples emitted per metric and player.
 
 If a future FixedDamage profile revision changes these values, it MUST bump `profile_version`.
 
@@ -156,6 +158,25 @@ These metrics are required for the first scorer implementation.
   - `0.0` to `1.0`
 - Purpose:
   - Measure whether the policy itself changes by position, not only whether win rate changes.
+- Evidence requirement:
+  - MUST emit `evidence.per_player.<player>.position_policy_delta.examples`
+  - Each example MUST compare one shared coarse state bucket across `first` and `second`
+  - Each example MUST include:
+    - `shared_state_key`
+    - `delta`
+    - `support_turns`
+    - `first.bucket_key`
+    - `first.attack_rate`
+    - `first.potion_rate`
+    - `first.support_turns`
+    - `first.source_path`
+    - `second.bucket_key`
+    - `second.attack_rate`
+    - `second.potion_rate`
+    - `second.support_turns`
+    - `second.source_path`
+  - Examples MUST be sorted by descending `delta`, then descending `support_turns`, then ascending `shared_state_key`
+  - The scorer MUST emit at most `EVIDENCE_MAX_EXAMPLES`
 
 #### `scarcity_action_profile`
 - Scope:
@@ -166,8 +187,24 @@ These metrics are required for the first scorer implementation.
 - Purpose:
   - Show whether policy changes as resources become scarce.
 
+#### `state_action_consistency` evidence
+- Scope:
+  - `evidence.per_player`
+- Definition:
+  - For supported decision-equivalence keys, emit up to `EVIDENCE_MAX_EXAMPLES` examples showing where consistency is weakest.
+- Required fields per example:
+  - `decision_key`
+  - `consistency`
+  - `support_turns`
+  - `attack_count`
+  - `potion_count`
+- Ordering:
+  - Sort by ascending `consistency`, then descending `support_turns`, then ascending `decision_key`
+- Purpose:
+  - Make low-consistency states inspectable without forcing readers to reconstruct them from aggregate rates alone.
+
 ### 6.2 Heuristic Quality Metrics
-These metrics are allowed in the profile but MAY remain unsupported in v0.1.0 if they are declared explicitly in `unsupported_metrics`.
+These metrics are allowed in the profile but MAY remain unsupported in v0.2.0 if they are declared explicitly in `unsupported_metrics`.
 
 #### `critical_potion_response_rate`
 - Definition:
@@ -209,6 +246,8 @@ These metrics are allowed in the profile but MAY remain unsupported in v0.1.0 if
 - **FD-B5**: The scorer MUST preserve `coverage` honestly when support thresholds exclude sparse states.
 - **FD-B6**: All rates MUST be reported in `[0.0, 1.0]`.
 - **FD-B7**: Support thresholds used by the profile MUST be deterministic and documented.
+- **FD-B8**: Evidence-bearing metrics MUST emit deterministic evidence payloads following the ordering rules in this profile.
+- **FD-B9**: Evidence examples MUST stay recorder-derived and MUST NOT introduce narrative or model-generated interpretation.
 
 ## 8. Data Flow & Interaction
 - Recorder payloads:
@@ -258,6 +297,41 @@ These metrics are allowed in the profile but MAY remain unsupported in v0.1.0 if
     "value": 0.61,
     "shared_state_buckets": 9,
     "support_turns": 144
+  }
+}
+```
+
+### 10.4 `position_policy_delta` evidence
+```json
+{
+  "evidence": {
+    "per_player": {
+      "Haiku-TR": {
+        "position_policy_delta": {
+          "examples": [
+            {
+              "shared_state_key": "hp=80|potions=3",
+              "delta": 1.0,
+              "support_turns": 36,
+              "first": {
+                "bucket_key": "position=first|hp=80|potions=3",
+                "attack_rate": 0.0,
+                "potion_rate": 1.0,
+                "support_turns": 12,
+                "source_path": "state_metrics.action_by_state.Haiku-TR.position=first|hp=80|potions=3"
+              },
+              "second": {
+                "bucket_key": "position=second|hp=80|potions=3",
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "support_turns": 24,
+                "source_path": "state_metrics.action_by_state.Haiku-TR.position=second|hp=80|potions=3"
+              }
+            }
+          ]
+        }
+      }
+    }
   }
 }
 ```

@@ -180,6 +180,7 @@ Minimum required fields:
 - `aggregate_metrics` (mapping)
 - `per_player` (mapping)
 - `state_metrics` (mapping)
+- `evidence` (mapping)
 - `quality_flags` (object)
 
 `behavioral_profile` remains optional because behavioral scorers are game-specific.

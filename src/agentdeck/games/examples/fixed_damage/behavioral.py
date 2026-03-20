@@ -13,6 +13,7 @@ CONSISTENCY_MIN_SUPPORT = 2
 POSITION_DELTA_MIN_SUPPORT_PER_POSITION = 2
 SCARCITY_BUCKETS = (0, 1, 2, 3)
 CRITICAL_POTION_HP_MULTIPLIER = 2
+EVIDENCE_MAX_EXAMPLES = 3
 
 
 NormalizedTurn = Dict[str, Any]
@@ -81,7 +82,7 @@ def _game_name(payload: Mapping[str, Any]) -> str:
 class FixedDamageBehavioralScorer(BehavioralScorer):
     game_id = "fixed_damage"
     profile_id = "fixed_damage_behavioral"
-    profile_version = "0.1.0"
+    profile_version = "0.2.0"
 
     def supports(self, *, match_payloads: Iterable[Mapping[str, Any]]) -> bool:
         names = set()
@@ -230,12 +231,13 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                         losses_with_unused_potions[player] += 1
 
         turns_total = len(turns)
-        # v0.1.0 excludes no gameplay turns once a match is deemed evaluable.
+        # v0.2.0 excludes no gameplay turns once a match is deemed evaluable.
         turns_evaluable = turns_total
 
         per_player_results: Dict[str, Dict[str, Any]] = {}
         action_by_state: Dict[str, Dict[str, Any]] = {}
         scarcity_profile: Dict[str, Dict[str, Any]] = {}
+        evidence_per_player: Dict[str, Dict[str, Any]] = {}
 
         consistency_scores: List[Tuple[float, int]] = []
         position_deltas: List[Tuple[float, int]] = []
@@ -319,11 +321,36 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 consistency_total / consistency_weight if consistency_weight else 0.0
             )
             consistency_scores.append((consistency_value, consistency_weight))
+            consistency_examples = []
+            for decision_key, counts in by_decision_key.items():
+                support = sum(counts.values())
+                if support < CONSISTENCY_MIN_SUPPORT:
+                    continue
+                attack_count = int(counts.get("ATTACK", 0))
+                potion_count = int(counts.get("POTION", 0))
+                consistency = max(counts.values()) / support
+                consistency_examples.append(
+                    {
+                        "decision_key": decision_key,
+                        "consistency": consistency,
+                        "support_turns": support,
+                        "attack_count": attack_count,
+                        "potion_count": potion_count,
+                    }
+                )
+            consistency_examples.sort(
+                key=lambda item: (
+                    item["consistency"],
+                    -item["support_turns"],
+                    item["decision_key"],
+                )
+            )
 
             position_weight = 0
             position_total = 0.0
             shared_buckets = 0
-            for states in by_shared_state.values():
+            position_examples = []
+            for shared_state_key, states in by_shared_state.items():
                 first_counts = states["first"]
                 second_counts = states["second"]
                 first_support = sum(first_counts.values())
@@ -339,12 +366,51 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 second_attack_rate = _safe_rate(
                     second_counts.get("ATTACK", 0), second_support
                 )
+                delta = abs(first_attack_rate - second_attack_rate)
                 position_weight += weight
-                position_total += abs(first_attack_rate - second_attack_rate) * weight
+                position_total += delta * weight
+                first_bucket_key = f"position=first|{shared_state_key}"
+                second_bucket_key = f"position=second|{shared_state_key}"
+                position_examples.append(
+                    {
+                        "shared_state_key": shared_state_key,
+                        "delta": delta,
+                        "support_turns": weight,
+                        "first": {
+                            "bucket_key": first_bucket_key,
+                            "attack_rate": first_attack_rate,
+                            "potion_rate": _safe_rate(
+                                first_counts.get("POTION", 0), first_support
+                            ),
+                            "support_turns": first_support,
+                            "source_path": (
+                                f"state_metrics.action_by_state.{player}.{first_bucket_key}"
+                            ),
+                        },
+                        "second": {
+                            "bucket_key": second_bucket_key,
+                            "attack_rate": second_attack_rate,
+                            "potion_rate": _safe_rate(
+                                second_counts.get("POTION", 0), second_support
+                            ),
+                            "support_turns": second_support,
+                            "source_path": (
+                                f"state_metrics.action_by_state.{player}.{second_bucket_key}"
+                            ),
+                        },
+                    }
+                )
             position_delta_value = (
                 position_total / position_weight if position_weight else 0.0
             )
             position_deltas.append((position_delta_value, position_weight))
+            position_examples.sort(
+                key=lambda item: (
+                    -item["delta"],
+                    -item["support_turns"],
+                    item["shared_state_key"],
+                )
+            )
 
             action_by_state[player] = {}
             for bucket_key in sorted(by_bucket.keys()):
@@ -373,6 +439,15 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                     "attack_rate": _safe_rate(attack_count, support),
                     "potion_rate": _safe_rate(potion_count, support),
                 }
+
+            evidence_per_player[player] = {
+                "position_policy_delta": {
+                    "examples": position_examples[:EVIDENCE_MAX_EXAMPLES]
+                },
+                "state_action_consistency": {
+                    "examples": consistency_examples[:EVIDENCE_MAX_EXAMPLES]
+                },
+            }
 
             player_entry: Dict[str, Any] = {
                 "matches_played": match_support,
@@ -551,7 +626,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
             aggregate_metrics["wasted_full_health_potion_rate"] = None
 
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "game_id": self.game_id,
             "profile_id": self.profile_id,
             "profile_version": self.profile_version,
@@ -567,6 +642,11 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 "action_by_state": action_by_state,
                 "scarcity_action_profile": scarcity_profile,
             },
+            "evidence": {
+                "aggregate_metrics": {},
+                "per_player": evidence_per_player,
+                "state_metrics": {},
+            },
             "quality_flags": {
                 "complete": not unsupported_metrics,
                 "unsupported_metrics": sorted(unsupported_metrics),
@@ -576,6 +656,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
 
 __all__ = [
     "CRITICAL_POTION_HP_MULTIPLIER",
+    "EVIDENCE_MAX_EXAMPLES",
     "CONSISTENCY_MIN_SUPPORT",
     "FixedDamageBehavioralScorer",
     "POSITION_DELTA_MIN_SUPPORT_PER_POSITION",

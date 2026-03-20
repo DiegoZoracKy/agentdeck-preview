@@ -739,10 +739,10 @@
     }
   ],
   "behavioral_profile": {
-    "schema_version": 1,
+    "schema_version": 2,
     "game_id": "fixed_damage",
     "profile_id": "fixed_damage_behavioral",
-    "profile_version": "0.1.0",
+    "profile_version": "0.2.0",
     "coverage": {
       "matches_total": 24,
       "matches_evaluable": 24,
@@ -1342,6 +1342,112 @@
           }
         }
       }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "Haiku-TR": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 1.0,
+                "support_turns": 36,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Haiku-TR.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Haiku-TR.position=second|hp=80|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=second|hp=40|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.75,
+                "support_turns": 12,
+                "attack_count": 9,
+                "potion_count": 3
+              },
+              {
+                "decision_key": "position=first|hp=50|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.9166666666666666,
+                "support_turns": 12,
+                "attack_count": 1,
+                "potion_count": 11
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "Haiku-HO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 1.0,
+                "support_turns": 36,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Haiku-HO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Haiku-HO.position=second|hp=80|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=60|potions=2|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 12,
+                "attack_count": 6,
+                "potion_count": 6
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
     },
     "quality_flags": {
       "complete": true,

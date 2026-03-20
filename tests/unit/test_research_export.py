@@ -138,3 +138,6 @@ def test_export_results_includes_behavioral_profile(tmp_path, monkeypatch) -> No
     assert "behavioral_profile" in payload
     assert payload["behavioral_profile"]["profile_id"] == "fixed_damage_behavioral"
     assert payload["behavioral_profile"]["quality_flags"]["complete"] is True
+    assert payload["behavioral_profile"]["evidence"]["aggregate_metrics"] == {}
+    assert "Alpha" in payload["behavioral_profile"]["evidence"]["per_player"]
+    assert payload["behavioral_profile"]["evidence"]["state_metrics"] == {}

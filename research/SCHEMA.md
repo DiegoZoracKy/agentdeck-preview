@@ -203,6 +203,7 @@ Minimum fields:
 - `aggregate_metrics`
 - `per_player`
 - `state_metrics`
+- `evidence`
 - `quality_flags`
 
 This extension is optional because behavioral scorers are game-specific. The

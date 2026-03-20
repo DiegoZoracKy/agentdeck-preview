@@ -1,9 +1,9 @@
 # SPEC-RESEARCH-BEHAVIORAL: Behavioral Scoring Contract
 
-> Status: Draft v0.1.0
-> Version: 0.1.0
+> Status: Draft v0.2.0
+> Version: 0.2.0
 > Last Updated: 2026-03-19
-> Implementation: 🟨 Partial (`src/agentdeck/research/recording_metrics.py` already provides game-agnostic baseline metrics; game-specific behavioral scorers are not implemented yet)
+> Implementation: ✅ Existing component (`src/agentdeck/research/behavioral.py`, `src/agentdeck/games/examples/fixed_damage/behavioral.py`)
 > Authors: Codex (draft)
 > Audience: Research engineers, game authors, contributors
 
@@ -22,13 +22,14 @@
   - replacing `SPEC-RESEARCH-EXPERIMENT.md` ownership of package schema
   - requiring every game to expose the same semantic metrics
 
-This draft defines the scorer contract and payload shape only. Wiring the payload into `results.json` validation is a follow-on change owned by `SPEC-RESEARCH-EXPERIMENT.md`.
+This spec defines the scorer contract and payload shape. `results.json` integration remains owned by `SPEC-RESEARCH-EXPERIMENT.md`, but the behavioral payload is now wired through that optional extension.
 
 ## 3. Responsibilities
 - Define the minimum contract for any behavioral scorer AgentDeck recognizes.
 - Distinguish the game-agnostic behavioral baseline from game-specific profile metrics.
 - Define a deterministic, JSON-serializable scorer payload shape.
 - Require scorers to surface unsupported metrics explicitly rather than omitting them silently.
+- Require scorers to expose deterministic evidence for profile-defined derived metrics so readers can trace "why this score happened" back to concrete states or events.
 - Keep metric semantics profile-owned: the global contract defines shape and guarantees, while each game profile defines meaning.
 
 ## 4. Data Structures
@@ -46,10 +47,10 @@ Any scorer MUST return a JSON-serializable mapping with this minimum shape:
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "game_id": "fixed_damage",
   "profile_id": "fixed_damage_behavioral",
-  "profile_version": "0.1.0",
+  "profile_version": "0.2.0",
   "coverage": {
     "matches_total": 24,
     "matches_evaluable": 24,
@@ -59,6 +60,11 @@ Any scorer MUST return a JSON-serializable mapping with this minimum shape:
   "aggregate_metrics": {},
   "per_player": {},
   "state_metrics": {},
+  "evidence": {
+    "aggregate_metrics": {},
+    "per_player": {},
+    "state_metrics": {}
+  },
   "quality_flags": {
     "complete": true,
     "unsupported_metrics": []
@@ -78,6 +84,9 @@ Required fields:
 - `aggregate_metrics: mapping`
 - `per_player: mapping`
 - `state_metrics: mapping`
+- `evidence.aggregate_metrics: mapping`
+- `evidence.per_player: mapping`
+- `evidence.state_metrics: mapping`
 - `quality_flags.complete: bool`
 - `quality_flags.unsupported_metrics: list[str]`
 
@@ -94,7 +103,17 @@ Required fields:
 
 The global contract does not define the contents of these mappings beyond requiring them to be JSON-serializable. Their semantics belong to the profile spec.
 
-### 4.4 Coverage Semantics
+### 4.4 Evidence Namespace
+- `evidence.aggregate_metrics`
+  - Profile-owned evidence for aggregate derived metrics.
+- `evidence.per_player`
+  - Profile-owned evidence keyed by player name and metric name.
+- `evidence.state_metrics`
+  - Optional evidence keyed by state-derived namespaces when a profile needs extra traceability beyond `state_metrics`.
+
+Evidence entries MUST be deterministic, JSON-serializable, and derived from the same recorder inputs as the metric they support. Profiles MAY choose any internal evidence shape, but they MUST document it explicitly.
+
+### 4.5 Coverage Semantics
 - `matches_total`
   - Total matches provided to the scorer.
 - `matches_evaluable`
@@ -106,7 +125,7 @@ The global contract does not define the contents of these mappings beyond requir
 
 Coverage makes missing or unsupported behavior explicit instead of letting scorers silently undercount.
 
-### 4.5 Player Metadata Input
+### 4.6 Player Metadata Input
 `BehavioralScorer.score(...)` receives `players` as an ordered list of mappings.
 
 Minimum required field per entry:
@@ -121,7 +140,7 @@ Common optional fields:
 
 Scorers MUST treat this list as the canonical ordered player roster for the supplied payload set. Profile specs MAY require additional optional fields, but they MUST document them explicitly.
 
-### 4.6 Canonical Serialization
+### 4.7 Canonical Serialization
 The scorer contract is defined over JSON-compatible mappings, but auditability also requires stable persisted bytes.
 
 AgentDeck canonical behavioral-profile serialization is:
@@ -162,7 +181,7 @@ A recognized scorer MUST expose stable profile metadata:
 These identifiers allow experiment tooling to label the profile unambiguously and compare future revisions of the same scorer.
 
 ## 6. Invariants & Guarantees
-- **BR1**: Behavioral scorers MUST be deterministic. Given identical normalized recording inputs and the canonical serialization settings in §4.6, they MUST produce byte-identical output.
+- **BR1**: Behavioral scorers MUST be deterministic. Given identical normalized recording inputs and the canonical serialization settings in §4.7, they MUST produce byte-identical output.
 - **BR2**: Behavioral scorers MUST NOT mutate `players`, `match_payloads`, or nested payload objects.
 - **BR3**: Behavioral scorers MUST read from recorder artifacts only. They MUST NOT depend on live provider calls, current time, or external mutable state.
 - **BR4**: Behavioral scorers MUST surface unsupported metrics by name in `quality_flags.unsupported_metrics`. Silent omission is prohibited.
@@ -173,6 +192,8 @@ These identifiers allow experiment tooling to label the profile unambiguously an
 - **BR9**: If a scorer cannot evaluate a metric because the recording payload lacks required support, that metric MUST be either:
   - omitted and listed in `unsupported_metrics`, or
   - emitted with explicit zero coverage in the profile-defined shape.
+- **BR10**: If a profile spec marks a metric as evidence-bearing, the scorer MUST emit deterministic supporting evidence for that metric under `evidence`.
+- **BR11**: Evidence MUST be recorder-derived. It MUST NOT depend on external models, human-written annotations, or non-deterministic summaries.
 
 ## 7. Data Flow & Interaction
 - Live execution:
@@ -201,10 +222,10 @@ Adjacent ownership:
 ### 9.1 Minimal Complete Result
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "game_id": "fixed_damage",
   "profile_id": "fixed_damage_behavioral",
-  "profile_version": "0.1.0",
+  "profile_version": "0.2.0",
   "coverage": {
     "matches_total": 24,
     "matches_evaluable": 24,
@@ -221,6 +242,17 @@ Adjacent ownership:
   },
   "state_metrics": {
     "action_by_state": {}
+  },
+  "evidence": {
+    "aggregate_metrics": {},
+    "per_player": {
+      "Gemini-HO": {
+        "position_policy_delta": {
+          "examples": []
+        }
+      }
+    },
+    "state_metrics": {}
   },
   "quality_flags": {
     "complete": true,
@@ -246,16 +278,19 @@ Adjacent ownership:
 - Global contract:
   - guarantees deterministic scorer output shape
   - requires explicit unsupported metric names
+  - requires explicit evidence namespaces for profile-defined derived metrics
 - Profile spec:
   - defines what `position_policy_delta` means for one game
   - defines which state buckets exist
   - defines whether a metric is descriptive or heuristic
+  - defines which metrics require evidence and what that evidence contains
 
 ## 10. Testing Strategy
 - Verify scorer determinism with identical payloads and canonical JSON serialization.
 - Verify scorers reject malformed payloads with field-specific errors.
 - Verify scorers preserve zero-coverage and empty-input behavior without crashing.
 - Verify unsupported metrics are surfaced by name and affect `quality_flags.complete`.
+- Verify evidence-bearing metrics emit deterministic evidence in the documented namespace.
 - Verify profile-specific scorers only emit metrics documented by their profile spec.
 
 ## 11. Design Rationale

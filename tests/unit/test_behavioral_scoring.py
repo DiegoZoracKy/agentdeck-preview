@@ -248,6 +248,7 @@ def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     assert profile is not None
     assert profile["quality_flags"]["complete"] is True
     assert profile["quality_flags"]["unsupported_metrics"] == []
+    assert profile["schema_version"] == 2
 
     alpha = profile["per_player"]["Alpha"]
     beta = profile["per_player"]["Beta"]
@@ -271,6 +272,24 @@ def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     assert profile["state_metrics"]["action_by_state"]["Alpha"]["position=first|hp=80|potions=3"]["attack_count"] == 2
     assert profile["state_metrics"]["action_by_state"]["Alpha"]["position=second|hp=80|potions=3"]["potion_count"] == 2
 
+    alpha_evidence = profile["evidence"]["per_player"]["Alpha"]
+    position_example = alpha_evidence["position_policy_delta"]["examples"][0]
+    assert position_example["shared_state_key"] == "hp=80|potions=3"
+    assert position_example["delta"] == 1.0
+    assert position_example["first"]["source_path"] == (
+        "state_metrics.action_by_state.Alpha.position=first|hp=80|potions=3"
+    )
+    assert position_example["second"]["source_path"] == (
+        "state_metrics.action_by_state.Alpha.position=second|hp=80|potions=3"
+    )
+
+    consistency_example = alpha_evidence["state_action_consistency"]["examples"][0]
+    assert consistency_example["decision_key"] == (
+        "position=first|hp=80|potions=3|self=NONE|opp=NONE"
+    )
+    assert consistency_example["consistency"] == 1.0
+    assert consistency_example["support_turns"] == 2
+
 
 def test_fixed_damage_behavioral_profile_marks_heuristics_unsupported_without_config() -> None:
     players = [{"name": "Alpha"}, {"name": "Beta"}]
@@ -287,9 +306,11 @@ def test_fixed_damage_behavioral_profile_marks_heuristics_unsupported_without_co
         "error_recovery_rate",
         "wasted_full_health_potion_rate",
     ]
+    assert profile["schema_version"] == 2
     assert profile["per_player"]["Alpha"]["critical_potion_response_rate"] is None
     assert profile["per_player"]["Alpha"]["error_recovery_rate"] is None
     assert profile["per_player"]["Alpha"]["wasted_full_health_potion_rate"] is None
+    assert "position_policy_delta" in profile["evidence"]["per_player"]["Alpha"]
 
 
 def test_fixed_damage_behavioral_scorer_canonical_json_is_stable() -> None:

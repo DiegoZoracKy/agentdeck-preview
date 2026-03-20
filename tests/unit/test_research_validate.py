@@ -280,10 +280,10 @@ def test_behavioral_profile_shape_is_valid_when_present(tmp_path):
         include_statistics=True,
         schema_version=3,
         behavioral_profile={
-            "schema_version": 1,
+            "schema_version": 2,
             "game_id": "fixed_damage",
             "profile_id": "fixed_damage_behavioral",
-            "profile_version": "0.1.0",
+            "profile_version": "0.2.0",
             "coverage": {
                 "matches_total": 1,
                 "matches_evaluable": 1,
@@ -293,6 +293,11 @@ def test_behavioral_profile_shape_is_valid_when_present(tmp_path):
             "aggregate_metrics": {},
             "per_player": {},
             "state_metrics": {},
+            "evidence": {
+                "aggregate_metrics": {},
+                "per_player": {},
+                "state_metrics": {},
+            },
             "quality_flags": {
                 "complete": True,
                 "unsupported_metrics": [],
@@ -317,7 +322,7 @@ def test_behavioral_profile_requires_minimum_keys_when_present(tmp_path):
         include_statistics=True,
         schema_version=3,
         behavioral_profile={
-            "schema_version": 1,
+            "schema_version": 2,
             "game_id": "fixed_damage",
         },
     )

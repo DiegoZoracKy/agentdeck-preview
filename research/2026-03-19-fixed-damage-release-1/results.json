@@ -4963,10 +4963,10 @@
     }
   ],
   "behavioral_profile": {
-    "schema_version": 1,
+    "schema_version": 2,
     "game_id": "fixed_damage",
     "profile_id": "fixed_damage_behavioral",
-    "profile_version": "0.1.0",
+    "profile_version": "0.2.0",
     "coverage": {
       "matches_total": 144,
       "matches_evaluable": 144,
@@ -8142,6 +8142,992 @@
           }
         }
       }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "Attack-B": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-B.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-B.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-B.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-B.position=second|hp=40|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-B.position=first|hp=60|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-B.position=second|hp=60|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=40|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "Attack-A": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-A.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-A.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-A.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-A.position=second|hp=40|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-A.position=first|hp=60|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Attack-A.position=second|hp=60|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=40|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "AttackBot": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.0,
+                "support_turns": 60,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.AttackBot.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 48,
+                  "source_path": "state_metrics.action_by_state.AttackBot.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.AttackBot.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.AttackBot.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.AttackBot.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.AttackBot.position=second|hp=40|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 1.0,
+                "support_turns": 36,
+                "attack_count": 36,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=second|hp=80|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 1.0,
+                "support_turns": 36,
+                "attack_count": 36,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "PotionAt80Bot": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=20|potions=0",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.PotionAt80Bot.position=first|hp=20|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.PotionAt80Bot.position=second|hp=20|potions=0"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=0",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.PotionAt80Bot.position=first|hp=40|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.PotionAt80Bot.position=second|hp=40|potions=0"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=0",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.PotionAt80Bot.position=first|hp=60|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.PotionAt80Bot.position=second|hp=60|potions=0"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=40|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "Mini-TR": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=2",
+                "delta": 0.6,
+                "support_turns": 39,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=2",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Mini-TR.position=first|hp=80|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=2",
+                  "attack_rate": 0.4,
+                  "potion_rate": 0.6,
+                  "support_turns": 15,
+                  "source_path": "state_metrics.action_by_state.Mini-TR.position=second|hp=80|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Mini-TR.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Mini-TR.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=70|potions=1",
+                "delta": 0.0,
+                "support_turns": 23,
+                "first": {
+                  "bucket_key": "position=first|hp=70|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 17,
+                  "source_path": "state_metrics.action_by_state.Mini-TR.position=first|hp=70|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=70|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.Mini-TR.position=second|hp=70|potions=1"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=second|hp=80|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.75,
+                "support_turns": 12,
+                "attack_count": 3,
+                "potion_count": 9
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 1.0,
+                "support_turns": 20,
+                "attack_count": 20,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "Mini-HO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=2",
+                "delta": 0.5,
+                "support_turns": 40,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=2",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Mini-HO.position=first|hp=80|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=2",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 16,
+                  "source_path": "state_metrics.action_by_state.Mini-HO.position=second|hp=80|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.0,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Mini-HO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Mini-HO.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=70|potions=1",
+                "delta": 0.0,
+                "support_turns": 23,
+                "first": {
+                  "bucket_key": "position=first|hp=70|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 15,
+                  "source_path": "state_metrics.action_by_state.Mini-HO.position=first|hp=70|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=70|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 8,
+                  "source_path": "state_metrics.action_by_state.Mini-HO.position=second|hp=70|potions=1"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=second|hp=80|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.6666666666666666,
+                "support_turns": 12,
+                "attack_count": 4,
+                "potion_count": 8
+              },
+              {
+                "decision_key": "position=second|hp=10|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 0.875,
+                "support_turns": 8,
+                "attack_count": 7,
+                "potion_count": 1
+              },
+              {
+                "decision_key": "position=second|hp=50|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 0.875,
+                "support_turns": 8,
+                "attack_count": 7,
+                "potion_count": 1
+              }
+            ]
+          }
+        },
+        "Haiku-TR": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 1.0,
+                "support_turns": 36,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Haiku-TR.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Haiku-TR.position=second|hp=80|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=second|hp=40|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.75,
+                "support_turns": 12,
+                "attack_count": 9,
+                "potion_count": 3
+              },
+              {
+                "decision_key": "position=first|hp=50|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.9166666666666666,
+                "support_turns": 12,
+                "attack_count": 1,
+                "potion_count": 11
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "Haiku-HO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 1.0,
+                "support_turns": 36,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Haiku-HO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Haiku-HO.position=second|hp=80|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=60|potions=2|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 12,
+                "attack_count": 6,
+                "potion_count": 6
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 12,
+                "attack_count": 12,
+                "potion_count": 0
+              }
+            ]
+          }
+        },
+        "Gemini-HO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=50|potions=2",
+                "delta": 0.4,
+                "support_turns": 9,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=2",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.Gemini-HO.position=first|hp=50|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=2",
+                  "attack_rate": 0.6,
+                  "potion_rate": 0.4,
+                  "support_turns": 5,
+                  "source_path": "state_metrics.action_by_state.Gemini-HO.position=second|hp=50|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=3",
+                "delta": 0.36363636363636365,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 13,
+                  "source_path": "state_metrics.action_by_state.Gemini-HO.position=first|hp=60|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=3",
+                  "attack_rate": 0.6363636363636364,
+                  "potion_rate": 0.36363636363636365,
+                  "support_turns": 11,
+                  "source_path": "state_metrics.action_by_state.Gemini-HO.position=second|hp=60|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=1",
+                "delta": 0.16666666666666674,
+                "support_turns": 9,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=1",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Gemini-HO.position=first|hp=20|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=1",
+                  "attack_rate": 0.8333333333333334,
+                  "potion_rate": 0.16666666666666666,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.Gemini-HO.position=second|hp=20|potions=1"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 10,
+                "attack_count": 5,
+                "potion_count": 5
+              },
+              {
+                "decision_key": "position=first|hp=10|potions=2|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 6,
+                "attack_count": 3,
+                "potion_count": 3
+              },
+              {
+                "decision_key": "position=second|hp=50|potions=2|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 4,
+                "attack_count": 2,
+                "potion_count": 2
+              }
+            ]
+          }
+        },
+        "Gemini-TR": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.3712121212121212,
+                "support_turns": 23,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 0.5454545454545454,
+                  "potion_rate": 0.45454545454545453,
+                  "support_turns": 11,
+                  "source_path": "state_metrics.action_by_state.Gemini-TR.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 0.9166666666666666,
+                  "potion_rate": 0.08333333333333333,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Gemini-TR.position=second|hp=40|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=10|potions=2",
+                "delta": 0.3555555555555556,
+                "support_turns": 14,
+                "first": {
+                  "bucket_key": "position=first|hp=10|potions=2",
+                  "attack_rate": 0.8,
+                  "potion_rate": 0.2,
+                  "support_turns": 5,
+                  "source_path": "state_metrics.action_by_state.Gemini-TR.position=first|hp=10|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=10|potions=2",
+                  "attack_rate": 0.4444444444444444,
+                  "potion_rate": 0.5555555555555556,
+                  "support_turns": 9,
+                  "source_path": "state_metrics.action_by_state.Gemini-TR.position=second|hp=10|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=3",
+                "delta": 0.16666666666666663,
+                "support_turns": 24,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=3",
+                  "attack_rate": 0.8333333333333334,
+                  "potion_rate": 0.16666666666666666,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Gemini-TR.position=first|hp=60|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Gemini-TR.position=second|hp=60|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=40|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 10,
+                "attack_count": 5,
+                "potion_count": 5
+              },
+              {
+                "decision_key": "position=second|hp=10|potions=2|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 8,
+                "attack_count": 4,
+                "potion_count": 4
+              },
+              {
+                "decision_key": "position=second|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5454545454545454,
+                "support_turns": 11,
+                "attack_count": 6,
+                "potion_count": 5
+              }
+            ]
+          }
+        },
+        "GeminiFlash-HO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.45833333333333337,
+                "support_turns": 22,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 0.625,
+                  "potion_rate": 0.375,
+                  "support_turns": 16,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-HO.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 0.16666666666666666,
+                  "potion_rate": 0.8333333333333334,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-HO.position=second|hp=40|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.33333333333333337,
+                "support_turns": 25,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 13,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-HO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-HO.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=50|potions=2",
+                "delta": 0.20000000000000007,
+                "support_turns": 20,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=2",
+                  "attack_rate": 0.9,
+                  "potion_rate": 0.1,
+                  "support_turns": 10,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-HO.position=first|hp=50|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=2",
+                  "attack_rate": 0.7,
+                  "potion_rate": 0.3,
+                  "support_turns": 10,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-HO.position=second|hp=50|potions=2"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=40|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5454545454545454,
+                "support_turns": 11,
+                "attack_count": 5,
+                "potion_count": 6
+              },
+              {
+                "decision_key": "position=second|hp=80|potions=3|self=NONE|opp=ATTACK",
+                "consistency": 0.6666666666666666,
+                "support_turns": 12,
+                "attack_count": 8,
+                "potion_count": 4
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.6666666666666666,
+                "support_turns": 3,
+                "attack_count": 1,
+                "potion_count": 2
+              }
+            ]
+          }
+        },
+        "GeminiFlash-TR": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=1",
+                "delta": 1.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-TR.position=first|hp=80|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=1",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-TR.position=second|hp=80|potions=1"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=1",
+                "delta": 0.5,
+                "support_turns": 5,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-TR.position=first|hp=60|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=1",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-TR.position=second|hp=60|potions=1"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=1",
+                "delta": 0.4,
+                "support_turns": 15,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 10,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-TR.position=first|hp=40|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=1",
+                  "attack_rate": 0.6,
+                  "potion_rate": 0.4,
+                  "support_turns": 5,
+                  "source_path": "state_metrics.action_by_state.GeminiFlash-TR.position=second|hp=40|potions=1"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=second|hp=30|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1
+              },
+              {
+                "decision_key": "position=second|hp=60|potions=1|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1
+              },
+              {
+                "decision_key": "position=first|hp=60|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5833333333333334,
+                "support_turns": 12,
+                "attack_count": 5,
+                "potion_count": 7
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
     },
     "quality_flags": {
       "complete": true,
