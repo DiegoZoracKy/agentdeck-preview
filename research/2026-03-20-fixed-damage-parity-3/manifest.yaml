@@ -1,0 +1,69 @@
+schema_version: 1
+experiment_id: 2026-03-20-fixed-damage-parity-3
+title: FixedDamage Parity 3
+status: complete
+question: >-
+  Can the full Flash-Lite strategy stack (ReasoningController + turn
+  reinforcement + HP-threshold grounding) reach competitive parity with plain
+  Gemini Flash in FixedDamage at N=48, and does the second-player win rate
+  improve enough to support that claim?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_tr_hp
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - turn_reinforced
+  prompt_overlays:
+    - hp_threshold_grounding
+run:
+  seed_base: 9242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-20-fixed-damage-parity-3/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-20-fixed-damage-parity-3
+  viewer_curation:
+    repo_path: research/2026-03-20-fixed-damage-parity-3/artifacts
+notes: >-
+  This package follows FixedDamage Threshold 1. The mechanism question is now
+  answered well enough to drop the within-package baseline. This dedicated
+  parity package asks only the competitive question: whether the full Flash-Lite
+  strategy stack can match plain Flash at N=48, with the second-player split as
+  the primary diagnostic.
