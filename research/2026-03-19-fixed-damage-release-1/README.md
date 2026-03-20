@@ -60,10 +60,14 @@
   - `Haiku-TR` `0.25034` vs `Haiku-HO` `0.21101`
   - `Gemini-TR` `0.00981` vs `Gemini-HO` `0.00849`
   - `GeminiFlash-TR` `0.05276` vs `GeminiFlash-HO` `0.04430`
+- Outcome-policy dissociation is real in this package:
+  - Mini, Haiku, and Flash-Lite all split `12-12` by named player under cadence, but they did so through very different policies
+  - Mini and Haiku were highly stable and near-deterministic
+  - Flash-Lite and Flash were materially more variable
 - Policy stability differed sharply by model family:
-  - Mini and Haiku were fully deterministic in turn count (`23` and `24` turns in every match)
-  - Flash-Lite ranged from `9` to `22` turns
-  - Flash ranged from `14` to `25` turns
+  - Mini and Haiku stayed near-perfect on state-action consistency (`0.978` to `0.989`) and never collapsed into all-attack play
+  - Flash-Lite was the least stable provider cell (`0.862` to `0.866` consistency) and kept the highest all-attack rates (`37.5%` HO, `25.0%` TR)
+  - Flash remained more stable than Flash-Lite but still variable (`0.879` to `0.911` consistency)
 - Minimal contract adherence was clean on the final audited codebase:
   - every provider cell finished with `0` parse failures
   - every provider cell finished with `100%` strict ActionOnly compliance
@@ -72,27 +76,35 @@
   - Haiku inverted the game completely (`24/24` second-player wins)
   - Flash-Lite kept a strong first-player lean (`20/24` first-player wins)
   - Flash kept a moderate first-player lean (`16/24` first-player wins)
+- Haiku's inversion now has a measurable mechanism:
+  - both `Haiku-HO` and `Haiku-TR` scored `1.0` on `position_policy_delta`
+  - this is the strongest policy-by-position split in the package, not just the strongest outcome split
 
 ### Directional Signals
 - No cadence comparison was significant at `N=24`. Mini, Haiku, and Flash-Lite all split `12-12`; Flash landed `10-14`. This is a strong baseline against large effects, but not enough to rule out moderate ones.
-- Flash still showed the largest cadence lean: `GeminiFlash-TR` finished `14-10` over `GeminiFlash-HO`, but the intervals overlap and the effect size remains negligible at pilot scale.
+- Cadence moved decision-level behavior in the Gemini cells even when it did not move wins:
+  - Flash-Lite reduced all-attack matches from `37.5%` to `25.0%` and improved heuristic recovery from `0.25` to `0.34`
+  - Flash reduced all-attack matches from `20.8%` to `0.0%` and improved heuristic recovery from `0.45` to `0.64`
+  - those are descriptive pilot-scale shifts, not yet a confirmed causal claim
 
 ### What AgentDeck Made Visible
 - Side-swap fairness metadata separated position effects from model identity, which is why the Haiku inversion and the weaker Gemini first-player leans are visible instead of being flattened into named-player splits.
+- The behavioral profile made outcome-policy dissociation explicit: a `12-12` split can mean stable state-grounded play (Mini), fully position-conditioned play (Haiku), or unstable partly locked play (Flash-Lite).
 - The same experiment could be rerun on a corrected Gemini integration path without changing the matrix design, which let the package replace an adapter-confounded result set with final audited artifacts.
 - Replay and trajectory artifacts made policy mechanisms inspectable:
   - `AttackBot` vs `PotionAt80Bot` shows suboptimal healing as a longer match shape, not just as a loss
-  - the Mini/Haiku/Gemini cells make deterministic vs variable policy regimes visible through turn-count distributions and representative recordings
+  - the Mini/Haiku/Gemini cells make deterministic vs variable policy regimes visible through turn-count distributions and the new scorer output
 - Cost, latency, fairness, and behavior live in the same validated package, so the tradeoff between contract reinforcement and spend is measurable rather than anecdotal.
-- Top-level `results.json` and `results.csv` are present for package validation and bookkeeping, but the analytic units for this study remain the per-cell exports under `artifacts/`.
+- Top-level `results.json` now includes a `behavioral_profile` block in addition to the baseline game-agnostic metrics, while the analytic units for this study remain the per-cell exports under `artifacts/`.
 
 ## Artifacts
 - `matrix.yaml` defines cells, phases, and cadence conditions
 - `manifest.yaml` tracks package status and reproducibility metadata
+- `results.json` now carries both the baseline research metrics and the optional `behavioral_profile` extension
 - `analysis.md` is the human-owned interpretation layer
 - `notes/` tracks phase-by-phase execution notes
 - `recordings/` stores external pointers and retention notes
-- `scripts/` contains the package-local runner
+- `scripts/` contains the package-local runner plus export helpers
 
 ## Repro
 Run one phase:
@@ -111,4 +123,5 @@ Export package results once sessions exist:
 
 ```bash
 .venv/bin/python research/2026-03-19-fixed-damage-release-1/scripts/export_cell_results.py --phase P0
+.venv/bin/python research/2026-03-19-fixed-damage-release-1/scripts/export_package_results.py
 ```

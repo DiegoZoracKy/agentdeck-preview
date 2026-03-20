@@ -737,5 +737,634 @@
         "ordered_index": 0
       }
     }
-  ]
+  ],
+  "behavioral_profile": {
+    "schema_version": 1,
+    "game_id": "fixed_damage",
+    "profile_id": "fixed_damage_behavioral",
+    "profile_version": "0.1.0",
+    "coverage": {
+      "matches_total": 24,
+      "matches_evaluable": 24,
+      "turns_total": 344,
+      "turns_evaluable": 344
+    },
+    "aggregate_metrics": {
+      "all_attack_match_rate": {
+        "value": 0.3125,
+        "all_attack_matches": 15,
+        "support_matches": 48
+      },
+      "first_potion_profile": {
+        "median_first_potion_hp": 20.0,
+        "first_potion_hp_values": [
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          80
+        ],
+        "never_used_rate": 0.3125,
+        "never_used_matches": 15,
+        "support_matches": 48
+      },
+      "unused_potions_on_loss_rate": {
+        "value": 1.0,
+        "losses_with_unused_potions": 24,
+        "support_losses": 24
+      },
+      "state_action_consistency": {
+        "value": 0.8643533123028391,
+        "support_turns": 317
+      },
+      "position_policy_delta": {
+        "value": 0.14545870266609076,
+        "support_turns": 293
+      },
+      "critical_potion_response_rate": {
+        "value": 0.2265193370165746,
+        "critical_potion_turns": 41,
+        "support_turns": 181,
+        "critical_hp_threshold": 40
+      },
+      "error_recovery_rate": {
+        "value": 0.2949640287769784,
+        "recovered_events": 41,
+        "support_events": 139,
+        "critical_hp_threshold": 40
+      },
+      "wasted_full_health_potion_rate": {
+        "value": 0.0,
+        "wasted_full_health_potions": 0,
+        "support_potions": 50,
+        "max_health": 100
+      }
+    },
+    "per_player": {
+      "Gemini-HO": {
+        "matches_played": 24,
+        "all_attack_match_rate": {
+          "value": 0.375,
+          "all_attack_matches": 9,
+          "support_matches": 24
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 20.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            40,
+            60,
+            60,
+            60,
+            60,
+            80
+          ],
+          "never_used_rate": 0.375,
+          "never_used_matches": 9,
+          "support_matches": 24
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 1.0,
+          "losses_with_unused_potions": 12,
+          "support_losses": 12
+        },
+        "state_action_consistency": {
+          "value": 0.8662420382165605,
+          "supported_state_keys": 29,
+          "support_turns": 157
+        },
+        "position_policy_delta": {
+          "value": 0.16621721415839064,
+          "shared_state_buckets": 8,
+          "support_turns": 140
+        },
+        "critical_potion_response_rate": {
+          "value": 0.2,
+          "critical_potion_turns": 18,
+          "support_turns": 90,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.25,
+          "recovered_events": 18,
+          "support_events": 72,
+          "missed_events": 72,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 25,
+          "max_health": 100
+        }
+      },
+      "Gemini-TR": {
+        "matches_played": 24,
+        "all_attack_match_rate": {
+          "value": 0.25,
+          "all_attack_matches": 6,
+          "support_matches": 24
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 20.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            60,
+            60
+          ],
+          "never_used_rate": 0.25,
+          "never_used_matches": 6,
+          "support_matches": 24
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 1.0,
+          "losses_with_unused_potions": 12,
+          "support_losses": 12
+        },
+        "state_action_consistency": {
+          "value": 0.8625,
+          "supported_state_keys": 25,
+          "support_turns": 160
+        },
+        "position_policy_delta": {
+          "value": 0.12646398626790784,
+          "shared_state_buckets": 8,
+          "support_turns": 153
+        },
+        "critical_potion_response_rate": {
+          "value": 0.25274725274725274,
+          "critical_potion_turns": 23,
+          "support_turns": 91,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.34328358208955223,
+          "recovered_events": 23,
+          "support_events": 67,
+          "missed_events": 68,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 25,
+          "max_health": 100
+        }
+      }
+    },
+    "state_metrics": {
+      "action_by_state": {
+        "Gemini-HO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 6,
+            "attack_count": 3,
+            "potion_count": 3,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 10,
+            "attack_count": 5,
+            "potion_count": 5,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 11,
+            "attack_count": 11,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 17,
+            "attack_count": 15,
+            "potion_count": 2,
+            "attack_rate": 0.8823529411764706,
+            "potion_rate": 0.11764705882352941
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 13,
+            "attack_count": 13,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 5,
+            "attack_count": 2,
+            "potion_count": 3,
+            "attack_rate": 0.4,
+            "potion_rate": 0.6
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 6,
+            "attack_count": 5,
+            "potion_count": 1,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          },
+          "position=second|hp=20|potions=2": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 9,
+            "attack_count": 6,
+            "potion_count": 3,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 10,
+            "attack_count": 10,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 5,
+            "attack_count": 3,
+            "potion_count": 2,
+            "attack_rate": 0.6,
+            "potion_rate": 0.4
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 11,
+            "attack_count": 7,
+            "potion_count": 4,
+            "attack_rate": 0.6363636363636364,
+            "potion_rate": 0.36363636363636365
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 11,
+            "potion_count": 1,
+            "attack_rate": 0.9166666666666666,
+            "potion_rate": 0.08333333333333333
+          }
+        },
+        "Gemini-TR": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 13,
+            "attack_count": 13,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 5,
+            "attack_count": 4,
+            "potion_count": 1,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 6,
+            "attack_count": 3,
+            "potion_count": 3,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 12,
+            "attack_count": 11,
+            "potion_count": 1,
+            "attack_rate": 0.9166666666666666,
+            "potion_rate": 0.08333333333333333
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 11,
+            "attack_count": 6,
+            "potion_count": 5,
+            "attack_rate": 0.5454545454545454,
+            "potion_rate": 0.45454545454545453
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 9,
+            "attack_count": 9,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 12,
+            "attack_count": 10,
+            "potion_count": 2,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 16,
+            "attack_count": 16,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 9,
+            "attack_count": 4,
+            "potion_count": 5,
+            "attack_rate": 0.4444444444444444,
+            "potion_rate": 0.5555555555555556
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 8,
+            "attack_count": 8,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 14,
+            "attack_count": 7,
+            "potion_count": 7,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 10,
+            "attack_count": 10,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 12,
+            "attack_count": 11,
+            "potion_count": 1,
+            "attack_rate": 0.9166666666666666,
+            "potion_rate": 0.08333333333333333
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          }
+        }
+      },
+      "scarcity_action_profile": {
+        "Gemini-HO": {
+          "0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 15,
+            "attack_count": 13,
+            "potion_count": 2,
+            "attack_rate": 0.8666666666666667,
+            "potion_rate": 0.13333333333333333
+          },
+          "2": {
+            "support_turns": 48,
+            "attack_count": 40,
+            "potion_count": 8,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          },
+          "3": {
+            "support_turns": 106,
+            "attack_count": 91,
+            "potion_count": 15,
+            "attack_rate": 0.8584905660377359,
+            "potion_rate": 0.14150943396226415
+          }
+        },
+        "Gemini-TR": {
+          "0": {
+            "support_turns": 0,
+            "attack_count": 0,
+            "potion_count": 0,
+            "attack_rate": 0.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "2": {
+            "support_turns": 52,
+            "attack_count": 45,
+            "potion_count": 7,
+            "attack_rate": 0.8653846153846154,
+            "potion_rate": 0.1346153846153846
+          },
+          "3": {
+            "support_turns": 108,
+            "attack_count": 90,
+            "potion_count": 18,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          }
+        }
+      }
+    },
+    "quality_flags": {
+      "complete": true,
+      "unsupported_metrics": []
+    }
+  }
 }

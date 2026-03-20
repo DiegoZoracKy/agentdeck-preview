@@ -77,6 +77,7 @@ Required fields:
 Optional source-provenance extension:
 - `source.recordings_dirs` (array of strings) for checkpoint aggregation from multiple sessions.
 - `generated_at` (ISO-8601) unless export was run with `--no-generated-at` for deterministic output.
+- `behavioral_profile` (object; optional game-specific behavioral scorer output following `SPEC-RESEARCH-BEHAVIORAL.md`)
 
 Extended required fields for `schema_version >= 2`:
 - `statistics` (object; inferential statistics)
@@ -166,12 +167,31 @@ Per-invariant summary fields:
 Artifact validation MUST remain game-agnostic. It validates recording integrity rather
 than gameplay correctness. Public committed exports SHOULD have `all_passed: true`.
 
-### 4.8 results.csv (Generated)
+### 4.8 behavioral_profile (Optional Extension)
+When present, `behavioral_profile` MUST follow the global scorer contract defined in
+`SPEC-RESEARCH-BEHAVIORAL.md`.
+
+Minimum required fields:
+- `schema_version` (int)
+- `game_id` (string)
+- `profile_id` (string)
+- `profile_version` (string)
+- `coverage` (object)
+- `aggregate_metrics` (mapping)
+- `per_player` (mapping)
+- `state_metrics` (mapping)
+- `quality_flags` (object)
+
+`behavioral_profile` remains optional because behavioral scorers are game-specific.
+When omitted, the baseline research package still consists of the game-agnostic
+metrics above.
+
+### 4.9 results.csv (Generated)
 Minimum columns:
 `match_id`, `winner`, `turns`, `outcome`, `seed`, `duration`, `cost`,
 `player_order_source`, `first_player`, `players`, `player_costs`.
 
-### 4.9 research/INDEX.md (Generated)
+### 4.10 research/INDEX.md (Generated)
 A registry table for all experiments. It is generated from manifests using
 `scripts/research_index.py` and MUST match the script output.
 
@@ -274,6 +294,7 @@ python scripts/research_validate.py --research-dir research
 ## 13. References
 - [SPEC.md](./SPEC.md) §2.4, §3.2
 - [SPEC-RESEARCH.md](./SPEC-RESEARCH.md)
+- [SPEC-RESEARCH-BEHAVIORAL.md](./SPEC-RESEARCH-BEHAVIORAL.md)
 - [research/SCHEMA.md](../research/SCHEMA.md)
 - [research/README.md](../research/README.md)
 - [scripts/research_export.py](../scripts/research_export.py)

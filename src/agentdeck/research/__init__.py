@@ -1,6 +1,7 @@
 """Research utilities for live comparisons, post-hoc analysis, and packaging support."""
 
 from .analysis import ResultsAnalyzer
+from .behavioral import compute_behavioral_profile
 from .comparison import (
     Benchmark,
     BenchmarkGame,
@@ -64,6 +65,7 @@ __all__ = [
     "PerformanceAnalysis",
     "CostAnalysis",
     "ComparisonAnalysis",
+    "compute_behavioral_profile",
     "compute_inferential_statistics",
     "compute_format_strictness",
     "compute_position_effect",

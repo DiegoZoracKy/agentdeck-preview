@@ -11,6 +11,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence, Tuple, Union
 
 try:
+    from agentdeck.research.behavioral import compute_behavioral_profile
+except ImportError:
+    compute_behavioral_profile = None
+
+try:
     from agentdeck.research.provider_utils import provider_from_module as _provider_from_module
 except ImportError:
     def _provider_from_module(module: str) -> str:
@@ -220,6 +225,8 @@ def export_results(
     experiment_id: str,
     *,
     include_generated_at: bool = True,
+    behavioral_profile_id: str | None = "auto",
+    behavioral_config: Dict[str, Any] | None = None,
 ) -> None:
     if isinstance(recordings_dir, Path):
         recordings_dirs: List[Path] = [recordings_dir]
@@ -325,6 +332,15 @@ def export_results(
     else:
         position_effect = _fallback_position_effect(players, matches)
 
+    behavioral_profile = None
+    if compute_behavioral_profile is not None and behavioral_profile_id != "none":
+        behavioral_profile = compute_behavioral_profile(
+            players=players,
+            match_payloads=match_payloads,
+            profile_id=behavioral_profile_id,
+            config=behavioral_config,
+        )
+
     source: Dict[str, Any] = {"recordings_dir": str(normalized_dirs[0])}
     if len(normalized_dirs) > 1:
         source["recordings_dirs"] = [str(path) for path in normalized_dirs]
@@ -341,6 +357,8 @@ def export_results(
         "players": players,
         "matches": matches,
     }
+    if behavioral_profile is not None:
+        results["behavioral_profile"] = behavioral_profile
     if include_generated_at:
         results["generated_at"] = _iso_timestamp()
 

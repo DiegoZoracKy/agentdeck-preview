@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
@@ -19,6 +20,7 @@ from scripts.research_export import export_results
 
 EXPERIMENT_DIR = Path(__file__).resolve().parents[1]
 MATRIX_PATH = EXPERIMENT_DIR / "matrix.yaml"
+MANIFEST_PATH = EXPERIMENT_DIR / "manifest.yaml"
 
 
 def _load_yaml(path: Path) -> Dict[str, Any]:
@@ -38,7 +40,26 @@ def _iter_selected_cells(matrix: Dict[str, Any], *, phase: str | None, cell_ids:
         yield cell
 
 
+def _canonical_recordings_dirs_from_artifact(cell_id: str) -> List[Path]:
+    artifact_results = EXPERIMENT_DIR / "artifacts" / cell_id / "results.json"
+    if not artifact_results.exists():
+        return []
+    payload = json.loads(artifact_results.read_text(encoding="utf-8"))
+    source = payload.get("source") or {}
+    recordings_dirs = source.get("recordings_dirs") or []
+    if recordings_dirs:
+        return [Path(path) for path in recordings_dirs]
+    recordings_dir = source.get("recordings_dir")
+    if recordings_dir:
+        return [Path(recordings_dir)]
+    return []
+
+
 def _recordings_dirs_for_cell(cell_id: str) -> List[Path]:
+    canonical = _canonical_recordings_dirs_from_artifact(cell_id)
+    if canonical:
+        return canonical
+
     cell_run_dir = EXPERIMENT_DIR / "agentdeck_runs" / cell_id
     usable_dirs: List[Path] = []
     for path in sorted(cell_run_dir.glob("session_*/records")):
@@ -58,6 +79,8 @@ def main() -> None:
     args = parser.parse_args()
 
     matrix = _load_yaml(MATRIX_PATH)
+    manifest = _load_yaml(MANIFEST_PATH)
+    behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
 
     if args.list_cells:
         for cell in matrix.get("cells", []):
@@ -89,6 +112,8 @@ def main() -> None:
             output_dir,
             experiment_id=f"{matrix['experiment_id']}::{cell_id}",
             include_generated_at=False,
+            behavioral_profile_id="auto",
+            behavioral_config=behavioral_config,
         )
         print(f"Exported {cell_id} -> {output_dir}")
 

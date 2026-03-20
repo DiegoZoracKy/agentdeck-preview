@@ -339,6 +339,77 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                             f"{experiment_name}: results.json.artifact_validation.failures must be empty for committed results"
                         )
 
+            behavioral_profile = data.get("behavioral_profile")
+            if behavioral_profile is not None:
+                if not isinstance(behavioral_profile, dict):
+                    errors.append(
+                        f"{experiment_name}: results.json.behavioral_profile must be mapping"
+                    )
+                else:
+                    required_behavioral_keys = {
+                        "schema_version",
+                        "game_id",
+                        "profile_id",
+                        "profile_version",
+                        "coverage",
+                        "aggregate_metrics",
+                        "per_player",
+                        "state_metrics",
+                        "quality_flags",
+                    }
+                    missing_behavioral = sorted(
+                        required_behavioral_keys - set(behavioral_profile.keys())
+                    )
+                    if missing_behavioral:
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile missing keys {missing_behavioral}"
+                        )
+                    coverage = behavioral_profile.get("coverage")
+                    if not isinstance(coverage, dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile.coverage must be mapping"
+                        )
+                    else:
+                        for key in (
+                            "matches_total",
+                            "matches_evaluable",
+                            "turns_total",
+                            "turns_evaluable",
+                        ):
+                            if not _is_int(coverage.get(key)):
+                                errors.append(
+                                    f"{experiment_name}: results.json.behavioral_profile.coverage.{key} must be int"
+                                )
+                    if not isinstance(behavioral_profile.get("aggregate_metrics"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile.aggregate_metrics must be mapping"
+                        )
+                    if not isinstance(behavioral_profile.get("per_player"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile.per_player must be mapping"
+                        )
+                    if not isinstance(behavioral_profile.get("state_metrics"), dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile.state_metrics must be mapping"
+                        )
+                    quality_flags = behavioral_profile.get("quality_flags")
+                    if not isinstance(quality_flags, dict):
+                        errors.append(
+                            f"{experiment_name}: results.json.behavioral_profile.quality_flags must be mapping"
+                        )
+                    else:
+                        if not isinstance(quality_flags.get("complete"), bool):
+                            errors.append(
+                                f"{experiment_name}: results.json.behavioral_profile.quality_flags.complete must be bool"
+                            )
+                        unsupported_metrics = quality_flags.get("unsupported_metrics")
+                        if not isinstance(unsupported_metrics, list) or not all(
+                            isinstance(item, str) for item in unsupported_metrics
+                        ):
+                            errors.append(
+                                f"{experiment_name}: results.json.behavioral_profile.quality_flags.unsupported_metrics must be list[str]"
+                            )
+
             schema_version = data.get("schema_version")
             if schema_version is not None:
                 if not _is_int(schema_version):

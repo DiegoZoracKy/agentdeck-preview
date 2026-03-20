@@ -114,6 +114,7 @@ notes: ""
 Optional source extension:
 - `source.recordings_dirs` (array of strings) for multi-session checkpoint aggregation.
 - `generated_at` (ISO-8601) unless the export intentionally omitted it via `--no-generated-at`.
+- `behavioral_profile` (object; optional game-specific behavioral scorer output)
 
 For `results.json.schema_version >= 2`, the following are additionally required:
 - `statistics` (object; inferential metrics)
@@ -189,6 +190,23 @@ Each check entry should contain:
 
 Exports SHOULD fail fast when any artifact invariant fails. Committed public
 results should therefore have `all_passed: true` and `failures: []`.
+
+### behavioral_profile Fields (Optional)
+When present, `behavioral_profile` should follow `SPEC-RESEARCH-BEHAVIORAL.md`.
+
+Minimum fields:
+- `schema_version`
+- `game_id`
+- `profile_id`
+- `profile_version`
+- `coverage`
+- `aggregate_metrics`
+- `per_player`
+- `state_metrics`
+- `quality_flags`
+
+This extension is optional because behavioral scorers are game-specific. The
+baseline research package contract remains game-agnostic.
 
 ### Match Fields (per entry)
 - `match_id`

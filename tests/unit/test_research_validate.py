@@ -36,6 +36,7 @@ def _write_results_files(
     artifact_validation_all_passed: bool = True,
     schema_version: int = 3,
     include_generated_at: bool = True,
+    behavioral_profile: Dict[str, Any] | None = None,
 ) -> None:
     results_payload: Dict[str, Any] = {
         "schema_version": schema_version,
@@ -82,6 +83,9 @@ def _write_results_files(
             },
             "failures": [] if artifact_validation_all_passed else [{"message": "bad"}],
         }
+
+    if behavioral_profile is not None:
+        results_payload["behavioral_profile"] = behavioral_profile
 
     (experiment_dir / "results.json").write_text(json.dumps(results_payload), encoding="utf-8")
     (experiment_dir / "results.csv").write_text(
@@ -265,6 +269,65 @@ def test_results_without_generated_at_are_valid_for_deterministic_exports(tmp_pa
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []
+
+
+def test_behavioral_profile_shape_is_valid_when_present(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        schema_version=3,
+        behavioral_profile={
+            "schema_version": 1,
+            "game_id": "fixed_damage",
+            "profile_id": "fixed_damage_behavioral",
+            "profile_version": "0.1.0",
+            "coverage": {
+                "matches_total": 1,
+                "matches_evaluable": 1,
+                "turns_total": 1,
+                "turns_evaluable": 1,
+            },
+            "aggregate_metrics": {},
+            "per_player": {},
+            "state_metrics": {},
+            "quality_flags": {
+                "complete": True,
+                "unsupported_metrics": [],
+            },
+        },
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert errors == []
+
+
+def test_behavioral_profile_requires_minimum_keys_when_present(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        schema_version=3,
+        behavioral_profile={
+            "schema_version": 1,
+            "game_id": "fixed_damage",
+        },
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+    }
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("behavioral_profile missing keys" in e for e in errors)
 
 
 def test_empty_research_tree_is_valid(tmp_path):
