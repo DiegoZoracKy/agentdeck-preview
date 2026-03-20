@@ -329,6 +329,14 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 attack_count = int(counts.get("ATTACK", 0))
                 potion_count = int(counts.get("POTION", 0))
                 consistency = max(counts.values()) / support
+                attack_rate = _safe_rate(attack_count, support)
+                potion_rate = _safe_rate(potion_count, support)
+                if attack_count > potion_count:
+                    dominant_action: str | None = "ATTACK"
+                elif potion_count > attack_count:
+                    dominant_action = "POTION"
+                else:
+                    dominant_action = None
                 consistency_examples.append(
                     {
                         "decision_key": decision_key,
@@ -336,6 +344,9 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                         "support_turns": support,
                         "attack_count": attack_count,
                         "potion_count": potion_count,
+                        "attack_rate": attack_rate,
+                        "potion_rate": potion_rate,
+                        "dominant_action": dominant_action,
                     }
                 )
             consistency_examples.sort(

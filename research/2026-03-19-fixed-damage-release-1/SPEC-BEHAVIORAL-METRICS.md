@@ -203,6 +203,12 @@ These metrics are required for the first scorer implementation.
   - `support_turns`
   - `attack_count`
   - `potion_count`
+  - `attack_rate`
+  - `potion_rate`
+  - `dominant_action`
+- `dominant_action` semantics:
+  - emit `"ATTACK"` or `"POTION"` when one action has strictly greater count
+  - emit `null` on an exact tie
 - Ordering:
   - Sort by ascending `consistency`, then descending `support_turns`, then ascending `decision_key`
 - Purpose:
@@ -253,6 +259,7 @@ These metrics are allowed in the profile but MAY remain unsupported in v0.2.0 if
 - **FD-B7**: Support thresholds used by the profile MUST be deterministic and documented.
 - **FD-B8**: Evidence-bearing metrics MUST emit deterministic evidence payloads following the ordering rules in this profile.
 - **FD-B9**: Evidence examples MUST stay recorder-derived and MUST NOT introduce narrative or model-generated interpretation.
+- **FD-B10**: Evidence examples MUST be readable without following helper pointers. `source_path` MAY aid navigation, but the behavioral contrast MUST already be visible in the example payload.
 
 ## 8. Data Flow & Interaction
 - Recorder payloads:

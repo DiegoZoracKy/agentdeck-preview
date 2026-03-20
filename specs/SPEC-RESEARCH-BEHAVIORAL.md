@@ -112,6 +112,7 @@ The global contract does not define the contents of these mappings beyond requir
   - Optional evidence keyed by state-derived namespaces when a profile needs extra traceability beyond `state_metrics`.
 
 Evidence entries MUST be deterministic, JSON-serializable, and derived from the same recorder inputs as the metric they support. Profiles MAY choose any internal evidence shape, but they MUST document it explicitly.
+Evidence entries MUST be interpretable from the entry itself. Optional helper pointers or source references MAY be included, but they MUST NOT be the primary way a reader understands the evidence.
 
 ### 4.5 Coverage Semantics
 - `matches_total`
@@ -194,6 +195,7 @@ These identifiers allow experiment tooling to label the profile unambiguously an
   - emitted with explicit zero coverage in the profile-defined shape.
 - **BR10**: If a profile spec marks a metric as evidence-bearing, the scorer MUST emit deterministic supporting evidence for that metric under `evidence`.
 - **BR11**: Evidence MUST be recorder-derived. It MUST NOT depend on external models, human-written annotations, or non-deterministic summaries.
+- **BR12**: Evidence MUST remain self-explanatory. Helper pointers such as `source_path` MAY be emitted, but a reader MUST be able to understand the behavioral contrast from the evidence entry itself.
 
 ## 7. Data Flow & Interaction
 - Live execution:

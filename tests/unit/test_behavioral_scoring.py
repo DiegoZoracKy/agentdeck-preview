@@ -377,6 +377,9 @@ def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     )
     assert consistency_example["consistency"] == 1.0
     assert consistency_example["support_turns"] == 2
+    assert consistency_example["attack_rate"] == 1.0
+    assert consistency_example["potion_rate"] == 0.0
+    assert consistency_example["dominant_action"] == "ATTACK"
 
 
 def test_fixed_damage_behavioral_profile_marks_heuristics_unsupported_without_config() -> None:
@@ -458,3 +461,10 @@ def test_behavioral_evidence_is_sorted_and_capped() -> None:
         "position=first|hp=40|potions=1|self=NONE|opp=NONE",
         "position=second|hp=60|potions=2|self=NONE|opp=ATTACK",
     ]
+    assert consistency_examples[0]["attack_rate"] == 0.5
+    assert consistency_examples[0]["potion_rate"] == 0.5
+    assert consistency_examples[0]["dominant_action"] is None
+    assert consistency_examples[1]["attack_rate"] == 0.5
+    assert consistency_examples[1]["potion_rate"] == 0.5
+    assert consistency_examples[1]["dominant_action"] is None
+    assert consistency_examples[2]["dominant_action"] == "ATTACK"
