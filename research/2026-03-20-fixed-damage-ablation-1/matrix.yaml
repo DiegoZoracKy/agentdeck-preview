@@ -1,0 +1,115 @@
+schema_version: 1
+experiment_id: 2026-03-20-fixed-damage-ablation-1
+created_at: "2026-03-20T00:00:00Z"
+purpose: >-
+  FixedDamage ablation study testing whether HP-threshold grounding still
+  improves Flash-Lite against plain Gemini Flash when turn-time
+  controller-format reinforcement is removed.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_hp_turn_modes
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first public release writeup if a frozen repo hash is required.
+
+player_registry:
+  gemini_2_5_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 8
+    retry_delay: 2.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_hp_grounded_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: |-
+        {game_view}
+
+        Before acting, calculate: does your current HP minus one ATTACK (20 damage) leave you alive? Let that determine your choice.
+
+sampling_policy:
+  pilot_matches_per_cell: 48
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 24
+    side_swap_required: true
+  expansion_selection_rules:
+    - hp_grounding_survives_without_turn_format_reinforcement
+    - second_player_win_rate_holds_up_without_turn_format_reinforcement
+    - cost_or_latency_changes_are_worth_the_contract_tradeoff
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package is an ablation of Parity 3. The only intended causal change
+      is removal of {controller_format} from the turn prompt while keeping the
+      handshake contract and the HP-threshold instruction. Analysis must report
+      position-controlled results and note any strictness drift caused by the
+      weaker turn prompt contract.
+    matches_per_cell: 0
+    required_checks:
+      - ablation_question_review
+      - hp_grounding_prompt_review
+      - no_turn_format_reinforcement_review
+      - cross_model_position_control_review
+      - behavioral_endpoints_review
+      - paired_side_swap_review
+      - gemini_thinking_budget_zero_review
+  phases:
+    - phase_id: P1
+      name: No-Turn-Reinforcement Ablation
+      cell_ids:
+        - p1_c01_flash_lite_rc_hp_vs_flash_ao
+
+cells:
+  - id: p1_c01_flash_lite_rc_hp_vs_flash_ao
+    phase: P1
+    question: Does Flash-Lite stay competitive against plain Flash when HP-threshold grounding is kept but turn-time controller-format reinforcement is removed?
+    intent: Isolate the value of turn-time controller-format reinforcement once the HP-threshold overlay is already in place.
+    causal_factor: turn_format_reinforcement_ablation
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results, with special attention to second-player wins
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_hp_grounded_handshake_only
+      name: FlashLite-RC-HP
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 48
+    pilot_matches: 48
+    viewer_priority: true
