@@ -89,6 +89,11 @@ Compute the FixedDamage behavioral profile from recorder match payloads.
 
 ## 6. Metric Definitions
 
+Profile note for `v0.2.0`:
+- `evidence.aggregate_metrics = {}`
+- `evidence.state_metrics = {}`
+- this profile currently emits evidence only under `evidence.per_player`, because the derived metrics needing explanation are player-scoped in this release package
+
 ### 6.1 Required Descriptive Metrics
 These metrics are required for the first scorer implementation.
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from agentdeck.games.examples.fixed_damage.behavioral import (
+    EVIDENCE_MAX_EXAMPLES,
     FixedDamageBehavioralScorer,
 )
 from agentdeck.research.behavioral import compute_behavioral_profile
@@ -237,6 +238,93 @@ def _cross_match_boundary_payloads() -> list[dict]:
     ]
 
 
+def _alpha_only_match_payload(
+    *,
+    match_id: str,
+    alpha_position: str,
+    own_hp: int,
+    own_potions: int,
+    action: str,
+) -> dict:
+    if alpha_position not in {"first", "second"}:
+        raise ValueError("alpha_position must be 'first' or 'second'")
+
+    first_player = "Alpha" if alpha_position == "first" else "Beta"
+    turn_number = 1 if alpha_position == "first" else 2
+    opponent_last_action = None if alpha_position == "first" else "ATTACK"
+
+    return {
+        "match_id": match_id,
+        "game": "FixedDamageGame",
+        "players": ["Alpha", "Beta"],
+        "winner": "Alpha",
+        "final_state": {
+            "health": {"Alpha": own_hp, "Beta": 80},
+            "potions": {
+                "Alpha": own_potions - 1 if action == "POTION" else own_potions,
+                "Beta": 3,
+            },
+            "last_action": {"Alpha": action, "Beta": opponent_last_action},
+            "turn": turn_number + 1,
+        },
+        "events": [
+            _gameplay_event(
+                player="Alpha",
+                opponent="Beta",
+                turn_number=turn_number,
+                own_hp=own_hp,
+                own_potions=own_potions,
+                action=action,
+                opponent_last_action=opponent_last_action,
+            )
+        ],
+        "metadata": {
+            "match": {
+                "players": ["Alpha", "Beta"],
+                "first_player": {"name": first_player},
+            },
+        },
+    }
+
+
+def _evidence_rich_payloads() -> list[dict]:
+    payloads: list[dict] = []
+
+    configs = [
+        ("s1", 80, 3, ["ATTACK", "ATTACK"], ["POTION", "POTION"]),
+        ("s2", 60, 2, ["ATTACK", "ATTACK"], ["ATTACK", "POTION"]),
+        ("s3", 40, 1, ["ATTACK", "POTION"], ["ATTACK", "ATTACK"]),
+        ("s4", 20, 1, ["ATTACK", "ATTACK"], ["ATTACK", "ATTACK"]),
+    ]
+
+    counter = 1
+    for state_id, hp, potions, first_actions, second_actions in configs:
+        for action in first_actions:
+            payloads.append(
+                _alpha_only_match_payload(
+                    match_id=f"{state_id}_m{counter}",
+                    alpha_position="first",
+                    own_hp=hp,
+                    own_potions=potions,
+                    action=action,
+                )
+            )
+            counter += 1
+        for action in second_actions:
+            payloads.append(
+                _alpha_only_match_payload(
+                    match_id=f"{state_id}_m{counter}",
+                    alpha_position="second",
+                    own_hp=hp,
+                    own_potions=potions,
+                    action=action,
+                )
+            )
+            counter += 1
+
+    return payloads
+
+
 def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     players = [{"name": "Alpha"}, {"name": "Beta"}]
     profile = compute_behavioral_profile(
@@ -342,3 +430,31 @@ def test_error_recovery_rate_does_not_cross_match_boundaries() -> None:
     assert alpha["error_recovery_rate"]["missed_events"] == 1
     assert alpha["error_recovery_rate"]["support_events"] == 0
     assert alpha["error_recovery_rate"]["recovered_events"] == 0
+
+
+def test_behavioral_evidence_is_sorted_and_capped() -> None:
+    scorer = FixedDamageBehavioralScorer()
+    payload = scorer.score(
+        players=[{"name": "Alpha"}, {"name": "Beta"}],
+        match_payloads=_evidence_rich_payloads(),
+        config={"attack_damage": 20, "max_health": 100},
+    )
+
+    alpha_evidence = payload["evidence"]["per_player"]["Alpha"]
+
+    position_examples = alpha_evidence["position_policy_delta"]["examples"]
+    assert len(position_examples) == EVIDENCE_MAX_EXAMPLES
+    assert [example["shared_state_key"] for example in position_examples] == [
+        "hp=80|potions=3",
+        "hp=40|potions=1",
+        "hp=60|potions=2",
+    ]
+    assert [example["delta"] for example in position_examples] == [1.0, 0.5, 0.5]
+
+    consistency_examples = alpha_evidence["state_action_consistency"]["examples"]
+    assert len(consistency_examples) == EVIDENCE_MAX_EXAMPLES
+    assert [example["consistency"] for example in consistency_examples] == [0.5, 0.5, 1.0]
+    assert [example["decision_key"] for example in consistency_examples[:2]] == [
+        "position=first|hp=40|potions=1|self=NONE|opp=NONE",
+        "position=second|hp=60|potions=2|self=NONE|opp=ATTACK",
+    ]
