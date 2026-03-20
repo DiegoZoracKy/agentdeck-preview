@@ -1,0 +1,1835 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-20-fixed-damage-parity-2::p1_c02_flash_lite_rc_tr_vs_flash_ao",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-20-fixed-damage-parity-2/agentdeck_runs/p1_c02_flash_lite_rc_tr_vs_flash_ao/session_20260320_134613_21bd90/records"
+  },
+  "summary": {
+    "total_matches": 24,
+    "decisive_matches": 24,
+    "draws": 0,
+    "win_rates": {
+      "FlashLite-RC-TR": 0.625,
+      "Flash-AO": 0.375
+    },
+    "total_cost": 0.0851721,
+    "avg_turns": 20.791666666666668,
+    "avg_duration": 19.18040994803111,
+    "avg_cost": 0.0035488375
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 24,
+    "n_decisive": 24,
+    "players": {
+      "FlashLite-RC-TR": {
+        "wins": 15,
+        "win_rate": 0.625,
+        "ci": [
+          0.42709962442674276,
+          0.7884063244045122
+        ],
+        "p_value": 0.30745625495910645,
+        "effect_size": 0.2526802551420786,
+        "effect_label": "small",
+        "is_significant": false
+      },
+      "Flash-AO": {
+        "wins": 9,
+        "win_rate": 0.375,
+        "ci": [
+          0.21159367559548778,
+          0.5729003755732572
+        ],
+        "p_value": 0.30745625495910645,
+        "effect_size": -0.25268025514207904,
+        "effect_label": "small",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "FlashLite-RC-TR_vs_Flash-AO": {
+        "player_a": "FlashLite-RC-TR",
+        "player_b": "Flash-AO",
+        "wins_a": 15,
+        "wins_b": 9,
+        "head_to_head_decisive": 24,
+        "win_rate_a": 0.625,
+        "ci_a": [
+          0.42709962442674276,
+          0.7884063244045122
+        ],
+        "p_value": 0.30745625495910645,
+        "effect_size": 0.2526802551420786,
+        "effect_label": "small",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 24,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 499,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 499,
+      "strict_contract_passes": 473,
+      "strict_contract_rate": 0.9478957915831663,
+      "recoverable_non_strict": 26,
+      "recoverable_non_strict_rate": 0.052104208416833664,
+      "action_line_rate": 0.9478957915831663,
+      "reasoning_line_rate": 0.503006012024048
+    },
+    "by_player": {
+      "Flash-AO": {
+        "turn_attempts": 248,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 248,
+        "strict_contract_passes": 222,
+        "strict_contract_rate": 0.8951612903225806,
+        "recoverable_non_strict": 26,
+        "recoverable_non_strict_rate": 0.10483870967741936,
+        "action_line_rate": 0.8951612903225806,
+        "reasoning_line_rate": 0.0
+      },
+      "FlashLite-RC-TR": {
+        "turn_attempts": 251,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 251,
+        "strict_contract_passes": 251,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 1.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 24,
+    "first_player_wins": 21,
+    "first_player_win_rate": 0.875,
+    "second_player_wins": 3,
+    "upset_rate": 0.125,
+    "by_player": {
+      "FlashLite-RC-TR": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 12,
+        "wins_as_second": 3,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.25
+      },
+      "Flash-AO": {
+        "first_count": 12,
+        "second_count": 12,
+        "wins_as_first": 9,
+        "wins_as_second": 0,
+        "win_rate_as_first": 0.75,
+        "win_rate_as_second": 0.0
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 24,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 24,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 24,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 24,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 24,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "FlashLite-RC-TR",
+      "provider": "google",
+      "model": "gemini-2.5-flash-lite",
+      "type": "GeminiPlayer",
+      "controller": "ReasoningController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "Flash-AO",
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_04a2a232",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 7348,
+      "duration": 19.21030902862549,
+      "cost": 0.0028559999999999905,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0013552999999999968,
+        "Flash-AO": 0.0015006999999999937
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_20ff0b9b",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7343,
+      "duration": 20.964860677719116,
+      "cost": 0.0049639,
+      "player_costs": {
+        "Flash-AO": 0.0028216999999999995,
+        "FlashLite-RC-TR": 0.0021422000000000004
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_3dfdded4",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 7344,
+      "duration": 15.518406391143799,
+      "cost": 0.002475299999999998,
+      "player_costs": {
+        "Flash-AO": 0.001259999999999999,
+        "FlashLite-RC-TR": 0.001215299999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4025f57d",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7351,
+      "duration": 41.08316230773926,
+      "cost": 0.004462300000000002,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0021243000000000026,
+        "Flash-AO": 0.002338
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_413d6198",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 7349,
+      "duration": 17.712584257125854,
+      "cost": 0.004078899999999993,
+      "player_costs": {
+        "Flash-AO": 0.002338899999999998,
+        "FlashLite-RC-TR": 0.001739999999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4e503dee",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7348,
+      "duration": 24.060022830963135,
+      "cost": 0.004450699999999995,
+      "player_costs": {
+        "Flash-AO": 0.0028216999999999964,
+        "FlashLite-RC-TR": 0.0016289999999999985
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5add2010",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 7347,
+      "duration": 14.058577537536621,
+      "cost": 0.0032867999999999994,
+      "player_costs": {
+        "Flash-AO": 0.0020399999999999967,
+        "FlashLite-RC-TR": 0.0012468000000000028
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_61e8e176",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 7353,
+      "duration": 10.917591094970703,
+      "cost": 0.0020325000000000065,
+      "player_costs": {
+        "Flash-AO": 0.0012600000000000042,
+        "FlashLite-RC-TR": 0.0007725000000000024
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_6a127c32",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 13,
+      "outcome": "win",
+      "seed": 7347,
+      "duration": 9.530358791351318,
+      "cost": 0.001619499999999996,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.000777899999999998,
+        "Flash-AO": 0.0008415999999999979
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_73bd17d2",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7342,
+      "duration": 26.433578968048096,
+      "cost": 0.0047504,
+      "player_costs": {
+        "Flash-AO": 0.002654,
+        "FlashLite-RC-TR": 0.0020964
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_82ba7a1e",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7349,
+      "duration": 20.324750185012817,
+      "cost": 0.004682599999999992,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0023445999999999953,
+        "Flash-AO": 0.0023379999999999963
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_83e1b123",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7343,
+      "duration": 19.092241287231445,
+      "cost": 0.00456,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.002222,
+        "Flash-AO": 0.002338
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8bd0eba9",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7350,
+      "duration": 20.05481791496277,
+      "cost": 0.004457900000000001,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.002119900000000008,
+        "Flash-AO": 0.002337999999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_9072ec98",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 7345,
+      "duration": 15.566344499588013,
+      "cost": 0.0033088999999999983,
+      "player_costs": {
+        "Flash-AO": 0.002036999999999999,
+        "FlashLite-RC-TR": 0.0012718999999999994
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_9bb49c61",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 7346,
+      "duration": 11.551430940628052,
+      "cost": 0.0020047,
+      "player_costs": {
+        "Flash-AO": 0.0010405999999999992,
+        "FlashLite-RC-TR": 0.0009641000000000007
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_aac84df9",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7345,
+      "duration": 22.285806894302368,
+      "cost": 0.0049898999999999985,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0026518999999999987,
+        "Flash-AO": 0.002338
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_afeeae32",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 11,
+      "outcome": "win",
+      "seed": 7352,
+      "duration": 10.938569784164429,
+      "cost": 0.0013230000000000047,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0006615000000000024,
+        "Flash-AO": 0.0006615000000000024
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b3e13dab",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7353,
+      "duration": 29.153830766677856,
+      "cost": 0.004355900000000003,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.002017900000000003,
+        "Flash-AO": 0.002338
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b73d03b3",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 7352,
+      "duration": 20.253471851348877,
+      "cost": 0.004074900000000006,
+      "player_costs": {
+        "Flash-AO": 0.002037000000000011,
+        "FlashLite-RC-TR": 0.0020378999999999953
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b9bf1845",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 7344,
+      "duration": 17.578128814697266,
+      "cost": 0.0038304000000000003,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0017913,
+        "Flash-AO": 0.0020391000000000003
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c4711e5e",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 13,
+      "outcome": "win",
+      "seed": 7342,
+      "duration": 14.220054388046265,
+      "cost": 0.0019312000000000005,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0010896000000000005,
+        "Flash-AO": 0.0008416000000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c62c9c1b",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 7351,
+      "duration": 25.90145492553711,
+      "cost": 0.004670200000000027,
+      "player_costs": {
+        "Flash-AO": 0.0026540000000000175,
+        "FlashLite-RC-TR": 0.0020162000000000097
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c9b4c642",
+      "players": [
+        "Flash-AO",
+        "FlashLite-RC-TR"
+      ],
+      "winner": "Flash-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 7350,
+      "duration": 20.200611114501953,
+      "cost": 0.004000700000000003,
+      "player_costs": {
+        "Flash-AO": 0.002338899999999998,
+        "FlashLite-RC-TR": 0.001661800000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f736dbb3",
+      "players": [
+        "FlashLite-RC-TR",
+        "Flash-AO"
+      ],
+      "winner": "FlashLite-RC-TR",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 7346,
+      "duration": 13.718873500823975,
+      "cost": 0.0020054999999999934,
+      "player_costs": {
+        "FlashLite-RC-TR": 0.0009639999999999996,
+        "Flash-AO": 0.0010414999999999938
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-RC-TR",
+        "index": 0,
+        "ordered_index": 0
+      }
+    }
+  ],
+  "behavioral_profile": {
+    "schema_version": 2,
+    "game_id": "fixed_damage",
+    "profile_id": "fixed_damage_behavioral",
+    "profile_version": "0.2.0",
+    "coverage": {
+      "matches_total": 24,
+      "matches_evaluable": 24,
+      "turns_total": 499,
+      "turns_evaluable": 499
+    },
+    "aggregate_metrics": {
+      "all_attack_match_rate": {
+        "value": 0.10416666666666667,
+        "all_attack_matches": 5,
+        "support_matches": 48
+      },
+      "first_potion_profile": {
+        "median_first_potion_hp": 40.0,
+        "first_potion_hp_values": [
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ],
+        "never_used_rate": 0.10416666666666667,
+        "never_used_matches": 5,
+        "support_matches": 48
+      },
+      "unused_potions_on_loss_rate": {
+        "value": 0.4166666666666667,
+        "losses_with_unused_potions": 10,
+        "support_losses": 24
+      },
+      "state_action_consistency": {
+        "value": 0.8901345291479821,
+        "support_turns": 446
+      },
+      "position_policy_delta": {
+        "value": 0.14606573107832554,
+        "support_turns": 397
+      },
+      "critical_potion_response_rate": {
+        "value": 0.4301675977653631,
+        "critical_potion_turns": 77,
+        "support_turns": 179,
+        "critical_hp_threshold": 40
+      },
+      "error_recovery_rate": {
+        "value": 0.43529411764705883,
+        "recovered_events": 37,
+        "support_events": 85,
+        "critical_hp_threshold": 40
+      },
+      "wasted_full_health_potion_rate": {
+        "value": 0.0,
+        "wasted_full_health_potions": 0,
+        "support_potions": 113,
+        "max_health": 100
+      }
+    },
+    "per_player": {
+      "FlashLite-RC-TR": {
+        "matches_played": 24,
+        "all_attack_match_rate": {
+          "value": 0.041666666666666664,
+          "all_attack_matches": 1,
+          "support_matches": 24
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 20.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            40,
+            40,
+            40,
+            40,
+            60,
+            60,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.041666666666666664,
+          "never_used_matches": 1,
+          "support_matches": 24
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.2222222222222222,
+          "losses_with_unused_potions": 2,
+          "support_losses": 9
+        },
+        "state_action_consistency": {
+          "value": 0.9264069264069265,
+          "supported_state_keys": 48,
+          "support_turns": 231
+        },
+        "position_policy_delta": {
+          "value": 0.2063573883161512,
+          "shared_state_buckets": 11,
+          "support_turns": 194
+        },
+        "critical_potion_response_rate": {
+          "value": 0.4368932038834951,
+          "critical_potion_turns": 45,
+          "support_turns": 103,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.58,
+          "recovered_events": 29,
+          "support_events": 50,
+          "missed_events": 58,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 60,
+          "max_health": 100
+        }
+      },
+      "Flash-AO": {
+        "matches_played": 24,
+        "all_attack_match_rate": {
+          "value": 0.16666666666666666,
+          "all_attack_matches": 4,
+          "support_matches": 24
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 50.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.16666666666666666,
+          "never_used_matches": 4,
+          "support_matches": 24
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.5333333333333333,
+          "losses_with_unused_potions": 8,
+          "support_losses": 15
+        },
+        "state_action_consistency": {
+          "value": 0.8511627906976744,
+          "supported_state_keys": 50,
+          "support_turns": 215
+        },
+        "position_policy_delta": {
+          "value": 0.08844710297912269,
+          "shared_state_buckets": 14,
+          "support_turns": 203
+        },
+        "critical_potion_response_rate": {
+          "value": 0.42105263157894735,
+          "critical_potion_turns": 32,
+          "support_turns": 76,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.22857142857142856,
+          "recovered_events": 8,
+          "support_events": 35,
+          "missed_events": 44,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 53,
+          "max_health": 100
+        }
+      }
+    },
+    "state_metrics": {
+      "action_by_state": {
+        "FlashLite-RC-TR": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 15,
+            "attack_count": 15,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 5,
+            "attack_count": 0,
+            "potion_count": 5,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 8,
+            "attack_count": 1,
+            "potion_count": 7,
+            "attack_rate": 0.125,
+            "potion_rate": 0.875
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 9,
+            "attack_count": 0,
+            "potion_count": 9,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 7,
+            "attack_count": 7,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 14,
+            "attack_count": 9,
+            "potion_count": 5,
+            "attack_rate": 0.6428571428571429,
+            "potion_rate": 0.35714285714285715
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 20,
+            "attack_count": 17,
+            "potion_count": 3,
+            "attack_rate": 0.85,
+            "potion_rate": 0.15
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 20,
+            "attack_count": 20,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 15,
+            "attack_count": 15,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 4,
+            "attack_count": 0,
+            "potion_count": 4,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 6,
+            "attack_count": 3,
+            "potion_count": 3,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 8,
+            "attack_count": 4,
+            "potion_count": 4,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 9,
+            "attack_count": 9,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 7,
+            "attack_count": 6,
+            "potion_count": 1,
+            "attack_rate": 0.8571428571428571,
+            "potion_rate": 0.14285714285714285
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 4,
+            "attack_count": 2,
+            "potion_count": 2,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 12,
+            "attack_count": 10,
+            "potion_count": 2,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=1": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 4,
+            "attack_count": 2,
+            "potion_count": 2,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=60|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 10,
+            "attack_count": 8,
+            "potion_count": 2,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=second|hp=70|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=1": {
+            "support_turns": 5,
+            "attack_count": 4,
+            "potion_count": 1,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=80|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 9,
+            "potion_count": 3,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          }
+        },
+        "Flash-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 15,
+            "attack_count": 15,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=20|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 5,
+            "attack_count": 2,
+            "potion_count": 3,
+            "attack_rate": 0.4,
+            "potion_rate": 0.6
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 4,
+            "attack_count": 3,
+            "potion_count": 1,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=1": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 5,
+            "attack_count": 1,
+            "potion_count": 4,
+            "attack_rate": 0.2,
+            "potion_rate": 0.8
+          },
+          "position=first|hp=40|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 11,
+            "attack_count": 8,
+            "potion_count": 3,
+            "attack_rate": 0.7272727272727273,
+            "potion_rate": 0.2727272727272727
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 9,
+            "attack_count": 5,
+            "potion_count": 4,
+            "attack_rate": 0.5555555555555556,
+            "potion_rate": 0.4444444444444444
+          },
+          "position=first|hp=50|potions=0": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 12,
+            "attack_count": 8,
+            "potion_count": 4,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=first|hp=60|potions=1": {
+            "support_turns": 4,
+            "attack_count": 3,
+            "potion_count": 1,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          },
+          "position=first|hp=60|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 14,
+            "attack_count": 10,
+            "potion_count": 4,
+            "attack_rate": 0.7142857142857143,
+            "potion_rate": 0.2857142857142857
+          },
+          "position=first|hp=70|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=70|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 7,
+            "attack_count": 7,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 16,
+            "attack_count": 15,
+            "potion_count": 1,
+            "attack_rate": 0.9375,
+            "potion_rate": 0.0625
+          },
+          "position=first|hp=90|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 5,
+            "attack_count": 2,
+            "potion_count": 3,
+            "attack_rate": 0.4,
+            "potion_rate": 0.6
+          },
+          "position=second|hp=20|potions=2": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 5,
+            "attack_count": 4,
+            "potion_count": 1,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 15,
+            "attack_count": 15,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=1": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 11,
+            "attack_count": 8,
+            "potion_count": 3,
+            "attack_rate": 0.7272727272727273,
+            "potion_rate": 0.2727272727272727
+          },
+          "position=second|hp=40|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 8,
+            "attack_count": 4,
+            "potion_count": 4,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 8,
+            "attack_count": 8,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 6,
+            "attack_count": 2,
+            "potion_count": 4,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 9,
+            "attack_count": 7,
+            "potion_count": 2,
+            "attack_rate": 0.7777777777777778,
+            "potion_rate": 0.2222222222222222
+          },
+          "position=second|hp=70|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 9,
+            "potion_count": 3,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          }
+        }
+      },
+      "scarcity_action_profile": {
+        "FlashLite-RC-TR": {
+          "0": {
+            "support_turns": 48,
+            "attack_count": 48,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 35,
+            "attack_count": 19,
+            "potion_count": 16,
+            "attack_rate": 0.5428571428571428,
+            "potion_rate": 0.45714285714285713
+          },
+          "2": {
+            "support_turns": 47,
+            "attack_count": 26,
+            "potion_count": 21,
+            "attack_rate": 0.5531914893617021,
+            "potion_rate": 0.44680851063829785
+          },
+          "3": {
+            "support_turns": 121,
+            "attack_count": 98,
+            "potion_count": 23,
+            "attack_rate": 0.8099173553719008,
+            "potion_rate": 0.19008264462809918
+          }
+        },
+        "Flash-AO": {
+          "0": {
+            "support_turns": 54,
+            "attack_count": 54,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 48,
+            "attack_count": 33,
+            "potion_count": 15,
+            "attack_rate": 0.6875,
+            "potion_rate": 0.3125
+          },
+          "2": {
+            "support_turns": 54,
+            "attack_count": 36,
+            "potion_count": 18,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "3": {
+            "support_turns": 92,
+            "attack_count": 72,
+            "potion_count": 20,
+            "attack_rate": 0.782608695652174,
+            "potion_rate": 0.21739130434782608
+          }
+        }
+      }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "FlashLite-RC-TR": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.5,
+                "support_turns": 17,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 9,
+                  "source_path": "state_metrics.action_by_state.FlashLite-RC-TR.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 8,
+                  "source_path": "state_metrics.action_by_state.FlashLite-RC-TR.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=1",
+                "delta": 0.5,
+                "support_turns": 10,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.FlashLite-RC-TR.position=first|hp=40|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=1",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.FlashLite-RC-TR.position=second|hp=40|potions=1"
+                }
+              },
+              {
+                "shared_state_key": "hp=50|potions=2",
+                "delta": 0.5,
+                "support_turns": 7,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=2",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.FlashLite-RC-TR.position=first|hp=50|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=2",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.FlashLite-RC-TR.position=second|hp=50|potions=2"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=30|potions=2|self=ATTACK|opp=POTION",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=50|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=70|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              }
+            ]
+          }
+        },
+        "Flash-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=50|potions=2",
+                "delta": 0.3333333333333333,
+                "support_turns": 18,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=2",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=50|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=2",
+                  "attack_rate": 0.3333333333333333,
+                  "potion_rate": 0.6666666666666666,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=50|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=1",
+                "delta": 0.25,
+                "support_turns": 9,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=1",
+                  "attack_rate": 0.75,
+                  "potion_rate": 0.25,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=60|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 5,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=60|potions=1"
+                }
+              },
+              {
+                "shared_state_key": "hp=30|potions=2",
+                "delta": 0.2,
+                "support_turns": 8,
+                "first": {
+                  "bucket_key": "position=first|hp=30|potions=2",
+                  "attack_rate": 0.2,
+                  "potion_rate": 0.8,
+                  "support_turns": 5,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=30|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=30|potions=2",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=30|potions=2"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=20|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 4,
+                "attack_count": 2,
+                "potion_count": 2,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=50|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 4,
+                "attack_count": 2,
+                "potion_count": 2,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=first|hp=40|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5714285714285714,
+                "support_turns": 7,
+                "attack_count": 3,
+                "potion_count": 4,
+                "attack_rate": 0.42857142857142855,
+                "potion_rate": 0.5714285714285714,
+                "dominant_action": "POTION"
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
+    },
+    "quality_flags": {
+      "complete": true,
+      "unsupported_metrics": []
+    }
+  }
+}

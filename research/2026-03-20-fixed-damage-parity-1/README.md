@@ -93,7 +93,7 @@
 
 ### Directional Signals
 - `ReasoningController` does not yet make Flash-Lite fully competitive with plain Flash in FixedDamage.
-- The remaining gap is no longer primarily “dumb all-attack policy”; it is now seat-conditioned over-healing and unstable threshold choice.
+- The remaining gap is no longer primarily “dumb all-attack policy”; it is now a seat-conditioned defensive threshold that flips the wrong way under pressure.
 - A broader parity claim needs either:
   - a second task class, or
   - a cheaper/tighter reasoning contract that preserves the behavioral gains without increasing position sensitivity
@@ -102,10 +102,12 @@
 - The parity question would look binary on win rate alone. The behavioral layer shows the real story:
   - plain Flash-Lite is clearly too weak
   - reasoning materially improves Flash-Lite
-  - but the improved policy is still brittle by seat
+  - but the improved policy is still brittle by seat, specifically because its defensive threshold inverts between healthy and critical states
 - The evidence layer makes that mechanism explicit. In `FlashLite-RC`:
-  - at shared `80 HP / 3 potions`, first player attacked `16/17` while second player used `POTION` `8/12`
-  - at shared `20 HP / 1 potion`, first player used `POTION` `3/3` while second player always `ATTACK`ed `2/2`
+  - at shared `80 HP / 3 potions`, first player attacked `16/17` while second player used `POTION` `8/12`, so the second-player policy heals while still healthy
+  - at shared `20 HP / 1 potion`, first player used `POTION` `3/3` while second player always `ATTACK`ed `2/2`, so the second-player policy then refuses to heal when survival depends on it
+- Plain Flash is not perfectly invariant across studies either.
+  - in this fresh seed family and against a different opponent, `Flash-AO` stayed clearly stronger than Flash-Lite but shifted slightly on metrics like all-attack rate and unused-potion losses, so behavioral profiles should be read in context rather than as fixed universal traits
 - So the package does answer the product question:
   - strategic reasoning can move a weaker model much closer to a stronger one
   - but in this game it did not fully erase the performance gap

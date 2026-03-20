@@ -21,7 +21,7 @@ who actually took the first turn.
 
 ## Executive Summary
 - Primary finding: `ReasoningController` substantially improves Flash-Lite and closes most of the plain-model gap, but it does not achieve parity with plain Flash in FixedDamage at `N=24`.
-- Secondary finding: the remaining gap is not mostly about crude aggression anymore; it is about position-sensitive reasoning policy that over-heals in some seats and loses too much as second player.
+- Secondary finding: the remaining gap is not mostly about crude aggression anymore; it is about a position-sensitive defensive threshold that flips the wrong way in the second-player seat, healing while healthy and attacking while critical.
 - Practical recommendation: reasoning is a real equalizer strategy, but not yet a full substitute for plain Flash on this task. The next intervention should target the remaining position-conditioned failure mode.
 
 ## Cross-Model Parity Pilot
@@ -105,13 +105,14 @@ who actually took the first turn.
 ## Interpretation Notes
 - Cross-model win rates must be paired with position-controlled summaries because position can bias raw named-player splits.
 - Cell artifacts are the primary inferential unit in this package. Top-level pooled player win rates mix heterogeneous cells and should not be read as a single matchup.
+- `Flash-AO`'s own behavioral profile shifts somewhat across packages and opponent contexts, so repeated values like all-attack rate or unused-potion losses should be read as context-dependent measurements rather than model invariants.
 - The strategic claim is broader than FixedDamage, but the evidence here is specific to constrained sequential decision-making under partial information.
 
 ## Evidence Highlights
-- `FlashLite-RC` over-heals by seat in ways that plain Flash does not.
-  - at shared `80 HP / 3 potions`, `FlashLite-RC` attacked `16/17` as first player but used `POTION` `8/12` as second player
-  - at shared `20 HP / 1 potion`, `FlashLite-RC` used `POTION` `3/3` as first player but `ATTACK` `2/2` as second player
-- Those divergences explain why reasoning closes the quality gap but still loses too much as second player.
+- `FlashLite-RC` develops an inverted defensive threshold in the second-player seat.
+  - at shared `80 HP / 3 potions`, `FlashLite-RC` attacked `16/17` as first player but used `POTION` `8/12` as second player, so the second-player policy heals while still healthy
+  - at shared `20 HP / 1 potion`, `FlashLite-RC` used `POTION` `3/3` as first player but `ATTACK` `2/2` as second player, so the second-player policy then attacks when healing is critical
+- That reversal explains the `1/12` second-player win rate more precisely than generic “seat-conditioned instability”: reasoning improved the policy, but under second-player pressure it moved the defensive threshold in the wrong direction at both ends of the health range.
 
 ## Limitations
 - FixedDamage remains a local-decision game.
@@ -124,5 +125,5 @@ who actually took the first turn.
   - but it did not close the full gap here
 - The next research move should target the remaining failure mode, for example:
   - a cheaper or tighter reasoning contract for Flash-Lite
-  - a prompt-reinforced parity cell to test whether reinforcement reduces the seat-conditioned over-healing
+  - a prompt-reinforced parity cell to test whether reinforcement reduces the inverted second-player defensive threshold
   - a second task class to test whether equalizer behavior transfers beyond FixedDamage

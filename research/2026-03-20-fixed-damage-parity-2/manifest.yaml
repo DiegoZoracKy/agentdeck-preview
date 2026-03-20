@@ -1,0 +1,74 @@
+schema_version: 1
+experiment_id: 2026-03-20-fixed-damage-parity-2
+title: FixedDamage Parity 2
+status: complete
+question: >-
+  Does turn instruction reinforcement on top of ReasoningController reduce
+  Flash-Lite's seat-conditioned policy errors enough to match or beat plain
+  Gemini Flash in FixedDamage, and are any gains worth the added cost and
+  latency?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_ho
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_lite_rc_tr
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+    - turn_reinforced
+run:
+  seed_base: 7242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-20-fixed-damage-parity-2/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-20-fixed-damage-parity-2
+  viewer_curation:
+    repo_path: research/2026-03-20-fixed-damage-parity-2/artifacts
+notes: >-
+  This package follows FixedDamage Parity 1. It keeps the same cross-model
+  matchup but tests whether turn reinforcement stabilizes the reasoning-lifted
+  Flash-Lite policy enough to remove the second-player threshold inversion that
+  blocked parity in the prior package. The pilot completed at N=24 per cell and
+  found strong behavioral improvement plus a directional outcome flip under
+  reinforcement, but no statistically significant parity result yet.

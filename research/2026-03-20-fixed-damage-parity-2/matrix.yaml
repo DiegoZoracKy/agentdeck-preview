@@ -1,0 +1,143 @@
+schema_version: 1
+experiment_id: 2026-03-20-fixed-damage-parity-2
+created_at: "2026-03-20T00:00:00Z"
+purpose: >-
+  FixedDamage cross-model parity follow-up testing whether turn instruction
+  reinforcement on top of ReasoningController can stabilize Gemini Flash-Lite
+  enough to match or beat plain Gemini Flash under the same audited game and
+  fairness settings.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_parity2_turn_modes
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first public release writeup if a frozen repo hash is required.
+
+player_registry:
+  gemini_2_5_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 8
+    retry_delay: 2.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_turn_reinforced:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}\n\n{controller_format}"
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - reinforcement_reduces_position_conditioned_threshold_inversion
+    - parity_gap_is_directionally_interesting
+    - weaker_model_remains_cost_advantaged
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package reuses the audited FixedDamage substrate and the parity
+      question from Parity 1. The new causal factor is turn instruction
+      reinforcement layered on top of Flash-Lite reasoning, so analysis must
+      report position-controlled results and state-level evidence around the
+      healthy and critical healing thresholds.
+    matches_per_cell: 0
+    required_checks:
+      - parity_question_review
+      - reinforcement_cadence_review
+      - cross_model_position_control_review
+      - behavioral_endpoints_review
+      - paired_side_swap_review
+      - gemini_thinking_budget_zero_review
+  phases:
+    - phase_id: P1
+      name: Reinforced Parity Pilot
+      cell_ids:
+        - p1_c01_flash_lite_rc_ho_vs_flash_ao
+        - p1_c02_flash_lite_rc_tr_vs_flash_ao
+
+cells:
+  - id: p1_c01_flash_lite_rc_ho_vs_flash_ao
+    phase: P1
+    question: Does reasoning-lifted Flash-Lite remain short of plain Flash under handshake-only cadence on a fresh seed family?
+    intent: Refresh the parity control cell inside the same package before testing reinforcement.
+    causal_factor: strategy_stack
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_handshake_only
+      name: FlashLite-RC-HO
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true
+
+  - id: p1_c02_flash_lite_rc_tr_vs_flash_ao
+    phase: P1
+    question: Can turn-reinforced reasoning lift Flash-Lite enough to match or beat plain Flash?
+    intent: Test whether repeated controller instructions stabilize the reasoning policy enough to remove the second-player threshold inversion.
+    causal_factor: instruction_reinforcement
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_turn_reinforced
+      name: FlashLite-RC-TR
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true
