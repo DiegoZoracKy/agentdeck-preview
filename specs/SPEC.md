@@ -217,6 +217,7 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
+| [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.1.0 | Draft | Global behavioral scorer contract and extension interface for game-specific profiles |
 | [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.5.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.3.0 | Final | Session-to-experiment package helper |
 
@@ -302,6 +303,7 @@ agentdeck/
     ├── SPEC-OBSERVABILITY.md
     ├── SPEC-LLM.md
     ├── SPEC-RESEARCH.md
+    ├── SPEC-RESEARCH-BEHAVIORAL.md
     └── SPEC-RESEARCH-EXPERIMENT.md
 ```
 

@@ -431,11 +431,10 @@ class TurnLoop:
             2. Build TurnContext
             3. Get player view and call player.decide()
             4. Apply action via game.update() with RNG fork
-            5. Emit GAMEPLAY event via runtime
-            6. Record turn via runtime.record_turn()
-            7. Emit custom game events via runtime
-            8. Validate state via runtime
-            9. Check status and increment turn counter
+            5. Record turn via runtime.record_turn() (sole GAMEPLAY emission path)
+            6. Emit custom game events via runtime
+            7. Validate state via runtime
+            8. Check status and increment turn counter
 
         Returns:
             TurnResult with (final_state, events, truncated=False)

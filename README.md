@@ -59,8 +59,8 @@ Today, the project is ready for:
 
 It is **not** presented as a `1.0` stable platform yet. The main remaining gaps are:
 - A methodologically stronger default benchmark regime for behavioral claims
-- A clean release-facing research package built from the fresh FixedDamage reset
-- A sharper public narrative connecting the engine, packaged findings, and viewer
+- A sharper public narrative connecting the engine, the shipped FixedDamage package, and the viewer
+- Curated replay/viewer surfaces for the strongest release-facing examples
 
 Viewer and replay UI work should currently be treated as a **beta offline surface**. The core product is still the engine, record contract, and research workflow.
 
@@ -117,7 +117,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 **Controllers** parse AI responses into actions
 - `ActionOnlyController` - extracts single action token
 - `ReasoningController` - extracts reasoning + action
-- Handshake validation is built into the base `Controller` (default accepts OK/READY/YES)
+- Handshake validation is built into the base `Controller` (default accepts exactly `OK`)
 
 **Renderers** format game state for AI consumption
 - `TextRenderer` - human-readable text format
