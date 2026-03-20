@@ -55,11 +55,7 @@ def _canonical_recordings_dirs_from_artifact(cell_id: str) -> List[Path]:
     return []
 
 
-def _recordings_dirs_for_cell(cell_id: str) -> List[Path]:
-    canonical = _canonical_recordings_dirs_from_artifact(cell_id)
-    if canonical:
-        return canonical
-
+def _session_recordings_dirs_for_cell(cell_id: str) -> List[Path]:
     cell_run_dir = EXPERIMENT_DIR / "agentdeck_runs" / cell_id
     usable_dirs: List[Path] = []
     for path in sorted(cell_run_dir.glob("session_*/records")):
@@ -69,6 +65,21 @@ def _recordings_dirs_for_cell(cell_id: str) -> List[Path]:
             continue
         usable_dirs.append(path)
     return usable_dirs
+
+
+def _recordings_dirs_for_cell(cell_id: str) -> List[Path]:
+    merged: List[Path] = []
+    seen = set()
+    for path in _canonical_recordings_dirs_from_artifact(cell_id) + _session_recordings_dirs_for_cell(
+        cell_id
+    ):
+        resolved = path.resolve()
+        key = str(resolved)
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(resolved)
+    return merged
 
 
 def main() -> None:

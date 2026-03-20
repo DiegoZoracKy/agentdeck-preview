@@ -55,6 +55,7 @@ config_registry:
 
 sampling_policy:
   pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 48
   paired_seed_side_swap:
     enabled: true
     seed_pairs_per_cell: 12
@@ -83,6 +84,10 @@ execution_plan:
       cell_ids:
         - p1_c01_flash_lite_ao_vs_rc
         - p1_c02_flash_ao_vs_rc
+    - phase_id: P1E
+      name: Flash-Lite Expansion
+      cell_ids:
+        - p1_c01_flash_lite_ao_vs_rc
 
 cells:
   - id: p1_c01_flash_lite_ao_vs_rc
@@ -102,7 +107,9 @@ cells:
       player_ref: gemini_2_5_flash_lite
       config_ref: RC_handshake_only
       name: FlashLite-RC
-    matches: 24
+    pilot_matches: 24
+    matches: 48
+    expansion_target_matches: 48
     viewer_priority: true
 
   - id: p1_c02_flash_ao_vs_rc
@@ -123,4 +130,5 @@ cells:
       config_ref: RC_handshake_only
       name: Flash-RC
     matches: 24
+    pilot_matches: 24
     viewer_priority: true

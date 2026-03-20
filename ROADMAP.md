@@ -1,6 +1,6 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-03-17
+Last updated: 2026-03-20
 Owner: Diego + Codex + Claude
 
 ## Goal
@@ -64,3 +64,12 @@ Prepare AgentDeck for a disciplined public beta release by:
 1. Lock the release-facing FixedDamage plan and encode it as an AgentDeck-native experiment package.
 2. Run the new calibration and baseline cells on the audited codebase.
 3. Package the first public showcase experiment and viewer-supported replay set.
+
+## After Current Experiments
+- [ ] Promote matrix-aware multi-session cell aggregation into the core research CLI so checkpoint expansions do not require package-local export logic.
+  - Scope:
+    - discover and retain full session history per `matrix.yaml` cell
+    - export cell artifacts with canonical `source.recordings_dirs`
+    - refresh package-level exports from aggregated cell history
+  - Non-goal:
+    - moving one-off experiment runners like `run_experiment.py` into the framework baseline

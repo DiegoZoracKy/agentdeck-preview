@@ -8,7 +8,9 @@ During active execution, local session artifacts are written under:
 
 Canonical retained sessions for this package:
 
-- `p1_c01_flash_lite_ao_vs_rc`: `session_20260319_231248_4b9e00`
+- `p1_c01_flash_lite_ao_vs_rc`:
+  - `session_20260319_231248_4b9e00`
+  - `session_20260320_113943_ef180e`
 - `p1_c02_flash_ao_vs_rc`: `session_20260319_231822_84cc1f`
 
 Excluded non-canonical session:

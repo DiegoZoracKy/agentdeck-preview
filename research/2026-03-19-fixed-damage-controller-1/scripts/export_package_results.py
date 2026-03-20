@@ -26,16 +26,19 @@ def _load_yaml(path: Path) -> Dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def _canonical_recordings_dir(cell_id: str) -> Path:
+def _canonical_recordings_dirs(cell_id: str) -> List[Path]:
     artifact_results = EXPERIMENT_DIR / "artifacts" / cell_id / "results.json"
     if not artifact_results.exists():
         raise FileNotFoundError(f"Missing canonical cell artifact for {cell_id}: {artifact_results}")
     payload = json.loads(artifact_results.read_text(encoding="utf-8"))
     source = payload.get("source") or {}
+    recordings_dirs = source.get("recordings_dirs") or []
+    if recordings_dirs:
+        return [Path(path) for path in recordings_dirs]
     recordings_dir = source.get("recordings_dir")
     if not recordings_dir:
-        raise ValueError(f"Artifact for {cell_id} missing source.recordings_dir")
-    return Path(recordings_dir)
+        raise ValueError(f"Artifact for {cell_id} missing source.recordings_dir(s)")
+    return [Path(recordings_dir)]
 
 
 def main() -> None:
@@ -43,9 +46,9 @@ def main() -> None:
     matrix = _load_yaml(MATRIX_PATH)
     behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
 
-    recordings_dirs: List[Path] = [
-        _canonical_recordings_dir(cell["id"]) for cell in matrix.get("cells", [])
-    ]
+    recordings_dirs: List[Path] = []
+    for cell in matrix.get("cells", []):
+        recordings_dirs.extend(_canonical_recordings_dirs(cell["id"]))
 
     export_results(
         recordings_dirs,

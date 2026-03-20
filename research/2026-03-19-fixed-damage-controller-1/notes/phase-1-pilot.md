@@ -28,3 +28,4 @@
 - Reason:
 - Flash-Lite is the only cell with a clearly legible behavioral gain worth considering for expansion
 - Flash remains too close to outcome-null and too expensive under reasoning to justify immediate expansion
+- follow-up: Flash-Lite was later expanded; see `phase-1-expansion.md`
