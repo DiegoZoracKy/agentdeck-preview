@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-21T12:38:57.495753Z
+Last updated: 2026-03-21T14:03:38.176444Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -15,3 +15,4 @@ Last updated: 2026-03-21T12:38:57.495753Z
 | [FixedDamage Parity 4](2026-03-20-fixed-damage-parity-4/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | FlashLite-RC-TR-HP 58.3% |
 | [FixedDamage Threshold 1](2026-03-20-fixed-damage-threshold-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
 | [FixedDamage Ablation 2](2026-03-21-fixed-damage-ablation-2/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
+| [FixedDamage GPT-5 Mini Parity 1](2026-03-21-fixed-damage-gpt5mini-parity-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, openai:gpt-5-mini | 48/48 | GPT5Mini-AO 58.3% |

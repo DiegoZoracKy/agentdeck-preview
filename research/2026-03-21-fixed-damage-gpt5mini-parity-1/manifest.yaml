@@ -1,0 +1,69 @@
+schema_version: 1
+experiment_id: 2026-03-21-fixed-damage-gpt5mini-parity-1
+title: FixedDamage GPT-5 Mini Parity 1
+status: complete
+question: >-
+  Does the full Flash-Lite strategy stack (ReasoningController + turn
+  reinforcement + HP-threshold grounding) stay competitive against plain
+  GPT-5 Mini in a fresh cross-provider matchup, and what does the behavioral
+  layer show about where the remaining gap sits?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_tr_hp
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_5_mini_ao
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gpt-5-mini
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - turn_reinforced
+  prompt_overlays:
+    - hp_threshold_grounding
+run:
+  seed_base: 15242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-20-fixed-damage-mini-parity-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-20-fixed-damage-mini-parity-1
+  viewer_curation:
+    repo_path: research/2026-03-20-fixed-damage-mini-parity-1/artifacts
+notes: >-
+  This package follows the Flash parity arc and the Mini cross-provider study.
+  The full Flash-Lite stack is now fixed enough to carry into a stronger plain
+  OpenAI mini baseline. The question here is whether that stack can stay
+  competitive against plain GPT-5 Mini at N=48, and whether the same
+  behavioral advantages still hold against a costlier plain mini model.
