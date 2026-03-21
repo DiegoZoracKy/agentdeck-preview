@@ -1,0 +1,124 @@
+schema_version: 1
+experiment_id: 2026-03-21-fixed-damage-openai-parity-1
+created_at: "2026-03-21T00:00:00Z"
+purpose: >-
+  FixedDamage OpenAI parity study establishing the plain `gpt-4o-mini` to plain
+  `gpt-5-mini` baseline gap, then testing whether `ReasoningController` alone is
+  enough to close meaningful ground for the cheaper model under the same audited
+  game and fairness settings.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_handshake_only_turns
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first public release writeup if a frozen repo hash is required.
+
+player_registry:
+  gpt_4o_mini:
+    kind: llm
+    provider: openai
+    model: gpt-4o-mini
+    tier: weak
+  gpt_5_mini:
+    kind: llm
+    provider: openai
+    model: gpt-5-mini
+    tier: strong
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+
+sampling_policy:
+  pilot_matches_per_cell: 48
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 24
+    side_swap_required: true
+  expansion_selection_rules:
+    - baseline_gap_is_clear
+    - reasoning_delta_is_legible
+    - cheaper_model_remains_cost_advantaged
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package opens the OpenAI-only ladder. Analysis must report both the
+      plain baseline gap and the RC-only intervention result, with explicit
+      position-controlled reporting because cross-model parity claims are highly
+      seat-sensitive in FixedDamage.
+    matches_per_cell: 0
+    required_checks:
+      - baseline_gap_review
+      - reasoning_only_intervention_review
+      - cross_model_position_control_review
+      - behavioral_endpoints_review
+      - paired_side_swap_review
+  phases:
+    - phase_id: P1
+      name: Baseline And RC Ladder
+      cell_ids:
+        - p1_c01_gpt4omini_ao_vs_gpt5mini_ao
+        - p1_c02_gpt4omini_rc_vs_gpt5mini_ao
+
+cells:
+  - id: p1_c01_gpt4omini_ao_vs_gpt5mini_ao
+    phase: P1
+    question: How large is the plain-model gap between `gpt-4o-mini` and `gpt-5-mini` in FixedDamage?
+    intent: Establish the baseline OpenAI mini ladder before adding any controller intervention.
+    causal_factor: model_choice
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_4o_mini
+      config_ref: AO_handshake_only
+      name: GPT4oMini-AO
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 48
+    pilot_matches: 48
+    viewer_priority: true
+
+  - id: p1_c02_gpt4omini_rc_vs_gpt5mini_ao
+    phase: P1
+    question: Is `ReasoningController` alone enough to make `gpt-4o-mini` competitive with plain `gpt-5-mini`?
+    intent: Isolate RC-only uplift before testing any heavier turn-time overlays.
+    causal_factor: controller_type
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_4o_mini
+      config_ref: RC_handshake_only
+      name: GPT4oMini-RC
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 48
+    pilot_matches: 48
+    viewer_priority: true
