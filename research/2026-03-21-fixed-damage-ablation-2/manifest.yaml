@@ -1,0 +1,73 @@
+schema_version: 1
+experiment_id: 2026-03-21-fixed-damage-ablation-2
+title: FixedDamage Ablation 2
+status: complete
+question: >-
+  Can Flash-Lite recover most of the HP-threshold gains against plain Gemini
+  Flash using only ActionOnly prompting overlays, and does turn-time
+  reinforcement still matter once the HP survival hint is present?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_ao_hp
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_lite_ao_tr_hp
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+    - turn_reinforced
+  prompt_overlays:
+    - hp_threshold_grounding
+run:
+  seed_base: 14242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-21-fixed-damage-ablation-2/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-21-fixed-damage-ablation-2
+  viewer_curation:
+    repo_path: research/2026-03-21-fixed-damage-ablation-2/artifacts
+notes: >-
+  This package follows the Flash-Lite FixedDamage parity arc and isolates a
+  cheaper strategy question: whether HP-grounding and turn reinforcement can
+  recover most of the full-stack gains without using ReasoningController at
+  all. Both cells keep the same audited game, fairness controls, and plain
+  Flash baseline while varying only ActionOnly turn-time prompting.
