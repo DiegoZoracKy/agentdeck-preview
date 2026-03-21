@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-20T21:27:06.676865Z
+Last updated: 2026-03-21T01:05:55.126904Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -10,4 +10,5 @@ Last updated: 2026-03-20T21:27:06.676865Z
 | [FixedDamage Parity 1](2026-03-20-fixed-damage-parity-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
 | [FixedDamage Parity 2](2026-03-20-fixed-damage-parity-2/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
 | [FixedDamage Parity 3](2026-03-20-fixed-damage-parity-3/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | FlashLite-RC-TR-HP 64.6% |
+| [FixedDamage Parity 4](2026-03-20-fixed-damage-parity-4/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | FlashLite-RC-TR-HP 58.3% |
 | [FixedDamage Threshold 1](2026-03-20-fixed-damage-threshold-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |

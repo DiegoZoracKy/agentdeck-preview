@@ -1,0 +1,70 @@
+schema_version: 1
+experiment_id: 2026-03-20-fixed-damage-parity-4
+title: FixedDamage Parity 4
+status: complete
+question: >-
+  Does the full Flash-Lite strategy stack (ReasoningController + turn
+  reinforcement + HP-threshold grounding) replicate its near-parity result
+  against plain Gemini Flash on a fresh seed family, and does the
+  second-player win rate stay high enough to support a formal competitive
+  claim?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_tr_hp
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - turn_reinforced
+  prompt_overlays:
+    - hp_threshold_grounding
+run:
+  seed_base: 11242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-20-fixed-damage-parity-4/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-20-fixed-damage-parity-4
+  viewer_curation:
+    repo_path: research/2026-03-20-fixed-damage-parity-4/artifacts
+notes: >-
+  This package follows FixedDamage Parity 3. The mechanism question is already
+  answered well enough to keep the package single-cell. This replication asks
+  only the competitive question again on a fresh seed family: whether the full
+  Flash-Lite strategy stack can beat plain Flash at N=48, with the
+  second-player split as the primary diagnostic.
