@@ -1,0 +1,73 @@
+schema_version: 1
+experiment_id: 2026-03-22-fixed-damage-openai-margin-1
+title: FixedDamage OpenAI Margin 1
+status: complete
+question: >-
+  Can a forward-projected HP-margin reminder improve the full `gpt-4o-mini`
+  stack enough to fix the last remaining second-player endgame aggression
+  against plain `gpt-5-mini` in FixedDamage?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gpt_4o_mini_full_control
+    provider: openai
+    model: gpt-4o-mini
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_4o_mini_full_margin
+    provider: openai
+    model: gpt-4o-mini
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_5_mini_ao
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gpt-4o-mini
+    - gpt-5-mini
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - turn_reinforced_hp_grounded
+    - turn_reinforced_margin_grounded
+run:
+  seed_base: 18242
+  matches_planned: 96
+  matches_completed: 96
+  concurrency: 4
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-22-fixed-damage-openai-margin-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-22-fixed-damage-openai-margin-1
+  viewer_curation:
+    repo_path: research/2026-03-22-fixed-damage-openai-margin-1/artifacts
+notes: >-
+  OpenAI Margin 1 is the final FixedDamage mechanism probe for this OpenAI-only
+  ladder. It pairs a within-package full-stack control against a forward-
+  projected HP-margin variant on a fresh seed family. The new prompt fixed the
+  exact targeted `30 HP / 2 potions` state, but it still produced `0/24`
+  second-player wins and worsened the overall cell result, so this ladder is
+  considered complete.
