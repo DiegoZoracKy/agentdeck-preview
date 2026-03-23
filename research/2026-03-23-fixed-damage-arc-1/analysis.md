@@ -3,7 +3,7 @@
 ## Executive Read
 <!-- AUTO_FACTS:BEGIN -->
 - Arc scope: `17` packages and `1,032` completed FixedDamage matches.
-- Main result: FixedDamage established that strategy stack can dominate model choice in a deterministic sequential game, but only when the interventions match the model's actual failure mode.
+- Main result: FixedDamage established that strategy stack can materially reshape effective model ranking in a deterministic sequential game, but only when the interventions match the model's actual failure mode.
 - Canonical carry-forward condition: `FlashLite-RC-TR-HP-exit`.
 - Next move: stop adding FixedDamage branches and start `VariableDamageGame`.
 <!-- AUTO_FACTS:END -->
