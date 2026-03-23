@@ -1,0 +1,81 @@
+schema_version: 1
+experiment_id: 2026-03-23-fixed-damage-arc-1
+title: FixedDamage Arc 1
+status: complete
+question: >-
+  What did the full FixedDamage research arc establish about strategy stacks,
+  weaker models, and the final canonical Flash-Lite configuration to carry
+  into the next game?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: attack_bot
+    provider: local
+    model: AttackBot
+  - id: potion_at_80_bot
+    provider: local
+    model: PotionAt80Bot
+  - id: gemini_flash_lite
+    provider: google
+    model: gemini-2.5-flash-lite
+  - id: gemini_flash
+    provider: google
+    model: gemini-2.5-flash
+  - id: gpt_4o_mini
+    provider: openai
+    model: gpt-4o-mini
+  - id: gpt_5_mini
+    provider: openai
+    model: gpt-5-mini
+  - id: claude_haiku
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+variants:
+  models:
+    - AttackBot
+    - PotionAt80Bot
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+    - gpt-4o-mini
+    - gpt-5-mini
+    - claude-haiku-4-5-20251001
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  prompt_cadence:
+    - handshake_only
+    - turn_reinforced
+  prompt_overlays:
+    - hp_threshold_grounding
+    - hp_threshold_grounding_with_no_potion_exit
+run:
+  seed_base: 4242
+  matches_planned: 0
+  matches_completed: 0
+analysis_plan:
+  ci_method: exact_binomial
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-23-fixed-damage-arc-1/recordings
+  summaries:
+    repo_path: research/2026-03-23-fixed-damage-arc-1
+  viewer_curation:
+    repo_path: research/2026-03-23-fixed-damage-arc-1/artifacts
+notes: >-
+  Summary-only umbrella package for the full FixedDamage branch. This package
+  does not add new matches; it consolidates 17 completed FixedDamage packages
+  totaling 1,032 matches and surfaces the final carry-forward configuration:
+  FlashLite-RC-TR-HP-exit from Exit 1.
