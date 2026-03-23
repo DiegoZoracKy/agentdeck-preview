@@ -41,6 +41,7 @@ from .core.types import (
 # Game examples
 from .games.examples.fixed_damage import FixedDamageGame
 from .games.examples.hangman import HangmanGame
+from .games.examples.variable_damage import VariableDamageGame
 
 # Player implementations
 from .players import ClaudePlayer, GeminiPlayer, GPTPlayer, MockPlayer
@@ -101,6 +102,7 @@ __all__ = [
     # Games
     "FixedDamageGame",
     "HangmanGame",
+    "VariableDamageGame",
     # Prompt composition
     "PromptBuilder",
     # Recording
