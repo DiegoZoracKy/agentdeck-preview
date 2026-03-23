@@ -1,0 +1,75 @@
+schema_version: 1
+experiment_id: 2026-03-23-fixed-damage-cap-1
+title: FixedDamage FlashLite Cap 1
+status: complete
+question: >-
+  Can a mild `max_tokens=128` cap preserve the best known Flash-Lite strategy
+  stack against plain Gemini Flash while trimming enough output overhead to
+  restore a small cost advantage?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_tr_hp_cap128
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - turn_reinforced
+  prompt_overlays:
+    - hp_threshold_grounding
+  output_caps:
+    - max_tokens_128
+run:
+  seed_base: 19242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-23-fixed-damage-cap-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-23-fixed-damage-cap-1
+  viewer_curation:
+    repo_path: research/2026-03-23-fixed-damage-cap-1/artifacts
+notes: >-
+  Cap 1 is a business-oriented cost probe. The full Flash-Lite stack already
+  came close to plain Flash but ended slightly more expensive. This package
+  tests whether a mild output cap can trim tail reasoning without damaging the
+  behavior that made Flash-Lite competitive. On 2026-03-23, two regional
+  execution attempts were blocked before any match completed because the plain
+  Flash control repeatedly hit Vertex `429 RESOURCE_EXHAUSTED` throttling even
+  after a package-local retry/backoff increase. A rerun with
+  `VERTEX_LOCATION=global` completed successfully, but the cap regressed
+  Flash-Lite behavior enough to flip the cell from near parity to a significant
+  loss.
