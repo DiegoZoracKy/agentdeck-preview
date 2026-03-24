@@ -1,20 +1,20 @@
 # VariableDamage Release 1
 
-**Status**: see `manifest.yaml`  
+**Status**: complete  
 **Research Question**: see `manifest.yaml`  
 **Experiment ID**: `2026-03-23-variable-damage-release-1`
 
 ## Factual Snapshot
 <!-- AUTO_FACTS:BEGIN -->
-- Status: planned
-- Matches: 0/72
+- Status: complete
+- Matches: 72/72
 - Game: VariableDamageGame
 - Players: AttackBot, PotionAt80Bot, gemini-2.5-flash-lite, gemini-2.5-flash
 - Seed Base: 21242
-- Topline Winner: TBD
-- Avg Turns: TBD
-- Avg Duration (s): TBD
-- Total Cost: TBD
+- Topline Winner: Flash-AO over FlashLite-AO in the LLM baseline; PotionAt80Bot over AttackBot in calibration
+- Avg Turns: 15.01
+- Avg Duration (s): 16.41
+- Total Cost: 0.0534
 <!-- AUTO_FACTS:END -->
 
 ## Why This Exists
@@ -44,7 +44,15 @@
   - expand only if baseline behavior is legible and the VariableDamage scorer lands cleanly
 
 ## Results
-- Not run yet. This package is a planned baseline only.
+- `AttackBot` vs `AttackBot` split `12-12` with a mild first-player lean (`16/24` first-player wins). Randomized damage reduced, but did not erase, seat advantage for pure attack play.
+- `PotionAt80Bot` beat `AttackBot` `18-6` (`p=0.0227`, medium effect). Under uncertainty, the old early-heal bot was no longer a clearly weak policy: its median first potion landed at `77 HP`, and that caution materially outperformed never healing.
+- `Flash-AO` beat `FlashLite-AO` `19-5` (`p=0.00661`, medium effect). The model gap remained large, but the seat effect was much smaller than in FixedDamage (`13/24` first-player wins).
+- Behaviorally, plain Flash adapted to uncertainty by healing much earlier and much more often in risky bands:
+  - first potion median `45 HP` vs `18.5 HP` for Flash-Lite
+  - danger-zone potion rate `54.7%` vs `6.3%`
+  - lethal-zone potion rate `83.3%` vs `37.1%`
+  - unused-potion losses `20.0%` vs `89.5%`
+- The new VariableDamage scorer landed cleanly: all `72` matches passed artifact validation, and the baseline cells produced legible risk-band differences instead of threshold noise.
 
 ## Artifacts
 - `matrix.yaml` (benchmark grid definition)
@@ -60,4 +68,4 @@
 - Repo keeps the package contract and later lightweight derived artifacts
 
 ## Next Package
-- If Release 1 is clean, `VariableDamage Transfer 1` should test whether the carried-forward `FlashLite-RC-TR-HP-exit` stack transfers under uncertainty.
+- `VariableDamage Transfer 1` should test whether the carried-forward FixedDamage stack transfers under uncertainty, but the HP-grounding text must be rewritten for stochastic damage rather than copied verbatim from FixedDamage.

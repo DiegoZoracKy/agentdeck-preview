@@ -1,3 +1,8 @@
 # Scripts
 
-Execution helpers for this package can be added here once the package moves from planning to execution.
+- `run_experiment.py`
+  - runs selected VariableDamage Release 1 cells
+- `export_cell_results.py`
+  - exports per-cell `results.json` into `artifacts/<cell_id>/`
+- `export_package_results.py`
+  - exports the package-level aggregate `results.json`
