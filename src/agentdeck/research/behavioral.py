@@ -76,17 +76,24 @@ def get_behavioral_scorer(
     if normalized_profile == "none":
         return None
 
-    # v0.1.0 intentionally ships with a single bundled scorer. Promote this
-    # to a real registry once a second game-specific scorer lands.
     from agentdeck.games.examples.fixed_damage.behavioral import (
         FixedDamageBehavioralScorer,
     )
+    from agentdeck.games.examples.variable_damage.behavioral import (
+        VariableDamageBehavioralScorer,
+    )
 
-    scorer = FixedDamageBehavioralScorer()
-    if normalized_profile == scorer.profile_id.lower():
-        return scorer
-    if normalized_profile == "auto" and scorer.supports(match_payloads=match_payloads):
-        return scorer
+    scorers = [
+        FixedDamageBehavioralScorer(),
+        VariableDamageBehavioralScorer(),
+    ]
+    for scorer in scorers:
+        if normalized_profile == scorer.profile_id.lower():
+            return scorer
+    if normalized_profile == "auto":
+        for scorer in scorers:
+            if scorer.supports(match_payloads=match_payloads):
+                return scorer
     return None
 
 
