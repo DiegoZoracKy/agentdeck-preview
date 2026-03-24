@@ -28,6 +28,14 @@ def test_variable_damage_setup_returns_json_serializable_state():
     assert payload["turn"] == 1
 
 
+@pytest.mark.parametrize("players", [["Alice"], ["Alice", "Bob", "Carol"]])
+def test_variable_damage_setup_rejects_non_two_player_rosters(players):
+    game = VariableDamageGame()
+
+    with pytest.raises(ValueError, match="VariableDamageGame requires exactly 2 players"):
+        game.setup(players, seed=42)
+
+
 def test_variable_damage_rejects_invalid_information_level():
     with pytest.raises(ValueError, match="information_level must be 'full' or 'partial'"):
         VariableDamageGame(information_level="parital")
@@ -80,6 +88,27 @@ def test_variable_damage_potion_does_not_consume_rng():
     assert rng.randint_calls == []
     assert updated["health"]["Alice"] == 70
     assert updated["potions"]["Alice"] == 2
+    assert updated["turn"] == 2
+
+
+def test_variable_damage_exhausted_potion_is_silent_no_op():
+    game = VariableDamageGame()
+    state = game.setup(["Alice", "Bob"], seed=42)
+    state["health"]["Alice"] = 40
+    state["potions"]["Alice"] = 0
+    rng = CountingRNG(value=17)
+
+    updated = game.update(
+        state,
+        "Alice",
+        ActionResult(action="POTION", raw_response="ACTION: POTION"),
+        rng=rng,
+    )
+
+    assert rng.randint_calls == []
+    assert updated["health"]["Alice"] == 40
+    assert updated["potions"]["Alice"] == 0
+    assert updated["last_action"]["Alice"] == "POTION"
     assert updated["turn"] == 2
 
 
