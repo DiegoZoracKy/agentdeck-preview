@@ -26,15 +26,15 @@
   - first-player win rate
   - position-controlled split
 - Behavior:
-- `safe_zone_potion_rate`
-- `lethal_zone_potion_rate`
-- `danger_zone_potion_rate`
-- `lower_danger_zone_potion_rate`
-- `upper_danger_zone_potion_rate`
-- `risk_band_potion_rate_by_scarcity`
-- `first_lethal_entry_inventory`
-- `unused_potions_on_loss_rate`
-- `high_roll_recovery_rate`
+  - `safe_zone_potion_rate`
+  - `lethal_zone_potion_rate`
+  - `danger_zone_potion_rate`
+  - `lower_danger_zone_potion_rate`
+  - `upper_danger_zone_potion_rate`
+  - `risk_band_potion_rate_by_scarcity`
+  - `first_lethal_entry_inventory`
+  - `unused_potions_on_loss_rate`
+  - `high_roll_recovery_rate`
 
 ## Interpretation Guardrails
 - This package is AO-only.
@@ -50,7 +50,7 @@
 ## Follow-On Rule
 - If Haiku remains clearly strongest and behaviorally healthy, no Haiku RC branch is justified.
 - If Mini remains coherent but overconservative even against stronger plain baselines, Mini can stay the only plausible stronger-model RC candidate.
-- If Flash outperforms both, the Flash baseline becomes the practical reference point for future VariableDamage intervention work.
+- If Flash outperforms both, the Flash baseline becomes the practical reference point for future VariableDamage intervention work because it combines strong outcomes with the more pressure-oriented policy we are most likely to challenge with intervention.
 
 ## Result
 - `Flash-AO` beat `Mini-AO` `34-14` (`p=0.0055`, small effect)
