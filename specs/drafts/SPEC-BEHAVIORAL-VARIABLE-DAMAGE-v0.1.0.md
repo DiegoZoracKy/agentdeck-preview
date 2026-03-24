@@ -2,7 +2,7 @@
 
 > Status: Draft v0.1.0
 > Version: 0.1.0
-> Last Updated: 2026-03-23
+> Last Updated: 2026-03-24
 > Implementation: ⬜ Not Started
 > Authors: Codex (draft)
 > Audience: Research engineers, experiment authors, contributors
@@ -30,6 +30,7 @@
 - Define deterministic risk bands derived from config, not from hand-picked thresholds.
 - Define which metrics remain required because they generalize well from FixedDamage.
 - Define new VariableDamage-specific risk metrics for the first scorer implementation.
+- Surface early-heal conservatism and mid-risk calibration as first-class metrics rather than forcing readers to derive them from raw state buckets.
 - Require evidence for derived metrics whose meaning is not self-evident from a single scalar.
 
 ## 4. Data Structures
@@ -81,6 +82,24 @@ The profile defines three deterministic HP risk bands from config:
 
 These band boundaries MUST be config-driven and deterministic.
 
+For finer-grained danger analysis, the profile also defines a config-derived danger split:
+
+- `danger_split_hp = min(max_attack_damage + potion_heal, min_attack_damage + max_attack_damage)`
+
+This yields two sub-bands inside danger:
+
+- **Lower danger**
+  - `max_attack_damage < own_hp <= danger_split_hp`
+  - even a minimum-damage opponent `ATTACK` moves the player into the lethal zone
+- **Upper danger**
+  - `danger_split_hp < own_hp <= max_attack_damage + potion_heal`
+  - a low roll still leaves the player in danger, but not yet lethal
+
+With the default config (`15..25` damage, `30` heal), the split is:
+
+- lower danger: `26..40`
+- upper danger: `41..55`
+
 ### 4.4 State Buckets
 - **Coarse state bucket**
   - `(position, own_hp, own_potions)`
@@ -88,6 +107,10 @@ These band boundaries MUST be config-driven and deterministic.
 - **Risk bucket**
   - `(position, risk_band, own_potions)`
   - used for VariableDamage-specific risk metrics
+- **Risk scarcity bucket**
+  - `(risk_band, scarcity_bucket)`
+  - where `scarcity_bucket in {"one", "multiple"}`
+  - used for promoted summaries of whether the policy changes when only one potion remains
 - **Decision-equivalence key**
   - `(position, own_hp, own_potions, last_action_self, last_action_opponent)`
   - used for state-action consistency
@@ -173,6 +196,24 @@ Compute the VariableDamage behavioral profile from recorder match payloads.
 - Purpose:
   - Detect objective resource underuse without claiming perfect play.
 
+#### `first_lethal_entry_inventory`
+- Scope:
+  - `per_player`
+  - `aggregate_metrics`
+- Definition:
+  - For each match, identify the first acting turn where:
+    - `own_hp <= max_attack_damage`
+  - Record `own_potions` on that turn.
+  - Also record matches where the player never enters the lethal zone.
+- Required fields:
+  - `median_potions_on_first_lethal_entry`
+  - `first_lethal_entry_potion_values`
+  - `zero_potions_rate`
+  - `never_entered_rate`
+- Purpose:
+  - Describe how much inventory the player still has when it first faces a truly lethal decision.
+  - This is descriptive only; reaching the lethal zone with `0` potions is not automatically a policy error.
+
 #### `state_action_consistency`
 - Scope:
   - `per_player`
@@ -227,6 +268,19 @@ Compute the VariableDamage behavioral profile from recorder match payloads.
 - Purpose:
   - Track immediate defensive response in the truly lethal band.
 
+#### `safe_zone_potion_rate`
+- Scope:
+  - `per_player`
+  - `aggregate_metrics`
+- Definition:
+  - Among turns where:
+    - `own_potions > 0`
+    - `own_hp > max_attack_damage + potion_heal`
+  - compute the fraction of actions that are `POTION`
+- Purpose:
+  - Surface conservative or front-loaded healing directly.
+  - This metric is broader than `wasted_full_health_potion_rate`, which is too narrow for VariableDamage.
+
 #### `danger_zone_potion_rate`
 - Scope:
   - `per_player`
@@ -238,6 +292,30 @@ Compute the VariableDamage behavioral profile from recorder match payloads.
   - compute the fraction of actions that are `POTION`
 - Purpose:
   - Detect whether the player preserves margin or over-pressures before entering the lethal band.
+
+#### `lower_danger_zone_potion_rate`
+- Scope:
+  - `per_player`
+  - `aggregate_metrics`
+- Definition:
+  - Among turns where:
+    - `own_potions > 0`
+    - `max_attack_damage < own_hp <= danger_split_hp`
+  - compute the fraction of actions that are `POTION`
+- Purpose:
+  - Measure whether the player heals when even a minimum-damage hit would push it into the lethal zone.
+
+#### `upper_danger_zone_potion_rate`
+- Scope:
+  - `per_player`
+  - `aggregate_metrics`
+- Definition:
+  - Among turns where:
+    - `own_potions > 0`
+    - `danger_split_hp < own_hp <= max_attack_damage + potion_heal`
+  - compute the fraction of actions that are `POTION`
+- Purpose:
+  - Separate high-danger pressure from lower-urgency buffer preservation.
 
 #### `lethal_zone_attack_rate`
 - Scope:
@@ -256,6 +334,20 @@ Compute the VariableDamage behavioral profile from recorder match payloads.
   - Same support set as `danger_zone_potion_rate`, but measure `ATTACK` frequency.
 - Purpose:
   - Capture risk-seeking behavior in the forward-projection band.
+
+#### `risk_band_potion_rate_by_scarcity`
+- Scope:
+  - `per_player`
+  - `aggregate_metrics`
+- Definition:
+  - For each `risk_band in {"lethal", "danger", "safe"}`, group turns with `own_potions > 0` into:
+    - `one`: `own_potions == 1`
+    - `multiple`: `own_potions >= 2`
+  - Emit a `(risk_band, scarcity_bucket)` entry only when support for that entry is at least `RISK_BAND_MIN_SUPPORT`.
+  - Emit potion rates and support counts for each `(risk_band, scarcity_bucket)` pair.
+- Purpose:
+  - Surface whether the policy changes when the player is down to its last potion.
+  - This is a promoted summary of information that would otherwise be buried in `action_by_risk_band`.
 
 #### `risk_band_policy_delta`
 - Scope:
@@ -305,6 +397,7 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 ## 7. Invariants & Guarantees
 - `VD-B1`: State-grounded descriptive metrics MUST use only the acting player's visible state.
 - `VD-B2`: Risk bands MUST be derived solely from `max_attack_damage` and `potion_heal`, not hand-tuned package thresholds.
+- `VD-B2a`: The danger sub-band split MUST be derived solely from `min_attack_damage`, `max_attack_damage`, and `potion_heal`.
 - `VD-B3`: Required metrics in §6.1 and §6.2 MUST be emitted unless explicitly listed in `unsupported_metrics`.
 - `VD-B4`: All rates MUST be reported in `[0.0, 1.0]`.
 - `VD-B5`: Support thresholds MUST be deterministic and documented.
@@ -313,7 +406,10 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 
 ## 8. Error Handling & Edge Cases
 - Mixed-game payloads MUST be rejected.
-- Missing required config (`max_attack_damage`, `potion_heal`) MUST fail fast or force metrics into `unsupported_metrics`.
+- Missing required config (`max_attack_damage`, `potion_heal`) MUST fail fast or force dependent metrics into `unsupported_metrics`.
+- Missing `min_attack_damage` MUST fail fast or force metrics that depend on `danger_split_hp` into `unsupported_metrics`, including:
+  - `lower_danger_zone_potion_rate`
+  - `upper_danger_zone_potion_rate`
 - Empty input sets MUST still return a valid behavioral profile with zero coverage.
 - If realized damage cannot be reconstructed, metrics depending on realized rolls MUST be declared unsupported rather than guessed.
 
@@ -323,7 +419,9 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 - `own_hp = 18`, `max_attack_damage = 25`
   - lethal zone
 - `own_hp = 40`, `max_attack_damage = 25`, `potion_heal = 30`
-  - danger zone
+  - lower danger
+- `own_hp = 50`, `min_attack_damage = 15`, `max_attack_damage = 25`, `potion_heal = 30`
+  - upper danger
 - `own_hp = 80`, `max_attack_damage = 25`, `potion_heal = 30`
   - safe zone
 
@@ -347,7 +445,9 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 ## 10. Testing Strategy
 - Unit tests MUST cover:
   - correct risk-band assignment from config
+  - correct lower/upper danger split assignment from config
   - support-threshold behavior
+  - first lethal-entry inventory extraction
   - deterministic evidence ordering
   - unsupported-metric handling when realized damage cannot be reconstructed
   - reconstructed damage correctness when `state_before` and `state_after` are present
@@ -358,13 +458,17 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 ## 11. Design Rationale
 - The FixedDamage `critical_hp_threshold = 2 * attack_damage` pattern does not transfer cleanly because VariableDamage has no single exact damage value.
 - Risk bands preserve determinism while respecting uncertainty.
+- VariableDamage experiments already showed that conservative healing behavior often lives in the safe zone rather than only at full health, so `safe_zone_potion_rate` is more useful than a full-health-only waste metric.
+- The single danger bucket is too coarse for VariableDamage: lower danger and upper danger already show materially different behavior in the first baseline and controller packages.
 - Keeping `all_attack_match_rate`, `first_potion_profile`, `state_action_consistency`, and `position_policy_delta` provides continuity with the FixedDamage arc.
 - The paired `attack_rate` and `potion_rate` metrics inside each risk zone are redundant by design and should sum to `1.0`; both are emitted so readers do not need to infer the complement mentally.
+- The promoted scarcity summary is not new raw information; it exists to make last-potion behavior legible without forcing readers to reconstruct it from fine-grained buckets.
 - Adding realized-outcome metrics such as `high_roll_recovery_rate` lets the scorer measure response quality to stochastic shocks rather than only pre-action state policy.
 
 ## 12. Open Questions / Future Work
-- Should later profile revisions separate “danger-low” and “danger-high” sub-bands?
+- Should later profile revisions add potion timing by match stage once VariableDamage packages have enough variation in match length?
 - Should future versions add expected-value style metrics once a stronger baseline policy exists?
+- Should later profile revisions add within-match damage adaptation metrics once longer trajectories provide enough support?
 - Should the scorer emit explicit reconstructed `damage_dealt` samples under `state_metrics` for audit/debug workflows?
 
 ## 13. References

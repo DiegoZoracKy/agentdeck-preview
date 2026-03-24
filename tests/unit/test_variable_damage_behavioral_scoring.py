@@ -270,13 +270,39 @@ def test_variable_damage_behavioral_profile_metrics_with_config() -> None:
     assert alpha["all_attack_match_rate"]["value"] == 0.5
     assert alpha["first_potion_profile"]["median_first_potion_hp"] == 40.0
     assert alpha["first_potion_profile"]["never_used_rate"] == 0.5
+    assert alpha["first_lethal_entry_inventory"]["median_potions_on_first_lethal_entry"] == 1.0
+    assert alpha["first_lethal_entry_inventory"]["first_lethal_entry_potion_values"] == [1, 1, 1, 1]
+    assert alpha["first_lethal_entry_inventory"]["zero_potions_rate"] == 0.0
+    assert alpha["first_lethal_entry_inventory"]["never_entered_rate"] == 2 / 3
     assert alpha["unused_potions_on_loss_rate"]["value"] == 1.0
     assert alpha["state_action_consistency"]["value"] == 1.0
     assert alpha["position_policy_delta"]["value"] == 1.0
     assert alpha["lethal_zone_potion_rate"]["value"] == 0.5
+    assert alpha["safe_zone_potion_rate"]["value"] == 0.5
     assert alpha["danger_zone_potion_rate"]["value"] == 0.5
+    assert alpha["lower_danger_zone_potion_rate"]["value"] == 0.5
+    assert alpha["lower_danger_zone_potion_rate"]["danger_split_hp"] == 40
+    assert alpha["upper_danger_zone_potion_rate"]["value"] == 0.0
+    assert alpha["upper_danger_zone_potion_rate"]["support_turns"] == 0
     assert alpha["lethal_zone_attack_rate"]["value"] == 0.5
     assert alpha["danger_zone_attack_rate"]["value"] == 0.5
+    assert alpha["risk_band_potion_rate_by_scarcity"]["entries"] == {
+        "risk=danger|scarcity=multiple": {
+            "value": 0.5,
+            "potion_turns": 2,
+            "support_turns": 4,
+        },
+        "risk=lethal|scarcity=one": {
+            "value": 0.5,
+            "potion_turns": 2,
+            "support_turns": 4,
+        },
+        "risk=safe|scarcity=multiple": {
+            "value": 0.5,
+            "potion_turns": 2,
+            "support_turns": 4,
+        },
+    }
     assert alpha["risk_band_policy_delta"]["value"] == 1.0
     assert alpha["high_roll_recovery_rate"]["support_events"] == 0
     assert alpha["wasted_full_health_potion_rate"]["value"] == 0.0
@@ -295,6 +321,28 @@ def test_variable_damage_behavioral_profile_metrics_with_config() -> None:
         "POTION",
         "ATTACK",
     ]
+
+    aggregate = profile["aggregate_metrics"]
+    assert aggregate["safe_zone_potion_rate"]["value"] == 0.5
+    assert aggregate["lower_danger_zone_potion_rate"]["value"] == 0.5
+    assert aggregate["upper_danger_zone_potion_rate"]["support_turns"] == 0
+    assert aggregate["risk_band_potion_rate_by_scarcity"]["entries"] == {
+        "risk=danger|scarcity=multiple": {
+            "value": 0.5,
+            "potion_turns": 2,
+            "support_turns": 4,
+        },
+        "risk=lethal|scarcity=one": {
+            "value": 0.5,
+            "potion_turns": 2,
+            "support_turns": 4,
+        },
+        "risk=safe|scarcity=multiple": {
+            "value": 0.5,
+            "potion_turns": 2,
+            "support_turns": 4,
+        },
+    }
 
 
 def test_variable_damage_high_roll_recovery_metric() -> None:
@@ -345,6 +393,30 @@ def test_variable_damage_marks_high_roll_unsupported_without_state_after() -> No
     assert profile["quality_flags"]["unsupported_metrics"] == ["high_roll_recovery_rate"]
     assert profile["per_player"]["Alpha"]["high_roll_recovery_rate"] is None
     assert profile["aggregate_metrics"]["high_roll_recovery_rate"] is None
+
+
+def test_variable_damage_marks_danger_subbands_unsupported_without_min_attack_damage() -> None:
+    profile = compute_behavioral_profile(
+        players=[{"name": "Alpha"}, {"name": "Beta"}],
+        match_payloads=_variable_sample_payloads(),
+        config={
+            "max_attack_damage": 25,
+            "potion_heal": 30,
+            "max_health": 100,
+        },
+    )
+
+    assert profile is not None
+    assert profile["quality_flags"]["complete"] is False
+    assert profile["quality_flags"]["unsupported_metrics"] == [
+        "high_roll_recovery_rate",
+        "lower_danger_zone_potion_rate",
+        "upper_danger_zone_potion_rate",
+    ]
+    assert profile["per_player"]["Alpha"]["lower_danger_zone_potion_rate"] is None
+    assert profile["per_player"]["Alpha"]["upper_danger_zone_potion_rate"] is None
+    assert profile["aggregate_metrics"]["lower_danger_zone_potion_rate"] is None
+    assert profile["aggregate_metrics"]["upper_danger_zone_potion_rate"] is None
 
 
 def test_variable_damage_behavioral_scorer_canonical_json_is_stable() -> None:
