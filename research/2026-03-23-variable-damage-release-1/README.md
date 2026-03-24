@@ -28,6 +28,7 @@
 - Configs: handshake-only `ActionOnlyController`
 - Matches Planned: `72`
 - Seed Base: `21242`
+- Planned turn cap: `40`
 
 ## Execution Plan
 - Preflight gate:

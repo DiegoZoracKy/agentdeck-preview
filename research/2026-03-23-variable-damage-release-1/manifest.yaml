@@ -52,7 +52,7 @@ run:
   matches_planned: 72
   matches_completed: 0
   concurrency: 1
-  max_turns: 30
+  max_turns: 40
   matrix_source: matrix.yaml
 analysis_plan:
   ci_method: wilson
@@ -74,4 +74,6 @@ storage:
 notes: >-
   Baseline-only VariableDamage opening package. Calibration stays local and the
   only LLM cell is Flash-Lite AO vs Flash AO. Carry-forward prompt stacks from
-  FixedDamage are intentionally deferred to a separate transfer package.
+  FixedDamage are intentionally deferred to a separate transfer package. The
+  planned turn cap is raised above the FixedDamage default to avoid truncating
+  legitimate low-roll, full-potion stochastic tails in the new game class.

@@ -30,6 +30,7 @@
 - This package is baseline only.
 - It must not be used to claim that the FixedDamage carry-forward stack transfers.
 - If the new risk-band metrics are unclear or unsupported, scorer implementation must be fixed before any transfer or intervention package is run.
+- The execution cap should stay above the FixedDamage default because VariableDamage can legitimately produce longer low-roll, full-potion matches without indicating a stuck engine.
 
 ## Planned Comparisons
 - `AttackBot` vs `AttackBot`
