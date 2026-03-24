@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-23T23:06:09.939790Z
+Last updated: 2026-03-24T00:09:21.004986Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -22,3 +22,4 @@ Last updated: 2026-03-23T23:06:09.939790Z
 | [FixedDamage Arc 1](2026-03-23-fixed-damage-arc-1/README.md) | complete | FixedDamageGame | local:AttackBot, local:PotionAt80Bot, google:gemini-2.5-flash-lite, google:gemini-2.5-flash, openai:gpt-4o-mini, openai:gpt-5-mini, anthropic:claude-haiku-4-5-20251001 | 0/0 | See README |
 | [FixedDamage FlashLite Cap 1](2026-03-23-fixed-damage-cap-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | Flash-AO 66.7% |
 | [FixedDamage FlashLite Exit 1](2026-03-23-fixed-damage-exit-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | FlashLite-RC-TR-HP-exit 72.9% |
+| [VariableDamage Release 1](2026-03-23-variable-damage-release-1/README.md) | *planned* | VariableDamageGame | local:AttackBot, local:PotionAt80Bot, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 0/72 | TBD |

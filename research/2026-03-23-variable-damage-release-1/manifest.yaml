@@ -1,0 +1,77 @@
+schema_version: 1
+experiment_id: 2026-03-23-variable-damage-release-1
+title: VariableDamage Release 1
+status: planned
+question: >-
+  How does seeded damage uncertainty change baseline behavior in a
+  FixedDamage-like game, and can AgentDeck make that baseline legible through
+  calibration plus a plain Flash-Lite vs Flash comparison before any strategy
+  transfer?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: attack_bot
+    provider: local
+    model: AttackBot
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: potion_at_80_bot
+    provider: local
+    model: PotionAt80Bot
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_lite
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - AttackBot
+    - PotionAt80Bot
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 21242
+  matches_planned: 72
+  matches_completed: 0
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-23-variable-damage-release-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-23-variable-damage-release-1
+  viewer_curation:
+    repo_path: research/2026-03-23-variable-damage-release-1/artifacts
+notes: >-
+  Baseline-only VariableDamage opening package. Calibration stays local and the
+  only LLM cell is Flash-Lite AO vs Flash AO. Carry-forward prompt stacks from
+  FixedDamage are intentionally deferred to a separate transfer package.

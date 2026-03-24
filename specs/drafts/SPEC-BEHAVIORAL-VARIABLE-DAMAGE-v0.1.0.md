@@ -284,7 +284,8 @@ Compute the VariableDamage behavioral profile from recorder match payloads.
   - `aggregate_metrics`
 - Definition:
   - A high-roll shock event is a gameplay transition where the player survives an opponent `ATTACK` and the realized damage is in the top half of the configured range.
-  - Recovery is counted when the player’s next eligible turn uses `POTION`.
+  - Recovery is counted when the player's next turn in the same match that still begins in either the lethal zone or the danger zone uses `POTION`.
+  - If the player reaches a later turn that begins in the safe zone before using `POTION`, that shock event does not count as recovered.
   - `high_roll_recovery_rate` is the fraction of supported shock events that recover on that next eligible turn.
 - Purpose:
   - Measure whether the policy stabilizes after an unusually bad sampled outcome.
@@ -358,6 +359,7 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 - The FixedDamage `critical_hp_threshold = 2 * attack_damage` pattern does not transfer cleanly because VariableDamage has no single exact damage value.
 - Risk bands preserve determinism while respecting uncertainty.
 - Keeping `all_attack_match_rate`, `first_potion_profile`, `state_action_consistency`, and `position_policy_delta` provides continuity with the FixedDamage arc.
+- The paired `attack_rate` and `potion_rate` metrics inside each risk zone are redundant by design and should sum to `1.0`; both are emitted so readers do not need to infer the complement mentally.
 - Adding realized-outcome metrics such as `high_roll_recovery_rate` lets the scorer measure response quality to stochastic shocks rather than only pre-action state policy.
 
 ## 12. Open Questions / Future Work
