@@ -1,0 +1,74 @@
+schema_version: 1
+experiment_id: 2026-03-24-variable-damage-baseline-3
+title: VariableDamage Baseline 3
+status: complete
+question: >-
+  How do plain Flash, plain GPT-4o Mini, and plain Claude Haiku compare
+  head-to-head in VariableDamage once the FlashLite-centered baseline is known,
+  and which stronger plain model is actually best calibrated under
+  uncertainty?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_4o_mini
+    provider: openai
+    model: gpt-4o-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: claude_haiku_4_5_20251001
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash
+    - gpt-4o-mini
+    - claude-haiku-4-5-20251001
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 25242
+  matches_planned: 144
+  matches_completed: 144
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-24-variable-damage-baseline-3/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-24-variable-damage-baseline-3
+  viewer_curation:
+    repo_path: research/2026-03-24-variable-damage-baseline-3/artifacts
+notes: >-
+  Stronger-model AO round-robin only. This package fills the remaining plain
+  VariableDamage ordering by running Flash, Mini, and Haiku against each other
+  before any controller or prompt-layer intervention is introduced on those
+  stronger baselines. The Mini-vs-Flash cell required segmented execution after
+  repeated post-429 Flash hangs; see notes/phase-1-run.md for the exact staged
+  export procedure used to recover the intended N=48 cell.
