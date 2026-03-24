@@ -1,0 +1,72 @@
+schema_version: 1
+experiment_id: 2026-03-23-variable-damage-baseline-2
+title: VariableDamage Baseline 2
+status: complete
+question: >-
+  How do plain GPT-4o Mini and plain Claude Haiku compare to plain Flash-Lite
+  in VariableDamage, and does either model expose a coherent enough risk-band
+  failure mode to justify a ReasoningController branch before any turn
+  reinforcement or guided prompt transfer is attempted?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_4o_mini
+    provider: openai
+    model: gpt-4o-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: claude_haiku_4_5_20251001
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gpt-4o-mini
+    - claude-haiku-4-5-20251001
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 22242
+  matches_planned: 96
+  matches_completed: 96
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-23-variable-damage-baseline-2/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-23-variable-damage-baseline-2
+  viewer_curation:
+    repo_path: research/2026-03-23-variable-damage-baseline-2/artifacts
+notes: >-
+  Cross-provider AO sweep only. This package is meant to answer whether Mini or
+  Haiku already show coherent VariableDamage policy failures at the plain-model
+  layer before introducing RC, turn reinforcement, or any transferred
+  FixedDamage prompt stack.
