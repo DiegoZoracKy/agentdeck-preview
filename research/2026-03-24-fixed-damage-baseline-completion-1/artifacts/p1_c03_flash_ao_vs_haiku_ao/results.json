@@ -1,0 +1,2385 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-24-fixed-damage-baseline-completion-1::p1_c03_flash_ao_vs_haiku_ao",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-24-fixed-damage-baseline-completion-1/agentdeck_runs/p1_c03_flash_ao_vs_haiku_ao/session_20260324_235449_17174b/records"
+  },
+  "summary": {
+    "total_matches": 48,
+    "decisive_matches": 48,
+    "draws": 0,
+    "win_rates": {
+      "Flash-AO": 0.5416666666666666,
+      "Haiku-AO": 0.4583333333333333
+    },
+    "total_cost": 0.4596750000000002,
+    "avg_turns": 21.75,
+    "avg_duration": 44.95594773193201,
+    "avg_cost": 0.009576562500000005
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 48,
+    "n_decisive": 48,
+    "players": {
+      "Flash-AO": {
+        "wins": 26,
+        "win_rate": 0.5416666666666666,
+        "ci": [
+          0.40291074545649797,
+          0.6742475770713254
+        ],
+        "p_value": 0.6654658120766188,
+        "effect_size": 0.0834300866106148,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "Haiku-AO": {
+        "wins": 22,
+        "win_rate": 0.4583333333333333,
+        "ci": [
+          0.32575242292867446,
+          0.5970892545435019
+        ],
+        "p_value": 0.6654658120766188,
+        "effect_size": -0.08343008661061524,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Flash-AO_vs_Haiku-AO": {
+        "player_a": "Flash-AO",
+        "player_b": "Haiku-AO",
+        "wins_a": 26,
+        "wins_b": 22,
+        "head_to_head_decisive": 48,
+        "win_rate_a": 0.5416666666666666,
+        "ci_a": [
+          0.40291074545649797,
+          0.6742475770713254
+        ],
+        "p_value": 0.6654658120766188,
+        "effect_size": 0.0834300866106148,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 48,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 1044,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 1044,
+      "strict_contract_passes": 1031,
+      "strict_contract_rate": 0.9875478927203065,
+      "recoverable_non_strict": 13,
+      "recoverable_non_strict_rate": 0.012452107279693486,
+      "action_line_rate": 0.9875478927203065,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "Flash-AO": {
+        "turn_attempts": 523,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 523,
+        "strict_contract_passes": 510,
+        "strict_contract_rate": 0.9751434034416826,
+        "recoverable_non_strict": 13,
+        "recoverable_non_strict_rate": 0.0248565965583174,
+        "action_line_rate": 0.9751434034416826,
+        "reasoning_line_rate": 0.0
+      },
+      "Haiku-AO": {
+        "turn_attempts": 521,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 521,
+        "strict_contract_passes": 521,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 48,
+    "first_player_wins": 16,
+    "first_player_win_rate": 0.3333333333333333,
+    "second_player_wins": 32,
+    "upset_rate": 0.6666666666666666,
+    "by_player": {
+      "Flash-AO": {
+        "first_count": 24,
+        "second_count": 24,
+        "wins_as_first": 9,
+        "wins_as_second": 17,
+        "win_rate_as_first": 0.375,
+        "win_rate_as_second": 0.7083333333333334
+      },
+      "Haiku-AO": {
+        "first_count": 24,
+        "second_count": 24,
+        "wins_as_first": 7,
+        "wins_as_second": 15,
+        "win_rate_as_first": 0.2916666666666667,
+        "win_rate_as_second": 0.625
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 48,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 48,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 48,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 48,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 48,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Flash-AO",
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "Haiku-AO",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "type": "ClaudePlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_050e91c5",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26452,
+      "duration": 59.630695104599,
+      "cost": 0.011348699999999975,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "Haiku-AO": 0.00872199999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_1142a72f",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 26465,
+      "duration": 47.47000598907471,
+      "cost": 0.010722300000000032,
+      "player_costs": {
+        "Haiku-AO": 0.008703000000000016,
+        "Flash-AO": 0.0020193000000000155
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_1558f4de",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26450,
+      "duration": 31.847220182418823,
+      "cost": 0.005957199999999989,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_15f75943",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26444,
+      "duration": 38.123170375823975,
+      "cost": 0.005957200000000003,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "Haiku-AO": 0.004708000000000004
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_1dc83c20",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26461,
+      "duration": 43.90914750099182,
+      "cost": 0.011019600000000032,
+      "player_costs": {
+        "Haiku-AO": 0.008705000000000018,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_1fd6ce76",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26451,
+      "duration": 50.27610373497009,
+      "cost": 0.01101860000000001,
+      "player_costs": {
+        "Haiku-AO": 0.008704000000000017,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_20803cc2",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26461,
+      "duration": 31.05798888206482,
+      "cost": 0.005957199999999996,
+      "player_costs": {
+        "Flash-AO": 0.0012492000000000059,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_22405415",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 26443,
+      "duration": 58.46559023857117,
+      "cost": 0.010723300000000002,
+      "player_costs": {
+        "Haiku-AO": 0.008704000000000003,
+        "Flash-AO": 0.002019299999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_25049956",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 26446,
+      "duration": 57.61825752258301,
+      "cost": 0.009624199999999994,
+      "player_costs": {
+        "Flash-AO": 0.0020171999999999985,
+        "Haiku-AO": 0.007606999999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_276a17e9",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26463,
+      "duration": 55.399826765060425,
+      "cost": 0.011018600000000059,
+      "player_costs": {
+        "Haiku-AO": 0.008704000000000045,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2fefe8e2",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26444,
+      "duration": 44.12173509597778,
+      "cost": 0.011023599999999986,
+      "player_costs": {
+        "Haiku-AO": 0.008708999999999988,
+        "Flash-AO": 0.0023145999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_419b5834",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26455,
+      "duration": 51.88865351676941,
+      "cost": 0.011348699999999975,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "Haiku-AO": 0.00872199999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_474c9c32",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26465,
+      "duration": 46.55715322494507,
+      "cost": 0.011348699999999962,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "Haiku-AO": 0.008721999999999952
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4bc26d2b",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26442,
+      "duration": 48.99455714225769,
+      "cost": 0.011347699999999999,
+      "player_costs": {
+        "Flash-AO": 0.0026267,
+        "Haiku-AO": 0.008721
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4daabbd4",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26447,
+      "duration": 61.29850196838379,
+      "cost": 0.011019599999999977,
+      "player_costs": {
+        "Haiku-AO": 0.008704999999999977,
+        "Flash-AO": 0.0023146
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_52f09ce5",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26459,
+      "duration": 31.437894105911255,
+      "cost": 0.005957199999999996,
+      "player_costs": {
+        "Flash-AO": 0.0012492000000000059,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_554d246a",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 26456,
+      "duration": 53.97017216682434,
+      "cost": 0.009624199999999972,
+      "player_costs": {
+        "Flash-AO": 0.0020171999999999968,
+        "Haiku-AO": 0.007606999999999975
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_64d9c498",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26454,
+      "duration": 32.692171812057495,
+      "cost": 0.005957199999999989,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_79687223",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26457,
+      "duration": 51.19902515411377,
+      "cost": 0.0110216,
+      "player_costs": {
+        "Haiku-AO": 0.008706999999999993,
+        "Flash-AO": 0.002314600000000007
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7a2fe9d1",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 26445,
+      "duration": 58.29948377609253,
+      "cost": 0.010724300000000003,
+      "player_costs": {
+        "Haiku-AO": 0.008705000000000004,
+        "Flash-AO": 0.002019299999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7e1c03aa",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26460,
+      "duration": 46.32550072669983,
+      "cost": 0.01102160000000009,
+      "player_costs": {
+        "Haiku-AO": 0.008707000000000076,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7ee6d1d5",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26450,
+      "duration": 38.04759407043457,
+      "cost": 0.011018599999999996,
+      "player_costs": {
+        "Haiku-AO": 0.008704000000000003,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_97441aa7",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26455,
+      "duration": 50.55476379394531,
+      "cost": 0.011024599999999989,
+      "player_costs": {
+        "Haiku-AO": 0.008709999999999996,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_9d643ccb",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 26449,
+      "duration": 42.950555086135864,
+      "cost": 0.009624200000000003,
+      "player_costs": {
+        "Flash-AO": 0.0020172000000000002,
+        "Haiku-AO": 0.007607000000000003
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_9f1155ad",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26443,
+      "duration": 32.897454261779785,
+      "cost": 0.005957199999999997,
+      "player_costs": {
+        "Flash-AO": 0.0012491999999999998,
+        "Haiku-AO": 0.004707999999999997
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a1d40bda",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26460,
+      "duration": 48.44943284988403,
+      "cost": 0.011347699999999988,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "Haiku-AO": 0.008720999999999979
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_a4181fa7",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26452,
+      "duration": 57.444578647613525,
+      "cost": 0.011024600000000016,
+      "player_costs": {
+        "Haiku-AO": 0.008710000000000023,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b42190ab",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26464,
+      "duration": 43.63520884513855,
+      "cost": 0.011023600000000092,
+      "player_costs": {
+        "Haiku-AO": 0.008709000000000078,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b7b4670d",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26464,
+      "duration": 29.515422582626343,
+      "cost": 0.005957199999999996,
+      "player_costs": {
+        "Flash-AO": 0.0012492000000000059,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b82e9b98",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 20,
+      "outcome": "win",
+      "seed": 26445,
+      "duration": 38.027376890182495,
+      "cost": 0.008307700000000001,
+      "player_costs": {
+        "Flash-AO": 0.0017416999999999988,
+        "Haiku-AO": 0.006566000000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b880d268",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26457,
+      "duration": 48.47162365913391,
+      "cost": 0.011347699999999988,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "Haiku-AO": 0.008720999999999979
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bf1c669f",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 26453,
+      "duration": 47.66549301147461,
+      "cost": 0.01072430000000004,
+      "player_costs": {
+        "Haiku-AO": 0.008705000000000046,
+        "Flash-AO": 0.0020192999999999947
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c21a04af",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26462,
+      "duration": 30.413071632385254,
+      "cost": 0.005957199999999996,
+      "player_costs": {
+        "Flash-AO": 0.0012492000000000059,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c5999395",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26453,
+      "duration": 52.292973041534424,
+      "cost": 0.011348699999999975,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "Haiku-AO": 0.00872199999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ca406dda",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26463,
+      "duration": 29.91302466392517,
+      "cost": 0.005957199999999996,
+      "player_costs": {
+        "Flash-AO": 0.0012492000000000059,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_cab0e174",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26454,
+      "duration": 46.03424286842346,
+      "cost": 0.011023600000000015,
+      "player_costs": {
+        "Haiku-AO": 0.008709000000000022,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_cf43a13d",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26456,
+      "duration": 46.0009765625,
+      "cost": 0.01101860000000001,
+      "player_costs": {
+        "Haiku-AO": 0.008704000000000017,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d0734107",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26442,
+      "duration": 71.71718883514404,
+      "cost": 0.011018600000000003,
+      "player_costs": {
+        "Haiku-AO": 0.008704000000000003,
+        "Flash-AO": 0.002314600000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_da06ee9a",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26447,
+      "duration": 46.144537687301636,
+      "cost": 0.011347700000000006,
+      "player_costs": {
+        "Flash-AO": 0.002626699999999999,
+        "Haiku-AO": 0.008721000000000007
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e6539a79",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 26458,
+      "duration": 47.57777404785156,
+      "cost": 0.011515399999999953,
+      "player_costs": {
+        "Flash-AO": 0.0027944000000000024,
+        "Haiku-AO": 0.008720999999999951
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e86aedae",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26448,
+      "duration": 43.269108295440674,
+      "cost": 0.01101859999999999,
+      "player_costs": {
+        "Haiku-AO": 0.00870399999999999,
+        "Flash-AO": 0.0023146
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ea444d03",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 26459,
+      "duration": 37.682459115982056,
+      "cost": 0.009340500000000085,
+      "player_costs": {
+        "Haiku-AO": 0.007597000000000076,
+        "Flash-AO": 0.001743500000000009
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ee9eb201",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 26458,
+      "duration": 29.061981916427612,
+      "cost": 0.005733100000000102,
+      "player_costs": {
+        "Haiku-AO": 0.004700000000000093,
+        "Flash-AO": 0.001033100000000009
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f58c20a8",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26451,
+      "duration": 37.96208930015564,
+      "cost": 0.005957199999999989,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f733ead1",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26462,
+      "duration": 43.92062711715698,
+      "cost": 0.011023600000000092,
+      "player_costs": {
+        "Haiku-AO": 0.008709000000000078,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_fb77b06d",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 24,
+      "outcome": "win",
+      "seed": 26449,
+      "duration": 43.26029706001282,
+      "cost": 0.011023599999999995,
+      "player_costs": {
+        "Haiku-AO": 0.008708999999999995,
+        "Flash-AO": 0.0023146
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_fd852f46",
+      "players": [
+        "Flash-AO",
+        "Haiku-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 26448,
+      "duration": 35.456156492233276,
+      "cost": 0.005957199999999989,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "Haiku-AO": 0.00470799999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_fe0cff86",
+      "players": [
+        "Haiku-AO",
+        "Flash-AO"
+      ],
+      "winner": "Haiku-AO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 26446,
+      "duration": 38.9366238117218,
+      "cost": 0.00933549999999999,
+      "player_costs": {
+        "Haiku-AO": 0.007591999999999988,
+        "Flash-AO": 0.001743500000000002
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Haiku-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    }
+  ],
+  "behavioral_profile": {
+    "schema_version": 2,
+    "game_id": "fixed_damage",
+    "profile_id": "fixed_damage_behavioral",
+    "profile_version": "0.2.0",
+    "coverage": {
+      "matches_total": 48,
+      "matches_evaluable": 48,
+      "turns_total": 1044,
+      "turns_evaluable": 1044
+    },
+    "aggregate_metrics": {
+      "all_attack_match_rate": {
+        "value": 0.125,
+        "all_attack_matches": 12,
+        "support_matches": 96
+      },
+      "first_potion_profile": {
+        "median_first_potion_hp": 60.0,
+        "first_potion_hp_values": [
+          20,
+          20,
+          20,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ],
+        "never_used_rate": 0.125,
+        "never_used_matches": 12,
+        "support_matches": 96
+      },
+      "unused_potions_on_loss_rate": {
+        "value": 0.3541666666666667,
+        "losses_with_unused_potions": 17,
+        "support_losses": 48
+      },
+      "state_action_consistency": {
+        "value": 0.9315068493150684,
+        "support_turns": 1022
+      },
+      "position_policy_delta": {
+        "value": 0.1770690324614167,
+        "support_turns": 691
+      },
+      "critical_potion_response_rate": {
+        "value": 0.6055555555555555,
+        "critical_potion_turns": 109,
+        "support_turns": 180,
+        "critical_hp_threshold": 40
+      },
+      "error_recovery_rate": {
+        "value": 0.3333333333333333,
+        "recovered_events": 18,
+        "support_events": 54,
+        "critical_hp_threshold": 40
+      },
+      "wasted_full_health_potion_rate": {
+        "value": 0.0,
+        "wasted_full_health_potions": 0,
+        "support_potions": 246,
+        "max_health": 100
+      }
+    },
+    "per_player": {
+      "Flash-AO": {
+        "matches_played": 48,
+        "all_attack_match_rate": {
+          "value": 0.25,
+          "all_attack_matches": 12,
+          "support_matches": 48
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 60.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            80,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.25,
+          "never_used_matches": 12,
+          "support_matches": 48
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.7727272727272727,
+          "losses_with_unused_potions": 17,
+          "support_losses": 22
+        },
+        "state_action_consistency": {
+          "value": 0.8913043478260869,
+          "supported_state_keys": 62,
+          "support_turns": 506
+        },
+        "position_policy_delta": {
+          "value": 0.17145448890774387,
+          "shared_state_buckets": 14,
+          "support_turns": 457
+        },
+        "critical_potion_response_rate": {
+          "value": 0.45384615384615384,
+          "critical_potion_turns": 59,
+          "support_turns": 130,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.3333333333333333,
+          "recovered_events": 18,
+          "support_events": 54,
+          "missed_events": 71,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 102,
+          "max_health": 100
+        }
+      },
+      "Haiku-AO": {
+        "matches_played": 48,
+        "all_attack_match_rate": {
+          "value": 0.0,
+          "all_attack_matches": 0,
+          "support_matches": 48
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 60.0,
+          "first_potion_hp_values": [
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            60,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.0,
+          "never_used_matches": 0,
+          "support_matches": 48
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.0,
+          "losses_with_unused_potions": 0,
+          "support_losses": 26
+        },
+        "state_action_consistency": {
+          "value": 0.9709302325581395,
+          "supported_state_keys": 39,
+          "support_turns": 516
+        },
+        "position_policy_delta": {
+          "value": 0.18803418803418803,
+          "shared_state_buckets": 7,
+          "support_turns": 234
+        },
+        "critical_potion_response_rate": {
+          "value": 1.0,
+          "critical_potion_turns": 50,
+          "support_turns": 50,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.0,
+          "recovered_events": 0,
+          "support_events": 0,
+          "missed_events": 0,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 144,
+          "max_health": 100
+        }
+      }
+    },
+    "state_metrics": {
+      "action_by_state": {
+        "Flash-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 24,
+            "attack_count": 24,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 9,
+            "attack_count": 9,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 8,
+            "attack_count": 3,
+            "potion_count": 5,
+            "attack_rate": 0.375,
+            "potion_rate": 0.625
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 13,
+            "attack_count": 11,
+            "potion_count": 2,
+            "attack_rate": 0.8461538461538461,
+            "potion_rate": 0.15384615384615385
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 9,
+            "attack_count": 9,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 7,
+            "attack_count": 1,
+            "potion_count": 6,
+            "attack_rate": 0.14285714285714285,
+            "potion_rate": 0.8571428571428571
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 11,
+            "attack_count": 8,
+            "potion_count": 3,
+            "attack_rate": 0.7272727272727273,
+            "potion_rate": 0.2727272727272727
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 33,
+            "attack_count": 26,
+            "potion_count": 7,
+            "attack_rate": 0.7878787878787878,
+            "potion_rate": 0.21212121212121213
+          },
+          "position=first|hp=50|potions=0": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 15,
+            "attack_count": 10,
+            "potion_count": 5,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=first|hp=60|potions=1": {
+            "support_turns": 11,
+            "attack_count": 10,
+            "potion_count": 1,
+            "attack_rate": 0.9090909090909091,
+            "potion_rate": 0.09090909090909091
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 44,
+            "attack_count": 40,
+            "potion_count": 4,
+            "attack_rate": 0.9090909090909091,
+            "potion_rate": 0.09090909090909091
+          },
+          "position=first|hp=70|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 7,
+            "attack_count": 6,
+            "potion_count": 1,
+            "attack_rate": 0.8571428571428571,
+            "potion_rate": 0.14285714285714285
+          },
+          "position=first|hp=80|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 48,
+            "attack_count": 48,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 18,
+            "attack_count": 18,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=1": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 8,
+            "attack_count": 1,
+            "potion_count": 7,
+            "attack_rate": 0.125,
+            "potion_rate": 0.875
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 19,
+            "attack_count": 19,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=1": {
+            "support_turns": 5,
+            "attack_count": 4,
+            "potion_count": 1,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 7,
+            "attack_count": 0,
+            "potion_count": 7,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 22,
+            "attack_count": 11,
+            "potion_count": 11,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=40|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 10,
+            "attack_count": 4,
+            "potion_count": 6,
+            "attack_rate": 0.4,
+            "potion_rate": 0.6
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 19,
+            "attack_count": 19,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=1": {
+            "support_turns": 6,
+            "attack_count": 6,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 23,
+            "attack_count": 13,
+            "potion_count": 10,
+            "attack_rate": 0.5652173913043478,
+            "potion_rate": 0.43478260869565216
+          },
+          "position=second|hp=60|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 21,
+            "attack_count": 21,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 3,
+            "attack_count": 1,
+            "potion_count": 2,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 27,
+            "attack_count": 16,
+            "potion_count": 11,
+            "attack_rate": 0.5925925925925926,
+            "potion_rate": 0.4074074074074074
+          },
+          "position=second|hp=70|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 14,
+            "attack_count": 13,
+            "potion_count": 1,
+            "attack_rate": 0.9285714285714286,
+            "potion_rate": 0.07142857142857142
+          },
+          "position=second|hp=80|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=1": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 8,
+            "attack_count": 6,
+            "potion_count": 2,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 43,
+            "attack_count": 38,
+            "potion_count": 5,
+            "attack_rate": 0.8837209302325582,
+            "potion_rate": 0.11627906976744186
+          }
+        },
+        "Haiku-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 32,
+            "attack_count": 32,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=0": {
+            "support_turns": 21,
+            "attack_count": 21,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=1": {
+            "support_turns": 13,
+            "attack_count": 0,
+            "potion_count": 13,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=40|potions=0": {
+            "support_turns": 31,
+            "attack_count": 31,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=40|potions=2": {
+            "support_turns": 11,
+            "attack_count": 0,
+            "potion_count": 11,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=50|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=1": {
+            "support_turns": 31,
+            "attack_count": 22,
+            "potion_count": 9,
+            "attack_rate": 0.7096774193548387,
+            "potion_rate": 0.2903225806451613
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=60|potions=0": {
+            "support_turns": 19,
+            "attack_count": 19,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=2": {
+            "support_turns": 29,
+            "attack_count": 18,
+            "potion_count": 11,
+            "attack_rate": 0.6206896551724138,
+            "potion_rate": 0.3793103448275862
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=70|potions=1": {
+            "support_turns": 20,
+            "attack_count": 20,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=2": {
+            "support_turns": 36,
+            "attack_count": 36,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 24,
+            "attack_count": 2,
+            "potion_count": 22,
+            "attack_rate": 0.08333333333333333,
+            "potion_rate": 0.9166666666666666
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 13,
+            "attack_count": 13,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 29,
+            "attack_count": 29,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 24,
+            "attack_count": 0,
+            "potion_count": 24,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 35,
+            "attack_count": 35,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 24,
+            "attack_count": 0,
+            "potion_count": 24,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 37,
+            "attack_count": 37,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 24,
+            "attack_count": 0,
+            "potion_count": 24,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 29,
+            "attack_count": 29,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 24,
+            "attack_count": 24,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          }
+        }
+      },
+      "scarcity_action_profile": {
+        "Flash-AO": {
+          "0": {
+            "support_turns": 92,
+            "attack_count": 92,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 101,
+            "attack_count": 70,
+            "potion_count": 31,
+            "attack_rate": 0.693069306930693,
+            "potion_rate": 0.3069306930693069
+          },
+          "2": {
+            "support_turns": 86,
+            "attack_count": 51,
+            "potion_count": 35,
+            "attack_rate": 0.5930232558139535,
+            "potion_rate": 0.4069767441860465
+          },
+          "3": {
+            "support_turns": 244,
+            "attack_count": 208,
+            "potion_count": 36,
+            "attack_rate": 0.8524590163934426,
+            "potion_rate": 0.14754098360655737
+          }
+        },
+        "Haiku-AO": {
+          "0": {
+            "support_turns": 152,
+            "attack_count": 152,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 129,
+            "attack_count": 81,
+            "potion_count": 48,
+            "attack_rate": 0.627906976744186,
+            "potion_rate": 0.37209302325581395
+          },
+          "2": {
+            "support_turns": 134,
+            "attack_count": 86,
+            "potion_count": 48,
+            "attack_rate": 0.6417910447761194,
+            "potion_rate": 0.3582089552238806
+          },
+          "3": {
+            "support_turns": 106,
+            "attack_count": 58,
+            "potion_count": 48,
+            "attack_rate": 0.5471698113207547,
+            "potion_rate": 0.4528301886792453
+          }
+        }
+      }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "Flash-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.3878787878787878,
+                "support_turns": 43,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 0.7878787878787878,
+                  "potion_rate": 0.21212121212121213,
+                  "support_turns": 33,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 0.4,
+                  "potion_rate": 0.6,
+                  "support_turns": 10,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=40|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.34615384615384615,
+                "support_turns": 15,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 0.8461538461538461,
+                  "potion_rate": 0.15384615384615385,
+                  "support_turns": 13,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=80|potions=1",
+                "delta": 0.33333333333333337,
+                "support_turns": 5,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=80|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=1",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=80|potions=1"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=30|potions=2|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=60|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5789473684210527,
+                "support_turns": 19,
+                "attack_count": 8,
+                "potion_count": 11,
+                "attack_rate": 0.42105263157894735,
+                "potion_rate": 0.5789473684210527,
+                "dominant_action": "POTION"
+              }
+            ]
+          }
+        },
+        "Haiku-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.9166666666666666,
+                "support_turns": 48,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.08333333333333333,
+                  "potion_rate": 0.9166666666666666,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Haiku-AO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Haiku-AO.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=1",
+                "delta": 0.0,
+                "support_turns": 39,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Haiku-AO.position=first|hp=60|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=1",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 37,
+                  "source_path": "state_metrics.action_by_state.Haiku-AO.position=second|hp=60|potions=1"
+                }
+              },
+              {
+                "shared_state_key": "hp=50|potions=0",
+                "delta": 0.0,
+                "support_turns": 37,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Haiku-AO.position=first|hp=50|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 35,
+                  "source_path": "state_metrics.action_by_state.Haiku-AO.position=second|hp=50|potions=0"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=60|potions=2|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 22,
+                "attack_count": 11,
+                "potion_count": 11,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=first|hp=50|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.8181818181818182,
+                "support_turns": 11,
+                "attack_count": 2,
+                "potion_count": 9,
+                "attack_rate": 0.18181818181818182,
+                "potion_rate": 0.8181818181818182,
+                "dominant_action": "POTION"
+              },
+              {
+                "decision_key": "position=first|hp=80|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.9166666666666666,
+                "support_turns": 24,
+                "attack_count": 2,
+                "potion_count": 22,
+                "attack_rate": 0.08333333333333333,
+                "potion_rate": 0.9166666666666666,
+                "dominant_action": "POTION"
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
+    },
+    "quality_flags": {
+      "complete": true,
+      "unsupported_metrics": []
+    }
+  }
+}

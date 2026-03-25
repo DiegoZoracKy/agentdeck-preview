@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-24T17:47:45.443508Z
+Last updated: 2026-03-25T03:34:38.602676Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -25,5 +25,6 @@ Last updated: 2026-03-24T17:47:45.443508Z
 | [VariableDamage Baseline 2](2026-03-23-variable-damage-baseline-2/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001 | 96/96 | See README |
 | [VariableDamage Controller 1](2026-03-23-variable-damage-controller-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, openai:gpt-4o-mini, openai:gpt-4o-mini | 48/48 | See README |
 | [VariableDamage Release 1](2026-03-23-variable-damage-release-1/README.md) | complete | VariableDamageGame | local:AttackBot, local:PotionAt80Bot, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 72/72 | See README |
+| [FixedDamage Baseline Completion 1](2026-03-24-fixed-damage-baseline-completion-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001 | 192/192 | See README |
 | [VariableDamage Baseline 3](2026-03-24-variable-damage-baseline-3/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash, openai:gpt-4o-mini, anthropic:claude-haiku-4-5-20251001 | 144/144 | See README |
 | [VariableDamage Reinforcement 1](2026-03-24-variable-damage-reinforcement-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |
