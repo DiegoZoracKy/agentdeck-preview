@@ -1,0 +1,72 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-parity-1
+title: VariableDamage OpenAI Parity 1
+status: complete
+question: >-
+  Does `ReasoningController` alone improve `gpt-4o-mini` against plain
+  `gpt-5-mini` in VariableDamage once the plain `gpt-5-mini` baseline
+  placement is known?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gpt_4o_mini_ao
+    provider: openai
+    model: gpt-4o-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_4o_mini_rc
+    provider: openai
+    model: gpt-4o-mini
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_5_mini_ao
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gpt-4o-mini
+    - gpt-5-mini
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 29242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-variable-damage-openai-parity-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-variable-damage-openai-parity-1
+  viewer_curation:
+    repo_path: research/2026-03-25-variable-damage-openai-parity-1/artifacts
+notes: >-
+  VariableDamage OpenAI parity package establishing the plain `gpt-4o-mini`
+  to plain `gpt-5-mini` baseline, then testing whether RC-only helps or harms
+  the cheaper model under uncertainty. Both cells completed in single sessions;
+  package export was rerun once after cell export to resolve an artifact timing
+  race on the AO cell.
