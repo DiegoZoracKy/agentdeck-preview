@@ -1,0 +1,76 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-baseline-1
+title: VariableDamage OpenAI Baseline 1
+status: complete
+question: >-
+  Where does plain GPT-5 Mini land in the VariableDamage baseline graph against
+  Flash, Haiku, and GPT-4o Mini before any OpenAI controller intervention is
+  attempted?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: claude_haiku_4_5_20251001
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_4o_mini
+    provider: openai
+    model: gpt-4o-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_5_mini
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash
+    - claude-haiku-4-5-20251001
+    - gpt-4o-mini
+    - gpt-5-mini
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 28242
+  matches_planned: 72
+  matches_completed: 72
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-variable-damage-openai-baseline-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-variable-damage-openai-baseline-1
+  viewer_curation:
+    repo_path: research/2026-03-25-variable-damage-openai-baseline-1/artifacts
+notes: >-
+  Pilot-sized VariableDamage OpenAI baseline package placing plain GPT-5 Mini
+  into the current Flash/Haiku/Mini baseline graph before any OpenAI
+  controller branch is attempted.

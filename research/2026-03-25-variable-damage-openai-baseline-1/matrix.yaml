@@ -1,0 +1,149 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-baseline-1
+created_at: "2026-03-25T00:00:00Z"
+purpose: >-
+  VariableDamage OpenAI baseline pilot establishing where plain GPT-5 Mini fits
+  relative to the current Flash, Haiku, and GPT-4o Mini baselines before any
+  OpenAI controller intervention is attempted under stochastic damage.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_turn_variant
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first executed VariableDamage OpenAI baseline batch.
+
+player_registry:
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 12
+    retry_delay: 4.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  claude_haiku_4_5_20251001:
+    kind: llm
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    tier: weak
+  gpt_4o_mini:
+    kind: llm
+    provider: openai
+    model: gpt-4o-mini
+    tier: weak
+  gpt_5_mini:
+    kind: llm
+    provider: openai
+    model: gpt-5-mini
+    tier: weak
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - expand_only_if_outcome_or_behavior_is_near_parity_or_mechanistically_novel
+    - use_risk_band_behavior_to_decide_whether_openai_controller_work_is_worthwhile
+    - do_not_infer_rc_helpfulness_from_cost_or_model_family_alone
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package is baseline-only. Analysis must locate GPT-5 Mini in the
+      current VariableDamage ordering and describe policy differences with the
+      risk-band metrics before any OpenAI controller branch is considered.
+    matches_per_cell: 0
+    required_checks:
+      - openai_cost_review
+      - paired_side_swap_review
+      - risk_band_behavior_review
+      - first_lethal_entry_inventory_review
+  phases:
+    - phase_id: P1
+      name: GPT-5 Mini Baseline Placement
+      cell_ids:
+        - p1_c01_gpt5mini_ao_vs_flash_ao
+        - p1_c02_gpt5mini_ao_vs_haiku_ao
+        - p1_c03_gpt5mini_ao_vs_mini_ao
+
+cells:
+  - id: p1_c01_gpt5mini_ao_vs_flash_ao
+    phase: P1
+    question: How does plain GPT-5 Mini compare directly with plain Flash in VariableDamage?
+    intent: Place GPT-5 Mini against the current practical VariableDamage reference baseline.
+    causal_factor: baseline_model_policy
+    fairness_notes: paired side-swap enabled; analysis must report both headline result and risk-band timing differences
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true
+
+  - id: p1_c02_gpt5mini_ao_vs_haiku_ao
+    phase: P1
+    question: How does plain GPT-5 Mini compare directly with plain Haiku in VariableDamage?
+    intent: Test whether GPT-5 Mini cleanly outruns the stronger anthropic baseline under stochastic damage.
+    causal_factor: baseline_model_policy
+    fairness_notes: paired side-swap enabled; analysis must report both headline result and whether Haiku stays behaviorally healthier even if it loses
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    player_b:
+      player_ref: claude_haiku_4_5_20251001
+      config_ref: AO_handshake_only
+      name: Haiku-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true
+
+  - id: p1_c03_gpt5mini_ao_vs_mini_ao
+    phase: P1
+    question: How does plain GPT-5 Mini compare directly with plain GPT-4o Mini in VariableDamage before any controller intervention?
+    intent: Establish the plain OpenAI baseline gap under uncertainty before testing whether RC is helpful or harmful.
+    causal_factor: baseline_model_policy
+    fairness_notes: paired side-swap enabled; analysis must focus on resource timing and first lethal-entry inventory before any RC branch is considered
+    seed_offset: 200
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    player_b:
+      player_ref: gpt_4o_mini
+      config_ref: AO_handshake_only
+      name: Mini-AO
+    matches: 24
+    pilot_matches: 24
+    viewer_priority: true
