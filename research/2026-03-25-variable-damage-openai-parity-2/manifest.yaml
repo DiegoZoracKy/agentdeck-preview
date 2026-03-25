@@ -1,0 +1,72 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-parity-2
+title: VariableDamage OpenAI Parity 2
+status: complete
+question: >-
+  Does `ReasoningController` help premium `gpt-4o` against plain
+  `gpt-5-mini` in VariableDamage, or is the AO baseline already the more
+  informative comparison?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gpt_4o_ao
+    provider: openai
+    model: gpt-4o
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_4o_rc
+    provider: openai
+    model: gpt-4o
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_5_mini_ao
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gpt-4o
+    - gpt-5-mini
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 30242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-variable-damage-openai-parity-2/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-variable-damage-openai-parity-2
+  viewer_curation:
+    repo_path: research/2026-03-25-variable-damage-openai-parity-2/artifacts
+notes: >-
+  VariableDamage OpenAI parity follow-up replacing `gpt-4o-mini` with premium
+  `gpt-4o`, first as a plain AO baseline and then with RC-only, both against
+  plain `gpt-5-mini`. Both cells completed in single sessions; package export
+  was rerun once after a transient artifact-timing race, with no missing or
+  excluded matches in the final export.

@@ -1,0 +1,127 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-parity-2
+created_at: "2026-03-25T00:00:00Z"
+purpose: >-
+  VariableDamage OpenAI premium parity study establishing the plain `gpt-4o`
+  to plain `gpt-5-mini` baseline gap, then testing whether
+  `ReasoningController` helps or harms the premium non-mini model under the
+  same stochastic game and fairness settings.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_handshake_only_turns
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before public writeup if required.
+
+player_registry:
+  gpt_4o:
+    kind: llm
+    provider: openai
+    model: gpt-4o
+    tier: strong
+  gpt_5_mini:
+    kind: llm
+    provider: openai
+    model: gpt-5-mini
+    tier: strong
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - premium_baseline_gap_is_legible
+    - rc_delta_is_behaviorally_legible
+    - premium_cost_is_justified_by_outcome
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package tests whether premium non-mini capability changes the OpenAI
+      RC story in VariableDamage. Analysis must report both the plain baseline
+      and the RC-only intervention with explicit cost framing, because this
+      branch is no longer a cheap-model equalization test.
+    matches_per_cell: 0
+    required_checks:
+      - premium_baseline_gap_review
+      - reasoning_only_intervention_review
+      - cross_model_position_control_review
+      - variable_damage_risk_band_review
+      - paired_side_swap_review
+      - premium_cost_review
+  phases:
+    - phase_id: P1
+      name: Premium Baseline And RC Ladder
+      cell_ids:
+        - p1_c01_gpt4o_ao_vs_gpt5mini_ao
+        - p1_c02_gpt4o_rc_vs_gpt5mini_ao
+
+cells:
+  - id: p1_c01_gpt4o_ao_vs_gpt5mini_ao
+    phase: P1
+    question: How large is the plain-model gap between `gpt-4o` and `gpt-5-mini` in VariableDamage?
+    intent: Establish the premium OpenAI baseline before adding any controller intervention.
+    causal_factor: model_choice
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_4o
+      config_ref: AO_handshake_only
+      name: GPT4o-AO
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 24
+    pilot_matches: 24
+    expansion_target_matches: 48
+    viewer_priority: true
+
+  - id: p1_c02_gpt4o_rc_vs_gpt5mini_ao
+    phase: P1
+    question: Is `ReasoningController` alone enough to make `gpt-4o` more competitive with plain `gpt-5-mini` in VariableDamage?
+    intent: Test whether the premium non-mini model benefits from RC where `gpt-4o-mini` did not.
+    causal_factor: controller_type
+    fairness_notes: paired side-swap enabled; analysis must report both named-player and position-controlled results
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_4o
+      config_ref: RC_handshake_only
+      name: GPT4o-RC
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 24
+    pilot_matches: 24
+    expansion_target_matches: 48
+    viewer_priority: true

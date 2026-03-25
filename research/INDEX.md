@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-25T14:45:12.594866Z
+Last updated: 2026-03-25T17:18:41.768699Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -31,3 +31,4 @@ Last updated: 2026-03-25T14:45:12.594866Z
 | [FixedDamage Baseline Completion 2](2026-03-25-fixed-damage-baseline-completion-2/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash, anthropic:claude-haiku-4-5-20251001, openai:gpt-5-mini | 96/96 | See README |
 | [VariableDamage OpenAI Baseline 1](2026-03-25-variable-damage-openai-baseline-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash, anthropic:claude-haiku-4-5-20251001, openai:gpt-4o-mini, openai:gpt-5-mini | 72/72 | See README |
 | [VariableDamage OpenAI Parity 1](2026-03-25-variable-damage-openai-parity-1/README.md) | complete | VariableDamageGame | openai:gpt-4o-mini, openai:gpt-4o-mini, openai:gpt-5-mini | 48/48 | See README |
+| [VariableDamage OpenAI Parity 2](2026-03-25-variable-damage-openai-parity-2/README.md) | complete | VariableDamageGame | openai:gpt-4o, openai:gpt-4o, openai:gpt-5-mini | 48/48 | See README |
