@@ -1,0 +1,76 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-threshold-1
+title: VariableDamage Threshold 1
+status: complete
+question: >-
+  Can a risk-band-aware HP instruction on top of ReasoningController help
+  Flash-Lite preserve more inventory into lethal states and close more ground
+  against plain Flash in VariableDamage?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_lite_rc_risk
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+    - risk_grounded
+run:
+  seed_base: 31242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-variable-damage-threshold-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-variable-damage-threshold-1
+  viewer_curation:
+    repo_path: research/2026-03-25-variable-damage-threshold-1/artifacts
+notes: >-
+  Completed. The RC control cell finished in one session. The risk-grounded
+  treatment session hung after 14 valid completed matches plus one incomplete
+  partial record with no ended_at/duration. Recovery resumed from seed 31349
+  for the remaining 10 matches in a fresh session, and the incomplete partial
+  was excluded from export by renaming it out of the .json set before package
+  export. The treatment reached 12-12 against Flash-AO, improving materially
+  over the 8-16 RC control while also reducing safe-zone healing, lowering
+  zero-potions first lethal entry, and collapsing position-policy delta.

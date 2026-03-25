@@ -1,0 +1,95 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-baseline-2
+created_at: "2026-03-25T00:00:00Z"
+purpose: >-
+  VariableDamage baseline expansion rerunning plain GPT-5 Mini against plain
+  Flash at `N=48` to clarify the top of the current baseline ordering under
+  stochastic damage.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_turn_variant
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first executed OpenAI baseline expansion writeup.
+
+player_registry:
+  gpt_5_mini:
+    kind: llm
+    provider: openai
+    model: gpt-5-mini
+    tier: strong
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 12
+    retry_delay: 4.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+
+sampling_policy:
+  pilot_matches_per_cell: 48
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 24
+    side_swap_required: true
+  expansion_selection_rules:
+    - top_of_baseline_graph_should_be_decided_by_outcome_and_inventory_timing
+    - use_behavioral_metrics_to_explain_near_parity_if_the_cell_stays_null
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package is a single-cell baseline expansion. It should confirm or
+      soften the current reading that GPT-5 Mini is slightly above Flash in
+      VariableDamage, with first-lethal-entry inventory and second-player
+      conversion carrying as much interpretive weight as the raw win count.
+    matches_per_cell: 0
+    required_checks:
+      - openai_cost_review
+      - paired_side_swap_review
+      - flash_retry_review
+      - first_lethal_entry_inventory_review
+  phases:
+    - phase_id: P1
+      name: GPT-5 Mini vs Flash Expansion
+      cell_ids:
+        - p1_c01_gpt5mini_ao_vs_flash_ao
+
+cells:
+  - id: p1_c01_gpt5mini_ao_vs_flash_ao
+    phase: P1
+    question: Does the pilot-sized GPT-5 Mini edge over plain Flash survive at `N=48` in VariableDamage?
+    intent: Expand the most informative GPT-5 Mini baseline cell rather than rerunning the full package.
+    causal_factor: baseline_model_policy
+    fairness_notes: paired side-swap enabled; analysis must compare outcome, inventory timing, and second-player conversion together
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    player_b:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    matches: 48
+    pilot_matches: 48
+    viewer_priority: true

@@ -1,0 +1,71 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-openai-baseline-2
+title: VariableDamage OpenAI Baseline 2
+status: complete
+question: >-
+  Does the pilot edge from plain GPT-5 Mini over plain Flash hold up at
+  `N=48`, or is the top of the VariableDamage baseline graph effectively
+  parity?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gpt_5_mini
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gpt-5-mini
+    - gemini-2.5-flash
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 32242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-variable-damage-openai-baseline-2/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-variable-damage-openai-baseline-2
+  viewer_curation:
+    repo_path: research/2026-03-25-variable-damage-openai-baseline-2/artifacts
+notes: >-
+  Completed after recovery from multiple interrupted runs. The original session
+  reached 21 valid matches plus one incomplete partial before stopping. A first
+  recovery session completed the missing odd side of seed 32252 and one side of
+  32253 before manual interruption, which created one duplicate even half-pair
+  for seed 32252 and one dead partial. Final recovery then ran exact seed-range
+  chunks for 32253, 32254..32259, and 32260..32265. Two dead partial files and
+  two duplicate even half-pairs were renamed out of the canonical .json set
+  before export. Final result: `Flash-AO` edged `GPT5Mini-AO` `25-23` at `N=48`
+  with a null exact-binomial read, while GPT-5 Mini still held the cleaner
+  inventory-timing policy.

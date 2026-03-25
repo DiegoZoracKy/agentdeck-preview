@@ -1,0 +1,33 @@
+# Phase 1 Run Notes
+
+- Intended cell:
+  - `p1_c01_gpt5mini_ao_vs_flash_ao`
+  - `48` matches with paired side-swap from seed base `32242`
+- Original session:
+  - `session_20260325_151939_845053`
+  - produced `21` valid completed matches
+  - then stopped, leaving one incomplete partial record
+- First recovery attempt:
+  - `session_20260325_170543_ded8b6`
+  - resumed from seed `32252`
+  - completed the missing odd half of seed `32252`
+  - also replayed the even half of seed `32252` and one even half of seed `32253`
+  - then was manually interrupted, leaving one additional dead partial
+- Final recovery:
+  - `session_20260325_171249_55ee93` for seed `32253`, `2` matches
+  - `session_20260325_171249_7bfff1` for seeds `32254..32259`, `12` matches
+  - `session_20260325_171250_9af927` for seeds `32260..32265`, `12` matches
+- Before export, these files were renamed out of the canonical `*.json` set:
+  - dead partials:
+    - `match_3dbcd9ac`
+    - `match_0d7aafde`
+  - duplicate even half-pairs:
+    - `match_d162835e` for seed `32252`
+    - `match_7cca130b` for seed `32253`
+- After pruning, the canonical cell contained exactly `48` completed matches:
+  - two matches for each seed `32242..32265`
+- Export then completed successfully for:
+  - per-cell `results.json`
+  - per-cell `results.csv`
+  - package-level `results.json`
+  - package-level `results.csv`
