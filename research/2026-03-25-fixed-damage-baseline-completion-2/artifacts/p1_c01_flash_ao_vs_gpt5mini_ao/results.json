@@ -1,0 +1,2411 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-03-25-fixed-damage-baseline-completion-2::p1_c01_flash_ao_vs_gpt5mini_ao",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-03-25-fixed-damage-baseline-completion-2/agentdeck_runs/p1_c01_flash_ao_vs_gpt5mini_ao/session_20260325_003744_45161b/records"
+  },
+  "summary": {
+    "total_matches": 48,
+    "decisive_matches": 48,
+    "draws": 0,
+    "win_rates": {
+      "Flash-AO": 0.25,
+      "GPT5Mini-AO": 0.75
+    },
+    "total_cost": 0.7865605000000003,
+    "avg_turns": 22.708333333333332,
+    "avg_duration": 115.22608652710915,
+    "avg_cost": 0.01638667708333334
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 48,
+    "n_decisive": 48,
+    "players": {
+      "Flash-AO": {
+        "wins": 12,
+        "win_rate": 0.25,
+        "ci": [
+          0.1492063367379791,
+          0.3878437280950796
+        ],
+        "p_value": 0.0007172696733945829,
+        "effect_size": -0.5235987755982989,
+        "effect_label": "medium",
+        "is_significant": true
+      },
+      "GPT5Mini-AO": {
+        "wins": 36,
+        "win_rate": 0.75,
+        "ci": [
+          0.6121562719049204,
+          0.8507936632620209
+        ],
+        "p_value": 0.0007172696733945829,
+        "effect_size": 0.5235987755982985,
+        "effect_label": "medium",
+        "is_significant": true
+      }
+    },
+    "pairwise_comparisons": {
+      "Flash-AO_vs_GPT5Mini-AO": {
+        "player_a": "Flash-AO",
+        "player_b": "GPT5Mini-AO",
+        "wins_a": 12,
+        "wins_b": 36,
+        "head_to_head_decisive": 48,
+        "win_rate_a": 0.25,
+        "ci_a": [
+          0.1492063367379791,
+          0.3878437280950796
+        ],
+        "p_value": 0.0007172696733945829,
+        "effect_size": -0.5235987755982989,
+        "effect_label": "medium",
+        "is_significant": true
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 48,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 1090,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 1090,
+      "strict_contract_passes": 1069,
+      "strict_contract_rate": 0.9807339449541285,
+      "recoverable_non_strict": 21,
+      "recoverable_non_strict_rate": 0.01926605504587156,
+      "action_line_rate": 0.9807339449541285,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "Flash-AO": {
+        "turn_attempts": 539,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 539,
+        "strict_contract_passes": 518,
+        "strict_contract_rate": 0.961038961038961,
+        "recoverable_non_strict": 21,
+        "recoverable_non_strict_rate": 0.03896103896103896,
+        "action_line_rate": 0.961038961038961,
+        "reasoning_line_rate": 0.0
+      },
+      "GPT5Mini-AO": {
+        "turn_attempts": 551,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 551,
+        "strict_contract_passes": 551,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 48,
+    "first_player_wins": 36,
+    "first_player_win_rate": 0.75,
+    "second_player_wins": 12,
+    "upset_rate": 0.25,
+    "by_player": {
+      "Flash-AO": {
+        "first_count": 24,
+        "second_count": 24,
+        "wins_as_first": 12,
+        "wins_as_second": 0,
+        "win_rate_as_first": 0.5,
+        "win_rate_as_second": 0.0
+      },
+      "GPT5Mini-AO": {
+        "first_count": 24,
+        "second_count": 24,
+        "wins_as_first": 24,
+        "wins_as_second": 12,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.5
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 48,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 48,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 48,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 48,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 48,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Flash-AO",
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "type": "GeminiPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "GPT5Mini-AO",
+      "provider": "openai",
+      "model": "gpt-5-mini",
+      "type": "GPTPlayer",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_04385e70",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 27249,
+      "duration": 59.89639115333557,
+      "cost": 0.007334199999999978,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "GPT5Mini-AO": 0.006084999999999979
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_09322610",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27245,
+      "duration": 150.5616159439087,
+      "cost": 0.01833719999999997,
+      "player_costs": {
+        "Flash-AO": 0.0020171999999999985,
+        "GPT5Mini-AO": 0.016319999999999973
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_0fcc3d0b",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27242,
+      "duration": 124.78629994392395,
+      "cost": 0.015198699999999997,
+      "player_costs": {
+        "Flash-AO": 0.002626700000000001,
+        "GPT5Mini-AO": 0.012571999999999996
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_20cb7141",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27260,
+      "duration": 99.63887619972229,
+      "cost": 0.01593320000000005,
+      "player_costs": {
+        "Flash-AO": 0.0020172000000000107,
+        "GPT5Mini-AO": 0.01391600000000004
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2a416c60",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 27246,
+      "duration": 87.41181445121765,
+      "cost": 0.01066820000000001,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "GPT5Mini-AO": 0.00941900000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2bae31ff",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27260,
+      "duration": 126.4323058128357,
+      "cost": 0.021136849999999943,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01882224999999993,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2d7b6aa3",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27245,
+      "duration": 138.77577328681946,
+      "cost": 0.017232849999999994,
+      "player_costs": {
+        "GPT5Mini-AO": 0.014918249999999994,
+        "Flash-AO": 0.0023145999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_30b1865d",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27252,
+      "duration": 127.50936102867126,
+      "cost": 0.020510700000000007,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "GPT5Mini-AO": 0.01788400000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_35a0be49",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27264,
+      "duration": 97.67566871643066,
+      "cost": 0.014424699999999985,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "GPT5Mini-AO": 0.011797999999999975
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_35eaeb3f",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27247,
+      "duration": 104.30131006240845,
+      "cost": 0.012375200000000006,
+      "player_costs": {
+        "Flash-AO": 0.0020172000000000002,
+        "GPT5Mini-AO": 0.010358000000000006
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_3ad5c32b",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27264,
+      "duration": 109.45857334136963,
+      "cost": 0.016272850000000186,
+      "player_costs": {
+        "GPT5Mini-AO": 0.013958250000000172,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_3d560808",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 27249,
+      "duration": 113.13864779472351,
+      "cost": 0.016342300000000032,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01432300000000003,
+        "Flash-AO": 0.0020193000000000016
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_408def3d",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27258,
+      "duration": 88.93911743164062,
+      "cost": 0.013066700000000014,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "GPT5Mini-AO": 0.010440000000000005
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_45d52e91",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27256,
+      "duration": 91.53872656822205,
+      "cost": 0.013378849999999935,
+      "player_costs": {
+        "GPT5Mini-AO": 0.011064249999999942,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5287ff87",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 27258,
+      "duration": 128.09137058258057,
+      "cost": 0.021158300000000033,
+      "player_costs": {
+        "GPT5Mini-AO": 0.019139000000000017,
+        "Flash-AO": 0.0020193000000000155
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_52f96b32",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27250,
+      "duration": 97.88276147842407,
+      "cost": 0.016054850000000002,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01374025000000001,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_582f1412",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 27252,
+      "duration": 144.51213884353638,
+      "cost": 0.02401229999999996,
+      "player_costs": {
+        "GPT5Mini-AO": 0.021860999999999964,
+        "Flash-AO": 0.002151299999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5afc5b98",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27253,
+      "duration": 164.1840693950653,
+      "cost": 0.024558849999999903,
+      "player_costs": {
+        "GPT5Mini-AO": 0.02224424999999991,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5c2d86e9",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27256,
+      "duration": 96.25322341918945,
+      "cost": 0.013768700000000036,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "GPT5Mini-AO": 0.01114200000000004
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_5f38150f",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27251,
+      "duration": 102.27798342704773,
+      "cost": 0.01604870000000007,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "GPT5Mini-AO": 0.013422000000000073
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_6144b393",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27253,
+      "duration": 102.60718870162964,
+      "cost": 0.014368699999999915,
+      "player_costs": {
+        "Flash-AO": 0.0026266999999999957,
+        "GPT5Mini-AO": 0.01174199999999992
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_6549d225",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27254,
+      "duration": 93.97594571113586,
+      "cost": 0.011657199999999979,
+      "player_costs": {
+        "Flash-AO": 0.0020171999999999968,
+        "GPT5Mini-AO": 0.009639999999999982
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_7c0425a0",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 19,
+      "outcome": "win",
+      "seed": 27257,
+      "duration": 95.43949484825134,
+      "cost": 0.01617220000000001,
+      "player_costs": {
+        "GPT5Mini-AO": 0.014685000000000004,
+        "Flash-AO": 0.001487200000000008
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8240a270",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27242,
+      "duration": 139.88153433799744,
+      "cost": 0.018000850000000002,
+      "player_costs": {
+        "GPT5Mini-AO": 0.015686250000000002,
+        "Flash-AO": 0.0023146
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8723482a",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27244,
+      "duration": 144.39845991134644,
+      "cost": 0.019480850000000022,
+      "player_costs": {
+        "GPT5Mini-AO": 0.017166250000000022,
+        "Flash-AO": 0.0023145999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8a9bc7f8",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27243,
+      "duration": 102.31762218475342,
+      "cost": 0.012179199999999998,
+      "player_costs": {
+        "Flash-AO": 0.0020171999999999994,
+        "GPT5Mini-AO": 0.010161999999999997
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8c5ccb76",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27262,
+      "duration": 86.94662165641785,
+      "cost": 0.012044700000000047,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "GPT5Mini-AO": 0.009418000000000037
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8f28d015",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27259,
+      "duration": 138.9706630706787,
+      "cost": 0.022628850000000048,
+      "player_costs": {
+        "GPT5Mini-AO": 0.020314250000000034,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_9a53f6d9",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27257,
+      "duration": 106.46636390686035,
+      "cost": 0.01616519999999995,
+      "player_costs": {
+        "Flash-AO": 0.0020172000000000107,
+        "GPT5Mini-AO": 0.014147999999999938
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_9a83dd54",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 27243,
+      "duration": 142.4917755126953,
+      "cost": 0.01805829999999999,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01603899999999999,
+        "Flash-AO": 0.002019299999999999
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_aa2d7906",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27254,
+      "duration": 123.0951600074768,
+      "cost": 0.018316850000000044,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01600225000000005,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_b94b339a",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 27244,
+      "duration": 107.85423064231873,
+      "cost": 0.014022199999999992,
+      "player_costs": {
+        "Flash-AO": 0.001249199999999999,
+        "GPT5Mini-AO": 0.012772999999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bac82d28",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 27261,
+      "duration": 130.96822595596313,
+      "cost": 0.021852250000000198,
+      "player_costs": {
+        "GPT5Mini-AO": 0.019993250000000184,
+        "Flash-AO": 0.0018590000000000134
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_bdc0cf05",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27263,
+      "duration": 85.75275540351868,
+      "cost": 0.013118700000000177,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "GPT5Mini-AO": 0.010492000000000168
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c02aace3",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27250,
+      "duration": 127.42371535301208,
+      "cost": 0.019994699999999997,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000026,
+        "GPT5Mini-AO": 0.017367999999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c7b6c5b9",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27265,
+      "duration": 138.070214509964,
+      "cost": 0.02161484999999992,
+      "player_costs": {
+        "GPT5Mini-AO": 0.019300249999999908,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c9cc83d0",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 27246,
+      "duration": 65.98424220085144,
+      "cost": 0.006870450000000011,
+      "player_costs": {
+        "GPT5Mini-AO": 0.00637225000000001,
+        "Flash-AO": 0.0004982000000000007
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ca0a526b",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27248,
+      "duration": 160.51128458976746,
+      "cost": 0.02437285000000003,
+      "player_costs": {
+        "GPT5Mini-AO": 0.02205825000000003,
+        "Flash-AO": 0.0023146
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d1e7841b",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 27251,
+      "duration": 145.87197160720825,
+      "cost": 0.020778749999999943,
+      "player_costs": {
+        "GPT5Mini-AO": 0.019035249999999948,
+        "Flash-AO": 0.001743499999999995
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d2ec30a6",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27255,
+      "duration": 179.61159706115723,
+      "cost": 0.022800849999999866,
+      "player_costs": {
+        "GPT5Mini-AO": 0.020486249999999873,
+        "Flash-AO": 0.002314599999999993
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_d312886e",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 17,
+      "outcome": "win",
+      "seed": 27263,
+      "duration": 84.2887270450592,
+      "cost": 0.0129046500000001,
+      "player_costs": {
+        "GPT5Mini-AO": 0.011654250000000088,
+        "Flash-AO": 0.0012504000000000126
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ddab7360",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27265,
+      "duration": 168.2722978591919,
+      "cost": 0.018868699999999877,
+      "player_costs": {
+        "Flash-AO": 0.0026267000000000096,
+        "GPT5Mini-AO": 0.016241999999999868
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_df3b8d23",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 27259,
+      "duration": 94.29685997962952,
+      "cost": 0.013495200000000054,
+      "player_costs": {
+        "Flash-AO": 0.0020172000000000107,
+        "GPT5Mini-AO": 0.011478000000000044
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e5ba6789",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27262,
+      "duration": 115.30935192108154,
+      "cost": 0.018612850000000083,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01629825000000007,
+        "Flash-AO": 0.002314600000000014
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ebab876b",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 27261,
+      "duration": 69.10243368148804,
+      "cost": 0.010176200000000024,
+      "player_costs": {
+        "Flash-AO": 0.0012492000000000059,
+        "GPT5Mini-AO": 0.008927000000000018
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_efaf216a",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 20,
+      "outcome": "win",
+      "seed": 27255,
+      "duration": 109.80349135398865,
+      "cost": 0.010447200000000031,
+      "player_costs": {
+        "Flash-AO": 0.0017416999999999988,
+        "GPT5Mini-AO": 0.008705500000000033
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f3b191ea",
+      "players": [
+        "Flash-AO",
+        "GPT5Mini-AO"
+      ],
+      "winner": "Flash-AO",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 27248,
+      "duration": 92.44676494598389,
+      "cost": 0.01397669999999997,
+      "player_costs": {
+        "Flash-AO": 0.002626699999999999,
+        "GPT5Mini-AO": 0.011349999999999971
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Flash-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_fe904154",
+      "players": [
+        "GPT5Mini-AO",
+        "Flash-AO"
+      ],
+      "winner": "GPT5Mini-AO",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 27247,
+      "duration": 125.42713046073914,
+      "cost": 0.01576630000000001,
+      "player_costs": {
+        "GPT5Mini-AO": 0.01374700000000001,
+        "Flash-AO": 0.0020193000000000016
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT5Mini-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    }
+  ],
+  "behavioral_profile": {
+    "schema_version": 2,
+    "game_id": "fixed_damage",
+    "profile_id": "fixed_damage_behavioral",
+    "profile_version": "0.2.0",
+    "coverage": {
+      "matches_total": 48,
+      "matches_evaluable": 48,
+      "turns_total": 1090,
+      "turns_evaluable": 1090
+    },
+    "aggregate_metrics": {
+      "all_attack_match_rate": {
+        "value": 0.0625,
+        "all_attack_matches": 6,
+        "support_matches": 96
+      },
+      "first_potion_profile": {
+        "median_first_potion_hp": 40.0,
+        "first_potion_hp_values": [
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ],
+        "never_used_rate": 0.0625,
+        "never_used_matches": 6,
+        "support_matches": 96
+      },
+      "unused_potions_on_loss_rate": {
+        "value": 0.3125,
+        "losses_with_unused_potions": 15,
+        "support_losses": 48
+      },
+      "state_action_consistency": {
+        "value": 0.8911819887429644,
+        "support_turns": 1066
+      },
+      "position_policy_delta": {
+        "value": 0.0964012410630091,
+        "support_turns": 965
+      },
+      "critical_potion_response_rate": {
+        "value": 0.6016483516483516,
+        "critical_potion_turns": 219,
+        "support_turns": 364,
+        "critical_hp_threshold": 40
+      },
+      "error_recovery_rate": {
+        "value": 0.5625,
+        "recovered_events": 72,
+        "support_events": 128,
+        "critical_hp_threshold": 40
+      },
+      "wasted_full_health_potion_rate": {
+        "value": 0.0,
+        "wasted_full_health_potions": 0,
+        "support_potions": 257,
+        "max_health": 100
+      }
+    },
+    "per_player": {
+      "Flash-AO": {
+        "matches_played": 48,
+        "all_attack_match_rate": {
+          "value": 0.10416666666666667,
+          "all_attack_matches": 5,
+          "support_matches": 48
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 40.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            60,
+            60,
+            60,
+            60,
+            60,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.10416666666666667,
+          "never_used_matches": 5,
+          "support_matches": 48
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.4166666666666667,
+          "losses_with_unused_potions": 15,
+          "support_losses": 36
+        },
+        "state_action_consistency": {
+          "value": 0.8793103448275862,
+          "supported_state_keys": 69,
+          "support_turns": 522
+        },
+        "position_policy_delta": {
+          "value": 0.13211343870393302,
+          "shared_state_buckets": 13,
+          "support_turns": 454
+        },
+        "critical_potion_response_rate": {
+          "value": 0.4971751412429379,
+          "critical_potion_turns": 88,
+          "support_turns": 177,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.43243243243243246,
+          "recovered_events": 32,
+          "support_events": 74,
+          "missed_events": 89,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 118,
+          "max_health": 100
+        }
+      },
+      "GPT5Mini-AO": {
+        "matches_played": 48,
+        "all_attack_match_rate": {
+          "value": 0.020833333333333332,
+          "all_attack_matches": 1,
+          "support_matches": 48
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 40.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            60,
+            60,
+            60,
+            60
+          ],
+          "never_used_rate": 0.020833333333333332,
+          "never_used_matches": 1,
+          "support_matches": 48
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.0,
+          "losses_with_unused_potions": 0,
+          "support_losses": 12
+        },
+        "state_action_consistency": {
+          "value": 0.9025735294117647,
+          "supported_state_keys": 53,
+          "support_turns": 544
+        },
+        "position_policy_delta": {
+          "value": 0.06467259580081837,
+          "shared_state_buckets": 14,
+          "support_turns": 511
+        },
+        "critical_potion_response_rate": {
+          "value": 0.7005347593582888,
+          "critical_potion_turns": 131,
+          "support_turns": 187,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.7407407407407407,
+          "recovered_events": 40,
+          "support_events": 54,
+          "missed_events": 56,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 139,
+          "max_health": 100
+        }
+      }
+    },
+    "state_metrics": {
+      "action_by_state": {
+        "Flash-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 24,
+            "attack_count": 24,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 5,
+            "attack_count": 1,
+            "potion_count": 4,
+            "attack_rate": 0.2,
+            "potion_rate": 0.8
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 15,
+            "attack_count": 7,
+            "potion_count": 8,
+            "attack_rate": 0.4666666666666667,
+            "potion_rate": 0.5333333333333333
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 9,
+            "attack_count": 6,
+            "potion_count": 3,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 16,
+            "attack_count": 7,
+            "potion_count": 9,
+            "attack_rate": 0.4375,
+            "potion_rate": 0.5625
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 20,
+            "attack_count": 16,
+            "potion_count": 4,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 31,
+            "attack_count": 17,
+            "potion_count": 14,
+            "attack_rate": 0.5483870967741935,
+            "potion_rate": 0.45161290322580644
+          },
+          "position=first|hp=50|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 32,
+            "attack_count": 26,
+            "potion_count": 6,
+            "attack_rate": 0.8125,
+            "potion_rate": 0.1875
+          },
+          "position=first|hp=60|potions=1": {
+            "support_turns": 18,
+            "attack_count": 18,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 41,
+            "attack_count": 38,
+            "potion_count": 3,
+            "attack_rate": 0.926829268292683,
+            "potion_rate": 0.07317073170731707
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 8,
+            "attack_count": 8,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 26,
+            "attack_count": 26,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 16,
+            "attack_count": 16,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 10,
+            "attack_count": 10,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 14,
+            "attack_count": 5,
+            "potion_count": 9,
+            "attack_rate": 0.35714285714285715,
+            "potion_rate": 0.6428571428571429
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 4,
+            "attack_count": 1,
+            "potion_count": 3,
+            "attack_rate": 0.25,
+            "potion_rate": 0.75
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 25,
+            "attack_count": 25,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=1": {
+            "support_turns": 3,
+            "attack_count": 1,
+            "potion_count": 2,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 14,
+            "attack_count": 1,
+            "potion_count": 13,
+            "attack_rate": 0.07142857142857142,
+            "potion_rate": 0.9285714285714286
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 8,
+            "attack_count": 8,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 29,
+            "attack_count": 23,
+            "potion_count": 6,
+            "attack_rate": 0.7931034482758621,
+            "potion_rate": 0.20689655172413793
+          },
+          "position=second|hp=40|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 14,
+            "attack_count": 4,
+            "potion_count": 10,
+            "attack_rate": 0.2857142857142857,
+            "potion_rate": 0.7142857142857143
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 25,
+            "attack_count": 25,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=1": {
+            "support_turns": 5,
+            "attack_count": 4,
+            "potion_count": 1,
+            "attack_rate": 0.8,
+            "potion_rate": 0.2
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 16,
+            "attack_count": 15,
+            "potion_count": 1,
+            "attack_rate": 0.9375,
+            "potion_rate": 0.0625
+          },
+          "position=second|hp=60|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 9,
+            "attack_count": 8,
+            "potion_count": 1,
+            "attack_rate": 0.8888888888888888,
+            "potion_rate": 0.1111111111111111
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 17,
+            "attack_count": 15,
+            "potion_count": 2,
+            "attack_rate": 0.8823529411764706,
+            "potion_rate": 0.11764705882352941
+          },
+          "position=second|hp=70|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=1": {
+            "support_turns": 5,
+            "attack_count": 3,
+            "potion_count": 2,
+            "attack_rate": 0.6,
+            "potion_rate": 0.4
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 8,
+            "attack_count": 3,
+            "potion_count": 5,
+            "attack_rate": 0.375,
+            "potion_rate": 0.625
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 24,
+            "attack_count": 16,
+            "potion_count": 8,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          }
+        },
+        "GPT5Mini-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 39,
+            "attack_count": 39,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 14,
+            "attack_count": 14,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 6,
+            "attack_count": 0,
+            "potion_count": 6,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 8,
+            "attack_count": 2,
+            "potion_count": 6,
+            "attack_rate": 0.25,
+            "potion_rate": 0.75
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 20,
+            "attack_count": 20,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 26,
+            "attack_count": 7,
+            "potion_count": 19,
+            "attack_rate": 0.2692307692307692,
+            "potion_rate": 0.7307692307692307
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 23,
+            "attack_count": 7,
+            "potion_count": 16,
+            "attack_rate": 0.30434782608695654,
+            "potion_rate": 0.6956521739130435
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 35,
+            "attack_count": 20,
+            "potion_count": 15,
+            "attack_rate": 0.5714285714285714,
+            "potion_rate": 0.42857142857142855
+          },
+          "position=first|hp=50|potions=0": {
+            "support_turns": 18,
+            "attack_count": 18,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 25,
+            "attack_count": 24,
+            "potion_count": 1,
+            "attack_rate": 0.96,
+            "potion_rate": 0.04
+          },
+          "position=first|hp=60|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 39,
+            "attack_count": 37,
+            "potion_count": 2,
+            "attack_rate": 0.9487179487179487,
+            "potion_rate": 0.05128205128205128
+          },
+          "position=first|hp=70|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 28,
+            "attack_count": 28,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 20,
+            "attack_count": 20,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 8,
+            "attack_count": 0,
+            "potion_count": 8,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 36,
+            "attack_count": 36,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 24,
+            "attack_count": 5,
+            "potion_count": 19,
+            "attack_rate": 0.20833333333333334,
+            "potion_rate": 0.7916666666666666
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 25,
+            "attack_count": 9,
+            "potion_count": 16,
+            "attack_rate": 0.36,
+            "potion_rate": 0.64
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 26,
+            "attack_count": 6,
+            "potion_count": 20,
+            "attack_rate": 0.23076923076923078,
+            "potion_rate": 0.7692307692307693
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 26,
+            "attack_count": 26,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 37,
+            "attack_count": 34,
+            "potion_count": 3,
+            "attack_rate": 0.918918918918919,
+            "potion_rate": 0.08108108108108109
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 27,
+            "attack_count": 25,
+            "potion_count": 2,
+            "attack_rate": 0.9259259259259259,
+            "potion_rate": 0.07407407407407407
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 24,
+            "attack_count": 24,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          }
+        }
+      },
+      "scarcity_action_profile": {
+        "Flash-AO": {
+          "0": {
+            "support_turns": 122,
+            "attack_count": 122,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 120,
+            "attack_count": 87,
+            "potion_count": 33,
+            "attack_rate": 0.725,
+            "potion_rate": 0.275
+          },
+          "2": {
+            "support_turns": 107,
+            "attack_count": 65,
+            "potion_count": 42,
+            "attack_rate": 0.6074766355140186,
+            "potion_rate": 0.3925233644859813
+          },
+          "3": {
+            "support_turns": 190,
+            "attack_count": 147,
+            "potion_count": 43,
+            "attack_rate": 0.7736842105263158,
+            "potion_rate": 0.22631578947368422
+          }
+        },
+        "GPT5Mini-AO": {
+          "0": {
+            "support_turns": 135,
+            "attack_count": 135,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 68,
+            "attack_count": 22,
+            "potion_count": 46,
+            "attack_rate": 0.3235294117647059,
+            "potion_rate": 0.6764705882352942
+          },
+          "2": {
+            "support_turns": 120,
+            "attack_count": 74,
+            "potion_count": 46,
+            "attack_rate": 0.6166666666666667,
+            "potion_rate": 0.38333333333333336
+          },
+          "3": {
+            "support_turns": 228,
+            "attack_count": 181,
+            "potion_count": 47,
+            "attack_rate": 0.793859649122807,
+            "potion_rate": 0.20614035087719298
+          }
+        }
+      }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "Flash-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.41666666666666663,
+                "support_turns": 13,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 9,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 0.25,
+                  "potion_rate": 0.75,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=30|potions=2",
+                "delta": 0.3660714285714286,
+                "support_turns": 30,
+                "first": {
+                  "bucket_key": "position=first|hp=30|potions=2",
+                  "attack_rate": 0.4375,
+                  "potion_rate": 0.5625,
+                  "support_turns": 16,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=30|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=30|potions=2",
+                  "attack_rate": 0.07142857142857142,
+                  "potion_rate": 0.9285714285714286,
+                  "support_turns": 14,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=30|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.33333333333333337,
+                "support_turns": 50,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 26,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.Flash-AO.position=second|hp=80|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=40|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 8,
+                "attack_count": 4,
+                "potion_count": 4,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=40|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 8,
+                "attack_count": 4,
+                "potion_count": 4,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=first|hp=30|potions=2|self=ATTACK|opp=POTION",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              }
+            ]
+          }
+        },
+        "GPT5Mini-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.3406593406593406,
+                "support_turns": 61,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 0.5714285714285714,
+                  "potion_rate": 0.42857142857142855,
+                  "support_turns": 35,
+                  "source_path": "state_metrics.action_by_state.GPT5Mini-AO.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 0.23076923076923078,
+                  "potion_rate": 0.7692307692307693,
+                  "support_turns": 26,
+                  "source_path": "state_metrics.action_by_state.GPT5Mini-AO.position=second|hp=40|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.25,
+                "support_turns": 10,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 0.25,
+                  "potion_rate": 0.75,
+                  "support_turns": 8,
+                  "source_path": "state_metrics.action_by_state.GPT5Mini-AO.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.GPT5Mini-AO.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=30|potions=2",
+                "delta": 0.060897435897435875,
+                "support_turns": 50,
+                "first": {
+                  "bucket_key": "position=first|hp=30|potions=2",
+                  "attack_rate": 0.2692307692307692,
+                  "potion_rate": 0.7307692307692307,
+                  "support_turns": 26,
+                  "source_path": "state_metrics.action_by_state.GPT5Mini-AO.position=first|hp=30|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=30|potions=2",
+                  "attack_rate": 0.20833333333333334,
+                  "potion_rate": 0.7916666666666666,
+                  "support_turns": 24,
+                  "source_path": "state_metrics.action_by_state.GPT5Mini-AO.position=second|hp=30|potions=2"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=second|hp=40|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 4,
+                "attack_count": 2,
+                "potion_count": 2,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=40|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 0.5,
+                "support_turns": 4,
+                "attack_count": 2,
+                "potion_count": 2,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=first|hp=40|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
+    },
+    "quality_flags": {
+      "complete": true,
+      "unsupported_metrics": []
+    }
+  }
+}

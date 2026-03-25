@@ -1,0 +1,122 @@
+schema_version: 1
+experiment_id: 2026-03-25-fixed-damage-baseline-completion-2
+created_at: "2026-03-25T00:00:00Z"
+purpose: >-
+  FixedDamage AO-only completion package filling the last missing direct
+  baseline edges against GPT-5 Mini so the FixedDamage plain-model graph is
+  fully closed.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_action_only_turn
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before the first public writeup if a frozen repo hash is required.
+
+player_registry:
+  gemini_2_5_flash:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash
+    tier: weak
+    max_retries: 12
+    retry_delay: 4.0
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  claude_haiku_4_5_20251001:
+    kind: llm
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    tier: weak
+  gpt_5_mini:
+    kind: llm
+    provider: openai
+    model: gpt-5-mini
+    tier: weak
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+
+sampling_policy:
+  pilot_matches_per_cell: 48
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 24
+    side_swap_required: true
+  expansion_selection_rules:
+    - remaining_fixed_damage_plain_edges_are_filled
+    - fixed_damage_plain_graph_is_fully_closed
+    - no_new_intervention_branch_is_implied_without_new_failure_evidence
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package is baseline-only. Analysis must close the remaining plain AO
+      graph edges and compare them against the already completed FixedDamage and
+      VariableDamage baseline ladders, but must not reopen FixedDamage
+      intervention work.
+    matches_per_cell: 0
+    required_checks:
+      - fixed_damage_plain_graph_completion_review
+      - cross_provider_position_control_review
+      - paired_side_swap_review
+  phases:
+    - phase_id: P1
+      name: GPT-5 Mini Baseline Completion
+      cell_ids:
+        - p1_c01_flash_ao_vs_gpt5mini_ao
+        - p1_c02_haiku_ao_vs_gpt5mini_ao
+
+cells:
+  - id: p1_c01_flash_ao_vs_gpt5mini_ao
+    phase: P1
+    question: How does plain Flash compare to plain GPT-5 Mini in FixedDamage before any controller or prompt-stack intervention?
+    intent: Close the remaining Gemini-vs-GPT-5 Mini baseline edge so the FixedDamage plain-model graph is complete.
+    causal_factor: baseline_model_policy
+    fairness_notes: paired side-swap enabled; analysis must report both raw and position-controlled results, with special attention to second-player wins and cost asymmetry
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash
+      config_ref: AO_handshake_only
+      name: Flash-AO
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 48
+    pilot_matches: 48
+    viewer_priority: true
+
+  - id: p1_c02_haiku_ao_vs_gpt5mini_ao
+    phase: P1
+    question: How does plain Haiku compare to plain GPT-5 Mini in FixedDamage before any controller or prompt-stack intervention?
+    intent: Close the remaining Anthropic-vs-GPT-5 Mini baseline edge and show whether Haiku's seat-distorted FixedDamage policy still competes with GPT-5 Mini directly.
+    causal_factor: baseline_model_policy
+    fairness_notes: paired side-swap enabled; analysis must report both raw and position-controlled results, with special attention to seat-conditioned reversals
+    seed_offset: 100
+    game:
+      information_level: partial
+    player_a:
+      player_ref: claude_haiku_4_5_20251001
+      config_ref: AO_handshake_only
+      name: Haiku-AO
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 48
+    pilot_matches: 48
+    viewer_priority: true

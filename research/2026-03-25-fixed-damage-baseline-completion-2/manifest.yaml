@@ -1,0 +1,70 @@
+schema_version: 1
+experiment_id: 2026-03-25-fixed-damage-baseline-completion-2
+title: FixedDamage Baseline Completion 2
+status: complete
+question: >-
+  How do the remaining plain-model FixedDamage matchups against GPT-5 Mini
+  resolve head-to-head, and does that fully close the plain AO baseline graph
+  for the FixedDamage program?
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: claude_haiku_4_5_20251001_ao
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    controller: ActionOnlyController
+    renderer: TextRenderer
+  - id: gpt_5_mini_ao
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash
+    - claude-haiku-4-5-20251001
+    - gpt-5-mini
+  controllers:
+    - ActionOnlyController
+  prompt_cadence:
+    - handshake_only
+run:
+  seed_base: 27242
+  matches_planned: 96
+  matches_completed: 96
+  concurrency: 1
+  max_turns: 30
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-fixed-damage-baseline-completion-2/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-fixed-damage-baseline-completion-2
+  viewer_curation:
+    repo_path: research/2026-03-25-fixed-damage-baseline-completion-2/artifacts
+notes: >-
+  AO-only FixedDamage baseline completion package closing the remaining direct
+  GPT-5 Mini edges against plain Flash and plain Haiku. Canonical exports use
+  the clean standalone c01 and c02 sessions only; the interrupted phase-run
+  duplicate c02 session was moved to notes/discarded_sessions/ before export.
