@@ -34,7 +34,7 @@ python scripts/research_package.py \
   --question "Your research question here"
 ```
 
-## 2. Fill The Package Contract
+### 2. Fill The Package Contract
 
 At minimum:
 - set `manifest.yaml`
@@ -50,7 +50,7 @@ Each cell should define at minimum:
 - `id`
 - `phase`
 
-## 3. Add The Package-Local Runner
+### 3. Add The Package-Local Runner
 
 For matrix-based studies, start from the template runner:
 
@@ -61,7 +61,7 @@ python research/YYYY-MM-DD-your-experiment/scripts/run_experiment.py --list-cell
 The template is intentionally package-local. Keep experiment execution logic in
 the package, not in framework core.
 
-## 4. Run Cells
+### 4. Run Cells
 
 Typical patterns:
 
@@ -77,7 +77,7 @@ Recordings should land under:
 research/YYYY-MM-DD-your-experiment/agentdeck_runs/<cell_id>/session_*/records/
 ```
 
-## 5. Export Cell Artifacts
+### 5. Export Cell Artifacts
 
 Use the shared exporter instead of package-local export helpers:
 
@@ -103,7 +103,7 @@ This writes canonical cell artifacts under:
 research/YYYY-MM-DD-your-experiment/artifacts/<cell_id>/
 ```
 
-## 6. Export The Top-Level Package
+### 6. Export The Top-Level Package
 
 After cell artifacts exist, aggregate the package:
 
@@ -114,11 +114,11 @@ python scripts/research_export.py \
   --no-generated-at
 ```
 
-Package aggregation prefers canonical `source.recordings_dir(s)` from cell
-artifacts when they exist, and otherwise falls back to discovered session
-recordings.
+Package aggregation merges canonical `source.recordings_dir(s)` from cell
+artifacts with discovered session recordings, while preferring canonical
+sources first when both exist.
 
-## 7. Validate And Index
+### 7. Validate And Index
 
 Before committing:
 
@@ -132,7 +132,7 @@ This validates:
 - index consistency
 - completed-package factual block expectations
 
-## 8. Write Analysis And Recordings Pointers
+### 8. Write Analysis And Recordings Pointers
 
 Keep the narrative human-owned:
 - update `analysis.md`

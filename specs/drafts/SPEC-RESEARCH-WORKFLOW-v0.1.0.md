@@ -2,7 +2,7 @@
 
 > Status: Draft
 > Last Updated: 2026-03-26
-> Implementation: 🚧 Planned
+> Implementation: ✅ Implemented (`scripts/research_export.py`, `research/_templates/scripts/run_experiment.py`)
 > Authors: Codex
 > Audience: Research engineers, experiment authors, contributors
 
@@ -50,8 +50,9 @@
   - export selected cells into `artifacts/<cell_id>/results.json` and `results.csv`
 - `--package`:
   - export top-level package `results.json` and `results.csv`
-  - aggregate canonical `source.recordings_dir(s)` from cell artifacts when present
-  - otherwise fall back to discovered `agentdeck_runs/<cell_id>/session_*/records`
+  - merge canonical `source.recordings_dir(s)` from cell artifacts with discovered
+    `agentdeck_runs/<cell_id>/session_*/records`
+  - prefer canonical cell-artifact sources first when both exist
 
 ### 4.3 Minimal Matrix Contract
 The supported shared workflow assumes these `matrix.yaml` sections exist:
@@ -87,7 +88,8 @@ The workflow MUST NOT require model/config registries for export-only operations
   - list cells
   - export a selected cell from discovered session recordings
   - export a package from canonical cell artifacts
-  - fall back to session discovery when cell artifacts are absent
+  - merge canonical and discovered sources, and still export from discovered
+    session recordings when cell artifacts are absent
 - Verify duplicate recordings dirs are deduplicated.
 - Verify invalid cell selection and missing matrix files fail fast.
 

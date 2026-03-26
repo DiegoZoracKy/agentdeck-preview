@@ -19,7 +19,7 @@ parallel execution.
 
 ## Quick Start Examples
 
-### 0. Zero-Dependency Mock Demo (`mock_demo.py`)
+### 1. Zero-Dependency Mock Demo (`mock_demo.py`)
 
 **Purpose**: Verify your install without any API keys or SDKs.
 
@@ -35,7 +35,7 @@ python examples/mock_demo.py
 
 ---
 
-### 1. Build Your First Game (`first_game_walkthrough.py`)
+### 2. Build Your First Game (`first_game_walkthrough.py`)
 
 **Purpose**: Author a tiny turn-based game, run it with deterministic mock players, and replay the recording.
 
@@ -51,7 +51,7 @@ python examples/first_game_walkthrough.py
 
 ---
 
-### 2. Minimal Configuration (`minimal_experiment.py`)
+### 3. Minimal Configuration (`minimal_experiment.py`)
 
 **Purpose**: Demonstrate the simplest possible setup for running LLM agent experiments.
 
@@ -76,7 +76,7 @@ python examples/minimal_experiment.py
 
 ---
 
-### 3. Spectator Monitoring (`spectator_example.py`)
+### 4. Spectator Monitoring (`spectator_example.py`)
 
 **Purpose**: Show how to use spectators for experiment monitoring and analysis.
 
@@ -98,7 +98,7 @@ python examples/spectator_example.py
 
 ---
 
-### 4. Parallel Execution (`test_parallel_execution.py`)
+### 5. Parallel Execution (`test_parallel_execution.py`)
 
 **Purpose**: Demonstrate parallel match execution with configurable concurrency.
 
@@ -123,7 +123,7 @@ python examples/test_parallel_execution.py
 
 ---
 
-### 5. Replay Engine (`replay_minimal.py`)
+### 6. Replay Engine (`replay_minimal.py`)
 
 **Purpose**: Replay a previously recorded match with full lifecycle observation.
 
