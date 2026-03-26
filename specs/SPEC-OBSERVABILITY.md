@@ -112,13 +112,22 @@ These fields enable faithful match replay per SPEC-REPLAY and support A/B testin
 {
     "mechanic": "turn_based",           # or "simultaneous", "quiz", etc.
     "phase_index": 0,                   # zero-based progression counter
+    "turn_index": 0,                    # alias for phase_index
     "state_before": {...},              # deep copy
     "state_after": {...},               # deep copy
     # Optional mechanic annotations:
     "player": "Alice",
-    "action": "ATTACK",                 # action string (JSON-serializable)
-    "reasoning": "...",                 # optional reasoning text
-    "metadata": {...},                  # action metadata (deep-copied)
+    "action": {
+        "action": "ATTACK",
+        "reasoning": "...",
+        "metadata": {...},
+        "raw_response": "ACTION: ATTACK",
+    },
+    "prompt_text": "...",               # optional prompt transcript fields
+    "response_text": "...",
+    "prompt_blocks": [...],
+    "controller_metadata": {...},
+    "usage_info": {...},
     "actions": {"Alice": "...", ...},   # simultaneous patterns
     "response_times": {"Alice": 1.2},   # quiz/simul helpers
     "turn_context": {...},              # richer metadata
@@ -263,7 +272,7 @@ This keeps game code to "one-line emissions."
 
 ### 8.1 Contract
 
-EventFactory provides centralized event creation for TurnLoop, ensuring standardized GAMEPLAY event structure and metadata consistency.
+EventFactory provides structured event construction helpers for mechanics and games. `MatchRuntime.record_turn()` remains the canonical live GAMEPLAY emission path, while `EventFactory.turn()` mirrors that payload shape for direct construction and tests.
 
 ```python
 class EventFactory:
@@ -286,7 +295,7 @@ class EventFactory:
         state_after: Dict[str, Any],
         turn_context: TurnContext,
     ) -> Event:
-        """Create the standardized GAMEPLAY event for a turn.
+        """Create the standardized GAMEPLAY event payload for a turn.
 
         Args:
             player: Player who acted
@@ -299,16 +308,21 @@ class EventFactory:
             Event with:
                 type: "gameplay"
                 data: {
-                    match_id, player, action (str), reasoning, metadata,
+                    match_id, player, mechanic, phase_index, turn_index,
+                    action: {
+                        action, reasoning, metadata, raw_response
+                    },
                     state_before, state_after, turn_context,
-                    mechanic: "turn_based", phase_index
+                    prompt_text, response_text, prompt_blocks,
+                    controller_metadata, controller_format,
+                    renderer_output, usage_info
                 }
                 context: {match_id, phase_index, turn_index}
 
         Guarantees:
-            - Extracts action.action string for JSON-serializability
+            - Preserves the canonical nested `action` payload used by live turn recording
             - Deep copies state_before and state_after (SPEC-GAME-MECHANIC-TURN-BASED EC1)
-            - Deep copies action.metadata to prevent mutations
+            - Deep copies action metadata and prompt metadata to prevent mutations
             - Sets mechanic="turn_based" (SPEC-GAME-MECHANIC-TURN-BASED EC2)
             - Sets phase_index = turn_context.turn_index (SPEC-GAME-MECHANIC-TURN-BASED EC3)
         """
@@ -318,10 +332,14 @@ class EventFactory:
                 "match_id": self._match_id,
                 "mechanic": "turn_based",
                 "phase_index": turn_context.turn_index,
+                "turn_index": turn_context.turn_index,
                 "player": player,
-                "action": action.action,  # Extract action string (JSON-serializable)
-                "reasoning": action.reasoning if hasattr(action, 'reasoning') else None,
-                "metadata": copy.deepcopy(action.metadata) if hasattr(action, 'metadata') else {},
+                "action": {
+                    "action": action.action,
+                    "reasoning": action.reasoning if hasattr(action, 'reasoning') else None,
+                    "metadata": copy.deepcopy(action.metadata) if hasattr(action, 'metadata') else {},
+                    "raw_response": action.raw_response if hasattr(action, 'raw_response') else None,
+                },
                 "state_before": copy.deepcopy(state_before),
                 "state_after": copy.deepcopy(state_after),
                 "turn_context": turn_context.to_dict() if hasattr(turn_context, 'to_dict') else {},
@@ -377,30 +395,27 @@ EventFactory is bound to TurnLoop per match (see SPEC-GAME-MECHANIC-TURN-BASED �
 # Console creates TurnLoop with match context
 turn_loop = TurnLoop(game, console, players, match_context)
 
-# TurnLoop uses event_factory.turn() to create standardized GAMEPLAY events
-turn_event = self.event_factory.turn(
+# TurnLoop records gameplay through the runtime helper
+self.runtime.record_turn(
     player=current_player_name,
-    action=action,
     state_before=adapter.before,
     state_after=final_state,
+    action=action,
     turn_context=turn_context,
 )
 
-# TurnLoop emits turn event via console
-console.emit_event(turn_event)
-
-# Games use event_factory.custom() for domain events (via GameEventEmitter)
+# Games use event_factory.custom() when they need prebuilt domain Event objects
 custom_events = game.get_events(state_before, player, action)
 for event in custom_events:
-    console.emit_event(event)
+    runtime.emit_event(event.type, **event.data)
 ```
 
 ### 8.3 Design Rationale
 
-- **Centralized Event Creation**: EventFactory ensures all GAMEPLAY events have consistent structure (mechanic, phase_index, deep-copied states)
+- **Canonical Live Path**: `MatchRuntime.record_turn()` owns live GAMEPLAY emission so recorder, replay, and observers see one consistent payload shape.
+- **Structured Helper Surface**: EventFactory still provides reusable helpers for direct event construction and custom-domain events.
 - **Mutation Prevention**: Deep-copying states and metadata prevents spectator mutations from corrupting recordings (SPEC-GAME-MECHANIC-TURN-BASED EC1)
-- **Metadata Injection**: Automatically injects match_id and phase_index, reducing boilerplate in TurnLoop
-- **Separation of Concerns**: TurnLoop delegates event creation to EventFactory, keeping turn execution logic focused
+- **Metadata Injection**: Automatically injects match_id and phase_index, reducing boilerplate for direct event construction
 
 ---
 
@@ -486,12 +501,18 @@ This schema is consistent across MatchResult objects, MATCH_END events, and reco
 |-------|------|----------|-------|
 | `mechanic` | str | ✓ | `"turn_based"`, `"simultaneous"`, `"quiz"`, etc. |
 | `phase_index` | int | ✓ | Zero-based canonical counter. |
+| `turn_index` | int | ✓ | Alias for `phase_index`. |
 | `state_before` | Dict | ✓ | Deep copy for replay. |
 | `state_after` | Dict | ✓ | Deep copy for replay. |
 | `player` | str | Optional | Present in sequential mechanics. |
-| `action` | str | Optional | Action string (JSON-serializable, extracted from ActionResult). |
-| `reasoning` | str | Optional | Reasoning text from ActionResult. |
-| `metadata` | Dict | Optional | Action metadata (deep-copied from ActionResult). |
+| `action` | Dict | Optional | Canonical action object with `action`, `reasoning`, `metadata`, and optional `raw_response`. |
+| `prompt_text` | str | Optional | Prompt transcript text when available. |
+| `response_text` | str | Optional | Raw model response when available. |
+| `prompt_blocks` | List[Dict] | Optional | PromptBuilder metadata when available. |
+| `controller_metadata` | Dict | Optional | Parsed controller metadata when available. |
+| `controller_format` | str | Optional | Controller format instructions when available. |
+| `usage_info` | Dict | Optional | Token/cost/latency payload when available. |
+| `renderer_output` | Dict | Optional | Renderer metadata when available. |
 | `actions` | Dict[str, str] | Optional | Simultaneous style. |
 | `response_times` | Dict[str, float] | Optional | Quiz/simul metadata. |
 | `turn_context` / `round_context` | Dict | Optional | Mechanic-specific context dictionaries. |

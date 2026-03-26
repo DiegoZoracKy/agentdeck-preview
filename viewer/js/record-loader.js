@@ -89,7 +89,12 @@ const RecordLoader = {
    */
   async loadFromFile(file) {
     const text = await file.text();
-    const json = JSON.parse(text);
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (_error) {
+      throw new Error('Invalid JSON format');
+    }
     return this.load(json);
   },
 

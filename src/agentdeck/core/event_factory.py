@@ -26,14 +26,37 @@ class EventFactory:
         """Create the standardized turn event payload."""
         turn_payload = {
             "match_id": self.match_id,
+            "mechanic": "turn_based",
+            "phase_index": turn_context.turn_index,
+            "turn_index": turn_context.turn_index,
             "player": player,
-            "action": action.action,
-            "reasoning": action.reasoning,
-            "metadata": copy.deepcopy(action.metadata) if action.metadata else None,
+            "action": {
+                "action": action.action,
+                "reasoning": action.reasoning,
+                "metadata": copy.deepcopy(action.metadata) if action.metadata else {},
+                "raw_response": action.raw_response,
+            },
             "state_before": copy.deepcopy(state_before),
             "state_after": copy.deepcopy(state_after),
             "turn_context": turn_context.to_dict(),
         }
+        if action.raw_response:
+            turn_payload["response_text"] = action.raw_response
+        if action.metadata:
+            if "raw_prompt" in action.metadata:
+                turn_payload["prompt_text"] = action.metadata["raw_prompt"]
+            if "prompt_blocks" in action.metadata:
+                turn_payload["prompt_blocks"] = copy.deepcopy(action.metadata["prompt_blocks"])
+            if "controller_metadata" in action.metadata:
+                turn_payload["controller_metadata"] = copy.deepcopy(
+                    action.metadata["controller_metadata"]
+                )
+            if "controller_format" in action.metadata:
+                turn_payload["controller_format"] = action.metadata["controller_format"]
+            if "usage_info" in action.metadata:
+                turn_payload["usage_info"] = copy.deepcopy(action.metadata["usage_info"])
+            if "renderer_output" in action.metadata:
+                turn_payload["renderer_output"] = copy.deepcopy(action.metadata["renderer_output"])
         context: EventContext = cast(
             EventContext,
             {
@@ -42,8 +65,6 @@ class EventFactory:
                 "turn_index": turn_context.turn_index,
             },
         )
-        turn_payload["mechanic"] = "turn_based"
-        turn_payload["phase_index"] = turn_context.turn_index
         return Event(type="gameplay", data=turn_payload, context=context)
 
     def custom(
