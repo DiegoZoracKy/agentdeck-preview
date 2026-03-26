@@ -47,19 +47,19 @@ Those live in separate internal planning.
 - [x] Update `research/INDEX.md` and arc-level READMEs to reflect the completed two-arc picture
 
 ### 3. Docs & Examples Productization
-- [ ] README first-touch pass:
+- [x] README first-touch pass:
   - make AgentDeck's primary promise explicit: bring an idea, turn it into a runnable, replayable, analyzable behavioral experiment
   - reduce early overload from deep research detail
   - align wording with beta / preview release posture
-- [ ] Top-level docs pass for consistency with the completed two-arc research picture
-- [ ] "How to run a study" guide for external users
-- [ ] Examples pass:
+- [x] Top-level docs pass for consistency with the completed two-arc research picture
+- [x] "How to run a study" guide for external users
+- [x] Examples pass:
   - confirm a clean progression across `mock_demo.py`, `first_game_walkthrough.py`, `minimal_experiment.py`, replay / spectator workflows
   - ensure `examples/README.md` reflects the intended onboarding ladder
-- [ ] Minimal `run_experiment.py` template for research packages, without promoting package-specific execution logic into framework core
+- [x] Minimal `run_experiment.py` template for research packages, without promoting package-specific execution logic into framework core
 
 ### 4. Research Workflow Productization
-- [ ] Ship one supported research CLI workflow for cell export and package aggregation on matrix-based studies, reducing reliance on per-package export boilerplate
+- [x] Ship one supported research CLI workflow for cell export and package aggregation on matrix-based studies, reducing reliance on per-package export boilerplate
   - Scope:
     - `agentdeck research export --cell <id> --matrix matrix.yaml`
     - `agentdeck research aggregate --matrix matrix.yaml`
@@ -72,8 +72,8 @@ Those live in separate internal planning.
     - eliminate per-package `export_cell_results.py` and `export_package_results.py` boilerplate entirely
   - Non-goal:
     - moving `run_experiment.py` execution logic into the framework baseline
-- [ ] Document `matrix.yaml` as a stable research contract with a minimal template
-- [ ] Ensure the documented workflow across `research_export.py`, `research_validate.py`, `research_index.py`, and `research_package.py` is coherent and externally legible
+- [x] Document `matrix.yaml` as a stable research contract with a minimal template
+- [x] Ensure the documented workflow across `research_export.py`, `research_validate.py`, `research_index.py`, and `research_package.py` is coherent and externally legible
 
 ## Release Gates
 
@@ -81,8 +81,8 @@ Those live in separate internal planning.
 - [x] Main-arc final experiment committed and validated
 - [x] VariableDamage Arc 1 summary written
 - [x] Cross-game comparison document written
-- [ ] Supported research workflow shipped and documented for the common matrix-based export/aggregation path
-- [ ] README, examples, and release-facing docs tell a consistent product story
+- [x] Supported research workflow shipped and documented for the common matrix-based export/aggregation path
+- [x] README, examples, and release-facing docs tell a consistent product story
 
 ## Optional Appendix (Not A Beta Gate)
 - [ ] `GPT-5-AO` vs `Flash-AO` at `N=24`
