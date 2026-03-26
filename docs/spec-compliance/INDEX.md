@@ -1,44 +1,113 @@
-# Spec Compliance Ledger
+# Spec Compliance Closeout
 
-Status: Wave 6 complete
-Plan: [spec-compliance-audit-plan.md](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance-audit-plan.md)
+Last updated: 2026-03-26
+Status: Complete
 
-## Purpose
-This ledger records the outcome of the spec-compliance assessment for each release-relevant spec.
+## Scope
 
-## Verdict Scale
-- `compliant`
-- `mostly compliant`
-- `partial`
-- `drifted`
-- `blocked`
+This closeout records the final pre-release spec-compliance sweep across the active AgentDeck contract surface.
 
-## Audit Units
+Audited areas:
+- Core facade and execution kernel
+- Research workflow, experiment packaging, and behavioral scoring
+- Game examples and runtime helpers
+- Observability, replay, and viewer surface
+- Provider integrations, pricing, prompt builder, and renderer
 
-| Spec | Wave | Verdict | Blockers | Notes |
-|------|------|---------|----------|-------|
-| [SPEC.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC.md) | 1 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC.md) |
-| [SPEC-AGENTDECK.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-AGENTDECK.md) | 2 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-AGENTDECK.md) |
-| [SPEC-CONSOLE.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-CONSOLE.md) | 2 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-CONSOLE.md) |
-| [SPEC-GAME.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-GAME.md) | 2 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-GAME.md) |
-| [SPEC-GAME-MECHANIC-TURN-BASED.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-GAME-MECHANIC-TURN-BASED.md) | 2 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-GAME-MECHANIC-TURN-BASED.md) |
-| [SPEC-MATCH-RUNTIME.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-MATCH-RUNTIME.md) | 2 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-MATCH-RUNTIME.md) |
-| [SPEC-PARALLEL.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-PARALLEL.md) | 2 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-PARALLEL.md) |
-| [SPEC-PLAYER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-PLAYER.md) | 3 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-PLAYER.md) |
-| [SPEC-CONTROLLER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-CONTROLLER.md) | 3 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-CONTROLLER.md) |
-| [SPEC-PROMPT-BUILDER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-PROMPT-BUILDER.md) | 3 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-PROMPT-BUILDER.md) |
-| [SPEC-RENDERER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-RENDERER.md) | 3 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-RENDERER.md) |
-| [SPEC-LLM.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-LLM.md) | 3 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-LLM.md) |
-| [SPEC-PRICING.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-PRICING.md) | 3 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-PRICING.md) |
-| [SPEC-OBSERVABILITY.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-OBSERVABILITY.md) | 4 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-OBSERVABILITY.md) |
-| [SPEC-SPECTATOR.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-SPECTATOR.md) | 4 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-SPECTATOR.md) |
-| [SPEC-MONITOR.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-MONITOR.md) | 4 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-MONITOR.md) |
-| [SPEC-RECORDER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-RECORDER.md) | 4 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-RECORDER.md) |
-| [SPEC-REPLAY.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-REPLAY.md) | 4 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-REPLAY.md) |
-| [SPEC-VIEWER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-VIEWER.md) | 4 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-VIEWER.md) |
-| [SPEC-RESEARCH.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-RESEARCH.md) | 5 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-RESEARCH.md) |
-| [SPEC-RESEARCH-EXPERIMENT.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-RESEARCH-EXPERIMENT.md) | 5 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-RESEARCH-EXPERIMENT.md) |
-| [SPEC-RESEARCH-PACKAGER.md](/home/diegozoracky/dev/agentdeck-preview/specs/SPEC-RESEARCH-PACKAGER.md) | 5 | compliant | 0 | [note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/SPEC-RESEARCH-PACKAGER.md) |
+## Final Verdict
 
-## Wave 6 Public Surface
-- [Public Surface Alignment Note](/home/diegozoracky/dev/agentdeck-preview/docs/spec-compliance/WAVE-6-PUBLIC-SURFACE.md)
+The active spec surface is release-clean for the pre-release branch:
+- no active draft specs remain under `specs/`
+- implemented specs now live in `specs/` rather than `specs/drafts/`
+- active spec headers no longer advertise planned or pending implementations
+- the audited code paths match the shipped spec contracts after targeted drift fixes
+- spec invariants touched in the sweep are now guarded by targeted tests
+
+## Key Fixes Applied
+
+### Spec Surface Cleanup
+- Promoted shipped research specs into `specs/`
+- Finalized shipped game and behavioral specs
+- Archived unshipped spec proposals under `docs/archive/spec-proposals/`
+- Removed the last active draft spec from `specs/drafts/`
+- Corrected stale status/version rows in `specs/SPEC.md`
+
+### Research And Behavioral Contracts
+- Added workflow/export invariants for matrix-aware package export
+- Added deterministic and serialization checks for behavioral scoring
+- Tightened packager/provider inference coverage
+
+### Runtime And Game Contracts
+- Added dedicated `MatchRuntime` contract tests
+- Closed VariableDamage game edge-case gaps
+- Corrected runtime/spec wording drift around event emission helpers
+
+### Observability, Replay, And Viewer
+- Fixed viewer invalid-JSON error behavior to match `SPEC-VIEWER`
+- Added viewer contract tests covering record loading, timeline behavior, and renderer registry guarantees
+- Updated `EventFactory` and observability docs to the actual canonical gameplay payload shape
+
+### Facade, LLM, And Pricing
+- Added `AgentDeck` validation and session-snapshot coverage
+- Added provider constant coverage for shipped LLM players
+- Added pricing structure and packaging coverage
+
+## Validation Evidence
+
+The final sweep completed with:
+
+```bash
+.venv/bin/pytest \
+  tests/unit/test_research_export.py \
+  tests/unit/test_behavioral_scoring.py \
+  tests/unit/test_variable_damage_behavioral_scoring.py \
+  tests/unit/test_research_packager.py \
+  tests/unit/test_research_validate.py \
+  tests/unit/test_research_posthoc.py \
+  tests/unit/test_match_runtime.py \
+  tests/unit/test_game.py \
+  tests/unit/test_variable_damage_game.py \
+  tests/unit/test_controller.py \
+  tests/unit/test_game_hooks.py \
+  tests/unit/test_turn_based_mechanic.py \
+  tests/unit/test_player_ordering.py \
+  tests/unit/test_event_factory.py \
+  tests/unit/test_event_bus.py \
+  tests/unit/test_replay_lifecycle.py \
+  tests/unit/test_spectator_contracts.py \
+  tests/unit/test_monitors.py \
+  tests/unit/test_auto_narrator.py \
+  tests/unit/test_viewer_contracts.py \
+  tests/unit/test_agentdeck.py \
+  tests/unit/test_pricing.py \
+  tests/unit/test_llm_player.py \
+  tests/unit/test_openai_player.py \
+  tests/unit/test_google_player.py \
+  tests/unit/test_parallel_execution.py \
+  tests/unit/test_config_concurrency.py \
+  tests/unit/test_match_artifact.py \
+  tests/unit/test_prompt_builder.py \
+  tests/unit/test_text_renderer.py \
+  -q
+```
+
+Result:
+- `402 passed`
+- `2 skipped`
+- overall coverage in this targeted sweep: `76%`
+
+Additional validation:
+
+```bash
+python3 scripts/research_validate.py --research-dir research
+node scripts/viewer_smoke_check.js
+```
+
+Result:
+- research validation passed
+- viewer smoke check passed
+
+## Residual Notes
+
+- Historical planning notes remain under `docs/` and archived proposal docs remain under `docs/archive/`; they are no longer marked as active drafts.
+- This closeout covers the active release-facing contract surface. Future unshipped proposals should continue to stay outside the active `specs/` surface until implemented.
