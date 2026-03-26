@@ -27,7 +27,7 @@ Those live in separate internal planning.
 - Research export, packaging, validation, and index tooling
 - Spec-compliance audit ledger (`docs/spec-compliance/`)
 - **FixedDamage Arc 1**: 19 packages, 1,000+ matches, full intervention ladder (RC → TR → HP → exit), cross-provider comparisons, behavioral scorer
-- **VariableDamage Arc**: 20+ packages covering plain-model baselines, intervention ladder (RC → RISK), cross-provider comparisons, new behavioral metrics (`safe_zone_potion_rate`, danger subbands, `first_lethal_entry_inventory`), and the main-arc premium pilot
+- **VariableDamage Arc 1**: 12 packages, 744 matches, plain-model baselines, intervention ladder (RC → RISK), cross-provider comparisons, new behavioral metrics (`safe_zone_potion_rate`, danger subbands, `first_lethal_entry_inventory`), and the main-arc premium pilot
 
 ## Remaining Pre-Release Work
 
@@ -59,13 +59,17 @@ Those live in separate internal planning.
 - [ ] Minimal `run_experiment.py` template for research packages, without promoting package-specific execution logic into framework core
 
 ### 4. Research Workflow Productization
-- [ ] Promote cell export and package aggregation into the core research CLI, eliminating per-package `export_cell_results.py` and `export_package_results.py` boilerplate
+- [ ] Ship one supported research CLI workflow for cell export and package aggregation on matrix-based studies, reducing reliance on per-package export boilerplate
   - Scope:
     - `agentdeck research export --cell <id> --matrix matrix.yaml`
     - `agentdeck research aggregate --matrix matrix.yaml`
     - discover and retain full session history per `matrix.yaml` cell
     - export cell artifacts with canonical `source.recordings_dirs`
     - refresh package-level exports from aggregated cell history
+  - Beta target:
+    - one coherent, documented common-case workflow for matrix-based export/aggregation
+  - Stretch goal:
+    - eliminate per-package `export_cell_results.py` and `export_package_results.py` boilerplate entirely
   - Non-goal:
     - moving `run_experiment.py` execution logic into the framework baseline
 - [ ] Document `matrix.yaml` as a stable research contract with a minimal template
@@ -77,9 +81,12 @@ Those live in separate internal planning.
 - [x] Main-arc final experiment committed and validated
 - [x] VariableDamage Arc 1 summary written
 - [x] Cross-game comparison document written
-- [ ] Research workflow productization complete (no per-package export script boilerplate)
+- [ ] Supported research workflow shipped and documented for the common matrix-based export/aggregation path
 - [ ] README, examples, and release-facing docs tell a consistent product story
-- [ ] Optional premium appendix completed if budget permits *(not a hard gate)*
+
+## Optional Appendix (Not A Beta Gate)
+- [ ] `GPT-5-AO` vs `Flash-AO` at `N=24`
+- [ ] `Opus-AO` vs `Flash-AO` at `N=24`
 
 ### `1.0` Gate
 - Stronger methodological defaults for benchmark fairness
