@@ -28,7 +28,7 @@ The active spec surface is release-clean for the pre-release branch:
 ### Spec Surface Cleanup
 - Promoted shipped research specs into `specs/`
 - Finalized shipped game and behavioral specs
-- Archived unshipped spec proposals under `docs/archive/spec-proposals/`
+- Removed unshipped proposals from the release branch instead of keeping an archive surface
 - Removed the last active draft spec from `specs/drafts/`
 - Corrected stale status/version rows in `specs/SPEC.md`
 
@@ -109,5 +109,5 @@ Result:
 
 ## Residual Notes
 
-- Historical planning notes remain under `docs/` and archived proposal docs remain under `docs/archive/`; they are no longer marked as active drafts.
-- This closeout covers the active release-facing contract surface. Future unshipped proposals should continue to stay outside the active `specs/` surface until implemented.
+- This closeout covers the active release-facing contract surface.
+- Future unshipped proposals should stay out of the active `specs/` surface until implemented.
