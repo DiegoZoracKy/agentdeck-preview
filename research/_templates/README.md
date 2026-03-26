@@ -52,7 +52,16 @@
 
 ## Repro (if recordings are available)
 ```bash
+python scripts/run_experiment.py --list-cells
+python scripts/run_experiment.py --phase P1
+
 python scripts/research_export.py \
-  --recordings-dir recordings \
-  --output-dir .
+  --experiment-dir . \
+  --phase P1 \
+  --no-generated-at
+
+python scripts/research_export.py \
+  --experiment-dir . \
+  --package \
+  --no-generated-at
 ```

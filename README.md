@@ -1,6 +1,6 @@
 # AgentDeck 🎮
 
-**A research platform for studying AI behavior through game scenarios**
+**Turn an AI behavior question into a runnable, replayable, analyzable experiment.**
 
 > **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
 > **Quality**: 75% coverage gate · Python 3.9+
@@ -14,6 +14,15 @@
 AgentDeck is a **research platform for studying AI behavior through game scenarios**. It enables researchers to run controlled experiments where AI agents interact in well-defined environments, providing comprehensive data collection for analysis of prompting strategies, decision-making patterns, and model capabilities.
 
 Want to try it immediately? Jump to [Quick Start](#-quick-start).
+
+### The Core Promise
+
+Bring a behavioral question, then use AgentDeck to:
+
+1. define a constrained game or reuse an existing one
+2. run seeded matches across models, prompts, and controllers
+3. replay and inspect what happened turn by turn
+4. export objective artifacts for validation and comparison
 
 ### Why Games?
 
@@ -45,6 +54,7 @@ By separating these concerns, AgentDeck ensures your research is **reproducible,
 - Deterministic seeding + recordings + replay parity
 - Parallel execution for scaling
 - Event-driven observability via spectators
+- Research export, validation, and package-friendly analysis workflows
 
 ## 🚦 Release Status
 
@@ -78,6 +88,7 @@ summaries, and a cross-game synthesis layer alongside the research tooling.
 - **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic reference arc: diagnosis, intervention ladder, and final carry-forward stack
 - **[VariableDamage Arc 1](research/2026-03-26-variable-damage-arc-1/README.md)** - Uncertainty arc: risk-band metrics, transfer failures, and final premium ceiling check
 - **[Cross-Game Comparison 1](research/2026-03-26-cross-game-comparison-1/README.md)** - What transferred, what broke, and why the metrics had to evolve
+- **[How To Run A Study](docs/how-to-run-a-study.md)** - Supported end-to-end workflow for creating, running, exporting, and validating a study
 - **[Research Guide](research/README.md)** - How experiment packages are organized
 - **[Research Index](research/INDEX.md)** - Registry of experiments and status
 - **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
@@ -229,6 +240,7 @@ print(f"Win rates: {results.win_rates}")
 ### Walkthroughs & Docs
 - Build your first game + replay tour: `examples/first_game_walkthrough.py`
 - Examples index: `examples/README.md`
+- End-to-end study workflow: `docs/how-to-run-a-study.md`
 
 ### Artifacts (Recordings + Logs)
 

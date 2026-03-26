@@ -2,6 +2,21 @@
 
 This directory contains practical examples demonstrating AgentDeck usage patterns.
 
+## Recommended Learning Path
+
+If you are new to the repo, run these in order:
+
+1. `mock_demo.py`
+2. `first_game_walkthrough.py`
+3. `minimal_experiment.py`
+4. `spectator_example.py`
+5. `replay_minimal.py`
+6. `test_parallel_execution.py`
+
+These six examples form the intended onboarding ladder: no-provider install
+check, custom game authoring, minimal LLM experiment, spectators, replay, then
+parallel execution.
+
 ## Quick Start Examples
 
 ### 0. Zero-Dependency Mock Demo (`mock_demo.py`)
@@ -132,6 +147,34 @@ python examples/replay_minimal.py --recording agentdeck_runs/session_XXX/records
 - Configurable replay speed (0.0 = instant, 1.0 = real-time)
 - Full three-phase lifecycle (handshake → gameplay → conclusion)
 - Identical spectator experience to live matches
+
+---
+
+## Research-Oriented Examples
+
+These are useful once you already know the basics:
+
+- `hangman_demo.py`
+- `hangman_benchmark.py`
+- `hangman_gpt4o_reasoning.py`
+- `hangman_llm_test.py`
+- `hangman_llm_test_reasoning.py`
+
+These are more scenario-specific than the onboarding ladder above.
+
+---
+
+## Internal / Diagnostic Examples
+
+These are maintained as repo utilities or smoke checks rather than first-touch
+examples:
+
+- `test_minimal_setup.py`
+- `test_prompt_builder_ux_full.py`
+- `test_prompt_builder_ux_minimal.py`
+- `test_research_compare_models.py`
+- `test_research_gpt_compare.py`
+- `run_auction_replay.py`
 
 ---
 

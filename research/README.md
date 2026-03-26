@@ -12,6 +12,7 @@ committed set of release-facing benchmark packages, including arc summaries and
 cross-game synthesis.
 
 ## Start Here
+- `../docs/how-to-run-a-study.md` - supported end-to-end study workflow
 - `2026-03-23-fixed-damage-arc-1/README.md` - FixedDamage arc summary
 - `2026-03-26-variable-damage-arc-1/README.md` - VariableDamage arc summary
 - `2026-03-26-cross-game-comparison-1/README.md` - cross-game findings
