@@ -1,9 +1,9 @@
 # SPEC-RESEARCH-BEHAVIORAL: Behavioral Scoring Contract
 
-> Status: Draft v0.2.0
+> Status: Final
 > Version: 0.2.0
-> Last Updated: 2026-03-19
-> Implementation: ✅ Existing component (`src/agentdeck/research/behavioral.py`, `src/agentdeck/games/examples/fixed_damage/behavioral.py`)
+> Last Updated: 2026-03-26
+> Implementation: ✅ Complete (`src/agentdeck/research/behavioral.py`, `src/agentdeck/games/examples/fixed_damage/behavioral.py`, `src/agentdeck/games/examples/variable_damage/behavioral.py`)
 > Audience: Research engineers, game authors, contributors
 
 ## 1. Purpose
@@ -15,7 +15,7 @@
 - Aligns with `SPEC.md` research-first framing: games are behavioral environments, not only score generators.
 - Aligns with `SPEC.md` separation principles: live execution, recording, and post-hoc scoring remain separate concerns.
 - Aligns with `SPEC.md` reproducibility guarantees: scorer output must be deterministic from recorder artifacts alone.
-- Follows `CONTRIBUTING.md`: this draft defines the contract before implementation work begins.
+- Follows `CONTRIBUTING.md`: this spec defines the contract used by the current scorer stack.
 - Non-goals:
   - defining what counts as a good move for every game
   - replacing `SPEC-RESEARCH-EXPERIMENT.md` ownership of package schema

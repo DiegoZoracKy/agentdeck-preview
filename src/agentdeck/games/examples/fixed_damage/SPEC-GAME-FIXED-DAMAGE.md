@@ -1,9 +1,9 @@
 # SPEC-GAME-FIXED-DAMAGE v0.1.0
 
-> Status: Draft
+> Status: Final
 > Version: 0.1.0
-> Last Updated: 2026-03-18
-> Implementation: ✅ Existing component (`src/agentdeck/games/examples/fixed_damage/game.py`)
+> Last Updated: 2026-03-26
+> Implementation: ✅ Complete (`src/agentdeck/games/examples/fixed_damage/game.py`)
 > Audience: game authors, researchers, renderer authors
 
 ## 1. Purpose

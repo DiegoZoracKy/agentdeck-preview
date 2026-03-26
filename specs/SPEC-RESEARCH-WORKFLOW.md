@@ -1,8 +1,9 @@
 # SPEC-RESEARCH-WORKFLOW v0.1.0
 
-> Status: Draft
+> Status: Final
+> Version: 0.1.0
 > Last Updated: 2026-03-26
-> Implementation: ✅ Implemented (`scripts/research_export.py`, `research/_templates/scripts/run_experiment.py`)
+> Implementation: ✅ Complete (`scripts/research_export.py`, `research/_templates/scripts/run_experiment.py`)
 > Audience: Research engineers, experiment authors, contributors
 
 ## 1. Purpose

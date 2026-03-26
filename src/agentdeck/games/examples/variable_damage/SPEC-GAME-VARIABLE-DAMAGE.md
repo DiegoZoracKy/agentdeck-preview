@@ -1,9 +1,9 @@
 # SPEC-GAME-VARIABLE-DAMAGE v0.1.0
 
-> Status: Draft v0.1.0
+> Status: Final
 > Version: 0.1.0
-> Last Updated: 2026-03-23
-> Implementation: ✅ Existing component (`src/agentdeck/games/examples/variable_damage/game.py`)
+> Last Updated: 2026-03-26
+> Implementation: ✅ Complete (`src/agentdeck/games/examples/variable_damage/game.py`)
 > Audience: game authors, researchers, renderer authors, behavioral-scorer authors
 
 ## 1. Purpose

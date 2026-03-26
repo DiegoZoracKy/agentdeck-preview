@@ -1,9 +1,9 @@
 # SPEC-BEHAVIORAL-VARIABLE-DAMAGE: VariableDamage Behavioral Profile
 
-> Status: Draft v0.1.0
+> Status: Final
 > Version: 0.1.0
-> Last Updated: 2026-03-24
-> Implementation: ⬜ Not Started
+> Last Updated: 2026-03-26
+> Implementation: ✅ Complete (`src/agentdeck/games/examples/variable_damage/behavioral.py`)
 > Audience: Research engineers, experiment authors, contributors
 
 ## 1. Purpose
@@ -12,8 +12,8 @@
 - Preserve as much continuity with the FixedDamage behavioral layer as possible while replacing exact-damage thresholds with deterministic risk bands.
 
 ## 2. Scope & Philosophy Alignment
-- Extends [`SPEC-RESEARCH-BEHAVIORAL`](../SPEC-RESEARCH-BEHAVIORAL.md).
-- Uses the rules and visibility contract defined by [SPEC-GAME-VARIABLE-DAMAGE](../../src/agentdeck/games/examples/variable_damage/SPEC-GAME-VARIABLE-DAMAGE.md).
+- Extends [`SPEC-RESEARCH-BEHAVIORAL`](./SPEC-RESEARCH-BEHAVIORAL.md).
+- Uses the rules and visibility contract defined by [SPEC-GAME-VARIABLE-DAMAGE](../src/agentdeck/games/examples/variable_damage/SPEC-GAME-VARIABLE-DAMAGE.md).
 - Keeps the profile recorder-driven:
   - no model-side instrumentation
   - no hidden prompt annotations
@@ -471,7 +471,7 @@ These MAY remain unsupported in `v0.1.0` if declared explicitly.
 - Should the scorer emit explicit reconstructed `damage_dealt` samples under `state_metrics` for audit/debug workflows?
 
 ## 13. References
-- [`SPEC-RESEARCH-BEHAVIORAL`](../SPEC-RESEARCH-BEHAVIORAL.md)
-- [`SPEC-GAME-VARIABLE-DAMAGE`](../../src/agentdeck/games/examples/variable_damage/SPEC-GAME-VARIABLE-DAMAGE.md)
-- [`SPEC-GAME-FIXED-DAMAGE`](../../src/agentdeck/games/examples/fixed_damage/SPEC-GAME-FIXED-DAMAGE.md)
-- [`FixedDamage Arc 1`](../../research/2026-03-23-fixed-damage-arc-1/README.md)
+- [`SPEC-RESEARCH-BEHAVIORAL`](./SPEC-RESEARCH-BEHAVIORAL.md)
+- [`SPEC-GAME-VARIABLE-DAMAGE`](../src/agentdeck/games/examples/variable_damage/SPEC-GAME-VARIABLE-DAMAGE.md)
+- [`SPEC-GAME-FIXED-DAMAGE`](../src/agentdeck/games/examples/fixed_damage/SPEC-GAME-FIXED-DAMAGE.md)
+- [`FixedDamage Arc 1`](../research/2026-03-23-fixed-damage-arc-1/README.md)
