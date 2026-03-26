@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import copy
+import json
+
 from agentdeck.games.examples.fixed_damage.behavioral import (
     EVIDENCE_MAX_EXAMPLES,
     FixedDamageBehavioralScorer,
@@ -468,3 +471,20 @@ def test_behavioral_evidence_is_sorted_and_capped() -> None:
     assert consistency_examples[1]["potion_rate"] == 0.5
     assert consistency_examples[1]["dominant_action"] is None
     assert consistency_examples[2]["dominant_action"] == "ATTACK"
+
+
+def test_behavioral_profile_is_json_serializable_and_does_not_mutate_inputs() -> None:
+    players = [{"name": "Alpha"}, {"name": "Beta"}]
+    payloads = _sample_payloads()
+    original_players = copy.deepcopy(players)
+    original_payloads = copy.deepcopy(payloads)
+
+    profile = compute_behavioral_profile(
+        players=players,
+        match_payloads=payloads,
+        config={"attack_damage": 20, "max_health": 100},
+    )
+
+    assert players == original_players
+    assert payloads == original_payloads
+    json.dumps(profile)

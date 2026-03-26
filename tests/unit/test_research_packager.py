@@ -156,6 +156,33 @@ def test_build_manifest_infers_required_fields(tmp_path):
     assert manifest["variants"]["controllers"] == ["ActionOnlyController"]
 
 
+def test_build_manifest_uses_shared_provider_inference(monkeypatch, tmp_path):
+    """RP8: Provider inference reuses the shared provider utility mapping."""
+    session_dir = _make_session(
+        tmp_path,
+        alice_module="custom.provider.module",
+        bob_module="custom.provider.module",
+    )
+    records_dir = session_dir / "records"
+    batch_data = json.loads((records_dir / "batch_batch_test.json").read_text(encoding="utf-8"))
+    match_files = [records_dir / "match_001.json"]
+
+    monkeypatch.setattr(
+        "agentdeck.research.packager.provider_from_module",
+        lambda module: "custom-provider" if module == "custom.provider.module" else "unknown",
+    )
+
+    manifest = build_manifest(
+        template_path=_repo_root() / "research" / "_templates" / "manifest.yaml",
+        experiment_id="2026-01-20-provider-mapping",
+        question="Does provider mapping stay shared?",
+        batch_data=batch_data,
+        match_files=match_files,
+    )
+
+    assert manifest["players"][0]["provider"] == "custom-provider"
+
+
 def test_package_session_creates_outputs(tmp_path):
     """RP4/RP5: Export results and update index when packaging."""
     session_dir = _make_session(tmp_path)

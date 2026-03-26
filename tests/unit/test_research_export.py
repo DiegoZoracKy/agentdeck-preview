@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -317,3 +318,94 @@ def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeyp
     payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
     assert payload["source"]["recordings_dir"] == str(records_dir.resolve())
     assert payload["summary"]["total_matches"] == 1
+
+
+def test_recordings_dirs_for_cell_deduplicates_canonical_and_discovered_paths(
+    tmp_path, monkeypatch
+) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+    records_dir = (
+        experiment_dir
+        / "agentdeck_runs"
+        / "p1_c01_demo"
+        / "session_001"
+        / "records"
+    )
+    _write_match(records_dir, "match_001")
+
+    artifact_dir = experiment_dir / "artifacts" / "p1_c01_demo"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "results.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 3,
+                "experiment_id": "2026-03-26-matrix-demo::p1_c01_demo",
+                "source": {"recordings_dir": str(records_dir.resolve())},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    merged = research_export._recordings_dirs_for_cell(experiment_dir, "p1_c01_demo")
+    assert merged == [records_dir.resolve()]
+
+
+def test_export_matrix_cells_fails_fast_for_unknown_cell(tmp_path, monkeypatch) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+
+    with pytest.raises(SystemExit, match="No cells selected"):
+        research_export._export_matrix_cells(
+            experiment_dir,
+            matrix_path=None,
+            phase=None,
+            cell_ids={"missing_cell"},
+            include_generated_at=False,
+        )
+
+
+def test_export_matrix_cells_skips_cells_without_recordings(tmp_path, monkeypatch) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+
+    exported = research_export._export_matrix_cells(
+        experiment_dir,
+        matrix_path=None,
+        phase="P1",
+        cell_ids=None,
+        include_generated_at=False,
+    )
+
+    assert exported == 0
+    assert not (experiment_dir / "artifacts" / "p1_c01_demo").exists()
+
+
+def test_export_results_no_generated_at_is_deterministic(tmp_path, monkeypatch) -> None:
+    recordings_dir = tmp_path / "records"
+    _write_match(recordings_dir, "match_001")
+    _pass_artifact_validation(monkeypatch)
+
+    output_a = tmp_path / "out_a"
+    output_b = tmp_path / "out_b"
+
+    research_export.export_results(
+        recordings_dir,
+        output_a,
+        experiment_id="deterministic-export-test",
+        include_generated_at=False,
+        behavioral_profile_id="auto",
+        behavioral_config={"attack_damage": 20, "max_health": 100},
+    )
+    research_export.export_results(
+        recordings_dir,
+        output_b,
+        experiment_id="deterministic-export-test",
+        include_generated_at=False,
+        behavioral_profile_id="auto",
+        behavioral_config={"attack_damage": 20, "max_health": 100},
+    )
+
+    assert (output_a / "results.json").read_text(encoding="utf-8") == (
+        output_b / "results.json"
+    ).read_text(encoding="utf-8")
