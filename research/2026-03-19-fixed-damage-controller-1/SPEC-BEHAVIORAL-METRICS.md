@@ -1,6 +1,6 @@
 # SPEC-BEHAVIORAL-METRICS: FixedDamage Behavioral Profile
 
-> Status: Draft v0.2.0
+> Status: Historical snapshot
 > Version: 0.2.0
 > Last Updated: 2026-03-19
 > Implementation: ✅ Existing component (`src/agentdeck/games/examples/fixed_damage/behavioral.py`)

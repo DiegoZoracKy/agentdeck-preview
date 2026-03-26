@@ -1,9 +1,9 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
-> Status: Draft
+> Status: Archived proposal
 > Version: 1.2.0
 > Last Updated: 2026-02-18
-> Implementation: ⏳ Pending (Phase A only)
+> Implementation: Deferred (not shipped)
 > Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose

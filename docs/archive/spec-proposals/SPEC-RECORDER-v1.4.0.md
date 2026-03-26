@@ -1,9 +1,9 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
-> Status: Draft v1.4.0
+> Status: Archived proposal
 > Version: 1.4.0
 > Last Updated: 2026-01-20
-> Implementation: 🚧 Pending
+> Implementation: Deferred (not shipped)
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose

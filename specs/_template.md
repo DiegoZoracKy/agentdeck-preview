@@ -1,6 +1,6 @@
 # SPEC-{COMPONENT}: {Title}
 
-> Status: Draft v0.1.0
+> Status: Template
 > Version: 0.1.0
 > Last Updated: YYYY-MM-DD
 > Implementation: ⬜ Not Started
