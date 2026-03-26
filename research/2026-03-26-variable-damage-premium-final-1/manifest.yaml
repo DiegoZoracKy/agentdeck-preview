@@ -1,0 +1,69 @@
+schema_version: 1
+experiment_id: 2026-03-26-variable-damage-premium-final-1
+title: VariableDamage Premium Final 1
+status: complete
+question: >-
+  Can the carried-forward `FlashLite-RC-RISK` VariableDamage condition stay
+  respectable against plain `GPT5Mini-AO`, or does the premium clean-policy
+  baseline reopen a clear gap?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_risk
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_5_mini
+    provider: openai
+    model: gpt-5-mini
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gpt-5-mini
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - risk_grounded
+    - handshake_only
+run:
+  seed_base: 34242
+  matches_planned: 24
+  matches_completed: 24
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-26-variable-damage-premium-final-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-26-variable-damage-premium-final-1
+  viewer_curation:
+    repo_path: research/2026-03-26-variable-damage-premium-final-1/artifacts
+notes: >-
+  Final main-arc VariableDamage premium pilot. This package carries forward the
+  exact `FlashLite-RC-RISK` condition that held near parity with `Flash-AO` and
+  tests it directly against the cleaner premium `GPT5Mini-AO` baseline. The
+  live run completed in a single session without match recovery. As in the most
+  recent packages, package export needed one immediate rerun after cell export
+  because the canonical artifact file was not yet visible on the first attempt.

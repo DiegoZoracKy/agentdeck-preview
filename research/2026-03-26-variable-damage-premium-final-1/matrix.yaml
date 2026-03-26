@@ -1,0 +1,115 @@
+schema_version: 1
+experiment_id: 2026-03-26-variable-damage-premium-final-1
+created_at: "2026-03-26T00:00:00Z"
+purpose: >-
+  Final main-arc VariableDamage premium pilot testing whether the carried-
+  forward `FlashLite-RC-RISK` condition can remain respectable against plain
+  `GPT5Mini-AO` after proving near parity with `Flash-AO`.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: null
+  prompt_template_version: game_default_handshake_plus_variable_risk_turn_modes
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  note: Fill git_commit before public citation if required.
+
+player_registry:
+  gemini_2_5_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gpt_5_mini:
+    kind: llm
+    provider: openai
+    model: gpt-5-mini
+    tier: strong
+
+config_registry:
+  AO_handshake_only:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: "{game_view}"
+  RC_risk_grounded:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      turn_template_mode: custom
+      turn_template: |-
+        {game_view}
+
+        {controller_format}
+
+        Before acting, check your risk band carefully.
+        - If your HP is above 55, do not use POTION.
+        - If your HP is 25 or lower and you have potions, use POTION.
+        - If your HP is 26 to 40 and you have 2 or 3 potions, prefer POTION now rather than entering the lethal zone with fewer resources.
+        - If your HP is 25 or lower and you have no potions, ATTACK anyway.
+        - Otherwise, act on your best read of the state.
+
+sampling_policy:
+  pilot_matches_per_cell: 24
+  expansion_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    seed_pairs_per_cell: 12
+    side_swap_required: true
+  expansion_selection_rules:
+    - this_is_the_final_main_arc_variable_damage_package
+    - interpret_outcome_with_behavior_and_cost_together
+    - do_not_extend_flash_lite_prompt_tuning_after_this_pilot
+
+execution_plan:
+  preflight:
+    cell_ids: []
+    interpretation: >-
+      This package is a ceiling check, not a new intervention branch. Analysis
+      must report whether the carried-forward Flash-Lite treatment stays
+      behaviorally clean against a premium baseline, even if the win count comes
+      back as a loss or close null.
+    matches_per_cell: 0
+    required_checks:
+      - parity1_carry_forward_review
+      - paired_side_swap_review
+      - premium_cost_review
+      - first_lethal_entry_inventory_review
+      - risk_band_behavior_review
+  phases:
+    - phase_id: P1
+      name: Final Main-Arc Premium Pilot
+      cell_ids:
+        - p1_c01_flash_lite_rc_risk_vs_gpt5mini_ao
+
+cells:
+  - id: p1_c01_flash_lite_rc_risk_vs_gpt5mini_ao
+    phase: P1
+    question: Can `FlashLite-RC-RISK` stay respectable against plain `GPT5Mini-AO` in VariableDamage?
+    intent: Run the final main-arc ceiling check before stopping experiments and switching to synthesis.
+    causal_factor: tuned_weak_model_vs_premium_clean_baseline
+    fairness_notes: paired side-swap enabled; interpret with first-lethal-entry inventory, danger-band scarcity split, and second-player conversion
+    seed_offset: 0
+    game:
+      information_level: partial
+    player_a:
+      player_ref: gemini_2_5_flash_lite
+      config_ref: RC_risk_grounded
+      name: FlashLite-RC-RISK
+    player_b:
+      player_ref: gpt_5_mini
+      config_ref: AO_handshake_only
+      name: GPT5Mini-AO
+    matches: 24
+    pilot_matches: 24
+    expansion_target_matches: 48
+    viewer_priority: true
