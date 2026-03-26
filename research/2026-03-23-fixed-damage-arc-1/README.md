@@ -7,7 +7,7 @@
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
 - Status: complete
-- Scope: `17` FixedDamage packages, `1,032` completed matches
+- Scope: `19` empirical FixedDamage packages, `1,320` completed matches
 - Game: `FixedDamageGame(information_level="partial")`
 - Providers: `local`, `google`, `openai`, `anthropic`
 - Canonical final stack: `FlashLite-RC-TR-HP-exit`
@@ -15,11 +15,11 @@
   - strategy stack mattered more than base-model choice alone in this game
   - plain `FlashLite-AO` lost badly to stronger baselines, but the final Flash-Lite stack became the strongest Gemini condition we found
   - the final Flash parity result closed in Exit 1: `FlashLite-RC-TR-HP-exit` beat `Flash-AO` `35-13`
-- Next Move: close FixedDamage here and begin `VariableDamageGame`
+- Next Move: treat FixedDamage as closed and use `VariableDamage Arc 1` plus the cross-game synthesis as the release-facing continuation
 <!-- AUTO_FACTS:END -->
 
 ## Why This Exists
-- The FixedDamage branch now spans `17` separate packages.
+- The FixedDamage branch now spans `19` empirical packages plus this summary.
 - Each package is atomic and auditable, but the full research story is spread
   across many READMEs.
 - This arc package is the single entrypoint for the whole branch:
@@ -52,6 +52,8 @@
   - [FixedDamage OpenAI Parity 1](../2026-03-21-fixed-damage-openai-parity-1/README.md)
   - [FixedDamage OpenAI Parity 2](../2026-03-21-fixed-damage-openai-parity-2/README.md)
   - [FixedDamage OpenAI Margin 1](../2026-03-22-fixed-damage-openai-margin-1/README.md)
+  - [FixedDamage Baseline Completion 1](../2026-03-24-fixed-damage-baseline-completion-1/README.md)
+  - [FixedDamage Baseline Completion 2](../2026-03-25-fixed-damage-baseline-completion-2/README.md)
 
 ## Final Answers
 - Outcome layer:
@@ -59,6 +61,8 @@
   - the final Flash-Lite stack beat plain `Flash` in Exit 1
   - tuned Flash-Lite crushed plain `gpt-4o-mini`
   - plain `gpt-5-mini` remained the best untuned premium baseline we tested
+  - the completed plain-model ordering is now closed:
+    - `GPT5Mini-AO > Flash-AO ≈ Haiku-AO > Mini-AO > FlashLite-AO`
 - Behavioral layer:
   - the behavioral scorer was the key unlock
   - it surfaced state-level bugs that win rates alone would not explain
@@ -112,8 +116,8 @@ Source of record:
     from clearly losing to genuinely competitive or even dominant against
     stronger plain baselines
 - If you want the next research question, it is no longer inside FixedDamage.
-  It is whether this strategy advantage survives under uncertainty in
-  `VariableDamageGame`.
+  That question is now answered in [VariableDamage Arc 1](../2026-03-26-variable-damage-arc-1/README.md)
+  and [Cross-Game Comparison 1](../2026-03-26-cross-game-comparison-1/README.md).
 
 ## Artifacts
 - `manifest.yaml` - arc-level summary metadata

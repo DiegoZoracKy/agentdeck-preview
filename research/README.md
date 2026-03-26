@@ -7,11 +7,14 @@ Core framework documentation remains in the repository root (`README.md`,
 `CONTRIBUTING.md`, and `specs/`). This `research/` area is intentionally
 experiment-specific.
 
-The baseline branch intentionally ships the **research contract and templates**
-without committed benchmark packages. Use `_templates/` or
-`scripts/research_package.py` to start new experiments.
+This preview repo now ships both the **research contract/tooling** and a
+committed set of release-facing benchmark packages, including arc summaries and
+cross-game synthesis.
 
 ## Start Here
+- `2026-03-23-fixed-damage-arc-1/README.md` - FixedDamage arc summary
+- `2026-03-26-variable-damage-arc-1/README.md` - VariableDamage arc summary
+- `2026-03-26-cross-game-comparison-1/README.md` - cross-game findings
 - `SCHEMA.md` - manifest/results schema and required fields
 - `INDEX.md` - registry of experiments with status and topline results
 - `_templates/` - boilerplate files for new experiments

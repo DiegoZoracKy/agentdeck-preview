@@ -59,7 +59,7 @@ Today, the project is ready for:
 
 It is **not** presented as a `1.0` stable platform yet. The main remaining gaps are:
 - A methodologically stronger default benchmark regime for behavioral claims
-- A sharper public narrative connecting the engine, the shipped FixedDamage package, and the viewer
+- A sharper public narrative connecting the engine, the shipped FixedDamage and VariableDamage arcs, and the viewer
 - Curated replay/viewer surfaces for the strongest release-facing examples
 
 Viewer and replay UI work should currently be treated as a **beta offline surface**. The core product is still the engine, record contract, and research workflow.
@@ -71,9 +71,13 @@ Viewer and replay UI work should currently be treated as a **beta offline surfac
 This README focuses on the **core AgentDeck platform** (architecture, APIs, and usage).
 Experiment-specific findings, result narratives, and benchmark grids live under [`research/`](research/).
 
-The baseline branch intentionally keeps the **research contract and tooling**, not archived benchmark packages. New release-facing studies should be created from templates or from packaged sessions.
+This preview repo now ships committed release-facing benchmark packages, arc
+summaries, and a cross-game synthesis layer alongside the research tooling.
 
 ### Explore Research
+- **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic reference arc: diagnosis, intervention ladder, and final carry-forward stack
+- **[VariableDamage Arc 1](research/2026-03-26-variable-damage-arc-1/README.md)** - Uncertainty arc: risk-band metrics, transfer failures, and final premium ceiling check
+- **[Cross-Game Comparison 1](research/2026-03-26-cross-game-comparison-1/README.md)** - What transferred, what broke, and why the metrics had to evolve
 - **[Research Guide](research/README.md)** - How experiment packages are organized
 - **[Research Index](research/INDEX.md)** - Registry of experiments and status
 - **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation

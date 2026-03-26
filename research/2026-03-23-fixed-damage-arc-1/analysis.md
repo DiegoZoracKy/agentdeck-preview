@@ -2,10 +2,10 @@
 
 ## Executive Read
 <!-- AUTO_FACTS:BEGIN -->
-- Arc scope: `17` packages and `1,032` completed FixedDamage matches.
+- Arc scope: `19` empirical packages and `1,320` completed FixedDamage matches.
 - Main result: FixedDamage established that strategy stack can materially reshape effective model ranking in a deterministic sequential game, but only when the interventions match the model's actual failure mode.
 - Canonical carry-forward condition: `FlashLite-RC-TR-HP-exit`.
-- Next move: stop adding FixedDamage branches and start `VariableDamageGame`.
+- Next move: treat FixedDamage as closed and read it together with `VariableDamage Arc 1` and the cross-game synthesis.
 <!-- AUTO_FACTS:END -->
 
 ## What The Arc Set Out To Test
@@ -47,6 +47,10 @@
   - showed the same stack logic did not transfer automatically to `gpt-4o-mini`
   - `RC` alone made `gpt-4o-mini` much worse
   - prompt micro-tuning could fix local states without closing the full parity gap
+- [Baseline Completion 1](../2026-03-24-fixed-damage-baseline-completion-1/README.md) and [Baseline Completion 2](../2026-03-25-fixed-damage-baseline-completion-2/README.md):
+  - closed the missing plain-model graph for release-facing comparison
+  - established the final untuned ordering:
+    - `GPT5Mini-AO > Flash-AO ≈ Haiku-AO > Mini-AO > FlashLite-AO`
 - [FlashLite Cap 1](../2026-03-23-fixed-damage-cap-1/README.md):
   - showed that output capping was the wrong cost lever
   - it made Flash-Lite cheaper than Flash, but damaged the critical low-HP policy
@@ -146,6 +150,7 @@ Canonical source:
   longer solves the task cleanly.
 
 ## Next Research Move
-- Start `VariableDamageGame` as a new branch.
-- Carry `FlashLite-RC-TR-HP-exit` into that game as the opening Flash-Lite condition.
-- Rebuild the behavioral layer around uncertainty and risk bands rather than exact HP thresholds.
+- FixedDamage is no longer the live branch.
+- Read the continuation in:
+  - [VariableDamage Arc 1](../2026-03-26-variable-damage-arc-1/README.md)
+  - [Cross-Game Comparison 1](../2026-03-26-cross-game-comparison-1/README.md)
