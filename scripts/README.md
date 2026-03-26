@@ -6,6 +6,7 @@ Utility scripts for validation, packaging, and viewer support.
 
 - `research_package.py` promotes one or more `agentdeck_runs/<session>/` folders into a standardized package under `research/`.
 - `research_export.py` generates `results.json` and `results.csv` from one or more recordings directories and fails fast on recording invariant violations.
+  It also supports matrix-based cell export and package aggregation for benchmark-grid studies.
 - `research_index.py` regenerates `research/INDEX.md` from experiment manifests.
 - `research_validate.py` validates package structure, generated artifacts, exported invariant summaries, and index consistency.
 
@@ -22,6 +23,36 @@ python scripts/research_export.py \
   --no-generated-at
 
 python scripts/research_validate.py --research-dir research --write-index
+```
+
+### Matrix-Based Benchmark Flow
+
+Export one selected cell from a benchmark package:
+
+```bash
+python scripts/research_export.py \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --cell p1_c01_example \
+  --no-generated-at
+```
+
+Export all cells from one phase:
+
+```bash
+python scripts/research_export.py \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --phase P1 \
+  --no-generated-at
+```
+
+Aggregate the top-level package from canonical cell artifacts and/or discovered
+session recordings:
+
+```bash
+python scripts/research_export.py \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --package \
+  --no-generated-at
 ```
 
 ## Viewer Support

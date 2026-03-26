@@ -8,7 +8,9 @@ import csv
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Sequence, Tuple, Union
+from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
+
+import yaml
 
 try:
     from agentdeck.research.behavioral import compute_behavioral_profile
@@ -55,6 +57,161 @@ def _safe_mean(values: List[float]) -> float:
     if not values:
         return 0.0
     return sum(values) / len(values)
+
+
+def _load_yaml(path: Path) -> Dict[str, Any]:
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def _behavioral_config_from_manifest(experiment_dir: Path) -> Dict[str, Any]:
+    manifest_path = experiment_dir / "manifest.yaml"
+    if not manifest_path.exists():
+        return {}
+    manifest = _load_yaml(manifest_path)
+    return dict((manifest.get("game") or {}).get("config") or {})
+
+
+def _resolve_matrix_path(experiment_dir: Path, matrix_path: Path | None) -> Path:
+    resolved = matrix_path or (experiment_dir / "matrix.yaml")
+    if not resolved.exists():
+        raise FileNotFoundError(f"Matrix file not found: {resolved}")
+    return resolved
+
+
+def _iter_selected_cells(
+    matrix: Dict[str, Any], *, phase: str | None, cell_ids: set[str] | None
+) -> Iterable[Dict[str, Any]]:
+    phase_to_cells: Dict[str, set[str]] = {}
+    for phase_entry in matrix.get("execution_plan", {}).get("phases", []):
+        phase_to_cells[phase_entry["phase_id"]] = set(phase_entry.get("cell_ids", []))
+
+    for cell in matrix.get("cells", []):
+        if phase and cell["id"] not in phase_to_cells.get(phase, set()):
+            continue
+        if cell_ids and cell["id"] not in cell_ids:
+            continue
+        yield cell
+
+
+def _canonical_recordings_dirs_from_artifact(experiment_dir: Path, cell_id: str) -> List[Path]:
+    artifact_results = experiment_dir / "artifacts" / cell_id / "results.json"
+    if not artifact_results.exists():
+        return []
+    payload = json.loads(artifact_results.read_text(encoding="utf-8"))
+    source = payload.get("source") or {}
+    recordings_dirs = source.get("recordings_dirs") or []
+    if recordings_dirs:
+        return [Path(path) for path in recordings_dirs]
+    recordings_dir = source.get("recordings_dir")
+    if recordings_dir:
+        return [Path(recordings_dir)]
+    return []
+
+
+def _session_recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
+    cell_run_dir = experiment_dir / "agentdeck_runs" / cell_id
+    usable_dirs: List[Path] = []
+    if not cell_run_dir.exists():
+        return usable_dirs
+    for path in sorted(cell_run_dir.glob("session_*/records")):
+        if not path.is_dir():
+            continue
+        if not any(path.glob("match_*.json")):
+            continue
+        usable_dirs.append(path)
+    return usable_dirs
+
+
+def _recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
+    merged: List[Path] = []
+    seen = set()
+    for path in _canonical_recordings_dirs_from_artifact(
+        experiment_dir, cell_id
+    ) + _session_recordings_dirs_for_cell(experiment_dir, cell_id):
+        resolved = path.resolve()
+        key = str(resolved)
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(resolved)
+    return merged
+
+
+def _export_matrix_cells(
+    experiment_dir: Path,
+    *,
+    matrix_path: Path | None,
+    phase: str | None,
+    cell_ids: set[str] | None,
+    include_generated_at: bool,
+) -> int:
+    matrix = _load_yaml(_resolve_matrix_path(experiment_dir, matrix_path))
+    selected = list(_iter_selected_cells(matrix, phase=phase, cell_ids=cell_ids))
+    if not selected:
+        raise SystemExit("No cells selected. Use --list-cells, --phase, or --cell.")
+
+    behavioral_config = _behavioral_config_from_manifest(experiment_dir)
+    exported = 0
+
+    for cell in selected:
+        cell_id = cell["id"]
+        recordings_dirs = _recordings_dirs_for_cell(experiment_dir, cell_id)
+        if not recordings_dirs:
+            print(f"Skipping {cell_id}: no session recordings found.")
+            continue
+
+        output_dir = experiment_dir / "artifacts" / cell_id
+        export_results(
+            recordings_dirs,
+            output_dir,
+            experiment_id=f"{matrix['experiment_id']}::{cell_id}",
+            include_generated_at=include_generated_at,
+            behavioral_profile_id="auto",
+            behavioral_config=behavioral_config,
+        )
+        print(f"Exported {cell_id} -> {output_dir}")
+        exported += 1
+
+    return exported
+
+
+def _export_matrix_package(
+    experiment_dir: Path,
+    *,
+    matrix_path: Path | None,
+    include_generated_at: bool,
+) -> None:
+    matrix = _load_yaml(_resolve_matrix_path(experiment_dir, matrix_path))
+    manifest_path = experiment_dir / "manifest.yaml"
+    manifest = _load_yaml(manifest_path) if manifest_path.exists() else {}
+    behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
+
+    recordings_dirs: List[Path] = []
+    for cell in matrix.get("cells", []):
+        recordings_dirs.extend(_recordings_dirs_for_cell(experiment_dir, cell["id"]))
+
+    if not recordings_dirs:
+        raise SystemExit(
+            "No recordings discovered for package export. Export cells first or ensure "
+            "agentdeck_runs/<cell_id>/session_*/records exists."
+        )
+
+    experiment_id = manifest.get("experiment_id") or matrix.get("experiment_id") or experiment_dir.name
+    export_results(
+        recordings_dirs,
+        experiment_dir,
+        experiment_id=experiment_id,
+        include_generated_at=include_generated_at,
+        behavioral_profile_id="auto",
+        behavioral_config=behavioral_config,
+    )
+    print(f"Exported package results -> {experiment_dir}")
+
+
+def _list_matrix_cells(experiment_dir: Path, *, matrix_path: Path | None) -> None:
+    matrix = _load_yaml(_resolve_matrix_path(experiment_dir, matrix_path))
+    for cell in matrix.get("cells", []):
+        print(f"{cell['id']} [{cell.get('phase', '?')}]")
 
 
 def _load_match(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
@@ -406,13 +563,39 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Export results from match recordings.")
     parser.add_argument(
         "--recordings-dir",
-        required=True,
         action="append",
         type=Path,
         help="Recordings directory containing match_*.json. Repeat to aggregate checkpoints.",
     )
-    parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--experiment-id", default=None)
+    parser.add_argument(
+        "--experiment-dir",
+        type=Path,
+        help="Experiment package root for matrix-based export workflows.",
+    )
+    parser.add_argument(
+        "--matrix",
+        type=Path,
+        help="Override matrix path for matrix-based workflows (defaults to <experiment-dir>/matrix.yaml).",
+    )
+    parser.add_argument("--phase", help="Export all cells in one phase (matrix mode only).")
+    parser.add_argument(
+        "--cell",
+        action="append",
+        dest="cells",
+        help="Export one or more specific cell IDs (matrix mode only).",
+    )
+    parser.add_argument(
+        "--list-cells",
+        action="store_true",
+        help="List available matrix cells and exit.",
+    )
+    parser.add_argument(
+        "--package",
+        action="store_true",
+        help="Export top-level package results from discovered matrix cell sources.",
+    )
     parser.add_argument(
         "--no-generated-at",
         action="store_true",
@@ -420,16 +603,73 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    experiment_id = args.experiment_id or args.output_dir.name
-    recordings_arg: Union[Path, Sequence[Path]]
-    if len(args.recordings_dir) == 1:
-        recordings_arg = args.recordings_dir[0]
-    else:
-        recordings_arg = args.recordings_dir
-    export_results(
-        recordings_arg,
-        args.output_dir,
-        experiment_id,
+    matrix_mode = any(
+        [
+            args.experiment_dir is not None,
+            args.matrix is not None,
+            args.phase is not None,
+            bool(args.cells),
+            args.list_cells,
+            args.package,
+        ]
+    )
+
+    if args.recordings_dir and matrix_mode:
+        parser.error(
+            "Direct mode (--recordings-dir/--output-dir) cannot be combined with matrix mode "
+            "(--experiment-dir/--matrix/--cell/--phase/--package)."
+        )
+
+    if args.recordings_dir:
+        if args.output_dir is None:
+            parser.error("--output-dir is required in direct export mode.")
+        experiment_id = args.experiment_id or args.output_dir.name
+        recordings_arg: Union[Path, Sequence[Path]]
+        if len(args.recordings_dir) == 1:
+            recordings_arg = args.recordings_dir[0]
+        else:
+            recordings_arg = args.recordings_dir
+        export_results(
+            recordings_arg,
+            args.output_dir,
+            experiment_id,
+            include_generated_at=not args.no_generated_at,
+        )
+        return
+
+    if not matrix_mode:
+        parser.error(
+            "Specify either direct export (--recordings-dir --output-dir) or matrix mode "
+            "(--experiment-dir/--matrix with --cell/--phase/--package/--list-cells)."
+        )
+
+    if args.output_dir is not None or args.experiment_id is not None:
+        parser.error("--output-dir and --experiment-id are only valid in direct export mode.")
+
+    if args.package and (args.phase is not None or args.cells):
+        parser.error("--package cannot be combined with --phase or --cell.")
+
+    experiment_dir = args.experiment_dir or (args.matrix.parent if args.matrix else None)
+    if experiment_dir is None:
+        parser.error("--experiment-dir is required for matrix mode unless --matrix is supplied.")
+
+    if args.list_cells:
+        _list_matrix_cells(experiment_dir, matrix_path=args.matrix)
+        return
+
+    if args.package:
+        _export_matrix_package(
+            experiment_dir,
+            matrix_path=args.matrix,
+            include_generated_at=not args.no_generated_at,
+        )
+        return
+
+    _export_matrix_cells(
+        experiment_dir,
+        matrix_path=args.matrix,
+        phase=args.phase,
+        cell_ids=set(args.cells or []) or None,
         include_generated_at=not args.no_generated_at,
     )
 

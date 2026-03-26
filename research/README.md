@@ -58,6 +58,20 @@ python scripts/research_export.py \
 Repeat `--recordings-dir` to aggregate multiple checkpoint/session directories
 into one export. Add `--no-generated-at` when you need deterministic diffs.
 
+For matrix-based benchmark packages, use the shared matrix workflow:
+
+```
+python scripts/research_export.py \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --phase P1 \
+  --no-generated-at
+
+python scripts/research_export.py \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --package \
+  --no-generated-at
+```
+
 5) Update the index:
 ```
 python scripts/research_index.py

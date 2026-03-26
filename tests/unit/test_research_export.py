@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import sys
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -105,6 +107,72 @@ def _match_payload(match_id: str) -> dict:
     }
 
 
+def _write_match(records_dir: Path, match_id: str) -> None:
+    records_dir.mkdir(parents=True, exist_ok=True)
+    (records_dir / f"{match_id}.json").write_text(
+        json.dumps(_match_payload(match_id)),
+        encoding="utf-8",
+    )
+
+
+def _write_matrix_experiment(tmp_path: Path, *, cell_ids: list[str]) -> Path:
+    experiment_dir = tmp_path / "research" / "2026-03-26-matrix-demo"
+    experiment_dir.mkdir(parents=True)
+    (experiment_dir / "manifest.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "experiment_id": "2026-03-26-matrix-demo",
+                "status": "running",
+                "question": "demo",
+                "game": {
+                    "name": "FixedDamageGame",
+                    "config": {"attack_damage": 20, "max_health": 100},
+                },
+                "players": [
+                    {"id": "A", "provider": "mock", "model": "MockPlayer"},
+                    {"id": "B", "provider": "mock", "model": "MockPlayer"},
+                ],
+                "run": {"seed_base": 42, "matches_planned": len(cell_ids), "matches_completed": 0},
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    (experiment_dir / "matrix.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "experiment_id": "2026-03-26-matrix-demo",
+                "execution_plan": {
+                    "phases": [{"phase_id": "P1", "cell_ids": cell_ids}],
+                },
+                "cells": [{"id": cell_id, "phase": "P1"} for cell_id in cell_ids],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    return experiment_dir
+
+
+def _pass_artifact_validation(monkeypatch) -> None:
+    monkeypatch.setattr(
+        research_export,
+        "validate_artifact_invariants",
+        lambda payloads: {
+            "matches_checked": len(payloads),
+            "all_passed": True,
+            "checks": {
+                "monotonic_gameplay_timeline": {"passed": len(payloads), "failed": 0},
+                "top_level_timing_consistency": {"passed": len(payloads), "failed": 0},
+                "prompt_turn_number_coherence": {"passed": len(payloads), "failed": 0},
+                "winner_final_state_consistency": {"passed": len(payloads), "failed": 0},
+            },
+            "failures": [],
+        },
+    )
+
+
 def test_export_results_includes_behavioral_profile(tmp_path, monkeypatch) -> None:
     recordings_dir = tmp_path / "records"
     recordings_dir.mkdir()
@@ -150,3 +218,102 @@ def test_export_results_includes_behavioral_profile(tmp_path, monkeypatch) -> No
     assert "examples" in alpha_evidence["position_policy_delta"]
     assert "examples" in alpha_evidence["state_action_consistency"]
     assert payload["behavioral_profile"]["evidence"]["state_metrics"] == {}
+
+
+def test_export_matrix_cells_uses_discovered_session_recordings(tmp_path, monkeypatch) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+    records_dir = (
+        experiment_dir
+        / "agentdeck_runs"
+        / "p1_c01_demo"
+        / "session_001"
+        / "records"
+    )
+    _write_match(records_dir, "match_001")
+
+    exported = research_export._export_matrix_cells(
+        experiment_dir,
+        matrix_path=None,
+        phase="P1",
+        cell_ids=None,
+        include_generated_at=False,
+    )
+
+    assert exported == 1
+    payload = json.loads(
+        (experiment_dir / "artifacts" / "p1_c01_demo" / "results.json").read_text(encoding="utf-8")
+    )
+    assert payload["experiment_id"] == "2026-03-26-matrix-demo::p1_c01_demo"
+    assert payload["source"]["recordings_dir"] == str(records_dir.resolve())
+
+
+def test_export_matrix_package_prefers_canonical_cell_artifacts(tmp_path, monkeypatch) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+    canonical_dir = (
+        experiment_dir
+        / "agentdeck_runs"
+        / "p1_c01_demo"
+        / "session_001"
+        / "records"
+    )
+    extra_dir = (
+        experiment_dir
+        / "agentdeck_runs"
+        / "p1_c01_demo"
+        / "session_002"
+        / "records"
+    )
+    _write_match(canonical_dir, "match_001")
+    _write_match(extra_dir, "match_002")
+
+    artifact_dir = experiment_dir / "artifacts" / "p1_c01_demo"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "results.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 3,
+                "experiment_id": "2026-03-26-matrix-demo::p1_c01_demo",
+                "source": {"recordings_dir": str(canonical_dir.resolve())},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    research_export._export_matrix_package(
+        experiment_dir,
+        matrix_path=None,
+        include_generated_at=False,
+    )
+
+    payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+    assert payload["source"]["recordings_dir"] == str(canonical_dir.resolve())
+    assert payload["summary"]["total_matches"] == 2
+    assert payload["source"]["recordings_dirs"] == [
+        str(canonical_dir.resolve()),
+        str(extra_dir.resolve()),
+    ]
+
+
+def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeypatch) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+    records_dir = (
+        experiment_dir
+        / "agentdeck_runs"
+        / "p1_c01_demo"
+        / "session_001"
+        / "records"
+    )
+    _write_match(records_dir, "match_001")
+
+    research_export._export_matrix_package(
+        experiment_dir,
+        matrix_path=None,
+        include_generated_at=False,
+    )
+
+    payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+    assert payload["source"]["recordings_dir"] == str(records_dir.resolve())
+    assert payload["summary"]["total_matches"] == 1

@@ -229,6 +229,17 @@ baseline research package contract remains game-agnostic.
 
 ## matrix.yaml (Optional, Recommended for Benchmark Grids)
 
+### Minimum Supported Shared-Workflow Contract
+
+The shared matrix export workflow assumes:
+- `experiment_id`
+- `cells`
+- `execution_plan.phases` when phase-based export is used
+
+Each cell SHOULD define at minimum:
+- `id`
+- `phase`
+
 Suggested top-level sections:
 - `frozen_inputs` (git tag/commit, template version, pricing snapshot)
 - `model_registry`
@@ -289,5 +300,11 @@ from manifest.yaml files and updated whenever experiments change.
 ## Scripts
 
 - `scripts/research_export.py` generates results.json/results.csv from recordings.
+  - direct mode:
+    - `--recordings-dir ... --output-dir ...`
+  - shared matrix mode:
+    - `--experiment-dir <path> --cell <id>`
+    - `--experiment-dir <path> --phase <id>`
+    - `--experiment-dir <path> --package`
 - `scripts/research_index.py` generates research/INDEX.md from manifests.
 - `scripts/research_package.py` creates a research package from one or more session directories.
