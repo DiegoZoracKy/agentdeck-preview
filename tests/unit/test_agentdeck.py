@@ -182,3 +182,52 @@ def test_r1_replay_requires_exactly_one_source(deck_with_game):
     with pytest.raises(ValueError) as exc_info:
         deck_with_game.replay(match={"events": []}, path="/some/path", spectators=[])
     assert "exactly one" in str(exc_info.value).lower()
+
+
+def test_b1_play_rejects_empty_players(deck_with_game):
+    """SPEC-AGENTDECK B1: play() must reject empty player lists."""
+    with pytest.raises(ValueError, match="cannot be empty"):
+        deck_with_game.play(players=[])
+
+
+def test_b1_play_rejects_duplicate_player_names(deck_with_game):
+    """SPEC-AGENTDECK B1: play() must reject duplicate player names."""
+    players = [MockPlayer("Alice"), MockPlayer("Alice")]
+
+    with pytest.raises(ValueError, match="duplicate"):
+        deck_with_game.play(players=players)
+
+
+def test_b1_play_rejects_non_positive_matches(deck_with_game):
+    """SPEC-AGENTDECK B1: play() must reject matches < 1."""
+    players = [MockPlayer("Alice"), MockPlayer("Bob")]
+
+    with pytest.raises(ValueError, match="must be >= 1"):
+        deck_with_game.play(players=players, matches=0)
+
+
+def test_b2_play_rejects_non_integer_seed(deck_with_game):
+    """SPEC-AGENTDECK B2: play() must reject non-integer batch seeds."""
+    players = [MockPlayer("Alice"), MockPlayer("Bob")]
+
+    with pytest.raises(TypeError, match="must be an integer or None"):
+        deck_with_game.play(players=players, seed="not-an-int")
+
+
+def test_get_session_stats_returns_snapshot(deck_with_game, simple_game):
+    """SPEC-AGENTDECK get_session_stats: facade exposes stable session snapshot fields."""
+    players = [MockPlayer("Alice"), MockPlayer("Bob")]
+    before = deck_with_game.get_session_stats()
+
+    assert before["session_id"] == deck_with_game.session.session_id
+    assert before["total_matches"] == 0
+    assert before["seed"] == deck_with_game.session.seed
+    assert before["max_turns"] == deck_with_game.session.max_turns
+
+    deck_with_game.play(players=players, game=simple_game, matches=2)
+    after = deck_with_game.get_session_stats()
+
+    assert after["total_matches"] == 2
+    assert after["elapsed_time"] >= before["elapsed_time"]
+    assert after["log_directory"] == deck_with_game.session.log_directory
+    assert after["record_directory"] == deck_with_game.session.record_directory

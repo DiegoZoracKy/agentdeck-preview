@@ -1,11 +1,11 @@
 # SPEC-GAME: Game Author Contract v0.8.0
 
-> **Status**: Draft
+> **Status**: Archived proposal
 > **Version**: 0.8.0
 > **Last Updated**: 2026-01-20
 > **Base Version**: 0.7.0 (Final)
-> **Implementation**: 🚧 Pending
-> **Approvals**: ⏳ Pending
+> **Implementation**: Archived, unshipped
+> **Review State**: Historical only
 > **Audience**: Game authors, framework contributors, researcher tool builders
 >
 > **Changes in v0.8.0**:

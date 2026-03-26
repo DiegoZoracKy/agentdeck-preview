@@ -207,8 +207,8 @@ All component specifications follow the lean spec format with numbered invariant
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.0.0 | Final | Per-match infrastructure context (`runtime`) |
-| [Pricing](SPEC-PRICING.md) | 1.0.0 | Final | Cost tracking system for LLM usage |
-| [LLM](SPEC-LLM.md) | 1.1.2 | Final | LLM provider integration contract |
+| [Pricing](SPEC-PRICING.md) | 1.0.1 | Final | Cost tracking system for LLM usage |
+| [LLM](SPEC-LLM.md) | 1.1.4 | Final | LLM provider integration contract |
 | [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
 | [Monitor](SPEC-MONITOR.md) | 1.0.0 | Final | Console-level observation and progress reporting |
 
@@ -217,8 +217,8 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
-| [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.1.0 | Draft | Global behavioral scorer contract and extension interface for game-specific profiles |
-| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.5.0 | Final | Experiment package, manifest/results/index contracts |
+| [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.2.0 | Final | Global behavioral scorer contract and extension interface for game-specific profiles |
+| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.6.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.3.0 | Final | Session-to-experiment package helper |
 
 ### 4.4 Viewer Surface

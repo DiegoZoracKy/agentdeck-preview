@@ -256,6 +256,13 @@ def test_provider_players_require_explicit_model():
         )
 
 
+def test_provider_players_define_provider_constants():
+    """SPEC-LLM PI1 / SPEC-PLAYER LP1: shipped provider players declare PROVIDER constants."""
+    assert GPTPlayer.PROVIDER == "openai"
+    assert ClaudePlayer.PROVIDER == "anthropic"
+    assert GeminiPlayer.PROVIDER == "google"
+
+
 def test_claude_player_uses_high_fallback_max_tokens(monkeypatch):
     """Claude API calls should include a high max_tokens fallback when unset."""
 

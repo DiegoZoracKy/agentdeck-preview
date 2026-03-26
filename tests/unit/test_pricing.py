@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -32,6 +33,65 @@ def test_validate_pricing_structure_rejects_non_mapping_root():
     """Validation should fail loudly before iterating malformed roots."""
     with pytest.raises(ValueError, match="pricing.yaml root must be a dict"):
         pricing._validate_pricing_structure([])  # type: ignore[arg-type]
+
+
+def test_validate_pricing_structure_rejects_non_mapping_provider():
+    """SPEC-PRICING V4: providers must map model names to pricing dicts."""
+    with pytest.raises(ValueError, match="Invalid pricing for provider 'openai'"):
+        pricing._validate_pricing_structure({"openai": "not-a-dict"})
+
+
+def test_validate_pricing_structure_rejects_missing_required_cost_fields():
+    """SPEC-PRICING V1: model entries need both input and output cost fields."""
+    with pytest.raises(ValueError, match="input_cost_per_million"):
+        pricing._validate_pricing_structure(
+            {
+                "openai": {
+                    "gpt-test": {
+                        "output_cost_per_million": 1.0,
+                    }
+                }
+            }
+        )
+
+
+def test_validate_pricing_structure_rejects_non_numeric_costs():
+    """SPEC-PRICING V2: cost fields must be numeric."""
+    with pytest.raises(ValueError, match="expected number"):
+        pricing._validate_pricing_structure(
+            {
+                "openai": {
+                    "gpt-test": {
+                        "input_cost_per_million": "0.1",
+                        "output_cost_per_million": 1.0,
+                    }
+                }
+            }
+        )
+
+
+def test_validate_pricing_structure_rejects_negative_costs():
+    """SPEC-PRICING V3: negative cost values are invalid."""
+    with pytest.raises(ValueError, match="Negative cost"):
+        pricing._validate_pricing_structure(
+            {
+                "openai": {
+                    "gpt-test": {
+                        "input_cost_per_million": -1.0,
+                        "output_cost_per_million": 1.0,
+                    }
+                }
+            }
+        )
+
+
+def test_pyproject_packages_pricing_yaml():
+    """SPEC-PRICING §5.2: pyproject must include config/*.yaml as package data."""
+    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    content = pyproject.read_text(encoding="utf-8")
+
+    assert "[tool.setuptools.package-data]" in content
+    assert '"config/*.yaml"' in content
 
 
 def test_get_model_pricing_uses_provider_default():

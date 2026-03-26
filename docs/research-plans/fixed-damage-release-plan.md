@@ -1,6 +1,6 @@
 # FixedDamage Release Experiment Plan
 
-Status: Draft for consensus before implementation and execution
+Status: Historical planning note
 Date: 2026-03-17
 
 ## Why This Plan Exists

@@ -1,7 +1,7 @@
 # AgentDeck Spec-Compliance Audit Plan
 
 Last updated: 2026-03-17
-Status: Draft execution plan
+Status: Historical audit plan
 
 ## Purpose
 Run a deep, systematic compliance assessment across the full AgentDeck spec suite so the release is grounded in the actual source of truth, not only in passing code reads or spot fixes.
