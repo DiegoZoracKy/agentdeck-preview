@@ -328,7 +328,7 @@ Use these patterns as litmus tests while drafting.
 
 ## 7. Next Steps
 
-1. Gather feedback from product review, implementation lead, and reviewer.
+1. Gather feedback from the people reviewing the change.
 2. Iterate on checklist & template alignment.
 3. Finalize this guideline doc (mark Status as "Final").
 4. Reference it in `ROADMAP.md` once agreed.

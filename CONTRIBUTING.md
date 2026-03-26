@@ -12,8 +12,7 @@
 4. [Writing Specifications](#writing-specifications)
 5. [Writing Code](#writing-code)
 6. [Testing Requirements](#testing-requirements)
-7. [Team Roles](#team-roles)
-8. [Code Review Checklist](#code-review-checklist)
+7. [Code Review Checklist](#code-review-checklist)
 
 ---
 
@@ -125,37 +124,35 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 
 #### Phase A: Specification Work
 
-**Goal**: Define **what** we're building with team consensus
-
-**Who**: Product review, implementation lead, reviewer
+**Goal**: Define **what** we're building with consensus
 
 **Process**:
 1. **Draft specs** following [Writing Specifications](#writing-specifications) guidelines
    - Create draft in `specs/drafts/SPEC-<component>-v<version>.md`
-   - Drafts stay in `drafts/` until team approval
-2. **Team review** - All three review the spec
-   - Product review: Product/user perspective
-   - Implementation lead: Technical feasibility
-   - Reviewer: Pragmatic critique (catch issues early)
+   - Drafts stay in `drafts/` until approval
+2. **Review** - Relevant contributors review the spec
+   - Check product/user perspective
+   - Check technical feasibility
+   - Check pragmatic implementability and edge cases
 3. **Incorporate feedback** - Refine specs based on reviews
    - Update draft in `specs/drafts/`
-4. **Consensus gate** - **All three roles must approve before Phase B**
+4. **Consensus gate** - **Required approvers must approve before Phase B**
    - Once approved, move spec from `drafts/` to `specs/`
    - Update version in main spec file (or create new file for major versions)
 
 **Deliverables**:
 - Approved SPEC-*.md files in `specs/` (moved from `drafts/`)
 - Updated related specs for consistency
-- Team consensus documented (in commit message)
+- Approval state documented (in commit message)
 
 **Exit Criteria**:
 - [ ] Specs follow `specs/GUIDELINES.md`
 - [ ] All invariants documented (e.g., GB1-GB6)
 - [ ] All success criteria defined
 - [ ] All edge cases addressed
-- [ ] Product review approves (requirements met)
-- [ ] Implementation lead approves (technically sound)
-- [ ] Reviewer approves (pragmatically feasible)
+- [ ] Required approvers confirm requirements are met
+- [ ] Technical soundness confirmed
+- [ ] Implementability confirmed
 
 ---
 
@@ -163,19 +160,17 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 
 **Goal**: Build exactly what the specs define
 
-**Who**: Implementation lead implements, reviewer reviews code
-
 **Process**:
 1. **Implement** - Write code matching specs exactly
    - Follow method signatures exactly (parameter names matter)
    - Enforce all invariants (GB1-GB6, EI1-EI3, etc.)
    - Match behavior precisely (no creative interpretation)
-2. **Code review** - Reviewer checks implementation
+2. **Code review** - Reviewers check implementation
    - Verify spec compliance
    - Catch implementation bugs
    - Suggest improvements
 3. **Iterate** - Fix issues found in review
-4. **Approval** - Reviewer approves implementation
+4. **Approval** - Review is completed
 
 **Deliverables**:
 - Working implementation (code files)
@@ -187,17 +182,15 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 - [ ] All invariants enforced
 - [ ] Tests pass
 - [ ] No regressions (existing tests still pass)
-- [ ] Reviewer approves implementation
+- [ ] Review completed
 
-**⚠️ BLOCKED until Phase A complete** (team consensus on specs)
+**⚠️ BLOCKED until Phase A complete** (approved specs required)
 
 ---
 
 #### Phase C: Testing & Validation
 
 **Goal**: Verify implementation meets all success criteria
-
-**Who**: Product review, implementation lead, reviewer validate
 
 **Process**:
 1. **Unit testing** - Test individual components
@@ -216,7 +209,7 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 - [ ] All success criteria met
 - [ ] Live validation successful (if applicable)
 - [ ] No regressions introduced
-- [ ] Team validates results
+- [ ] Results validated
 
 ---
 
@@ -587,57 +580,6 @@ tests/
 
 ---
 
-## Team Roles
-
-### Product Review
-
-**Phase A**: Reviews specs for product fit
-- Are requirements captured correctly?
-- Do specs align with user needs?
-- Are success criteria meaningful?
-
-**Phase B**: Monitors progress (no detailed review needed)
-
-**Phase C**: Validates end-to-end results
-- Does it work as expected?
-- Does it solve the user problem?
-
-### Implementation Lead
-
-**Phase A**: Drafts specs, incorporates feedback
-- Writes SPEC-*.md drafts
-- Updates related specs for consistency
-- Incorporates product and reviewer feedback
-
-**Phase B**: Implements according to approved specs
-- Follows specs exactly (no interpretation)
-- Writes tests alongside code
-- Responds to reviewer feedback
-
-**Phase C**: Runs tests, fixes issues
-- Ensures all tests pass
-- Conducts live validation
-- Fixes any discovered issues
-
-### Reviewer
-
-**Phase A**: Reviews specs pragmatically
-- Catches design issues early
-- Identifies missing edge cases
-- Ensures specs are implementable
-
-**Phase B**: Reviews implementation
-- Verifies spec compliance
-- Catches implementation bugs
-- Suggests code improvements
-
-**Phase C**: Validates results
-- Confirms success criteria met
-- Reviews test coverage
-- Approves completion
-
----
-
 ## Code Review Checklist
 
 Before submitting a PR, verify:
@@ -680,12 +622,12 @@ Before submitting a PR, verify:
 
 **Wrong:**
 ```
-Implementation lead: "I'll port pricing.py and we can adjust the spec later"
+Contributor: "I'll port pricing.py and we can adjust the spec later"
 ```
 
 **Right:**
 ```
-Implementation lead: "Let me write SPEC-PRICING first, get review, then implement"
+Contributor: "Let me write SPEC-PRICING first, get review, then implement"
 ```
 
 ### ❌ Anti-Pattern 2: "Specs are bureaucracy"
@@ -704,13 +646,13 @@ Attitude: "Specs save time by catching issues before coding"
 
 **Wrong:**
 ```
-Implementation lead changes behavior from the spec
-Implementation lead: "I thought this was better"
+Contributor changes behavior from the spec
+Contributor: "I thought this was better"
 ```
 
 **Right:**
 ```
-Implementation lead: "Spec says X, but I think Y is better. Let me update the spec
+Contributor: "Spec says X, but I think Y is better. Let me update the spec
 and get review first"
 ```
 
@@ -718,13 +660,13 @@ and get review first"
 
 **Wrong:**
 ```
-Implementation lead: "This spec looks good to me, moving to implementation"
-(Without product/reviewer review)
+Contributor: "This spec looks good to me, moving to implementation"
+(Without review)
 ```
 
 **Right:**
 ```
-Implementation lead: "SPEC-PRICING draft ready for review. Product and reviewer sign-off requested."
+Contributor: "SPEC-PRICING draft ready for review."
 ```
 
 ---
