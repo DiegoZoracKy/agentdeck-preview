@@ -91,7 +91,7 @@ class MatchRuntime:
   - optional `events_list` for replay parity and optional `initial_state` when Console has already executed setup + handshake before calling `game.run(...)`.
 
 ### 4.2 `emit_event`
-- Wraps console `_emit_event` with pre-populated context (session_id/batch_id/match_id, timestamps, mechanic info).  
+- Wraps console `_dispatch_event` when available, otherwise falls back to direct `EventBus` emission, with pre-populated context (session_id/batch_id/match_id, timestamps, mechanic info).  
 - Mechanics MUST use `emit_event` for all GAMEPLAY + custom events; direct EventBus usage is prohibited.  
 - Automatically enforces `SPEC-OBSERVABILITY` payload requirements (phase_index, mechanic name, etc.).
 
