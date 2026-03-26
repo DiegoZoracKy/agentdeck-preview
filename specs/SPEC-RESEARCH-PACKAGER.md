@@ -4,7 +4,6 @@
 > Version: 0.3.1
 > Last Updated: 2026-03-05
 > Implementation: ✅ Complete (packager module + CLI wrapper)
-> Authors: Codex, Diego ZoracKy
 > Audience: Research engineers, contributors, experiment owners
 
 ## 1. Purpose

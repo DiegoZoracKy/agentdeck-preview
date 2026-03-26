@@ -4,7 +4,6 @@
 > Version: 0.3.0
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
-> Authors: Diego Zoracky, Codex, Claude
 > Audience: Researchers, framework contributors
 
 ## 1. Purpose

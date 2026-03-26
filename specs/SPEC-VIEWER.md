@@ -4,7 +4,6 @@
 > **Version**: 0.2.0
 > **Last Updated**: 2026-03-17
 > **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check)
-> **Authors**: Diego Zoracky, Claude
 > **Audience**: Viewer developers, skin authors, integration engineers
 
 ## 1. Purpose

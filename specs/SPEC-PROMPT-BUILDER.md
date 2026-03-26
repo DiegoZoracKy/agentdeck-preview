@@ -4,7 +4,6 @@
 > Version: 0.4.1
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
-> Authors: Diego ZoracKy, Codex, Claude
 > Audience: Researchers, player implementers, prompt engineers
 
 ## 1. Purpose

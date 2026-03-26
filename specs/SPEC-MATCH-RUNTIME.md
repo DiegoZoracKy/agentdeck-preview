@@ -4,7 +4,6 @@
 > Version: 1.0.0
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
-> Authors: Codex, Diego Zoracky, Claude
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
 
 ## 1. Purpose

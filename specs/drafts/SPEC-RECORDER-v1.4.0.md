@@ -4,7 +4,6 @@
 > Version: 1.4.0
 > Last Updated: 2026-01-20
 > Implementation: 🚧 Pending
-> Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose

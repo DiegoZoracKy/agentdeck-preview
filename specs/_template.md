@@ -4,7 +4,7 @@
 > Version: 0.1.0
 > Last Updated: YYYY-MM-DD
 > Implementation: ⬜ Not Started
-> Authors: {Names}
+> Review State: {draft|consensus-approved}
 > Audience: {Primary readers (researchers, game authors, contributors, etc.)}
 
 ## 1. Purpose

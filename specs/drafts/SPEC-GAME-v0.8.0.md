@@ -5,7 +5,6 @@
 > **Last Updated**: 2026-01-20
 > **Base Version**: 0.7.0 (Final)
 > **Implementation**: 🚧 Pending
-> **Authors**: Claude, Diego Zoracky, Codex
 > **Approvals**: ⏳ Pending
 > **Audience**: Game authors, framework contributors, researcher tool builders
 >

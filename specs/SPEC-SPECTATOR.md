@@ -4,7 +4,6 @@
 > Version: 1.2.0
 > Last Updated: 2026-02-03
 > Implementation: ✅ Complete (Console & ReplayEngine logger injection)
-> Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Spectator authors, analytics engineers, observability contributors
 
 ## 1. Purpose

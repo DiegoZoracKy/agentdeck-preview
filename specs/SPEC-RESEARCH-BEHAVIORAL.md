@@ -4,7 +4,6 @@
 > Version: 0.2.0
 > Last Updated: 2026-03-19
 > Implementation: ✅ Existing component (`src/agentdeck/research/behavioral.py`, `src/agentdeck/games/examples/fixed_damage/behavioral.py`)
-> Authors: Codex (draft)
 > Audience: Research engineers, game authors, contributors
 
 ## 1. Purpose

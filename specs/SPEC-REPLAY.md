@@ -4,7 +4,6 @@
 > Version: 1.1.0
 > Last Updated: 2026-02-03
 > Implementation: ✅ Complete (Recorder v1.x alignment)
-> Authors: Codex, Claude (consensus)
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors
 
 ## 1. Purpose

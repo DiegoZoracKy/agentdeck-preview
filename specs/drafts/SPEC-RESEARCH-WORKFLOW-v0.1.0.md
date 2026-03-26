@@ -3,7 +3,6 @@
 > Status: Draft
 > Last Updated: 2026-03-26
 > Implementation: ✅ Implemented (`scripts/research_export.py`, `research/_templates/scripts/run_experiment.py`)
-> Authors: Codex
 > Audience: Research engineers, experiment authors, contributors
 
 ## 1. Purpose

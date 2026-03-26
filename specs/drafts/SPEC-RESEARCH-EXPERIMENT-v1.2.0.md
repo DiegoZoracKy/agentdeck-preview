@@ -4,7 +4,6 @@
 > Version: 1.2.0
 > Last Updated: 2026-02-18
 > Implementation: ⏳ Pending (Phase A only)
-> Authors: Diego ZoracKy, Codex, Claude (brainstorming)
 > Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose

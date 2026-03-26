@@ -49,7 +49,7 @@ AgentDeck is a research platform for studying AI behavior. Specs must support:
 3. **Draft using the shared template** (`specs/_template.md`)
    - Fill sections in order; they build context progressively.
    - Keep language user-facing first, engineering second.
-   - Populate the header metadata (Status, Version, Last Updated, Implementation, Authors, Audience).
+   - Populate the header metadata (Status, Version, Last Updated, Implementation, Review State, Audience).
    - Keep the spec header contract-only. Do not add rolling `Changes in v...` blocks inside specs; version history belongs in git/audit notes, not in the source-of-truth contract.
    - In §1 Purpose, name the primary audience (researcher, contributor, game author, etc.).
    - Use §4 Data Structures when the component exposes reusable schemas (contexts, payloads, results); omit if not applicable.
@@ -197,7 +197,7 @@ Reserve specs for components with:
 Before marking a spec "Final", ensure:
 
 **Content & Completeness**:
-- [ ] **Metadata**: Status, Authors, Audience fields populated.
+- [ ] **Metadata**: Status, Review State, Audience fields populated.
 - [ ] **Purpose**: Framed as researcher problem/goal, names primary audience.
 - [ ] **Responsibilities**: Limited to one primary function.
 - [ ] **Public API**: Documented with signatures and returned values.
@@ -328,7 +328,7 @@ Use these patterns as litmus tests while drafting.
 
 ## 7. Next Steps
 
-1. Gather feedback from Diego, Claude, Codex.
+1. Gather feedback from product review, implementation lead, and reviewer.
 2. Iterate on checklist & template alignment.
 3. Finalize this guideline doc (mark Status as "Final").
 4. Reference it in `ROADMAP.md` once agreed.

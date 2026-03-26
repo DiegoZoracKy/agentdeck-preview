@@ -4,7 +4,6 @@
 > Version: 1.3.1
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (schema v1.3 event enrichment)
-> Authors: Claude, Codex, Diego ZoracKy
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose

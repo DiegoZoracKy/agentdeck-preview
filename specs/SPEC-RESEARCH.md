@@ -4,7 +4,6 @@
 > Version: 1.2.0
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete
-> Authors: Diego ZoracKy, Codex, Claude
 > Audience: Research engineers, experiment authors, AI practitioners
 
 ## 1. Purpose

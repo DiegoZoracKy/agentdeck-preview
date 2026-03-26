@@ -4,7 +4,6 @@
 > Version: 1.3.3
 > Last Updated: 2026-03-17
 > Implementation: ✅ Implemented
-> Authors: Diego ZoracKy, Codex, Claude (consensus)
 > Audience: Game authors, LLM player implementers, research engineers
 
 ## 1. Purpose

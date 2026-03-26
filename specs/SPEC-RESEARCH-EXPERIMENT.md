@@ -4,7 +4,6 @@
 > Version: 1.6.0
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
-> Authors: Diego ZoracKy, Codex
 > Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose

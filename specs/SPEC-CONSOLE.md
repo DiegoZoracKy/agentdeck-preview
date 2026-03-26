@@ -4,7 +4,6 @@
 > Version: 0.7.1
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
-> Authors: Codex, Claude
 > Audience: Core contributors, engine implementers
 
 ## 1. Purpose

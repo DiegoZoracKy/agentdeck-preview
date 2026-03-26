@@ -1,7 +1,6 @@
 # AgentDeck Spec-Compliance Audit Plan
 
 Last updated: 2026-03-17
-Owner: Diego + Codex + Claude
 Status: Draft execution plan
 
 ## Purpose

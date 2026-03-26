@@ -1,7 +1,6 @@
 # AgentDeck Roadmap
 
 Last updated: 2026-03-26
-Owner: Diego + Codex + Claude
 
 ## Release Position
 - AgentDeck targets a public beta / preview release, not `1.0`.
@@ -31,7 +30,7 @@ Those live in separate internal planning.
 
 ## Remaining Pre-Release Work
 
-### 1. Final Experiments (Codex executing)
+### 1. Final Experiments
 - [x] `FlashLite-RC-RISK` vs `GPT5Mini-AO` at `N=24` — main VariableDamage arc final
 
 **Optional Pre-Release Appendix (budget permitting)**

@@ -127,19 +127,19 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 
 **Goal**: Define **what** we're building with team consensus
 
-**Who**: Diego (Product), Claude (Dev), Codex (Reviewer)
+**Who**: Product review, implementation lead, reviewer
 
 **Process**:
 1. **Draft specs** following [Writing Specifications](#writing-specifications) guidelines
    - Create draft in `specs/drafts/SPEC-<component>-v<version>.md`
    - Drafts stay in `drafts/` until team approval
-2. **Team review** - All three review specs
-   - Diego: Product/user perspective
-   - Claude: Technical feasibility
-   - Codex: Pragmatic critique (catch issues early)
+2. **Team review** - All three review the spec
+   - Product review: Product/user perspective
+   - Implementation lead: Technical feasibility
+   - Reviewer: Pragmatic critique (catch issues early)
 3. **Incorporate feedback** - Refine specs based on reviews
    - Update draft in `specs/drafts/`
-4. **Consensus gate** - **All three must approve before Phase B**
+4. **Consensus gate** - **All three roles must approve before Phase B**
    - Once approved, move spec from `drafts/` to `specs/`
    - Update version in main spec file (or create new file for major versions)
 
@@ -153,9 +153,9 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 - [ ] All invariants documented (e.g., GB1-GB6)
 - [ ] All success criteria defined
 - [ ] All edge cases addressed
-- [ ] Diego approves (product requirements met)
-- [ ] Claude approves (technically sound)
-- [ ] Codex approves (pragmatically feasible)
+- [ ] Product review approves (requirements met)
+- [ ] Implementation lead approves (technically sound)
+- [ ] Reviewer approves (pragmatically feasible)
 
 ---
 
@@ -163,19 +163,19 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 
 **Goal**: Build exactly what the specs define
 
-**Who**: Claude implements, Codex reviews code
+**Who**: Implementation lead implements, reviewer reviews code
 
 **Process**:
 1. **Implement** - Write code matching specs exactly
    - Follow method signatures exactly (parameter names matter)
    - Enforce all invariants (GB1-GB6, EI1-EI3, etc.)
    - Match behavior precisely (no creative interpretation)
-2. **Code review** - Codex reviews implementation
+2. **Code review** - Reviewer checks implementation
    - Verify spec compliance
    - Catch implementation bugs
    - Suggest improvements
 3. **Iterate** - Fix issues found in review
-4. **Approval** - Codex approves implementation
+4. **Approval** - Reviewer approves implementation
 
 **Deliverables**:
 - Working implementation (code files)
@@ -187,7 +187,7 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 - [ ] All invariants enforced
 - [ ] Tests pass
 - [ ] No regressions (existing tests still pass)
-- [ ] Codex approves implementation
+- [ ] Reviewer approves implementation
 
 **⚠️ BLOCKED until Phase A complete** (team consensus on specs)
 
@@ -197,7 +197,7 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 
 **Goal**: Verify implementation meets all success criteria
 
-**Who**: Diego, Claude, Codex validate
+**Who**: Product review, implementation lead, reviewer validate
 
 **Process**:
 1. **Unit testing** - Test individual components
@@ -342,11 +342,11 @@ Expect to trim 10-15% from first draft without losing guarantees.
 ### Clean Spec Principle
 
 Specs MUST NOT contain review meta-commentary:
-- ❌ "Codex feedback:", "Diego suggested:", "After discussion:"
+- ❌ "Reviewer feedback:", "Product suggested:", "After discussion:"
 - ✅ Specs are clean technical documentation, not change logs
 
 Review history belongs in:
-- Git commit messages ("Add packaging requirements per Codex review")
+- Git commit messages ("Add packaging requirements per review feedback")
 - WORKFLOW.md example sections
 - PR descriptions / GitHub discussions
 
@@ -589,7 +589,7 @@ tests/
 
 ## Team Roles
 
-### Diego (Product Owner)
+### Product Review
 
 **Phase A**: Reviews specs for product fit
 - Are requirements captured correctly?
@@ -602,24 +602,24 @@ tests/
 - Does it work as expected?
 - Does it solve the user problem?
 
-### Claude (AI Dev)
+### Implementation Lead
 
 **Phase A**: Drafts specs, incorporates feedback
 - Writes SPEC-*.md drafts
 - Updates related specs for consistency
-- Incorporates Diego and Codex feedback
+- Incorporates product and reviewer feedback
 
 **Phase B**: Implements according to approved specs
 - Follows specs exactly (no interpretation)
 - Writes tests alongside code
-- Responds to Codex code review
+- Responds to reviewer feedback
 
 **Phase C**: Runs tests, fixes issues
 - Ensures all tests pass
 - Conducts live validation
 - Fixes any discovered issues
 
-### Codex (AI Reviewer)
+### Reviewer
 
 **Phase A**: Reviews specs pragmatically
 - Catches design issues early
@@ -680,12 +680,12 @@ Before submitting a PR, verify:
 
 **Wrong:**
 ```
-Claude: "I'll port pricing.py and we can adjust the spec later"
+Implementation lead: "I'll port pricing.py and we can adjust the spec later"
 ```
 
 **Right:**
 ```
-Claude: "Let me write SPEC-PRICING first, get team review, then implement"
+Implementation lead: "Let me write SPEC-PRICING first, get review, then implement"
 ```
 
 ### ❌ Anti-Pattern 2: "Specs are bureaucracy"
@@ -704,27 +704,27 @@ Attitude: "Specs save time by catching issues before coding"
 
 **Wrong:**
 ```
-Claude implements different behavior than spec says
-Claude: "I thought this was better"
+Implementation lead changes behavior from the spec
+Implementation lead: "I thought this was better"
 ```
 
 **Right:**
 ```
-Claude: "Spec says X, but I think Y is better. Let me update the spec
-and get team review first"
+Implementation lead: "Spec says X, but I think Y is better. Let me update the spec
+and get review first"
 ```
 
 ### ❌ Anti-Pattern 4: Skip review
 
 **Wrong:**
 ```
-Claude: "This spec looks good to me, moving to implementation"
-(Without Diego/Codex review)
+Implementation lead: "This spec looks good to me, moving to implementation"
+(Without product/reviewer review)
 ```
 
 **Right:**
 ```
-Claude: "SPEC-PRICING draft ready for team review. Diego and Codex, please review"
+Implementation lead: "SPEC-PRICING draft ready for review. Product and reviewer sign-off requested."
 ```
 
 ---
