@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-25T20:41:56.731240Z
+Last updated: 2026-03-26T02:41:04.215154Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -33,4 +33,5 @@ Last updated: 2026-03-25T20:41:56.731240Z
 | [VariableDamage OpenAI Baseline 2](2026-03-25-variable-damage-openai-baseline-2/README.md) | complete | VariableDamageGame | openai:gpt-5-mini, google:gemini-2.5-flash | 48/48 | Flash-AO 52.1% |
 | [VariableDamage OpenAI Parity 1](2026-03-25-variable-damage-openai-parity-1/README.md) | complete | VariableDamageGame | openai:gpt-4o-mini, openai:gpt-4o-mini, openai:gpt-5-mini | 48/48 | See README |
 | [VariableDamage OpenAI Parity 2](2026-03-25-variable-damage-openai-parity-2/README.md) | complete | VariableDamageGame | openai:gpt-4o, openai:gpt-4o, openai:gpt-5-mini | 48/48 | See README |
+| [VariableDamage Parity 1](2026-03-25-variable-damage-parity-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | FlashLite-RC-RISK 54.2% |
 | [VariableDamage Threshold 1](2026-03-25-variable-damage-threshold-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, google:gemini-2.5-flash-lite, google:gemini-2.5-flash | 48/48 | See README |

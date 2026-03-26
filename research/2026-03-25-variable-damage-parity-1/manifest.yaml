@@ -1,0 +1,68 @@
+schema_version: 1
+experiment_id: 2026-03-25-variable-damage-parity-1
+title: VariableDamage Parity 1
+status: complete
+question: >-
+  Does the risk-grounded Flash-Lite condition from Threshold 1 hold up at
+  `N=48` against plain Flash, or was the `12-12` pilot only a small-sample
+  signal?
+game:
+  name: VariableDamageGame
+  config:
+    max_health: 100
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: gemini_2_5_flash_lite_rc_risk
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gemini_2_5_flash_ao
+    provider: google
+    model: gemini-2.5-flash
+    controller: ActionOnlyController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gemini-2.5-flash
+  controllers:
+    - ReasoningController
+    - ActionOnlyController
+  prompt_cadence:
+    - risk_grounded
+    - handshake_only
+run:
+  seed_base: 33242
+  matches_planned: 48
+  matches_completed: 48
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-03-25-variable-damage-parity-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-03-25-variable-damage-parity-1
+  viewer_curation:
+    repo_path: research/2026-03-25-variable-damage-parity-1/artifacts
+notes: >-
+  Expansion package for the best Flash-Lite VariableDamage condition found in
+  Threshold 1. The full N=48 cell completed in a single live session with
+  normal Vertex retry noise but no match-level recovery. Package export needed
+  one immediate rerun after cell export because the canonical artifact file was
+  not yet visible on the first package-export attempt.
