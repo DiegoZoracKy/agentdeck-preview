@@ -1,10 +1,10 @@
 # SPEC-RESEARCH-PACKAGER: Session to Experiment Packager
 
 > Status: Final
-> Version: 0.3.1
-> Last Updated: 2026-03-05
-> Implementation: ✅ Complete (packager module + CLI wrapper)
-> Audience: Research engineers, contributors, experiment owners
+> Version: 0.3.2
+> Last Updated: 2026-03-26
+> Implementation: ✅ Complete (`agentdeck.research.packager`, `agentdeck.research.export`, `agentdeck.research.index`)
+> Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose
 - Provide a one-command way to promote an AgentDeck session into a standardized research package.
@@ -13,19 +13,19 @@
 
 ## 2. Scope & Philosophy Alignment
 - Aligns with `SPEC.md` research-first focus and reproducibility guarantees.
-- Composes existing tooling (`research/_templates`, `scripts/research_export.py`, `scripts/research_index.py`) rather than reimplementing it.
+- Composes the shared package-owned research surfaces (`agentdeck.research.export`, `agentdeck.research.index`) rather than loading script files dynamically.
 - Keeps the tool opt-in to avoid polluting the repo with unintentional experiments.
 - Enforces "recordings external" policy from `research/README.md` and `SPEC-RESEARCH-EXPERIMENT.md`.
 
 ## 3. Responsibilities
 - Create a new experiment directory under `research/` using `_templates/`.
 - Pre-fill `manifest.yaml` with required fields using session metadata and CLI inputs.
-- Generate `results.json` and `results.csv` by invoking `scripts/research_export.py`.
-- Update `research/INDEX.md` by invoking `scripts/research_index.py`.
+- Generate `results.json` and `results.csv` by invoking the shared export surface.
+- Update `research/INDEX.md` by invoking the shared index surface.
 - Create or update `recordings/README.md` with a pointer to the source session.
 - Auto-populate factual markdown blocks in `README.md` and `analysis.md`.
 - Support checkpoint-style aggregation from multiple compatible sessions in one package.
-- Implement core logic in `src/agentdeck/research/packager.py` with a thin CLI wrapper in `scripts/research_package.py`.
+- Implement core logic in `src/agentdeck/research/packager.py` with a thin CLI wrapper in `scripts/research_package.py` and an installable `agentdeck-research-package` entry point.
 
 ## 4. Data Structures
 - **manifest.yaml**: MUST follow `research/SCHEMA.md` and `SPEC-RESEARCH-EXPERIMENT.md`.
@@ -48,7 +48,16 @@
 ## 5. Public API
 
 ### CLI
+Preferred:
+```bash
+agentdeck-research-package \
+  --session-dir agentdeck_runs/session_20260119_215606_7e095e \
+  --experiment-id 2026-01-19-walkthrough-demo \
+  --question "Does Alice beat Bob in TinyBattleGame?"
 ```
+
+Backward-compatible wrapper:
+```bash
 python scripts/research_package.py \
   --session-dir agentdeck_runs/session_20260119_215606_7e095e \
   --experiment-id 2026-01-19-walkthrough-demo \
@@ -64,7 +73,7 @@ python scripts/research_package.py \
 - `--research-dir` (Path, default: `research`): Destination root for experiment packages.
 - `--experiment-id` (str, optional): Defaults to `session_id`.
 - `--question` (str, required): Research question to store in manifest.
-- `--status` (planned|running|complete|archived, optional): Overrides derived status.
+- `--status` (`planned|running|complete|archived`, optional): Overrides derived status.
 - `--title` (str, optional): Title stored in manifest and experiment README.
 - `--include-matrix` (flag, optional): Include `matrix.yaml` scaffold for benchmark grids.
 - `--dry-run` (flag, optional): Validate inputs and print planned actions without writing files.
@@ -73,8 +82,8 @@ python scripts/research_package.py \
 1. **RP1**: Tool MUST be opt-in; it MUST NOT run automatically after sessions.
 2. **RP2**: Tool MUST NOT copy raw recordings into `research/`.
 3. **RP3**: Tool MUST write a manifest that satisfies required fields in `research/SCHEMA.md`.
-4. **RP4**: Tool MUST generate `results.json`/`results.csv` by calling `scripts/research_export.py`.
-5. **RP5**: Tool MUST update `research/INDEX.md` by calling `scripts/research_index.py`.
+4. **RP4**: Tool MUST generate `results.json`/`results.csv` by calling the shared export surface implemented in `agentdeck.research.export`.
+5. **RP5**: Tool MUST update `research/INDEX.md` by calling the shared index surface implemented in `agentdeck.research.index`.
 6. **RP6**: Tool MUST fail if the experiment directory already exists (no implicit overwrite).
 7. **RP7**: Tool MUST fail fast if required fields cannot be inferred and no CLI override is supplied.
 8. **RP8**: Provider inference MUST reuse the same mapping as `agentdeck.research.provider_utils.provider_from_module`.
@@ -84,11 +93,12 @@ python scripts/research_package.py \
 12. **RP12**: When a session contains multiple `batch_*.json` files (e.g., side-swap split runs), tool MUST aggregate them into a single packaging view for `match_refs`, `matches_planned`, `matches_completed`, `seeds_used`, and time window (`started_at`/`ended_at`).
 13. **RP13**: Tool MUST support checkpoint packaging from multiple sessions. When multiple sessions are supplied, tool MUST aggregate all compatible `match_*.json` into one experiment export and MUST record all source sessions in `recordings/README.md`.
 14. **RP14**: Multi-session packaging MUST fail fast when compatibility checks fail (mismatched game name or mismatched player identity/model/controller tuple).
+15. **RP15**: Packager implementation MUST import shared research surfaces directly from the package; it MUST NOT dynamically load repo script files by path.
 
 ## 7. Data Flow & Interaction
 - Package: CLI → resolve session records → copy templates → write manifest → run export → update index.
 - Markdown hydration: after export, fill factual blocks in `README.md` and `analysis.md`.
-- Validation: CLI → `scripts/research_validate.py` (optional follow-up, not required by tool).
+- Validation: CLI → `research_validate` surface (optional follow-up, not required by tool).
 - References: `SPEC-RECORDER.md` for batch metadata, `SPEC-RESEARCH-EXPERIMENT.md` for schema.
 
 ## 8. Error Handling & Edge Cases
@@ -99,44 +109,10 @@ python scripts/research_package.py \
 - `--dry-run`: perform validation and print inferred manifest without writing files.
 - Missing auto-facts markers: skip markdown hydration (non-fatal), preserving manual docs.
 
-## 9. Examples
-
-### Minimal (session dir)
-```bash
-python scripts/research_package.py \
-  --session-dir agentdeck_runs/session_20260119_215606_7e095e \
-  --question "Does Alice beat Bob in TinyBattleGame?"
-```
-
-### With explicit experiment id + title
-```bash
-python scripts/research_package.py \
-  --session-id session_20260119_215606_7e095e \
-  --experiment-id 2026-01-19-walkthrough-demo \
-  --title "Walkthrough Demo" \
-  --question "Does Alice beat Bob in TinyBattleGame?"
-```
-
-### Checkpoint aggregation from multiple sessions
-```bash
-python scripts/research_package.py \
-  --session-ids session_20260304_181345_92ec64 session_20260305_010000_ab12cd \
-  --experiment-id fixed-damage-mini-vs-haiku-ao__n80 \
-  --question "Does gpt-4o-mini beat Haiku in FixedDamage AO at N=80?"
-```
-
-### Dry run
-```bash
-python scripts/research_package.py \
-  --session-id session_20260119_215606_7e095e \
-  --question "Does Alice beat Bob in TinyBattleGame?" \
-  --dry-run
-```
-
-## 10. Testing Strategy
+## 9. Testing Strategy
 - **RP3**: Unit test manifest inference from a fixture `batch_*.json`.
-- **RP4**: Integration test writes results via `research_export.py`.
-- **RP5**: Integration test updates `research/INDEX.md` deterministically.
+- **RP4**: Integration test writes results via the shared export surface.
+- **RP5**: Integration test updates `research/INDEX.md` deterministically via the shared index surface.
 - **RP6**: Unit test fails on existing experiment directory.
 - **RP7**: Unit test fails when provider/model cannot be inferred.
 - **RP9/RP10**: Unit tests for default matrix omission and `--include-matrix` opt-in behavior.
@@ -144,21 +120,23 @@ python scripts/research_package.py \
 - **RP12**: Unit test verifies multi-batch sessions are aggregated deterministically.
 - **RP13**: Unit test verifies multi-session packaging aggregates match files and emits `source.recordings_dirs`.
 - **RP14**: Unit test verifies multi-session packaging fails on incompatible sessions.
+- **RP15**: Unit test verifies packager imports package-owned research helpers without script-path loading.
 
-## 11. Design Rationale
+## 10. Design Rationale
 - Keeps research packages intentional and tidy (opt-in, no automatic writes).
-- Reuses existing scripts to avoid schema drift and duplicated logic.
+- Reuses shared package-owned tooling to avoid schema drift and duplicated logic.
 - Fails loudly when required manifest fields cannot be inferred, preserving standards.
+- Removes the awkward dynamic dependency on repo-local `scripts/` files from the package implementation.
 
-## 12. Open Questions / Future Work
+## 11. Open Questions / Future Work
 - Should markdown hydration support custom marker names for non-default templates?
 - Should we support packaging from non-session recordings directories (e.g., `agentdeck_records/`)?
 
-## 13. References
+## 12. References
 - `SPEC-RESEARCH-EXPERIMENT.md`
 - `SPEC-RECORDER.md`
 - `SPEC-RESEARCH.md`
 - `research/SCHEMA.md`
 - `research/README.md`
-- `scripts/research_export.py`
-- `scripts/research_index.py`
+- `agentdeck.research.export`
+- `agentdeck.research.index`

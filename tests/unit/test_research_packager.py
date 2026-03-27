@@ -1,4 +1,4 @@
-"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP14)."""
+"""Tests for session-to-research packager (SPEC-RESEARCH-PACKAGER RP1-RP15)."""
 
 import json
 import shutil
@@ -231,6 +231,97 @@ def test_package_session_creates_outputs(tmp_path):
     assert "First-player win rate:" in analysis
     assert "Strict contract rate:" in analysis
     assert "One-paragraph motivation and intended audience." in readme
+
+
+def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
+    """RP4/RP5/RP15: Packager calls package-owned export and index helpers directly."""
+    session_dir = _make_session(tmp_path)
+    research_dir = _prepare_research_dir(tmp_path)
+    calls: dict[str, object] = {}
+
+    def _fake_export(recordings_dir, output_dir, experiment_id, **kwargs):
+        calls["recordings_dir"] = recordings_dir
+        calls["output_dir"] = output_dir
+        calls["experiment_id"] = experiment_id
+        calls["kwargs"] = kwargs
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "results.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 3,
+                    "experiment_id": experiment_id,
+                    "source": {"recordings_dir": "stub"},
+                    "summary": {
+                        "total_matches": 1,
+                        "decisive_matches": 1,
+                        "draws": 0,
+                        "win_rates": {"Alice": 1.0, "Bob": 0.0},
+                        "total_cost": 0.0,
+                        "avg_turns": 1.0,
+                        "avg_duration": 1.0,
+                        "avg_cost": 0.0,
+                    },
+                    "statistics": {
+                        "method": "exact_binomial",
+                        "players": {},
+                        "n_total": 1,
+                        "n_decisive": 1,
+                        "confidence_level": 0.95,
+                        "alpha": 0.05,
+                        "null_win_rate": 0.5,
+                    },
+                    "format_strictness": {"overall": {}, "by_player": {}},
+                    "position_effect": {
+                        "total_matches": 1,
+                        "first_player_wins": 1,
+                        "first_player_win_rate": 1.0,
+                        "second_player_wins": 0,
+                        "upset_rate": 0.0,
+                        "by_player": {},
+                    },
+                    "artifact_validation": {
+                        "matches_checked": 1,
+                        "all_passed": True,
+                        "checks": {},
+                        "failures": [],
+                    },
+                    "players": [
+                        {"name": "Alice", "provider": "openai", "model": "gpt-4o-mini"},
+                        {"name": "Bob", "provider": "openai", "model": "gpt-4o-mini"},
+                    ],
+                    "matches": [{"match_id": "match_001", "winner": "Alice"}],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (output_dir / "results.csv").write_text(
+            "match_id,winner,turns,outcome,seed,duration,cost,player_order_source,first_player,players,player_costs\n",
+            encoding="utf-8",
+        )
+
+    def _fake_index(_research_dir):
+        calls["index_called"] = True
+        return "# Research Index\n"
+
+    monkeypatch.setattr("agentdeck.research.packager.export_results", _fake_export)
+    monkeypatch.setattr("agentdeck.research.packager.generate_index", _fake_index)
+
+    package_session(
+        session_dir=session_dir,
+        session_id=None,
+        run_dir=tmp_path / "agentdeck_runs",
+        research_dir=research_dir,
+        experiment_id="2026-01-20-direct-helpers",
+        question="Does the packager use direct helpers?",
+        status=None,
+        title="Direct Helper Demo",
+        include_matrix=False,
+        dry_run=False,
+    )
+
+    assert calls["experiment_id"] == "2026-01-20-direct-helpers"
+    assert calls["output_dir"] == research_dir / "2026-01-20-direct-helpers"
+    assert calls["index_called"] is True
 
 
 def test_package_session_include_matrix_keeps_matrix_scaffold(tmp_path):

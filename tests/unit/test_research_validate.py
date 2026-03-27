@@ -2,22 +2,22 @@
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from agentdeck.research import validate as research_validate
+from scripts import research_validate as research_validate_wrapper
+
 
 def _load_validator_module():
-    script_path = Path(__file__).resolve().parents[2] / "scripts" / "research_validate.py"
-    spec = importlib.util.spec_from_file_location("research_validate", script_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Unable to load research_validate.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return research_validate
 
 
 def _manifest(status: str, matches_completed: int) -> Dict[str, Any]:
@@ -365,3 +365,8 @@ def test_empty_research_tree_is_valid(tmp_path):
         check=False,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_validate_script_wrapper_reexports_package_surface() -> None:
+    assert research_validate_wrapper.main is research_validate.main
+    assert research_validate_wrapper._validate_results is research_validate._validate_results

@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts import research_export
+from agentdeck.research import export as research_export
+from scripts import research_export as research_export_wrapper
 
 
 def _match_payload(match_id: str) -> dict:
@@ -409,3 +410,8 @@ def test_export_results_no_generated_at_is_deterministic(tmp_path, monkeypatch) 
     assert (output_a / "results.json").read_text(encoding="utf-8") == (
         output_b / "results.json"
     ).read_text(encoding="utf-8")
+
+
+def test_script_wrapper_reexports_package_surface() -> None:
+    assert research_export_wrapper.export_results is research_export.export_results
+    assert research_export_wrapper.main is research_export.main

@@ -2,27 +2,35 @@
 
 Utility scripts for validation, packaging, and viewer support.
 
+The preferred research workflow now lives in package-owned entry points:
+- `agentdeck-research-export`
+- `agentdeck-research-index`
+- `agentdeck-research-package`
+- `agentdeck-research-validate`
+
+The `scripts/` files remain as backward-compatible wrappers for repo-local use.
+
 ## Research Workflow
 
-- `research_package.py` promotes one or more `agentdeck_runs/<session>/` folders into a standardized package under `research/`.
-- `research_export.py` generates `results.json` and `results.csv` from one or more recordings directories and fails fast on recording invariant violations.
+- `research_package.py` wraps the package-owned packager surface and promotes one or more `agentdeck_runs/<session>/` folders into a standardized package under `research/`.
+- `research_export.py` wraps the package-owned export surface and generates `results.json` and `results.csv` from one or more recordings directories while failing fast on recording invariant violations.
   It also supports matrix-based cell export and package aggregation for benchmark-grid studies.
-- `research_index.py` regenerates `research/INDEX.md` from experiment manifests.
-- `research_validate.py` validates package structure, generated artifacts, exported invariant summaries, and index consistency.
+- `research_index.py` wraps the package-owned index surface and regenerates `research/INDEX.md` from experiment manifests.
+- `research_validate.py` wraps the package-owned validation surface and validates package structure, generated artifacts, exported invariant summaries, and index consistency.
 
 ### Typical flow
 
 ```bash
-python scripts/research_package.py \
+agentdeck-research-package \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
   --question "Your research question here"
 
-python scripts/research_export.py \
+agentdeck-research-export \
   --recordings-dir agentdeck_runs/session_YYYYMMDD_HHMMSS_xxxxxx/records \
   --output-dir research/YYYY-MM-DD-your-experiment \
   --no-generated-at
 
-python scripts/research_validate.py --research-dir research --write-index
+agentdeck-research-validate --research-dir research --write-index
 ```
 
 ### Matrix-Based Benchmark Flow
@@ -30,7 +38,7 @@ python scripts/research_validate.py --research-dir research --write-index
 Export one selected cell from a benchmark package:
 
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --cell p1_c01_example \
   --no-generated-at
@@ -39,7 +47,7 @@ python scripts/research_export.py \
 Export all cells from one phase:
 
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --phase P1 \
   --no-generated-at
@@ -49,7 +57,7 @@ Aggregate the top-level package from canonical cell artifacts and/or discovered
 session recordings:
 
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --package \
   --no-generated-at

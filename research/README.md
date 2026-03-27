@@ -11,6 +11,10 @@ This preview repo now ships both the **research contract/tooling** and a
 committed set of release-facing benchmark packages, including arc summaries and
 cross-game synthesis.
 
+Preferred commands use the installed `agentdeck-research-*` entry points. If
+those are not yet available in your shell, use the equivalent `python scripts/...`
+wrapper from the repo root.
+
 ## Start Here
 - `../docs/how-to-run-a-study.md` - supported end-to-end study workflow
 - `2026-03-23-fixed-damage-arc-1/README.md` - FixedDamage arc summary
@@ -51,7 +55,7 @@ cp -R research/_templates research/YYYY-MM-DD-your-experiment
 
 4) Export results:
 ```
-python scripts/research_export.py \
+agentdeck-research-export \
   --recordings-dir recordings \
   --output-dir research/YYYY-MM-DD-your-experiment
 ```
@@ -62,12 +66,12 @@ into one export. Add `--no-generated-at` when you need deterministic diffs.
 For matrix-based benchmark packages, use the shared matrix workflow:
 
 ```
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --phase P1 \
   --no-generated-at
 
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --package \
   --no-generated-at
@@ -75,7 +79,7 @@ python scripts/research_export.py \
 
 5) Update the index:
 ```
-python scripts/research_index.py
+agentdeck-research-index
 ```
 
 ## Create Package From Session
@@ -83,21 +87,21 @@ python scripts/research_index.py
 If you already have a completed session under `agentdeck_runs/`, promote it to a
 research package in one step:
 ```
-python scripts/research_package.py \
+agentdeck-research-package \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
   --question "Your research question here"
 ```
 
 For checkpoint aggregation across multiple compatible sessions:
 ```
-python scripts/research_package.py \
+agentdeck-research-package \
   --session-ids session_A session_B \
   --question "Your research question here"
 ```
 
 For benchmark grids, opt in to matrix scaffold generation:
 ```
-python scripts/research_package.py \
+agentdeck-research-package \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
   --question "Your research question here" \
   --include-matrix
@@ -107,12 +111,12 @@ python scripts/research_package.py \
 
 Validate manifests and the index before committing research changes:
 ```
-python scripts/research_validate.py --research-dir research
+agentdeck-research-validate --research-dir research
 ```
 
 To regenerate the index if out of date:
 ```
-python scripts/research_validate.py --research-dir research --write-index
+agentdeck-research-validate --research-dir research --write-index
 ```
 
 ## Recordings Policy

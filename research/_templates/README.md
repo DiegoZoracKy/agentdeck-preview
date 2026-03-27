@@ -55,12 +55,12 @@
 python scripts/run_experiment.py --list-cells
 python scripts/run_experiment.py --phase P1
 
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir . \
   --phase P1 \
   --no-generated-at
 
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir . \
   --package \
   --no-generated-at

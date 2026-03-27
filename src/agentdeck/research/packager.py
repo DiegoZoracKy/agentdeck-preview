@@ -10,32 +10,12 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import yaml
 
+from .export import export_results
+from .index import generate_index
 from .provider_utils import provider_from_module
 
 AUTO_FACTS_BEGIN = "<!-- AUTO_FACTS:BEGIN -->"
 AUTO_FACTS_END = "<!-- AUTO_FACTS:END -->"
-
-
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
-
-
-def _load_script_function(script_name: str, func_name: str):
-    script_path = _repo_root() / "scripts" / script_name
-    if not script_path.exists():
-        raise FileNotFoundError(f"Missing script: {script_path}")
-
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(script_name.replace(".py", ""), script_path)
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Unable to import {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    if not hasattr(module, func_name):
-        raise AttributeError(f"{script_path} missing {func_name}()")
-    return getattr(module, func_name)
 
 
 def _resolve_session_paths(
@@ -664,14 +644,12 @@ def package_session(
         list(zip(resolved_session_ids, session_roots)),
     )
 
-    export_results = _load_script_function("research_export.py", "export_results")
     if len(records_dirs) == 1:
         export_results(records_dirs[0], dest_dir, experiment_id)
     else:
         export_results(records_dirs, dest_dir, experiment_id)
     _write_factual_markdown_blocks(dest_dir, manifest)
 
-    generate_index = _load_script_function("research_index.py", "generate_index")
     index_content = generate_index(research_dir)
     (research_dir / "INDEX.md").write_text(index_content, encoding="utf-8")
 

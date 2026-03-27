@@ -15,6 +15,11 @@ It assumes:
 - you are working inside this repo
 - runtime recordings stay outside git
 - `matrix.yaml` is the source of truth for multi-cell benchmark packages
+- preferred commands come from the installed `agentdeck-research-*` entry points
+- the `scripts/` commands remain available as compatibility fallbacks inside the repo
+
+If the `agentdeck-research-*` commands are not yet available in your shell, use
+the equivalent `python scripts/...` command from the repo root.
 
 ## The Workflow
 
@@ -29,7 +34,7 @@ cp -R research/_templates research/YYYY-MM-DD-your-experiment
 If you already have a finished session and want to package it quickly:
 
 ```bash
-python scripts/research_package.py \
+agentdeck-research-package \
   --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
   --question "Your research question here"
 ```
@@ -82,7 +87,7 @@ research/YYYY-MM-DD-your-experiment/agentdeck_runs/<cell_id>/session_*/records/
 Use the shared exporter instead of package-local export helpers:
 
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --phase P1 \
   --no-generated-at
@@ -91,7 +96,7 @@ python scripts/research_export.py \
 Or export a single cell:
 
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --cell p1_c01_example \
   --no-generated-at
@@ -108,7 +113,7 @@ research/YYYY-MM-DD-your-experiment/artifacts/<cell_id>/
 After cell artifacts exist, aggregate the package:
 
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --experiment-dir research/YYYY-MM-DD-your-experiment \
   --package \
   --no-generated-at
@@ -123,7 +128,7 @@ sources first when both exist.
 Before committing:
 
 ```bash
-python scripts/research_validate.py --research-dir research --write-index
+agentdeck-research-validate --research-dir research --write-index
 ```
 
 This validates:

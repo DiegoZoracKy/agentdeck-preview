@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """Create a research package from an AgentDeck session."""
 
+try:
+    from scripts._bootstrap import ensure_repo_src_on_path
+except ModuleNotFoundError:  # pragma: no cover - direct script execution path
+    from _bootstrap import ensure_repo_src_on_path
+
+ensure_repo_src_on_path()
+
 from agentdeck.research.packager import main
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

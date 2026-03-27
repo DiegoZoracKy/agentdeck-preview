@@ -299,12 +299,12 @@ from manifest.yaml files and updated whenever experiments change.
 
 ## Scripts
 
-- `scripts/research_export.py` generates results.json/results.csv from recordings.
+- The shared export surface (`agentdeck-research-export`, `python -m agentdeck.research.export`, or compatibility `python scripts/research_export.py`) generates results.json/results.csv from recordings.
   - direct mode:
     - `--recordings-dir ... --output-dir ...`
   - shared matrix mode:
     - `--experiment-dir <path> --cell <id>`
     - `--experiment-dir <path> --phase <id>`
     - `--experiment-dir <path> --package`
-- `scripts/research_index.py` generates research/INDEX.md from manifests.
-- `scripts/research_package.py` creates a research package from one or more session directories.
+- The shared index surface (`agentdeck-research-index`, `python -m agentdeck.research.index`, or compatibility `python scripts/research_index.py`) generates `research/INDEX.md` from manifests.
+- `agentdeck-research-package` / `python scripts/research_package.py` creates a research package from one or more session directories.

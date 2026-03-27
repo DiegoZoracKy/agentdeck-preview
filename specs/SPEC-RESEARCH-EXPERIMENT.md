@@ -1,9 +1,9 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
 > Status: Final
-> Version: 1.6.0
-> Last Updated: 2026-03-17
-> Implementation: ✅ Complete (`research/SCHEMA.md`, `scripts/research_export.py`, `scripts/research_index.py`, `scripts/research_validate.py`)
+> Version: 1.6.1
+> Last Updated: 2026-03-26
+> Implementation: ✅ Complete (`research/SCHEMA.md`, `agentdeck.research.export`, `agentdeck.research.index`, `agentdeck.research.validate`, compatibility `scripts/` wrappers)
 > Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose
@@ -14,7 +14,7 @@
 ## 2. Scope & Philosophy Alignment
 - Supports `SPEC.md` §2.4 (reproducibility) and §3.2 (separation of concerns).
 - Aligns with research-first framing: experiment artifacts are data-first, not prose-first.
-- Keeps outputs deterministic: scripts are the source of truth for results and index.
+- Keeps outputs deterministic: the shared research surfaces are the source of truth for results, validation, and index generation.
 
 ## 3. Responsibilities
 - Define the required experiment package layout and required artifacts.
@@ -192,8 +192,8 @@ Minimum columns:
 `player_order_source`, `first_player`, `players`, `player_costs`.
 
 ### 4.10 research/INDEX.md (Generated)
-A registry table for all experiments. It is generated from manifests using
-`scripts/research_index.py` and MUST match the script output.
+A registry table for all experiments. It is generated from manifests using the
+shared research index surface and MUST match its generated output.
 
 Minimum table shape:
 
@@ -206,7 +206,11 @@ Minimum table shape:
 ## 5. Public API
 
 ### 5.1 Export Results
-`scripts/research_export.py`
+Preferred surfaces:
+- `agentdeck-research-export ...`
+- `python -m agentdeck.research.export ...`
+- compatibility: `python scripts/research_export.py ...`
+
 - `--recordings-dir` (Path, required)
   - Repeat the flag to aggregate multiple source directories into one export.
 - `--output-dir` (Path, required)
@@ -215,13 +219,21 @@ Minimum table shape:
 - Output: `results.json` and `results.csv` in `--output-dir`
 
 ### 5.2 Generate Index
-`scripts/research_index.py`
+Preferred surfaces:
+- `agentdeck-research-index ...`
+- `python -m agentdeck.research.index ...`
+- compatibility: `python scripts/research_index.py ...`
+
 - `--research-dir` (Path, default `research`)
 - `--output` (Path, default `research/INDEX.md`)
 - Output: `research/INDEX.md`
 
 ### 5.3 Validate Research Tree
-`scripts/research_validate.py`
+Preferred surfaces:
+- `agentdeck-research-validate ...`
+- `python -m agentdeck.research.validate ...`
+- compatibility: `python scripts/research_validate.py ...`
+
 - `--research-dir` (Path, default `research`)
 - `--index` (Path, default `research/INDEX.md`)
 - `--write-index` (bool; regenerate index if out of date)
@@ -229,29 +241,29 @@ Minimum table shape:
 
 ## 6. Invariants & Guarantees
 - **RE1**: Committed experiment directories MUST contain `manifest.yaml`. `README.md` is RECOMMENDED for curated experiments. Ad-hoc/local experiments may omit README.
-- **RE2**: When using `research_validate.py`, `results.json` and `results.csv` MUST be present for completed experiments (`status: complete`) or whenever results files exist, and MUST conform to the schema produced by `research_export.py` (provenance/shape check).
+- **RE2**: When using the shared research validation surface, `results.json` and `results.csv` MUST be present for completed experiments (`status: complete`) or whenever results files exist, and MUST conform to the schema produced by the shared export surface (provenance/shape check).
 - **RE3**: `manifest.yaml` MUST include all required fields in §4.2.
 - **RE4**: `experiment_id` MUST match the experiment folder name.
 - **RE5**: `schema_version` MUST be an integer >= 1 for manifests. Results files SHOULD include schema_version for forward compatibility.
 - **RE6**: Raw recordings SHOULD NOT be committed to version control; `recordings/` should contain pointers or be gitignored. (This is a repository policy, enforced by `.gitignore`, not runtime validation.)
-- **RE7**: `research/INDEX.md` MUST match the output of `research_index.py`.
+- **RE7**: `research/INDEX.md` MUST match the output of the shared research index surface.
 - **RE8**: Export scripts MUST produce deterministic output for identical recordings, excluding `generated_at` timestamps. Use `--no-generated-at` to omit the timestamp for diff-sensitive checks.
 - **RE9**: Status-gated markdown completeness MUST be enforced by validation:
   - `planned`/`running`: placeholders allowed.
   - `complete`/`archived` with `run.matches_completed > 0`: factual markdown blocks in `README.md` and `analysis.md` MUST be populated.
 - **RE10**: Auto-written markdown content MUST be limited to the factual marker block (`<!-- AUTO_FACTS:BEGIN -->` ... `<!-- AUTO_FACTS:END -->`). Narrative sections remain human-authored.
-- **RE11**: For `results.json.schema_version >= 2`, `results.json.statistics` MUST be produced by `research_export.py` for every exported dataset with one or more matches.
-- **RE12**: For `results.json.schema_version >= 2`, `results.json.format_strictness` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from recorder events only (game-agnostic).
-- **RE13**: For `results.json.schema_version >= 2`, `results.json.position_effect` MUST be produced by `research_export.py` for every exported dataset with one or more matches and MUST be derived from first-player metadata and winners only (game-agnostic).
+- **RE11**: For `results.json.schema_version >= 2`, `results.json.statistics` MUST be produced by the shared export surface for every exported dataset with one or more matches.
+- **RE12**: For `results.json.schema_version >= 2`, `results.json.format_strictness` MUST be produced by the shared export surface for every exported dataset with one or more matches and MUST be derived from recorder events only (game-agnostic).
+- **RE13**: For `results.json.schema_version >= 2`, `results.json.position_effect` MUST be produced by the shared export surface for every exported dataset with one or more matches and MUST be derived from first-player metadata and winners only (game-agnostic).
 - **RE14**: `results.json.source.recordings_dir` MUST be a non-empty primary source string. When aggregating multiple source directories, `results.json.source.recordings_dirs` MUST be a non-empty array and `recordings_dir` MUST equal its first entry.
-- **RE15**: For `results.json.schema_version >= 3`, `results.json.artifact_validation` MUST be produced by `research_export.py` for every exported dataset with one or more matches.
+- **RE15**: For `results.json.schema_version >= 3`, `results.json.artifact_validation` MUST be produced by the shared export surface for every exported dataset with one or more matches.
 - **RE16**: `artifact_validation` MUST cover monotonic gameplay timeline, top-level timing consistency, prompt payload turn-number coherence, and winner/final-state consistency using only recorder payloads (game-agnostic).
-- **RE17**: `research_export.py` MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
+- **RE17**: The shared export surface MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
 
 ## 7. Data Flow & Interaction
-- Export: `recordings/ -> research_export.py -> results.json + results.csv`
-- Index: `manifest.yaml -> research_index.py -> research/INDEX.md`
-- Validation: `manifest.yaml + INDEX.md -> research_validate.py -> pass/fail`
+- Export: `recordings/ -> agentdeck.research.export -> results.json + results.csv`
+- Index: `manifest.yaml -> agentdeck.research.index -> research/INDEX.md`
+- Validation: `manifest.yaml + INDEX.md -> agentdeck.research.validate -> pass/fail`
 
 ## 8. Error Handling & Edge Cases
 - Missing recordings directory or no `match_*.json` files → fail fast with
@@ -269,27 +281,27 @@ cp -R research/_templates research/2026-01-19-example
 
 ### 9.2 Export Results
 ```bash
-python scripts/research_export.py \
+agentdeck-research-export \
   --recordings-dir recordings \
   --output-dir research/2026-01-19-example
 ```
 
 ### 9.3 Validate Research Tree
 ```bash
-python scripts/research_validate.py --research-dir research
+agentdeck-research-validate --research-dir research
 ```
 
 ## 10. Testing Strategy
-- Run `scripts/research_validate.py` before committing research changes.
+- Run the shared research validation surface before committing research changes.
 - Validator MUST cover RE3, RE4, and RE7 at minimum.
 
 ## 11. Design Rationale
-- Script-only results prevent drift between recordings and reported metrics.
+- Shared package-owned research surfaces prevent drift between recordings and reported metrics while keeping `scripts/` available as compatibility wrappers.
 - Generated index avoids manual registry errors and keeps status consistent.
 
 ## 12. Open Questions / Future Work
 - Add optional JSON schema validation for results.json.
-- CI enforcement for `scripts/research_validate.py`.
+- CI enforcement for the shared research validation surface.
 
 ## 13. References
 - [SPEC.md](./SPEC.md) §2.4, §3.2
@@ -297,6 +309,9 @@ python scripts/research_validate.py --research-dir research
 - [SPEC-RESEARCH-BEHAVIORAL.md](./SPEC-RESEARCH-BEHAVIORAL.md)
 - [research/SCHEMA.md](../research/SCHEMA.md)
 - [research/README.md](../research/README.md)
+- [agentdeck.research.export](../src/agentdeck/research/export.py)
+- [agentdeck.research.index](../src/agentdeck/research/index.py)
+- [agentdeck.research.validate](../src/agentdeck/research/validate.py)
 - [scripts/research_export.py](../scripts/research_export.py)
 - [scripts/research_index.py](../scripts/research_index.py)
 - [scripts/research_validate.py](../scripts/research_validate.py)

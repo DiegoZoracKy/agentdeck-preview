@@ -446,7 +446,7 @@ def test_variable_damage_behavioral_scorer_canonical_json_is_stable() -> None:
 
 
 def test_variable_damage_export_auto_selects_variable_scorer(tmp_path, monkeypatch) -> None:
-    from scripts import research_export
+    from agentdeck.research import export as research_export
 
     recordings_dir = tmp_path / "records"
     recordings_dir.mkdir()
