@@ -234,7 +234,7 @@ def test_export_matrix_cells_uses_discovered_session_recordings(tmp_path, monkey
     )
     _write_match(records_dir, "match_001")
 
-    exported = research_export._export_matrix_cells(
+    exported = research_export.export_matrix_cells(
         experiment_dir,
         matrix_path=None,
         phase="P1",
@@ -283,7 +283,7 @@ def test_export_matrix_package_prefers_canonical_cell_artifacts(tmp_path, monkey
         encoding="utf-8",
     )
 
-    research_export._export_matrix_package(
+    research_export.export_matrix_package(
         experiment_dir,
         matrix_path=None,
         include_generated_at=False,
@@ -310,7 +310,7 @@ def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeyp
     )
     _write_match(records_dir, "match_001")
 
-    research_export._export_matrix_package(
+    research_export.export_matrix_package(
         experiment_dir,
         matrix_path=None,
         include_generated_at=False,
@@ -348,7 +348,7 @@ def test_recordings_dirs_for_cell_deduplicates_canonical_and_discovered_paths(
         encoding="utf-8",
     )
 
-    merged = research_export._recordings_dirs_for_cell(experiment_dir, "p1_c01_demo")
+    merged = research_export.recordings_dirs_for_cell(experiment_dir, "p1_c01_demo")
     assert merged == [records_dir.resolve()]
 
 
@@ -357,7 +357,7 @@ def test_export_matrix_cells_fails_fast_for_unknown_cell(tmp_path, monkeypatch) 
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
 
     with pytest.raises(SystemExit, match="No cells selected"):
-        research_export._export_matrix_cells(
+        research_export.export_matrix_cells(
             experiment_dir,
             matrix_path=None,
             phase=None,
@@ -370,7 +370,7 @@ def test_export_matrix_cells_skips_cells_without_recordings(tmp_path, monkeypatc
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
 
-    exported = research_export._export_matrix_cells(
+    exported = research_export.export_matrix_cells(
         experiment_dir,
         matrix_path=None,
         phase="P1",

@@ -420,7 +420,7 @@ class _MatchWorker:
             # Use actual state at point of abort (attached by mechanic via exception)
             abort_state = getattr(abort_error, "abort_state", {})
 
-            # Get turn number safely (Codex fix #2: tolerate None turn_context)
+            # Get turn number safely (tolerate None turn_context)
             abort_turn = abort_error.turn_context.turn_number if abort_error.turn_context else 0
             resolved_first_player = self.console._resolve_first_player_metadata(
                 first_player,
@@ -452,7 +452,7 @@ class _MatchWorker:
             metadata["policy"] = abort_error.policy.value
             metadata["abort_turn"] = abort_turn
 
-            # Serialize turn context for reconstruction (Codex fix #2)
+            # Serialize turn context for reconstruction
             if abort_error.turn_context is not None:
                 metadata["abort_turn_context"] = {
                     "match_id": abort_error.turn_context.match_id,
@@ -566,7 +566,7 @@ class _MatchWorker:
             else:
                 metadata["forfeit_turn"] = None
 
-            # Serialize parse error details (Codex fix #2: include reasoning + full metadata)
+            # Serialize parse error details (include reasoning + full metadata)
             metadata["parse_error"] = {
                 "success": forfeit_error.parse_error.parse_result.success,
                 "error": forfeit_error.parse_error.parse_result.error,
@@ -817,7 +817,7 @@ class _MatchWorker:
                 )
             elif policy == ParseFailurePolicy.SKIP_TURN:
                 # Return sentinel ActionResult preserving original ParseResult metadata
-                # Codex fix: Must include parser_success=False to maintain contract
+                # Must include parser_success=False to maintain contract
                 sentinel_metadata = (
                     dict(parse_error.parse_result.metadata)
                     if parse_error.parse_result.metadata
@@ -2265,7 +2265,7 @@ class Console:
             raise
 
         except MatchForfeitedError as forfeit_error:
-            # FORFEIT policy: Match ends with winner determined (Codex fix: add sequential path handler)
+            # FORFEIT policy: Match ends with winner determined (sequential path handler)
             match_duration = time.time() - runtime.started_at
 
             forfeit_state = copy.deepcopy(getattr(forfeit_error, "forfeit_state", {}))
@@ -2311,7 +2311,7 @@ class Console:
                     "rng_label": forfeit_error.turn_context.rng_label,
                 }
 
-            # Codex fix #2: Include full parse_result metadata (reasoning + deep copy)
+            # Include full parse_result metadata (reasoning + deep copy)
             metadata["parse_error"] = {
                 "success": forfeit_error.parse_error.parse_result.success,
                 "error": forfeit_error.parse_error.parse_result.error,
@@ -2515,7 +2515,7 @@ class Console:
                 )
             elif policy == ParseFailurePolicy.SKIP_TURN:
                 # Return sentinel ActionResult preserving original ParseResult metadata
-                # Codex fix: Must include parser_success=False to maintain contract
+                # Must include parser_success=False to maintain contract
                 sentinel_metadata = (
                     dict(parse_error.parse_result.metadata)
                     if parse_error.parse_result.metadata

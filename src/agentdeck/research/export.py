@@ -38,7 +38,7 @@ def _load_yaml(path: Path) -> Dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
-def _behavioral_config_from_manifest(experiment_dir: Path) -> Dict[str, Any]:
+def behavioral_config_from_manifest(experiment_dir: Path) -> Dict[str, Any]:
     manifest_path = experiment_dir / "manifest.yaml"
     if not manifest_path.exists():
         return {}
@@ -46,14 +46,14 @@ def _behavioral_config_from_manifest(experiment_dir: Path) -> Dict[str, Any]:
     return dict((manifest.get("game") or {}).get("config") or {})
 
 
-def _resolve_matrix_path(experiment_dir: Path, matrix_path: Path | None) -> Path:
+def resolve_matrix_path(experiment_dir: Path, matrix_path: Path | None) -> Path:
     resolved = matrix_path or (experiment_dir / "matrix.yaml")
     if not resolved.exists():
         raise FileNotFoundError(f"Matrix file not found: {resolved}")
     return resolved
 
 
-def _iter_selected_cells(
+def iter_selected_cells(
     matrix: Dict[str, Any], *, phase: str | None, cell_ids: set[str] | None
 ) -> Iterable[Dict[str, Any]]:
     phase_to_cells: Dict[str, set[str]] = {}
@@ -68,7 +68,7 @@ def _iter_selected_cells(
         yield cell
 
 
-def _canonical_recordings_dirs_from_artifact(experiment_dir: Path, cell_id: str) -> List[Path]:
+def canonical_recordings_dirs_from_artifact(experiment_dir: Path, cell_id: str) -> List[Path]:
     artifact_results = experiment_dir / "artifacts" / cell_id / "results.json"
     if not artifact_results.exists():
         return []
@@ -83,7 +83,7 @@ def _canonical_recordings_dirs_from_artifact(experiment_dir: Path, cell_id: str)
     return []
 
 
-def _session_recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
+def session_recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
     cell_run_dir = experiment_dir / "agentdeck_runs" / cell_id
     usable_dirs: List[Path] = []
     if not cell_run_dir.exists():
@@ -97,12 +97,12 @@ def _session_recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> Lis
     return usable_dirs
 
 
-def _recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
+def recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
     merged: List[Path] = []
     seen = set()
-    for path in _canonical_recordings_dirs_from_artifact(
+    for path in canonical_recordings_dirs_from_artifact(
         experiment_dir, cell_id
-    ) + _session_recordings_dirs_for_cell(experiment_dir, cell_id):
+    ) + session_recordings_dirs_for_cell(experiment_dir, cell_id):
         resolved = path.resolve()
         key = str(resolved)
         if key in seen:
@@ -112,7 +112,7 @@ def _recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List[Path]:
     return merged
 
 
-def _export_matrix_cells(
+def export_matrix_cells(
     experiment_dir: Path,
     *,
     matrix_path: Path | None,
@@ -120,17 +120,17 @@ def _export_matrix_cells(
     cell_ids: set[str] | None,
     include_generated_at: bool,
 ) -> int:
-    matrix = _load_yaml(_resolve_matrix_path(experiment_dir, matrix_path))
-    selected = list(_iter_selected_cells(matrix, phase=phase, cell_ids=cell_ids))
+    matrix = _load_yaml(resolve_matrix_path(experiment_dir, matrix_path))
+    selected = list(iter_selected_cells(matrix, phase=phase, cell_ids=cell_ids))
     if not selected:
         raise SystemExit("No cells selected. Use --list-cells, --phase, or --cell.")
 
-    behavioral_config = _behavioral_config_from_manifest(experiment_dir)
+    behavioral_config = behavioral_config_from_manifest(experiment_dir)
     exported = 0
 
     for cell in selected:
         cell_id = cell["id"]
-        recordings_dirs = _recordings_dirs_for_cell(experiment_dir, cell_id)
+        recordings_dirs = recordings_dirs_for_cell(experiment_dir, cell_id)
         if not recordings_dirs:
             print(f"Skipping {cell_id}: no session recordings found.")
             continue
@@ -150,20 +150,20 @@ def _export_matrix_cells(
     return exported
 
 
-def _export_matrix_package(
+def export_matrix_package(
     experiment_dir: Path,
     *,
     matrix_path: Path | None,
     include_generated_at: bool,
 ) -> None:
-    matrix = _load_yaml(_resolve_matrix_path(experiment_dir, matrix_path))
+    matrix = _load_yaml(resolve_matrix_path(experiment_dir, matrix_path))
     manifest_path = experiment_dir / "manifest.yaml"
     manifest = _load_yaml(manifest_path) if manifest_path.exists() else {}
     behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
 
     recordings_dirs: List[Path] = []
     for cell in matrix.get("cells", []):
-        recordings_dirs.extend(_recordings_dirs_for_cell(experiment_dir, cell["id"]))
+        recordings_dirs.extend(recordings_dirs_for_cell(experiment_dir, cell["id"]))
 
     if not recordings_dirs:
         raise SystemExit(
@@ -183,13 +183,13 @@ def _export_matrix_package(
     print(f"Exported package results -> {experiment_dir}")
 
 
-def _list_matrix_cells(experiment_dir: Path, *, matrix_path: Path | None) -> None:
-    matrix = _load_yaml(_resolve_matrix_path(experiment_dir, matrix_path))
+def list_matrix_cells(experiment_dir: Path, *, matrix_path: Path | None) -> None:
+    matrix = _load_yaml(resolve_matrix_path(experiment_dir, matrix_path))
     for cell in matrix.get("cells", []):
         print(f"{cell['id']} [{cell.get('phase', '?')}]")
 
 
-def _load_match(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+def load_match(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     metadata = data.get("metadata", {})
     match_meta = metadata.get("match", {})
@@ -221,7 +221,7 @@ def _load_match(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, A
     return match_entry, metadata, data
 
 
-def _collect_players(metadata_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def collect_players(metadata_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     player_meta: Dict[str, Dict[str, Any]] = {}
     player_order: List[str] = []
 
@@ -391,7 +391,7 @@ def export_results(
     seen_match_ids: Dict[str, Path] = {}
 
     for match_path in match_files:
-        match_entry, metadata, payload = _load_match(match_path)
+        match_entry, metadata, payload = load_match(match_path)
         match_id = str(match_entry.get("match_id") or "")
         if not match_id:
             raise ValueError(f"Missing match_id in {match_path}")
@@ -411,7 +411,7 @@ def export_results(
         detail = f"\n{formatted_failures}" if formatted_failures else ""
         raise ValueError(f"Artifact invariant validation failed.{detail}")
 
-    players = _collect_players(metadata_list)
+    players = collect_players(metadata_list)
 
     wins = {player["name"]: 0 for player in players}
     draws = 0
@@ -637,18 +637,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--experiment-dir is required for matrix mode unless --matrix is supplied.")
 
     if args.list_cells:
-        _list_matrix_cells(experiment_dir, matrix_path=args.matrix)
+        list_matrix_cells(experiment_dir, matrix_path=args.matrix)
         return 0
 
     if args.package:
-        _export_matrix_package(
+        export_matrix_package(
             experiment_dir,
             matrix_path=args.matrix,
             include_generated_at=not args.no_generated_at,
         )
         return 0
 
-    _export_matrix_cells(
+    export_matrix_cells(
         experiment_dir,
         matrix_path=args.matrix,
         phase=args.phase,
@@ -661,15 +661,17 @@ def main(argv: Sequence[str] | None = None) -> int:
 __all__ = [
     "export_results",
     "main",
-    "_behavioral_config_from_manifest",
-    "_resolve_matrix_path",
-    "_iter_selected_cells",
-    "_canonical_recordings_dirs_from_artifact",
-    "_session_recordings_dirs_for_cell",
-    "_recordings_dirs_for_cell",
-    "_export_matrix_cells",
-    "_export_matrix_package",
-    "_list_matrix_cells",
+    "behavioral_config_from_manifest",
+    "resolve_matrix_path",
+    "iter_selected_cells",
+    "canonical_recordings_dirs_from_artifact",
+    "session_recordings_dirs_for_cell",
+    "recordings_dirs_for_cell",
+    "export_matrix_cells",
+    "export_matrix_package",
+    "list_matrix_cells",
+    "load_match",
+    "collect_players",
 ]
 
 

@@ -428,7 +428,7 @@ class MatchAbortedError(Exception):
         self.policy = policy
         self.abort_state: Optional[Dict[str, Any]] = None
 
-        # Codex fix #2: Tolerate None turn_context (for reconstructed exceptions)
+        # Tolerate None turn_context (for reconstructed exceptions)
         if turn_context is not None:
             turn_info = f"at turn {turn_context.turn_number}"
         else:

@@ -9,31 +9,35 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution path
 ensure_repo_src_on_path()
 
 from agentdeck.research.export import (
-    _behavioral_config_from_manifest,
-    _canonical_recordings_dirs_from_artifact,
-    _export_matrix_cells,
-    _export_matrix_package,
-    _iter_selected_cells,
-    _list_matrix_cells,
-    _recordings_dirs_for_cell,
-    _resolve_matrix_path,
-    _session_recordings_dirs_for_cell,
+    behavioral_config_from_manifest,
+    canonical_recordings_dirs_from_artifact,
+    collect_players,
+    export_matrix_cells,
+    export_matrix_package,
     export_results,
+    iter_selected_cells,
+    list_matrix_cells,
+    load_match,
     main,
+    recordings_dirs_for_cell,
+    resolve_matrix_path,
+    session_recordings_dirs_for_cell,
 )
 
 __all__ = [
     "export_results",
     "main",
-    "_behavioral_config_from_manifest",
-    "_resolve_matrix_path",
-    "_iter_selected_cells",
-    "_canonical_recordings_dirs_from_artifact",
-    "_session_recordings_dirs_for_cell",
-    "_recordings_dirs_for_cell",
-    "_export_matrix_cells",
-    "_export_matrix_package",
-    "_list_matrix_cells",
+    "behavioral_config_from_manifest",
+    "resolve_matrix_path",
+    "iter_selected_cells",
+    "canonical_recordings_dirs_from_artifact",
+    "session_recordings_dirs_for_cell",
+    "recordings_dirs_for_cell",
+    "export_matrix_cells",
+    "export_matrix_package",
+    "list_matrix_cells",
+    "load_match",
+    "collect_players",
 ]
 
 
