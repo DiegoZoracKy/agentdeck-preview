@@ -1,8 +1,8 @@
-# SPEC-RESEARCH-WORKFLOW v0.1.1
+# SPEC-RESEARCH-WORKFLOW v0.1.2
 
 > Status: Final
-> Version: 0.1.1
-> Last Updated: 2026-03-26
+> Version: 0.1.2
+> Last Updated: 2026-03-27
 > Implementation: ✅ Complete (`agentdeck.research.export`, `agentdeck.research.index`, thin `scripts/` wrappers)
 > Audience: Research engineers, experiment authors, contributors
 
@@ -69,7 +69,9 @@ The export surface MUST support two modes:
   - export top-level package `results.json` and `results.csv`
   - merge canonical `source.recordings_dir(s)` from cell artifacts with discovered
     `agentdeck_runs/<cell_id>/session_*/records`
-  - prefer canonical cell-artifact sources first when both exist
+  - prefer canonical cell-artifact sources first when both exist and remain usable
+  - ignore canonical sources that do not exist, are not directories, or contain no
+    `match_*.json` files
 
 ### 4.4 Shared Index Surface
 The shared index surface MUST be implemented in `agentdeck.research.index` and exposed through:
@@ -100,7 +102,12 @@ The workflow MUST NOT require model/config registries for export-only operations
 - **RW2**: Matrix mode MUST deduplicate recordings directories by resolved path.
 - **RW3**: Cell export MUST fail fast when the selected cell ids do not exist.
 - **RW4**: Cell export MUST skip cells with no discovered recordings rather than fabricate empty artifacts.
-- **RW5**: Package export MUST prefer canonical sources from committed cell artifacts when they exist.
+- **RW5**: Package export MUST prefer usable canonical sources from committed cell
+  artifacts when they exist.
+- **RW5a**: Package export MUST ignore unusable canonical sources from committed cell
+  artifacts and continue with discovered session recordings when available. A canonical
+  source is unusable when the path does not exist, is not a directory, or contains no
+  `match_*.json` files.
 - **RW6**: Package export MUST preserve deterministic outputs when `--no-generated-at` is used.
 - **RW7**: Shared tooling MUST NOT own or infer experiment execution policy; it only exports, scores, aggregates, and indexes outputs.
 - **RW8**: The minimal template `scripts/run_experiment.py` MUST remain package-local and framework-agnostic beyond stable public AgentDeck APIs.
@@ -121,6 +128,8 @@ The workflow MUST NOT require model/config registries for export-only operations
   - export a package from canonical cell artifacts
   - merge canonical and discovered sources, and still export from discovered
     session recordings when cell artifacts are absent
+  - ignore dead or empty canonical artifact sources and still export from discovered
+    session recordings
 - Verify duplicate recordings dirs are deduplicated.
 - Verify invalid cell selection and missing matrix files fail fast.
 - Verify the package-owned module and the `scripts/` wrapper share the same behavior.
