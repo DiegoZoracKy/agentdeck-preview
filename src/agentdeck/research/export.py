@@ -68,6 +68,10 @@ def iter_selected_cells(
         yield cell
 
 
+def _is_usable_recordings_dir(path: Path) -> bool:
+    return path.is_dir() and any(path.glob("match_*.json"))
+
+
 def canonical_recordings_dirs_from_artifact(experiment_dir: Path, cell_id: str) -> List[Path]:
     artifact_results = experiment_dir / "artifacts" / cell_id / "results.json"
     if not artifact_results.exists():
@@ -76,10 +80,12 @@ def canonical_recordings_dirs_from_artifact(experiment_dir: Path, cell_id: str) 
     source = payload.get("source") or {}
     recordings_dirs = source.get("recordings_dirs") or []
     if recordings_dirs:
-        return [Path(path) for path in recordings_dirs]
+        return [Path(path) for path in recordings_dirs if _is_usable_recordings_dir(Path(path))]
     recordings_dir = source.get("recordings_dir")
     if recordings_dir:
-        return [Path(recordings_dir)]
+        path = Path(recordings_dir)
+        if _is_usable_recordings_dir(path):
+            return [path]
     return []
 
 
@@ -89,9 +95,7 @@ def session_recordings_dirs_for_cell(experiment_dir: Path, cell_id: str) -> List
     if not cell_run_dir.exists():
         return usable_dirs
     for path in sorted(cell_run_dir.glob("session_*/records")):
-        if not path.is_dir():
-            continue
-        if not any(path.glob("match_*.json")):
+        if not _is_usable_recordings_dir(path):
             continue
         usable_dirs.append(path)
     return usable_dirs

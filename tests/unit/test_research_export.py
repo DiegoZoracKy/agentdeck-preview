@@ -321,6 +321,50 @@ def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeyp
     assert payload["summary"]["total_matches"] == 1
 
 
+@pytest.mark.parametrize("dead_kind", ["missing", "empty"])
+def test_export_matrix_package_ignores_unusable_canonical_sources(
+    tmp_path, monkeypatch, dead_kind: str
+) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+    discovered_dir = (
+        experiment_dir
+        / "agentdeck_runs"
+        / "p1_c01_demo"
+        / "session_001"
+        / "records"
+    )
+    _write_match(discovered_dir, "match_001")
+
+    dead_canonical_dir = tmp_path / "stale_records"
+    if dead_kind == "empty":
+        dead_canonical_dir.mkdir(parents=True, exist_ok=True)
+
+    artifact_dir = experiment_dir / "artifacts" / "p1_c01_demo"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "results.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 3,
+                "experiment_id": "2026-03-26-matrix-demo::p1_c01_demo",
+                "source": {"recordings_dir": str(dead_canonical_dir.resolve())},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    research_export.export_matrix_package(
+        experiment_dir,
+        matrix_path=None,
+        include_generated_at=False,
+    )
+
+    payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+    assert payload["source"]["recordings_dir"] == str(discovered_dir.resolve())
+    assert payload["source"].get("recordings_dirs") in (None, [str(discovered_dir.resolve())])
+    assert payload["summary"]["total_matches"] == 1
+
+
 def test_recordings_dirs_for_cell_deduplicates_canonical_and_discovered_paths(
     tmp_path, monkeypatch
 ) -> None:
