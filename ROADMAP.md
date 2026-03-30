@@ -1,6 +1,6 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-03-26
+Last updated: 2026-03-30
 
 ## Release Position
 - AgentDeck targets a public beta / preview release, not `1.0`.
@@ -74,6 +74,21 @@ Those live in separate internal planning.
 - [x] Document `matrix.yaml` as a stable research contract with a minimal template
 - [x] Ensure the documented workflow across `research_export.py`, `research_validate.py`, `research_index.py`, and `research_package.py` is coherent and externally legible
 
+### 5. Viewer Showcase Curation
+
+The viewer is beta-functional but its `matches/` directory still contains pre-research placeholder matches (Haiku vs. Sonnet, GPT-4o vs. GPT-4o-mini). It does not yet reflect the research story at all. This is the primary remaining in-repo product gap before release.
+
+- [x] Select 4–6 canonical FixedDamage matches from the completed arc (flagship game, clearest behavioral signal)
+- [x] Copy selected match recordings into `viewer/matches/`
+- [x] Update `viewer/matches/manifest.json` with labeled entries
+- [x] Confirm viewer renders them correctly end-to-end
+- [x] Add a brief note in `viewer/README.md` on what the curated matches represent
+
+**Constraints:**
+- VariableDamage renderer is not yet registered in the viewer; FixedDamage only for now
+- Depends on the 31-package rerun completing and exports settling first
+- Pick matches that show behavioral contrast (e.g., plain AO vs. RC-TR-HP, a potion decision turning point, a loss from poor HP management)
+
 ## Release Gates
 
 ### Beta Gate
@@ -82,6 +97,7 @@ Those live in separate internal planning.
 - [x] Cross-game comparison document written
 - [x] Supported research workflow shipped and documented for the common matrix-based export/aggregation path
 - [x] README, examples, and release-facing docs tell a consistent product story
+- [x] Viewer curated with research matches (section 5 above)
 
 ## Optional Appendix (Not A Beta Gate)
 - [ ] `GPT-5-AO` vs `Flash-AO` at `N=24`

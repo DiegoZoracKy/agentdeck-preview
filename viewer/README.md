@@ -31,6 +31,20 @@ node scripts/update_match_manifest.js
 
 3. Reload `viewer/index.html` and use **Local Match Library**.
 
+### Curated Research Matches
+
+The bundled local library is now a curated `FixedDamage` set from the rebuilt
+official research runs. It is ordered to tell the arc:
+
+1. plain `FlashLite-AO` collapse against `Flash-AO`
+2. `ReasoningController` partially repairing that collapse
+3. the final `FlashLite-RC-TR-HP-exit` stack winning as second player
+4. `gpt-4o-mini RC` backfiring against `gpt-5-mini`
+5. Haiku's seat-conditioned pathology against `Flash-AO`
+6. a premium plain-baseline reference match: `Flash-AO` vs `GPT5Mini-AO`
+
+These matches are meant to show behavioral contrast, not just winners.
+
 ### Option 2: With a local server (recommended)
 
 ```bash
