@@ -14,7 +14,7 @@
 - Topline Read:
   - uncertainty changed both the baseline ranking and the failure modes worth measuring
   - `RC` transferred to Flash-Lite, `TR` did not, and the fixed `20` HP rule had to be redesigned as a risk-band prompt
-  - the final premium ceiling check closed with a clean near-parity result: `GPT5Mini-AO` beat `FlashLite-RC-RISK` `13-11`, but the gap stayed null and narrow
+  - the final premium ceiling check still closed at near parity: `FlashLite-RC-RISK` edged `GPT5Mini-AO` `13-11`, but the gap stayed null and narrow
 - Next Move: stop the VariableDamage experiment line here and switch fully to synthesis and release-facing docs
 <!-- AUTO_FACTS:END -->
 
@@ -48,7 +48,11 @@
 ## Final Answers
 - Outcome layer:
   - plain `FlashLite-AO` was again the weakest baseline, but the ordering above it changed under uncertainty
-  - the effective top tier we observed was `Flash-AO`, `Haiku-AO`, and `GPT5Mini-AO`, with `Mini-AO` below them and `FlashLite-AO` at the bottom
+  - the effective top tier we observed was `Flash-AO`, `Haiku-AO`, and `GPT5Mini-AO`, with no decisive separation among them, `Mini-AO` below them, and `FlashLite-AO` at the bottom
+  - cleaned OpenAI baseline pilots came back:
+    - `GPT5Mini-AO` vs `Flash-AO`: `14-10`
+    - `GPT5Mini-AO` vs `Haiku-AO`: `12-12`
+    - `GPT5Mini-AO` vs `Mini-AO`: `14-10`
   - the final tuned Flash-Lite condition reached near parity with `Flash-AO` and stayed respectable against `GPT5Mini-AO`
 - Behavioral layer:
   - FixedDamage metrics were not enough here
@@ -104,6 +108,8 @@ Source of record:
 - If you want the main scientific takeaway, it is this:
   - interventions do not transfer by name alone
   - they transfer only when they match the new game’s real failure mode
+- If you want the baseline ranking takeaway, it is this:
+  - VariableDamage compressed the top of the field into a co-top tier rather than revealing a single runaway premium model
 - If you want the release-facing continuation, read:
   - [FixedDamage Arc 1](../2026-03-23-fixed-damage-arc-1/README.md)
   - [Cross-Game Comparison 1](../2026-03-26-cross-game-comparison-1/README.md)

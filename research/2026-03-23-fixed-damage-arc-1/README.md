@@ -13,8 +13,8 @@
 - Canonical final stack: `FlashLite-RC-TR-HP-exit`
 - Topline Read:
   - strategy stack mattered more than base-model choice alone in this game
-  - plain `FlashLite-AO` lost badly to stronger baselines, but the final Flash-Lite stack became the strongest Gemini condition we found
-  - the final Flash parity result closed in Exit 1: `FlashLite-RC-TR-HP-exit` beat `Flash-AO` `35-13`
+  - plain `FlashLite-AO` lost badly to stronger baselines, but the final Flash-Lite stack still became the strongest Gemini condition we found
+  - the rebuilt parity ladder no longer supports a decisive Flash-Lite-over-Flash claim; the right final read is competitive / near-parity, not clear dominance
 - Next Move: treat FixedDamage as closed and use `VariableDamage Arc 1` plus the cross-game synthesis as the release-facing continuation
 <!-- AUTO_FACTS:END -->
 
@@ -58,11 +58,11 @@
 ## Final Answers
 - Outcome layer:
   - plain `Flash` beat plain `Flash-Lite`
-  - the final Flash-Lite stack beat plain `Flash` in Exit 1
-  - tuned Flash-Lite crushed plain `gpt-4o-mini`
+  - the final Flash-Lite stack reached near parity with plain `Flash`, but the rebuilt set does not support the older stronger claim that it clearly beat `Flash-AO`
+  - tuned Flash-Lite still beat plain `gpt-4o-mini`
   - plain `gpt-5-mini` remained the best untuned premium baseline we tested
   - the completed plain-model ordering is now closed:
-    - `GPT5Mini-AO > Flash-AO ≈ Haiku-AO > Mini-AO > FlashLite-AO`
+    - `GPT5Mini-AO > Flash-AO > Haiku-AO > Mini-AO > FlashLite-AO`
 - Behavioral layer:
   - the behavioral scorer was the key unlock
   - it surfaced state-level bugs that win rates alone would not explain
@@ -113,8 +113,7 @@ Source of record:
   `FlashLite-RC-TR-HP-exit`.
 - If you want the main scientific takeaway, it is this:
   - in constrained sequential tasks, prompt strategy can transform a weak model
-    from clearly losing to genuinely competitive or even dominant against
-    stronger plain baselines
+    from clearly losing to genuinely competitive against stronger plain baselines
 - If you want the next research question, it is no longer inside FixedDamage.
   That question is now answered in [VariableDamage Arc 1](../2026-03-26-variable-damage-arc-1/README.md)
   and [Cross-Game Comparison 1](../2026-03-26-cross-game-comparison-1/README.md).

@@ -38,7 +38,7 @@
   - HP guidance transferred only after being rewritten from exact fixed-threshold language into VariableDamage risk bands
 - Model behavior:
   - `Flash` was the most robust baseline across both games
-  - `Haiku` changed the most: pathological in FixedDamage, coherent and strong in VariableDamage
+  - `Haiku` changed the most: it sat clearly below `Flash` in rebuilt FixedDamage, then became coherent and co-top in VariableDamage
   - `Mini` changed least in behavior: it stayed early-healing and conservative, but VariableDamage made that cost clearer
   - `FlashLite` remained the most improvable weak model in both games
 - Product value:
@@ -49,6 +49,9 @@
 - If you want the shortest release-facing story:
   - FixedDamage proved the intervention workflow in a deterministic game
   - VariableDamage proved the same workflow still works under uncertainty, but only after the metrics and the prompt logic changed
+- If you want the ordering takeaway:
+  - rebuilt FixedDamage now supports `GPT5Mini > Flash > Haiku > Mini > FlashLite`
+  - VariableDamage still supports a compressed co-top tier of `Flash`, `Haiku`, and `GPT5Mini`
 - If you want the most important product claim:
   - AgentDeck is useful for diagnosing model behavior, not just for tuning weaker models
 
