@@ -1,5 +1,5 @@
 /**
- * FixedDamageFFVISceneRenderer - FFVI-inspired battle scene renderer
+ * CombatRetroJrpgSceneRenderer - Retro JRPG-inspired battle scene renderer
  *
  * Per SPEC-VIEWER §5.3:
  * - R1: init() MUST be callable multiple times (re-init for new match)
@@ -8,7 +8,7 @@
  * - R4: Renderers MUST NOT modify MatchData or GameplayFrame objects
  */
 
-class FixedDamageFFVISceneRenderer {
+class CombatRetroJrpgSceneRenderer {
   constructor() {
     this._container = null;
     this._matchData = null;
@@ -116,7 +116,7 @@ class FixedDamageFFVISceneRenderer {
 
   _createScene() {
     const scene = document.createElement('div');
-    scene.className = 'ffvi-scene';
+    scene.className = 'retro-jrpg-scene';
 
     // Message box (top)
     const message = document.createElement('div');
@@ -579,7 +579,7 @@ class FixedDamageFFVISceneRenderer {
   }
 
   _assetUrl(fileName) {
-    return `../src/agentdeck/games/examples/fixed_damage/viewers/ffvi_scene/assets/${fileName}`;
+    return `../src/agentdeck/games/examples/fixed_damage/viewers/retro_jrpg_scene/assets/${fileName}`;
   }
 
   _getModelName(playerName) {
@@ -612,11 +612,11 @@ class FixedDamageFFVISceneRenderer {
 
 // Register renderer for the bundled combat games (if registry present).
 if (typeof RendererRegistry !== 'undefined') {
-  RendererRegistry.register('FixedDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
-  RendererRegistry.register('VariableDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
+  RendererRegistry.register('FixedDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
+  RendererRegistry.register('VariableDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
 }
 
 // Export for module systems, also available as global
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = FixedDamageFFVISceneRenderer;
+  module.exports = CombatRetroJrpgSceneRenderer;
 }

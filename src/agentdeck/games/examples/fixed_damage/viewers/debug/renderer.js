@@ -1,5 +1,5 @@
 /**
- * FixedDamageDebugRenderer - Simple state-focused renderer for debugging.
+ * CombatDebugRenderer - State-focused combat renderer for debugging.
  *
  * Per SPEC-VIEWER §5.3:
  * - R1: init() MUST be callable multiple times (re-init for new match)
@@ -8,7 +8,7 @@
  * - R4: Renderers MUST NOT modify MatchData or GameplayFrame objects
  */
 
-class FixedDamageDebugRenderer {
+class CombatDebugRenderer {
   constructor() {
     this._container = null;
     this._matchData = null;
@@ -298,11 +298,11 @@ class FixedDamageDebugRenderer {
 
 // Register renderer for the bundled combat games (if registry present).
 if (typeof RendererRegistry !== 'undefined') {
-  RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
-  RendererRegistry.register('VariableDamageGame', 'debug', FixedDamageDebugRenderer);
+  RendererRegistry.register('FixedDamageGame', 'debug', CombatDebugRenderer);
+  RendererRegistry.register('VariableDamageGame', 'debug', CombatDebugRenderer);
 }
 
 // Export for module systems, also available as global
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = FixedDamageDebugRenderer;
+  module.exports = CombatDebugRenderer;
 }

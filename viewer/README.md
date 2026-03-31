@@ -124,7 +124,7 @@ viewer/
 src/agentdeck/games/examples/fixed_damage/
 ├── game.py                    # Game logic
 └── viewers/                   # Bundled combat viewers reused by both games
-    ├── ffvi_scene/
+    ├── retro_jrpg_scene/
     │   ├── renderer.js
     │   ├── styles.css
     │   └── assets/
@@ -163,7 +163,7 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 - Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
 
 ### Bundled Combat Viewers
-- **FFVI Scene**: logo‑knights battle scene with top message box
+- **Retro JRPG Scene**: logo‑knights battle scene with top message box
 - **Debug**: state‑focused developer view (before/after, reasoning, prompt/response)
 
 ## Creating Custom Renderers

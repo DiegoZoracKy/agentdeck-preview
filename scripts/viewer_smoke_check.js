@@ -25,13 +25,13 @@ const repoRoot = path.join(__dirname, '..');
 const RecordLoader = require(path.join(repoRoot, 'viewer/js/record-loader.js'));
 const Timeline = require(path.join(repoRoot, 'viewer/js/timeline.js'));
 const RendererRegistry = require(path.join(repoRoot, 'viewer/js/renderers/index.js'));
-const FixedDamageDebugRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js'));
-const FixedDamageFFVISceneRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/ffvi_scene/renderer.js'));
+const CombatDebugRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js'));
+const CombatRetroJrpgSceneRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/retro_jrpg_scene/renderer.js'));
 
-RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
-RendererRegistry.register('FixedDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
-RendererRegistry.register('VariableDamageGame', 'debug', FixedDamageDebugRenderer);
-RendererRegistry.register('VariableDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
+RendererRegistry.register('FixedDamageGame', 'debug', CombatDebugRenderer);
+RendererRegistry.register('FixedDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
+RendererRegistry.register('VariableDamageGame', 'debug', CombatDebugRenderer);
+RendererRegistry.register('VariableDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
 
 const manifestPath = path.join(repoRoot, 'viewer/matches/manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -48,8 +48,8 @@ function runSampleSmoke(entry, expectedGame) {
   const debugRenderer = RendererRegistry.create(matchData, 'debug');
   assert(debugRenderer, 'RendererRegistry.create(matchData, "debug") returned falsy');
 
-  const sceneRenderer = RendererRegistry.create(matchData, 'ffvi_scene');
-  assert(sceneRenderer, 'RendererRegistry.create(matchData, "ffvi_scene") returned falsy');
+  const sceneRenderer = RendererRegistry.create(matchData, 'retro_jrpg_scene');
+  assert(sceneRenderer, 'RendererRegistry.create(matchData, "retro_jrpg_scene") returned falsy');
 
   const timeline = new Timeline(matchData);
   let frames = 0;

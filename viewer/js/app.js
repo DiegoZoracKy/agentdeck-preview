@@ -292,7 +292,7 @@ function populateSkinSelector(data) {
 
   const preferred = preferredSkin || currentSkin
   if (preferred && skins.includes(preferred)) currentSkin = preferred
-  else currentSkin = skins.includes('ffvi_scene') ? 'ffvi_scene' : skins[0]
+  else currentSkin = skins.includes('retro_jrpg_scene') ? 'retro_jrpg_scene' : skins[0]
 
   skinSelect.value = currentSkin
   if (mobileSkinSelect) mobileSkinSelect.value = currentSkin

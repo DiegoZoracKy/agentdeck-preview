@@ -7,7 +7,7 @@ const RendererRegistry = {
   /**
    * Register a renderer class for a game and skin.
    * @param {string} gameName
-   * @param {string} skin - Renderer variant (e.g., 'ffvi', 'debug')
+   * @param {string} skin - Renderer variant (e.g., 'retro_jrpg_scene', 'debug')
    * @param {Function} rendererClass
    */
   register(gameName, skin, rendererClass) {
