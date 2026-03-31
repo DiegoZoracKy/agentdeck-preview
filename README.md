@@ -10,146 +10,9 @@
 
 ## 🎯 Purpose & Vision
 
-![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
-
 AgentDeck helps you turn a behavioral question into a concrete study: define a game or reuse an existing one, run seeded matches across models and controllers, replay every decision, and export artifacts you can validate and compare.
 
-It is built for research on AI behavior in structured game scenarios, where state, incentives, and resource tradeoffs are explicit instead of being hidden inside static prompts.
-
-Want to try it immediately? Jump to [Quick Start](#-quick-start).
-
-### The Core Promise
-
-Use AgentDeck to:
-
-1. define a constrained game or reuse an existing one
-2. run seeded matches across models, prompts, and controllers
-3. replay and inspect what happened turn by turn
-4. export objective artifacts for validation and comparison
-
-### Why Games?
-
-Most LLM benchmarks measure **knowledge** (answering static questions). But real-world utility requires **agency**: maintaining state, forming strategies, and adapting over time.
-
-Games are the perfect "behavioral wind tunnel" for testing these capabilities:
-
-- **Constrained environments** – Isolate specific variables (e.g., "Does the model understand resource scarcity?")
-- **Iterative decision making** – Agents live with consequences, testing long-term planning
-- **Social dynamics** – Multiplayer games reveal cooperation, betrayal, and negotiation patterns
-- **Measurable outcomes** – Win/lose provides clear signal for cost/quality trade-offs
-
-### The Console Metaphor
-
-AgentDeck is architected like a video game console to keep experiments modular and clean:
-
-- 🎮 **Console (AgentDeck)** – The engine that orchestrates sessions, manages seeding, and enforces rules
-- 💾 **Game (Cartridge)** – Pure logic defining rules and state transitions; swap games without changing agents
-- 🤖 **Player** – The AI agent (GPT-4, Claude, Gemini) that "holds the controller"
-- 🕹️ **Controller** – Translates the AI's text response into valid game actions
-- 📺 **Renderer** – "Draws" the game state into text the AI can understand
-- 👁️ **Spectator** – The audience watching the live stream (stats, narration, cost tracking)
-- 📹 **Recorder** – The "DVR" capturing every event for perfect replay and analysis
-
-By separating these concerns, AgentDeck ensures your research is **reproducible, observable, and easy to modify**.
-
-**Core Capabilities:**
-- Run experiments with GPT/Claude/Gemini in ~10 lines of code
-- Deterministic seeding + recordings + replay parity
-- Parallel execution for scaling
-- Event-driven observability via spectators
-- Research export, validation, and package-friendly analysis workflows
-
-## 🚦 Release Status
-
-AgentDeck is currently published as a **public beta / preview**.
-
-Today, the project is ready for:
-- Core match execution through the `AgentDeck` facade
-- Provider-backed and mock-player experiments
-- Recording, replay, and event-driven observability
-- Native fairness controls for paired side-swap and diagnostic first-player policies
-- Research export, packaging, invariant validation, and post-hoc analysis workflows
-
-It is **not** presented as a `1.0` stable platform yet. The main remaining gaps are:
-- A methodologically stronger default benchmark regime for behavioral claims
-- A sharper public narrative connecting the engine, the shipped FixedDamage and VariableDamage arcs, and the viewer
-- Curated replay/viewer surfaces for the strongest release-facing examples
-
-Viewer and replay UI work should currently be treated as a **beta offline surface**. The core product is still the engine, record contract, and research workflow.
-
----
-
-## 🔬 Research Program
-
-This README focuses on the **core AgentDeck platform** (architecture, APIs, and usage).
-Experiment-specific findings, result narratives, and benchmark grids live under [`research/`](research/).
-
-This preview repo now ships committed release-facing benchmark packages, arc
-summaries, and a cross-game synthesis layer alongside the research tooling.
-
-### Explore Research
-- **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic reference arc: diagnosis, intervention ladder, and final carry-forward stack
-- **[VariableDamage Arc 1](research/2026-03-26-variable-damage-arc-1/README.md)** - Uncertainty arc: risk-band metrics, transfer failures, and final premium ceiling check
-- **[Cross-Game Comparison 1](research/2026-03-26-cross-game-comparison-1/README.md)** - What transferred, what broke, and why the metrics had to evolve
-- **[How To Run A Study](docs/how-to-run-a-study.md)** - Supported end-to-end workflow for creating, running, exporting, and validating a study
-- **[Research Guide](research/README.md)** - How experiment packages are organized
-- **[Research Index](research/INDEX.md)** - Registry of experiments and status
-- **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
-- **[Research Templates](research/_templates/)** - Boilerplate for new experiment packages
-
----
-
-## ⚙️ Architecture
-
-AgentDeck follows a **gaming console metaphor** with clean separation of concerns:
-
-```
-┌─────────────────────────────────────┐
-│         AgentDeck (Facade)          │  ← You interact here
-├─────────────────────────────────────┤
-│         Console (Orchestrator)       │  ← Manages lifecycle
-├─────────────┬───────────────────────┤
-│    Game     │     EventBus          │  ← Game logic + Events
-├─────────────┼───────────────────────┤
-│   Players   │     Spectators        │  ← AI agents + Observers
-└─────────────┴───────────────────────┘
-```
-
-### Single Turn Flow
-
-![Single Turn Flow](docs/images/agentdeck-whiteboard-single-turn-flow.png)
-
-### Core Components
-
-**Games** define rules and state
-- Required properties: `instructions`, `allowed_actions`, `default_handshake_template`
-- Core methods: `setup()`, `get_view()`, `update()`, `status()`
-- State is JSON-serializable dicts (no complex objects)
-- Example: [FixedDamageGame](src/agentdeck/games/examples/fixed_damage/)
-
-**Players** are AI agents making decisions
-- Three-phase lifecycle: Handshake → Turn → Conclusion
-- Built-in: `GPTPlayer`, `ClaudePlayer`, `GeminiPlayer`, `MockPlayer`
-- Composable prompt templates via `PromptBuilder`
-
-**Controllers** parse AI responses into actions
-- `ActionOnlyController` - extracts single action token
-- `ReasoningController` - extracts reasoning + action
-- Handshake validation is built into the base `Controller` (default accepts exactly `OK`)
-
-**Renderers** format game state for AI consumption
-- `TextRenderer` - human-readable text format
-- Custom renderers can provide JSON, images, etc.
-
-**Spectators** observe and analyze matches
-- `MatchNarrator` - turn-by-turn commentary
-- `ProgressDisplay` - real-time progress with ETA
-- `TokenUsageTracker` - cost tracking per player/model
-- `StatsTracker` - win rates and performance metrics
-
-**Recording & Replay**
-- `Recorder` - captures complete match data to JSON
-- `ReplayEngine` - reconstructs matches with event parity guarantee
+It is useful when static prompt-response evaluation is not enough. By putting agents inside structured games, AgentDeck makes state, incentives, and resource tradeoffs explicit so behavior is easier to observe, compare, replay, and explain.
 
 ---
 
@@ -180,8 +43,8 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
-cd agentdeck-preview
+git clone https://github.com/DiegoZoracKy/agentdeck-preview-pre-release.git
+cd agentdeck-preview-pre-release
 pip install -e ".[dev]"
 ```
 
@@ -241,10 +104,18 @@ print(f"Win rates: {results.win_rates}")
 - Uses `MockPlayer` (deterministic) so no LLM providers are needed
 - Shows live commentary + progress + stats, and saves recordings under `agentdeck_runs/mock_demo/<session>/records/`
 
+### Recommended Learning Path
+1. `examples/mock_demo.py` — verify the install with a zero-provider run
+2. `examples/first_game_walkthrough.py` — build a tiny game and replay it
+3. `examples/minimal_experiment.py` — run the smallest real provider-backed experiment
+4. `examples/spectator_example.py` and `examples/replay_minimal.py` — add monitoring and replay workflows
+
+For the full ladder, see [examples/README.md](examples/README.md).
+
 ### Walkthroughs & Docs
 - Build your first game + replay tour: `examples/first_game_walkthrough.py`
-- Examples index: `examples/README.md`
-- End-to-end study workflow: `docs/how-to-run-a-study.md`
+- Examples index: [examples/README.md](examples/README.md)
+- End-to-end study workflow: [docs/how-to-run-a-study.md](docs/how-to-run-a-study.md)
 
 ### Artifacts (Recordings + Logs)
 
@@ -277,6 +148,109 @@ with AgentDeck(game=game, session=config) as deck:
 ```
 > Performance depends on provider rate limits and workload. For a determinism + concurrency comparison,
 > see [`examples/test_parallel_execution.py`](examples/test_parallel_execution.py).
+
+---
+
+## 🔬 Research Program
+
+This preview repo ships release-facing benchmark packages, arc summaries, and a cross-game synthesis layer alongside the engine.
+
+Start here:
+- **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic flagship arc: diagnosis, intervention ladder, and final carry-forward stack
+- **[VariableDamage Arc 1](research/2026-03-26-variable-damage-arc-1/README.md)** - Uncertainty arc: risk-band metrics, transfer failures, and premium ceiling check
+- **[Cross-Game Comparison 1](research/2026-03-26-cross-game-comparison-1/README.md)** - What transferred, what broke, and why the metrics had to evolve
+- **[How To Run A Study](docs/how-to-run-a-study.md)** - Supported end-to-end workflow for creating, running, exporting, and validating a study
+
+Deeper references:
+- **[Research Guide](research/README.md)** - How experiment packages are organized
+- **[Research Index](research/INDEX.md)** - Registry of experiments and status
+- **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
+- **[Research Templates](research/_templates/)** - Boilerplate for new experiment packages
+
+---
+
+## 🚦 Release Status
+
+AgentDeck is currently published as a **public beta / preview**.
+
+Ready today:
+- Core match execution through the `AgentDeck` facade
+- Provider-backed and mock-player experiments
+- Recording, replay, and event-driven observability
+- Native fairness controls for paired side-swap and diagnostic first-player policies
+- Research export, packaging, invariant validation, and post-hoc analysis workflows
+
+Not `1.0` yet:
+- The default benchmark regime is still evolving
+- Viewer and replay UI work are still a curated beta surface, not a stable product UI
+
+---
+
+## ⚙️ Architecture
+
+![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
+
+### Why Games?
+
+Most LLM benchmarks measure **knowledge** through static questions. AgentDeck focuses on **behavior**: maintaining state, adapting over time, and making tradeoffs inside explicit rules.
+
+Game scenarios work well because they make the important variables legible:
+- **Constrained environments** – Isolate specific variables (for example, resource scarcity or turn order)
+- **Iterative decision making** – Agents live with consequences, testing longer-horizon behavior
+- **Social dynamics** – Multiplayer games reveal cooperation, betrayal, and negotiation patterns
+- **Measurable outcomes** – Win/lose provides a clean signal for cost/quality trade-offs
+
+### The Console Metaphor
+
+AgentDeck follows a **gaming console metaphor** with clean separation of concerns:
+
+```
+┌─────────────────────────────────────┐
+│         AgentDeck (Facade)          │  ← You interact here
+├─────────────────────────────────────┤
+│         Console (Orchestrator)       │  ← Manages lifecycle
+├─────────────┬───────────────────────┤
+│    Game     │     EventBus          │  ← Game logic + Events
+├─────────────┼───────────────────────┤
+│   Players   │     Spectators        │  ← AI agents + Observers
+└─────────────┴───────────────────────┘
+```
+
+### Single Turn Flow
+
+![Single Turn Flow](docs/images/agentdeck-whiteboard-single-turn-flow.png)
+
+### Core Components
+
+**Games** define rules and state
+- Required properties: `instructions`, `allowed_actions`, `default_handshake_template`
+- Core methods: `setup()`, `get_view()`, `update()`, `status()`
+- State is JSON-serializable dicts (no complex objects)
+- Example: [FixedDamageGame](src/agentdeck/games/examples/fixed_damage/)
+
+**Players** are AI agents making decisions
+- Three-phase lifecycle: Handshake → Turn → Conclusion
+- Built-in: `GPTPlayer`, `ClaudePlayer`, `GeminiPlayer`, `MockPlayer`
+- Composable prompt templates via `PromptBuilder`
+
+**Controllers** parse AI responses into actions
+- `ActionOnlyController` - extracts single action token
+- `ReasoningController` - extracts reasoning + action
+- Handshake validation is built into the base `Controller` (default accepts exactly `OK`)
+
+**Renderers** format game state for AI consumption
+- `TextRenderer` - human-readable text format
+- Custom renderers can provide JSON, images, etc.
+
+**Spectators** observe and analyze matches
+- `MatchNarrator` - turn-by-turn commentary
+- `ProgressDisplay` - real-time progress with ETA
+- `TokenUsageTracker` - cost tracking per player/model
+- `StatsTracker` - win rates and performance metrics
+
+**Recording & Replay**
+- `Recorder` - captures complete match data to JSON
+- `ReplayEngine` - reconstructs matches with event parity guarantee
 
 ---
 
