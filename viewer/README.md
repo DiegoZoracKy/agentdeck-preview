@@ -33,8 +33,8 @@ node scripts/update_match_manifest.js
 
 ### Curated Research Matches
 
-The bundled local library is now a curated `FixedDamage` set from the rebuilt
-official research runs. It is ordered to tell the arc:
+The bundled local library now mixes rebuilt `FixedDamage` and `VariableDamage`
+research replays:
 
 1. plain `FlashLite-AO` collapse against `Flash-AO`
 2. `ReasoningController` partially repairing that collapse
@@ -42,6 +42,8 @@ official research runs. It is ordered to tell the arc:
 4. `gpt-4o-mini RC` backfiring against `gpt-5-mini`
 5. Haiku's seat-conditioned pathology against `Flash-AO`
 6. a premium plain-baseline reference match: `Flash-AO` vs `GPT5Mini-AO`
+7. the VariableDamage premium ceiling check: `FlashLite-RC-RISK` vs `GPT5Mini-AO`
+8. the compressed VariableDamage top tier: `GPT5Mini-AO` vs `Flash-AO`
 
 These matches are meant to show behavioral contrast, not just winners.
 
@@ -49,11 +51,13 @@ These matches are meant to show behavioral contrast, not just winners.
 
 ```bash
 # Python 3
-cd viewer
 python -m http.server 8080
 
-# Then open http://localhost:8080
+# Then open http://localhost:8080/viewer/
 ```
+
+Serve the repository root, not the `viewer/` directory by itself. The bundled
+skins load shared assets from `src/agentdeck/games/examples/...`.
 
 ### Option 3: Load from URL
 
@@ -77,8 +81,13 @@ viewer/index.html?match=http://example.com/match.json
 ## Supported Records
 
 The viewer supports AgentDeck match records with schema version **1.3+**.
-The default renderer targets **FixedDamageGame** records; other games require
-registering a custom renderer. The current viewer is offline playback only.
+The bundled combat skins currently support:
+
+- **FixedDamageGame**
+- **VariableDamageGame**
+
+Other games require registering a custom renderer. The current viewer is
+offline playback only.
 
 Record files are generated automatically when running matches with AgentDeck:
 
@@ -114,7 +123,7 @@ viewer/
 
 src/agentdeck/games/examples/fixed_damage/
 ├── game.py                    # Game logic
-└── viewers/                   # Bundled viewers for the game
+└── viewers/                   # Bundled combat viewers reused by both games
     ├── ffvi_scene/
     │   ├── renderer.js
     │   ├── styles.css
@@ -153,7 +162,7 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 - Selects the renderer based on `(matchData.game, skin)`
 - Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
 
-### FixedDamageGame Viewers
+### Bundled Combat Viewers
 - **FFVI Scene**: logo‑knights battle scene with top message box
 - **Debug**: state‑focused developer view (before/after, reasoning, prompt/response)
 

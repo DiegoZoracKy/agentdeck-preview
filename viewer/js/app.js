@@ -13,7 +13,7 @@ let frameCallback = null
 let endCallback = null
 let localMatchEntries = []
 
-const DEFAULT_MATCH_PATH = 'matches/claude-sonnet-4.5-vs-gpt-4o-mini.json'
+const DEFAULT_MATCH_PATH = 'matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json'
 const STORAGE_MATCH_KEY = 'agentdeck.viewer.match'
 const STORAGE_SKIN_KEY = 'agentdeck.viewer.skin'
 

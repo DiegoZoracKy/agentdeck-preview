@@ -296,9 +296,10 @@ class FixedDamageDebugRenderer {
   }
 }
 
-// Register renderer for FixedDamageGame (if registry present).
+// Register renderer for the bundled combat games (if registry present).
 if (typeof RendererRegistry !== 'undefined') {
   RendererRegistry.register('FixedDamageGame', 'debug', FixedDamageDebugRenderer);
+  RendererRegistry.register('VariableDamageGame', 'debug', FixedDamageDebugRenderer);
 }
 
 // Export for module systems, also available as global

@@ -610,9 +610,10 @@ class FixedDamageFFVISceneRenderer {
   }
 }
 
-// Register renderer for FixedDamageGame (if registry present).
+// Register renderer for the bundled combat games (if registry present).
 if (typeof RendererRegistry !== 'undefined') {
   RendererRegistry.register('FixedDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
+  RendererRegistry.register('VariableDamageGame', 'ffvi_scene', FixedDamageFFVISceneRenderer);
 }
 
 // Export for module systems, also available as global

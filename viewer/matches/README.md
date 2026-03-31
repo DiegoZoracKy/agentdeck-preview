@@ -1,7 +1,7 @@
 # Local Matches
 
-This directory now carries the curated `FixedDamage` research showcase set used
-by the beta viewer.
+This directory now carries the curated research showcase set used by the beta
+viewer across both bundled combat games.
 
 Bundled matches:
 
@@ -11,6 +11,8 @@ Bundled matches:
 - `fixed-damage-04-gpt4omini-rc-backfires-vs-gpt5mini.json`
 - `fixed-damage-05-haiku-seat-pathology-vs-flash.json`
 - `fixed-damage-06-flash-vs-gpt5mini-premium-baseline.json`
+- `variable-damage-01-flashlite-rc-risk-vs-gpt5mini.json`
+- `variable-damage-02-gpt5mini-vs-flash.json`
 
 To replace or extend the local library, drop replay files (`*.json`) here and
 refresh `manifest.json`.
