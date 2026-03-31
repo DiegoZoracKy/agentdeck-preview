@@ -1,9 +1,10 @@
 # AgentDeck 🎮
 
-**Turn an AI behavior question into a runnable, replayable, analyzable experiment.**
+**A research platform for analyzing AI agent behavior through game scenarios**
 
-> **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
-> **Quality**: 75% coverage gate · Python 3.9+
+*Bring your idea and turn it into a runnable, replayable experiment*
+
+[Quick Start](#-quick-start) · [Examples](examples/README.md) · [How to Run a Study](docs/how-to-run-a-study.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
 
 ---
 
@@ -11,13 +12,15 @@
 
 ![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
 
-AgentDeck is a **research platform for studying AI behavior through game scenarios**. It enables researchers to run controlled experiments where AI agents interact in well-defined environments, providing comprehensive data collection for analysis of prompting strategies, decision-making patterns, and model capabilities.
+AgentDeck helps you turn a behavioral question into a concrete study: define a game or reuse an existing one, run seeded matches across models and controllers, replay every decision, and export artifacts you can validate and compare.
+
+It is built for research on AI behavior in structured game scenarios, where state, incentives, and resource tradeoffs are explicit instead of being hidden inside static prompts.
 
 Want to try it immediately? Jump to [Quick Start](#-quick-start).
 
 ### The Core Promise
 
-Bring a behavioral question, then use AgentDeck to:
+Use AgentDeck to:
 
 1. define a constrained game or reuse an existing one
 2. run seeded matches across models, prompts, and controllers
@@ -152,7 +155,8 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 
 ## 🚀 Quick Start
 
-> Requires Python 3.9+ (CI covers 3.9–3.11).
+> **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
+> **Runtime**: Python 3.9+ (CI covers 3.9–3.11) · 75% coverage gate
 
 ### Installation
 
