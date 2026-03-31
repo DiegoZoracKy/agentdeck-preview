@@ -11,7 +11,7 @@
 - Provide a browser-based visualization layer for AgentDeck match records
 - Enable researchers to "watch" AI agent matches with intuitive playback controls
 - Define stable contracts between record loading, timeline playback, and rendering
-- Support pluggable "skins" (FFVI, debug, custom) without coupling to specific UI frameworks
+- Support pluggable "skins" (`retro_jrpg_scene`, `debug`, custom) without coupling to specific UI frameworks
 - Require the bundled offline viewer to support both `FixedDamageGame` and `VariableDamageGame`
 
 ## 2. Scope & Philosophy Alignment
@@ -257,7 +257,7 @@ const matchData = RecordLoader.load(json);
 
 // Create timeline and renderer with specific skin
 const timeline = new Timeline(matchData);
-const renderer = RendererRegistry.create(matchData, 'ffvi');
+const renderer = RendererRegistry.create(matchData, 'retro_jrpg_scene');
 
 // Initialize
 renderer.init(document.getElementById('viewer'), matchData);
@@ -275,7 +275,7 @@ timeline.play();
 ```javascript
 // Get available skins for the game
 const skins = RendererRegistry.getAvailableSkins(matchData.game);
-// ['debug', 'ffvi']
+// ['debug', 'retro_jrpg_scene']
 
 // Switch skins dynamically
 function switchSkin(newSkin) {
@@ -315,7 +315,7 @@ document.addEventListener('keydown', (e) => {
 ## 10. Design Rationale
 
 - **Record-first**: Viewer is a **consumer** of the record contract. Changes to visualization don't require record format changes.
-- **Pluggable renderers**: Separation allows FFVI skin, debug view, future Unity renderer, etc. without core changes.
+- **Pluggable renderers**: Separation allows a retro-JRPG skin, debug view, future Unity renderer, etc. without core changes.
 - **No framework dependency**: Vanilla JS ensures viewer works anywhere (iframe, Jupyter, standalone).
 - **Fail-safe playback**: Renderer errors don't crash timeline; unknown events are skipped.
 
