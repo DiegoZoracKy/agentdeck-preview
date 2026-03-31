@@ -225,7 +225,7 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Viewer](SPEC-VIEWER.md) | 0.2.0 | Final | Offline browser replay viewer for recorded match artifacts |
+| [Viewer](SPEC-VIEWER.md) | 0.3.0 | Final | Offline browser replay viewer for recorded match artifacts |
 
 ---
 

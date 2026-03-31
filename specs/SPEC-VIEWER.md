@@ -1,8 +1,8 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
 > **Status**: Final
-> **Version**: 0.2.0
-> **Last Updated**: 2026-03-17
+> **Version**: 0.3.0
+> **Last Updated**: 2026-03-30
 > **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check)
 > **Audience**: Viewer developers, skin authors, integration engineers
 
@@ -12,6 +12,7 @@
 - Enable researchers to "watch" AI agent matches with intuitive playback controls
 - Define stable contracts between record loading, timeline playback, and rendering
 - Support pluggable "skins" (FFVI, debug, custom) without coupling to specific UI frameworks
+- Require the bundled offline viewer to support both `FixedDamageGame` and `VariableDamageGame`
 
 ## 2. Scope & Philosophy Alignment
 
@@ -52,7 +53,7 @@
 interface MatchData {
   schemaVersion: string;        // "1.3"
   matchId: string;
-  game: string;                 // "FixedDamageGame"
+  game: string;                 // "FixedDamageGame" | "VariableDamageGame" | ...
   players: string[];            // ["Alice", "Bob"]
   winner: string | null;
   seed: number;
@@ -85,7 +86,7 @@ interface GameplayFrame {
 }
 ```
 
-### 4.3 GameState (FixedDamageGame)
+### 4.3 GameState (Combat-State Shape Used By Bundled Skins)
 
 ```typescript
 interface GameState {
@@ -95,6 +96,12 @@ interface GameState {
   lastAction: Record<string, string | null>;
 }
 ```
+
+The bundled offline combat skins assume this state shape and therefore MUST work for both:
+- `FixedDamageGame`
+- `VariableDamageGame`
+
+Games with different state contracts MAY still use the viewer, but they MUST register their own renderers.
 
 ### 4.4 PromptData (Optional Debug Info)
 
@@ -206,6 +213,7 @@ RendererRegistry.get(gameName: string, skin: string): Function | null
 **Guarantees:**
 - RR1: `create()` MUST throw a clear error when no renderer is registered for the (game, skin) pair
 - RR2: `getAvailableSkins()` MUST return all registered skins for a game in sorted order
+- RR3: The bundled offline viewer MUST register at least one renderer for both `FixedDamageGame` and `VariableDamageGame`
 
 ## 6. Invariants & Guarantees
 
@@ -214,6 +222,7 @@ RendererRegistry.get(gameName: string, skin: string): Function | null
 2. **RC2**: Viewer MUST fail fast with clear error on unsupported schema
 3. **RC3**: Unknown event types MUST be skipped, not crash playback
 4. **RC4**: Missing optional fields MUST use sensible defaults
+5. **RC5**: Bundled combat skins MUST accept both `FixedDamageGame` and `VariableDamageGame` records when the normalized state contains `health`, `potions`, `turn`, and `lastAction`
 
 ### 6.2 Playback Integrity (PI)
 5. **PI1**: Frame order MUST match original event order (by `turn_index`/`phase_index`)
