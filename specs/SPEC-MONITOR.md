@@ -51,7 +51,7 @@
 
 | Layer | Observes | Event Timing | Examples |
 |-------|----------|--------------|----------|
-| **Spectators** | Match narrative (handshakes, turns, conclusions) | Buffered, replayed in order (preserves determinism) | MatchNarrator, StatsTracker, TokenUsageTracker |
+| **Spectators** | Match reporting (handshakes, turns, conclusions) | Buffered, replayed in order (preserves determinism) | MatchReporter, StatsTracker, TokenUsageTracker |
 | **Monitors** | Console/system events (progress, workers, execution health) | Live, immediate (enables real-time feedback) | ProgressMonitor, custom console monitors |
 
 ### 3.2 Monitor Base Class

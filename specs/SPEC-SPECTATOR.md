@@ -1,9 +1,9 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 1.2.0
-> Last Updated: 2026-02-03
-> Implementation: ✅ Complete (Console & ReplayEngine logger injection)
+> Version: 1.3.0
+> Last Updated: 2026-03-31
+> Implementation: ✅ Complete (reporter default + logger injection)
 > Audience: Spectator authors, analytics engineers, observability contributors
 
 ## 1. Purpose
@@ -48,12 +48,17 @@
 
 ## 5. Reference Spectators
 
-### MatchNarrator (Auto-Attached by Default)
+### MatchReporter (Auto-Attached by Default)
 
-- **Purpose**: Provide turn-by-turn narration (handshake, actions, state deltas, reflections) so researchers see the full story of each match without needing to attach spectators manually.
-- **Default Behavior**: When callers omit the `spectators` parameter, Console auto-attaches `MatchNarrator` (see SPEC-CONSOLE §5 "Default Session Spectators"). Output flows through the session logger at INFO level, appearing in the console and `info.log`.
-- **Opt-Out**: Researchers silence the narration by supplying their own spectator list. Passing `spectators=[]` yields a quiet run; passing `spectators=[CustomSpectator(...)]` entirely replaces the default narrator.
-- **Usage**: MatchNarrator remains available for explicit attachment (`spectators=[MatchNarrator()]`) when researchers want to enrich output or use it alongside other observers.
+- **Purpose**: Provide structured lifecycle reporting (handshake prompts/results, turn-by-turn actions, state deltas, reflections, and match summary) so researchers can inspect a match without needing custom spectators.
+- **Default Behavior**: When callers omit the `spectators` parameter, Console auto-attaches `MatchReporter` (see SPEC-CONSOLE §5 "Default Session Spectators"). Output flows through the session logger at INFO level, appearing in the console and `info.log`.
+- **Opt-Out**: Researchers silence the reporting by supplying their own spectator list. Passing `spectators=[]` yields a quiet run; passing `spectators=[CustomSpectator(...)]` entirely replaces the default reporter.
+- **Usage**: MatchReporter remains available for explicit attachment (`spectators=[MatchReporter()]`) when researchers want to enrich output or use it alongside other observers.
+
+### Reserved Spectator Names
+
+- **MatchNarrator**: Reserved for a future prose-forward spectator that turns match events into actual narrative commentary rather than structured lifecycle logs.
+- **MatchCaster**: Reserved for a future broadcast-oriented role that may span live commentary, post-match analysis, or broader spectator/broadcast surfaces.
 
 ### Research Spectators (`SPEC-RESEARCH.md`)
 
@@ -289,9 +294,9 @@ class PlayerLifecycleTracker(Spectator):
 
 ### Example 6: Logger Usage (Logger Injection - LI1-LI5)
 ```python
-class MatchNarrativeLogger(Spectator):
+class MatchReporter(Spectator):
     """
-    Spectator that writes turn-by-turn narrative to INFO log.
+    Spectator that writes structured lifecycle reporting to INFO log.
 
     Demonstrates LI1-LI5:
     - LI1: Console injects logger automatically (no logger in __init__)
@@ -333,7 +338,7 @@ class MatchNarrativeLogger(Spectator):
             completion = usage_info.get('completion_tokens', 0)
             token_str = f" | tokens={tokens} (prompt={prompt}, completion={completion})"
 
-        # LI5: Write rich INFO-level narrative to core log streams
+        # LI5: Write structured INFO-level reporting to core log streams
         if self.logger:
             self.logger.info(
                 f"Turn {ctx.phase_index}: {player}\n"

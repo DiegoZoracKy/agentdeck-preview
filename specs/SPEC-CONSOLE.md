@@ -1,8 +1,8 @@
 # SPEC-CONSOLE: Execution Engine Contract
 
 > Status: Final
-> Version: 0.7.1
-> Last Updated: 2026-03-17
+> Version: 0.7.2
+> Last Updated: 2026-03-31
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Core contributors, engine implementers
 
@@ -128,8 +128,8 @@ Create Console instance and initialize session lifecycle.
 
 #### Default Session Spectators
 
-- **Auto-Attach MatchNarrator**: When the console is constructed with `spectators is None`, it MUST instantiate `MatchNarrator()` and subscribe it prior to emitting `SESSION_START`. This guarantees a turn-by-turn narrative is available for first-run experiences without any additional configuration.
-- **Explicit Override**: When the caller supplies any spectators list (including an empty list), the console MUST respect that list verbatim and MUST NOT auto-attach `MatchNarrator`. Researchers silence the default narration via `spectators=[]` or provide bespoke observers via `spectators=[...]`.
+- **Auto-Attach MatchReporter**: When the console is constructed with `spectators is None`, it MUST instantiate `MatchReporter()` and subscribe it prior to emitting `SESSION_START`. This guarantees structured match reporting is available for first-run experiences without any additional configuration.
+- **Explicit Override**: When the caller supplies any spectators list (including an empty list), the console MUST respect that list verbatim and MUST NOT auto-attach `MatchReporter`. Researchers silence the default reporting via `spectators=[]` or provide bespoke observers via `spectators=[...]`.
 - **Logger Injection**: Auto-attached spectators MUST follow the logger-injection rules in §6.5 (P4) so their output flows through the session logger (console + info.log).
 
 ### run(game: Game, players: List[Player], matches: int = 1, seed: Optional[int] = None, spectators: Optional[List[Spectator]] = None) -> List[MatchResult]

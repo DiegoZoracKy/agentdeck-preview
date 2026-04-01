@@ -2,7 +2,7 @@
 
 **Version**: 2.1 (Lean Navigation)
 **Status**: Active
-**Last Updated**: 2026-03-17
+**Last Updated**: 2026-03-31
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -189,14 +189,14 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [AgentDeck](SPEC-AGENTDECK.md) | 0.3.0 | Final | Public API facade for the framework |
-| [Console](SPEC-CONSOLE.md) | 0.7.1 | Final | Execution engine for session/match lifecycle |
+| [AgentDeck](SPEC-AGENTDECK.md) | 0.3.1 | Final | Public API facade for the framework |
+| [Console](SPEC-CONSOLE.md) | 0.7.2 | Final | Execution engine for session/match lifecycle |
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 1.2.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Game](SPEC-GAME.md) | 0.7.1 | Final | Game author contract (rules, state, narrative, lifecycle hooks) |
 | [Player](SPEC-PLAYER.md) | 1.3.2 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.3.1 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
-| [Spectator](SPEC-SPECTATOR.md) | 1.2.0 | Final | Observation and analysis interface |
+| [Spectator](SPEC-SPECTATOR.md) | 1.3.0 | Final | Observation and analysis interface |
 
 ### 4.2 Infrastructure Components
 

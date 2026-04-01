@@ -1,8 +1,8 @@
 # SPEC-AGENTDECK: AgentDeck Facade Contract
 
 > Status: Final
-> Version: 0.3.0
-> Last Updated: 2026-03-17
+> Version: 0.3.1
+> Last Updated: 2026-03-31
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Researchers, framework contributors
 
@@ -20,7 +20,7 @@
 ## 3. Responsibilities
 - **Engine Construction**: Construct the default execution console, pass the resolved session context into it, and retain the console/session handles.
 - **Input Validation & Delegation**: Validate researcher inputs (games, players, matches, seeds), resolve spectator scopes/seeds, then delegate batch execution to the console which owns lifecycle events, player ordering, and match aggregation. Player order is randomized per match (Console applies Fisher-Yates shuffle by default, games may override via `get_player_order()` hook per SPEC-GAME §4).
-- **Spectator Scoping**: Maintain additive session vs execution spectator scopes and forward them to the console for both live play and replay. When researchers omit the spectator list, AgentDeck MUST rely on the console's default auto-attachment (MatchNarrator) so turn-by-turn narration is available out of the box. Supplying any spectator list (including `[]`) MUST override the default.
+- **Spectator Scoping**: Maintain additive session vs execution spectator scopes and forward them to the console for both live play and replay. When researchers omit the spectator list, AgentDeck MUST rely on the console's default auto-attachment (MatchReporter) so structured match reporting is available out of the box. Supplying any spectator list (including `[]`) MUST override the default.
 - **Result Aggregation**: Collect `MatchResult` outputs from the console into `MatchResults` and surface researcher-facing helpers (win rates, summaries, stats).
 - **Metrics Exposure**: Surface session metadata and live counters through read-only properties (`session`, `total_matches`, `elapsed_time`) plus lightweight snapshot helpers.
 - **Safe Shutdown**: Provide deterministic teardown via context manager exit and best-effort cleanup on destruction.
