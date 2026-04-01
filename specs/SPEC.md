@@ -2,7 +2,7 @@
 
 **Version**: 2.1 (Lean Navigation)
 **Status**: Active
-**Last Updated**: 2026-03-31
+**Last Updated**: 2026-04-01
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -196,7 +196,7 @@ All component specifications follow the lean spec format with numbered invariant
 | [Player](SPEC-PLAYER.md) | 1.3.2 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.3.1 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
-| [Spectator](SPEC-SPECTATOR.md) | 1.3.0 | Final | Observation and analysis interface |
+| [Spectator](SPEC-SPECTATOR.md) | 1.4.0 | Final | Observation and analysis interface |
 
 ### 4.2 Infrastructure Components
 
@@ -225,7 +225,7 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Viewer](SPEC-VIEWER.md) | 0.3.0 | Final | Offline browser replay viewer for recorded match artifacts |
+| [Viewer](SPEC-VIEWER.md) | 0.4.0 | Final | Offline browser replay viewer for recorded match artifacts |
 
 ---
 

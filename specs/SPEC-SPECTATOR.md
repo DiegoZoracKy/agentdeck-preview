@@ -1,9 +1,9 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 1.3.0
-> Last Updated: 2026-03-31
-> Implementation: ✅ Complete (reporter default + logger injection)
+> Version: 1.4.0
+> Last Updated: 2026-04-01
+> Implementation: ✅ Complete (reporter default + logger injection) / 🚧 Planned (curator sidecars)
 > Audience: Spectator authors, analytics engineers, observability contributors
 
 ## 1. Purpose
@@ -54,6 +54,18 @@
 - **Default Behavior**: When callers omit the `spectators` parameter, Console auto-attaches `MatchReporter` (see SPEC-CONSOLE §5 "Default Session Spectators"). Output flows through the session logger at INFO level, appearing in the console and `info.log`.
 - **Opt-Out**: Researchers silence the reporting by supplying their own spectator list. Passing `spectators=[]` yields a quiet run; passing `spectators=[CustomSpectator(...)]` entirely replaces the default reporter.
 - **Usage**: MatchReporter remains available for explicit attachment (`spectators=[MatchReporter()]`) when researchers want to enrich output or use it alongside other observers.
+
+### MatchCurator (Replay / Artifact Metadata Generation)
+
+- **Purpose**: Generate viewer-ready curation metadata for a recorded match without changing the underlying match JSON.
+- **Scope**: `MatchCurator` consumes live or replayed match events, assembles a full match snapshot, and MAY write a `*.meta.json` sidecar adjacent to a recording or to an explicit output path.
+- **Output contract**: The sidecar is the portable artifact. It contains:
+  - `subtitle`: short lesson-oriented summary for the picker
+  - `synopsis`: compact narrative summary naming the decisive event
+  - `highlights`: ordered list of key moments (`turn` + short `label`)
+  - `transcript` (optional): richer turn-by-turn commentary kept out of the runtime manifest
+- **Generation strategy**: The curation strategy is pluggable. Implementations MAY use deterministic heuristics, an injected callable, or provider-backed analysis. The stable contract is the sidecar payload, not the generation mechanism.
+- **Usage**: MatchCurator is intended for replay-driven post-analysis (`ReplayEngine(...).replay(spectators=[MatchCurator(...)])`) and curated showcase pipelines.
 
 ### Reserved Spectator Names
 
@@ -113,6 +125,17 @@
 19. **CA1**: EventContext MUST include `session_id` (except early construction events before session initialization).
 20. **CA2**: EventContext MUST include `match_id` during match execution (between `MATCH_START` and `MATCH_END`).
 21. **CA3**: EventContext MUST include `phase_index` during GAMEPLAY events and domain events emitted during gameplay. Player lifecycle events (handshake, conclusion) MAY omit `phase_index` per SPEC-OBSERVABILITY §4.1.
+
+### 5.7 MatchCurator Artifact Contract (CU)
+22. **CU1**: `MatchCurator` MUST treat the recorded match artifact as the source of truth. It MUST NOT mutate gameplay events, final state, or match result payloads.
+23. **CU2**: When `MatchCurator` writes a sidecar, the JSON payload MUST contain `subtitle` (string), `synopsis` (string), and `highlights` (array). It MAY contain `transcript` (array).
+24. **CU3**: Each highlight entry MUST contain:
+    - `turn` as a positive integer using the human-facing 1-based turn number
+    - `label` as a non-empty string no longer than 50 characters
+25. **CU4**: `synopsis` SHOULD stay compact (1-2 sentences) and MUST name the decisive moment or behavioral lesson explicitly.
+26. **CU5**: `transcript`, when present, MUST remain in the sidecar only. It MUST NOT be required for manifest promotion or baseline viewer playback.
+27. **CU6**: `MatchCurator` MUST support deterministic non-LLM generation paths so curated metadata can be produced in offline or provider-free environments.
+28. **CU7**: Sidecar writes MUST be explicit. If no output target is configured, `MatchCurator` MAY return metadata in memory but MUST NOT silently write files to arbitrary locations.
 
 ## 6. Data Flow & Interaction
 - **Registration**: AgentDeck/Console attaches session spectators during construction; execution spectators added per `play`/`replay` call.

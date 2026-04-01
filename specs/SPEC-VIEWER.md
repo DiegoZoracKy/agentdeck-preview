@@ -1,9 +1,9 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
 > **Status**: Final
-> **Version**: 0.3.0
-> **Last Updated**: 2026-03-30
-> **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check)
+> **Version**: 0.4.0
+> **Last Updated**: 2026-04-01
+> **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check) / 🚧 Planned (curation sidecars + metadata UI)
 > **Audience**: Viewer developers, skin authors, integration engineers
 
 ## 1. Purpose
@@ -44,6 +44,15 @@
 ### 3.4 Renderer Registry (Optional)
 - Map `matchData.game` to a renderer implementation
 - Provide a simple selection mechanism for swapping skins
+
+### 3.5 Match Metadata Layer
+- Accept curated match metadata from a sidecar-derived manifest entry
+- Display:
+  - picker-facing `subtitle`
+  - loaded-match `synopsis`
+  - timeline highlight markers
+  - active-frame highlight badge
+- Keep optional long-form `transcript` out of the runtime manifest payload
 
 ## 4. Data Structures
 
@@ -110,6 +119,42 @@ interface PromptData {
   promptText: string;
   responseText: string;
   duration: number;
+}
+```
+
+### 4.5 MatchHighlight (Viewer Metadata)
+
+```typescript
+interface MatchHighlight {
+  turn: number;                 // 1-based turn number
+  label: string;               // <= 50 chars, short badge/picker copy
+}
+```
+
+### 4.6 MatchMetadataSidecar (Portable Sidecar Artifact)
+
+```typescript
+interface MatchMetadataSidecar {
+  version: number;             // 1
+  subtitle: string;
+  synopsis: string;
+  highlights: MatchHighlight[];
+  transcript?: Array<{
+    turn: number;              // 1-based turn number
+    text: string;
+  }>;
+}
+```
+
+### 4.7 MatchManifestEntry (Viewer Runtime Catalog)
+
+```typescript
+interface MatchManifestEntry {
+  label: string;
+  path: string;
+  subtitle?: string | null;
+  synopsis?: string | null;
+  highlights?: MatchHighlight[];
 }
 ```
 
@@ -215,6 +260,19 @@ RendererRegistry.get(gameName: string, skin: string): Function | null
 - RR2: `getAvailableSkins()` MUST return all registered skins for a game in sorted order
 - RR3: The bundled offline viewer MUST register at least one renderer for both `FixedDamageGame` and `VariableDamageGame`
 
+### 5.5 Match Manifest Promotion
+
+```javascript
+// Promote sidecar metadata into manifest entries
+updateManifestFromSidecars(matchesDir: string): ManifestPayload
+```
+
+**Guarantees:**
+- MP1: Manifest promotion MUST preserve `label` + `path` for every bundled match
+- MP2: When `matches/<name>.meta.json` exists, promotion MUST copy `subtitle`, `synopsis`, and `highlights` into the manifest entry
+- MP3: Promotion MUST NOT copy `transcript` into the manifest
+- MP4: Missing sidecars MUST be tolerated; the manifest entry remains valid with only `label` + `path`
+
 ## 6. Invariants & Guarantees
 
 ### 6.1 Record Compatibility (RC)
@@ -236,6 +294,14 @@ RendererRegistry.get(gameName: string, skin: string): Function | null
 11. **RI3**: Multiple renderers MAY be attached to one Timeline
 12. **RI4**: Renderer failures MUST NOT crash Timeline
 
+### 6.4 Metadata UI (MU)
+13. **MU1**: The viewer MUST accept manifest entries with or without metadata fields; missing `subtitle`, `synopsis`, or `highlights` MUST degrade gracefully.
+14. **MU2**: When `subtitle` is present, the viewer MUST surface it near match selection so users can decide what to watch before loading.
+15. **MU3**: When `synopsis` is present, the viewer MUST show it in the loaded-match info panel.
+16. **MU4**: When `highlights` are present, the timeline MUST render a marker for each highlighted turn.
+17. **MU5**: When playback reaches a highlighted turn, the viewer MUST surface the matching `label` as the active key-moment badge.
+18. **MU6**: Highlight markers MUST map by 1-based turn number, not by raw frame index, so curated metadata remains readable and stable across renderer implementations.
+
 ## 7. Error Handling
 
 | Condition | Behavior | User Message |
@@ -245,6 +311,7 @@ RendererRegistry.get(gameName: string, skin: string): Function | null
 | Missing required field | Reject load | "Missing required field: {field}" |
 | No gameplay events | Allow load, warn | "No gameplay events found" |
 | Renderer throws | Log, continue | (silent, playback continues) |
+| Invalid sidecar metadata | Skip metadata, keep match loadable | "Invalid metadata for {match}" |
 
 ## 8. Examples
 
@@ -286,6 +353,22 @@ function switchSkin(newSkin) {
 }
 ```
 
+### 8.1.2 Curated Match Metadata
+
+```json
+{
+  "label": "FixedDamage 1: FlashLite-AO collapse vs Flash-AO",
+  "path": "matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json",
+  "subtitle": "Ignores recovery and collapses",
+  "synopsis": "FlashLite never touches its potion, then reaches the late fight in lethal range with no recovery left to use. The loss is a behavioral failure to engage the recovery mechanic at all.",
+  "highlights": [
+    { "turn": 8, "label": "Flash pushes to lethal range" },
+    { "turn": 9, "label": "Still attacks instead of healing" },
+    { "turn": 11, "label": "Collapse completes" }
+  ]
+}
+```
+
 ### 8.2 Playback Controls
 
 ```javascript
@@ -310,6 +393,8 @@ document.addEventListener('keydown', (e) => {
 | Playback timing | T1, PI4 | Measure frame intervals at different speeds |
 | Renderer contract | R1-R4, RI1-RI4 | Mock renderer, verify callbacks |
 | Renderer registry | RR1 | Register renderer, create instance, assert error on unknown game |
+| Manifest promotion | MP1-MP4, MU1 | Merge sidecars, preserve fallback entries, exclude transcript |
+| Metadata UI | MU2-MU6 | Subtitle preview, synopsis panel, timeline markers, active highlight badge |
 | Error handling | All error cases | Invalid inputs produce expected errors |
 
 ## 10. Design Rationale
