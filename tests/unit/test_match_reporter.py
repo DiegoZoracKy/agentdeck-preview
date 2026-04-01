@@ -1,17 +1,17 @@
 """
-Unit tests for MatchNarrator spectator.
+Unit tests for MatchReporter spectator.
 
-Tests verify that MatchNarrator:
+Tests verify that MatchReporter:
 - Uses injected logger for all output (LI1-LI5)
 - Displays match start banner
-- Narrates turn-by-turn gameplay
+- Reports turn-by-turn gameplay
 - Shows state changes and token usage
 - Displays match completion summary
 - Resets state between matches
 """
 
 from agentdeck.core.types import ActionResult, Event, MatchResult
-from agentdeck.spectators.narrator import MatchNarrator
+from agentdeck.spectators.reporter import MatchReporter
 
 
 class MockLogger:
@@ -39,19 +39,19 @@ class MockPlayer:
         self.name = name
 
 
-def test_narrator_uses_injected_logger():
-    """Verify LI1: MatchNarrator uses injected logger for output."""
-    narrator = MatchNarrator()
+def test_reporter_uses_injected_logger():
+    """Verify LI1: MatchReporter uses injected logger for output."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
 
     # Logger should be None initially
-    assert narrator.logger is None
+    assert reporter.logger is None
 
     # Inject logger (simulates Console injection)
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Trigger match start
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="test-match-1"
     )
 
@@ -60,16 +60,16 @@ def test_narrator_uses_injected_logger():
     assert any("test-match-1" in call for call in test_logger.info_calls)
 
 
-def test_narrator_match_start_banner():
-    """Verify narrator displays match start information."""
-    narrator = MatchNarrator()
+def test_reporter_match_start_banner():
+    """Verify reporter displays match start information."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Trigger match start
     game = MockGame()
     players = [MockPlayer("Alice"), MockPlayer("Bob")]
-    narrator.on_match_start(game=game, players=players, match_id="match-abc")
+    reporter.on_match_start(game=game, players=players, match_id="match-abc")
 
     # Check output
     output = "\n".join(test_logger.info_calls)
@@ -79,14 +79,14 @@ def test_narrator_match_start_banner():
     assert "Bob" in output
 
 
-def test_narrator_turn_narration():
-    """Verify narrator shows turn-by-turn gameplay."""
-    narrator = MatchNarrator()
+def test_reporter_turn_reporting():
+    """Verify reporter shows turn-by-turn gameplay."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match context
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -111,7 +111,7 @@ def test_narrator_turn_narration():
         context={"match_id": "match-1", "turn_index": 0},
     )
 
-    narrator.on_gameplay(turn_event)
+    reporter.on_gameplay(turn_event)
 
     # Check output
     output = "\n".join(test_logger.info_calls)
@@ -124,14 +124,14 @@ def test_narrator_turn_narration():
     assert "1.04s" in output
 
 
-def test_narrator_first_player_selection():
-    """Verify narrator logs first player selection on turn 0."""
-    narrator = MatchNarrator()
+def test_reporter_first_player_selection():
+    """Verify reporter logs first player selection on turn 0."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -153,20 +153,20 @@ def test_narrator_first_player_selection():
         context={"turn_index": 0},
     )
 
-    narrator.on_gameplay(first_turn)
+    reporter.on_gameplay(first_turn)
 
     output = "\n".join(test_logger.info_calls)
     assert "First player selected: Bob (index 1)" in output
 
 
-def test_narrator_state_delta_computation():
-    """Verify narrator computes state changes correctly."""
-    narrator = MatchNarrator(show_state_changes=True)
+def test_reporter_state_delta_computation():
+    """Verify reporter computes state changes correctly."""
+    reporter = MatchReporter(show_state_changes=True)
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -196,7 +196,7 @@ def test_narrator_state_delta_computation():
         context={"turn_index": 5},
     )
 
-    narrator.on_gameplay(turn_event)
+    reporter.on_gameplay(turn_event)
 
     output = "\n".join(test_logger.info_calls)
     assert "health.Alice:80->100" in output
@@ -204,14 +204,14 @@ def test_narrator_state_delta_computation():
     assert "potions.Alice:3->2" in output
 
 
-def test_narrator_match_end_summary():
-    """Verify narrator displays match completion summary."""
-    narrator = MatchNarrator()
+def test_reporter_match_end_summary():
+    """Verify reporter displays match completion summary."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-123"
     )
 
@@ -226,7 +226,7 @@ def test_narrator_match_end_summary():
         metadata={"turns": 21, "duration": 18.0},
     )
 
-    narrator.on_match_end(result)
+    reporter.on_match_end(result)
 
     # Check output
     output = "\n".join(test_logger.info_calls)
@@ -236,17 +236,17 @@ def test_narrator_match_end_summary():
     assert "Duration:" in output
 
 
-def test_narrator_without_logger_silent():
-    """Verify narrator does nothing without logger (before injection)."""
-    narrator = MatchNarrator()
+def test_reporter_without_logger_silent():
+    """Verify reporter does nothing without logger (before injection)."""
+    reporter = MatchReporter()
 
     # No logger injected yet
-    assert narrator.logger is None
+    assert reporter.logger is None
 
     # These should not raise errors
-    narrator.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="test")
+    reporter.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="test")
 
-    narrator.on_gameplay(
+    reporter.on_gameplay(
         Event(
             type="gameplay",
             data={"mechanic": "turn_based", "player": "Alice", "action": "MOVE"},
@@ -254,47 +254,47 @@ def test_narrator_without_logger_silent():
         )
     )
 
-    narrator.on_match_end(
+    reporter.on_match_end(
         MatchResult(winner="Alice", final_state={}, events=[], seed=1, metadata={})
     )
 
     # No errors = success
 
 
-def test_narrator_state_reset_between_matches():
-    """Verify narrator resets state per SS3 between matches."""
-    narrator = MatchNarrator()
+def test_reporter_state_reset_between_matches():
+    """Verify reporter resets state per SS3 between matches."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # First match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
-    assert narrator.match_id == "match-1"
-    assert narrator.game_name == "MockGame"
-    assert narrator.player_names == ["Alice", "Bob"]
+    assert reporter.match_id == "match-1"
+    assert reporter.game_name == "MockGame"
+    assert reporter.player_names == ["Alice", "Bob"]
 
     # Second match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Charlie"), MockPlayer("Dave")], match_id="match-2"
     )
 
     # State should be reset
-    assert narrator.match_id == "match-2"
-    assert narrator.player_names == ["Charlie", "Dave"]
-    assert narrator.first_player_selected is False  # Reset
+    assert reporter.match_id == "match-2"
+    assert reporter.player_names == ["Charlie", "Dave"]
+    assert reporter.first_player_selected is False  # Reset
 
 
-def test_narrator_disable_state_changes():
+def test_reporter_disable_state_changes():
     """Verify state changes can be disabled."""
-    narrator = MatchNarrator(show_state_changes=False)
+    reporter = MatchReporter(show_state_changes=False)
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
+    reporter.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
 
     test_logger.info_calls.clear()
 
@@ -314,7 +314,7 @@ def test_narrator_disable_state_changes():
         context={"turn_index": 0},
     )
 
-    narrator.on_gameplay(turn_event)
+    reporter.on_gameplay(turn_event)
 
     output = "\n".join(test_logger.info_calls)
     # Should show turn info but not state delta
@@ -323,13 +323,13 @@ def test_narrator_disable_state_changes():
     assert "x:0->1" not in output  # State changes disabled
 
 
-def test_narrator_non_turn_based_mechanic_ignored():
-    """Verify narrator only processes turn-based mechanics."""
-    narrator = MatchNarrator()
+def test_reporter_non_turn_based_mechanic_ignored():
+    """Verify reporter only processes turn-based mechanics."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
-    narrator.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
+    reporter.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
 
     test_logger.info_calls.clear()
 
@@ -344,28 +344,28 @@ def test_narrator_non_turn_based_mechanic_ignored():
         context={},
     )
 
-    narrator.on_gameplay(simul_event)
+    reporter.on_gameplay(simul_event)
 
     # Should not log anything for non-turn-based
     assert len(test_logger.info_calls) == 0
 
 
-def test_narrator_with_action_result_dataclass():
+def test_reporter_with_action_result_dataclass():
     """
-    Verify narrator handles real ActionResult dataclass from live engine.
+    Verify reporter handles real ActionResult dataclass from live engine.
 
     This tests Codex's finding: GAMEPLAY events carry ActionResult dataclass
-    with nested metadata, not plain strings. The narrator must extract:
+    with nested metadata, not plain strings. The reporter must extract:
     - action text from action_result.action
     - reasoning from action_result.reasoning (Phase 2.8)
     - usage_info from action_result.metadata["usage_info"]
     """
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -398,16 +398,16 @@ def test_narrator_with_action_result_dataclass():
         context={"match_id": "match-1", "turn_index": 3},
     )
 
-    narrator.on_gameplay(turn_event)
+    reporter.on_gameplay(turn_event)
 
-    # Verify narrator extracted action text and reasoning correctly
+    # Verify reporter extracted action text and reasoning correctly
     output = "\n".join(test_logger.info_calls)
     assert (
         "Reasoning: Opponent is weak, go aggressive" in output
     ), "Should display reasoning from ActionResult"
     assert "Action: ATTACK" in output, "Should extract action text from ActionResult.action"
 
-    # Verify narrator found usage_info in ActionResult.metadata
+    # Verify reporter found usage_info in ActionResult.metadata
     assert "tokens=205" in output, "Should find usage_info in ActionResult.metadata"
     assert "prompt=200" in output
     assert "completion=5" in output
@@ -419,19 +419,19 @@ def test_narrator_with_action_result_dataclass():
     assert "ActionResult" not in output, "Should not log repr of ActionResult"
 
 
-def test_narrator_with_reasoning_from_dict():
+def test_reporter_with_reasoning_from_dict():
     """
-    Verify narrator displays reasoning when action is dict format from Console.
+    Verify reporter displays reasoning when action is dict format from Console.
 
     Console emits action as dict: {"action": "...", "reasoning": "...", "metadata": {...}}
     This test ensures reasoning is properly extracted and displayed (Phase 2.8).
     """
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -462,7 +462,7 @@ def test_narrator_with_reasoning_from_dict():
         context={"match_id": "match-1", "turn_index": 4},
     )
 
-    narrator.on_gameplay(turn_event)
+    reporter.on_gameplay(turn_event)
 
     # Verify reasoning and action displayed
     output = "\n".join(test_logger.info_calls)
@@ -474,14 +474,14 @@ def test_narrator_with_reasoning_from_dict():
     assert "tokens=160" in output
 
 
-def test_narrator_handshake_complete():
-    """Verify narrator displays handshake completion."""
-    narrator = MatchNarrator()
+def test_reporter_handshake_complete():
+    """Verify reporter displays handshake completion."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -500,20 +500,20 @@ def test_narrator_handshake_complete():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_handshake_complete(handshake_event)
+    reporter.on_player_handshake_complete(handshake_event)
 
     output = "\n".join(test_logger.info_calls)
     assert "✓ Alice handshake: OK" in output
 
 
-def test_narrator_handshake_abort():
-    """Verify narrator displays handshake rejection."""
-    narrator = MatchNarrator()
+def test_reporter_handshake_abort():
+    """Verify reporter displays handshake rejection."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -533,20 +533,20 @@ def test_narrator_handshake_abort():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_handshake_abort(abort_event)
+    reporter.on_player_handshake_abort(abort_event)
 
     output = "\n".join(test_logger.info_calls)
     assert "✗ Bob rejected handshake: I don't understand the rules" in output
 
 
-def test_narrator_player_conclusion():
-    """Verify narrator displays player conclusions/reflections."""
-    narrator = MatchNarrator()
+def test_reporter_player_conclusion():
+    """Verify reporter displays player conclusions/reflections."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -563,20 +563,20 @@ def test_narrator_player_conclusion():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_conclusion(conclusion_event)
+    reporter.on_player_conclusion(conclusion_event)
 
     output = "\n".join(test_logger.info_calls)
     assert "💭 Alice reflection: Great match! I should have used more potions." in output
 
 
-def test_narrator_conclusion_without_reflection():
-    """Verify narrator handles missing reflections gracefully."""
-    narrator = MatchNarrator()
+def test_reporter_conclusion_without_reflection():
+    """Verify reporter handles missing reflections gracefully."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -589,21 +589,21 @@ def test_narrator_conclusion_without_reflection():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_conclusion(conclusion_event)
+    reporter.on_player_conclusion(conclusion_event)
 
     # Should not log anything if reflection is None
     output = "\n".join(test_logger.info_calls)
     assert len(test_logger.info_calls) == 0
 
 
-def test_narrator_handshake_complete_with_instructions():
-    """Verify narrator displays handshake instructions alongside completion."""
-    narrator = MatchNarrator()
+def test_reporter_handshake_complete_with_instructions():
+    """Verify reporter displays handshake instructions alongside completion."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -622,7 +622,7 @@ def test_narrator_handshake_complete_with_instructions():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_dialogue_turn(dialogue_event)
+    reporter.on_dialogue_turn(dialogue_event)
 
     # Then emit handshake_complete
     handshake_event = Event(
@@ -637,7 +637,7 @@ def test_narrator_handshake_complete_with_instructions():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_handshake_complete(handshake_event)
+    reporter.on_player_handshake_complete(handshake_event)
 
     # Verify output includes both completion and instructions
     output = "\n".join(test_logger.info_calls)
@@ -648,13 +648,13 @@ def test_narrator_handshake_complete_with_instructions():
     assert "✓ Alice handshake: OK" in output
 
 
-def test_narrator_handshake_instructions_cached_from_prompt_field():
-    """Ensure narrator handles live dialogue_turn payloads using 'prompt' key."""
-    narrator = MatchNarrator()
+def test_reporter_handshake_instructions_cached_from_prompt_field():
+    """Ensure reporter handles live dialogue_turn payloads using 'prompt' key."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -671,7 +671,7 @@ def test_narrator_handshake_instructions_cached_from_prompt_field():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_dialogue_turn(live_dialogue_event)
+    reporter.on_dialogue_turn(live_dialogue_event)
 
     handshake_event = Event(
         type="player_handshake_complete",
@@ -685,7 +685,7 @@ def test_narrator_handshake_instructions_cached_from_prompt_field():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_handshake_complete(handshake_event)
+    reporter.on_player_handshake_complete(handshake_event)
 
     output = "\n".join(test_logger.info_calls)
     assert "Alice handshake instructions:" in output
@@ -693,14 +693,14 @@ def test_narrator_handshake_instructions_cached_from_prompt_field():
     assert "Line 2" in output
 
 
-def test_narrator_handshake_abort_with_instructions():
-    """Verify narrator displays handshake instructions alongside rejection."""
-    narrator = MatchNarrator()
+def test_reporter_handshake_abort_with_instructions():
+    """Verify reporter displays handshake instructions alongside rejection."""
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(
+    reporter.on_match_start(
         game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-1"
     )
 
@@ -719,7 +719,7 @@ def test_narrator_handshake_abort_with_instructions():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_dialogue_turn(dialogue_event)
+    reporter.on_dialogue_turn(dialogue_event)
 
     # Then emit handshake_abort
     abort_event = Event(
@@ -735,7 +735,7 @@ def test_narrator_handshake_abort_with_instructions():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_handshake_abort(abort_event)
+    reporter.on_player_handshake_abort(abort_event)
 
     # Verify output includes both rejection and instructions
     output = "\n".join(test_logger.info_calls)
@@ -745,14 +745,14 @@ def test_narrator_handshake_abort_with_instructions():
     assert "✗ Bob rejected handshake: Unclear instructions" in output
 
 
-def test_narrator_handshake_instructions_display_full_prompt():
+def test_reporter_handshake_instructions_display_full_prompt():
     """Verify long handshake instructions are displayed without truncation."""
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # Set up match
-    narrator.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
+    reporter.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
 
     test_logger.info_calls.clear()
 
@@ -772,7 +772,7 @@ def test_narrator_handshake_instructions_display_full_prompt():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_dialogue_turn(dialogue_event)
+    reporter.on_dialogue_turn(dialogue_event)
 
     # Emit handshake_complete
     handshake_event = Event(
@@ -787,7 +787,7 @@ def test_narrator_handshake_instructions_display_full_prompt():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_player_handshake_complete(handshake_event)
+    reporter.on_player_handshake_complete(handshake_event)
 
     # Verify full prompt is displayed without truncation
     output = "\n".join(test_logger.info_calls)
@@ -798,14 +798,14 @@ def test_narrator_handshake_instructions_display_full_prompt():
     assert "✓ Alice handshake: OK" in output
 
 
-def test_narrator_handshake_cache_cleared_between_matches():
+def test_reporter_handshake_cache_cleared_between_matches():
     """Verify handshake prompt cache is cleared between matches (SS3)."""
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
     test_logger = MockLogger()
-    narrator.logger = test_logger
+    reporter.logger = test_logger
 
     # First match - cache a handshake prompt
-    narrator.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
+    reporter.on_match_start(game=MockGame(), players=[MockPlayer("Alice")], match_id="match-1")
 
     dialogue_event = Event(
         type="dialogue_turn",
@@ -819,15 +819,15 @@ def test_narrator_handshake_cache_cleared_between_matches():
         context={"match_id": "match-1"},
     )
 
-    narrator.on_dialogue_turn(dialogue_event)
+    reporter.on_dialogue_turn(dialogue_event)
 
     # Verify cache has Alice's prompt
-    assert "Alice" in narrator._handshake_prompts
-    assert narrator._handshake_prompts["Alice"] == "First match instructions"
+    assert "Alice" in reporter._handshake_prompts
+    assert reporter._handshake_prompts["Alice"] == "First match instructions"
 
     # Second match - cache should be cleared
-    narrator.on_match_start(game=MockGame(), players=[MockPlayer("Bob")], match_id="match-2")
+    reporter.on_match_start(game=MockGame(), players=[MockPlayer("Bob")], match_id="match-2")
 
     # Cache should be empty after match start
-    assert len(narrator._handshake_prompts) == 0
-    assert "Alice" not in narrator._handshake_prompts
+    assert len(reporter._handshake_prompts) == 0
+    assert "Alice" not in reporter._handshake_prompts

@@ -13,7 +13,7 @@ Last updated: 2026-03-17
 ## Evidence Reviewed
 - spec sections: full document, especially §§3-10
 - implementation files: [console.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/core/console.py), [session.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/core/session.py)
-- tests: [test_player_ordering.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_player_ordering.py), [test_parallel_execution.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_parallel_execution.py), [test_auto_narrator.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_auto_narrator.py)
+- tests: [test_player_ordering.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_player_ordering.py), [test_parallel_execution.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_parallel_execution.py), [test_auto_reporter.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_auto_reporter.py)
 - docs/examples: in-spec examples and adjacent execution specs
 
 ## Findings

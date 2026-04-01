@@ -17,7 +17,7 @@ from agentdeck import (
     GPTPlayer,
     ReasoningController,
     StatsTracker,
-    MatchNarrator,
+    MatchReporter,
 )
 
 
@@ -34,7 +34,7 @@ def main():
     )
 
     stats = StatsTracker()
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
 
     print("=" * 60)
     print("Hangman LLM Test - GPT-4o with Reasoning")
@@ -45,7 +45,7 @@ def main():
     print("=" * 60)
     print()
 
-    with AgentDeck(game=game, spectators=[stats, narrator]) as deck:
+    with AgentDeck(game=game, spectators=[stats, reporter]) as deck:
         results = deck.play(
             players=[player],
             matches=1,

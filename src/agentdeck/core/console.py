@@ -1238,11 +1238,11 @@ class Console:
         # Inject session logger for proper exception context (§6.3 EI4 / §8.1)
         self.console_bus = EventBus(session_id=self.session_state.session_id, logger=self.logger)
 
-        # SPEC-CONSOLE §5: Auto-attach MatchNarrator when spectators=None
+        # SPEC-CONSOLE §5: Auto-attach MatchReporter when spectators=None
         if spectators is None:
-            from agentdeck.spectators import MatchNarrator
+            from agentdeck.spectators import MatchReporter
 
-            self._base_spectators: List[Spectator] = [MatchNarrator()]
+            self._base_spectators: List[Spectator] = [MatchReporter()]
         else:
             self._base_spectators: List[Spectator] = spectators
         self._temp_spectators: List[Spectator] = []

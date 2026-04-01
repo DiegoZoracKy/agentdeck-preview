@@ -75,7 +75,7 @@ from agentdeck import AgentDeck, AgentDeckConfig
 from agentdeck.games.examples import FixedDamageGame
 from agentdeck.players import GPTPlayer
 from agentdeck.controllers import ActionOnlyController
-from agentdeck.spectators import MatchNarrator
+from agentdeck.spectators import MatchReporter
 from agentdeck.core.types import LogLevel
 
 
@@ -137,12 +137,12 @@ def run_experiment(concurrency: int, matches: int = 10, seed: int = 42):
 
     players = create_players()
 
-    # Use MatchNarrator to verify event ordering
-    narrator = MatchNarrator()
+    # Use MatchReporter to verify event ordering
+    reporter = MatchReporter()
 
     start_time = time.time()
 
-    with AgentDeck(game=game, session=config, spectators=[narrator]) as deck:
+    with AgentDeck(game=game, session=config, spectators=[reporter]) as deck:
         results = deck.play(players=players, matches=matches)
 
     duration = time.time() - start_time

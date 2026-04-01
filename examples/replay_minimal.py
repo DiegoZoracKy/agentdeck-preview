@@ -10,7 +10,7 @@ If --recording is omitted the script will automatically replay the most recent
 match located under the ./agentdeck_runs directory.
 
 The replay uses spectators to demonstrate full lifecycle observation:
-    - MatchNarrator (displays reasoning, actions, reflections)
+    - MatchReporter (displays reasoning, actions, reflections)
     - TokenUsageTracker (reconstructs cost metadata)
     - StatsTracker (rebuilds match statistics)
 
@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from agentdeck import MatchNarrator, StatsTracker, TokenUsageTracker
+from agentdeck import MatchReporter, StatsTracker, TokenUsageTracker
 from agentdeck.core.replay import ReplayEngine
 
 
@@ -124,15 +124,15 @@ def main() -> None:
     console_logger.propagate = False
 
     # Spectators observe the replay just like a live run.
-    # MatchNarrator displays full lifecycle (handshake → turns → reflections)
-    narrator = MatchNarrator(show_state_changes=True, logger=console_logger)
+    # MatchReporter displays full lifecycle (handshake → turns → reflections)
+    reporter = MatchReporter(show_state_changes=True, logger=console_logger)
     tokens = TokenUsageTracker()
     stats = StatsTracker()
 
     engine = ReplayEngine(match_data)
     engine.replay(
         spectators=[
-            narrator,
+            reporter,
             tokens,
             stats,
         ],

@@ -1,7 +1,7 @@
 """
-Test auto-attachment of MatchNarrator spectator per SPEC-CONSOLE §5.
+Test auto-attachment of MatchReporter spectator per SPEC-CONSOLE §5.
 
-Validates that Console auto-attaches MatchNarrator when spectators=None
+Validates that Console auto-attaches MatchReporter when spectators=None
 and respects explicit spectator lists (including empty lists).
 """
 
@@ -10,22 +10,22 @@ import pytest
 from agentdeck.core.base import Spectator
 from agentdeck.core.console import Console
 from agentdeck.core.session import AgentDeckConfig, SessionContext
-from agentdeck.spectators import MatchNarrator
+from agentdeck.spectators import MatchReporter
 
 
 class CustomSpectator(Spectator):
     """Test spectator for validation."""
 
 
-class TestAutoAttachMatchNarrator:
-    """Test auto-attachment of MatchNarrator per SPEC-CONSOLE §5."""
+class TestAutoAttachMatchReporter:
+    """Test auto-attachment of MatchReporter per SPEC-CONSOLE §5."""
 
     def test_auto_attach_when_spectators_none(self, temp_session_dir):
         """
-        When spectators=None (omitted), Console MUST auto-attach MatchNarrator.
+        When spectators=None (omitted), Console MUST auto-attach MatchReporter.
 
         Per SPEC-CONSOLE §5 "Default Session Spectators":
-        - Auto-attach MatchNarrator when spectators is None
+        - Auto-attach MatchReporter when spectators is None
         - Subscribe it before SESSION_START emission
         """
         config = AgentDeckConfig(run_dir=str(temp_session_dir))
@@ -34,9 +34,9 @@ class TestAutoAttachMatchNarrator:
         # Call with spectators=None (default)
         console = Console(session=session, spectators=None)
 
-        # Verify MatchNarrator was auto-attached
+        # Verify MatchReporter was auto-attached
         assert len(console._base_spectators) == 1
-        assert isinstance(console._base_spectators[0], MatchNarrator)
+        assert isinstance(console._base_spectators[0], MatchReporter)
 
         # Verify it's subscribed to event bus
         assert console._base_spectators[0] in console.event_bus._spectators
@@ -45,7 +45,7 @@ class TestAutoAttachMatchNarrator:
 
     def test_auto_attach_when_spectators_omitted(self, temp_session_dir):
         """
-        When spectators parameter omitted, Console MUST auto-attach MatchNarrator.
+        When spectators parameter omitted, Console MUST auto-attach MatchReporter.
 
         Same as spectators=None (Python default parameter semantics).
         """
@@ -55,9 +55,9 @@ class TestAutoAttachMatchNarrator:
         # Call without spectators parameter (defaults to None)
         console = Console(session=session)
 
-        # Verify MatchNarrator was auto-attached
+        # Verify MatchReporter was auto-attached
         assert len(console._base_spectators) == 1
-        assert isinstance(console._base_spectators[0], MatchNarrator)
+        assert isinstance(console._base_spectators[0], MatchReporter)
 
         console.close()
 
@@ -67,7 +67,7 @@ class TestAutoAttachMatchNarrator:
 
         Per SPEC-CONSOLE §5:
         - Explicit spectator list (even empty) bypasses auto-attachment
-        - This is how users opt out of default narrator
+        - This is how users opt out of default reporter
         """
         config = AgentDeckConfig(run_dir=str(temp_session_dir))
         session = SessionContext.create(config)
@@ -94,40 +94,40 @@ class TestAutoAttachMatchNarrator:
         # Call with explicit spectator list
         console = Console(session=session, spectators=[custom])
 
-        # Verify ONLY custom spectator attached (no MatchNarrator)
+        # Verify ONLY custom spectator attached (no MatchReporter)
         assert len(console._base_spectators) == 1
         assert console._base_spectators[0] is custom
-        assert not isinstance(console._base_spectators[0], MatchNarrator)
+        assert not isinstance(console._base_spectators[0], MatchReporter)
 
         console.close()
 
-    def test_explicit_match_narrator_allowed(self, temp_session_dir):
+    def test_explicit_match_reporter_allowed(self, temp_session_dir):
         """
-        Users can still explicitly attach MatchNarrator if desired.
+        Users can still explicitly attach MatchReporter if desired.
 
         This allows customization (e.g., different modes in future).
         """
         config = AgentDeckConfig(run_dir=str(temp_session_dir))
         session = SessionContext.create(config)
 
-        narrator = MatchNarrator()
+        reporter = MatchReporter()
 
-        # Call with explicit MatchNarrator
-        console = Console(session=session, spectators=[narrator])
+        # Call with explicit MatchReporter
+        console = Console(session=session, spectators=[reporter])
 
-        # Verify the explicit narrator is attached
+        # Verify the explicit reporter is attached
         assert len(console._base_spectators) == 1
-        assert console._base_spectators[0] is narrator
+        assert console._base_spectators[0] is reporter
 
         console.close()
 
-    def test_logger_injection_for_auto_attached_narrator(self, temp_session_dir):
+    def test_logger_injection_for_auto_attached_reporter(self, temp_session_dir):
         """
-        Auto-attached MatchNarrator MUST receive logger injection.
+        Auto-attached MatchReporter MUST receive logger injection.
 
         Per SPEC-CONSOLE §5:
         - Auto-attached spectators follow logger-injection rules (§6.5 P4)
-        - Logger allows narrator output to flow through session logger
+        - Logger allows reporter output to flow through session logger
         """
         from agentdeck.core.logging import AgentDeckLogger
 
@@ -140,11 +140,11 @@ class TestAutoAttachMatchNarrator:
         # Create console with logger
         console = Console(session=session, logger=test_logger)
 
-        # Verify auto-attached narrator received logger injection
-        narrator = console._base_spectators[0]
-        assert isinstance(narrator, MatchNarrator)
-        assert narrator.logger is test_logger
-        assert narrator.logger is console.logger
+        # Verify auto-attached reporter received logger injection
+        reporter = console._base_spectators[0]
+        assert isinstance(reporter, MatchReporter)
+        assert reporter.logger is test_logger
+        assert reporter.logger is console.logger
 
         console.close()
 

@@ -10,7 +10,7 @@ Usage:
     python examples/mock_demo.py
 
 What You'll See:
-    - MatchNarrator commentary for each turn
+    - MatchReporter output for each turn
     - ProgressDisplay updates (no carriage returns for clean logs)
     - StatsTracker win/loss summary
     - Recordings saved under agentdeck_runs/mock_demo/<session>/records/
@@ -23,7 +23,7 @@ from agentdeck import (
     AgentDeckConfig,
     FixedDamageGame,
     LogLevel,
-    MatchNarrator,
+    MatchReporter,
     MockPlayer,
     ProgressDisplay,
     Recorder,
@@ -55,7 +55,7 @@ def main() -> None:
     )
 
     # Spectators for human-friendly output + recording
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
     progress = ProgressDisplay(show_eta=False, use_carriage_return=False)
     stats = StatsTracker()
     recorder = Recorder()  # Auto-bound to session; writes JSON recordings
@@ -64,7 +64,7 @@ def main() -> None:
 
     with AgentDeck(
         game=game,
-        spectators=[narrator, progress, stats],
+        spectators=[reporter, progress, stats],
         recorder=recorder,
         session=config,
     ) as deck:

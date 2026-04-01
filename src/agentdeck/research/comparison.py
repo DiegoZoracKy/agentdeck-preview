@@ -123,7 +123,7 @@ def compare_models(
         test: Statistical test ("auto", "t-test", "mann-whitney", "bootstrap")
         confidence: Confidence level (default 0.95)
         parallel: Run matches in parallel (future feature, currently ignored)
-        spectators: Optional spectators to observe matches (ProgressSpectator, Narrator, etc.)
+        spectators: Optional spectators to observe matches (ProgressDisplay, MatchReporter, etc.)
 
     Returns:
         ComparisonResult with win rates, p-value, CI, effect size, metadata

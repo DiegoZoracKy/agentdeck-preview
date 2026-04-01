@@ -15,7 +15,7 @@ What This Demonstrates:
     ✓ Custom player instructions (coaching, cognitive styles)
     ✓ Custom controllers (ActionOnlyController vs ReasoningController)
     ✓ A/B testing setup (different strategies per player)
-    ✓ Full observability (MatchNarrator, metadata, stats, token tracking)
+    ✓ Full observability (MatchReporter, metadata, stats, token tracking)
 
 Comparison with Minimal Example:
     - Minimal: Just controller (uses all smart defaults)
@@ -35,7 +35,7 @@ from agentdeck.players.openai_player import GPTPlayer
 from agentdeck.controllers.action_only import ActionOnlyController
 from agentdeck.controllers.reasoning import ReasoningController
 from agentdeck.renderers.text_renderer import TextRenderer
-from agentdeck.spectators import MatchNarrator
+from agentdeck.spectators import MatchReporter
 
 
 def main():
@@ -176,9 +176,9 @@ Provide a brief reflection on your performance and what you learned (2-3 sentenc
     # STEP 5: Run match with full observability
     # =========================================================================
 
-    # Use MatchNarrator for turn-by-turn commentary
+    # Use MatchReporter for turn-by-turn reporting
     # Logger is auto-injected per SPEC-SPECTATOR v1.2.0
-    with AgentDeck(game=game, spectators=[MatchNarrator()]) as deck:
+    with AgentDeck(game=game, spectators=[MatchReporter()]) as deck:
         results = deck.play(
             players=[player_1, player_2],
             matches=1,

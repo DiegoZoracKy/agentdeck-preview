@@ -22,7 +22,7 @@ from agentdeck import (
     HangmanGame,
     MockPlayer,
     StatsTracker,
-    MatchNarrator,
+    MatchReporter,
 )
 
 
@@ -49,7 +49,7 @@ def main():
 
     # Spectators to observe the game
     stats = StatsTracker()
-    narrator = MatchNarrator()
+    reporter = MatchReporter()
 
     # Run matches
     print("=" * 60)
@@ -60,7 +60,7 @@ def main():
     print("=" * 60)
     print()
 
-    with AgentDeck(game=game, spectators=[stats, narrator]) as deck:
+    with AgentDeck(game=game, spectators=[stats, reporter]) as deck:
         results = deck.play(
             players=[alice, bob],
             matches=5,

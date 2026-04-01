@@ -14,7 +14,7 @@ What This Demonstrates:
     ✓ compare_models() over 100 matches (SPEC-RESEARCH default)
     ✓ Reproducible results via seeded AgentDeck session
     ✓ Access to confidence intervals and effect sizes
-    ✓ Live progress via ProgressDisplay and MatchNarrator spectators
+    ✓ Live progress via ProgressDisplay and MatchReporter spectators
 """
 
 from agentdeck.games.examples import FixedDamageGame
@@ -22,7 +22,7 @@ from agentdeck.controllers import ReasoningController
 from agentdeck.players import GPTPlayer
 from agentdeck.prompts import DEFAULT_CONCLUSION_TEMPLATE_PATH
 from agentdeck.research import compare_models
-from agentdeck.spectators import MatchNarrator, ProgressDisplay
+from agentdeck.spectators import MatchReporter, ProgressDisplay
 
 
 MATCHES = 2  # Small sample for quick GPT comparison
@@ -70,7 +70,7 @@ def main() -> None:
         game=game,
         matches=MATCHES,
         seed=SEED,
-        spectators=[ProgressDisplay(), MatchNarrator()],
+        spectators=[ProgressDisplay(), MatchReporter()],
     )
 
     print("=== AgentDeck Research: GPT Comparison ===")

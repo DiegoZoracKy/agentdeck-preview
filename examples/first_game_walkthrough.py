@@ -18,7 +18,7 @@ from agentdeck import (
     ActionResult,
     AgentDeck,
     GameStatus,
-    MatchNarrator,
+    MatchReporter,
     MockPlayer,
     Recorder,
     ReplayEngine,
@@ -117,8 +117,8 @@ def run_and_replay():
     stats = StatsTracker()
     players = build_mock_players()
 
-    # Record a single match with narration
-    with AgentDeck(game=game, spectators=[recorder, MatchNarrator(), stats]) as deck:
+    # Record a single match with reporting
+    with AgentDeck(game=game, spectators=[recorder, MatchReporter(), stats]) as deck:
         results = deck.play(players=players, matches=1, seed=7)
 
     summary = stats.get_stats()
@@ -131,7 +131,7 @@ def run_and_replay():
     with latest_recording.open("r", encoding="utf-8") as handle:
         match_data = json.load(handle)
 
-    ReplayEngine(match_data).replay(spectators=[MatchNarrator()], speed=0.0)
+    ReplayEngine(match_data).replay(spectators=[MatchReporter()], speed=0.0)
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ parallel execution.
 **What You'll Learn**:
 - Deterministic MockPlayer gameplay (no network calls)
 - Where recordings/logs are stored (`agentdeck_runs/mock_demo/...`)
-- Live commentary and stats via spectators
+- Live reporting and stats via spectators
 
 **Usage**:
 ```bash

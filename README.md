@@ -102,7 +102,7 @@ print(f"Win rates: {results.win_rates}")
 ### Try AgentDeck Without API Keys
 - Run `python examples/mock_demo.py`
 - Uses `MockPlayer` (deterministic) so no LLM providers are needed
-- Shows live commentary + progress + stats, and saves recordings under `agentdeck_runs/mock_demo/<session>/records/`
+- Shows live reporting + progress + stats, and saves recordings under `agentdeck_runs/mock_demo/<session>/records/`
 
 ### Recommended Learning Path
 1. `examples/mock_demo.py` — verify the install with a zero-provider run
@@ -243,7 +243,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 - Custom renderers can provide JSON, images, etc.
 
 **Spectators** observe and analyze matches
-- `MatchNarrator` - turn-by-turn commentary
+- `MatchReporter` - turn-by-turn reporting
 - `ProgressDisplay` - real-time progress with ETA
 - `TokenUsageTracker` - cost tracking per player/model
 - `StatsTracker` - win rates and performance metrics
@@ -261,11 +261,11 @@ Everything is observable through events - no modifications needed to games:
 
 ```python
 from agentdeck import AgentDeck
-from agentdeck.spectators import MatchNarrator, TokenUsageTracker
+from agentdeck.spectators import MatchReporter, TokenUsageTracker
 
 # Add spectators for observation
 with AgentDeck(game=game, spectators=[
-    MatchNarrator(),      # Turn-by-turn commentary
+    MatchReporter(),      # Turn-by-turn reporting
     TokenUsageTracker()   # Cost tracking
 ]) as deck:
     results = deck.play(players, matches=10)
@@ -277,18 +277,18 @@ Every match is automatically recorded with full metadata:
 ```python
 from pathlib import Path
 
-from agentdeck import AgentDeck, MatchNarrator
+from agentdeck import AgentDeck, MatchReporter
 
 with AgentDeck(game=game) as deck:
     results = deck.play(players, matches=3, seed=7)
 
     # Replay from memory (no file I/O)
-    deck.replay(match=results[0], spectators=[MatchNarrator()], speed=0.0)
+    deck.replay(match=results[0], spectators=[MatchReporter()], speed=0.0)
 
     # Or replay from disk (recorded under records/)
     record_dir = Path(deck.session.record_directory)
     match_path = sorted(record_dir.glob("match_*.json"))[0]
-    deck.replay(path=match_path, spectators=[MatchNarrator()], speed=0.0)
+    deck.replay(path=match_path, spectators=[MatchReporter()], speed=0.0)
 ```
 
 **Replay Parity Guarantee**: Replay emits identical event stream as live execution, including complete three-phase lifecycle (handshake → gameplay → conclusion).

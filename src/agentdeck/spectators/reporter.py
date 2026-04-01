@@ -1,4 +1,4 @@
-"""Match narrative spectator for AgentDeck."""
+"""Structured match reporting spectator for AgentDeck."""
 
 from __future__ import annotations
 
@@ -9,11 +9,11 @@ from ..core.base.spectator import Spectator
 from ..core.types import Event, EventContext, MatchResult
 
 
-class MatchNarrator(Spectator):
+class MatchReporter(Spectator):
     """
-    Provides real-time match narration showing turn-by-turn progression.
+    Provides structured match reporting across the full match lifecycle.
 
-    Per SPEC-SPECTATOR v1.2.0:
+    Per SPEC-SPECTATOR v1.3.0:
     - HC1-HC4: Duck-typed handlers, read-only, quick completion
     - SS1-SS4: Resets state per batch/match, tolerates missing context
     - EI1-EI3: Error-safe, no execution mutations
@@ -22,7 +22,7 @@ class MatchNarrator(Spectator):
     Output includes:
     - Match start with game/players
     - Handshake phase: player acknowledgments
-    - Turn-by-turn: player, reasoning, action, token usage, state changes, duration
+    - Turn-by-turn reporting: player, reasoning, action, token usage, state changes, duration
     - Conclusion phase: player reflections
     - Match completion with winner, turns, total duration
 
@@ -52,7 +52,7 @@ class MatchNarrator(Spectator):
 
     def __init__(self, *, logger: Any = None, show_state_changes: bool = True) -> None:
         """
-        Initialize match narrator.
+        Initialize match reporter.
 
         Args:
             logger: Optional logger (auto-injected by Console/ReplayEngine per LI1)
@@ -160,7 +160,7 @@ class MatchNarrator(Spectator):
 
     def on_gameplay(self, event: Event) -> None:
         """
-        Narrate turn-by-turn gameplay.
+        Report turn-by-turn gameplay.
 
         Per HC3: Read-only access to event data.
         Per SPEC-OBSERVABILITY §3.2: GAMEPLAY event has mechanic, phase_index,
@@ -175,7 +175,7 @@ class MatchNarrator(Spectator):
         # Extract turn info
         mechanic = data.get("mechanic")
         if mechanic != "turn_based":
-            return  # Only narrate turn-based games for now
+            return  # Only report turn-based games for now
 
         # Get current player from GAMEPLAY event
         player = data.get("player")
@@ -196,7 +196,7 @@ class MatchNarrator(Spectator):
         # Extract action info (handle ActionResult dataclass, dict, or string)
         action_obj = data.get("action")
         if action_obj is None:
-            return  # No action to narrate
+            return  # No action to report
 
         # Normalize action text and metadata based on type
         if isinstance(action_obj, dict):

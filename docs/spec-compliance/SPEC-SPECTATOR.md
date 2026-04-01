@@ -12,8 +12,8 @@ Last updated: 2026-03-17
 
 ## Evidence Reviewed
 - spec sections: full document, especially §§4-7 and examples
-- implementation files: [spectator.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/core/base/spectator.py), [event_bus.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/core/event_bus.py), [narrator.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/spectators/narrator.py), [stats.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/spectators/stats.py), [token_usage.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/spectators/token_usage.py)
-- tests: [test_spectator_contracts.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_spectator_contracts.py), [test_spectator_logger_injection.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_spectator_logger_injection.py), [test_match_narrator.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_match_narrator.py), [test_auto_narrator.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_auto_narrator.py)
+- implementation files: [spectator.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/core/base/spectator.py), [event_bus.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/core/event_bus.py), [reporter.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/spectators/reporter.py), [stats.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/spectators/stats.py), [token_usage.py](/home/diegozoracky/dev/agentdeck-preview/src/agentdeck/spectators/token_usage.py)
+- tests: [test_spectator_contracts.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_spectator_contracts.py), [test_spectator_logger_injection.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_spectator_logger_injection.py), [test_match_reporter.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_match_reporter.py), [test_auto_reporter.py](/home/diegozoracky/dev/agentdeck-preview/tests/unit/test_auto_reporter.py)
 - docs/examples: in-spec examples and exported spectator docs
 
 ## Findings
@@ -26,7 +26,7 @@ Last updated: 2026-03-17
 - The spec blurred the difference between lifecycle helpers defined on the base `Spectator` class and optional event-specific handlers such as `on_player_handshake_complete`.
 
 ### Medium
-- One example still implied `MatchNarrator(mode=...)`, which is not part of the shipped constructor surface.
+- One example still implied `MatchReporter(mode=...)`, which is not part of the shipped constructor surface.
 - Several references were pinned to older adjacent spec versions rather than the current contract.
 
 ### Low

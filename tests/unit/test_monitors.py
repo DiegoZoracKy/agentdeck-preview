@@ -14,7 +14,7 @@ from agentdeck.core.types import Event
 from agentdeck.games.examples import FixedDamageGame
 from agentdeck.monitors import Monitor, ProgressMonitor
 from agentdeck.players import MockPlayer
-from agentdeck.spectators import MatchNarrator
+from agentdeck.spectators import MatchReporter
 
 
 class EventCollector(Monitor):
@@ -43,7 +43,7 @@ class EventCollector(Monitor):
         self.events.append(("batch_complete", event.data))
 
 
-class SpectatorSpy(MatchNarrator):
+class SpectatorSpy(MatchReporter):
     """Test spectator that tracks which events it receives."""
 
     def __init__(self):

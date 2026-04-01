@@ -76,7 +76,7 @@ The final sweep completed with:
   tests/unit/test_replay_lifecycle.py \
   tests/unit/test_spectator_contracts.py \
   tests/unit/test_monitors.py \
-  tests/unit/test_auto_narrator.py \
+  tests/unit/test_auto_reporter.py \
   tests/unit/test_viewer_contracts.py \
   tests/unit/test_agentdeck.py \
   tests/unit/test_pricing.py \

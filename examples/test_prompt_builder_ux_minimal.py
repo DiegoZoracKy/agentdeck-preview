@@ -15,7 +15,7 @@ What This Demonstrates:
     ✓ Out-of-the-box three-phase lifecycle (handshake → turn → conclusion)
     ✓ Parallel execution with real-time progress monitoring (SPEC-MONITOR v1.0.0)
     ✓ Auto-attached ProgressMonitor when concurrency > 1
-    ✓ Turn-by-turn narrative via MatchNarrator spectator
+    ✓ Turn-by-turn reporting via MatchReporter spectator
     ✓ Dual-tier observation: monitors (console events) + spectators (match events)
 
 Smart Defaults Used (SPEC-PLAYER v1.0.0):
@@ -39,7 +39,7 @@ Progress Monitoring (SPEC-MONITOR v1.0.0):
 
 Observability:
     - Monitors: Console-level events (batch progress, worker lifecycle)
-    - Spectators: Match-level events (turn-by-turn narrative)
+    - Spectators: Match-level events (turn-by-turn reporting)
     - Logger auto-injected to both monitors and spectators
     - Output flows to info.log/debug.log and console (INFO level)
 
@@ -53,7 +53,7 @@ from agentdeck.core.types import Event, LogLevel
 from agentdeck.games.examples import FixedDamageGame
 from agentdeck.monitors import Monitor, ProgressMonitor
 from agentdeck.players.openai_player import GPTPlayer
-from agentdeck.spectators import MatchNarrator
+from agentdeck.spectators import MatchReporter
 from agentdeck.prompts import DEFAULT_CONCLUSION_TEMPLATE_PATH
 
 
@@ -158,16 +158,16 @@ def main():
 
     # Run with default ProgressMonitor (mode="normal")
     print("\n=== Running with default ProgressMonitor ===\n")
-    with AgentDeck(game=game, session=config_default, spectators=[MatchNarrator()]) as deck:
+    with AgentDeck(game=game, session=config_default, spectators=[MatchReporter()]) as deck:
         deck.play(players=players, matches=10)
 
     # Uncomment to test verbose mode or silent execution:
     # print("\n=== Running with verbose ProgressMonitor + CustomMonitor ===\n")
-    # with AgentDeck(game=game, session=config_verbose, spectators=[MatchNarrator()]) as deck:
+    # with AgentDeck(game=game, session=config_verbose, spectators=[MatchReporter()]) as deck:
     #     deck.play(players=players, matches=10)
 
     # print("\n=== Running with silent execution (no monitors) ===\n")
-    # with AgentDeck(game=game, session=config_silent, spectators=[MatchNarrator()]) as deck:
+    # with AgentDeck(game=game, session=config_silent, spectators=[MatchReporter()]) as deck:
     #     deck.play(players=players, matches=10)
 
 if __name__ == "__main__":
