@@ -9,6 +9,8 @@ let currentSkin = null
 let currentMatchSource = null
 let preferredSkin = null
 let currentMatchLabel = null
+let currentMatchEntry = null
+let currentHighlightMarkers = []
 let frameCallback = null
 let endCallback = null
 let localMatchEntries = []
@@ -52,9 +54,15 @@ const speedSelect = document.getElementById('speed-select')
 const skinSelect = document.getElementById('skin-select')
 const progressBar = document.getElementById('progress-bar')
 const progressFill = document.getElementById('progress-fill')
+const progressMarkers = document.getElementById('progress-markers')
 const statusText = document.getElementById('status-text')
 const controlsTurn = document.getElementById('controls-turn')
 const infoGrid = document.getElementById('info-grid')
+const matchSynopsis = document.getElementById('match-synopsis')
+const matchPreview = document.getElementById('match-preview')
+const matchPreviewTitle = document.getElementById('match-preview-title')
+const matchPreviewSubtitle = document.getElementById('match-preview-subtitle')
+const metadataUtils = window.MatchMetadataUtils
 
 // ============================================================================
 // Storage + URL helpers
@@ -209,6 +217,38 @@ function updateStatus(text) {
   if (headerStatusSupported) renderer.setPlaybackStatus(text)
 }
 
+function renderHighlightMarkers() {
+  if (!progressMarkers) return
+
+  if (!currentHighlightMarkers.length) {
+    progressMarkers.innerHTML = ''
+    return
+  }
+
+  progressMarkers.innerHTML = currentHighlightMarkers
+    .map(
+      (marker) => `
+        <button
+          type="button"
+          class="viewer-progress-marker"
+          data-turn="${marker.turn}"
+          data-frame-index="${marker.frameIndex}"
+          style="left: ${marker.percent}%"
+          title="Turn ${marker.turn}: ${marker.icon ? `${marker.icon} ` : ''}${marker.label}"
+          aria-label="Turn ${marker.turn}: ${marker.icon ? `${marker.icon} ` : ''}${marker.label}"
+        >
+          <span class="viewer-progress-marker-line" aria-hidden="true"></span>
+        </button>
+      `
+    )
+    .join('')
+}
+
+function setActiveHighlight(frame) {
+  const marker = metadataUtils ? metadataUtils.findActiveHighlight(currentHighlightMarkers, frame) : null
+  if (renderer && typeof renderer.setActiveHighlight === 'function') renderer.setActiveHighlight(marker)
+}
+
 function showViewerShell(visible) {
   viewerContainer.style.display = visible ? 'block' : 'none'
   controlsContainer.style.display = visible ? 'flex' : 'none'
@@ -257,12 +297,13 @@ function setCurrentMatchSource(path) {
   currentMatchSource = path || null
   if (currentMatchSource) {
     writeStorage(STORAGE_MATCH_KEY, currentMatchSource)
-    const localEntry = localMatchEntries.find((entry) => entry.path === currentMatchSource)
-    currentMatchLabel = localEntry
-      ? localEntry.label
+    currentMatchEntry = getEntryForPath(currentMatchSource)
+    currentMatchLabel = currentMatchEntry
+      ? currentMatchEntry.label
       : (currentMatchSource.split('/').pop() || 'Match')
   } else {
     removeStorage(STORAGE_MATCH_KEY)
+    currentMatchEntry = null
     currentMatchLabel = currentMatchLabel || 'Custom'
   }
   updateMobileCompactLabels()
@@ -270,6 +311,26 @@ function setCurrentMatchSource(path) {
 
 function hasEntryForPath(path) {
   return localMatchEntries.some((entry) => entry.path === path)
+}
+
+function getEntryForPath(path) {
+  return localMatchEntries.find((entry) => entry.path === path) || null
+}
+
+function renderSelectedMatchPreview(path) {
+  if (!matchPreview || !matchPreviewTitle || !matchPreviewSubtitle) return
+
+  const entry = path ? getEntryForPath(path) : null
+  if (!entry) {
+    matchPreview.style.display = 'none'
+    matchPreviewTitle.textContent = ''
+    matchPreviewSubtitle.textContent = ''
+    return
+  }
+
+  matchPreview.style.display = 'block'
+  matchPreviewTitle.textContent = entry.label
+  matchPreviewSubtitle.textContent = entry.subtitle || 'Load this replay to inspect the turning point.'
 }
 
 function populateSkinSelector(data) {
@@ -309,6 +370,7 @@ function reconnectTimeline() {
   frameCallback = (frame) => {
     renderer.renderFrame(frame)
     updateProgress()
+    setActiveHighlight(frame)
     if (controlsTurn && matchData) {
       const total = matchData.frames.length
       const turn = frame.turnNumber || (frame.index + 1)
@@ -329,14 +391,22 @@ function reconnectTimeline() {
     if (winnerEl && infoGrid.dataset.winner) {
       winnerEl.textContent = infoGrid.dataset.winner
     }
+
+    setActiveHighlight(matchData?.frames?.[timeline.currentFrame] || null)
   }
 
   timeline.onFrame(frameCallback)
   timeline.onEnd(endCallback)
 }
 
-function displayMatchInfo(data) {
+function displayMatchInfo(data, entry) {
   const players = data.players.join(' vs ')
+  if (matchSynopsis) {
+    const synopsis = entry && entry.synopsis ? entry.synopsis : ''
+    matchSynopsis.textContent = synopsis
+    matchSynopsis.style.display = synopsis ? 'block' : 'none'
+  }
+
   infoGrid.innerHTML = `
     <div class="match-table">
       <div class="match-table-grid">
@@ -373,9 +443,13 @@ function displayMatchInfo(data) {
   infoGrid.dataset.winner = data.winner || 'Draw'
 }
 
-function initializeViewer(data) {
+function initializeViewer(data, entry = null) {
   destroyViewerRuntime()
   matchData = data
+  currentMatchEntry = entry
+  currentHighlightMarkers = metadataUtils
+    ? metadataUtils.resolveHighlightMarkers(data.frames, entry && entry.highlights ? entry.highlights : [])
+    : []
 
   showViewerShell(true)
   setEmptyStateVisibility(false)
@@ -400,7 +474,9 @@ function initializeViewer(data) {
     controlsTurn.textContent = `Turn ${turn}/${data.frames.length}`
   }
 
-  displayMatchInfo(data)
+  displayMatchInfo(data, currentMatchEntry)
+  renderHighlightMarkers()
+  setActiveHighlight(data.frames[0] || null)
   updateControls()
   updateProgress()
   updateStatus('Ready')
@@ -418,10 +494,11 @@ async function loadFromUrl(url, options = {}) {
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`)
 
     const json = await response.json()
-    initializeViewer(RecordLoader.load(json))
+    initializeViewer(RecordLoader.load(json), getEntryForPath(url))
     setCurrentMatchSource(url)
     if (!persistMatch) removeStorage(STORAGE_MATCH_KEY)
     syncMatchSelectValue(url)
+    renderSelectedMatchPreview(url)
     syncUrlState()
     closeMobileSheet()
     return true
@@ -443,9 +520,10 @@ async function loadMatchFile(file) {
   updateStatus('Loading')
 
   try {
-    initializeViewer(await RecordLoader.loadFromFile(file))
+    initializeViewer(await RecordLoader.loadFromFile(file), null)
     currentMatchLabel = file.name || 'Uploaded JSON'
     setCurrentMatchSource(null)
+    renderSelectedMatchPreview(null)
     syncUrlState()
     closeMobileSheet()
   } catch (err) {
@@ -476,27 +554,13 @@ function switchSkin(newSkin) {
 
   if (currentFrame >= 0 && currentFrame < matchData.frames.length) {
     renderer.renderFrame(matchData.frames[currentFrame])
+    setActiveHighlight(matchData.frames[currentFrame])
   }
 
   reconnectTimeline()
   syncUrlState()
 
   if (wasPlaying) timeline.play()
-}
-
-function normalizeManifestEntries(payload) {
-  const candidates = Array.isArray(payload?.matches) ? payload.matches : []
-  return candidates
-    .map((entry) => {
-      if (!entry || typeof entry !== 'object') return null
-      const path = typeof entry.path === 'string' ? entry.path.trim() : ''
-      if (!path) return null
-      const label = typeof entry.label === 'string' && entry.label.trim()
-        ? entry.label.trim()
-        : path.replace(/^matches\//, '')
-      return { label, path }
-    })
-    .filter(Boolean)
 }
 
 function renderLocalMatchOptions() {
@@ -512,6 +576,7 @@ function renderLocalMatchOptions() {
   if (!currentMatchLabel && hasEntries) {
     currentMatchLabel = localMatchEntries[0].label
   }
+  renderSelectedMatchPreview(currentMatchSource || matchSelect.value || localMatchEntries[0]?.path || null)
   updateMobileCompactLabels()
 }
 
@@ -524,7 +589,7 @@ async function loadLocalMatchManifest() {
       return
     }
 
-    localMatchEntries = normalizeManifestEntries(await response.json())
+    localMatchEntries = metadataUtils ? metadataUtils.normalizeManifestEntries(await response.json()) : []
     renderLocalMatchOptions()
   } catch (err) {
     localMatchEntries = []
@@ -551,6 +616,7 @@ function updateControls() {
 function updateProgress() {
   if (!timeline || timeline.totalFrames === 0 || timeline.currentFrame < 0) {
     progressFill.style.width = '0%'
+    setActiveHighlight(null)
     return
   }
 
@@ -635,9 +701,11 @@ if (mobileSkinSelect) {
 if (matchSelect && mobileMatchSelect) {
   matchSelect.addEventListener('change', () => {
     mobileMatchSelect.value = matchSelect.value
+    renderSelectedMatchPreview(matchSelect.value)
   })
   mobileMatchSelect.addEventListener('change', () => {
     matchSelect.value = mobileMatchSelect.value
+    renderSelectedMatchPreview(mobileMatchSelect.value)
   })
 }
 
@@ -655,6 +723,16 @@ progressBar.addEventListener('click', (e) => {
   const frameIndex = Math.floor(percent * timeline.totalFrames)
   timeline.seek(frameIndex)
 })
+
+if (progressMarkers) {
+  progressMarkers.addEventListener('click', (e) => {
+    const marker = e.target.closest('.viewer-progress-marker')
+    if (!marker || !timeline) return
+    e.stopPropagation()
+    const frameIndex = Number(marker.dataset.frameIndex)
+    if (Number.isInteger(frameIndex)) timeline.seek(frameIndex)
+  })
+}
 
 // ============================================================================
 // Keyboard controls

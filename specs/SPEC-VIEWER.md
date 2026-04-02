@@ -1,7 +1,7 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
 > **Status**: Final
-> **Version**: 0.4.0
+> **Version**: 0.5.0
 > **Last Updated**: 2026-04-01
 > **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check) / 🚧 Planned (curation sidecars + metadata UI)
 > **Audience**: Viewer developers, skin authors, integration engineers
@@ -51,7 +51,7 @@
   - picker-facing `subtitle`
   - loaded-match `synopsis`
   - timeline highlight markers
-  - active-frame highlight badge
+  - active-frame highlight annotation inside the replay surface, separate from the global controls
 - Keep optional long-form `transcript` out of the runtime manifest payload
 
 ## 4. Data Structures
@@ -125,9 +125,12 @@ interface PromptData {
 ### 4.5 MatchHighlight (Viewer Metadata)
 
 ```typescript
+type HighlightKind = "mistake" | "smart_move" | "surprise" | "turning_point";
+
 interface MatchHighlight {
   turn: number;                 // 1-based turn number
-  label: string;               // <= 50 chars, short badge/picker copy
+  label: string;                // <= 50 chars, short annotation copy
+  kind?: HighlightKind;         // optional editorial tone for viewer iconography
 }
 ```
 
@@ -230,6 +233,9 @@ interface Renderer {
     extras?: { outcome?: string; forfeitReason?: string | null; forfeitingPlayer?: string | null }
   ): void
 
+  // Optional viewer-metadata hook used by bundled skins
+  setActiveHighlight?(highlight: { label: string; kind?: HighlightKind } | null): void
+
   // Cleanup resources
   destroy(): void
 }
@@ -299,8 +305,9 @@ updateManifestFromSidecars(matchesDir: string): ManifestPayload
 14. **MU2**: When `subtitle` is present, the viewer MUST surface it near match selection so users can decide what to watch before loading.
 15. **MU3**: When `synopsis` is present, the viewer MUST show it in the loaded-match info panel.
 16. **MU4**: When `highlights` are present, the timeline MUST render a marker for each highlighted turn.
-17. **MU5**: When playback reaches a highlighted turn, the viewer MUST surface the matching `label` as the active key-moment badge.
+17. **MU5**: When playback reaches a highlighted turn, the viewer MUST surface the matching `label` as the active key-moment annotation inside the replay surface, not only in the global controls area.
 18. **MU6**: Highlight markers MUST map by 1-based turn number, not by raw frame index, so curated metadata remains readable and stable across renderer implementations.
+19. **MU7**: When a highlight `kind` is present, the viewer SHOULD render a compact expressive indicator (emoji or equivalent icon) consistently for that kind while keeping the timeline markers visually neutral.
 
 ## 7. Error Handling
 
@@ -362,9 +369,9 @@ function switchSkin(newSkin) {
   "subtitle": "Ignores recovery and collapses",
   "synopsis": "FlashLite never touches its potion, then reaches the late fight in lethal range with no recovery left to use. The loss is a behavioral failure to engage the recovery mechanic at all.",
   "highlights": [
-    { "turn": 8, "label": "Flash pushes to lethal range" },
-    { "turn": 9, "label": "Still attacks instead of healing" },
-    { "turn": 11, "label": "Collapse completes" }
+    { "turn": 8, "kind": "turning_point", "label": "Flash pushes to lethal range" },
+    { "turn": 9, "kind": "mistake", "label": "Still attacks instead of healing" },
+    { "turn": 11, "kind": "mistake", "label": "Collapse completes" }
   ]
 }
 ```
@@ -394,7 +401,7 @@ document.addEventListener('keydown', (e) => {
 | Renderer contract | R1-R4, RI1-RI4 | Mock renderer, verify callbacks |
 | Renderer registry | RR1 | Register renderer, create instance, assert error on unknown game |
 | Manifest promotion | MP1-MP4, MU1 | Merge sidecars, preserve fallback entries, exclude transcript |
-| Metadata UI | MU2-MU6 | Subtitle preview, synopsis panel, timeline markers, active highlight badge |
+| Metadata UI | MU2-MU7 | Subtitle preview, synopsis panel, timeline markers, in-view active highlight annotation |
 | Error handling | All error cases | Invalid inputs produce expected errors |
 
 ## 10. Design Rationale

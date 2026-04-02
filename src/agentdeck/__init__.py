@@ -50,7 +50,14 @@ from .players import ClaudePlayer, GeminiPlayer, GPTPlayer, MockPlayer
 from .renderers import TextRenderer
 
 # Spectator implementations
-from .spectators import MatchReporter, ProgressDisplay, StatsTracker, TokenUsageTracker
+from .spectators import (
+    MatchCurator,
+    MatchReporter,
+    ProgressDisplay,
+    StatsTracker,
+    TokenUsageTracker,
+    curate_match_file,
+)
 
 __all__ = [
     # Main
@@ -98,7 +105,9 @@ __all__ = [
     "StatsTracker",
     "ProgressDisplay",
     "TokenUsageTracker",
+    "MatchCurator",
     "MatchReporter",
+    "curate_match_file",
     # Games
     "FixedDamageGame",
     "HangmanGame",

@@ -23,13 +23,30 @@ Then drag & drop a match JSON file onto the viewer.
 You can preload matches and pick them from the UI:
 
 1. Put replay files in `viewer/matches/`.
-2. Refresh `viewer/matches/manifest.json`:
+2. Optionally add sidecars next to them:
+   - `my-match.json`
+   - `my-match.meta.json`
+3. Refresh `viewer/matches/manifest.json`:
 
 ```bash
 node scripts/update_match_manifest.js
 ```
 
-3. Reload `viewer/index.html` and use **Local Match Library**.
+4. Reload `viewer/index.html` and use **Local Match Library**.
+
+The manifest promotion step copies `subtitle`, `synopsis`, and `highlights`
+from each `*.meta.json` file into the picker/runtime catalog. Long-form
+`transcript` data stays in the sidecar only.
+
+To generate a first-draft sidecar from a recorded match, use
+`MatchCurator`:
+
+```bash
+python examples/replay_curate_match.py viewer/matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json
+```
+
+If a canonical `*.meta.json` sidecar already exists, the example writes
+`*.generated.meta.json` instead so you can inspect the draft safely.
 
 ### Curated Research Matches
 
@@ -111,9 +128,11 @@ viewer/
 ├── index.html                 # Main entry point (host)
 ├── matches/
 │   ├── manifest.json          # UI catalog for local match picker
-│   └── *.json                 # Local replay files for quick testing
+│   ├── *.json                 # Local replay files for quick testing
+│   └── *.meta.json            # Optional subtitle/synopsis/highlights/kind sidecars
 ├── js/
 │   ├── app.js                 # UI shell + wiring
+│   ├── match-metadata.js      # Manifest + highlight normalization helpers
 │   ├── record-loader.js       # Schema validation & parsing
 │   ├── timeline.js            # Core playback engine
 │   └── renderers/index.js     # Renderer registry (game + skin)
@@ -161,6 +180,17 @@ Record JSON → RecordLoader → MatchData → Timeline → Renderer → DOM
 ### RendererRegistry
 - Selects the renderer based on `(matchData.game, skin)`
 - Register additional renderers in your renderer file or in `viewer/js/renderers/index.js`
+
+### Match Metadata Layer
+- `MatchCurator` can generate `*.meta.json` sidecars from replayed matches
+- `scripts/update_match_manifest.js` promotes sidecar metadata into the local
+  viewer manifest
+- The viewer surfaces:
+  - picker subtitle
+  - loaded-match synopsis
+  - timeline highlight markers
+  - in-view active highlight annotation inside the replay surface
+  - optional per-highlight `kind` rendered as expressive iconography
 
 ### Bundled Combat Viewers
 - **Retro JRPG Scene**: logo‑knights battle scene with top message box

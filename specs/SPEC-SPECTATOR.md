@@ -1,7 +1,7 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 1.4.0
+> Version: 1.5.0
 > Last Updated: 2026-04-01
 > Implementation: ✅ Complete (reporter default + logger injection) / 🚧 Planned (curator sidecars)
 > Audience: Spectator authors, analytics engineers, observability contributors
@@ -62,7 +62,7 @@
 - **Output contract**: The sidecar is the portable artifact. It contains:
   - `subtitle`: short lesson-oriented summary for the picker
   - `synopsis`: compact narrative summary naming the decisive event
-  - `highlights`: ordered list of key moments (`turn` + short `label`)
+  - `highlights`: ordered list of key moments (`turn` + short `label`, plus optional `kind`)
   - `transcript` (optional): richer turn-by-turn commentary kept out of the runtime manifest
 - **Generation strategy**: The curation strategy is pluggable. Implementations MAY use deterministic heuristics, an injected callable, or provider-backed analysis. The stable contract is the sidecar payload, not the generation mechanism.
 - **Usage**: MatchCurator is intended for replay-driven post-analysis (`ReplayEngine(...).replay(spectators=[MatchCurator(...)])`) and curated showcase pipelines.
@@ -132,6 +132,7 @@
 24. **CU3**: Each highlight entry MUST contain:
     - `turn` as a positive integer using the human-facing 1-based turn number
     - `label` as a non-empty string no longer than 50 characters
+    - `kind` MAY be present. When present, it MUST be one of: `mistake`, `smart_move`, `surprise`, `turning_point`
 25. **CU4**: `synopsis` SHOULD stay compact (1-2 sentences) and MUST name the decisive moment or behavioral lesson explicitly.
 26. **CU5**: `transcript`, when present, MUST remain in the sidecar only. It MUST NOT be required for manifest promotion or baseline viewer playback.
 27. **CU6**: `MatchCurator` MUST support deterministic non-LLM generation paths so curated metadata can be produced in offline or provider-free environments.

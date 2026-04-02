@@ -131,6 +131,10 @@ class CombatDebugRenderer {
           <label>Action:</label>
           <span id="debug-action">-</span>
         </div>
+        <div id="debug-highlight-row" class="debug-highlight-row" style="display: none;">
+          <span id="debug-highlight-icon" class="debug-highlight-icon"></span>
+          <span id="debug-highlight-text" class="debug-highlight-text"></span>
+        </div>
       </div>
 
       <div class="debug-state-comparison">
@@ -193,6 +197,9 @@ class CombatDebugRenderer {
     this._elements.turnNumber = root.querySelector('#debug-turn-number');
     this._elements.player = root.querySelector('#debug-player');
     this._elements.action = root.querySelector('#debug-action');
+    this._elements.highlightRow = root.querySelector('#debug-highlight-row');
+    this._elements.highlightIcon = root.querySelector('#debug-highlight-icon');
+    this._elements.highlightText = root.querySelector('#debug-highlight-text');
     this._elements.stateBefore = root.querySelector('#debug-state-before');
     this._elements.stateAfter = root.querySelector('#debug-state-after');
     this._elements.reasoningContainer = root.querySelector('#debug-reasoning-container');
@@ -293,6 +300,27 @@ class CombatDebugRenderer {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  setActiveHighlight(highlight) {
+    const row = this._elements.highlightRow;
+    const icon = this._elements.highlightIcon;
+    const text = this._elements.highlightText;
+    if (!row || !icon || !text) return;
+
+    if (!highlight || !highlight.label) {
+      row.style.display = 'none';
+      row.removeAttribute('data-kind');
+      icon.textContent = '';
+      text.textContent = '';
+      return;
+    }
+
+    row.style.display = 'flex';
+    if (highlight.kind) row.dataset.kind = highlight.kind;
+    else row.removeAttribute('data-kind');
+    icon.textContent = highlight.icon || '';
+    text.textContent = highlight.label;
   }
 }
 

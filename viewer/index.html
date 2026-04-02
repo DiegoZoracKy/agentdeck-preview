@@ -39,6 +39,12 @@
       </label>
     </div>
 
+    <section id="match-preview" class="match-preview" style="display: none;">
+      <div class="match-preview-label">Why watch this match</div>
+      <div id="match-preview-title" class="match-preview-title"></div>
+      <div id="match-preview-subtitle" class="match-preview-subtitle"></div>
+    </section>
+
     <!-- Mobile compact controls -->
     <div id="mobile-top-controls" class="mobile-top-controls" style="display: none;">
       <button id="mobile-btn-match" class="mobile-top-btn" title="Load match">
@@ -102,6 +108,7 @@
 
       <div class="viewer-progress" id="progress-bar">
         <div class="viewer-progress-fill" id="progress-fill"></div>
+        <div class="viewer-progress-markers" id="progress-markers"></div>
       </div>
 
       <div class="controls-meta">
@@ -115,6 +122,7 @@
 
     <!-- Match info (shown when match loaded) -->
     <div id="match-info" class="match-info" style="display: none;">
+      <div id="match-synopsis" class="match-synopsis" style="display: none;"></div>
       <div class="info-grid" id="info-grid"></div>
     </div>
 
@@ -133,6 +141,7 @@
   <script src="js/record-loader.js"></script>
   <script src="js/timeline.js"></script>
   <script src="js/renderers/index.js"></script>
+  <script src="js/match-metadata.js"></script>
   <script src="../src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js"></script>
   <script src="../src/agentdeck/games/examples/fixed_damage/viewers/retro_jrpg_scene/renderer.js"></script>
   <script src="js/app.js"></script>

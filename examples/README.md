@@ -12,10 +12,11 @@ If you are new to the repo, run these in order:
 4. `spectator_example.py`
 5. `replay_minimal.py`
 6. `test_parallel_execution.py`
+7. `replay_curate_match.py`
 
-These six examples form the intended onboarding ladder: no-provider install
-check, custom game authoring, minimal LLM experiment, spectators, replay, then
-parallel execution.
+These seven examples form the intended onboarding ladder: no-provider install
+check, custom game authoring, minimal LLM experiment, spectators, replay,
+parallel execution, then replay-driven viewer curation.
 
 ## Quick Start Examples
 
@@ -147,6 +148,24 @@ python examples/replay_minimal.py --recording agentdeck_runs/session_XXX/records
 - Configurable replay speed (0.0 = instant, 1.0 = real-time)
 - Full three-phase lifecycle (handshake → gameplay → conclusion)
 - Identical spectator experience to live matches
+
+---
+
+### 7. Match Curation (`replay_curate_match.py`)
+
+**Purpose**: Generate viewer-ready sidecar metadata from an existing match
+record.
+
+**What You'll Learn**:
+- Replay-driven post-analysis with `MatchCurator`
+- Writing `*.meta.json` next to a match file
+- How viewer subtitles, synopses, highlight markers, and optional highlight
+  kinds can be derived from the same replay artifact
+
+**Usage**:
+```bash
+python examples/replay_curate_match.py viewer/matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json
+```
 
 ---
 

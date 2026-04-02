@@ -36,8 +36,13 @@ RendererRegistry.register('VariableDamageGame', 'retro_jrpg_scene', CombatRetroJ
 const manifestPath = path.join(repoRoot, 'viewer/matches/manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 assert(Array.isArray(manifest.matches) && manifest.matches.length > 0, 'Expected viewer/matches/manifest.json to contain entries');
+const validHighlightKinds = new Set(['mistake', 'smart_move', 'surprise', 'turning_point']);
 
 function runSampleSmoke(entry, expectedGame) {
+  assert(typeof entry.subtitle === 'string' && entry.subtitle.trim(), `Expected subtitle for ${entry.path}`);
+  assert(typeof entry.synopsis === 'string' && entry.synopsis.trim(), `Expected synopsis for ${entry.path}`);
+  assert(Array.isArray(entry.highlights) && entry.highlights.length > 0, `Expected highlights for ${entry.path}`);
+
   const samplePath = path.join(repoRoot, 'viewer', entry.path);
   const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
   const matchData = RecordLoader.load(raw);
@@ -68,6 +73,16 @@ function runSampleSmoke(entry, expectedGame) {
 
   assert(frames === timeline.totalFrames, `Expected ${timeline.totalFrames} frames, got ${frames}`);
   assert(ended, 'Expected Timeline to emit onEnd after last frame');
+  const highlightTurns = new Set(matchData.frames.map((frame) => Number(frame.turnNumber)));
+  entry.highlights.forEach((highlight) => {
+    assert(
+      Number.isInteger(highlight.turn) && highlightTurns.has(highlight.turn),
+      `Expected highlight turn ${highlight.turn} to exist in ${entry.path}`
+    );
+    if (highlight.kind != null) {
+      assert(validHighlightKinds.has(highlight.kind), `Invalid highlight kind ${highlight.kind} in ${entry.path}`);
+    }
+  });
 
   return {
     label: entry.label,

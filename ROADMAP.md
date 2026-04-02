@@ -114,3 +114,34 @@ The viewer is beta-functional but its `matches/` directory still contains pre-re
 - Duplicate-session pruning and recovery orchestration in core
 - Promotion of package-specific `run_experiment.py` logic into framework baseline
 - Autonomous Researcher workflows
+
+## Post-Release: MatchCurator Improvements
+
+### Recording-first refactor (prerequisite for LLM curation)
+The current `curate_match_file(...)` replay path is redundant: it loads the recording JSON, replays it through `ReplayEngine`, re-accumulates a snapshot, then passes that to the generator. The recording already contains everything needed.
+
+Before adding an LLM-backed generator, refactor the replay curation path to be recording-first:
+- **replay path**: parse recording once, pass recording-derived input directly to generator — no `ReplayEngine` involved
+- **live path**: keep spectator-first accumulation (no recording exists yet during live matches)
+- **generator contract**: stable `CuratorInput` object, not coupled to raw recorder JSON schema
+
+The live spectator path stays as-is. Only `curate_match_file` and the replay-facing generator contract need to change.
+
+### LLM-backed curator
+Once the recording-first refactor is done, add an LLM-backed generator path:
+- one post-match LLM call with the full recording or a deliberate compressed slice
+- structured JSON output: `subtitle`, `synopsis`, `highlights`, optional `transcript`
+- plugged in via `MatchCurator(generator=llm_curate_match)`
+- `MatchCaster` reserved for future live broadcast layer
+
+### Typed highlight kinds
+Add an optional `kind` field to each highlight in the sidecar schema and render it as an emoji in the viewer:
+- 😬 mistake / bad decision
+- 💡 smart move
+- 🤯 surprise / unexpected reveal
+- ⚡ turning point / swing
+
+Schema change: `kind` is an optional string on each highlight entry (emoji value from the defined set).
+Viewer change: render the emoji before the `★` or replace it — e.g. `😬 Still attacks instead of healing`.
+Authoring: update the 8 bundled `.meta.json` sidecars with `kind` on each highlight.
+`kind` is optional — highlights without it fall back to the neutral `★` amber treatment.

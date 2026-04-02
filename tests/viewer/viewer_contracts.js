@@ -7,6 +7,7 @@ const repoRoot = path.join(__dirname, '..', '..');
 const RecordLoader = require(path.join(repoRoot, 'viewer/js/record-loader.js'));
 const Timeline = require(path.join(repoRoot, 'viewer/js/timeline.js'));
 const RendererRegistry = require(path.join(repoRoot, 'viewer/js/renderers/index.js'));
+const MatchMetadataUtils = require(path.join(repoRoot, 'viewer/js/match-metadata.js'));
 
 function makeRecord() {
   return {
@@ -326,10 +327,61 @@ function testRendererRegistry() {
   assert(instance instanceof AlphaRenderer);
 }
 
+function testMatchMetadataUtils() {
+  const payload = {
+    matches: [
+      {
+        label: 'FixedDamage 1: Collapse',
+        path: 'matches/fixed-damage-01.json',
+        subtitle: 'Ignores recovery and collapses',
+        synopsis: 'The failure is never engaging the potion mechanic.',
+        highlights: [
+          { turn: 9, kind: 'turning_point', label: 'Enters lethal range' },
+          { turn: 10, kind: 'mistake', label: 'Still refuses to heal' }
+        ],
+        transcript: [{ turn: 9, text: 'Ignored at runtime' }]
+      },
+      {
+        path: 'matches/plain.json'
+      }
+    ]
+  };
+
+  const entries = MatchMetadataUtils.normalizeManifestEntries(payload);
+  assert.strictEqual(entries.length, 2);
+  assert.strictEqual(entries[0].subtitle, 'Ignores recovery and collapses');
+  assert.strictEqual(entries[0].synopsis, 'The failure is never engaging the potion mechanic.');
+  assert.deepStrictEqual(entries[0].highlights, [
+    { turn: 9, kind: 'turning_point', label: 'Enters lethal range' },
+    { turn: 10, kind: 'mistake', label: 'Still refuses to heal' }
+  ]);
+  assert.strictEqual(entries[0].transcript, undefined, 'Manifest entries must not expose transcript data');
+  assert.strictEqual(entries[1].label, 'plain.json');
+
+  const matchData = RecordLoader.load(makeRecord());
+  const markers = MatchMetadataUtils.resolveHighlightMarkers(matchData.frames, [
+    { turn: 1, label: 'Opening swing' },
+    { turn: 2, label: 'Potion recovery' },
+    { turn: 99, label: 'Ignored' }
+  ]);
+  assert.deepStrictEqual(
+    markers.map((marker) => ({ turn: marker.turn, frameIndex: marker.frameIndex })),
+    [
+      { turn: 1, frameIndex: 0 },
+      { turn: 2, frameIndex: 1 }
+    ]
+  );
+  assert.strictEqual(Math.round(markers[0].percent), 50);
+  assert.strictEqual(MatchMetadataUtils.findActiveHighlight(markers, matchData.frames[1]).label, 'Potion recovery');
+  assert.strictEqual(MatchMetadataUtils.iconForHighlightKind('mistake'), '😬');
+  assert.strictEqual(MatchMetadataUtils.findActiveHighlight(markers, null), null);
+}
+
 async function main() {
   await testRecordLoader();
   testTimeline();
   testRendererRegistry();
+  testMatchMetadataUtils();
   console.log('viewer contract tests OK');
 }
 

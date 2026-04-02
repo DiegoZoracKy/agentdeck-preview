@@ -244,6 +244,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 
 **Spectators** observe and analyze matches
 - `MatchReporter` - turn-by-turn reporting
+- `MatchCurator` - sidecar metadata for replay viewer curation
 - `ProgressDisplay` - real-time progress with ETA
 - `TokenUsageTracker` - cost tracking per player/model
 - `StatsTracker` - win rates and performance metrics

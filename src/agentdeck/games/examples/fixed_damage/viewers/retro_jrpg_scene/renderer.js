@@ -137,11 +137,11 @@ class CombatRetroJrpgSceneRenderer {
     messageRight.className = 'scene-message-right';
 
     const playbackStatusEl = document.createElement('div');
-    playbackStatusEl.className = 'scene-playback-status is-ready';
+    playbackStatusEl.className = 'scene-playback-status scene-message-meta is-ready';
     playbackStatusEl.textContent = 'READY';
 
     const turnEl = document.createElement('div');
-    turnEl.className = 'scene-turn';
+    turnEl.className = 'scene-turn scene-message-meta';
     turnEl.textContent = 'Turn 0/0';
 
     messageLeft.appendChild(actionEl);
@@ -176,6 +176,21 @@ class CombatRetroJrpgSceneRenderer {
     reasoningBubble.appendChild(reasoningText);
     arena.appendChild(reasoningBubble);
 
+    const highlightEl = document.createElement('div');
+    highlightEl.className = 'scene-highlight';
+
+    const highlightIconEl = document.createElement('span');
+    highlightIconEl.className = 'scene-highlight-icon';
+    highlightIconEl.textContent = '';
+
+    const highlightTextEl = document.createElement('span');
+    highlightTextEl.className = 'scene-highlight-text';
+    highlightTextEl.textContent = '';
+
+    highlightEl.appendChild(highlightIconEl);
+    highlightEl.appendChild(highlightTextEl);
+    arena.appendChild(highlightEl);
+
     // Status bar (bottom)
     const status = document.createElement('div');
     status.className = 'scene-status';
@@ -200,6 +215,9 @@ class CombatRetroJrpgSceneRenderer {
       turnEl,
       reasoningBubble,
       reasoningText,
+      highlightEl,
+      highlightIconEl,
+      highlightTextEl,
       knights: {
         [this._players[0]]: leftKnight,
         [this._players[1]]: rightKnight
@@ -476,6 +494,27 @@ class CombatRetroJrpgSceneRenderer {
       return;
     }
     el.classList.add('is-ready');
+  }
+
+  setActiveHighlight(highlight) {
+    const highlightEl = this._elements.highlightEl;
+    const highlightIconEl = this._elements.highlightIconEl;
+    const highlightTextEl = this._elements.highlightTextEl;
+    if (!highlightEl || !highlightIconEl || !highlightTextEl) return;
+
+    if (!highlight || !highlight.label) {
+      highlightEl.classList.remove('visible');
+      highlightEl.removeAttribute('data-kind');
+      highlightIconEl.textContent = '';
+      highlightTextEl.textContent = '';
+      return;
+    }
+
+    highlightEl.classList.add('visible');
+    if (highlight.kind) highlightEl.dataset.kind = highlight.kind;
+    else highlightEl.removeAttribute('data-kind');
+    highlightIconEl.textContent = highlight.icon || '';
+    highlightTextEl.textContent = highlight.label;
   }
 
   _triggerAnimation(frame) {

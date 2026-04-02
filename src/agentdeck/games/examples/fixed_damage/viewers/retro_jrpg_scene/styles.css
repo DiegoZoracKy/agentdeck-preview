@@ -83,6 +83,10 @@
   width: 100%;
 }
 
+.scene-message-meta {
+  display: none;
+}
+
 .scene-detail-action {
   color: var(--scene-gold);
 }
@@ -146,9 +150,61 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 26px;
+  padding: 18px 26px 64px;
   min-height: 220px;
   position: relative;
+}
+
+.scene-highlight {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%) translateY(6px);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  width: min(360px, calc(100% - 52px));
+  padding: 8px 12px;
+  border: 2px solid rgba(255, 216, 102, 0.68);
+  border-radius: 999px;
+  background: rgba(8, 10, 24, 0.84);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.36);
+  color: #fff1b7;
+  text-shadow: 2px 2px 0 #000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s ease;
+}
+
+.scene-highlight.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.scene-highlight-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  text-shadow: none;
+  transform: translateY(-2px);
+}
+
+.scene-highlight-text {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+  transform: translateY(-3px);
 }
 
 .scene-reasoning {
@@ -508,6 +564,17 @@
   transition: all 0.15s ease;
 }
 
+.viewer-controls.skin-retro-jrpg-scene button.viewer-progress-marker {
+  padding: 0;
+  width: 18px;
+  height: 12px;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .viewer-controls.skin-retro-jrpg-scene #btn-play {
   min-width: 92px;
   padding: 8px 14px;
@@ -568,7 +635,7 @@
   background: var(--scene-bg-dark);
   border: 1px solid var(--scene-border);
   border-radius: 2px;
-  overflow: hidden;
+  overflow: visible;
   margin: 0 8px;
 }
 
@@ -695,9 +762,27 @@
   }
 
   .scene-arena {
-    padding: 76px 10px 12px;
+    padding: 76px 10px 58px;
     min-height: 210px;
     align-items: flex-start;
+  }
+
+  .scene-highlight {
+    bottom: 8px;
+    width: calc(100% - 20px);
+    padding: 7px 10px;
+    gap: 6px;
+  }
+
+  .scene-highlight-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 20px;
+  }
+
+  .scene-highlight-text {
+    font-size: 8px;
+    line-height: 1.2;
   }
 
   .scene-knight {
