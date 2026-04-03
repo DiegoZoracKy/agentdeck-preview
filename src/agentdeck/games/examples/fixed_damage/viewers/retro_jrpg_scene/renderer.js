@@ -64,6 +64,10 @@ class CombatRetroJrpgSceneRenderer {
   renderVictory(winner, finalState, outcomeInfo = {}) {
     if (!this._container || !this._elements.scene) return;
 
+    if (this._elements.reasoningBubble) {
+      this._elements.reasoningBubble.classList.add('hidden');
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'scene-victory';
 

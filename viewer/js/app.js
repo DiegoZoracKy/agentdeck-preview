@@ -253,6 +253,7 @@ function showViewerShell(visible) {
   viewerContainer.style.display = visible ? 'block' : 'none'
   controlsContainer.style.display = visible ? 'flex' : 'none'
   matchInfoContainer.style.display = visible ? 'block' : 'none'
+  if (!visible && matchSynopsis) matchSynopsis.style.display = 'none'
 }
 
 function destroyViewerRuntime() {
@@ -320,6 +321,17 @@ function getEntryForPath(path) {
 function renderSelectedMatchPreview(path) {
   if (!matchPreview || !matchPreviewTitle || !matchPreviewSubtitle) return
 
+  // Only surface the picker preview when no match is loaded yet.
+  // While a match is loaded, dropdown changes queue the next load but do not
+  // displace the synopsis (which reflects the currently loaded match).
+  if (matchData) {
+    matchPreview.style.display = 'none'
+    return
+  }
+
+  // Pre-load picker state: hide synopsis — it belongs to the loaded-match view
+  if (matchSynopsis) matchSynopsis.style.display = 'none'
+
   const entry = path ? getEntryForPath(path) : null
   if (!entry) {
     matchPreview.style.display = 'none'
@@ -331,6 +343,12 @@ function renderSelectedMatchPreview(path) {
   matchPreview.style.display = 'block'
   matchPreviewTitle.textContent = entry.label
   matchPreviewSubtitle.textContent = entry.subtitle || 'Load this replay to inspect the turning point.'
+}
+
+function hideMatchPreview() {
+  if (matchPreview) matchPreview.style.display = 'none'
+  if (matchPreviewTitle) matchPreviewTitle.textContent = ''
+  if (matchPreviewSubtitle) matchPreviewSubtitle.textContent = ''
 }
 
 function populateSkinSelector(data) {
@@ -498,7 +516,7 @@ async function loadFromUrl(url, options = {}) {
     setCurrentMatchSource(url)
     if (!persistMatch) removeStorage(STORAGE_MATCH_KEY)
     syncMatchSelectValue(url)
-    renderSelectedMatchPreview(url)
+    hideMatchPreview()
     syncUrlState()
     closeMobileSheet()
     return true
@@ -523,7 +541,7 @@ async function loadMatchFile(file) {
     initializeViewer(await RecordLoader.loadFromFile(file), null)
     currentMatchLabel = file.name || 'Uploaded JSON'
     setCurrentMatchSource(null)
-    renderSelectedMatchPreview(null)
+    hideMatchPreview()
     syncUrlState()
     closeMobileSheet()
   } catch (err) {
