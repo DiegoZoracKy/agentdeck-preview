@@ -14,6 +14,8 @@ AgentDeck helps you turn a behavioral question into a concrete study: define a g
 
 It is useful when static prompt-response evaluation is not enough. By putting agents inside structured games, AgentDeck makes state, incentives, and resource tradeoffs explicit so behavior is easier to observe, compare, replay, and explain.
 
+![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
+
 ---
 
 ## 🚀 Quick Start
@@ -187,8 +189,6 @@ Not `1.0` yet:
 ---
 
 ## ⚙️ Architecture
-
-![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
 
 ### Why Games?
 

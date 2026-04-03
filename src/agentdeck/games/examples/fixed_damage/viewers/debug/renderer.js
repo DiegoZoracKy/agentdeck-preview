@@ -72,12 +72,30 @@ class CombatDebugRenderer {
    * @param {string | null} winner
    * @param {GameState} finalState
    */
-  renderVictory(winner, finalState) {
+  renderVictory(winner, finalState, outcomeInfo = {}) {
     if (!this._container) return;
 
+    const { outcome, forfeitReason, forfeitingPlayer } = outcomeInfo;
+
     this._elements.victoryContainer.style.display = 'block';
+    this._elements.victoryTitle.textContent = outcome === 'forfeit' ? 'Match Forfeited' : 'Match Complete';
     this._elements.winner.textContent = winner || 'Draw';
     this._elements.finalState.textContent = JSON.stringify(finalState, null, 2);
+
+    if (outcome === 'forfeit') {
+      this._elements.outcomeRow.style.display = 'flex';
+      this._elements.outcome.textContent = 'Forfeit';
+      this._elements.outcomeDetailRow.style.display = 'flex';
+      this._elements.outcomeDetail.textContent = forfeitingPlayer
+        ? `${forfeitingPlayer} ${this._formatForfeitReason(forfeitReason)}`
+        : this._formatForfeitReason(forfeitReason);
+      return;
+    }
+
+    this._elements.outcomeRow.style.display = 'none';
+    this._elements.outcome.textContent = '';
+    this._elements.outcomeDetailRow.style.display = 'none';
+    this._elements.outcomeDetail.textContent = '';
   }
 
   /**
@@ -172,7 +190,15 @@ class CombatDebugRenderer {
       </div>
 
       <div id="debug-victory-container" class="debug-victory" style="display: none;">
-        <h2>Match Complete</h2>
+        <h2 id="debug-victory-title">Match Complete</h2>
+        <div id="debug-outcome-row" class="debug-row" style="display: none;">
+          <label>Outcome:</label>
+          <span id="debug-outcome"></span>
+        </div>
+        <div id="debug-outcome-detail-row" class="debug-row" style="display: none;">
+          <label>Detail:</label>
+          <span id="debug-outcome-detail"></span>
+        </div>
         <div class="debug-row">
           <label>Winner:</label>
           <span id="debug-winner">-</span>
@@ -209,6 +235,11 @@ class CombatDebugRenderer {
     this._elements.responseText = root.querySelector('#debug-response-text');
     this._elements.duration = root.querySelector('#debug-duration');
     this._elements.victoryContainer = root.querySelector('#debug-victory-container');
+    this._elements.victoryTitle = root.querySelector('#debug-victory-title');
+    this._elements.outcomeRow = root.querySelector('#debug-outcome-row');
+    this._elements.outcome = root.querySelector('#debug-outcome');
+    this._elements.outcomeDetailRow = root.querySelector('#debug-outcome-detail-row');
+    this._elements.outcomeDetail = root.querySelector('#debug-outcome-detail');
     this._elements.winner = root.querySelector('#debug-winner');
     this._elements.finalState = root.querySelector('#debug-final-state');
 
@@ -300,6 +331,21 @@ class CombatDebugRenderer {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  _formatForfeitReason(reason) {
+    switch (reason) {
+      case 'parse_failure':
+        return 'failed to provide a valid action';
+      case 'timeout':
+        return 'ran out of time';
+      case 'invalid_action':
+        return 'chose an invalid action';
+      case 'disconnect':
+        return 'disconnected';
+      default:
+        return 'forfeited the match';
+    }
   }
 
   setActiveHighlight(highlight) {
