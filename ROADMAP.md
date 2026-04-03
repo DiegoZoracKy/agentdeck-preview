@@ -135,13 +135,9 @@ Once the recording-first refactor is done, add an LLM-backed generator path:
 - `MatchCaster` reserved for future live broadcast layer
 
 ### Typed highlight kinds
-Add an optional `kind` field to each highlight in the sidecar schema and render it as an emoji in the viewer:
-- 😬 mistake / bad decision
-- 💡 smart move
-- 🤯 surprise / unexpected reveal
-- ⚡ turning point / swing
+Shipped in the viewer metadata pipeline:
+- optional `kind` on each highlight sidecar entry
+- viewer rendering for `😬`, `💡`, `🤯`, and `⚡`
+- bundled `.meta.json` sidecars updated with `kind`
 
-Schema change: `kind` is an optional string on each highlight entry (emoji value from the defined set).
-Viewer change: render the emoji before the `★` or replace it — e.g. `😬 Still attacks instead of healing`.
-Authoring: update the 8 bundled `.meta.json` sidecars with `kind` on each highlight.
-`kind` is optional — highlights without it fall back to the neutral `★` amber treatment.
+`kind` remains optional. Highlights without it still fall back to the neutral amber treatment.
