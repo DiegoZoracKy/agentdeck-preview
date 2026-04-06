@@ -340,6 +340,132 @@ class TestTokenUsageTracker:
 
         assert tracker.total_tokens == 100
 
+    def test_on_gameplay_extracts_replay_flattened_metadata_usage(self):
+        """on_gameplay() handles replay-style flattened metadata payloads."""
+        tracker = TokenUsageTracker()
+
+        event = make_event(
+            "gameplay",
+            {
+                "player": "Alice",
+                "action": "ATTACK",
+                "metadata": {
+                    "usage_info": {
+                        "prompt_tokens": 90,
+                        "completion_tokens": 10,
+                        "tokens": 100,
+                        "cost": 0.001,
+                        "model": "gpt-4o-mini",
+                    }
+                },
+            },
+        )
+
+        tracker.on_gameplay(event)
+
+        assert tracker.total_calls == 1
+        assert tracker.total_tokens == 100
+        assert tracker.player_tokens["Alice"]["total_tokens"] == 100
+
+    def test_on_gameplay_extracts_top_level_usage_info(self):
+        """on_gameplay() handles top-level usage_info payloads."""
+        tracker = TokenUsageTracker()
+
+        event = make_event(
+            "gameplay",
+            {
+                "player": "Bob",
+                "action": "ATTACK",
+                "usage_info": {
+                    "prompt_tokens": 80,
+                    "completion_tokens": 20,
+                    "total_tokens": 100,
+                    "cost": 0.0005,
+                    "model": "gpt-4o-mini",
+                    "call_id": "call-1",
+                },
+            },
+        )
+
+        tracker.on_gameplay(event)
+
+        assert tracker.total_calls == 1
+        assert tracker.total_tokens == 100
+        assert tracker.player_tokens["Bob"]["total_tokens"] == 100
+
+    def test_handshake_complete_counts_usage(self):
+        """Handshake usage should be counted as a real provider call."""
+        tracker = TokenUsageTracker()
+
+        event = make_event(
+            "player_handshake_complete",
+            {
+                "player": "Alice",
+                "usage_info": {
+                    "prompt_tokens": 100,
+                    "completion_tokens": 2,
+                    "tokens": 102,
+                    "cost": 0.0001,
+                    "model": "gpt-4o-mini",
+                    "call_id": "hs-1",
+                },
+            },
+        )
+
+        tracker.on_player_handshake_complete(event)
+
+        assert tracker.total_calls == 1
+        assert tracker.total_tokens == 102
+        assert tracker.player_tokens["Alice"]["total_tokens"] == 102
+
+    def test_player_conclusion_counts_usage(self):
+        """Conclusion usage should be counted in the final summary."""
+        tracker = TokenUsageTracker()
+
+        event = make_event(
+            "player_conclusion",
+            {
+                "player": "Bob",
+                "usage_info": {
+                    "prompt_tokens": 70,
+                    "completion_tokens": 15,
+                    "tokens": 85,
+                    "cost": 0.0002,
+                    "model": "gpt-4o-mini",
+                    "call_id": "c-1",
+                },
+            },
+        )
+
+        tracker.on_player_conclusion(event)
+
+        assert tracker.total_calls == 1
+        assert tracker.total_tokens == 85
+        assert tracker.player_tokens["Bob"]["total_tokens"] == 85
+
+    def test_deduplicates_same_call_id_across_events(self):
+        """Repeated events for the same call_id should only count once."""
+        tracker = TokenUsageTracker()
+
+        usage = {
+            "prompt_tokens": 60,
+            "completion_tokens": 10,
+            "tokens": 70,
+            "cost": 0.0001,
+            "model": "gpt-4o-mini",
+            "call_id": "same-call",
+        }
+
+        tracker.on_player_handshake_complete(
+            make_event("player_handshake_complete", {"player": "Alice", "usage_info": usage})
+        )
+        tracker.on_player_handshake_complete(
+            make_event("player_handshake_complete", {"player": "Alice", "usage_info": usage})
+        )
+
+        assert tracker.total_calls == 1
+        assert tracker.total_tokens == 70
+
     def test_on_gameplay_ignores_zero_tokens(self):
         """on_gameplay() ignores events with no tokens."""
         tracker = TokenUsageTracker()

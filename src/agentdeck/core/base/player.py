@@ -321,6 +321,7 @@ class Player(ABC):
         # Attach metadata (DS2)
         # Per SPEC-PROMPT-BUILDER §5.3 MC3, preserve PromptBlock.metadata (renderer hints)
         action_result.metadata = action_result.metadata or {}
+        usage_info = copy.deepcopy(getattr(self, "last_usage_info", None))
         action_result.metadata.update(
             {
                 "raw_prompt": bundle.text,
@@ -332,6 +333,8 @@ class Player(ABC):
                 "template_id": bundle.metadata.get("template_id", "unknown"),
             }
         )
+        if usage_info:
+            action_result.metadata["usage_info"] = usage_info
 
         # Preserve in conversation history (CS2)
         # Capture PM1-PM6 metadata for dialogue array
@@ -343,7 +346,7 @@ class Player(ABC):
             prompt_blocks=action_result.metadata.get("prompt_blocks"),
             controller_format=self.controller.get_format_instructions(),
             renderer_output=action_result.metadata.get("renderer_output"),
-            usage_info=action_result.metadata.get("usage_info"),
+            usage_info=usage_info,
         )
 
         return action_result

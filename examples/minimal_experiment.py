@@ -57,12 +57,13 @@ def main():
         print("   export OPENAI_API_KEY='sk-...'")
         return
 
-    print("="*60)
+    print("=" * 60)
     print("AgentDeck Minimal Configuration Example")
-    match_count = 3
-    print("="*60)
+    match_count = 1
+    print("=" * 60)
     print(f"\nRunning {match_count} matches with GPT-4o-mini players...")
-    print("Using default templates and smart defaults\n")
+    print("Using default templates and smart defaults")
+    print("Tip: start with one real match, then raise match_count once everything looks right.\n")
 
     # Game configuration
     game = FixedDamageGame(
@@ -118,18 +119,18 @@ def main():
     )
 
     # Display results
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Results")
-    print("="*60)
+    print("=" * 60)
 
     for i, result in enumerate(results, 1):
         turns = result.metadata.get("turns", "?")
         print(f"\nMatch {i}: {result.winner or 'Draw'} wins in {turns} turns")
 
     # Display token usage
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Token Usage Summary")
-    print("="*60)
+    print("=" * 60)
 
     token_summary = tokens.get_summary()
     total = token_summary["total"]
@@ -149,9 +150,9 @@ def main():
             print(f"    Cost: ${player_stats['cost']:.4f}")
 
     # Display match statistics
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Match Statistics")
-    print("="*60)
+    print("=" * 60)
 
     stats_summary = stats.get_stats()
     print(f"\nTotal Matches: {stats_summary['total_matches']}")
@@ -165,12 +166,13 @@ def main():
         print(f"  Losses: {player_stats['losses']}")
         print(f"  Win Rate: {win_rate:.1%}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("\n✓ Experiment complete!")
     print("✓ All components used smart defaults")
     print("✓ Zero template configuration required")
     print("✓ Recordings saved under ./agentdeck_runs/<session_id>/records/")
-    print("\n" + "="*60)
+    print("✓ Increase match_count to scale beyond the first validation run")
+    print("\n" + "=" * 60)
 
 
 if __name__ == "__main__":

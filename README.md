@@ -45,8 +45,8 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/DiegoZoracKy/agentdeck-preview-pre-release.git
-cd agentdeck-preview-pre-release
+git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
+cd agentdeck-preview
 pip install -e ".[dev]"
 ```
 
@@ -84,7 +84,7 @@ players = [
 with AgentDeck(game=game) as deck:
     results = deck.play(
         players=players,
-        matches=10,
+        matches=1,
         seed=42,  # Reproducible!
     )
 
@@ -100,6 +100,9 @@ print(f"Win rates: {results.win_rates}")
 
 > 📝 **`.env` loading policy**  
 > AgentDeck does not auto-load `.env` at the library level. Source it in your shell or load it in your entry script.
+
+> ✅ **First real provider-backed run**
+> Start with `matches=1` so you can confirm credentials, recordings, and replay before scaling up.
 
 ### Try AgentDeck Without API Keys
 - Run `python examples/mock_demo.py`
@@ -269,7 +272,7 @@ with AgentDeck(game=game, spectators=[
     MatchReporter(),      # Turn-by-turn reporting
     TokenUsageTracker()   # Cost tracking
 ]) as deck:
-    results = deck.play(players, matches=10)
+    results = deck.play(players, matches=1)
 ```
 
 ### 2. Complete Recording & Replay

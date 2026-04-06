@@ -13,6 +13,7 @@ from agentdeck.core.types import (
     HandshakeContext,
     MatchContext,
     MatchResult,
+    TurnContext,
 )
 from agentdeck.games.examples.fixed_damage.game import FixedDamageGame
 from agentdeck.players import ClaudePlayer, GeminiPlayer, GPTPlayer
@@ -140,7 +141,46 @@ def test_llmplayer_conclude_hides_engine_internal_state_keys():
 
 
 # Test handshake and decide phases are covered by integration tests
-# Skipped here due to complexity of HandshakeContext/decide() setup
+# Handshake is covered by integration tests; keep a focused decide() regression here
+
+
+def test_llmplayer_decide_preserves_usage_info_in_action_metadata():
+    """Turn actions should carry per-call usage_info into downstream observers."""
+    player = DummyLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+    )
+    usage_info = {
+        "tokens": 42,
+        "prompt_tokens": 30,
+        "completion_tokens": 12,
+        "cost": 0.0002,
+        "model": "dummy-model",
+        "call_id": "call-123",
+    }
+
+    def _fake_get_response(prompt):
+        player.last_usage_info = usage_info
+        return "ACTION: ATTACK"
+
+    player.get_response = _fake_get_response  # type: ignore[method-assign]
+
+    action = player.decide(
+        game_state={"health": {"Alice": 100, "Bob": 100}},
+        turn_context=TurnContext(
+            match_id="match-1",
+            turn_number=1,
+            turn_index=0,
+            player="Alice",
+            started_at=0.0,
+            duration=0.0,
+        ),
+    )
+
+    assert action.action == "ATTACK"
+    assert action.metadata["usage_info"] == usage_info
+    assert action.metadata["raw_prompt"]
 
 
 def test_llmplayer_handshake_uses_game_default_template_and_frontloads_action_format():

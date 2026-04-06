@@ -61,12 +61,15 @@ python examples/first_game_walkthrough.py
 - Smart defaults for templates, renderers, and controllers
 - Real-time progress monitoring with spectators
 - Token usage and cost tracking
+- The shortest real-provider path: one match, one recording, one replayable artifact
 
 **Usage**:
 ```bash
 export OPENAI_API_KEY="sk-..."
 python examples/minimal_experiment.py
 ```
+
+Runs a single match by default so you can validate credentials, recordings, and replay before scaling up.
 
 **Smart Defaults Used**:
 - `renderer`: TextRenderer()
@@ -247,7 +250,7 @@ environment injects secrets as base64.
 
 ```python
 with AgentDeck(game=game, session=config) as deck:
-    results = deck.play(players, matches=10)
+    results = deck.play(players, matches=1)
     # Session automatically closes on exit
 ```
 
@@ -416,6 +419,6 @@ JSON includes `project_id`, AgentDeck can infer the Vertex project automatically
 
 ## Questions?
 
-- GitHub Issues: https://github.com/DiegoZoracKy/agentdeck/issues
+- GitHub Issues: https://github.com/DiegoZoracKy/agentdeck-preview/issues
 - Documentation: See `docs/` directory
 - Examples: This directory (`examples/`)

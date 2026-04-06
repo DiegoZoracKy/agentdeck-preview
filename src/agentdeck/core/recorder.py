@@ -318,6 +318,70 @@ class Recorder:
         return prompt_payload
 
     @staticmethod
+    def _normalize_usage_payload(payload: Any) -> Optional[Dict[str, Any]]:
+        """Normalize usage metadata across lifecycle and gameplay payload shapes."""
+        if not isinstance(payload, dict):
+            return None
+
+        prompt_tokens = payload.get("prompt_tokens", payload.get("input_tokens", 0)) or 0
+        completion_tokens = payload.get("completion_tokens", payload.get("output_tokens", 0)) or 0
+        total_tokens = payload.get("tokens")
+        if total_tokens is None:
+            total_tokens = payload.get("total_tokens")
+        if total_tokens is None:
+            total_tokens = prompt_tokens + completion_tokens
+
+        cost = payload.get("cost", 0.0) or 0.0
+        if not any([prompt_tokens, completion_tokens, total_tokens, cost]):
+            return None
+
+        return {
+            "tokens": total_tokens,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "cost": cost,
+            "latency_ms": payload.get("latency_ms", 0.0) or 0.0,
+            "model": payload.get("model") or payload.get("provider_model") or "unknown",
+        }
+
+    def _extract_usage_payload(self, data: Any) -> Optional[Dict[str, Any]]:
+        """Extract usage metadata from live event payloads or serialized recordings."""
+        if not isinstance(data, dict):
+            return None
+
+        action_data = data.get("action")
+        if isinstance(action_data, dict):
+            action_metadata = action_data.get("metadata")
+        else:
+            action_metadata = getattr(action_data, "metadata", None)
+
+        metadata = data.get("metadata")
+        prompt = data.get("prompt")
+
+        candidates = [
+            data.get("usage_info"),
+            action_metadata.get("usage_info") if isinstance(action_metadata, dict) else None,
+            action_metadata,
+            metadata.get("usage_info") if isinstance(metadata, dict) else None,
+            metadata,
+            prompt.get("usage_info") if isinstance(prompt, dict) else None,
+        ]
+
+        for candidate in candidates:
+            normalized = self._normalize_usage_payload(candidate)
+            if normalized:
+                return normalized
+        return None
+
+    def _record_usage_from_payload(self, data: Any) -> None:
+        """Accumulate API usage into the current match summary when available."""
+        if not self.current_match:
+            return
+        usage = self._extract_usage_payload(data)
+        if usage:
+            self.current_match.usage.record(usage)
+
+    @staticmethod
     def _sanitize_gameplay_state_for_recording(state: Any) -> Any:
         """
         Remove engine-internal runtime keys from recorded gameplay state snapshots.
@@ -444,6 +508,7 @@ class Recorder:
 
         # Flush buffered pre-match events (handshakes) to match recording
         for event_data in self._pending_events:
+            self._record_usage_from_payload(event_data.get("data"))
             self.current_match.events.append(event_data)
         self._pending_events.clear()
 
@@ -544,9 +609,7 @@ class Recorder:
         event_data["data"]["prompt"] = self._extract_prompt_payload(event, "turn")
 
         self.current_match.events.append(event_data)
-
-        if metadata_snapshot and "usage_info" in metadata_snapshot:
-            self.current_match.usage.record(metadata_snapshot["usage_info"])
+        self._record_usage_from_payload(event.data)
 
         for collector in self.collectors:
             if hasattr(collector, "on_gameplay"):
@@ -588,6 +651,7 @@ class Recorder:
         else:
             # Normal path: append to match events
             self.current_match.events.append(event_data)
+            self._record_usage_from_payload(event.data)
             self._flush_current_match()
 
     def on_player_handshake_start(self, event: Event) -> None:
@@ -633,6 +697,7 @@ class Recorder:
         else:
             # Normal path: append to match events
             self.current_match.events.append(event_data)
+            self._record_usage_from_payload(event.data)
             self._flush_current_match()
 
     def on_player_action_parse_failed(self, event: Event) -> None:
@@ -654,6 +719,7 @@ class Recorder:
         event_data["data"]["prompt"] = self._extract_prompt_payload(event, "parse_failure")
 
         self.current_match.events.append(event_data)
+        self._record_usage_from_payload(event.data)
 
         # Flush immediately to ensure failure is durable
         self._flush_current_match()
@@ -676,6 +742,7 @@ class Recorder:
         event_data["data"]["prompt"] = self._extract_prompt_payload(event, "conclusion")
 
         self.current_match.events.append(event_data)
+        self._record_usage_from_payload(event.data)
         self._flush_current_match()
 
     def on_match_end(self, result: MatchResult, context: Optional[EventContext] = None):

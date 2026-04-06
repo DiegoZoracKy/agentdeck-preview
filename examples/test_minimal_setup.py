@@ -70,23 +70,23 @@ def test_minimal_setup():
     # Run matches
     results = deck.play(
         players=players,
-        matches=3,
+        matches=1,
         seed=42,
     )
-    print(f"✓ Played 3 matches")
+    print("✓ Played 1 match")
 
     # Verify results
-    assert len(results) == 3, f"Expected 3 results, got {len(results)}"
+    assert len(results) == 1, f"Expected 1 result, got {len(results)}"
     print(f"✓ Got {len(results)} results")
 
     # Check spectators collected data
     token_summary = tokens.get_summary()
     stats_summary = stats.get_stats()
 
-    assert stats_summary["total_matches"] == 3, "StatsTracker should have 3 matches"
+    assert stats_summary["total_matches"] == 1, "StatsTracker should have 1 match"
     print(f"✓ StatsTracker recorded {stats_summary['total_matches']} matches")
 
-    assert progress.completed_matches == 3, "ProgressDisplay should show 3 completed"
+    assert progress.completed_matches == 1, "ProgressDisplay should show 1 completed"
     print(f"✓ ProgressDisplay tracked {progress.completed_matches} matches")
 
     # Display summary

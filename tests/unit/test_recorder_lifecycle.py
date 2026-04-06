@@ -590,6 +590,131 @@ class TestHandshakeMetadata:
 class TestMatchCostAndIds:
     """Validate finalized cost fields and top-level batch IDs in recordings."""
 
+    def test_match_recording_includes_api_usage_summary_from_lifecycle_events(
+        self, recorder, temp_recorder_dir
+    ):
+        class MockGame:
+            pass
+
+        class MockPlayer:
+            def __init__(self, name):
+                self.name = name
+
+            def get_summary(self):
+                return {"name": self.name, "type": "MockPlayer"}
+
+        players = [MockPlayer("Player-1"), MockPlayer("Player-2")]
+
+        recorder.on_batch_start(
+            batch_id="batch_001",
+            game=MockGame(),
+            players=players,
+            matches=1,
+            context={"session_id": "test_session"},
+        )
+
+        recorder.on_player_handshake_complete(
+            Event(
+                type=EventType.PLAYER_HANDSHAKE_COMPLETE,
+                data={
+                    "player": "Player-1",
+                    "accepted": True,
+                    "normalized_response": "OK",
+                    "response_text": "OK",
+                    "prompt_text": "Handshake prompt",
+                    "prompt_blocks": [],
+                    "controller_format": "Reply with OK",
+                    "controller_metadata": {},
+                    "renderer_output": None,
+                    "usage_info": {
+                        "prompt_tokens": 8,
+                        "completion_tokens": 2,
+                        "tokens": 10,
+                        "cost": 0.0001,
+                        "model": "gpt-4o-mini",
+                    },
+                },
+                context={"session_id": "test_session"},
+            )
+        )
+
+        recorder.on_match_start(
+            game=MockGame(),
+            players=players,
+            match_id="match_001",
+            context={"session_id": "test_session", "batch_id": "batch_001"},
+        )
+
+        recorder.on_gameplay(
+            Event(
+                type=EventType.GAMEPLAY,
+                data={
+                    "player": "Player-1",
+                    "action": {
+                        "action": "ATTACK",
+                        "metadata": {
+                            "usage_info": {
+                                "prompt_tokens": 20,
+                                "completion_tokens": 10,
+                                "tokens": 30,
+                                "cost": 0.0002,
+                                "model": "gpt-4o-mini",
+                            }
+                        },
+                    },
+                    "state_before": {},
+                    "state_after": {},
+                },
+                context={"match_id": "match_001"},
+            )
+        )
+
+        recorder.on_player_conclusion(
+            Event(
+                type=EventType.PLAYER_CONCLUSION,
+                data={
+                    "player": "Player-1",
+                    "reflection_text": "Good game!",
+                    "outcome": "Player-1 won the match.",
+                    "prompt_text": "Conclusion prompt",
+                    "response_text": "Good game!",
+                    "usage_info": {
+                        "prompt_tokens": 15,
+                        "completion_tokens": 10,
+                        "tokens": 25,
+                        "cost": 0.00015,
+                        "model": "gpt-4o-mini",
+                    },
+                },
+                context={"match_id": "match_001"},
+            )
+        )
+
+        recorder.on_match_end(
+            result=MatchResult(
+                winner="Player-1",
+                final_state={},
+                events=[],
+                seed=42,
+                metadata={},
+            ),
+            context={"session_id": "test_session"},
+        )
+
+        with open(temp_recorder_dir / "match_001.json") as f:
+            match_data = json.load(f)
+
+        assert match_data["api_usage_summary"] == {
+            "total_calls": 3,
+            "total_tokens": 65,
+            "total_prompt_tokens": 43,
+            "total_completion_tokens": 22,
+            "total_cost": 0.00045,
+            "average_latency_ms": 0.0,
+            "total_latency_ms": 0.0,
+            "models_used": {"gpt-4o-mini": 3},
+        }
+
     def test_updates_player_summaries_costs_and_exposes_batch_id(self, recorder, temp_recorder_dir):
         class MockGame:
             pass
