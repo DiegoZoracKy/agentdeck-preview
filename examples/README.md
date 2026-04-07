@@ -336,8 +336,8 @@ from agentdeck import FixedDamageGame
 game = FixedDamageGame(
     max_health=100,
     attack_damage=20,
-    initial_potions=3,
-    potion_healing=30,
+    starting_potions=3,
+    potion_heal=30,
 )
 ```
 
