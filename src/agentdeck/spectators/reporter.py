@@ -240,7 +240,8 @@ class MatchReporter(Spectator):
             completion_tokens = usage_info.get("completion_tokens", 0)
             total_tokens = usage_info.get("total_tokens", 0)
             self.logger.info(
-                f"Usage: tokens={total_tokens} (prompt={prompt_tokens}, completion={completion_tokens})"
+                "API Usage (this turn): "
+                f"total_tokens={total_tokens} (prompt={prompt_tokens}, completion={completion_tokens})"
             )
 
         # Show state changes if enabled
@@ -286,7 +287,7 @@ class MatchReporter(Spectator):
         self.logger.info(f"Match {self.match_id} complete")
         self.logger.info(f"Winner: {winner}")
         self.logger.info(f"Turns: {turns}")
-        self.logger.info(f"Duration: {duration:.2f}s")
+        self.logger.info(f"Observed Elapsed Time: {duration:.2f}s")
 
     def _compute_state_delta(self, before: Dict[str, Any], after: Dict[str, Any]) -> str:
         """

@@ -147,7 +147,7 @@ def main() -> None:
     turns = match_meta.get("turns", "?")
     duration = match_meta.get("duration")
     if duration is not None:
-        print(f"Match Duration: {duration:.2f}s")
+        print(f"Original Match Duration: {duration:.2f}s")
     print(f"Winner: {winner}")
     print(f"Turns: {turns}")
 
@@ -173,7 +173,8 @@ def main() -> None:
     print(f"Total Matches: {stats_summary['total_matches']}")
     if stats_summary.get("avg_match_duration"):
         print(
-            f"Average Match Duration: {stats_summary['avg_match_duration']:.2f}s"
+            "Replay Processing Duration: "
+            f"{stats_summary['avg_match_duration']:.2f}s"
         )
 
     if stats_summary["players"]:

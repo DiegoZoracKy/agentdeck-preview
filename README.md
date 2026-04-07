@@ -59,7 +59,8 @@ game = FixedDamageGame(
     max_health=100,
     attack_damage=20,
     potion_heal=30,
-    starting_potions=1,
+    starting_potions=3,
+    information_level="full",  # use "partial" to hide opponent HP/potions
 )
 
 # 2. Create AI players
@@ -106,6 +107,10 @@ print(f"Win rates: {results.win_rates}")
 > ✅ **First real provider-backed run**
 > Start with `matches=1` so you can confirm credentials, recordings, and replay before scaling up.
 
+> 🎮 **FixedDamageGame information level**
+> `information_level="full"` shows both players' HP and potion counts.
+> `information_level="partial"` hides the opponent's HP and potions while still showing last actions.
+
 ### Try AgentDeck Without API Keys
 - Run `python examples/mock_demo.py`
 - Uses `MockPlayer` (deterministic) so no LLM providers are needed
@@ -132,7 +137,8 @@ configured `run_dir`):
 - `records/` contains a `batch_<batch_id>.json` summary plus one `match_*.json` per match
 - `logs/` contains `info.log` and `debug.log` by default
 
-Tip: open a match JSON to see prompts, raw responses, parsed actions, costs, and the full event
+Tip: open `batch_<batch_id>.json` first for the high-level batch summary, then open `match_*.json`
+for the full audit trail, replay source, prompts, raw responses, parsed actions, costs, and event
 timeline.
 
 ### Parallel Execution (Workload-Dependent Speedups)
