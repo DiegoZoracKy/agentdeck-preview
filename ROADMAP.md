@@ -24,7 +24,7 @@ Those live in separate internal planning.
 - Core fairness, recorder, artifact-validation, and metadata fixes
 - Viewer beta baseline
 - Research export, packaging, validation, and index tooling
-- Spec-compliance audit ledger (`docs/spec-compliance/`)
+- Spec-compliance audit sweep completed and folded back into the active repo surface
 - **FixedDamage Arc 1**: 19 packages, 1,000+ matches, full intervention ladder (RC → TR → HP → exit), cross-provider comparisons, behavioral scorer
 - **VariableDamage Arc 1**: 12 packages, 744 matches, plain-model baselines, intervention ladder (RC → RISK), cross-provider comparisons, new behavioral metrics (`safe_zone_potion_rate`, danger subbands, `first_lethal_entry_inventory`), and the main-arc premium pilot
 
