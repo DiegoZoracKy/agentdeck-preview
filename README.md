@@ -100,6 +100,8 @@ print(f"Win rates: {results.win_rates}")
 
 > 📝 **`.env` loading policy**  
 > AgentDeck does not auto-load `.env` at the library level. Source it in your shell or load it in your entry script.
+> In `bash`/`zsh`, a simple local setup is:
+> `set -a; source .env; set +a`
 
 > ✅ **First real provider-backed run**
 > Start with `matches=1` so you can confirm credentials, recordings, and replay before scaling up.
