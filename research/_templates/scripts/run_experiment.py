@@ -67,7 +67,11 @@ def _build_player(
     player_registry: Dict[str, Dict[str, Any]],
     config_registry: Dict[str, Dict[str, Any]],
 ):
-    player_spec = player_registry[side["player_ref"]]
+    player_ref = side.get("player_ref", side.get("model_ref"))
+    if player_ref is None:
+        raise KeyError("Cell side must define player_ref (legacy alias: model_ref).")
+
+    player_spec = player_registry[player_ref]
     config_spec = config_registry[side["config_ref"]]
     controller_cls = _controller_from_name(config_spec["controller"])
     prompt_builder = config_spec.get("prompt_builder", {})
@@ -162,7 +166,11 @@ def main() -> None:
     if not selected:
         raise SystemExit("No cells selected. Use --list-cells, --phase, or --cell.")
 
-    player_registry = matrix["player_registry"]
+    player_registry = matrix.get("player_registry") or matrix.get("model_registry")
+    if not isinstance(player_registry, dict):
+        raise KeyError(
+            "matrix.yaml must define player_registry (legacy alias: model_registry)."
+        )
     config_registry = matrix["config_registry"]
     manifest_run = manifest["run"]
     base_seed = manifest_run["seed_base"]

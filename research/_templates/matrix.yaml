@@ -12,7 +12,7 @@ frozen_inputs:
   pricing_snapshot: src/agentdeck/config/pricing.yaml
   note: Fill before running.
 
-model_registry:
+player_registry:
   weak_model:
     provider: openai
     model: gpt-4o-mini
@@ -109,8 +109,8 @@ cells:
     controller_asymmetry_notes: ""
     visibility_notes: ""
     fairness_notes: paired side-swap enabled; use position metrics before topline win-rate claims
-    player_a: { model_ref: weak_model, config_ref: CoT-T }
-    player_b: { model_ref: weak_model, config_ref: AO }
+    player_a: { player_ref: weak_model, config_ref: CoT-T }
+    player_b: { player_ref: weak_model, config_ref: AO }
     pilot_matches: 24
     expansion_target_matches: 80
     viewer_priority: false

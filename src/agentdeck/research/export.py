@@ -16,6 +16,7 @@ from .artifact_validation import (
     validate_artifact_invariants,
 )
 from .behavioral import compute_behavioral_profile
+from .factual_blocks import write_factual_markdown_blocks
 from .provider_utils import provider_from_module as _provider_from_module
 from .recording_metrics import (
     compute_format_strictness,
@@ -184,6 +185,8 @@ def export_matrix_package(
         behavioral_profile_id="auto",
         behavioral_config=behavioral_config,
     )
+    if manifest:
+        write_factual_markdown_blocks(experiment_dir, manifest)
     print(f"Exported package results -> {experiment_dir}")
 
 
