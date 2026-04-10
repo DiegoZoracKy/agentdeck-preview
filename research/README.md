@@ -19,6 +19,11 @@ For matrix packages, the shared template and runner use `player_registry` and
 per-cell `player_ref` keys. Older drafts that still say `model_registry` /
 `model_ref` should be updated.
 
+For package-owned games, keep a package-local behavioral scorer at
+`scripts/behavioral_scorer.py` and run `agentdeck-research-score` after export
+to populate `results.json.behavioral_profile`. Package export does not apply
+package-local scorers automatically.
+
 ## Start Here
 - `../docs/how-to-run-a-study.md` - supported end-to-end study workflow
 - `2026-03-23-fixed-damage-arc-1/README.md` - FixedDamage arc summary
@@ -85,6 +90,13 @@ agentdeck-research-export \
 
 Top-level package export refreshes `results.json` / `results.csv` and also
 hydrates the `AUTO_FACTS` blocks in `README.md` and `analysis.md`.
+
+If the package includes `scripts/behavioral_scorer.py`, follow export with:
+
+```
+agentdeck-research-score \
+  --experiment-dir research/YYYY-MM-DD-your-experiment
+```
 
 5) Update the index:
 ```

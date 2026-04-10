@@ -79,6 +79,11 @@ For game-specific metrics, add a package-local analysis script under
 recordings and writes package-local artifacts. Do not modify the central
 behavioral scorer registry unless the metric is generic across many studies.
 
+If the study needs a formal `behavioral_profile` for a package-owned game, add
+`research/YYYY-MM-DD-your-experiment/scripts/behavioral_scorer.py`. The scorer
+must follow `SPEC-RESEARCH-BEHAVIORAL.md`, and `agentdeck-research-score` will
+load it for that package without framework edits.
+
 ### 4. Run Cells
 
 Typical patterns:
@@ -138,6 +143,16 @@ sources first when both exist.
 
 This step also refreshes the `AUTO_FACTS` blocks in the top-level
 `README.md` and `analysis.md` from the exported package results.
+
+Package-local behavioral scorers are a separate step. After export, run:
+
+```bash
+agentdeck-research-score \
+  --experiment-dir research/YYYY-MM-DD-your-experiment
+```
+
+That updates only `results.json.behavioral_profile`. Export does not apply
+package-local scorers automatically.
 
 ### 7. Validate And Index
 

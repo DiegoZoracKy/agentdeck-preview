@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-SCORE: Standalone Behavioral Rescore CLI
 
 > Status: ✅ Implemented
-> Version: 0.1.0
-> Last Updated: 2026-03-26
+> Version: 0.2.0
+> Last Updated: 2026-04-09
 > Implementation: ✅ Complete (`src/agentdeck/research/score.py`, `scripts/research_score.py`)
 > Audience: Research engineers, contributors
 
@@ -21,6 +21,7 @@ Researchers need to recompute the behavioral profile of a packaged experiment in
 - **Recordings dir**: the directory containing raw `match_*.json` payloads produced by the recorder.
 - **Behavioral profile**: the `behavioral_profile` key in `results.json`, defined by `SPEC-RESEARCH-BEHAVIORAL.md §4.2`.
 - **Profile ID**: the scorer identity string used to select a specific `BehavioralScorer`; `auto` selects the first scorer that reports `supports() == True` for the supplied payloads.
+- **Package-local scorer**: an optional scorer defined at `{experiment_dir}/scripts/behavioral_scorer.py` and loaded only for that experiment.
 
 ## 3. Architecture
 
@@ -35,6 +36,11 @@ results.json  [behavioral_profile key updated in place]
 ```
 
 The scorer reads recordings via the same path-resolution logic used by the research export surface (`SPEC-RESEARCH-WORKFLOW.md`). All other keys in `results.json` are preserved byte-for-byte.
+
+Resolution order:
+1. package-local scorer at `{experiment_dir}/scripts/behavioral_scorer.py`
+2. built-in scorer registry
+3. no scorer matched
 
 Adjacent ownership:
 - Scorer contract: `SPEC-RESEARCH-BEHAVIORAL.md`
@@ -54,6 +60,17 @@ Script wrapper:
 ```
 python scripts/research_score.py
 ```
+
+Package-local scorer convention:
+```text
+research/YYYY-MM-DD-your-experiment/scripts/behavioral_scorer.py
+```
+
+That module MAY expose either:
+- `SCORER`, a module-global `BehavioralScorer` instance
+- exactly one concrete `BehavioralScorer` subclass
+
+If both exist, `SCORER` wins.
 
 ### 4.2 Arguments
 
@@ -83,6 +100,11 @@ python scripts/research_score.py
 - **RS7**: For matrix experiments, `--cell` MUST scope both recordings discovery and results.json update to that cell's artifact. If omitted on a matrix experiment, the scorer MUST require explicit confirmation or fail with a clear error rather than silently scoring all cells.
 - **RS8**: `--dry-run` MUST print: resolved scorer `profile_id`, `profile_version`, recordings path used, and match count. It MUST NOT write any files.
 - **RS9**: The scorer MUST delegate all behavioral computation to the `BehavioralScorer.score(...)` contract. It MUST NOT implement game-specific logic directly.
+- **RS10**: If `{experiment_dir}/scripts/behavioral_scorer.py` exists, the scorer MUST attempt package-local resolution before consulting the built-in registry.
+- **RS11**: If a package-local scorer module exists but does not expose a valid, unambiguous scorer, the scorer MUST fail with exit code `1` and leave `results.json` unchanged.
+- **RS12**: If a package-local scorer resolves successfully but `supports(...)` returns `False` for the supplied payloads, the scorer MUST fail with exit code `1` rather than silently falling back to a built-in scorer.
+- **RS13**: Package-local scorer modules MUST NOT produce side effects at import time beyond defining the scorer.
+- **RS14**: `--dry-run` MUST report whether the resolved scorer source is `package_local` or `builtin`.
 
 ## 6. Error Handling
 
@@ -93,6 +115,9 @@ python scripts/research_score.py
 - `--profile-id` names a specific scorer that does not match the experiment's game → `ValueError`, exit 1
 - Scorer raises during `score()` → propagate with exit 1
 - Matrix experiment, `--cell` omitted → `ValueError` with message listing available cells, exit 1
+- Package-local scorer module exists but exposes invalid `SCORER` → `ValueError`, exit 1
+- Package-local scorer module exists but exposes multiple concrete subclasses without `SCORER` → `ValueError`, exit 1
+- Package-local scorer resolves but `supports(...)` returns `False` → `ValueError`, exit 1
 
 ## 7. Testing Strategy
 
@@ -103,6 +128,9 @@ python scripts/research_score.py
 - Verify RS8: `--dry-run` emits required fields and writes nothing.
 - Verify error paths: missing experiment dir, missing results.json, missing recordings, unknown explicit profile ID.
 - Verify RS9: scorer computation is delegated; the CLI adds no game-specific logic.
+- Verify RS10/RS11: valid package-local scorer is loaded; invalid or ambiguous package-local module fails loudly.
+- Verify RS12: package-local scorer with `supports(...) == False` fails with exit code `1`.
+- Verify RS14: `--dry-run` reports `package_local` vs `builtin`.
 
 ## 8. Examples
 
@@ -120,6 +148,10 @@ agentdeck-research-score \
   --experiment-dir research/2026-03-25-fixed-damage-baseline-completion-2 \
   --dry-run
 
+# Package-local scorer inside the experiment package
+agentdeck-research-score \
+  --experiment-dir research/2026-04-09-signal-cache-controller-2
+
 # Override recordings path (e.g., after moving runs to a new location)
 agentdeck-research-score \
   --experiment-dir research/2026-03-23-fixed-damage-exit-1 \
@@ -132,6 +164,8 @@ agentdeck-research-score \
 - **Requires raw recordings (RS1)**: behavioral scorers consume recorder match payloads, not the derived `matches` array in `results.json`. The raw payloads carry event-level detail that the summarized array strips out.
 - **No-op on no match (RS4)**: games without a registered scorer are valid. Failing loudly would make the scorer unusable in mixed-game pipelines or automation.
 - **RS7 explicit cell requirement**: silently scoring all cells of a matrix experiment would produce multiple writes to different result files without feedback. An explicit cell flag keeps each invocation unambiguous.
+- **Package-local convention over manifest fields**: a conventional `scripts/behavioral_scorer.py` path is the smallest non-breaking extension for new games and keeps scorer ownership inside the experiment package.
+- **Fail loudly on package-local mismatch**: the presence of a package-local scorer file signals author intent. Silent fallback would hide scorer bugs and make Round 8-style benchmark authoring harder to audit.
 
 ## 10. References
 
