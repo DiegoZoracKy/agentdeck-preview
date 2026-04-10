@@ -46,6 +46,10 @@ At minimum:
 - set `README.md`
 - define `matrix.yaml` if the package has benchmark cells/phases
 
+For matrix-based studies, use:
+- `player_registry` for reusable player/model definitions
+- `player_ref` inside each cell side (`player_a`, `player_b`)
+
 For matrix-based studies, keep these sections stable:
 - `experiment_id`
 - `cells`
@@ -65,6 +69,15 @@ python research/YYYY-MM-DD-your-experiment/scripts/run_experiment.py --list-cell
 
 The template is intentionally package-local. Keep experiment execution logic in
 the package, not in framework core.
+
+If the study introduces a brand-new repo-local game, put the importable game
+implementation under `src/agentdeck/games/examples/<slug>/` so the package can
+import it cleanly without promoting it to the core built-in game surface.
+
+For game-specific metrics, add a package-local analysis script under
+`research/YYYY-MM-DD-your-experiment/scripts/` that reads `results.json` or raw
+recordings and writes package-local artifacts. Do not modify the central
+behavioral scorer registry unless the metric is generic across many studies.
 
 ### 4. Run Cells
 
@@ -123,6 +136,9 @@ Package aggregation merges canonical `source.recordings_dir(s)` from cell
 artifacts with discovered session recordings, while preferring canonical
 sources first when both exist.
 
+This step also refreshes the `AUTO_FACTS` blocks in the top-level
+`README.md` and `analysis.md` from the exported package results.
+
 ### 7. Validate And Index
 
 Before committing:
@@ -136,6 +152,10 @@ This validates:
 - generated results artifacts
 - index consistency
 - completed-package factual block expectations
+
+For completed or archived packages with matches:
+- keep the `AUTO_FACTS` markers in `README.md` and `analysis.md`
+- do not leave placeholder values like `TBD` inside those blocks
 
 ### 8. Write Analysis And Recordings Pointers
 

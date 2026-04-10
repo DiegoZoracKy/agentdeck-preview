@@ -15,6 +15,10 @@ Preferred commands use the installed `agentdeck-research-*` entry points. If
 those are not yet available in your shell, use the equivalent `python scripts/...`
 wrapper from the repo root.
 
+For matrix packages, the shared template and runner use `player_registry` and
+per-cell `player_ref` keys. Older drafts that still say `model_registry` /
+`model_ref` should be updated.
+
 ## Start Here
 - `../docs/how-to-run-a-study.md` - supported end-to-end study workflow
 - `2026-03-23-fixed-damage-arc-1/README.md` - FixedDamage arc summary
@@ -50,6 +54,8 @@ cp -R research/_templates research/YYYY-MM-DD-your-experiment
 2) Fill out `manifest.yaml` and `README.md`.
    - If applicable, define benchmark cells/phases in `matrix.yaml`.
    - If `matrix.yaml` exists, use it as source of truth for sampling + cells.
+   - For matrix packages, use `player_registry` plus per-cell `player_ref`.
+   - Keep the `AUTO_FACTS` marker blocks in `README.md` and `analysis.md`.
 
 3) Run experiments (recordings should be stored externally).
 
@@ -76,6 +82,9 @@ agentdeck-research-export \
   --package \
   --no-generated-at
 ```
+
+Top-level package export refreshes `results.json` / `results.csv` and also
+hydrates the `AUTO_FACTS` blocks in `README.md` and `analysis.md`.
 
 5) Update the index:
 ```
@@ -113,6 +122,9 @@ Validate manifests and the index before committing research changes:
 ```
 agentdeck-research-validate --research-dir research
 ```
+
+Completed packages with recorded matches must have real values inside the
+`AUTO_FACTS` blocks. Placeholder `TBD` values will cause validation to fail.
 
 To regenerate the index if out of date:
 ```

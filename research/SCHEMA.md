@@ -242,7 +242,7 @@ Each cell SHOULD define at minimum:
 
 Suggested top-level sections:
 - `frozen_inputs` (git tag/commit, template version, pricing snapshot)
-- `model_registry`
+- `player_registry`
 - `config_registry`
 - `sampling_policy`
 - `execution_plan`
@@ -283,8 +283,14 @@ include a fenced factual block with markers:
 - `<!-- AUTO_FACTS:BEGIN -->`
 - `<!-- AUTO_FACTS:END -->`
 
-Packager tools may rewrite only content between those markers.
+Tooling may rewrite only content between those markers.
 Anything outside those markers is considered human-authored narrative.
+
+For completed or archived experiments with `run.matches_completed > 0`:
+- `README.md` and `analysis.md` MUST contain these marker blocks
+- the factual block contents MUST contain real values, not placeholders like `TBD`
+- `agentdeck-research-package` and `agentdeck-research-export --package` are the
+  supported ways to refresh those blocks automatically
 
 ## results.csv (Generated)
 

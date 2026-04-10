@@ -44,6 +44,13 @@ scripts/            # CI/dev utilities
 
 Runtime artifacts (recordings/logs) are written under `agentdeck_runs/` by default and are ignored by git.
 
+Game file location convention:
+- Put reusable game implementations under `src/agentdeck/games/` so tests and downstream users can import them from the package.
+- Keep runnable demos, walkthroughs, and one-off harnesses in `examples/`.
+- Add coverage under `tests/`.
+- Only place a game directly under `examples/` when it is intentionally example-only and not meant to ship as part of the importable library surface.
+- For repo-local research games that should remain importable but not become core built-ins, prefer `src/agentdeck/games/examples/<slug>/`.
+
 ---
 
 ## Core Philosophy

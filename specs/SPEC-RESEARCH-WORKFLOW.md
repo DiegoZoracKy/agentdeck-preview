@@ -67,6 +67,7 @@ The export surface MUST support two modes:
   - export selected cells into `artifacts/<cell_id>/results.json` and `results.csv`
 - `--package`:
   - export top-level package `results.json` and `results.csv`
+  - refresh factual marker blocks in top-level `README.md` and `analysis.md`
   - merge canonical `source.recordings_dir(s)` from cell artifacts with discovered
     `agentdeck_runs/<cell_id>/session_*/records`
   - prefer canonical cell-artifact sources first when both exist and remain usable
@@ -109,6 +110,8 @@ The workflow MUST NOT require model/config registries for export-only operations
   source is unusable when the path does not exist, is not a directory, or contains no
   `match_*.json` files.
 - **RW6**: Package export MUST preserve deterministic outputs when `--no-generated-at` is used.
+- **RW6a**: Package export MUST refresh top-level factual marker blocks when
+  `README.md` / `analysis.md` contain `AUTO_FACTS` markers.
 - **RW7**: Shared tooling MUST NOT own or infer experiment execution policy; it only exports, scores, aggregates, and indexes outputs.
 - **RW8**: The minimal template `scripts/run_experiment.py` MUST remain package-local and framework-agnostic beyond stable public AgentDeck APIs.
 - **RW9**: Workflow logic MUST live in `src/agentdeck/research/`; any `scripts/` entry file for export or index MUST be a thin wrapper over the package-owned implementation.
