@@ -128,6 +128,9 @@ For the full ladder, see [examples/README.md](examples/README.md).
 - Build your first game + replay tour: `examples/first_game_walkthrough.py`
 - Examples index: [examples/README.md](examples/README.md)
 - End-to-end study workflow: [docs/how-to-run-a-study.md](docs/how-to-run-a-study.md)
+- Package-owned behavioral scoring: keep `scripts/behavioral_scorer.py` in
+  your research package and run `agentdeck-research-score` after export to
+  populate `results.json.behavioral_profile`
 
 ### Artifacts (Recordings + Logs)
 

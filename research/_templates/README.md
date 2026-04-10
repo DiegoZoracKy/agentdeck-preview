@@ -45,6 +45,8 @@
 - `notes/` (human run notes)
 - `recordings/` (external pointers only)
 - `scripts/` (execution scripts)
+  - `scripts/behavioral_scorer.py` (optional package-local scorer for a formal
+    `behavioral_profile`)
 
 ## Storage
 - Raw recordings: external store (HF/S3/R2) + pointer docs in `recordings/`
@@ -64,4 +66,8 @@ agentdeck-research-export \
   --experiment-dir . \
   --package \
   --no-generated-at
+
+# Optional: only when this package defines scripts/behavioral_scorer.py
+agentdeck-research-score \
+  --experiment-dir .
 ```
