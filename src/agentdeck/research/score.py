@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import inspect
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import yaml
 
-from .behavioral import compute_behavioral_profile, get_behavioral_scorer
+from .behavioral import BehavioralScorer, get_behavioral_scorer
 from .export import (
     behavioral_config_from_manifest,
     collect_players,
@@ -73,6 +75,76 @@ def _list_matrix_cell_ids(experiment_dir: Path) -> List[str]:
     return [cell["id"] for cell in matrix.get("cells", [])]
 
 
+def _load_module_from_path(path: Path, module_name: str):
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise ValueError(f"Could not load scorer module from {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _package_local_scorer_path(experiment_dir: Path) -> Path:
+    return experiment_dir / "scripts" / "behavioral_scorer.py"
+
+
+def _load_package_local_scorer(experiment_dir: Path) -> BehavioralScorer | None:
+    scorer_path = _package_local_scorer_path(experiment_dir)
+    if not scorer_path.exists():
+        return None
+
+    module = _load_module_from_path(scorer_path, "agentdeck_package_behavioral_scorer")
+
+    scorer = getattr(module, "SCORER", None)
+    if scorer is not None:
+        if not isinstance(scorer, BehavioralScorer):
+            raise ValueError(
+                f"{scorer_path} defines SCORER, but it is not a BehavioralScorer instance"
+            )
+        return scorer
+
+    scorer_classes = []
+    for _, obj in inspect.getmembers(module, inspect.isclass):
+        if not issubclass(obj, BehavioralScorer) or obj is BehavioralScorer:
+            continue
+        if getattr(obj, "__module__", None) != module.__name__:
+            continue
+        scorer_classes.append(obj)
+
+    if not scorer_classes:
+        raise ValueError(
+            f"{scorer_path} must define SCORER or exactly one BehavioralScorer subclass"
+        )
+    if len(scorer_classes) > 1:
+        names = ", ".join(sorted(cls.__name__ for cls in scorer_classes))
+        raise ValueError(
+            f"{scorer_path} defines multiple BehavioralScorer subclasses ({names}); "
+            "export SCORER to disambiguate"
+        )
+
+    return scorer_classes[0]()
+
+
+def _resolve_scorer(
+    *,
+    experiment_dir: Path,
+    match_payloads: List[Dict[str, Any]],
+    profile_id: str,
+) -> Tuple[BehavioralScorer | None, str | None]:
+    package_scorer = _load_package_local_scorer(experiment_dir)
+    if package_scorer is not None:
+        if not package_scorer.supports(match_payloads=match_payloads):
+            raise ValueError(
+                "Package-local scorer exists but does not support the supplied match payloads"
+            )
+        return package_scorer, "package_local"
+
+    scorer = get_behavioral_scorer(match_payloads=match_payloads, profile_id=profile_id)
+    if scorer is None:
+        return None, None
+    return scorer, "builtin"
+
+
 def rescore_experiment(
     *,
     experiment_dir: Path,
@@ -127,12 +199,17 @@ def rescore_experiment(
     match_payloads, metadata_list = load_match_payloads_from_dirs(resolved_recordings_dirs)
     players = collect_players(metadata_list)
     behavioral_config = behavioral_config_from_manifest(experiment_dir)
-    scorer = get_behavioral_scorer(match_payloads=match_payloads, profile_id=profile_id)
+    scorer, scorer_source = _resolve_scorer(
+        experiment_dir=experiment_dir,
+        match_payloads=match_payloads,
+        profile_id=profile_id,
+    )
 
     if dry_run:
         return {
             "dry_run": True,
             "scorer_found": scorer is not None,
+            "scorer_source": scorer_source,
             "profile_id": scorer.profile_id if scorer else None,
             "profile_version": scorer.profile_version if scorer else None,
             "recordings_dirs": [str(d) for d in resolved_recordings_dirs],
@@ -143,21 +220,22 @@ def rescore_experiment(
     if scorer is None:
         return {
             "scorer_found": False,
+            "scorer_source": None,
             "profile_id": profile_id,
             "results_path": str(results_path),
             "updated": False,
         }
 
-    behavioral_profile = compute_behavioral_profile(
+    behavioral_profile = scorer.score(
         players=players,
         match_payloads=match_payloads,
-        profile_id=profile_id,
         config=behavioral_config,
     )
 
     if behavioral_profile is None:
         return {
             "scorer_found": False,
+            "scorer_source": scorer_source,
             "profile_id": profile_id,
             "results_path": str(results_path),
             "updated": False,
@@ -169,6 +247,7 @@ def rescore_experiment(
 
     return {
         "scorer_found": True,
+        "scorer_source": scorer_source,
         "profile_id": scorer.profile_id,
         "profile_version": scorer.profile_version,
         "recordings_dirs": [str(d) for d in resolved_recordings_dirs],
@@ -237,7 +316,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.dry_run:
         if result.get("scorer_found"):
-            print(f"Scorer:       {result['profile_id']} v{result['profile_version']}")
+            print(
+                f"Scorer:       {result['profile_id']} v{result['profile_version']} "
+                f"({result.get('scorer_source', 'unknown')})"
+            )
         else:
             print(f"Scorer:       none (no scorer matched profile_id={args.profile_id!r})")
         print(f"Recordings:   {', '.join(result.get('recordings_dirs', []))}")
