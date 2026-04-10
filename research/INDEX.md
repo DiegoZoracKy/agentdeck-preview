@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-03-28T13:47:27.140440Z
+Last updated: 2026-04-08T16:00:21.910712Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -38,3 +38,4 @@ Last updated: 2026-03-28T13:47:27.140440Z
 | [Cross-Game Comparison 1](2026-03-26-cross-game-comparison-1/README.md) | complete | ComparativeSynthesis | local:AttackBot, local:PotionAt80Bot, google:gemini-2.5-flash-lite, google:gemini-2.5-flash, openai:gpt-4o-mini, openai:gpt-4o, openai:gpt-5-mini, anthropic:claude-haiku-4-5-20251001 | 0/0 | See README |
 | [VariableDamage Arc 1](2026-03-26-variable-damage-arc-1/README.md) | complete | VariableDamageGame | local:AttackBot, local:PotionAt80Bot, google:gemini-2.5-flash-lite, google:gemini-2.5-flash, openai:gpt-4o-mini, openai:gpt-4o, openai:gpt-5-mini, anthropic:claude-haiku-4-5-20251001 | 0/0 | See README |
 | [VariableDamage Premium Final 1](2026-03-26-variable-damage-premium-final-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, openai:gpt-5-mini | 24/24 | FlashLite-RC-RISK 54.2% |
+| [FixedDamage RC Replication — Flash-Lite RC vs GPT-4o-mini RC](2026-04-08-fixed-damage-rc-replication-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, openai:gpt-4o-mini | 0/20 | Gemini 60.0% |

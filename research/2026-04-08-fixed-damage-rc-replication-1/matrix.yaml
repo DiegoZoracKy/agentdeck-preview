@@ -1,0 +1,41 @@
+schema_version: 1
+experiment_id: 2026-04-08-fixed-damage-rc-replication-1
+created_at: "2026-04-08T00:00:00Z"
+purpose: >-
+  Exact replication of Gemini's Round 6 QA experiment: both players using
+  ReasoningController in FixedDamage with full information. Verifies whether
+  the 11-9 Gemini-favoring result (p=0.82) is reproducible.
+
+player_registry:
+  gemini_flash_lite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: weak
+  gpt_4o_mini:
+    kind: llm
+    provider: openai
+    model: gpt-4o-mini
+    tier: strong
+
+config_registry:
+  RC:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+
+execution_plan:
+  phases:
+    - phase_id: P1
+      name: RC Replication
+      cell_ids: [p1_c01_flash_lite_rc_vs_mini_rc]
+
+cells:
+  - id: p1_c01_flash_lite_rc_vs_mini_rc
+    phase: P1
+    question: >-
+      Does the Gemini Round 6 result (11-9 Gemini, p=0.82, both RC) replicate
+      when run independently with the same config?
+    player_a: { name: "Gemini", player_ref: gemini_flash_lite, config_ref: RC }
+    player_b: { name: "GPT", player_ref: gpt_4o_mini, config_ref: RC }
+    matches: 20

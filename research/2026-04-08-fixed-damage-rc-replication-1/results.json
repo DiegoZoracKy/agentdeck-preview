@@ -1,0 +1,1807 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-04-08-fixed-damage-rc-replication-1",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck-preview/research/2026-04-08-fixed-damage-rc-replication-1/agentdeck_runs/p1_c01_flash_lite_rc_vs_mini_rc/session_20260408_124002_25b4d4/records"
+  },
+  "summary": {
+    "total_matches": 20,
+    "decisive_matches": 20,
+    "draws": 0,
+    "win_rates": {
+      "Gemini": 0.6,
+      "GPT": 0.4
+    },
+    "total_cost": 0.07018960000000003,
+    "avg_turns": 19.4,
+    "avg_duration": 39.84812428951263,
+    "avg_cost": 0.0035094800000000015
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 20,
+    "n_decisive": 20,
+    "players": {
+      "Gemini": {
+        "wins": 12,
+        "win_rate": 0.6,
+        "ci": [
+          0.3865815007622531,
+          0.781193467627183
+        ],
+        "p_value": 0.5034446716308594,
+        "effect_size": 0.20135792079033066,
+        "effect_label": "small",
+        "is_significant": false
+      },
+      "GPT": {
+        "wins": 8,
+        "win_rate": 0.4,
+        "ci": [
+          0.21880653237281705,
+          0.6134184992377469
+        ],
+        "p_value": 0.5034446716308594,
+        "effect_size": -0.20135792079033088,
+        "effect_label": "small",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Gemini_vs_GPT": {
+        "player_a": "Gemini",
+        "player_b": "GPT",
+        "wins_a": 12,
+        "wins_b": 8,
+        "head_to_head_decisive": 20,
+        "win_rate_a": 0.6,
+        "ci_a": [
+          0.3865815007622531,
+          0.781193467627183
+        ],
+        "p_value": 0.5034446716308594,
+        "effect_size": 0.20135792079033066,
+        "effect_label": "small",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": false,
+      "n_decisive": 20,
+      "min_recommended": 10,
+      "is_actionable": true,
+      "quality_note": "Sample size sufficient for baseline inferential readout"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 388,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 388,
+      "strict_contract_passes": 388,
+      "strict_contract_rate": 1.0,
+      "recoverable_non_strict": 0,
+      "recoverable_non_strict_rate": 0.0,
+      "action_line_rate": 1.0,
+      "reasoning_line_rate": 1.0
+    },
+    "by_player": {
+      "GPT": {
+        "turn_attempts": 193,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 193,
+        "strict_contract_passes": 193,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 1.0
+      },
+      "Gemini": {
+        "turn_attempts": 195,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 195,
+        "strict_contract_passes": 195,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 1.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 20,
+    "first_player_wins": 12,
+    "first_player_win_rate": 0.6,
+    "second_player_wins": 8,
+    "upset_rate": 0.4,
+    "by_player": {
+      "Gemini": {
+        "first_count": 10,
+        "second_count": 10,
+        "wins_as_first": 7,
+        "wins_as_second": 5,
+        "win_rate_as_first": 0.7,
+        "win_rate_as_second": 0.5
+      },
+      "GPT": {
+        "first_count": 10,
+        "second_count": 10,
+        "wins_as_first": 5,
+        "wins_as_second": 3,
+        "win_rate_as_first": 0.5,
+        "win_rate_as_second": 0.3
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 20,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 20,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 20,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 20,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 20,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Gemini",
+      "provider": "google",
+      "model": "gemini-2.5-flash-lite",
+      "type": "GeminiPlayer",
+      "controller": "ReasoningController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    },
+    {
+      "name": "GPT",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "type": "GPTPlayer",
+      "controller": "ReasoningController",
+      "renderer": "TextRenderer",
+      "temperature": 1.0
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_03455f00",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 47,
+      "duration": 48.886467695236206,
+      "cost": 0.0054699499999999995,
+      "player_costs": {
+        "Gemini": 0.0025135999999999995,
+        "GPT": 0.00295635
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_092fceed",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "GPT",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 51,
+      "duration": 41.3450665473938,
+      "cost": 0.0045619500000000125,
+      "player_costs": {
+        "GPT": 0.0027532500000000057,
+        "Gemini": 0.0018087000000000068
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_0cde58f5",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 48,
+      "duration": 38.08288335800171,
+      "cost": 0.0040056000000000015,
+      "player_costs": {
+        "Gemini": 0.0017655000000000032,
+        "GPT": 0.0022400999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_0cf9cab9",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "GPT",
+      "turns": 9,
+      "outcome": "win",
+      "seed": 49,
+      "duration": 13.629550695419312,
+      "cost": 0.0008766999999999976,
+      "player_costs": {
+        "GPT": 0.0005756999999999984,
+        "Gemini": 0.0003009999999999992
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_13483cf8",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 51,
+      "duration": 53.68903589248657,
+      "cost": 0.004855099999999998,
+      "player_costs": {
+        "Gemini": 0.001748000000000003,
+        "GPT": 0.0031070999999999946
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_14aa111c",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "GPT",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 45,
+      "duration": 51.68773627281189,
+      "cost": 0.004660350000000001,
+      "player_costs": {
+        "Gemini": 0.001395600000000002,
+        "GPT": 0.0032647499999999986
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_2b476d5e",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "GPT",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 46,
+      "duration": 37.67415523529053,
+      "cost": 0.002574449999999999,
+      "player_costs": {
+        "GPT": 0.001383149999999998,
+        "Gemini": 0.001191300000000001
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_35dc2716",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 49,
+      "duration": 42.91204786300659,
+      "cost": 0.003462000000000017,
+      "player_costs": {
+        "Gemini": 0.0014784000000000047,
+        "GPT": 0.0019836000000000124
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_387e9095",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "Gemini",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 43,
+      "duration": 31.696964979171753,
+      "cost": 0.0024228999999999995,
+      "player_costs": {
+        "GPT": 0.0013190999999999993,
+        "Gemini": 0.0011038000000000003
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_4a112794",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "GPT",
+      "turns": 14,
+      "outcome": "win",
+      "seed": 46,
+      "duration": 26.052967071533203,
+      "cost": 0.0018639,
+      "player_costs": {
+        "Gemini": 0.0005330999999999999,
+        "GPT": 0.0013308
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_86cab6a4",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "GPT",
+      "turns": 12,
+      "outcome": "win",
+      "seed": 44,
+      "duration": 22.6247615814209,
+      "cost": 0.001400150000000001,
+      "player_costs": {
+        "Gemini": 0.0005351000000000019,
+        "GPT": 0.0008650499999999992
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_8b81f52d",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "GPT",
+      "turns": 25,
+      "outcome": "win",
+      "seed": 42,
+      "duration": 71.36065244674683,
+      "cost": 0.00649615,
+      "player_costs": {
+        "GPT": 0.0025642499999999997,
+        "Gemini": 0.0039319
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ad4b0a10",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 42,
+      "duration": 37.187304973602295,
+      "cost": 0.0033098499999999996,
+      "player_costs": {
+        "Gemini": 0.0012513999999999997,
+        "GPT": 0.00205845
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_c356bd24",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "GPT",
+      "turns": 13,
+      "outcome": "win",
+      "seed": 48,
+      "duration": 23.42277979850769,
+      "cost": 0.0015883499999999988,
+      "player_costs": {
+        "GPT": 0.001054949999999999,
+        "Gemini": 0.0005333999999999998
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_cd4d8a2e",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "Gemini",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 45,
+      "duration": 75.47720909118652,
+      "cost": 0.0039006499999999986,
+      "player_costs": {
+        "GPT": 0.002077350000000002,
+        "Gemini": 0.0018232999999999965
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_e5bcee7b",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "Gemini",
+      "turns": 16,
+      "outcome": "win",
+      "seed": 44,
+      "duration": 34.8459632396698,
+      "cost": 0.0024741999999999976,
+      "player_costs": {
+        "GPT": 0.0012494999999999989,
+        "Gemini": 0.0012246999999999987
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_ea65dbe6",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 23,
+      "outcome": "win",
+      "seed": 50,
+      "duration": 38.33320903778076,
+      "cost": 0.004191100000000007,
+      "player_costs": {
+        "Gemini": 0.0020016999999999986,
+        "GPT": 0.002189400000000008
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f02ed96c",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "Gemini",
+      "turns": 22,
+      "outcome": "win",
+      "seed": 47,
+      "duration": 39.758739948272705,
+      "cost": 0.0050013,
+      "player_costs": {
+        "GPT": 0.001962600000000002,
+        "Gemini": 0.0030386999999999983
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f221d802",
+      "players": [
+        "GPT",
+        "Gemini"
+      ],
+      "winner": "Gemini",
+      "turns": 20,
+      "outcome": "win",
+      "seed": 50,
+      "duration": 32.99925184249878,
+      "cost": 0.003466199999999999,
+      "player_costs": {
+        "GPT": 0.001849500000000004,
+        "Gemini": 0.0016166999999999952
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "GPT",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f31740bd",
+      "players": [
+        "Gemini",
+        "GPT"
+      ],
+      "winner": "Gemini",
+      "turns": 21,
+      "outcome": "win",
+      "seed": 43,
+      "duration": 35.295738220214844,
+      "cost": 0.003608749999999999,
+      "player_costs": {
+        "Gemini": 0.0017879000000000003,
+        "GPT": 0.0018208499999999989
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Gemini",
+        "index": 0,
+        "ordered_index": 0
+      }
+    }
+  ],
+  "behavioral_profile": {
+    "schema_version": 2,
+    "game_id": "fixed_damage",
+    "profile_id": "fixed_damage_behavioral",
+    "profile_version": "0.2.0",
+    "coverage": {
+      "matches_total": 20,
+      "matches_evaluable": 20,
+      "turns_total": 388,
+      "turns_evaluable": 388
+    },
+    "aggregate_metrics": {
+      "all_attack_match_rate": {
+        "value": 0.175,
+        "all_attack_matches": 7,
+        "support_matches": 40
+      },
+      "first_potion_profile": {
+        "median_first_potion_hp": 60.0,
+        "first_potion_hp_values": [
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          40,
+          40,
+          40,
+          60,
+          60,
+          60,
+          60,
+          60,
+          60,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ],
+        "never_used_rate": 0.175,
+        "never_used_matches": 7,
+        "support_matches": 40
+      },
+      "unused_potions_on_loss_rate": {
+        "value": 0.55,
+        "losses_with_unused_potions": 11,
+        "support_losses": 20
+      },
+      "state_action_consistency": {
+        "value": 0.8738170347003155,
+        "support_turns": 317
+      },
+      "position_policy_delta": {
+        "value": 0.22002386926051046,
+        "support_turns": 262
+      },
+      "critical_potion_response_rate": {
+        "value": 0.3308270676691729,
+        "critical_potion_turns": 44,
+        "support_turns": 133,
+        "critical_hp_threshold": 40
+      },
+      "error_recovery_rate": {
+        "value": 0.4857142857142857,
+        "recovered_events": 34,
+        "support_events": 70,
+        "critical_hp_threshold": 40
+      },
+      "wasted_full_health_potion_rate": {
+        "value": 0.0,
+        "wasted_full_health_potions": 0,
+        "support_potions": 83,
+        "max_health": 100
+      }
+    },
+    "per_player": {
+      "Gemini": {
+        "matches_played": 20,
+        "all_attack_match_rate": {
+          "value": 0.2,
+          "all_attack_matches": 4,
+          "support_matches": 20
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 30.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            60,
+            60,
+            60,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.2,
+          "never_used_matches": 4,
+          "support_matches": 20
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.75,
+          "losses_with_unused_potions": 6,
+          "support_losses": 8
+        },
+        "state_action_consistency": {
+          "value": 0.8789808917197452,
+          "supported_state_keys": 40,
+          "support_turns": 157
+        },
+        "position_policy_delta": {
+          "value": 0.16428571428571426,
+          "shared_state_buckets": 15,
+          "support_turns": 152
+        },
+        "critical_potion_response_rate": {
+          "value": 0.38028169014084506,
+          "critical_potion_turns": 27,
+          "support_turns": 71,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.5142857142857142,
+          "recovered_events": 18,
+          "support_events": 35,
+          "missed_events": 44,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 42,
+          "max_health": 100
+        }
+      },
+      "GPT": {
+        "matches_played": 20,
+        "all_attack_match_rate": {
+          "value": 0.15,
+          "all_attack_matches": 3,
+          "support_matches": 20
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 60.0,
+          "first_potion_hp_values": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            40,
+            40,
+            60,
+            60,
+            60,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.15,
+          "never_used_matches": 3,
+          "support_matches": 20
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.4166666666666667,
+          "losses_with_unused_potions": 5,
+          "support_losses": 12
+        },
+        "state_action_consistency": {
+          "value": 0.86875,
+          "supported_state_keys": 44,
+          "support_turns": 160
+        },
+        "position_policy_delta": {
+          "value": 0.2970438652256834,
+          "shared_state_buckets": 12,
+          "support_turns": 110
+        },
+        "critical_potion_response_rate": {
+          "value": 0.27419354838709675,
+          "critical_potion_turns": 17,
+          "support_turns": 62,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.45714285714285713,
+          "recovered_events": 16,
+          "support_events": 35,
+          "missed_events": 45,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 41,
+          "max_health": 100
+        }
+      }
+    },
+    "state_metrics": {
+      "action_by_state": {
+        "Gemini": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 16,
+            "attack_count": 16,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=20|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 6,
+            "attack_count": 4,
+            "potion_count": 2,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 8,
+            "attack_count": 4,
+            "potion_count": 4,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 7,
+            "attack_count": 4,
+            "potion_count": 3,
+            "attack_rate": 0.5714285714285714,
+            "potion_rate": 0.42857142857142855
+          },
+          "position=first|hp=40|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 10,
+            "attack_count": 9,
+            "potion_count": 1,
+            "attack_rate": 0.9,
+            "potion_rate": 0.1
+          },
+          "position=first|hp=50|potions=1": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 12,
+            "attack_count": 11,
+            "potion_count": 1,
+            "attack_rate": 0.9166666666666666,
+            "potion_rate": 0.08333333333333333
+          },
+          "position=first|hp=70|potions=1": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 15,
+            "attack_count": 13,
+            "potion_count": 2,
+            "attack_rate": 0.8666666666666667,
+            "potion_rate": 0.13333333333333333
+          },
+          "position=first|hp=90|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 3,
+            "attack_count": 1,
+            "potion_count": 2,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 5,
+            "attack_count": 1,
+            "potion_count": 4,
+            "attack_rate": 0.2,
+            "potion_rate": 0.8
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 6,
+            "attack_count": 2,
+            "potion_count": 4,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 8,
+            "attack_count": 8,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=1": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 6,
+            "attack_count": 5,
+            "potion_count": 1,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 7,
+            "attack_count": 7,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 8,
+            "attack_count": 6,
+            "potion_count": 2,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          },
+          "position=second|hp=70|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 3,
+            "attack_count": 2,
+            "potion_count": 1,
+            "attack_rate": 0.6666666666666666,
+            "potion_rate": 0.3333333333333333
+          },
+          "position=second|hp=80|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 10,
+            "potion_count": 2,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          }
+        },
+        "GPT": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=10|potions=2": {
+            "support_turns": 5,
+            "attack_count": 2,
+            "potion_count": 3,
+            "attack_rate": 0.4,
+            "potion_rate": 0.6
+          },
+          "position=first|hp=20|potions=1": {
+            "support_turns": 4,
+            "attack_count": 3,
+            "potion_count": 1,
+            "attack_rate": 0.75,
+            "potion_rate": 0.25
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 6,
+            "attack_count": 3,
+            "potion_count": 3,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=first|hp=30|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=30|potions=2": {
+            "support_turns": 10,
+            "attack_count": 10,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 13,
+            "attack_count": 11,
+            "potion_count": 2,
+            "attack_rate": 0.8461538461538461,
+            "potion_rate": 0.15384615384615385
+          },
+          "position=first|hp=50|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=50|potions=2": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=1": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 11,
+            "attack_count": 10,
+            "potion_count": 1,
+            "attack_rate": 0.9090909090909091,
+            "potion_rate": 0.09090909090909091
+          },
+          "position=first|hp=70|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=70|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=80|potions=1": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=2": {
+            "support_turns": 1,
+            "attack_count": 0,
+            "potion_count": 1,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 13,
+            "attack_count": 12,
+            "potion_count": 1,
+            "attack_rate": 0.9230769230769231,
+            "potion_rate": 0.07692307692307693
+          },
+          "position=first|hp=90|potions=2": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=10|potions=1": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=10|potions=2": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 9,
+            "attack_count": 9,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=1": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=20|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=30|potions=0": {
+            "support_turns": 4,
+            "attack_count": 4,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=1": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=30|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 8,
+            "attack_count": 8,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=1": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=2": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=50|potions=1": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=50|potions=2": {
+            "support_turns": 2,
+            "attack_count": 0,
+            "potion_count": 2,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=60|potions=0": {
+            "support_turns": 5,
+            "attack_count": 5,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=1": {
+            "support_turns": 2,
+            "attack_count": 1,
+            "potion_count": 1,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=60|potions=2": {
+            "support_turns": 6,
+            "attack_count": 2,
+            "potion_count": 4,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 4,
+            "attack_count": 2,
+            "potion_count": 2,
+            "attack_rate": 0.5,
+            "potion_rate": 0.5
+          },
+          "position=second|hp=70|potions=0": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=70|potions=1": {
+            "support_turns": 6,
+            "attack_count": 5,
+            "potion_count": 1,
+            "attack_rate": 0.8333333333333334,
+            "potion_rate": 0.16666666666666666
+          },
+          "position=second|hp=70|potions=2": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=0": {
+            "support_turns": 2,
+            "attack_count": 2,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 7,
+            "attack_count": 7,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 10,
+            "attack_count": 4,
+            "potion_count": 6,
+            "attack_rate": 0.4,
+            "potion_rate": 0.6
+          },
+          "position=second|hp=90|potions=1": {
+            "support_turns": 1,
+            "attack_count": 1,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          }
+        }
+      },
+      "scarcity_action_profile": {
+        "Gemini": {
+          "0": {
+            "support_turns": 30,
+            "attack_count": 30,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 32,
+            "attack_count": 21,
+            "potion_count": 11,
+            "attack_rate": 0.65625,
+            "potion_rate": 0.34375
+          },
+          "2": {
+            "support_turns": 39,
+            "attack_count": 24,
+            "potion_count": 15,
+            "attack_rate": 0.6153846153846154,
+            "potion_rate": 0.38461538461538464
+          },
+          "3": {
+            "support_turns": 94,
+            "attack_count": 78,
+            "potion_count": 16,
+            "attack_rate": 0.8297872340425532,
+            "potion_rate": 0.1702127659574468
+          }
+        },
+        "GPT": {
+          "0": {
+            "support_turns": 39,
+            "attack_count": 39,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 33,
+            "attack_count": 23,
+            "potion_count": 10,
+            "attack_rate": 0.696969696969697,
+            "potion_rate": 0.30303030303030304
+          },
+          "2": {
+            "support_turns": 48,
+            "attack_count": 34,
+            "potion_count": 14,
+            "attack_rate": 0.7083333333333334,
+            "potion_rate": 0.2916666666666667
+          },
+          "3": {
+            "support_turns": 73,
+            "attack_count": 56,
+            "potion_count": 17,
+            "attack_rate": 0.7671232876712328,
+            "potion_rate": 0.2328767123287671
+          }
+        }
+      }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "Gemini": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=50|potions=2",
+                "delta": 0.5,
+                "support_turns": 5,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=2",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Gemini.position=first|hp=50|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=2",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Gemini.position=second|hp=50|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=2",
+                "delta": 0.5,
+                "support_turns": 4,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=2",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Gemini.position=first|hp=60|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=2",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.Gemini.position=second|hp=60|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=1",
+                "delta": 0.4666666666666666,
+                "support_turns": 11,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=1",
+                  "attack_rate": 0.6666666666666666,
+                  "potion_rate": 0.3333333333333333,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.Gemini.position=first|hp=20|potions=1"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=1",
+                  "attack_rate": 0.2,
+                  "potion_rate": 0.8,
+                  "support_turns": 5,
+                  "source_path": "state_metrics.action_by_state.Gemini.position=second|hp=20|potions=1"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 6,
+                "attack_count": 3,
+                "potion_count": 3,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=20|potions=1|self=POTION|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              }
+            ]
+          }
+        },
+        "GPT": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=50|potions=2",
+                "delta": 1.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=50|potions=2",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 4,
+                  "source_path": "state_metrics.action_by_state.GPT.position=first|hp=50|potions=2"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=50|potions=2",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.GPT.position=second|hp=50|potions=2"
+                }
+              },
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.5230769230769231,
+                "support_turns": 23,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 0.9230769230769231,
+                  "potion_rate": 0.07692307692307693,
+                  "support_turns": 13,
+                  "source_path": "state_metrics.action_by_state.GPT.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 0.4,
+                  "potion_rate": 0.6,
+                  "support_turns": 10,
+                  "source_path": "state_metrics.action_by_state.GPT.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.5,
+                "support_turns": 8,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 0.5,
+                  "potion_rate": 0.5,
+                  "support_turns": 6,
+                  "source_path": "state_metrics.action_by_state.GPT.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 0.0,
+                  "potion_rate": 1.0,
+                  "support_turns": 2,
+                  "source_path": "state_metrics.action_by_state.GPT.position=second|hp=20|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=20|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 6,
+                "attack_count": 3,
+                "potion_count": 3,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=second|hp=60|potions=3|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 4,
+                "attack_count": 2,
+                "potion_count": 2,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=1|self=ATTACK|opp=ATTACK",
+                "consistency": 0.5,
+                "support_turns": 2,
+                "attack_count": 1,
+                "potion_count": 1,
+                "attack_rate": 0.5,
+                "potion_rate": 0.5,
+                "dominant_action": null
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
+    },
+    "quality_flags": {
+      "complete": true,
+      "unsupported_metrics": []
+    }
+  }
+}

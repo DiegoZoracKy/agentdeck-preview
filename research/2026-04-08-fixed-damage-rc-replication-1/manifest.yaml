@@ -1,0 +1,65 @@
+schema_version: 1
+experiment_id: 2026-04-08-fixed-damage-rc-replication-1
+title: FixedDamage RC Replication — Flash-Lite RC vs GPT-4o-mini RC
+status: complete
+question: >-
+  When both Flash-Lite and GPT-4o-mini use ReasoningController in FixedDamage
+  with full information, does the 20-0 ActionOnlyController gap disappear?
+  Replication of Gemini's Round 6 QA experiment to verify the result is
+  reproducible with the same config.
+game:
+  name: FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: full
+players:
+  - id: gemini_2_5_flash_lite_rc
+    provider: google
+    model: gemini-2.5-flash-lite
+    controller: ReasoningController
+    renderer: TextRenderer
+  - id: gpt_4o_mini_rc
+    provider: openai
+    model: gpt-4o-mini
+    controller: ReasoningController
+    renderer: TextRenderer
+variants:
+  models:
+    - gemini-2.5-flash-lite
+    - gpt-4o-mini
+  controllers:
+    - ReasoningController
+  information_level:
+    - full
+run:
+  seed_base: 42
+  matches_planned: 20
+  matches_completed: 0
+  concurrency: 1
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+storage:
+  raw_recordings:
+    backend: local
+    path: research/2026-04-08-fixed-damage-rc-replication-1/agentdeck_runs
+  summaries:
+    repo_path: research/2026-04-08-fixed-damage-rc-replication-1
+notes: >-
+  Exact replication of the Gemini agent's Round 6 QA experiment
+  (round-06-20260407-171442). Gemini used ReasoningController for both
+  players instead of ActionOnlyController, producing 11-9 in favor of
+  Gemini (p=0.82). This package verifies whether that result is
+  reproducible with the same config: both players RC, full info,
+  N=20, seed=42.
