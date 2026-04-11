@@ -13,11 +13,14 @@ Researchers need to recompute the behavioral profile of a packaged experiment in
 1. Raw recordings are available for a new run, but the researcher wants to score behavior without regenerating all statistics.
 2. A behavioral profile definition changed — the researcher wants to rescore existing recordings against the updated profile without rerunning the experiment.
 
-`agentdeck-research-score` provides this as a first-class CLI entry point backed by the same `BehavioralScorer` contract defined in `SPEC-RESEARCH-BEHAVIORAL.md`. It writes only the `behavioral_profile` key in `results.json`; it does not touch match results, statistics, or any other package artifact.
+`agentdeck-research-score` provides this as a first-class CLI entry point backed by the same `BehavioralScorer` contract defined in `SPEC-RESEARCH-BEHAVIORAL.md`. It writes only the `behavioral_profile` key in the targeted `results.json`; it does not touch match results, statistics, or any other package artifact.
 
 ## 2. Terminology
 
 - **Experiment dir**: a packaged experiment directory containing `manifest.yaml` and `results.json`.
+- **Targeted results file**: the `results.json` file that rescoring will update.
+  - for direct/non-matrix packages: `<experiment-dir>/results.json`
+  - for matrix packages: `<experiment-dir>/artifacts/<cell>/results.json`
 - **Recordings dir**: the directory containing raw `match_*.json` payloads produced by the recorder.
 - **Behavioral profile**: the `behavioral_profile` key in `results.json`, defined by `SPEC-RESEARCH-BEHAVIORAL.md §4.2`.
 - **Profile ID**: the scorer identity string used to select a specific `BehavioralScorer`; `auto` selects the first scorer that reports `supports() == True` for the supplied payloads.
@@ -32,10 +35,10 @@ agentdeck-research-score
       ↓
 BehavioralScorer.score(players, match_payloads, config)   ← SPEC-RESEARCH-BEHAVIORAL
       ↓
-results.json  [behavioral_profile key updated in place]
+targeted results.json  [behavioral_profile key updated in place]
 ```
 
-The scorer reads recordings via the same path-resolution logic used by the research export surface (`SPEC-RESEARCH-WORKFLOW.md`). All other keys in `results.json` are preserved byte-for-byte.
+The scorer reads recordings via the same path-resolution logic used by the research export surface (`SPEC-RESEARCH-WORKFLOW.md`). All other keys in the targeted `results.json` are preserved byte-for-byte.
 
 Resolution order:
 1. package-local scorer at `{experiment_dir}/scripts/behavioral_scorer.py`
@@ -92,7 +95,7 @@ If both exist, `SCORER` wins.
 ## 5. Invariants
 
 - **RS1**: The scorer MUST read match payloads from raw recordings (`match_*.json` files). It MUST NOT attempt to reconstruct payloads from the existing `results.json` matches array.
-- **RS2**: On success, the scorer MUST write only the `behavioral_profile` key in `results.json`. All other keys MUST remain unchanged.
+- **RS2**: On success, the scorer MUST write only the `behavioral_profile` key in the targeted `results.json`. All other keys MUST remain unchanged.
 - **RS3**: The scorer MUST be idempotent: running it twice on the same inputs MUST produce the same `behavioral_profile` output.
 - **RS4**: If `profile_id=auto` resolves to no supported scorer for the experiment's game, the scorer MUST exit with code `0` and leave `results.json` unmodified.
 - **RS5**: The scorer MUST read `game.config` from `manifest.yaml` as the behavioral config, matching the behavior of the research export surface.
@@ -109,7 +112,7 @@ If both exist, `SCORER` wins.
 ## 6. Error Handling
 
 - `--experiment-dir` not found → `FileNotFoundError`, exit 1
-- `results.json` not found in experiment dir → `FileNotFoundError`, exit 1
+- targeted `results.json` not found → `FileNotFoundError`, exit 1
 - Recordings dir not found (from manifest or override) → `FileNotFoundError`, exit 1
 - No `match_*.json` files in recordings dir → `FileNotFoundError`, exit 1
 - `--profile-id` names a specific scorer that does not match the experiment's game → `ValueError`, exit 1
@@ -121,7 +124,7 @@ If both exist, `SCORER` wins.
 
 ## 7. Testing Strategy
 
-- Verify RS2: `results.json` keys other than `behavioral_profile` are byte-identical before and after scoring.
+- Verify RS2: targeted `results.json` keys other than `behavioral_profile` are byte-identical before and after scoring.
 - Verify RS3: running twice produces the same `behavioral_profile` output.
 - Verify RS4: no-op exit on auto with no matching scorer; results.json untouched.
 - Verify RS6: `--recordings-dir` override is used when supplied.
@@ -152,6 +155,11 @@ agentdeck-research-score \
 agentdeck-research-score \
   --experiment-dir research/2026-04-09-signal-cache-controller-2
 
+# Matrix package: rescore one cell artifact
+agentdeck-research-score \
+  --experiment-dir research/2026-04-10-your-matrix-study \
+  --cell p1_c01_example
+
 # Override recordings path (e.g., after moving runs to a new location)
 agentdeck-research-score \
   --experiment-dir research/2026-03-23-fixed-damage-exit-1 \
@@ -160,10 +168,11 @@ agentdeck-research-score \
 
 ## 9. Design Rationale
 
-- **Write only `behavioral_profile`**: the rest of `results.json` is stable and audit-relevant. Updating only the profile key makes the scorer a surgical tool rather than a re-export alias.
+- **Write only `behavioral_profile`**: the rest of the targeted `results.json` is stable and audit-relevant. Updating only the profile key makes the scorer a surgical tool rather than a re-export alias.
 - **Requires raw recordings (RS1)**: behavioral scorers consume recorder match payloads, not the derived `matches` array in `results.json`. The raw payloads carry event-level detail that the summarized array strips out.
 - **No-op on no match (RS4)**: games without a registered scorer are valid. Failing loudly would make the scorer unusable in mixed-game pipelines or automation.
 - **RS7 explicit cell requirement**: silently scoring all cells of a matrix experiment would produce multiple writes to different result files without feedback. An explicit cell flag keeps each invocation unambiguous.
+- **Matrix cell ownership**: matrix rescoring is intentionally cell-scoped. It updates `artifacts/<cell>/results.json`, not the top-level package `results.json`.
 - **Package-local convention over manifest fields**: a conventional `scripts/behavioral_scorer.py` path is the smallest non-breaking extension for new games and keeps scorer ownership inside the experiment package.
 - **Fail loudly on package-local mismatch**: the presence of a package-local scorer file signals author intent. Silent fallback would hide scorer bugs and make Round 8-style benchmark authoring harder to audit.
 

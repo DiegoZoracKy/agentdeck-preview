@@ -163,7 +163,8 @@ def rescore_experiment(
     if is_matrix and cell is None:
         cell_ids = _list_matrix_cell_ids(experiment_dir)
         raise ValueError(
-            f"--cell is required for matrix experiments. "
+            f"--cell is required for matrix experiments because rescoring "
+            f"updates one cell artifact at a time. "
             f"Available cells: {', '.join(cell_ids)}"
         )
 
