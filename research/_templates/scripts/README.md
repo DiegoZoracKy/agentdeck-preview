@@ -7,6 +7,8 @@ Default expectation:
 - use the shared `agentdeck-research-export` workflow for cell/package export
 - add `behavioral_scorer.py` only when the package needs a formal
   `behavioral_profile`
+- let `agentdeck-research-score` discover `SCORER` from
+  `behavioral_scorer.py`; do not patch `results.json` directly
 - fall back to `python scripts/research_export.py` only when you need the repo-local wrapper
 
 Examples:

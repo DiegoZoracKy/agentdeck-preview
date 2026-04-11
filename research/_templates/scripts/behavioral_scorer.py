@@ -39,4 +39,5 @@ class PackageBehavioralScorer(BehavioralScorer):
         raise ValueError(_NOT_CONFIGURED)
 
 
+# agentdeck-research-score auto-discovers this module-global scorer instance.
 SCORER = PackageBehavioralScorer()

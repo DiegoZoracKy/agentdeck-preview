@@ -21,8 +21,10 @@ per-cell `player_ref` keys. Older drafts that still say `model_registry` /
 
 For package-owned games, keep a package-local behavioral scorer at
 `scripts/behavioral_scorer.py` and run `agentdeck-research-score` after export
-to populate `results.json.behavioral_profile`. Package export does not apply
-package-local scorers automatically.
+to populate the targeted `results.json.behavioral_profile`. For matrix studies,
+that target is the cell artifact under `artifacts/<cell>/results.json`; for
+direct/non-matrix studies, it is the top-level package `results.json`. Package
+export does not apply package-local scorers automatically.
 
 ## Start Here
 - `../docs/how-to-run-a-study.md` - supported end-to-end study workflow
@@ -94,8 +96,14 @@ hydrates the `AUTO_FACTS` blocks in `README.md` and `analysis.md`.
 If the package includes `scripts/behavioral_scorer.py`, follow export with:
 
 ```
+# direct / non-matrix package
 agentdeck-research-score \
   --experiment-dir research/YYYY-MM-DD-your-experiment
+
+# matrix package
+agentdeck-research-score \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --cell p1_c01_example
 ```
 
 5) Update the index:

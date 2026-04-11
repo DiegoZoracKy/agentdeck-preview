@@ -68,6 +68,16 @@ agentdeck-research-export \
   --no-generated-at
 
 # Optional: only when this package defines scripts/behavioral_scorer.py
+# This template is matrix-based, so score one cell artifact at a time.
 agentdeck-research-score \
-  --experiment-dir .
+  --experiment-dir . \
+  --cell p1_c01_example
 ```
+
+For matrix packages, rescoring writes the behavioral profile to:
+
+```text
+artifacts/<cell>/results.json
+```
+
+It does not update the top-level package `results.json`.

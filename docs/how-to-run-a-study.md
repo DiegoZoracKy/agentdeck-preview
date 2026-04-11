@@ -147,12 +147,22 @@ This step also refreshes the `AUTO_FACTS` blocks in the top-level
 Package-local behavioral scorers are a separate step. After export, run:
 
 ```bash
+# direct / non-matrix package
 agentdeck-research-score \
   --experiment-dir research/YYYY-MM-DD-your-experiment
+
+# matrix package (scores one cell artifact)
+agentdeck-research-score \
+  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --cell p1_c01_example
 ```
 
-That updates only `results.json.behavioral_profile`. Export does not apply
-package-local scorers automatically.
+That updates only the targeted `results.json.behavioral_profile`.
+
+- direct / non-matrix packages: `<experiment>/results.json`
+- matrix packages: `<experiment>/artifacts/<cell>/results.json`
+
+Export does not apply package-local scorers automatically.
 
 ### 7. Validate And Index
 
