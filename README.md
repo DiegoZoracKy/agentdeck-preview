@@ -4,7 +4,7 @@
 
 *Bring your idea and turn it into a runnable, replayable experiment*
 
-[Quick Start](#-quick-start) · [Examples](examples/README.md) · [How to Run a Study](docs/how-to-run-a-study.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
+[Why Games?](#-why-games) · [Quick Start](#-quick-start) · [Examples](examples/README.md) · [How to Run a Study](docs/how-to-run-a-study.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
 
 ---
 
@@ -15,6 +15,18 @@ AgentDeck helps you turn a behavioral question into a concrete study: define a g
 It is useful when static prompt-response evaluation is not enough. By putting agents inside structured games, AgentDeck makes state, incentives, and resource tradeoffs explicit so behavior is easier to observe, compare, replay, and explain.
 
 ![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
+
+---
+
+## 🎮 Why Games?
+
+Most LLM benchmarks measure **knowledge** through static questions. AgentDeck focuses on **behavior**: maintaining state, adapting over time, and making tradeoffs inside explicit rules.
+
+Game scenarios work well because they make the important variables legible:
+- **Constrained environments** – Isolate specific variables (for example, resource scarcity or turn order)
+- **Iterative decision making** – Agents live with consequences, testing longer-horizon behavior
+- **Social dynamics** – Multiplayer games reveal cooperation, betrayal, and negotiation patterns
+- **Measurable outcomes** – Win/lose provides a clean signal for cost/quality trade-offs
 
 ---
 
@@ -204,16 +216,6 @@ Not `1.0` yet:
 ---
 
 ## ⚙️ Architecture
-
-### Why Games?
-
-Most LLM benchmarks measure **knowledge** through static questions. AgentDeck focuses on **behavior**: maintaining state, adapting over time, and making tradeoffs inside explicit rules.
-
-Game scenarios work well because they make the important variables legible:
-- **Constrained environments** – Isolate specific variables (for example, resource scarcity or turn order)
-- **Iterative decision making** – Agents live with consequences, testing longer-horizon behavior
-- **Social dynamics** – Multiplayer games reveal cooperation, betrayal, and negotiation patterns
-- **Measurable outcomes** – Win/lose provides a clean signal for cost/quality trade-offs
 
 ### The Console Metaphor
 
