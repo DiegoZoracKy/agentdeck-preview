@@ -113,9 +113,7 @@ class GeminiPlayer(LLMPlayer):
             ) from exc
 
         if not isinstance(payload, dict):
-            raise ValueError(
-                "GOOGLE_APPLICATION_CREDENTIALS_B64 must decode to a JSON object."
-            )
+            raise ValueError("GOOGLE_APPLICATION_CREDENTIALS_B64 must decode to a JSON object.")
 
         return payload
 

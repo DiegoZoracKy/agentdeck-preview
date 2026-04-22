@@ -36,7 +36,10 @@ def _gameplay_event(
             },
             "state_after": {
                 "health": {player: own_hp, opponent: 80},
-                "potions": {player: own_potions - 1 if action == "POTION" else own_potions, opponent: 3},
+                "potions": {
+                    player: own_potions - 1 if action == "POTION" else own_potions,
+                    opponent: 3,
+                },
                 "last_action": {
                     player: action,
                     opponent: opponent_last_action,
@@ -360,8 +363,18 @@ def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     assert alpha["wasted_full_health_potion_rate"]["value"] == 0.0
 
     assert profile["state_metrics"]["scarcity_action_profile"]["Alpha"]["3"]["potion_count"] == 2
-    assert profile["state_metrics"]["action_by_state"]["Alpha"]["position=first|hp=80|potions=3"]["attack_count"] == 2
-    assert profile["state_metrics"]["action_by_state"]["Alpha"]["position=second|hp=80|potions=3"]["potion_count"] == 2
+    assert (
+        profile["state_metrics"]["action_by_state"]["Alpha"]["position=first|hp=80|potions=3"][
+            "attack_count"
+        ]
+        == 2
+    )
+    assert (
+        profile["state_metrics"]["action_by_state"]["Alpha"]["position=second|hp=80|potions=3"][
+            "potion_count"
+        ]
+        == 2
+    )
 
     alpha_evidence = profile["evidence"]["per_player"]["Alpha"]
     position_example = alpha_evidence["position_policy_delta"]["examples"][0]

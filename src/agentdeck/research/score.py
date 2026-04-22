@@ -171,9 +171,7 @@ def rescore_experiment(
     if is_matrix and cell:
         results_path = experiment_dir / "artifacts" / cell / "results.json"
         if not results_path.exists():
-            raise FileNotFoundError(
-                f"results.json not found for cell '{cell}': {results_path}"
-            )
+            raise FileNotFoundError(f"results.json not found for cell '{cell}': {results_path}")
         if recordings_dir is not None:
             resolved_recordings_dirs = [recordings_dir.resolve()]
         else:
@@ -330,10 +328,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if not result.get("scorer_found"):
-        print(
-            f"No scorer matched for profile_id={args.profile_id!r}. "
-            "results.json unchanged."
-        )
+        print(f"No scorer matched for profile_id={args.profile_id!r}. " "results.json unchanged.")
         return 0
 
     print(

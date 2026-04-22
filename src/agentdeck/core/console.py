@@ -2892,12 +2892,12 @@ class Console:
             ordered_players = self._shuffle_players(players, rng)
         elif self.config.first_player_policy == "fixed":
             if self.config.fixed_first_player_index >= len(players):
-                raise ValueError(
-                    "fixed_first_player_index must be less than the number of players"
-                )
+                raise ValueError("fixed_first_player_index must be less than the number of players")
             fixed_player = players[self.config.fixed_first_player_index]
             ordered_players = [fixed_player] + [
-                player for idx, player in enumerate(players) if idx != self.config.fixed_first_player_index
+                player
+                for idx, player in enumerate(players)
+                if idx != self.config.fixed_first_player_index
             ]
         else:  # alternating
             offset = match_index % len(players)

@@ -8,7 +8,6 @@ from typing import Any, DefaultDict, Dict, Iterable, List, Mapping, Optional, Tu
 
 from agentdeck.research.behavioral import BehavioralScorer
 
-
 CONSISTENCY_MIN_SUPPORT = 2
 POSITION_DELTA_MIN_SUPPORT_PER_POSITION = 2
 SCARCITY_BUCKETS = (0, 1, 2, 3)
@@ -112,9 +111,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
 
         unsupported_metrics = set()
         if attack_damage is None:
-            unsupported_metrics.update(
-                {"critical_potion_response_rate", "error_recovery_rate"}
-            )
+            unsupported_metrics.update({"critical_potion_response_rate", "error_recovery_rate"})
         if max_health is None:
             unsupported_metrics.add("wasted_full_health_potion_rate")
 
@@ -134,7 +131,9 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
 
         for payload in match_list:
             if _game_name(payload) != "FixedDamageGame":
-                raise ValueError("FixedDamageBehavioralScorer only supports FixedDamageGame payloads")
+                raise ValueError(
+                    "FixedDamageBehavioralScorer only supports FixedDamageGame payloads"
+                )
 
             match_id = str(payload.get("match_id") or "")
             if not match_id:
@@ -142,14 +141,18 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
 
             metadata = payload.get("metadata") or {}
             match_meta = metadata.get("match") or {}
-            match_players = [str(name) for name in (payload.get("players") or match_meta.get("players") or [])]
+            match_players = [
+                str(name) for name in (payload.get("players") or match_meta.get("players") or [])
+            ]
             if len(match_players) != 2:
-                raise ValueError("FixedDamage behavioral scoring requires exactly two players per match")
+                raise ValueError(
+                    "FixedDamage behavioral scoring requires exactly two players per match"
+                )
             unknown = sorted(set(match_players) - player_names)
             if unknown:
                 raise ValueError(f"Unknown players in match payload: {unknown}")
 
-            first_player = ((match_meta.get("first_player") or {}).get("name"))
+            first_player = (match_meta.get("first_player") or {}).get("name")
             if not first_player:
                 raise ValueError("Missing first_player metadata for behavioral scoring")
             first_player = str(first_player)
@@ -160,9 +163,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
             position_by_player = {first_player: "first", second_player: "second"}
 
             gameplay_events = [
-                event
-                for event in (payload.get("events") or [])
-                if event.get("type") == "gameplay"
+                event for event in (payload.get("events") or []) if event.get("type") == "gameplay"
             ]
             if gameplay_events:
                 matches_evaluable += 1
@@ -186,7 +187,9 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 potions = state_before.get("potions") or {}
                 last_action = state_before.get("last_action") or {}
                 if player not in health or player not in potions:
-                    raise ValueError(f"Gameplay state_before missing acting player fields for {player}")
+                    raise ValueError(
+                        f"Gameplay state_before missing acting player fields for {player}"
+                    )
 
                 opponent = next(name for name in match_players if name != player)
                 record: NormalizedTurn = {
@@ -299,9 +302,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 shared_key = _shared_state_key(turn["own_hp"], turn["own_potions"])
                 by_shared_state[shared_key][turn["position"]][turn["action"]] += 1
 
-                bucket_key = _bucket_key(
-                    turn["position"], turn["own_hp"], turn["own_potions"]
-                )
+                bucket_key = _bucket_key(turn["position"], turn["own_hp"], turn["own_potions"])
                 by_bucket[bucket_key][turn["action"]] += 1
 
                 if turn["own_potions"] in SCARCITY_BUCKETS:
@@ -374,9 +375,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 shared_buckets += 1
                 weight = first_support + second_support
                 first_attack_rate = _safe_rate(first_counts.get("ATTACK", 0), first_support)
-                second_attack_rate = _safe_rate(
-                    second_counts.get("ATTACK", 0), second_support
-                )
+                second_attack_rate = _safe_rate(second_counts.get("ATTACK", 0), second_support)
                 delta = abs(first_attack_rate - second_attack_rate)
                 position_weight += weight
                 position_total += delta * weight
@@ -390,9 +389,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                         "first": {
                             "bucket_key": first_bucket_key,
                             "attack_rate": first_attack_rate,
-                            "potion_rate": _safe_rate(
-                                first_counts.get("POTION", 0), first_support
-                            ),
+                            "potion_rate": _safe_rate(first_counts.get("POTION", 0), first_support),
                             "support_turns": first_support,
                             "source_path": (
                                 f"state_metrics.action_by_state.{player}.{first_bucket_key}"
@@ -411,9 +408,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                         },
                     }
                 )
-            position_delta_value = (
-                position_total / position_weight if position_weight else 0.0
-            )
+            position_delta_value = position_total / position_weight if position_weight else 0.0
             position_deltas.append((position_delta_value, position_weight))
             position_examples.sort(
                 key=lambda item: (
@@ -452,9 +447,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 }
 
             evidence_per_player[player] = {
-                "position_policy_delta": {
-                    "examples": position_examples[:EVIDENCE_MAX_EXAMPLES]
-                },
+                "position_policy_delta": {"examples": position_examples[:EVIDENCE_MAX_EXAMPLES]},
                 "state_action_consistency": {
                     "examples": consistency_examples[:EVIDENCE_MAX_EXAMPLES]
                 },
@@ -501,9 +494,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                     if turn["own_potions"] > 0 and turn["own_hp"] <= critical_threshold
                 ]
                 critical_turn_support = len(critical_turns)
-                critical_turn_hits = sum(
-                    1 for turn in critical_turns if turn["action"] == "POTION"
-                )
+                critical_turn_hits = sum(1 for turn in critical_turns if turn["action"] == "POTION")
                 critical_support += critical_turn_support
                 critical_hits += critical_turn_hits
                 player_entry["critical_potion_response_rate"] = {
@@ -548,13 +539,9 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 player_entry["error_recovery_rate"] = None
 
             if max_health is not None:
-                potion_turns = [
-                    turn for turn in player_turn_list if turn["action"] == "POTION"
-                ]
+                potion_turns = [turn for turn in player_turn_list if turn["action"] == "POTION"]
                 potion_support = len(potion_turns)
-                wasted_hits = sum(
-                    1 for turn in potion_turns if turn["own_hp"] == int(max_health)
-                )
+                wasted_hits = sum(1 for turn in potion_turns if turn["own_hp"] == int(max_health))
                 wasted_full_health_support += potion_support
                 wasted_full_health_hits += wasted_hits
                 player_entry["wasted_full_health_potion_rate"] = {
@@ -576,9 +563,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
             },
             "first_potion_profile": {
                 "median_first_potion_hp": (
-                    float(median(first_potion_all_values))
-                    if first_potion_all_values
-                    else None
+                    float(median(first_potion_all_values)) if first_potion_all_values else None
                 ),
                 "first_potion_hp_values": sorted(first_potion_all_values),
                 "never_used_rate": _safe_rate(never_used_hits, never_used_support),
@@ -626,9 +611,7 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
 
         if max_health is not None:
             aggregate_metrics["wasted_full_health_potion_rate"] = {
-                "value": _safe_rate(
-                    wasted_full_health_hits, wasted_full_health_support
-                ),
+                "value": _safe_rate(wasted_full_health_hits, wasted_full_health_support),
                 "wasted_full_health_potions": wasted_full_health_hits,
                 "support_potions": wasted_full_health_support,
                 "max_health": int(max_health),

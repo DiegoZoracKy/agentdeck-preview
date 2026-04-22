@@ -33,7 +33,7 @@ Game scenarios work well because they make the important variables legible:
 ## 🚀 Quick Start
 
 > **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
-> **Runtime**: Python 3.9+ (CI covers 3.9–3.11) · 75% coverage gate
+> **Runtime**: Python 3.10+ (CI covers 3.10–3.11) · 75% coverage gate
 
 ### Installation
 

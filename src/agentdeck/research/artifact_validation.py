@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-
 _CHECK_ORDER: Tuple[str, ...] = (
     "monotonic_gameplay_timeline",
     "top_level_timing_consistency",
@@ -99,7 +98,9 @@ def _prompt_turn_number(event_data: Dict[str, Any]) -> Optional[int]:
     return _as_int(prompt.get("turn_number"))
 
 
-def _resolve_consistent_turn_number(event_data: Dict[str, Any]) -> Tuple[Optional[int], Optional[str]]:
+def _resolve_consistent_turn_number(
+    event_data: Dict[str, Any],
+) -> Tuple[Optional[int], Optional[str]]:
     values: List[Tuple[str, int]] = []
     prompt_turn_number = _prompt_turn_number(event_data)
     if prompt_turn_number is not None:
@@ -132,17 +133,13 @@ def _check_monotonic_gameplay_timeline(payload: Dict[str, Any], match_id: str) -
 
         timestamp = _as_float(event.get("timestamp"))
         if event.get("timestamp") is not None and timestamp is None:
-            failures.append(
-                f"{match_id}: gameplay event {event_index} has non-numeric timestamp"
-            )
+            failures.append(f"{match_id}: gameplay event {event_index} has non-numeric timestamp")
         if (
             previous_timestamp is not None
             and timestamp is not None
             and timestamp < previous_timestamp
         ):
-            failures.append(
-                f"{match_id}: gameplay timestamp decreased at event {event_index}"
-            )
+            failures.append(f"{match_id}: gameplay timestamp decreased at event {event_index}")
         if timestamp is not None:
             previous_timestamp = timestamp
 

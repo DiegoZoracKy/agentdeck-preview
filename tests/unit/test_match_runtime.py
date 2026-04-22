@@ -136,7 +136,9 @@ def _make_runtime(
     return runtime, console, logger, game
 
 
-def _turn_context(match_id: str = "match-1", player: str = "Alice", turn_number: int = 1) -> TurnContext:
+def _turn_context(
+    match_id: str = "match-1", player: str = "Alice", turn_number: int = 1
+) -> TurnContext:
     return TurnContext(
         match_id=match_id,
         turn_number=turn_number,
@@ -265,7 +267,9 @@ def test_mr3_handle_parse_failure_delegates_shared_pipeline_and_returns_policy()
     assert console.dispatched_events == []
     assert len(console.parse_failure_events) == 1
     assert console.parse_failure_events[0].type == EventType.PLAYER_ACTION_PARSE_FAILED.value
-    assert console.parse_failure_events[0].data["policy_outcome"] == ParseFailurePolicy.SKIP_TURN.value
+    assert (
+        console.parse_failure_events[0].data["policy_outcome"] == ParseFailurePolicy.SKIP_TURN.value
+    )
 
 
 def test_mr4_fork_rng_logs_label_and_is_deterministic():
@@ -284,16 +288,16 @@ def test_mr4_fork_rng_logs_label_and_is_deterministic():
         "RNG fork: turn_7 (match_id=match-rng, base_seed=12345)",
         "RNG fork: setup (match_id=match-rng, base_seed=12345)",
     ]
-    assert logger_b.debug_calls == [
-        "RNG fork: turn_7 (match_id=match-rng, base_seed=12345)"
-    ]
+    assert logger_b.debug_calls == ["RNG fork: turn_7 (match_id=match-rng, base_seed=12345)"]
 
 
 def test_validate_state_logs_and_reraises_failures():
     """SPEC-MATCH-RUNTIME §4.6: validate_state logs context and re-raises validation failures."""
     validation_error = ValueError("state invalid")
     logger = DummyLogger()
-    runtime, _, _, _ = _make_runtime(game=DummyGame(validation_error=validation_error), logger=logger)
+    runtime, _, _, _ = _make_runtime(
+        game=DummyGame(validation_error=validation_error), logger=logger
+    )
 
     with pytest.raises(ValueError, match="state invalid"):
         runtime.validate_state({"hp": {"Alice": -1}})

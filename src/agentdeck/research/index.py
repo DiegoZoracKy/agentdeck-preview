@@ -61,9 +61,7 @@ def _format_results(results_path: Path) -> str:
 
 def generate_index(research_dir: Path) -> str:
     manifest_paths = sorted(
-        path
-        for path in research_dir.glob("*/manifest.yaml")
-        if "_templates" not in str(path)
+        path for path in research_dir.glob("*/manifest.yaml") if "_templates" not in str(path)
     )
 
     rows = []

@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 AUTO_FACTS_BEGIN = "<!-- AUTO_FACTS:BEGIN -->"
 AUTO_FACTS_END = "<!-- AUTO_FACTS:END -->"
 

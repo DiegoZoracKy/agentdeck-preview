@@ -215,7 +215,10 @@ def test_llmplayer_handshake_uses_game_default_template_and_frontloads_action_fo
     assert "Gameplay format:" in bundle.text
     assert "Respond with: ACTION: <action>" in bundle.text
     assert "Allowed actions: ATTACK, POTION" in bundle.text
-    assert "Reply with exactly 'OK' and nothing else if you understand and are ready to begin." in bundle.text
+    assert (
+        "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
+        in bundle.text
+    )
 
 
 # Test clone()

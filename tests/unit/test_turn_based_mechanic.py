@@ -353,9 +353,9 @@ def test_tl0_update_dropping_mechanic_keys_is_fail_soft(tmp_path):
             if repr(key) in msg:
                 warnings_for_keys[key] += 1
 
-    assert warnings_for_keys["_turn_count"] == 1, (
-        f"expected 1 warning for _turn_count, got {warnings_for_keys['_turn_count']}"
-    )
+    assert (
+        warnings_for_keys["_turn_count"] == 1
+    ), f"expected 1 warning for _turn_count, got {warnings_for_keys['_turn_count']}"
     assert warnings_for_keys["_first_player_idx"] == 1, (
         f"expected 1 warning for _first_player_idx, got "
         f"{warnings_for_keys['_first_player_idx']}"
@@ -394,6 +394,4 @@ def test_tl0_mechanic_key_warning_does_not_repeat_per_turn(tmp_path):
         and "dropped mechanic key" in record.getMessage()
     )
     # One warning per mechanic key (_turn_count, _first_player_idx).
-    assert total_warnings == 2, (
-        f"expected exactly 2 warnings (one per key), got {total_warnings}"
-    )
+    assert total_warnings == 2, f"expected exactly 2 warnings (one per key), got {total_warnings}"

@@ -409,7 +409,7 @@ class TurnLoop:
         Emits FIRST_PLAYER_SELECTED event via runtime.
         """
         first_idx = state.get("_first_player_idx")
-        if not isinstance(first_idx, int) or not (0 <= first_idx < len(self.players)):
+        if not isinstance(first_idx, int) or not 0 <= first_idx < len(self.players):
             # Fork RNG for first player selection (TL1)
             first_player_rng = self.runtime.fork_rng("first_player_selection")
             first_idx = first_player_rng.randint(0, len(self.players) - 1)

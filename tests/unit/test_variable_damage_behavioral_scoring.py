@@ -308,15 +308,37 @@ def test_variable_damage_behavioral_profile_metrics_with_config() -> None:
     assert alpha["wasted_full_health_potion_rate"]["value"] == 0.0
 
     state_metrics = profile["state_metrics"]
-    assert state_metrics["action_by_state"]["Alpha"]["position=first|hp=80|potions=3"]["attack_count"] == 2
-    assert state_metrics["action_by_risk_band"]["Alpha"]["position=second|risk=safe|potions=3"]["potion_count"] == 2
-    assert state_metrics["action_by_risk_band"]["Alpha"]["position=first|risk=lethal|potions=1"]["potion_rate"] == 1.0
+    assert (
+        state_metrics["action_by_state"]["Alpha"]["position=first|hp=80|potions=3"]["attack_count"]
+        == 2
+    )
+    assert (
+        state_metrics["action_by_risk_band"]["Alpha"]["position=second|risk=safe|potions=3"][
+            "potion_count"
+        ]
+        == 2
+    )
+    assert (
+        state_metrics["action_by_risk_band"]["Alpha"]["position=first|risk=lethal|potions=1"][
+            "potion_rate"
+        ]
+        == 1.0
+    )
 
     alpha_evidence = profile["evidence"]["per_player"]["Alpha"]
-    assert alpha_evidence["position_policy_delta"]["examples"][0]["shared_state_key"] == "hp=20|potions=1"
-    assert alpha_evidence["risk_band_policy_delta"]["examples"][0]["shared_risk_key"] == "risk=danger|potions=2"
+    assert (
+        alpha_evidence["position_policy_delta"]["examples"][0]["shared_state_key"]
+        == "hp=20|potions=1"
+    )
+    assert (
+        alpha_evidence["risk_band_policy_delta"]["examples"][0]["shared_risk_key"]
+        == "risk=danger|potions=2"
+    )
     assert len(alpha_evidence["risk_band_policy_delta"]["examples"]) == EVIDENCE_MAX_EXAMPLES
-    assert [example["dominant_action"] for example in alpha_evidence["state_action_consistency"]["examples"]] == [
+    assert [
+        example["dominant_action"]
+        for example in alpha_evidence["state_action_consistency"]["examples"]
+    ] == [
         "POTION",
         "POTION",
         "ATTACK",
@@ -530,4 +552,7 @@ def test_variable_damage_export_auto_selects_variable_scorer(tmp_path, monkeypat
     exported = json.loads((output_dir / "results.json").read_text(encoding="utf-8"))
     assert exported["behavioral_profile"]["profile_id"] == "variable_damage_behavioral"
     assert exported["behavioral_profile"]["quality_flags"]["complete"] is True
-    assert "risk_band_policy_delta" in exported["behavioral_profile"]["evidence"]["per_player"]["Alpha"]
+    assert (
+        "risk_band_policy_delta"
+        in exported["behavioral_profile"]["evidence"]["per_player"]["Alpha"]
+    )

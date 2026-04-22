@@ -9,7 +9,6 @@ from typing import Any, DefaultDict, Dict, Iterable, List, Mapping, Optional, Tu
 
 from agentdeck.research.behavioral import BehavioralScorer
 
-
 CONSISTENCY_MIN_SUPPORT = 2
 POSITION_DELTA_MIN_SUPPORT_PER_POSITION = 2
 RISK_BAND_MIN_SUPPORT = 2
@@ -284,8 +283,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             metadata = payload.get("metadata") or {}
             match_meta = metadata.get("match") or {}
             match_players = [
-                str(name)
-                for name in (payload.get("players") or match_meta.get("players") or [])
+                str(name) for name in (payload.get("players") or match_meta.get("players") or [])
             ]
             if len(match_players) != 2:
                 raise ValueError(
@@ -295,7 +293,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             if unknown:
                 raise ValueError(f"Unknown players in match payload: {unknown}")
 
-            first_player = ((match_meta.get("first_player") or {}).get("name"))
+            first_player = (match_meta.get("first_player") or {}).get("name")
             if not first_player:
                 raise ValueError("Missing first_player metadata for behavioral scoring")
             first_player = str(first_player)
@@ -306,9 +304,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             position_by_player = {first_player: "first", second_player: "second"}
 
             gameplay_events = [
-                event
-                for event in (payload.get("events") or [])
-                if event.get("type") == "gameplay"
+                event for event in (payload.get("events") or []) if event.get("type") == "gameplay"
             ]
             if gameplay_events:
                 matches_evaluable += 1
@@ -349,10 +345,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                     "last_action_opponent": last_action.get(opponent),
                 }
 
-                if (
-                    max_attack_damage is not None
-                    and potion_heal is not None
-                ):
+                if max_attack_damage is not None and potion_heal is not None:
                     record["risk_band"] = _risk_band(
                         own_hp=record["own_hp"],
                         max_attack_damage=int(max_attack_damage),
@@ -392,10 +385,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                     high_roll_min_damage = _top_half_min_damage(
                         int(min_attack_damage), int(max_attack_damage)
                     )
-                    if (
-                        target_after > 0
-                        and realized_damage >= high_roll_min_damage
-                    ):
+                    if target_after > 0 and realized_damage >= high_roll_min_damage:
                         shocks_by_player[opponent].append(
                             {
                                 "match_id": match_id,
@@ -499,17 +489,13 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
         wasted_full_health_support = 0
         wasted_full_health_hits = 0
 
-        risk_config_available = (
-            max_attack_damage is not None and potion_heal is not None
-        )
+        risk_config_available = max_attack_damage is not None and potion_heal is not None
         danger_split_available = (
             min_attack_damage is not None
             and max_attack_damage is not None
             and potion_heal is not None
         )
-        high_roll_config_available = (
-            min_attack_damage is not None and max_attack_damage is not None
-        )
+        high_roll_config_available = min_attack_damage is not None and max_attack_damage is not None
 
         for player in roster:
             player_turn_list = sorted(
@@ -565,16 +551,12 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                 shared_key = _shared_state_key(turn["own_hp"], turn["own_potions"])
                 by_shared_state[shared_key][turn["position"]][turn["action"]] += 1
 
-                bucket_key = _bucket_key(
-                    turn["position"], turn["own_hp"], turn["own_potions"]
-                )
+                bucket_key = _bucket_key(turn["position"], turn["own_hp"], turn["own_potions"])
                 by_bucket[bucket_key][turn["action"]] += 1
 
                 if risk_config_available:
                     band = str(turn["risk_band"])
-                    risk_bucket_key = _risk_bucket_key(
-                        turn["position"], band, turn["own_potions"]
-                    )
+                    risk_bucket_key = _risk_bucket_key(turn["position"], band, turn["own_potions"])
                     by_risk_bucket[risk_bucket_key][turn["action"]] += 1
 
                     shared_risk_key = _shared_risk_key(band, turn["own_potions"])
@@ -653,9 +635,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                         "first": {
                             "bucket_key": f"position=first|{shared_state_key}",
                             "attack_rate": first_attack_rate,
-                            "potion_rate": _safe_rate(
-                                first_counts.get("POTION", 0), first_support
-                            ),
+                            "potion_rate": _safe_rate(first_counts.get("POTION", 0), first_support),
                             "support_turns": first_support,
                             "source_path": (
                                 f"state_metrics.action_by_state.{player}.position=first|{shared_state_key}"
@@ -681,9 +661,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                     item["shared_state_key"],
                 )
             )
-            position_delta_value = (
-                position_total / position_weight if position_weight else 0.0
-            )
+            position_delta_value = position_total / position_weight if position_weight else 0.0
             position_deltas.append((position_delta_value, position_weight))
 
             risk_band_weight = 0
@@ -703,12 +681,8 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                         continue
                     shared_risk_buckets += 1
                     weight = first_support + second_support
-                    first_attack_rate = _safe_rate(
-                        first_counts.get("ATTACK", 0), first_support
-                    )
-                    second_attack_rate = _safe_rate(
-                        second_counts.get("ATTACK", 0), second_support
-                    )
+                    first_attack_rate = _safe_rate(first_counts.get("ATTACK", 0), first_support)
+                    second_attack_rate = _safe_rate(second_counts.get("ATTACK", 0), second_support)
                     delta = abs(first_attack_rate - second_attack_rate)
                     risk_band_weight += weight
                     risk_band_total += delta * weight
@@ -738,9 +712,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                         item["shared_risk_key"],
                     )
                 )
-            risk_band_policy_value = (
-                risk_band_total / risk_band_weight if risk_band_weight else 0.0
-            )
+            risk_band_policy_value = risk_band_total / risk_band_weight if risk_band_weight else 0.0
             risk_band_deltas.append((risk_band_policy_value, risk_band_weight))
 
             action_by_state[player] = {}
@@ -884,13 +856,9 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                 high_roll_entry = None
 
             if max_health is not None:
-                potion_turns = [
-                    turn for turn in player_turn_list if turn["action"] == "POTION"
-                ]
+                potion_turns = [turn for turn in player_turn_list if turn["action"] == "POTION"]
                 potion_support = len(potion_turns)
-                wasted_hits = sum(
-                    1 for turn in potion_turns if turn["own_hp"] == int(max_health)
-                )
+                wasted_hits = sum(1 for turn in potion_turns if turn["own_hp"] == int(max_health))
                 wasted_full_health_support += potion_support
                 wasted_full_health_hits += wasted_hits
                 wasted_entry: Dict[str, Any] | None = {
@@ -937,9 +905,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                 "first_lethal_entry_inventory": (
                     {
                         "median_potions_on_first_lethal_entry": (
-                            float(median(lethal_entry_values))
-                            if lethal_entry_values
-                            else None
+                            float(median(lethal_entry_values)) if lethal_entry_values else None
                         ),
                         "first_lethal_entry_potion_values": lethal_entry_values,
                         "zero_potions_rate": _safe_rate(
@@ -1002,9 +968,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                 ),
                 "lower_danger_zone_potion_rate": (
                     {
-                        "value": _safe_rate(
-                            lower_danger_potions, lower_danger_support
-                        ),
+                        "value": _safe_rate(lower_danger_potions, lower_danger_support),
                         "potion_turns": lower_danger_potions,
                         "support_turns": lower_danger_support,
                         "danger_split_hp": _danger_split_hp(
@@ -1018,9 +982,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                 ),
                 "upper_danger_zone_potion_rate": (
                     {
-                        "value": _safe_rate(
-                            upper_danger_potions, upper_danger_support
-                        ),
+                        "value": _safe_rate(upper_danger_potions, upper_danger_support),
                         "potion_turns": upper_danger_potions,
                         "support_turns": upper_danger_support,
                         "danger_split_hp": _danger_split_hp(
@@ -1065,15 +1027,11 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             }
 
             evidence_per_player[player] = {
-                "position_policy_delta": {
-                    "examples": position_examples[:EVIDENCE_MAX_EXAMPLES]
-                },
+                "position_policy_delta": {"examples": position_examples[:EVIDENCE_MAX_EXAMPLES]},
                 "state_action_consistency": {
                     "examples": consistency_examples[:EVIDENCE_MAX_EXAMPLES]
                 },
-                "risk_band_policy_delta": {
-                    "examples": risk_band_examples[:EVIDENCE_MAX_EXAMPLES]
-                },
+                "risk_band_policy_delta": {"examples": risk_band_examples[:EVIDENCE_MAX_EXAMPLES]},
             }
 
             per_player_results[player] = player_entry
@@ -1086,9 +1044,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             },
             "first_potion_profile": {
                 "median_first_potion_hp": (
-                    float(median(first_potion_all_values))
-                    if first_potion_all_values
-                    else None
+                    float(median(first_potion_all_values)) if first_potion_all_values else None
                 ),
                 "first_potion_hp_values": sorted(first_potion_all_values),
                 "never_used_rate": _safe_rate(never_used_hits, never_used_support),
@@ -1103,9 +1059,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                         else None
                     ),
                     "first_lethal_entry_potion_values": sorted(first_lethal_all_values),
-                    "zero_potions_rate": _safe_rate(
-                        first_lethal_zero_hits, first_lethal_support
-                    ),
+                    "zero_potions_rate": _safe_rate(first_lethal_zero_hits, first_lethal_support),
                     "zero_potions_matches": first_lethal_zero_hits,
                     "support_matches": first_lethal_support,
                     "never_entered_rate": _safe_rate(
@@ -1166,9 +1120,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             ),
             "lower_danger_zone_potion_rate": (
                 {
-                    "value": _safe_rate(
-                        lower_danger_potion_hits, lower_danger_potion_support
-                    ),
+                    "value": _safe_rate(lower_danger_potion_hits, lower_danger_potion_support),
                     "potion_turns": lower_danger_potion_hits,
                     "support_turns": lower_danger_potion_support,
                     "danger_split_hp": _danger_split_hp(
@@ -1182,9 +1134,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             ),
             "upper_danger_zone_potion_rate": (
                 {
-                    "value": _safe_rate(
-                        upper_danger_potion_hits, upper_danger_potion_support
-                    ),
+                    "value": _safe_rate(upper_danger_potion_hits, upper_danger_potion_support),
                     "potion_turns": upper_danger_potion_hits,
                     "support_turns": upper_danger_potion_support,
                     "danger_split_hp": _danger_split_hp(
@@ -1218,9 +1168,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                 {
                     "entries": {
                         key: {
-                            "value": _safe_rate(
-                                counts["potion_turns"], counts["support_turns"]
-                            ),
+                            "value": _safe_rate(counts["potion_turns"], counts["support_turns"]),
                             "potion_turns": counts["potion_turns"],
                             "support_turns": counts["support_turns"],
                         }
@@ -1257,9 +1205,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
             ),
             "wasted_full_health_potion_rate": (
                 {
-                    "value": _safe_rate(
-                        wasted_full_health_hits, wasted_full_health_support
-                    ),
+                    "value": _safe_rate(wasted_full_health_hits, wasted_full_health_support),
                     "wasted_full_health_potions": wasted_full_health_hits,
                     "support_potions": wasted_full_health_support,
                     "max_health": int(max_health),

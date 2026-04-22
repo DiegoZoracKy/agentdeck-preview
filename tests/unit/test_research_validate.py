@@ -91,7 +91,7 @@ def _write_results_files(
     (experiment_dir / "results.json").write_text(json.dumps(results_payload), encoding="utf-8")
     (experiment_dir / "results.csv").write_text(
         "match_id,winner,turns,outcome,seed,duration,cost,player_order_source,first_player,players,player_costs\n"
-        "m1,Alice,1,win,42,1.0,0.0,console,Alice,\"Alice,Bob\",{}\n",
+        'm1,Alice,1,win,42,1.0,0.0,console,Alice,"Alice,Bob",{}\n',
         encoding="utf-8",
     )
 
@@ -345,7 +345,14 @@ def test_empty_research_tree_is_valid(tmp_path):
     index_path = research_dir / "INDEX.md"
 
     result = subprocess.run(
-        [sys.executable, str(index_script), "--research-dir", str(research_dir), "--output", str(index_path)],
+        [
+            sys.executable,
+            str(index_script),
+            "--research-dir",
+            str(research_dir),
+            "--output",
+            str(index_path),
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -375,9 +382,7 @@ def test_validate_main_write_index_defaults_to_research_dir(tmp_path, monkeypatc
     cwd.mkdir()
     monkeypatch.chdir(cwd)
 
-    result = research_validate.main(
-        ["--research-dir", str(research_dir), "--write-index"]
-    )
+    result = research_validate.main(["--research-dir", str(research_dir), "--write-index"])
 
     assert result == 0
     assert (research_dir / "INDEX.md").exists()

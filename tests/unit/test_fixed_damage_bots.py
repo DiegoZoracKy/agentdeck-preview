@@ -4,7 +4,6 @@ import pytest
 
 from agentdeck.games.examples.fixed_damage import AttackBot, PotionAt80Bot
 
-
 TURN_PROMPT = """=== Current Game State ===
 You are: Alice
 Turn: 3

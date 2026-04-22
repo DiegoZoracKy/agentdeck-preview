@@ -526,6 +526,7 @@ def test_get_current_player_round_robin():
     Verify that the default get_current_player() implementation cycles
     through players in order.
     """
+
     class RoundRobinReferenceGame(TurnBasedGame):
         @property
         def instructions(self) -> str:

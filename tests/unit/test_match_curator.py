@@ -8,7 +8,12 @@ from pathlib import Path
 import pytest
 
 from agentdeck.core.types import Event, MatchResult
-from agentdeck.spectators.curator import MatchCurator, MatchCuratorPayload, MatchHighlight, curate_match_file
+from agentdeck.spectators.curator import (
+    MatchCurator,
+    MatchCuratorPayload,
+    MatchHighlight,
+    curate_match_file,
+)
 
 
 class MockGame:
@@ -164,7 +169,10 @@ def test_match_curator_default_generator_produces_valid_payload():
         highlight.turn for highlight in payload.highlights
     )
     assert all(len(highlight.label) <= 50 for highlight in payload.highlights)
-    assert all(highlight.kind in {None, "mistake", "smart_move", "surprise", "turning_point"} for highlight in payload.highlights)
+    assert all(
+        highlight.kind in {None, "mistake", "smart_move", "surprise", "turning_point"}
+        for highlight in payload.highlights
+    )
 
 
 def test_match_curator_rejects_overlong_highlight_labels():

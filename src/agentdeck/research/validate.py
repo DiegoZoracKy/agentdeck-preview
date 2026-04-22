@@ -14,7 +14,6 @@ import yaml
 
 from .index import generate_index
 
-
 REQUIRED_FIELDS: Tuple[Tuple[str, ...], ...] = (
     ("schema_version",),
     ("experiment_id",),
@@ -91,9 +90,7 @@ def _validate_manifest(manifest_path: Path, manifest: Dict[str, Any]) -> List[st
 
     experiment_id = manifest.get("experiment_id")
     if experiment_id and experiment_id != experiment_name:
-        errors.append(
-            f"{experiment_name}: experiment_id '{experiment_id}' != folder name"
-        )
+        errors.append(f"{experiment_name}: experiment_id '{experiment_id}' != folder name")
 
     players = manifest.get("players")
     if isinstance(players, list):
@@ -153,9 +150,7 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
             data = None
         if isinstance(data, dict):
             if data.get("experiment_id") != experiment_name:
-                errors.append(
-                    f"{experiment_name}: results.json experiment_id mismatch"
-                )
+                errors.append(f"{experiment_name}: results.json experiment_id mismatch")
             source = data.get("source", {})
             if not isinstance(source, dict):
                 errors.append(f"{experiment_name}: results.json missing source object")
@@ -229,9 +224,7 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
             position_effect = data.get("position_effect")
             if has_matches and enforce_extended_research_metrics:
                 if not isinstance(position_effect, dict):
-                    errors.append(
-                        f"{experiment_name}: results.json missing position_effect object"
-                    )
+                    errors.append(f"{experiment_name}: results.json missing position_effect object")
                 else:
                     required_position_keys = {
                         "total_matches",
@@ -425,13 +418,9 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
             schema_version = data.get("schema_version")
             if schema_version is not None:
                 if not _is_int(schema_version):
-                    errors.append(
-                        f"{experiment_name}: results.json schema_version must be int"
-                    )
+                    errors.append(f"{experiment_name}: results.json schema_version must be int")
                 elif schema_version < 1:
-                    errors.append(
-                        f"{experiment_name}: results.json schema_version must be >= 1"
-                    )
+                    errors.append(f"{experiment_name}: results.json schema_version must be >= 1")
         elif data is not None:
             errors.append(f"{experiment_name}: results.json must be mapping")
 
@@ -478,9 +467,7 @@ def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> 
     matches_completed = run.get("matches_completed")
 
     must_enforce = (
-        status in {"complete", "archived"}
-        and _is_int(matches_completed)
-        and matches_completed > 0
+        status in {"complete", "archived"} and _is_int(matches_completed) and matches_completed > 0
     )
     if not must_enforce:
         return errors
@@ -494,9 +481,7 @@ def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> 
         content = path.read_text(encoding="utf-8")
         has_block, block = _extract_auto_facts_block(content)
         if not has_block:
-            errors.append(
-                f"{experiment_name}: {doc_name} missing AUTO_FACTS block markers"
-            )
+            errors.append(f"{experiment_name}: {doc_name} missing AUTO_FACTS block markers")
             continue
 
         if _has_auto_facts_placeholder(block):
@@ -522,9 +507,7 @@ def _normalize_index(content: str, timestamp_line: str) -> str:
     return "\n".join(normalized) + ("\n" if content.endswith("\n") else "")
 
 
-def _validate_index(
-    research_dir: Path, index_path: Path, write_index: bool
-) -> List[str]:
+def _validate_index(research_dir: Path, index_path: Path, write_index: bool) -> List[str]:
     generated = generate_index(research_dir)
 
     if write_index:
@@ -559,9 +542,7 @@ def validate_research_tree(
 ) -> List[str]:
     errors: List[str] = []
     manifest_paths = sorted(
-        path
-        for path in research_dir.glob("*/manifest.yaml")
-        if "_templates" not in str(path)
+        path for path in research_dir.glob("*/manifest.yaml") if "_templates" not in str(path)
     )
 
     for manifest_path in manifest_paths:
@@ -580,7 +561,7 @@ def validate_research_tree(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agentdeck-research-validate",
-        description="Validate research manifests and INDEX.md consistency."
+        description="Validate research manifests and INDEX.md consistency.",
     )
     parser.add_argument("--research-dir", default=Path("research"), type=Path)
     parser.add_argument("--index", default=None, type=Path)

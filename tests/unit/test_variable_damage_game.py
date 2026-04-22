@@ -46,7 +46,10 @@ def test_variable_damage_rejects_invalid_information_level():
     [
         ({"min_attack_damage": 0, "max_attack_damage": 25}, "positive integers"),
         ({"min_attack_damage": 15, "max_attack_damage": 0}, "positive integers"),
-        ({"min_attack_damage": 30, "max_attack_damage": 25}, "min_attack_damage must be <= max_attack_damage"),
+        (
+            {"min_attack_damage": 30, "max_attack_damage": 25},
+            "min_attack_damage must be <= max_attack_damage",
+        ),
     ],
 )
 def test_variable_damage_rejects_invalid_damage_ranges(kwargs, message):

@@ -198,8 +198,7 @@ def test_rescore_experiment_package_local_multiple_subclasses_fail(tmp_path: Pat
     experiment_dir = _create_experiment(tmp_path)
     _write_package_local_scorer(
         experiment_dir,
-        _base_profile()
-        + """
+        _base_profile() + """
 
 class AnotherScorer(CustomBehavioralScorer):
     profile_id = "another"

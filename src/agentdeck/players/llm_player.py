@@ -210,16 +210,16 @@ class LLMPlayer(Player, ABC):
         logger = getattr(self, "logger", None)
         if logger:
             logger.api_request(
-                    player=self.name,
-                    model=self.model,
-                    messages=messages,
-                    temperature=self.temperature,
-                    max_tokens=self._effective_max_tokens_for_request(),
-                    phase=phase,
-                    match_id=match_id,
-                    turn_number=turn_number,
-                    call_id=call_id,
-                )
+                player=self.name,
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self._effective_max_tokens_for_request(),
+                phase=phase,
+                match_id=match_id,
+                turn_number=turn_number,
+                call_id=call_id,
+            )
 
         retry_durations: List[float] = []
         attempt_durations: List[float] = []

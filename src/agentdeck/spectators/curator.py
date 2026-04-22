@@ -250,7 +250,9 @@ class MatchCurator(Spectator):
             encoding="utf-8",
         )
 
-    def _normalize_payload(self, payload: MatchCuratorPayload | Dict[str, Any]) -> MatchCuratorPayload:
+    def _normalize_payload(
+        self, payload: MatchCuratorPayload | Dict[str, Any]
+    ) -> MatchCuratorPayload:
         if isinstance(payload, MatchCuratorPayload):
             self._validate_payload(payload)
             return payload
@@ -275,7 +277,9 @@ class MatchCurator(Spectator):
             if not isinstance(transcript_raw, Sequence):
                 raise ValueError("MatchCurator transcript must be an array when provided")
             transcript = [
-                MatchTranscriptEntry(turn=int(item["turn"]), text=self._require_string(item, "text"))
+                MatchTranscriptEntry(
+                    turn=int(item["turn"]), text=self._require_string(item, "text")
+                )
                 for item in transcript_raw
             ]
 
@@ -378,7 +382,9 @@ class MatchCurator(Spectator):
             add(potion_frame.turn, f"{potion_frame.player} uses recovery", kind="smart_move")
 
         if decisive is not None:
-            target, hp = self._lowest_health_target(decisive.state_after.get("health", {}), exclude=decisive.player)
+            target, hp = self._lowest_health_target(
+                decisive.state_after.get("health", {}), exclude=decisive.player
+            )
             if target and hp is not None:
                 add(decisive.turn, f"{target} falls to {hp} HP", kind="turning_point")
             else:
@@ -390,7 +396,9 @@ class MatchCurator(Spectator):
     def _build_transcript(self, frames: Sequence[CuratorFrame]) -> List[MatchTranscriptEntry]:
         transcript: List[MatchTranscriptEntry] = []
         for frame in frames:
-            target, hp = self._lowest_health_target(frame.state_after.get("health", {}), exclude=frame.player)
+            target, hp = self._lowest_health_target(
+                frame.state_after.get("health", {}), exclude=frame.player
+            )
             if target and hp is not None:
                 text = f"Turn {frame.turn}: {frame.player} uses {frame.action} and leaves {target} at {hp} HP."
             else:
@@ -427,9 +435,7 @@ class MatchCurator(Spectator):
         exclude: str | None = None,
     ) -> tuple[str | None, int | None]:
         candidates = [
-            (name, int(hp))
-            for name, hp in (health_state or {}).items()
-            if name != exclude
+            (name, int(hp)) for name, hp in (health_state or {}).items() if name != exclude
         ]
         if not candidates:
             return None, None

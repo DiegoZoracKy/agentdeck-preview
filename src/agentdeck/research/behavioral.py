@@ -6,7 +6,6 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
-
 CANONICAL_JSON_KWARGS = {
     "sort_keys": True,
     "separators": (",", ":"),
@@ -105,9 +104,7 @@ def compute_behavioral_profile(
     config: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any] | None:
     match_payload_list = list(match_payloads)
-    scorer = get_behavioral_scorer(
-        match_payloads=match_payload_list, profile_id=profile_id
-    )
+    scorer = get_behavioral_scorer(match_payloads=match_payload_list, profile_id=profile_id)
     if scorer is None:
         return None
     return scorer.score(

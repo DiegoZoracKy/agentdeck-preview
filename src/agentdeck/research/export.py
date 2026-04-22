@@ -176,7 +176,9 @@ def export_matrix_package(
             "agentdeck_runs/<cell_id>/session_*/records exists."
         )
 
-    experiment_id = manifest.get("experiment_id") or matrix.get("experiment_id") or experiment_dir.name
+    experiment_id = (
+        manifest.get("experiment_id") or matrix.get("experiment_id") or experiment_dir.name
+    )
     export_results(
         recordings_dirs,
         experiment_dir,
@@ -441,9 +443,7 @@ def export_results(
             costs.append(float(match["cost"]))
 
     decisive = sum(wins.values())
-    win_rates = {
-        player: (wins[player] / decisive if decisive else 0.0) for player in wins
-    }
+    win_rates = {player: (wins[player] / decisive if decisive else 0.0) for player in wins}
 
     summary = {
         "total_matches": len(matches),

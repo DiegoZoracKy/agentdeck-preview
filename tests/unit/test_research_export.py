@@ -225,13 +225,7 @@ def test_export_results_includes_behavioral_profile(tmp_path, monkeypatch) -> No
 def test_export_matrix_cells_uses_discovered_session_recordings(tmp_path, monkeypatch) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
-    records_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_001"
-        / "records"
-    )
+    records_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
     _write_match(records_dir, "match_001")
 
     exported = research_export.export_matrix_cells(
@@ -253,20 +247,8 @@ def test_export_matrix_cells_uses_discovered_session_recordings(tmp_path, monkey
 def test_export_matrix_package_prefers_canonical_cell_artifacts(tmp_path, monkeypatch) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
-    canonical_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_001"
-        / "records"
-    )
-    extra_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_002"
-        / "records"
-    )
+    canonical_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
+    extra_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_002" / "records"
     _write_match(canonical_dir, "match_001")
     _write_match(extra_dir, "match_002")
 
@@ -301,13 +283,7 @@ def test_export_matrix_package_prefers_canonical_cell_artifacts(tmp_path, monkey
 def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeypatch) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
-    records_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_001"
-        / "records"
-    )
+    records_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
     _write_match(records_dir, "match_001")
 
     research_export.export_matrix_package(
@@ -324,13 +300,7 @@ def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeyp
 def test_export_matrix_package_hydrates_auto_facts_blocks(tmp_path, monkeypatch) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
-    records_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_001"
-        / "records"
-    )
+    records_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
     _write_match(records_dir, "match_001")
 
     (experiment_dir / "README.md").write_text(
@@ -383,13 +353,7 @@ def test_export_matrix_package_ignores_unusable_canonical_sources(
 ) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
-    discovered_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_001"
-        / "records"
-    )
+    discovered_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
     _write_match(discovered_dir, "match_001")
 
     dead_canonical_dir = tmp_path / "stale_records"
@@ -426,13 +390,7 @@ def test_recordings_dirs_for_cell_deduplicates_canonical_and_discovered_paths(
 ) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
-    records_dir = (
-        experiment_dir
-        / "agentdeck_runs"
-        / "p1_c01_demo"
-        / "session_001"
-        / "records"
-    )
+    records_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
     _write_match(records_dir, "match_001")
 
     artifact_dir = experiment_dir / "artifacts" / "p1_c01_demo"

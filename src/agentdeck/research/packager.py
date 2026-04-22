@@ -255,7 +255,9 @@ def _infer_players(
     return players
 
 
-def _session_compatibility_signature(batch_data: Dict[str, Any]) -> Tuple[str, Tuple[Tuple[Any, ...], ...]]:
+def _session_compatibility_signature(
+    batch_data: Dict[str, Any],
+) -> Tuple[str, Tuple[Tuple[Any, ...], ...]]:
     metadata = batch_data.get("metadata") or {}
     match_refs = batch_data.get("match_refs") or []
     game_name = _infer_game_name(metadata) or ""

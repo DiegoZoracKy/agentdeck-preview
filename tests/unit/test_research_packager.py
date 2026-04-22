@@ -479,9 +479,7 @@ def test_package_session_multi_session_aggregates_sources(tmp_path):
         "session_20260120_000000_abcd12",
         "session_20260120_000100_ef3456",
     ]
-    assert results["source"]["recordings_dir"].endswith(
-        "session_20260120_000000_abcd12/records"
-    )
+    assert results["source"]["recordings_dir"].endswith("session_20260120_000000_abcd12/records")
     assert len(results["source"]["recordings_dirs"]) == 2
     assert "session_20260120_000000_abcd12" in recordings_readme
     assert "session_20260120_000100_ef3456" in recordings_readme
