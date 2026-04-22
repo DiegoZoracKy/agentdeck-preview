@@ -276,8 +276,11 @@ class MatchReporter(Spectator):
         if not self.logger:
             return
 
-        # Calculate match duration
-        duration = time.time() - self.match_start_time if self.match_start_time > 0 else 0
+        # Prefer the canonical recorded duration when present. Fall back to
+        # observed wall-clock time for legacy or partial results.
+        duration = result.metadata.get("duration")
+        if duration is None:
+            duration = time.time() - self.match_start_time if self.match_start_time > 0 else 0
 
         # Extract match metadata
         winner = result.winner or "Draw"
@@ -287,7 +290,7 @@ class MatchReporter(Spectator):
         self.logger.info(f"Match {self.match_id} complete")
         self.logger.info(f"Winner: {winner}")
         self.logger.info(f"Turns: {turns}")
-        self.logger.info(f"Observed Elapsed Time: {duration:.2f}s")
+        self.logger.info(f"Duration: {float(duration):.2f}s")
 
     def _compute_state_delta(self, before: Dict[str, Any], after: Dict[str, Any]) -> str:
         """

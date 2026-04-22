@@ -10,6 +10,8 @@ Tests verify that MatchReporter:
 - Resets state between matches
 """
 
+import time
+
 from agentdeck.core.types import ActionResult, Event, MatchResult
 from agentdeck.spectators.reporter import MatchReporter
 
@@ -233,7 +235,37 @@ def test_reporter_match_end_summary():
     assert "match-123 complete" in output
     assert "Winner: Alice" in output
     assert "Turns: 21" in output
-    assert "Duration:" in output
+    assert "Duration: 18.00s" in output
+
+
+def test_reporter_match_end_falls_back_to_observed_elapsed_time():
+    """Verify reporter falls back to observed time when metadata duration is absent."""
+    reporter = MatchReporter()
+    test_logger = MockLogger()
+    reporter.logger = test_logger
+
+    reporter.on_match_start(
+        game=MockGame(), players=[MockPlayer("Alice"), MockPlayer("Bob")], match_id="match-456"
+    )
+    reporter.match_start_time = time.time() - 3.2
+
+    test_logger.info_calls.clear()
+
+    result = MatchResult(
+        winner="Bob",
+        final_state={"health": {"Alice": 0, "Bob": 20}},
+        events=[],
+        seed=7,
+        metadata={"turns": 11},
+    )
+
+    reporter.on_match_end(result)
+
+    output = "\n".join(test_logger.info_calls)
+    assert "match-456 complete" in output
+    assert "Winner: Bob" in output
+    assert "Turns: 11" in output
+    assert "Duration: 3." in output
 
 
 def test_reporter_without_logger_silent():
