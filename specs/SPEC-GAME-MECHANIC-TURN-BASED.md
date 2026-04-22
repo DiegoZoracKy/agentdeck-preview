@@ -116,7 +116,7 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 ### TL0 – Mechanic-Owned State Keys
 - TurnLoop MAY store execution bookkeeping in canonical state using underscore-prefixed keys such as `_turn_count` and `_first_player_idx`.
 - These keys are mechanic-owned internal fields. Game authors SHOULD treat them as read-only sequencing metadata rather than domain state.
-- Games that return a fresh mapping from `update()` MUST preserve these keys, typically by starting with `state = dict(game_state)` and then mutating game-owned fields. Rebuilding state from scratch can drop `_turn_count` / `_first_player_idx` and cause a `KeyError` inside `TurnLoop`.
+- Games that return a fresh mapping from `update()` MUST preserve these keys, typically by starting with `state = dict(game_state)` and then mutating game-owned fields. If an author forgets, `TurnLoop` fail-soft: it re-injects the missing key(s) from the pre-turn snapshot and emits a one-time per-match warning through the console logger that names the responsible game class. Relying on this recovery is discouraged — the spec still requires authors to preserve the keys, and the warning is the signal to fix the game.
 - TurnLoop MUST preserve a game-supplied value when it is already equal to or ahead of the mechanic's expected next turn count, but games SHOULD NOT rely on mutating these fields directly for gameplay semantics.
 
 ### TL1 – Deterministic Setup

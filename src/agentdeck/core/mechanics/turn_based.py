@@ -236,6 +236,12 @@ class TurnLoop:
     See SPEC-GAME-MECHANIC-TURN-BASED.md §4.2 for complete contract.
     """
 
+    # Mechanic-owned bookkeeping keys that must survive each turn.
+    # If game.update() returns a fresh dict that drops these, TurnLoop
+    # re-injects them from the pre-turn snapshot and logs a one-time
+    # per-match warning. See SPEC-GAME-MECHANIC-TURN-BASED §5.
+    _MECHANIC_KEYS = ("_turn_count", "_first_player_idx")
+
     def __init__(
         self,
         game: Game,
@@ -258,6 +264,7 @@ class TurnLoop:
         self.players = players
         self.player_names = [p.name for p in players]
         self.event_factory = EventFactory(runtime.match_id)
+        self._mechanic_keys_warned: set = set()
 
     def run(self) -> TurnResult:
         """
@@ -530,6 +537,12 @@ class TurnLoop:
         updated_state = self._apply_action(adapter, current_player_name, action, turn_rng)
         final_state = adapter.commit(updated_state)
 
+        # Defensively restore mechanic-owned bookkeeping keys if game.update()
+        # returned a fresh dict that dropped them. Authors should preserve these
+        # per SPEC-GAME-MECHANIC-TURN-BASED §5; this fail-soft prevents a KeyError
+        # on the next turn's get_current_player() / turn-count advance.
+        self._restore_mechanic_keys(adapter.before, final_state)
+
         # Update turn context duration
         turn_duration = time.time() - turn_start
         turn_ctx.duration = turn_duration
@@ -606,6 +619,41 @@ class TurnLoop:
             self.game.event_emitter.clear_phase_index()
 
         return TurnResult(final_state=final_state, events=turn_events)
+
+    def _restore_mechanic_keys(
+        self,
+        before: Dict[str, Any],
+        after: Dict[str, Any],
+    ) -> None:
+        """
+        Re-inject mechanic-owned bookkeeping keys if update() dropped them.
+
+        Games returning a fresh dict from update() MUST preserve _turn_count
+        and _first_player_idx per SPEC-GAME-MECHANIC-TURN-BASED §5. When an
+        author forgets, TurnLoop copies the keys from the pre-turn snapshot
+        and logs a one-time per-match warning naming the responsible game
+        class. This keeps matches from crashing with a KeyError on the next
+        turn while still nudging the author to fix their update().
+        """
+        console_logger = getattr(self.runtime._console, "logger", None)
+        for key in self._MECHANIC_KEYS:
+            if key in after:
+                continue
+            if key not in before:
+                continue
+            after[key] = copy.deepcopy(before[key])
+            if key in self._mechanic_keys_warned:
+                continue
+            self._mechanic_keys_warned.add(key)
+            if console_logger is not None:
+                console_logger.warning(
+                    f"{self.game.__class__.__name__}.update() dropped mechanic "
+                    f"key {key!r}; TurnLoop re-injected it from the pre-turn "
+                    f"snapshot. Preserve mechanic keys by starting with "
+                    f"`state = dict(game_state)` "
+                    f"(see SPEC-GAME-MECHANIC-TURN-BASED §5). "
+                    f"match_id={self.runtime.match_id}"
+                )
 
     def _apply_action(
         self,

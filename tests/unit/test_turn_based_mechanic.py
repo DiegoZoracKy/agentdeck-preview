@@ -5,6 +5,7 @@ These tests verify:
 - TL6: JSON-serializability validation for custom events from get_events()
 """
 
+import logging
 from typing import Any, Dict, List
 
 import pytest
@@ -237,3 +238,162 @@ def test_tl6_multiple_events_one_invalid(tmp_path):
         # Error should mention the invalid event
         error_msg = str(exc_info.value)
         assert "INVALID_EVENT" in error_msg
+
+
+# ---------------------------------------------------------------------------
+# TL0 – Mechanic-owned state keys: fail-soft re-inject
+#
+# Regression for the trap surfaced repeatedly in agent-QA rounds 4/7/8/9,
+# where an authored game's update() rebuilt state from scratch and dropped
+# the mechanic-owned bookkeeping keys (_turn_count, _first_player_idx).
+# Previously this produced a KeyError on the next turn. TurnLoop now
+# re-injects the dropped keys from the pre-turn snapshot and emits a
+# one-time per-match warning naming the responsible game class.
+# ---------------------------------------------------------------------------
+
+
+class GameDroppingMechanicKeys(TurnBasedGame):
+    """
+    Hostile game that rebuilds state from scratch on every update(),
+    reproducing the Round 7/9 failure mode (dropped _turn_count /
+    _first_player_idx).
+    """
+
+    MAX_TURNS = 6
+
+    @property
+    def instructions(self) -> str:
+        return "Drop mechanic keys on every update."
+
+    @property
+    def allowed_actions(self) -> List[str]:
+        return ["MOVE"]
+
+    @property
+    def default_handshake_template(self) -> str:
+        return "Respond with OK."
+
+    def setup(self, players: List[str], seed: int) -> Dict[str, Any]:
+        return {"players": list(players), "moves": 0, "ended": False}
+
+    def get_view(self, game_state: Dict[str, Any], player: str) -> Dict[str, Any]:
+        return {"player": player, "moves": game_state["moves"]}
+
+    def update(
+        self,
+        game_state: Dict[str, Any],
+        player: str,
+        action,
+        *,
+        rng,
+    ) -> Dict[str, Any]:
+        # Deliberately rebuild state from scratch — drops _turn_count
+        # and _first_player_idx. This is the Round 7/9 authoring trap.
+        next_moves = game_state["moves"] + 1
+        return {
+            "players": list(game_state["players"]),
+            "moves": next_moves,
+            "ended": next_moves >= self.MAX_TURNS,
+        }
+
+    def status(self, game_state: Dict[str, Any]) -> GameStatus:
+        winner = game_state["players"][0] if game_state["ended"] else None
+        return GameStatus(is_over=game_state["ended"], winner=winner)
+
+
+class _ListLogHandler(logging.Handler):
+    def __init__(self) -> None:
+        super().__init__(level=logging.WARNING)
+        self.records: List[logging.LogRecord] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.records.append(record)
+
+
+def test_tl0_update_dropping_mechanic_keys_is_fail_soft(tmp_path):
+    """
+    TL0 regression: update() returning a fresh dict without mechanic keys
+    must not crash. TurnLoop re-injects _turn_count / _first_player_idx
+    and the match completes normally.
+    """
+    config = AgentDeckConfig(seed=42, run_dir=tmp_path)
+    handler = _ListLogHandler()
+
+    with AgentDeck(game=GameDroppingMechanicKeys(), session=config) as deck:
+        deck.console.logger.logger.addHandler(handler)
+        try:
+            players = [
+                MockPlayer("Alice", actions=["MOVE"] * GameDroppingMechanicKeys.MAX_TURNS),
+                MockPlayer("Bob", actions=["MOVE"] * GameDroppingMechanicKeys.MAX_TURNS),
+            ]
+
+            # Before the fix, the second turn raised KeyError inside
+            # TurnBasedGame.get_current_player() (_first_player_idx missing).
+            results = deck.play(players=players, matches=1)
+        finally:
+            deck.console.logger.logger.removeHandler(handler)
+
+    # Match completed without KeyError.
+    assert results.single is not None
+    final_state = results.single.final_state
+    assert "_turn_count" in final_state
+    assert "_first_player_idx" in final_state
+
+    # Exactly one warning per dropped key, naming the game class.
+    warnings_for_keys = {"_turn_count": 0, "_first_player_idx": 0}
+    for record in handler.records:
+        if record.levelno != logging.WARNING:
+            continue
+        msg = record.getMessage()
+        if "GameDroppingMechanicKeys" not in msg:
+            continue
+        if "dropped mechanic key" not in msg:
+            continue
+        for key in warnings_for_keys:
+            if repr(key) in msg:
+                warnings_for_keys[key] += 1
+
+    assert warnings_for_keys["_turn_count"] == 1, (
+        f"expected 1 warning for _turn_count, got {warnings_for_keys['_turn_count']}"
+    )
+    assert warnings_for_keys["_first_player_idx"] == 1, (
+        f"expected 1 warning for _first_player_idx, got "
+        f"{warnings_for_keys['_first_player_idx']}"
+    )
+
+
+def test_tl0_mechanic_key_warning_does_not_repeat_per_turn(tmp_path):
+    """
+    TL0: the fail-soft warning must fire once per key per match, not on
+    every turn. A long match that drops keys on every turn should still
+    produce exactly one warning per dropped key.
+    """
+
+    class LongMatchDropper(GameDroppingMechanicKeys):
+        MAX_TURNS = 10  # longer match to prove warning doesn't repeat
+
+    config = AgentDeckConfig(seed=7, run_dir=tmp_path)
+    handler = _ListLogHandler()
+
+    with AgentDeck(game=LongMatchDropper(), session=config) as deck:
+        deck.console.logger.logger.addHandler(handler)
+        try:
+            players = [
+                MockPlayer("Alice", actions=["MOVE"] * LongMatchDropper.MAX_TURNS),
+                MockPlayer("Bob", actions=["MOVE"] * LongMatchDropper.MAX_TURNS),
+            ]
+            deck.play(players=players, matches=1)
+        finally:
+            deck.console.logger.logger.removeHandler(handler)
+
+    total_warnings = sum(
+        1
+        for record in handler.records
+        if record.levelno == logging.WARNING
+        and "LongMatchDropper" in record.getMessage()
+        and "dropped mechanic key" in record.getMessage()
+    )
+    # One warning per mechanic key (_turn_count, _first_player_idx).
+    assert total_warnings == 2, (
+        f"expected exactly 2 warnings (one per key), got {total_warnings}"
+    )
