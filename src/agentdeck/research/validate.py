@@ -583,7 +583,7 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Validate research manifests and INDEX.md consistency."
     )
     parser.add_argument("--research-dir", default=Path("research"), type=Path)
-    parser.add_argument("--index", default=Path("research/INDEX.md"), type=Path)
+    parser.add_argument("--index", default=None, type=Path)
     parser.add_argument(
         "--write-index",
         action="store_true",
@@ -600,10 +600,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not research_dir.exists():
         print(f"Research dir not found: {research_dir}", file=sys.stderr)
         return 1
+    index_path = args.index if args.index is not None else research_dir / "INDEX.md"
 
     errors = validate_research_tree(
         research_dir,
-        args.index,
+        index_path,
         write_index=args.write_index,
     )
 

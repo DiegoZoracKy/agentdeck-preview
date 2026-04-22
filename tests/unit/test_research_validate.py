@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from agentdeck.research import validate as research_validate
+from scripts import research_index as research_index_wrapper
 from scripts import research_validate as research_validate_wrapper
 
 
@@ -365,6 +366,36 @@ def test_empty_research_tree_is_valid(tmp_path):
         check=False,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_validate_main_write_index_defaults_to_research_dir(tmp_path, monkeypatch):
+    research_dir = tmp_path / "external-research"
+    research_dir.mkdir()
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+
+    result = research_validate.main(
+        ["--research-dir", str(research_dir), "--write-index"]
+    )
+
+    assert result == 0
+    assert (research_dir / "INDEX.md").exists()
+    assert not (cwd / "research" / "INDEX.md").exists()
+
+
+def test_research_index_main_defaults_output_to_research_dir(tmp_path, monkeypatch):
+    research_dir = tmp_path / "external-research"
+    research_dir.mkdir()
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+
+    result = research_index_wrapper.main(["--research-dir", str(research_dir)])
+
+    assert result == 0
+    assert (research_dir / "INDEX.md").exists()
+    assert not (cwd / "research" / "INDEX.md").exists()
 
 
 def test_validate_script_wrapper_reexports_package_surface() -> None:

@@ -103,7 +103,7 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Generate research/INDEX.md from manifests.",
     )
     parser.add_argument("--research-dir", default=Path("research"), type=Path)
-    parser.add_argument("--output", default=Path("research/INDEX.md"), type=Path)
+    parser.add_argument("--output", default=None, type=Path)
     return parser
 
 
@@ -111,7 +111,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     content = generate_index(args.research_dir)
-    args.output.write_text(content, encoding="utf-8")
+    output_path = args.output if args.output is not None else args.research_dir / "INDEX.md"
+    output_path.write_text(content, encoding="utf-8")
     return 0
 
 
