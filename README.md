@@ -57,8 +57,8 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/DiegoZoracKy/agentdeck-preview.git
-cd agentdeck-preview
+git clone https://github.com/agentdeck/agentdeck.git
+cd agentdeck
 pip install -e ".[dev]"
 ```
 
@@ -182,7 +182,7 @@ with AgentDeck(game=game, session=config) as deck:
 
 ## 🔬 Research Program
 
-This preview repo ships release-facing benchmark packages, arc summaries, and a cross-game synthesis layer alongside the engine.
+This repo ships release-facing benchmark packages, arc summaries, and a cross-game synthesis layer alongside the engine.
 
 Start here:
 - **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic flagship arc: diagnosis, intervention ladder, and final carry-forward stack
@@ -200,7 +200,7 @@ Deeper references:
 
 ## 🚦 Release Status
 
-AgentDeck is currently published as a **public beta / preview**.
+AgentDeck is currently published as a **public beta**.
 
 Ready today:
 - Core match execution through the `AgentDeck` facade

@@ -7,7 +7,7 @@ Core framework documentation remains in the repository root (`README.md`,
 `CONTRIBUTING.md`, and `specs/`). This `research/` area is intentionally
 experiment-specific.
 
-This preview repo now ships both the **research contract/tooling** and a
+This repo now ships both the **research contract/tooling** and a
 committed set of release-facing benchmark packages, including arc summaries and
 cross-game synthesis.
 
