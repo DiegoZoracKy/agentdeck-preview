@@ -1,0 +1,938 @@
+{
+  "schema_version": 3,
+  "experiment_id": "2026-04-27-agentic-edge-strategy-stack::p0_fd_bot_smoke",
+  "source": {
+    "recordings_dir": "/home/diegozoracky/dev/agentdeck/research/2026-04-27-agentic-edge-strategy-stack/agentdeck_runs/p0_fd_bot_smoke/session_20260427_113252_a18822/records"
+  },
+  "summary": {
+    "total_matches": 6,
+    "decisive_matches": 6,
+    "draws": 0,
+    "win_rates": {
+      "Potion80Bot-AO": 0.5,
+      "AttackBot-AO": 0.5
+    },
+    "total_cost": 0.0,
+    "avg_turns": 15.0,
+    "avg_duration": 0.13964295387268066,
+    "avg_cost": 0.0
+  },
+  "statistics": {
+    "method": "exact_binomial",
+    "confidence_level": 0.95,
+    "alpha": 0.05,
+    "null_win_rate": 0.5,
+    "n_total": 6,
+    "n_decisive": 6,
+    "players": {
+      "Potion80Bot-AO": {
+        "wins": 3,
+        "win_rate": 0.5,
+        "ci": [
+          0.4,
+          0.6
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      },
+      "AttackBot-AO": {
+        "wins": 3,
+        "win_rate": 0.5,
+        "ci": [
+          0.4,
+          0.6
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "pairwise_comparisons": {
+      "Potion80Bot-AO_vs_AttackBot-AO": {
+        "player_a": "Potion80Bot-AO",
+        "player_b": "AttackBot-AO",
+        "wins_a": 3,
+        "wins_b": 3,
+        "head_to_head_decisive": 6,
+        "win_rate_a": 0.5,
+        "ci_a": [
+          0.4,
+          0.6
+        ],
+        "p_value": 1.0,
+        "effect_size": 0.0,
+        "effect_label": "negligible",
+        "is_significant": false
+      }
+    },
+    "quality": {
+      "insufficient_sample": true,
+      "n_decisive": 6,
+      "min_recommended": 10,
+      "is_actionable": false,
+      "quality_note": "Sample too small for reliable inference"
+    }
+  },
+  "format_strictness": {
+    "overall": {
+      "turn_attempts": 90,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "contract_evaluable_attempts": 90,
+      "strict_contract_passes": 90,
+      "strict_contract_rate": 1.0,
+      "recoverable_non_strict": 0,
+      "recoverable_non_strict_rate": 0.0,
+      "action_line_rate": 1.0,
+      "reasoning_line_rate": 0.0
+    },
+    "by_player": {
+      "AttackBot-AO": {
+        "turn_attempts": 45,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 45,
+        "strict_contract_passes": 45,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      },
+      "Potion80Bot-AO": {
+        "turn_attempts": 45,
+        "parse_failures": 0,
+        "parse_failure_rate": 0.0,
+        "contract_evaluable_attempts": 45,
+        "strict_contract_passes": 45,
+        "strict_contract_rate": 1.0,
+        "recoverable_non_strict": 0,
+        "recoverable_non_strict_rate": 0.0,
+        "action_line_rate": 1.0,
+        "reasoning_line_rate": 0.0
+      }
+    }
+  },
+  "position_effect": {
+    "total_matches": 6,
+    "first_player_wins": 6,
+    "first_player_win_rate": 1.0,
+    "second_player_wins": 0,
+    "upset_rate": 0.0,
+    "by_player": {
+      "Potion80Bot-AO": {
+        "first_count": 3,
+        "second_count": 3,
+        "wins_as_first": 3,
+        "wins_as_second": 0,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.0
+      },
+      "AttackBot-AO": {
+        "first_count": 3,
+        "second_count": 3,
+        "wins_as_first": 3,
+        "wins_as_second": 0,
+        "win_rate_as_first": 1.0,
+        "win_rate_as_second": 0.0
+      }
+    }
+  },
+  "artifact_validation": {
+    "matches_checked": 6,
+    "all_passed": true,
+    "checks": {
+      "monotonic_gameplay_timeline": {
+        "passed": 6,
+        "failed": 0
+      },
+      "top_level_timing_consistency": {
+        "passed": 6,
+        "failed": 0
+      },
+      "prompt_turn_number_coherence": {
+        "passed": 6,
+        "failed": 0
+      },
+      "winner_final_state_consistency": {
+        "passed": 6,
+        "failed": 0
+      }
+    },
+    "failures": []
+  },
+  "players": [
+    {
+      "name": "Potion80Bot-AO",
+      "provider": "unknown",
+      "model": "fixed-damage-policy",
+      "type": "PotionAt80Bot",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer"
+    },
+    {
+      "name": "AttackBot-AO",
+      "provider": "unknown",
+      "model": "fixed-damage-policy",
+      "type": "AttackBot",
+      "controller": "ActionOnlyController",
+      "renderer": "TextRenderer"
+    }
+  ],
+  "matches": [
+    {
+      "match_id": "match_0595f6c4",
+      "players": [
+        "Potion80Bot-AO",
+        "AttackBot-AO"
+      ],
+      "winner": "Potion80Bot-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 2026042703,
+      "duration": 0.15243768692016602,
+      "cost": 0.0,
+      "player_costs": {
+        "Potion80Bot-AO": 0.0,
+        "AttackBot-AO": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Potion80Bot-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_3852fb22",
+      "players": [
+        "AttackBot-AO",
+        "Potion80Bot-AO"
+      ],
+      "winner": "AttackBot-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 2026042703,
+      "duration": 0.1455545425415039,
+      "cost": 0.0,
+      "player_costs": {
+        "AttackBot-AO": 0.0,
+        "Potion80Bot-AO": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "AttackBot-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_74784df0",
+      "players": [
+        "AttackBot-AO",
+        "Potion80Bot-AO"
+      ],
+      "winner": "AttackBot-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 2026042701,
+      "duration": 0.1279468536376953,
+      "cost": 0.0,
+      "player_costs": {
+        "AttackBot-AO": 0.0,
+        "Potion80Bot-AO": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "AttackBot-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_913d1ddd",
+      "players": [
+        "AttackBot-AO",
+        "Potion80Bot-AO"
+      ],
+      "winner": "AttackBot-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 2026042702,
+      "duration": 0.13220000267028809,
+      "cost": 0.0,
+      "player_costs": {
+        "AttackBot-AO": 0.0,
+        "Potion80Bot-AO": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "AttackBot-AO",
+        "index": 0,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_efb49c1a",
+      "players": [
+        "Potion80Bot-AO",
+        "AttackBot-AO"
+      ],
+      "winner": "Potion80Bot-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 2026042702,
+      "duration": 0.14124512672424316,
+      "cost": 0.0,
+      "player_costs": {
+        "Potion80Bot-AO": 0.0,
+        "AttackBot-AO": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Potion80Bot-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    },
+    {
+      "match_id": "match_f534e1ec",
+      "players": [
+        "Potion80Bot-AO",
+        "AttackBot-AO"
+      ],
+      "winner": "Potion80Bot-AO",
+      "turns": 15,
+      "outcome": "win",
+      "seed": 2026042701,
+      "duration": 0.1384735107421875,
+      "cost": 0.0,
+      "player_costs": {
+        "Potion80Bot-AO": 0.0,
+        "AttackBot-AO": 0.0
+      },
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Potion80Bot-AO",
+        "index": 1,
+        "ordered_index": 0
+      }
+    }
+  ],
+  "behavioral_profile": {
+    "schema_version": 2,
+    "game_id": "fixed_damage",
+    "profile_id": "fixed_damage_behavioral",
+    "profile_version": "0.2.0",
+    "coverage": {
+      "matches_total": 6,
+      "matches_evaluable": 6,
+      "turns_total": 90,
+      "turns_evaluable": 90
+    },
+    "aggregate_metrics": {
+      "all_attack_match_rate": {
+        "value": 0.5,
+        "all_attack_matches": 6,
+        "support_matches": 12
+      },
+      "first_potion_profile": {
+        "median_first_potion_hp": 80.0,
+        "first_potion_hp_values": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ],
+        "never_used_rate": 0.5,
+        "never_used_matches": 6,
+        "support_matches": 12
+      },
+      "unused_potions_on_loss_rate": {
+        "value": 0.5,
+        "losses_with_unused_potions": 3,
+        "support_losses": 6
+      },
+      "state_action_consistency": {
+        "value": 1.0,
+        "support_turns": 90
+      },
+      "position_policy_delta": {
+        "value": 0.0,
+        "support_turns": 75
+      },
+      "critical_potion_response_rate": {
+        "value": 0.0,
+        "critical_potion_turns": 0,
+        "support_turns": 12,
+        "critical_hp_threshold": 40
+      },
+      "error_recovery_rate": {
+        "value": 0.0,
+        "recovered_events": 0,
+        "support_events": 6,
+        "critical_hp_threshold": 40
+      },
+      "wasted_full_health_potion_rate": {
+        "value": 0.0,
+        "wasted_full_health_potions": 0,
+        "support_potions": 18,
+        "max_health": 100
+      }
+    },
+    "per_player": {
+      "Potion80Bot-AO": {
+        "matches_played": 6,
+        "all_attack_match_rate": {
+          "value": 0.0,
+          "all_attack_matches": 0,
+          "support_matches": 6
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": 80.0,
+          "first_potion_hp_values": [
+            80,
+            80,
+            80,
+            80,
+            80,
+            80
+          ],
+          "never_used_rate": 0.0,
+          "never_used_matches": 0,
+          "support_matches": 6
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 0.0,
+          "losses_with_unused_potions": 0,
+          "support_losses": 3
+        },
+        "state_action_consistency": {
+          "value": 1.0,
+          "supported_state_keys": 15,
+          "support_turns": 45
+        },
+        "position_policy_delta": {
+          "value": 0.0,
+          "shared_state_buckets": 7,
+          "support_turns": 42
+        },
+        "critical_potion_response_rate": {
+          "value": 0.0,
+          "critical_potion_turns": 0,
+          "support_turns": 0,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.0,
+          "recovered_events": 0,
+          "support_events": 0,
+          "missed_events": 0,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 18,
+          "max_health": 100
+        }
+      },
+      "AttackBot-AO": {
+        "matches_played": 6,
+        "all_attack_match_rate": {
+          "value": 1.0,
+          "all_attack_matches": 6,
+          "support_matches": 6
+        },
+        "first_potion_profile": {
+          "median_first_potion_hp": null,
+          "first_potion_hp_values": [],
+          "never_used_rate": 1.0,
+          "never_used_matches": 6,
+          "support_matches": 6
+        },
+        "unused_potions_on_loss_rate": {
+          "value": 1.0,
+          "losses_with_unused_potions": 3,
+          "support_losses": 3
+        },
+        "state_action_consistency": {
+          "value": 1.0,
+          "supported_state_keys": 11,
+          "support_turns": 45
+        },
+        "position_policy_delta": {
+          "value": 0.0,
+          "shared_state_buckets": 4,
+          "support_turns": 33
+        },
+        "critical_potion_response_rate": {
+          "value": 0.0,
+          "critical_potion_turns": 0,
+          "support_turns": 12,
+          "critical_hp_threshold": 40
+        },
+        "error_recovery_rate": {
+          "value": 0.0,
+          "recovered_events": 0,
+          "support_events": 6,
+          "missed_events": 12,
+          "critical_hp_threshold": 40
+        },
+        "wasted_full_health_potion_rate": {
+          "value": 0.0,
+          "wasted_full_health_potions": 0,
+          "support_potions": 0,
+          "max_health": 100
+        }
+      }
+    },
+    "state_metrics": {
+      "action_by_state": {
+        "Potion80Bot-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=1": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=80|potions=2": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=20|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=0": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=1": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=80|potions=2": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 3,
+            "attack_count": 0,
+            "potion_count": 3,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          }
+        },
+        "AttackBot-AO": {
+          "position=first|hp=100|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=20|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=40|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=60|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=first|hp=80|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=20|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=40|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=60|potions=3": {
+            "support_turns": 3,
+            "attack_count": 3,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "position=second|hp=80|potions=3": {
+            "support_turns": 12,
+            "attack_count": 12,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          }
+        }
+      },
+      "scarcity_action_profile": {
+        "Potion80Bot-AO": {
+          "0": {
+            "support_turns": 24,
+            "attack_count": 24,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 6,
+            "attack_count": 0,
+            "potion_count": 6,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "2": {
+            "support_turns": 6,
+            "attack_count": 0,
+            "potion_count": 6,
+            "attack_rate": 0.0,
+            "potion_rate": 1.0
+          },
+          "3": {
+            "support_turns": 9,
+            "attack_count": 3,
+            "potion_count": 6,
+            "attack_rate": 0.3333333333333333,
+            "potion_rate": 0.6666666666666666
+          }
+        },
+        "AttackBot-AO": {
+          "0": {
+            "support_turns": 0,
+            "attack_count": 0,
+            "potion_count": 0,
+            "attack_rate": 0.0,
+            "potion_rate": 0.0
+          },
+          "1": {
+            "support_turns": 0,
+            "attack_count": 0,
+            "potion_count": 0,
+            "attack_rate": 0.0,
+            "potion_rate": 0.0
+          },
+          "2": {
+            "support_turns": 0,
+            "attack_count": 0,
+            "potion_count": 0,
+            "attack_rate": 0.0,
+            "potion_rate": 0.0
+          },
+          "3": {
+            "support_turns": 45,
+            "attack_count": 45,
+            "potion_count": 0,
+            "attack_rate": 1.0,
+            "potion_rate": 0.0
+          }
+        }
+      }
+    },
+    "evidence": {
+      "aggregate_metrics": {},
+      "per_player": {
+        "Potion80Bot-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=20|potions=0",
+                "delta": 0.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Potion80Bot-AO.position=first|hp=20|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Potion80Bot-AO.position=second|hp=20|potions=0"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=0",
+                "delta": 0.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Potion80Bot-AO.position=first|hp=40|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Potion80Bot-AO.position=second|hp=40|potions=0"
+                }
+              },
+              {
+                "shared_state_key": "hp=60|potions=0",
+                "delta": 0.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=60|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Potion80Bot-AO.position=first|hp=60|potions=0"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=60|potions=0",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.Potion80Bot-AO.position=second|hp=60|potions=0"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 3,
+                "attack_count": 3,
+                "potion_count": 0,
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "dominant_action": "ATTACK"
+              },
+              {
+                "decision_key": "position=first|hp=20|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 3,
+                "attack_count": 3,
+                "potion_count": 0,
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "dominant_action": "ATTACK"
+              },
+              {
+                "decision_key": "position=first|hp=40|potions=0|self=ATTACK|opp=ATTACK",
+                "consistency": 1.0,
+                "support_turns": 3,
+                "attack_count": 3,
+                "potion_count": 0,
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "dominant_action": "ATTACK"
+              }
+            ]
+          }
+        },
+        "AttackBot-AO": {
+          "position_policy_delta": {
+            "examples": [
+              {
+                "shared_state_key": "hp=80|potions=3",
+                "delta": 0.0,
+                "support_turns": 15,
+                "first": {
+                  "bucket_key": "position=first|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.AttackBot-AO.position=first|hp=80|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=80|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 12,
+                  "source_path": "state_metrics.action_by_state.AttackBot-AO.position=second|hp=80|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=20|potions=3",
+                "delta": 0.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.AttackBot-AO.position=first|hp=20|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=20|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.AttackBot-AO.position=second|hp=20|potions=3"
+                }
+              },
+              {
+                "shared_state_key": "hp=40|potions=3",
+                "delta": 0.0,
+                "support_turns": 6,
+                "first": {
+                  "bucket_key": "position=first|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.AttackBot-AO.position=first|hp=40|potions=3"
+                },
+                "second": {
+                  "bucket_key": "position=second|hp=40|potions=3",
+                  "attack_rate": 1.0,
+                  "potion_rate": 0.0,
+                  "support_turns": 3,
+                  "source_path": "state_metrics.action_by_state.AttackBot-AO.position=second|hp=40|potions=3"
+                }
+              }
+            ]
+          },
+          "state_action_consistency": {
+            "examples": [
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 1.0,
+                "support_turns": 9,
+                "attack_count": 9,
+                "potion_count": 0,
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "dominant_action": "ATTACK"
+              },
+              {
+                "decision_key": "position=second|hp=80|potions=3|self=ATTACK|opp=POTION",
+                "consistency": 1.0,
+                "support_turns": 9,
+                "attack_count": 9,
+                "potion_count": 0,
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "dominant_action": "ATTACK"
+              },
+              {
+                "decision_key": "position=first|hp=100|potions=3|self=NONE|opp=NONE",
+                "consistency": 1.0,
+                "support_turns": 3,
+                "attack_count": 3,
+                "potion_count": 0,
+                "attack_rate": 1.0,
+                "potion_rate": 0.0,
+                "dominant_action": "ATTACK"
+              }
+            ]
+          }
+        }
+      },
+      "state_metrics": {}
+    },
+    "quality_flags": {
+      "complete": true,
+      "unsupported_metrics": []
+    }
+  }
+}

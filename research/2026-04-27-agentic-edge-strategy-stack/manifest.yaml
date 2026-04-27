@@ -1,0 +1,79 @@
+schema_version: 1
+experiment_id: 2026-04-27-agentic-edge-strategy-stack
+title: "The Agentic Edge: Strategy Stack Effects on LLM Agency"
+status: planned
+question: >-
+  Can strategy stacks change LLM agent behavior enough to overcome model-tier
+  differences in sequential decision environments?
+game:
+  name: MixedFixedVariableBenchmark
+  config:
+    max_health: 100
+    attack_damage: 20
+    min_attack_damage: 15
+    max_attack_damage: 25
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+players:
+  - id: flashlite
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: lite
+    controller: matrix-defined
+    renderer: TextRenderer
+  - id: gpt4omini
+    provider: openai
+    model: gpt-4o-mini
+    tier: mini
+    controller: matrix-defined
+    renderer: TextRenderer
+variants:
+  games:
+    - FixedDamageGame
+    - VariableDamageGame
+  models:
+    - gemini-2.5-flash-lite
+    - gpt-4o-mini
+  controllers:
+    - ActionOnlyController
+    - ReasoningController
+  strategy_conditions:
+    - S0_AO
+    - S1_RC
+    - S3_FIXED_FULL
+    - S3_VARIABLE_FULL
+  fairness:
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+run:
+  seed_base: 2026042701
+  matches_planned: 108
+  matches_completed: 0
+  concurrency: 8
+  max_turns: 40
+  matrix_source: matrix.yaml
+analysis_plan:
+  ci_method: wilson
+  alpha: 0.05
+  effect_size: cohens_h
+  stopping_rule: fixed_n
+artifacts:
+  matrix_yaml: matrix.yaml
+  results_json: results.json
+  results_csv: results.csv
+  analysis_md: analysis.md
+  reproduction_md: reproduction.md
+  prompt_dir: prompts/
+storage:
+  raw_recordings:
+    backend: huggingface
+    dataset: agentdeck/agentic-edge-strategy-stack-study
+    path_prefix: 2026-04-27-agentic-edge-strategy-stack
+  summaries:
+    repo_path: research/2026-04-27-agentic-edge-strategy-stack
+  viewer_curation:
+    repo_path: viewer/matches
+notes: >-
+  This package is scaffolded for the pilot. Before live execution, verify
+  provider model availability, credentials, pricing snapshot, and budget.

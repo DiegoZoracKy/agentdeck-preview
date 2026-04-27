@@ -1,143 +1,160 @@
 # AgentDeck Roadmap
 
-Last updated: 2026-03-30
+Last updated: 2026-04-27
 
-## Release Position
-- AgentDeck targets a public beta / preview release, not `1.0`.
-- All spec-compliance audit waves (0–6) are complete.
-- All pre-release blocker-level spec drifts are resolved.
-- The research showcase has expanded beyond the original FixedDamage plan to a two-arc study covering both deterministic and stochastic game settings.
+## Active Focus
 
-## Scope of This Roadmap
-This roadmap tracks implementation, documentation, examples, research workflow, and in-repo release readiness for AgentDeck itself.
+The active branch is `study/agentic-edge-strategy-stack`.
 
-It does not track:
-- external launch operations or social/media plans
-- showcase surfaces outside the repo
-- broader AI-first meta-experiment storytelling
-- Autonomous Researcher exploration tracks
+The current goal is to prepare the next flagship AgentDeck research package:
 
-Those live in separate internal planning.
+```text
+research/2026-04-27-agentic-edge-strategy-stack/
+```
 
-## What Is Already Done
+The study asks whether strategy stacks can change LLM agent behavior enough to
+overcome model-tier differences in sequential decision environments. The
+execution principle is to exercise every major AgentDeck research workflow
+surface that strengthens validity, not every API for its own sake.
 
-- Core fairness, recorder, artifact-validation, and metadata fixes
-- Viewer beta baseline
-- Research export, packaging, validation, and index tooling
-- Spec-compliance audit sweep completed and folded back into the active repo surface
-- **FixedDamage Arc 1**: 19 packages, 1,000+ matches, full intervention ladder (RC → TR → HP → exit), cross-provider comparisons, behavioral scorer
-- **VariableDamage Arc 1**: 12 packages, 744 matches, plain-model baselines, intervention ladder (RC → RISK), cross-provider comparisons, new behavioral metrics (`safe_zone_potion_rate`, danger subbands, `first_lethal_entry_inventory`), and the main-arc premium pilot
+## Current Study Package
 
-## Remaining Pre-Release Work
+Prepared package contents:
 
-### 1. Final Experiments
-- [x] `FlashLite-RC-RISK` vs `GPT5Mini-AO` at `N=24` — main VariableDamage arc final
+- `manifest.yaml` - package metadata, seed base, run envelope, model roster
+- `matrix.yaml` - central cell plan, fairness policy, seed offsets, sampling,
+  budget gates, and expansion criteria
+- `prompts/` - frozen prompt templates for S0, S1, FixedDamage S3, and
+  VariableDamage S3
+- `scripts/run_experiment.py` - package-local phase/cell runner
+- `analysis.md` - interpretation shell
+- `reproduction.md` - dry-run, execution, export, validation, and lock commands
+- `recordings/README.md` - external raw-artifact policy
+- `artifacts/README.md` - derived-artifact policy
 
-**Optional Pre-Release Appendix (budget permitting)**
-- [ ] `GPT-5-AO` vs `Flash-AO` at `N=24` — premium behavioral appendix
-- [ ] `Opus-AO` vs `Flash-AO` at `N=24` — premium behavioral appendix
+## Study Design Commitments
 
-### 2. Research Synthesis
-- [x] VariableDamage Arc 1 summary (parallel to FixedDamage Arc 1)
-- [x] Cross-game comparison document:
-  - what transfers across games and what does not
-  - what the behavioral layer revealed beyond win rates alone
-  - how deterministic and stochastic settings probe different aspects of agent behavior
-- [x] Update `research/INDEX.md` and arc-level READMEs to reflect the completed two-arc picture
+- Keep `matrix.yaml` as the study spine.
+- Use fixed-N sampling for the first flagship version.
+- Use `paired_side_swap` with even match counts for head-to-head cells.
+- Use only supported first-player policies: `random`, `fixed`, and
+  `alternating`.
+- Report position effects before topline win-rate claims.
+- Disable conclusions in pilot/main cells to keep costs and post-match
+  reflection noise controlled.
+- Prefer built-in FixedDamage and VariableDamage behavioral scorers before
+  adding package-local custom scoring.
+- Lock any S2 controller choice after pilot and before main-run expansion.
+- Name the exact prior FixedDamage package being replicated before Layer A is
+  described as a replication.
 
-### 3. Docs & Examples Productization
-- [x] README first-touch pass:
-  - make AgentDeck's primary promise explicit: bring an idea, turn it into a runnable, replayable, analyzable behavioral experiment
-  - reduce early overload from deep research detail
-  - align wording with beta / preview release posture
-- [x] Top-level docs pass for consistency with the completed two-arc research picture
-- [x] "How to run a study" guide for external users
-- [x] Examples pass:
-  - confirm a clean progression across `mock_demo.py`, `first_game_walkthrough.py`, `minimal_experiment.py`, replay / spectator workflows
-  - ensure `examples/README.md` reflects the intended onboarding ladder
-- [x] Minimal `run_experiment.py` template for research packages, without promoting package-specific execution logic into framework core
+## Phase P0 - Local Preflight
 
-### 4. Research Workflow Productization
-- [x] Ship one supported research CLI workflow for cell export and package aggregation on matrix-based studies, reducing reliance on per-package export boilerplate
-  - Scope:
-    - `agentdeck research export --cell <id> --matrix matrix.yaml`
-    - `agentdeck research aggregate --matrix matrix.yaml`
-    - discover and retain full session history per `matrix.yaml` cell
-    - export cell artifacts with canonical `source.recordings_dirs`
-    - refresh package-level exports from aggregated cell history
-  - Beta target:
-    - one coherent, documented common-case workflow for matrix-based export/aggregation
-  - Stretch goal:
-    - eliminate per-package `export_cell_results.py` and `export_package_results.py` boilerplate entirely
-  - Non-goal:
-    - moving `run_experiment.py` execution logic into the framework baseline
-- [x] Document `matrix.yaml` as a stable research contract with a minimal template
-- [x] Ensure the documented workflow across `research_export.py`, `research_validate.py`, `research_index.py`, and `research_package.py` is coherent and externally legible
+Purpose: verify that the package runs without provider credentials.
 
-### 5. Viewer Showcase Curation
+Cells:
 
-The viewer is beta-functional but its `matches/` directory still contains pre-research placeholder matches (Haiku vs. Sonnet, GPT-4o vs. GPT-4o-mini). It does not yet reflect the research story at all. This is the primary remaining in-repo product gap before release.
+- `p0_fd_bot_smoke`
+- `p0_vd_bot_smoke`
 
-- [x] Select 4–6 canonical FixedDamage matches from the completed arc (flagship game, clearest behavioral signal)
-- [x] Copy selected match recordings into `viewer/matches/`
-- [x] Update `viewer/matches/manifest.json` with labeled entries
-- [x] Confirm viewer renders them correctly end-to-end
-- [x] Add a brief note in `viewer/README.md` on what the curated matches represent
+Required checks:
 
-**Constraints:**
-- VariableDamage renderer is not yet registered in the viewer; FixedDamage only for now
-- Depends on the 31-package rerun completing and exports settling first
-- Pick matches that show behavioral contrast (e.g., plain AO vs. RC-TR-HP, a potion decision turning point, a loss from poor HP management)
+- [x] package scaffold exists
+- [x] `matrix.yaml` has explicit even match counts for runnable cells
+- [x] runner supports phase, cell, dry-run, and match overrides
+- [x] list cells cleanly
+- [x] P0 dry-run cleanly
+- [x] P0 local bot execution writes recordings
+- [x] P0 cell export succeeds
+- [x] research validation succeeds without introducing fake live results
 
-## Release Gates
+## Phase P1 - Provider Pilot
 
-### Beta Gate
-- [x] Main-arc final experiment committed and validated
-- [x] VariableDamage Arc 1 summary written
-- [x] Cross-game comparison document written
-- [x] Supported research workflow shipped and documented for the common matrix-based export/aggregation path
-- [x] README, examples, and release-facing docs tell a consistent product story
-- [x] Viewer curated with research matches (section 5 above)
+Purpose: exercise the main validity surfaces before scaling.
 
-## Optional Appendix (Not A Beta Gate)
-- [ ] `GPT-5-AO` vs `Flash-AO` at `N=24`
-- [ ] `Opus-AO` vs `Flash-AO` at `N=24`
+Cells:
 
-### `1.0` Gate
-- Stronger methodological defaults for benchmark fairness
-- Robust session lifecycle management (recovery, segmented execution, duplicate pruning)
-- Ongoing spec-compliance discipline built into normal development, not only pre-release cleanup
+- `p1_fd_tier_gap_s0`
+- `p1_fd_controller_effect_s1`
+- `p1_fd_full_stack_effect_s3`
+- `p1_fd_frontier_s3`
+- `p1_vd_tier_gap_s0`
+- `p1_vd_controller_effect_s1`
+- `p1_vd_full_stack_effect_s3`
+- `p1_vd_frontier_s3`
 
-## Explicitly Deferred Beyond `v0.1.0`
+Before running P1:
+
+- [ ] provider credentials verified (OPENAI_API_KEY + Google creds not set in current shell — load .env before running)
+- [ ] live model IDs confirmed available (gemini-2.5-flash-lite, gpt-4o-mini used in prior experiments; verify current availability before authorizing)
+- [x] `matrix.yaml` budget envelope filled (pilot $2.00, main $10.00, expansion $5.00)
+- [x] git commit and pricing snapshot recorded (commit 92c17fa, pricing updated_at 2026-02-13)
+- [x] P1 dry-run cleanly
+
+After running P1:
+
+- [ ] export every P1 cell
+- [ ] export package-level artifacts
+- [ ] validate the package
+- [ ] record measured cost multipliers for S0, S1, and S3
+- [ ] check built-in behavioral scorer coverage
+- [ ] update `analysis.md` with pilot gates
+- [ ] decide whether S2 is needed
+- [ ] prune or expand cells before main-run execution
+
+## Phase P2 - Main Run
+
+Purpose: run only selected cells that support preregistered claims.
+
+P2 must not be populated until P1 is reviewed. Main-run expansion requires:
+
+- explicit cell list in `matrix.yaml`
+- fixed even match count per paired-side-swap cell
+- locked model roster
+- locked prompt templates
+- locked controller choices
+- budget projection from pilot telemetry
+- named FixedDamage replication target
+- updated `analysis.md` hypothesis readout plan
+
+## Research Workflow
+
+Use package-local execution and shared export/validation:
+
+```bash
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --list-cells
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P0 --dry-run
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P1 --dry-run
+agentdeck-research-export --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --package --no-generated-at
+agentdeck-research-validate --research-dir research
+```
+
+Raw recordings should be stored externally, with pointers under
+`research/2026-04-27-agentic-edge-strategy-stack/recordings/`.
+
+If the console entry points are not installed in a checkout, use the repo-local
+wrappers:
+
+```bash
+python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --list-cells
+python3 scripts/research_validate.py --research-dir research
+```
+
+## Deferred AgentDeck Product Work
+
+These are not blockers for the study package:
+
 - Native session recovery in the research CLI
 - Segmented execution as a framework-level capability
-- Duplicate-session pruning and recovery orchestration in core
-- Promotion of package-specific `run_experiment.py` logic into framework baseline
-- Autonomous Researcher workflows
+- Duplicate-session pruning in core
+- Promotion of package-specific runner logic into framework core
+- Broader Autonomous Researcher workflows
+- MatchCurator recording-first refactor and LLM-backed curation
 
-## Post-Release: MatchCurator Improvements
+## 0.2.x Engineering Hardening
 
-### Recording-first refactor (prerequisite for LLM curation)
-The current `curate_match_file(...)` replay path is redundant: it loads the recording JSON, replays it through `ReplayEngine`, re-accumulates a snapshot, then passes that to the generator. The recording already contains everything needed.
-
-Before adding an LLM-backed generator, refactor the replay curation path to be recording-first:
-- **replay path**: parse recording once, pass recording-derived input directly to generator — no `ReplayEngine` involved
-- **live path**: keep spectator-first accumulation (no recording exists yet during live matches)
-- **generator contract**: stable `CuratorInput` object, not coupled to raw recorder JSON schema
-
-The live spectator path stays as-is. Only `curate_match_file` and the replay-facing generator contract need to change.
-
-### LLM-backed curator
-Once the recording-first refactor is done, add an LLM-backed generator path:
-- one post-match LLM call with the full recording or a deliberate compressed slice
-- structured JSON output: `subtitle`, `synopsis`, `highlights`, optional `transcript`
-- plugged in via `MatchCurator(generator=llm_curate_match)`
-- `MatchCaster` reserved for future live broadcast layer
-
-### Typed highlight kinds
-Shipped in the viewer metadata pipeline:
-- optional `kind` on each highlight sidecar entry
-- viewer rendering for `😬`, `💡`, `🤯`, and `⚡`
-- bundled `.meta.json` sidecars updated with `kind`
-
-`kind` remains optional. Highlights without it still fall back to the neutral amber treatment.
+- Decompose `console.py` into narrower lifecycle, scheduling,
+  fairness/player-ordering, parse-failure, conclusion, metadata, and
+  replay/event-dispatch modules.
+- Pick one stable strict-mypy island first, then expand enforcement
+  progressively instead of flipping the whole codebase at once.

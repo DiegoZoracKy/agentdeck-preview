@@ -1,0 +1,347 @@
+schema_version: 1
+experiment_id: 2026-04-27-agentic-edge-strategy-stack
+created_at: "2026-04-27T00:00:00Z"
+purpose: >-
+  Pilot matrix for the Agentic Edge flagship study. The pilot verifies the
+  execution path, cost envelope, built-in behavioral scoring, and transfer slice
+  before any main-run expansion.
+
+frozen_inputs:
+  git_tag: null
+  git_commit: "92c17fa"
+  prompt_template_version: pilot-v0.1
+  pricing_snapshot: src/agentdeck/config/pricing.yaml
+  pricing_snapshot_updated_at: "2026-02-13"
+  note: git_commit frozen at gate-prep 2026-04-27. Pricing snapshot updated_at 2026-02-13.
+
+player_registry:
+  attack_bot:
+    kind: bot
+    class: AttackBot
+    provider: local
+    model: attack-policy
+    tier: deterministic
+  potion80_bot:
+    kind: bot
+    class: PotionAt80Bot
+    provider: local
+    model: potion-at-80-policy
+    tier: deterministic
+  flashlite:
+    kind: llm
+    provider: google
+    model: gemini-2.5-flash-lite
+    tier: lite
+    temperature: 0.2
+    max_retries: 3
+    generation_config:
+      thinking_config:
+        thinking_budget: 0
+  gpt4omini:
+    kind: llm
+    provider: openai
+    model: gpt-4o-mini
+    tier: mini
+    temperature: 0.2
+    max_retries: 3
+
+config_registry:
+  S0_AO:
+    strategy: S0_AO
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ActionOnlyController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      handshake_template_path: prompts/handshake_default.txt
+      turn_template_path: prompts/turn_action_only.txt
+  S1_RC:
+    strategy: S1_RC
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      handshake_template_path: prompts/handshake_default.txt
+      turn_template_path: prompts/turn_reasoning.txt
+  S3_FIXED_FULL:
+    strategy: S3_FIXED_FULL
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      handshake_template_path: prompts/handshake_default.txt
+      turn_template_path: prompts/turn_fixed_full_stack.txt
+  S3_VARIABLE_FULL:
+    strategy: S3_VARIABLE_FULL
+    pairing_policy: paired_side_swap
+    first_player_policy: random
+    controller: ReasoningController
+    conclusion:
+      enabled: false
+    prompt_builder:
+      handshake_template_path: prompts/handshake_default.txt
+      turn_template_path: prompts/turn_variable_full_stack.txt
+
+sampling_policy:
+  stopping_rule: fixed_n
+  preflight_matches_per_cell: 6
+  pilot_matches_per_cell: 12
+  main_target_matches_per_selected_cell: 48
+  paired_seed_side_swap:
+    enabled: true
+    side_swap_required: true
+    even_match_counts_required: true
+    note: "matches=12 means 6 AB/BA seed pairs."
+  expansion_selection_rules:
+    - pilot_artifact_validation_passed
+    - no_unexpected_truncation_at_max_turns
+    - cost_projection_within_budget
+    - scorer_coverage_sufficient_for_hypothesis
+  budget_envelope:
+    max_pilot_budget_usd: 2.00
+    max_main_budget_usd: 10.00
+    max_expansion_budget_usd: 5.00
+    cost_projection_source: pilot TokenUsageTracker and exported results.json
+    cost_estimate_note: >-
+      P1 calibrated from prior experiments (variable_damage_controller-1,
+      fixed_damage_parity-4) using same model pair. Estimated P1 total ~$0.27
+      (FlashLite-AO $0.00061/match, FlashLite-S3 $0.00257/match,
+      GPT-mini-AO $0.00126/match; VD cells +12% overhead). Budget is 7x
+      estimated P1, 4x for main-run scale. Refine from P1 telemetry before P2.
+  locked_after_pilot:
+    - S2 controller choice if S2 is added
+    - final model roster
+    - main-run cell list
+    - max_turns
+
+execution_plan:
+  preflight:
+    phase_id: P0
+    cell_ids:
+      - p0_fd_bot_smoke
+      - p0_vd_bot_smoke
+    matches_per_cell: 6
+    required_checks:
+      - matrix_cells_list_cleanly
+      - runner_dry_run_clean
+      - recorder_writes_match_files
+      - export_cell_artifacts
+      - validation_passes_for_planned_package
+  phases:
+    - phase_id: P1
+      name: Pilot - strategy stack and transfer slice
+      tracks: [fixed_damage, variable_damage]
+      cell_ids:
+        - p1_fd_tier_gap_s0
+        - p1_fd_controller_effect_s1
+        - p1_fd_full_stack_effect_s3
+        - p1_fd_frontier_s3
+        - p1_vd_tier_gap_s0
+        - p1_vd_controller_effect_s1
+        - p1_vd_full_stack_effect_s3
+        - p1_vd_frontier_s3
+    - phase_id: P2
+      name: Main run - selected cells only
+      tracks: []
+      cell_ids: []
+
+highlight_tag_rules:
+  critical_potion:
+    definition: potion_used_at_or_below_single_attack_survival_threshold
+  wasted_resource:
+    definition: potion_used_at_full_or_safe_health
+  transfer_break:
+    definition: fixed_damage_repair_fails_in_variable_damage
+  cost_frontier:
+    definition: cheaper_stack_matches_or_beats_more_expensive_baseline
+
+cells:
+  - id: p0_fd_bot_smoke
+    track: fixed_damage
+    phase: P0
+    question: Can the package runner execute and record a FixedDamage paired-side-swap bot cell?
+    intent: No-provider smoke test for setup, recorder, export, and validation.
+    causal_factor: preflight
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; even N; no provider calls
+    matches: 6
+    seed_offset: 0
+    player_a: { name: AttackBot-AO, player_ref: attack_bot, config_ref: S0_AO }
+    player_b: { name: Potion80Bot-AO, player_ref: potion80_bot, config_ref: S0_AO }
+    viewer_priority: false
+
+  - id: p0_vd_bot_smoke
+    track: variable_damage
+    phase: P0
+    question: Can the package runner execute and record a VariableDamage paired-side-swap bot cell?
+    intent: No-provider smoke test for stochastic game setup and recorder/export compatibility.
+    causal_factor: preflight
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; even N; no provider calls
+    matches: 6
+    seed_offset: 100
+    player_a: { name: AttackBot-AO, player_ref: attack_bot, config_ref: S0_AO }
+    player_b: { name: Potion80Bot-AO, player_ref: potion80_bot, config_ref: S0_AO }
+    viewer_priority: false
+
+  - id: p1_fd_tier_gap_s0
+    track: fixed_damage
+    phase: P1
+    question: What is the raw FixedDamage model-tier gap under AO baselines?
+    intent: Establish the unscaffolded tier gap before strategy intervention.
+    causal_factor: model_tier
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; report position effects before topline claims
+    matches: 12
+    seed_offset: 1000
+    player_a: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: false
+
+  - id: p1_fd_controller_effect_s1
+    track: fixed_damage
+    phase: P1
+    question: Does ReasoningController change Flash-Lite FixedDamage behavior without explicit HP grounding?
+    intent: Isolate controller effect within the cheaper model.
+    causal_factor: controller
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; same model, different controller condition
+    matches: 12
+    seed_offset: 1100
+    player_a: { name: FlashLite-S1-RC, player_ref: flashlite, config_ref: S1_RC }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p1_fd_full_stack_effect_s3
+    track: fixed_damage
+    phase: P1
+    question: Does full HP-grounded scaffolding improve Flash-Lite over its own AO baseline?
+    intent: Estimate the local strategy-stack effect in the deterministic anchor.
+    causal_factor: strategy_stack
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; same model, full stack versus AO
+    matches: 12
+    seed_offset: 1200
+    player_a: { name: FlashLite-S3-HP, player_ref: flashlite, config_ref: S3_FIXED_FULL }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p1_fd_frontier_s3
+    track: fixed_damage
+    phase: P1
+    question: Can scaffolded Flash-Lite approach or beat unscaffolded GPT-4o-mini in FixedDamage?
+    intent: Pilot the cost-quality frontier claim in the deterministic anchor.
+    causal_factor: cost_quality_frontier
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; compare cost-adjusted behavior, not only wins
+    matches: 12
+    seed_offset: 1300
+    player_a: { name: FlashLite-S3-HP, player_ref: flashlite, config_ref: S3_FIXED_FULL }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p1_vd_tier_gap_s0
+    track: variable_damage
+    phase: P1
+    question: What is the raw VariableDamage model-tier gap under AO baselines?
+    intent: Establish the unscaffolded transfer-environment tier gap.
+    causal_factor: model_tier
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; report risk-band and position effects
+    matches: 12
+    seed_offset: 2000
+    player_a: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: false
+
+  - id: p1_vd_controller_effect_s1
+    track: variable_damage
+    phase: P1
+    question: Does ReasoningController change Flash-Lite VariableDamage behavior without risk grounding?
+    intent: Test whether controller-only gains transfer under uncertainty.
+    causal_factor: controller
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; same model, different controller condition
+    matches: 12
+    seed_offset: 2100
+    player_a: { name: FlashLite-S1-RC, player_ref: flashlite, config_ref: S1_RC }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p1_vd_full_stack_effect_s3
+    track: variable_damage
+    phase: P1
+    question: Does risk-grounded scaffolding improve Flash-Lite over its own AO baseline?
+    intent: Estimate transfer of strategy-stack logic after rewriting HP thresholds as risk bands.
+    causal_factor: strategy_stack_transfer
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; same model, risk stack versus AO
+    matches: 12
+    seed_offset: 2200
+    player_a: { name: FlashLite-S3-RISK, player_ref: flashlite, config_ref: S3_VARIABLE_FULL }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p1_vd_frontier_s3
+    track: variable_damage
+    phase: P1
+    question: Can risk-grounded Flash-Lite approach or beat unscaffolded GPT-4o-mini in VariableDamage?
+    intent: Pilot the cost-quality frontier claim under stochastic damage.
+    causal_factor: cost_quality_frontier_transfer
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; compare cost-adjusted risk behavior
+    matches: 12
+    seed_offset: 2300
+    player_a: { name: FlashLite-S3-RISK, player_ref: flashlite, config_ref: S3_VARIABLE_FULL }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: true
