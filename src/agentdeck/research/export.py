@@ -7,7 +7,7 @@ import csv
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
+from typing import Any, Dict, List, Sequence, Tuple, Union
 
 import yaml
 
@@ -17,6 +17,11 @@ from .artifact_validation import (
 )
 from .behavioral import compute_behavioral_profile
 from .factual_blocks import write_factual_markdown_blocks
+from .phase_model import (
+    iter_selected_cells,
+    phase_for_cell,
+    select_package_cells,
+)
 from .provider_utils import provider_from_module as _provider_from_module
 from .recording_metrics import (
     compute_format_strictness,
@@ -52,21 +57,6 @@ def resolve_matrix_path(experiment_dir: Path, matrix_path: Path | None) -> Path:
     if not resolved.exists():
         raise FileNotFoundError(f"Matrix file not found: {resolved}")
     return resolved
-
-
-def iter_selected_cells(
-    matrix: Dict[str, Any], *, phase: str | None, cell_ids: set[str] | None
-) -> Iterable[Dict[str, Any]]:
-    phase_to_cells: Dict[str, set[str]] = {}
-    for phase_entry in matrix.get("execution_plan", {}).get("phases", []):
-        phase_to_cells[phase_entry["phase_id"]] = set(phase_entry.get("cell_ids", []))
-
-    for cell in matrix.get("cells", []):
-        if phase and cell["id"] not in phase_to_cells.get(phase, set()):
-            continue
-        if cell_ids and cell["id"] not in cell_ids:
-            continue
-        yield cell
 
 
 def _is_usable_recordings_dir(path: Path) -> bool:
@@ -126,6 +116,16 @@ def export_matrix_cells(
     include_generated_at: bool,
 ) -> int:
     matrix = _load_yaml(resolve_matrix_path(experiment_dir, matrix_path))
+    known_cell_ids = {
+        str(cell["id"])
+        for cell in matrix.get("cells", [])
+        if isinstance(cell, dict) and cell.get("id")
+    }
+    if cell_ids:
+        missing = sorted(cell_ids - known_cell_ids)
+        if missing:
+            raise SystemExit(f"Unknown matrix cells: {', '.join(missing)}")
+
     selected = list(iter_selected_cells(matrix, phase=phase, cell_ids=cell_ids))
     if not selected:
         raise SystemExit("No cells selected. Use --list-cells, --phase, or --cell.")
@@ -148,6 +148,11 @@ def export_matrix_cells(
             include_generated_at=include_generated_at,
             behavioral_profile_id="auto",
             behavioral_config=behavioral_config,
+            source_metadata={
+                "aggregation_scope": "cell",
+                "phase": phase_for_cell(matrix, cell_id),
+                "cell_id": cell_id,
+            },
         )
         print(f"Exported {cell_id} -> {output_dir}")
         exported += 1
@@ -159,15 +164,24 @@ def export_matrix_package(
     experiment_dir: Path,
     *,
     matrix_path: Path | None,
-    include_generated_at: bool,
+    phase: str | None = None,
+    cell_ids: set[str] | None = None,
+    include_generated_at: bool = True,
 ) -> None:
     matrix = _load_yaml(resolve_matrix_path(experiment_dir, matrix_path))
     manifest_path = experiment_dir / "manifest.yaml"
     manifest = _load_yaml(manifest_path) if manifest_path.exists() else {}
     behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
 
+    selected_cells, source_metadata = select_package_cells(
+        matrix,
+        manifest,
+        phase=phase,
+        cell_ids=cell_ids,
+    )
+
     recordings_dirs: List[Path] = []
-    for cell in matrix.get("cells", []):
+    for cell in selected_cells:
         recordings_dirs.extend(recordings_dirs_for_cell(experiment_dir, cell["id"]))
 
     if not recordings_dirs:
@@ -186,6 +200,7 @@ def export_matrix_package(
         include_generated_at=include_generated_at,
         behavioral_profile_id="auto",
         behavioral_config=behavioral_config,
+        source_metadata=source_metadata,
     )
     if manifest:
         write_factual_markdown_blocks(experiment_dir, manifest)
@@ -368,6 +383,7 @@ def export_results(
     include_generated_at: bool = True,
     behavioral_profile_id: str | None = "auto",
     behavioral_config: Dict[str, Any] | None = None,
+    source_metadata: Dict[str, Any] | None = None,
 ) -> None:
     if isinstance(recordings_dir, Path):
         recordings_dirs: List[Path] = [recordings_dir]
@@ -483,6 +499,10 @@ def export_results(
     source: Dict[str, Any] = {"recordings_dir": str(normalized_dirs[0])}
     if len(normalized_dirs) > 1:
         source["recordings_dirs"] = [str(path) for path in normalized_dirs]
+    if source_metadata:
+        source.update(
+            {key: value for key, value in source_metadata.items() if value is not None}
+        )
 
     results: Dict[str, Any] = {
         "schema_version": 3,
@@ -507,7 +527,7 @@ def export_results(
 
     csv_path = output_dir / "results.csv"
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.writer(handle)
+        writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(
             [
                 "match_id",
@@ -579,7 +599,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--package",
         action="store_true",
-        help="Export top-level package results from discovered matrix cell sources.",
+        help=(
+            "Export top-level package results from discovered matrix cell sources. "
+            "May be combined with --phase or --cell for an explicit package scope."
+        ),
     )
     parser.add_argument(
         "--no-generated-at",
@@ -636,9 +659,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.output_dir is not None or args.experiment_id is not None:
         parser.error("--output-dir and --experiment-id are only valid in direct export mode.")
 
-    if args.package and (args.phase is not None or args.cells):
-        parser.error("--package cannot be combined with --phase or --cell.")
-
     experiment_dir = args.experiment_dir or (args.matrix.parent if args.matrix else None)
     if experiment_dir is None:
         parser.error("--experiment-dir is required for matrix mode unless --matrix is supplied.")
@@ -651,6 +671,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         export_matrix_package(
             experiment_dir,
             matrix_path=args.matrix,
+            phase=args.phase,
+            cell_ids=set(args.cells or []) or None,
             include_generated_at=not args.no_generated_at,
         )
         return 0

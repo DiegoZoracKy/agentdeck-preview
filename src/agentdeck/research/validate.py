@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 import yaml
 
 from .index import generate_index
+from .phase_model import validate_package_phase_scope
 
 REQUIRED_FIELDS: Tuple[Tuple[str, ...], ...] = (
     ("schema_version",),
@@ -421,6 +422,7 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                     errors.append(f"{experiment_name}: results.json schema_version must be int")
                 elif schema_version < 1:
                     errors.append(f"{experiment_name}: results.json schema_version must be >= 1")
+            errors.extend(validate_package_phase_scope(experiment_dir, manifest, data))
         elif data is not None:
             errors.append(f"{experiment_name}: results.json must be mapping")
 

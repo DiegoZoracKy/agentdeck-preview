@@ -1,8 +1,8 @@
-# SPEC-RESEARCH-WORKFLOW v0.1.2
+# SPEC-RESEARCH-WORKFLOW v0.2.0
 
 > Status: Final
-> Version: 0.1.2
-> Last Updated: 2026-03-27
+> Version: 0.2.0
+> Last Updated: 2026-04-27
 > Implementation: ✅ Complete (`agentdeck.research.export`, `agentdeck.research.index`, thin `scripts/` wrappers)
 > Audience: Research engineers, experiment authors, contributors
 
@@ -23,7 +23,7 @@
 
 ## 3. Responsibilities
 - Support matrix-aware cell export from shared package-owned tooling.
-- Support package-level aggregation from canonical cell artifacts and/or discovered session recordings.
+- Support phase-aware package aggregation from canonical cell artifacts and/or discovered session recordings.
 - Keep direct recordings-dir export working unchanged for single-run or non-matrix workflows.
 - Provide installable research CLI entry points for export and index generation.
 - Retain backward-compatible `scripts/research_export.py` and `scripts/research_index.py` wrappers.
@@ -57,7 +57,7 @@ The export surface MUST support two modes:
   - `--list-cells`
   - `--cell <id>` (repeatable)
   - `--phase <id>`
-  - `--package`
+  - `--package` (MAY be combined with `--phase` or `--cell` for explicit package-scope overrides)
 
 ### 4.3 Matrix Mode Semantics
 - `--list-cells`:
@@ -73,8 +73,29 @@ The export surface MUST support two modes:
   - prefer canonical cell-artifact sources first when both exist and remain usable
   - ignore canonical sources that do not exist, are not directories, or contain no
     `match_*.json` files
+  - default to declared study phases when a phase model exists
+  - fail fast for ambiguous multi-phase matrices without a declared default scope
+  - record package aggregation scope in `results.json.source`
 
-### 4.4 Shared Index Surface
+### 4.4 Phase/Run Model
+Matrix packages MAY declare a phase model in `matrix.yaml` or `manifest.yaml`.
+When both exist, `matrix.yaml` is authoritative because it owns cell membership.
+
+Supported phase model fields:
+- `study_phases`: phases included in default `--package` exports.
+- `preflight_phases`: smoke/setup phases excluded from default package exports.
+- `main_phases`: optional descriptive grouping for scaled study phases.
+- `excluded_phases`: phases intentionally excluded from default package exports.
+
+Default package aggregation semantics:
+- If `study_phases` is declared, `--package` MUST aggregate only cells in those phases.
+- If no phase model exists and the matrix has exactly one non-empty phase, `--package` MAY aggregate that phase for backward compatibility.
+- If no phase model exists and the matrix has multiple non-empty phases, `--package` MUST fail fast and ask for `phase_model.study_phases` or an explicit `--phase` / `--cell` scope.
+- `--package --phase <id>` MUST aggregate only that phase and record an explicit phase scope.
+- `--package --cell <id>` MUST aggregate only those cells and record an explicit cell scope.
+- Cell exports MUST record their owning phase when it is known.
+
+### 4.5 Shared Index Surface
 The shared index surface MUST be implemented in `agentdeck.research.index` and exposed through:
 
 - **Package API**:
@@ -86,7 +107,7 @@ The shared index surface MUST be implemented in `agentdeck.research.index` and e
 - **Compatibility wrapper**:
   - `python scripts/research_index.py ...`
 
-### 4.5 Minimal Matrix Contract
+### 4.6 Minimal Matrix Contract
 The supported shared workflow assumes these `matrix.yaml` sections exist:
 - `experiment_id`
 - `cells`
@@ -109,9 +130,17 @@ The workflow MUST NOT require model/config registries for export-only operations
   artifacts and continue with discovered session recordings when available. A canonical
   source is unusable when the path does not exist, is not a directory, or contains no
   `match_*.json` files.
+- **RW5b**: Package export MUST be phase-aware when a phase model exists; default
+  package exports MUST include declared `study_phases` only.
+- **RW5c**: Package export MUST fail fast for ambiguous multi-phase matrices without
+  a phase model unless the user provides an explicit `--phase` or `--cell` scope.
+- **RW5d**: Package and cell exports MUST write source-scope metadata sufficient for
+  validation to determine aggregation scope, included phases, and included cells.
 - **RW6**: Package export MUST preserve deterministic outputs when `--no-generated-at` is used.
 - **RW6a**: Package export MUST refresh top-level factual marker blocks when
   `README.md` / `analysis.md` contain `AUTO_FACTS` markers.
+- **RW6b**: Factual marker blocks for matrix package aggregates MUST identify the
+  aggregation scope and avoid presenting pooled multi-cell winners as study toplines.
 - **RW7**: Shared tooling MUST NOT own or infer experiment execution policy; it only exports, scores, aggregates, and indexes outputs.
 - **RW8**: The minimal template `scripts/run_experiment.py` MUST remain package-local and framework-agnostic beyond stable public AgentDeck APIs.
 - **RW9**: Workflow logic MUST live in `src/agentdeck/research/`; any `scripts/` entry file for export or index MUST be a thin wrapper over the package-owned implementation.
@@ -120,6 +149,7 @@ The workflow MUST NOT require model/config registries for export-only operations
 ## 6. Error Handling
 - Missing `matrix.yaml` in matrix mode: raise `FileNotFoundError` with the expected path.
 - Missing selected cells: exit with a clear selection error.
+- Ambiguous multi-phase package export: exit with guidance to declare `phase_model.study_phases` or pass explicit `--phase` / `--cell`.
 - `--package` with no usable cell recordings: fail fast with clear provenance guidance.
 - Invalid mixed mode (for example, `--recordings-dir` plus `--package`): reject early with a clear CLI error.
 
@@ -133,6 +163,9 @@ The workflow MUST NOT require model/config registries for export-only operations
     session recordings when cell artifacts are absent
   - ignore dead or empty canonical artifact sources and still export from discovered
     session recordings
+  - default package export excludes preflight phases when `study_phases` is declared
+  - ambiguous multi-phase package export fails without a phase model
+  - explicit `--package --phase` and `--package --cell` scopes work
 - Verify duplicate recordings dirs are deduplicated.
 - Verify invalid cell selection and missing matrix files fail fast.
 - Verify the package-owned module and the `scripts/` wrapper share the same behavior.

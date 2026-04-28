@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -38,11 +40,12 @@ def _write_results_files(
     schema_version: int = 3,
     include_generated_at: bool = True,
     behavioral_profile: Dict[str, Any] | None = None,
+    source: Dict[str, Any] | None = None,
 ) -> None:
     results_payload: Dict[str, Any] = {
         "schema_version": schema_version,
         "experiment_id": experiment_dir.name,
-        "source": {"recordings_dir": "agentdeck_runs/session_x/records"},
+        "source": source or {"recordings_dir": "agentdeck_runs/session_x/records"},
         "summary": {"total_matches": 1},
         "players": [{"name": "Alice"}],
         "matches": [{"match_id": "m1", "winner": "Alice"}],
@@ -92,6 +95,30 @@ def _write_results_files(
     (experiment_dir / "results.csv").write_text(
         "match_id,winner,turns,outcome,seed,duration,cost,player_order_source,first_player,players,player_costs\n"
         'm1,Alice,1,win,42,1.0,0.0,console,Alice,"Alice,Bob",{}\n',
+        encoding="utf-8",
+    )
+
+
+def _write_phase_matrix(experiment_dir: Path) -> None:
+    (experiment_dir / "matrix.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "experiment_id": experiment_dir.name,
+                "phase_model": {
+                    "preflight_phases": ["P0"],
+                    "study_phases": ["P1"],
+                },
+                "execution_plan": {
+                    "preflight": {"phase_id": "P0", "cell_ids": ["p0_smoke"]},
+                    "phases": [{"phase_id": "P1", "cell_ids": ["p1_study"]}],
+                },
+                "cells": [
+                    {"id": "p0_smoke", "phase": "P0"},
+                    {"id": "p1_study", "phase": "P1"},
+                ],
+            },
+            sort_keys=False,
+        ),
         encoding="utf-8",
     )
 
@@ -179,6 +206,65 @@ def test_complete_results_with_statistics_block_pass(tmp_path):
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []
+
+
+def test_phase_aware_package_results_pass_validation(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "2026-03-26-matrix-demo"
+    experiment_dir.mkdir()
+    _write_phase_matrix(experiment_dir)
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        schema_version=3,
+        source={
+            "recordings_dir": "agentdeck_runs/p1_study/session_001/records",
+            "aggregation_scope": "study_phases",
+            "phases_included": ["P1"],
+            "cells_included": ["p1_study"],
+        },
+    )
+
+    manifest = {"status": "complete", "run": {"matches_completed": 1}}
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert errors == []
+
+
+def test_phase_contaminated_package_results_fail_validation(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "2026-03-26-matrix-demo"
+    experiment_dir.mkdir()
+    _write_phase_matrix(experiment_dir)
+    _write_results_files(
+        experiment_dir,
+        include_statistics=True,
+        schema_version=3,
+        source={
+            "recordings_dir": "agentdeck_runs/p0_smoke/session_001/records",
+            "aggregation_scope": "study_phases",
+            "phases_included": ["P0", "P1"],
+            "cells_included": ["p0_smoke", "p1_study"],
+        },
+    )
+
+    manifest = {"status": "complete", "run": {"matches_completed": 1}}
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("includes non-study phases" in e for e in errors)
+    assert any("includes excluded phases" in e for e in errors)
+
+
+def test_phase_model_requires_source_scope_metadata(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "2026-03-26-matrix-demo"
+    experiment_dir.mkdir()
+    _write_phase_matrix(experiment_dir)
+    _write_results_files(experiment_dir, include_statistics=True, schema_version=3)
+
+    manifest = {"status": "complete", "run": {"matches_completed": 1}}
+    errors = validator._validate_results(experiment_dir, manifest)
+    assert any("source.aggregation_scope missing" in e for e in errors)
+    assert any("source.phases_included must be list[str]" in e for e in errors)
+    assert any("source.cells_included must be list[str]" in e for e in errors)
 
 
 def test_complete_results_require_position_effect_block(tmp_path):

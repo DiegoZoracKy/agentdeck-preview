@@ -157,6 +157,52 @@ def _write_matrix_experiment(tmp_path: Path, *, cell_ids: list[str]) -> Path:
     return experiment_dir
 
 
+def _write_multiphase_matrix_experiment(
+    tmp_path: Path, *, phase_model: dict | None = None
+) -> Path:
+    experiment_dir = tmp_path / "research" / "2026-03-26-matrix-demo"
+    experiment_dir.mkdir(parents=True)
+    (experiment_dir / "manifest.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "experiment_id": "2026-03-26-matrix-demo",
+                "status": "running",
+                "question": "demo",
+                "game": {
+                    "name": "FixedDamageGame",
+                    "config": {"attack_damage": 20, "max_health": 100},
+                },
+                "players": [
+                    {"id": "A", "provider": "mock", "model": "MockPlayer"},
+                    {"id": "B", "provider": "mock", "model": "MockPlayer"},
+                ],
+                "run": {"seed_base": 42, "matches_planned": 2, "matches_completed": 0},
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    matrix = {
+        "experiment_id": "2026-03-26-matrix-demo",
+        "execution_plan": {
+            "preflight": {"phase_id": "P0", "cell_ids": ["p0_smoke"]},
+            "phases": [{"phase_id": "P1", "cell_ids": ["p1_study"]}],
+        },
+        "cells": [
+            {"id": "p0_smoke", "phase": "P0"},
+            {"id": "p1_study", "phase": "P1"},
+        ],
+    }
+    if phase_model is not None:
+        matrix["phase_model"] = phase_model
+    (experiment_dir / "matrix.yaml").write_text(
+        yaml.safe_dump(matrix, sort_keys=False),
+        encoding="utf-8",
+    )
+    return experiment_dir
+
+
 def _pass_artifact_validation(monkeypatch) -> None:
     monkeypatch.setattr(
         research_export,
@@ -242,6 +288,9 @@ def test_export_matrix_cells_uses_discovered_session_recordings(tmp_path, monkey
     )
     assert payload["experiment_id"] == "2026-03-26-matrix-demo::p1_c01_demo"
     assert payload["source"]["recordings_dir"] == str(records_dir.resolve())
+    assert payload["source"]["aggregation_scope"] == "cell"
+    assert payload["source"]["phase"] == "P1"
+    assert payload["source"]["cell_id"] == "p1_c01_demo"
 
 
 def test_export_matrix_package_prefers_canonical_cell_artifacts(tmp_path, monkeypatch) -> None:
@@ -295,6 +344,80 @@ def test_export_matrix_package_falls_back_to_session_discovery(tmp_path, monkeyp
     payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
     assert payload["source"]["recordings_dir"] == str(records_dir.resolve())
     assert payload["summary"]["total_matches"] == 1
+
+
+def test_export_matrix_package_uses_declared_study_phases(tmp_path, monkeypatch) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_multiphase_matrix_experiment(
+        tmp_path,
+        phase_model={"preflight_phases": ["P0"], "study_phases": ["P1"]},
+    )
+    p0_records = experiment_dir / "agentdeck_runs" / "p0_smoke" / "session_001" / "records"
+    p1_records = experiment_dir / "agentdeck_runs" / "p1_study" / "session_001" / "records"
+    _write_match(p0_records, "match_p0")
+    _write_match(p1_records, "match_p1")
+
+    research_export.export_matrix_package(
+        experiment_dir,
+        matrix_path=None,
+        include_generated_at=False,
+    )
+
+    payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+    assert payload["summary"]["total_matches"] == 1
+    assert payload["source"]["aggregation_scope"] == "study_phases"
+    assert payload["source"]["phases_included"] == ["P1"]
+    assert payload["source"]["cells_included"] == ["p1_study"]
+    assert payload["source"]["recordings_dir"] == str(p1_records.resolve())
+
+
+def test_export_matrix_package_requires_phase_model_for_ambiguous_multi_phase_matrix(
+    tmp_path, monkeypatch
+) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_multiphase_matrix_experiment(tmp_path)
+    _write_match(
+        experiment_dir / "agentdeck_runs" / "p0_smoke" / "session_001" / "records",
+        "match_p0",
+    )
+    _write_match(
+        experiment_dir / "agentdeck_runs" / "p1_study" / "session_001" / "records",
+        "match_p1",
+    )
+
+    with pytest.raises(SystemExit, match="ambiguous for a multi-phase matrix"):
+        research_export.export_matrix_package(
+            experiment_dir,
+            matrix_path=None,
+            include_generated_at=False,
+        )
+
+
+def test_export_matrix_package_allows_explicit_phase_scope_for_ambiguous_matrix(
+    tmp_path, monkeypatch
+) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_multiphase_matrix_experiment(tmp_path)
+    p0_records = experiment_dir / "agentdeck_runs" / "p0_smoke" / "session_001" / "records"
+    _write_match(p0_records, "match_p0")
+    _write_match(
+        experiment_dir / "agentdeck_runs" / "p1_study" / "session_001" / "records",
+        "match_p1",
+    )
+
+    research_export.export_matrix_package(
+        experiment_dir,
+        matrix_path=None,
+        phase="P0",
+        include_generated_at=False,
+    )
+
+    payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
+    assert payload["summary"]["total_matches"] == 1
+    assert payload["source"]["aggregation_scope"] == "explicit_phase"
+    assert payload["source"]["phases_included"] == ["P0"]
+    assert payload["source"]["cells_included"] == ["p0_smoke"]
+    assert payload["source"]["recordings_dir"] == str(p0_records.resolve())
 
 
 def test_export_matrix_package_hydrates_auto_facts_blocks(tmp_path, monkeypatch) -> None:
@@ -414,7 +537,7 @@ def test_export_matrix_cells_fails_fast_for_unknown_cell(tmp_path, monkeypatch) 
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
 
-    with pytest.raises(SystemExit, match="No cells selected"):
+    with pytest.raises(SystemExit, match="Unknown matrix cells"):
         research_export.export_matrix_cells(
             experiment_dir,
             matrix_path=None,

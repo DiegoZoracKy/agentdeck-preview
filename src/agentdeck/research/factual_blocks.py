@@ -51,6 +51,11 @@ def _player_label(player: Dict[str, Any]) -> str:
 
 
 def _winner_topline(results: Dict[str, Any]) -> str:
+    source = results.get("source") or {}
+    cells_included = source.get("cells_included")
+    if isinstance(cells_included, list) and len(cells_included) > 1:
+        return "See per-cell results (matrix aggregate)"
+
     summary = results.get("summary") or {}
     win_rates = summary.get("win_rates") or {}
     if not isinstance(win_rates, dict) or not win_rates:
@@ -81,9 +86,27 @@ def _load_results_json(path: Path) -> Dict[str, Any]:
     return {}
 
 
+def _source_scope_lines(source: Dict[str, Any]) -> List[str]:
+    scope = source.get("aggregation_scope")
+    if not scope:
+        return []
+
+    lines = [f"- Aggregation Scope: {scope}"]
+    phases = source.get("phases_included")
+    cells = source.get("cells_included")
+    if isinstance(phases, list) and phases:
+        lines.append(f"- Phases Included: {', '.join(str(item) for item in phases)}")
+    if isinstance(cells, list):
+        lines.append(f"- Cells Included: {len(cells)}")
+    elif source.get("cell_id"):
+        lines.append(f"- Cell: {source.get('cell_id')}")
+    return lines
+
+
 def write_factual_markdown_blocks(dest_dir: Path, manifest: Dict[str, Any]) -> None:
     """Refresh AUTO_FACTS blocks from results.json while preserving narrative text."""
     results = _load_results_json(dest_dir / "results.json")
+    source = results.get("source") or {}
     summary = results.get("summary") or {}
     statistics = results.get("statistics") or {}
     strictness = results.get("format_strictness") or {}
@@ -95,7 +118,7 @@ def write_factual_markdown_blocks(dest_dir: Path, manifest: Dict[str, Any]) -> N
 
     player_line = ", ".join(_player_label(player) for player in players) or "N/A"
     matches_planned = run.get("matches_planned", "N/A")
-    matches_completed = run.get("matches_completed", "N/A")
+    matches_completed = summary.get("total_matches", run.get("matches_completed", "N/A"))
 
     readme_lines = [
         f"- Status: {manifest.get('status', 'N/A')}",
@@ -108,6 +131,7 @@ def write_factual_markdown_blocks(dest_dir: Path, manifest: Dict[str, Any]) -> N
         f"- Avg Duration (s): {summary.get('avg_duration', 'N/A')}",
         f"- Total Cost: {_format_usd(summary.get('total_cost'))}",
     ]
+    readme_lines.extend(_source_scope_lines(source))
     _replace_auto_facts_block(dest_dir / "README.md", readme_lines)
 
     analysis_lines = [
@@ -130,4 +154,5 @@ def write_factual_markdown_blocks(dest_dir: Path, manifest: Dict[str, Any]) -> N
         f"- Quality actionable: {quality.get('is_actionable', 'N/A')}",
         f"- Quality note: {quality.get('quality_note', 'N/A')}",
     ]
+    analysis_lines.extend(_source_scope_lines(source))
     _replace_auto_facts_block(dest_dir / "analysis.md", analysis_lines)

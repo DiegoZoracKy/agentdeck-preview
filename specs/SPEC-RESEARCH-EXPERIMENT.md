@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-EXPERIMENT: Experiment Package Contract
 
 > Status: Final
-> Version: 1.6.1
-> Last Updated: 2026-03-26
+> Version: 1.7.0
+> Last Updated: 2026-04-27
 > Implementation: ✅ Complete (`research/SCHEMA.md`, `agentdeck.research.export`, `agentdeck.research.index`, `agentdeck.research.validate`, compatibility `scripts/` wrappers)
 > Audience: Research engineers, contributors, experiment authors
 
@@ -58,11 +58,24 @@ Recommended fields (non-exhaustive):
 - `variants` (model/controller variants used across matchups)
 - `run.matches_completed`, `run.concurrency`, `run.max_turns`, `run.source_sessions`
 - `run.matrix_source` (when `matrix.yaml` exists)
+- `phase_model` (when a package has multiple execution phases and no `matrix.yaml`)
 - `analysis_plan` (ci_method, alpha, effect_size)
 - `artifacts` (paths for results.json/results.csv/plots)
 - `notes`
 
 The canonical schema and examples live in `research/SCHEMA.md`.
+
+### 4.2a matrix.yaml Phase Model (Optional)
+Matrix packages MAY declare phase scope for export and validation.
+
+Recommended fields:
+- `phase_model.study_phases` (list[str]): phases included in default package aggregation.
+- `phase_model.preflight_phases` (list[str]): smoke/setup phases excluded from default package aggregation.
+- `phase_model.main_phases` (list[str]): scaled phases, when distinct from pilot phases.
+- `phase_model.excluded_phases` (list[str]): phases intentionally excluded from default package aggregation.
+
+When both `matrix.yaml` and `manifest.yaml` declare `phase_model`, `matrix.yaml` is authoritative.
+Multi-phase matrices SHOULD declare `study_phases` before top-level package export.
 
 ### 4.3 results.json (Generated)
 Required fields:
@@ -75,6 +88,11 @@ Required fields:
 
 Optional source-provenance extension:
 - `source.recordings_dirs` (array of strings) for checkpoint aggregation from multiple sessions.
+- `source.aggregation_scope` (`cell|study_phases|explicit_phase|explicit_cells|all_phases`)
+- `source.phase` (string) for cell exports when known.
+- `source.cell_id` (string) for cell exports.
+- `source.phases_included` (array of strings) for matrix package exports.
+- `source.cells_included` (array of strings) for matrix package exports.
 - `generated_at` (ISO-8601) unless export was run with `--no-generated-at` for deterministic output.
 - `behavioral_profile` (object; optional game-specific behavioral scorer output following `SPEC-RESEARCH-BEHAVIORAL.md`)
 
@@ -258,7 +276,14 @@ Preferred surfaces:
 - **RE14**: `results.json.source.recordings_dir` MUST be a non-empty primary source string. When aggregating multiple source directories, `results.json.source.recordings_dirs` MUST be a non-empty array and `recordings_dir` MUST equal its first entry.
 - **RE15**: For `results.json.schema_version >= 3`, `results.json.artifact_validation` MUST be produced by the shared export surface for every exported dataset with one or more matches.
 - **RE16**: `artifact_validation` MUST cover monotonic gameplay timeline, top-level timing consistency, prompt payload turn-number coherence, and winner/final-state consistency using only recorder payloads (game-agnostic).
-- **RE17**: The shared export surface MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
+- **RE17**: Matrix package exports that include source-scope metadata MUST keep
+  `source.phases_included` and `source.cells_included` consistent with `matrix.yaml`.
+- **RE18**: When a phase model declares `study_phases`, top-level package exports
+  with `source.aggregation_scope: study_phases` MUST NOT include preflight,
+  excluded, or otherwise non-study phases.
+- **RE19**: Validation MUST reject phase-contaminated package results when a phase
+  model exists or source-scope metadata is present.
+- **RE20**: The shared export surface MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
 
 ## 7. Data Flow & Interaction
 - Export: `recordings/ -> agentdeck.research.export -> results.json + results.csv`
