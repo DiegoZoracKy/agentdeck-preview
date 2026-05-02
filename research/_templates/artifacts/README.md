@@ -6,4 +6,4 @@ Examples:
 - `cells.parquet`
 - `matches.parquet`
 - `highlights.json`
-- plots/tables used in `analysis.md`
+- plots/tables used by authored analyses under `analysis/`

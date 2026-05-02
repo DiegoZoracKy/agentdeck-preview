@@ -13,7 +13,7 @@ The `scripts/` files remain as backward-compatible wrappers for repo-local use.
 ## Research Workflow
 
 - `research_package.py` wraps the package-owned packager surface and promotes one or more `agentdeck_runs/<session>/` folders into a standardized package under `research/`.
-- `research_export.py` wraps the package-owned export surface and generates `results.json` and `results.csv` from one or more recordings directories while failing fast on recording invariant violations.
+- `research_export.py` wraps the package-owned export surface and generates `results.json`, `results.csv`, and deterministic `results.md` from one or more recordings directories while failing fast on recording invariant violations.
   It also supports matrix-based cell export and package aggregation for benchmark-grid studies.
 - `research_index.py` wraps the package-owned index surface and regenerates `research/INDEX.md` from experiment manifests.
 - `research_validate.py` wraps the package-owned validation surface and validates package structure, generated artifacts, exported invariant summaries, and index consistency.
@@ -27,7 +27,7 @@ agentdeck-research-package \
 
 agentdeck-research-export \
   --recordings-dir agentdeck_runs/session_YYYYMMDD_HHMMSS_xxxxxx/records \
-  --output-dir research/YYYY-MM-DD-your-experiment \
+  --output-dir research/research_YYYY-MM-DD-your-experiment \
   --no-generated-at
 
 agentdeck-research-validate --research-dir research --write-index
@@ -39,7 +39,7 @@ Export one selected cell from a benchmark package:
 
 ```bash
 agentdeck-research-export \
-  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --experiment-dir research/research_YYYY-MM-DD-your-experiment \
   --cell p1_c01_example \
   --no-generated-at
 ```
@@ -48,7 +48,7 @@ Export all cells from one phase:
 
 ```bash
 agentdeck-research-export \
-  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --experiment-dir research/research_YYYY-MM-DD-your-experiment \
   --phase P1 \
   --no-generated-at
 ```
@@ -58,7 +58,7 @@ session recordings:
 
 ```bash
 agentdeck-research-export \
-  --experiment-dir research/YYYY-MM-DD-your-experiment \
+  --experiment-dir research/research_YYYY-MM-DD-your-experiment \
   --package \
   --no-generated-at
 ```
@@ -71,7 +71,8 @@ agentdeck-research-export \
 
 ## Validation Utilities
 
-- `validate_schema_v1_3.py` runs a schema/replay validation flow.
+- `validate_schema_v1_3.py` validates existing schema v1.3 match recordings offline.
+- `live_schema_check_v1_3.py` runs the OpenAI-backed schema/replay validation flow.
 - `validate_baseline.py` checks baseline assumptions used by local workflows.
 - `bundle_specs.py` packages spec files for review or export.
 - `ci.sh` runs the repository CI script locally.

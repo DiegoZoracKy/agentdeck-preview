@@ -28,6 +28,7 @@ from .recording_metrics import (
     compute_inferential_statistics,
     compute_position_effect,
 )
+from .results_markdown import write_results_markdown_report
 
 
 def _iso_timestamp() -> str:
@@ -559,6 +560,8 @@ def export_results(
                     json.dumps(match.get("player_costs") or {}),
                 ]
             )
+
+    write_results_markdown_report(output_dir)
 
 
 def _build_parser() -> argparse.ArgumentParser:

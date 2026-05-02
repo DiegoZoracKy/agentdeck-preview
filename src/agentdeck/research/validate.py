@@ -51,6 +51,9 @@ AUTO_FACTS_PLACEHOLDER_PATTERNS = (
     r"Topline Winner:\s*TBD",
     r"Topline winner:\s*TBD",
 )
+ANALYSIS_REPORT_DIR_PATTERN = re.compile(
+    r"^analysis_\d{8}_\d{6}_[a-z0-9]+_[a-z0-9][a-z0-9_]*$"
+)
 
 
 def _get_nested(data: Dict[str, Any], path: Tuple[str, ...]) -> Tuple[Any, bool]:
@@ -64,6 +67,74 @@ def _get_nested(data: Dict[str, Any], path: Tuple[str, ...]) -> Tuple[Any, bool]
 
 def _is_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _match_players(match: Dict[str, Any]) -> set[str]:
+    players = match.get("players") or []
+    if not isinstance(players, list):
+        return set()
+    return {str(name) for name in players if name is not None}
+
+
+def _validate_statistics_pairwise(
+    experiment_name: str,
+    statistics: Dict[str, Any],
+    matches: List[Dict[str, Any]],
+) -> List[str]:
+    errors: List[str] = []
+    pairwise = statistics.get("pairwise_comparisons")
+    if pairwise is None:
+        return errors
+    if not isinstance(pairwise, dict):
+        return [f"{experiment_name}: results.json.statistics.pairwise_comparisons must be mapping"]
+
+    for key, comparison in pairwise.items():
+        prefix = f"{experiment_name}: results.json.statistics.pairwise_comparisons.{key}"
+        if not isinstance(comparison, dict):
+            errors.append(f"{prefix} must be mapping")
+            continue
+
+        player_a = comparison.get("player_a")
+        player_b = comparison.get("player_b")
+        if not isinstance(player_a, str) or not player_a:
+            errors.append(f"{prefix}.player_a must be non-empty string")
+            continue
+        if not isinstance(player_b, str) or not player_b:
+            errors.append(f"{prefix}.player_b must be non-empty string")
+            continue
+
+        scope = comparison.get("comparison_scope")
+        if scope is not None and scope != "direct_head_to_head":
+            errors.append(f"{prefix}.comparison_scope must be direct_head_to_head")
+
+        direct_matches = [
+            match for match in matches if {player_a, player_b}.issubset(_match_players(match))
+        ]
+        if not direct_matches:
+            errors.append(f"{prefix} has no direct matches in results.json.matches")
+            continue
+
+        wins_a = sum(1 for match in direct_matches if match.get("winner") == player_a)
+        wins_b = sum(1 for match in direct_matches if match.get("winner") == player_b)
+        decisive = wins_a + wins_b
+
+        if comparison.get("wins_a") != wins_a:
+            errors.append(f"{prefix}.wins_a must equal direct wins for player_a ({wins_a})")
+        if comparison.get("wins_b") != wins_b:
+            errors.append(f"{prefix}.wins_b must equal direct wins for player_b ({wins_b})")
+        if comparison.get("head_to_head_decisive") != decisive:
+            errors.append(
+                f"{prefix}.head_to_head_decisive must equal direct decisive matches ({decisive})"
+            )
+
+        head_to_head_matches = comparison.get("head_to_head_matches")
+        if head_to_head_matches is not None and head_to_head_matches != len(direct_matches):
+            errors.append(
+                f"{prefix}.head_to_head_matches must equal direct match count "
+                f"({len(direct_matches)})"
+            )
+
+    return errors
 
 
 def _validate_manifest(manifest_path: Path, manifest: Dict[str, Any]) -> List[str]:
@@ -205,6 +276,9 @@ def _validate_results(experiment_dir: Path, manifest: Dict[str, Any]) -> List[st
                         errors.append(
                             f"{experiment_name}: results.json.statistics.n_total must equal matches length"
                         )
+                    errors.extend(
+                        _validate_statistics_pairwise(experiment_name, statistics, matches)
+                    )
 
             strictness = data.get("format_strictness")
             if has_matches and enforce_extended_research_metrics:
@@ -474,7 +548,12 @@ def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> 
     if not must_enforce:
         return errors
 
-    for doc_name in ("README.md", "analysis.md"):
+    doc_names = ["README.md"]
+    artifacts = manifest.get("artifacts") if isinstance(manifest.get("artifacts"), dict) else {}
+    if (experiment_dir / "analysis.md").exists() or artifacts.get("analysis_md"):
+        doc_names.append(str(artifacts.get("analysis_md") or "analysis.md"))
+
+    for doc_name in doc_names:
         path = experiment_dir / doc_name
         if not path.exists():
             errors.append(f"{experiment_name}: {doc_name} missing")
@@ -491,6 +570,75 @@ def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> 
                 f"{experiment_name}: {doc_name} AUTO_FACTS block still contains placeholders"
             )
 
+    return errors
+
+
+def _validate_results_markdown_report(
+    experiment_dir: Path, manifest: Dict[str, Any]
+) -> List[str]:
+    errors: List[str] = []
+    experiment_name = experiment_dir.name
+    status = manifest.get("status")
+    run = manifest.get("run") if isinstance(manifest.get("run"), dict) else {}
+    matches_completed = run.get("matches_completed")
+    artifacts = manifest.get("artifacts") if isinstance(manifest.get("artifacts"), dict) else {}
+    declared_path = artifacts.get("results_md")
+
+    must_enforce = (
+        status in {"complete", "archived"}
+        and _is_int(matches_completed)
+        and matches_completed > 0
+        and bool(declared_path)
+    )
+    if not must_enforce:
+        return errors
+
+    path = experiment_dir / str(declared_path)
+    if not path.exists():
+        errors.append(
+            f"{experiment_name}: {declared_path} missing "
+            "(run agentdeck-research-export or python scripts/research_export.py)"
+        )
+        return errors
+    if not path.is_file():
+        errors.append(f"{experiment_name}: {declared_path} must be a file")
+        return errors
+
+    content = path.read_text(encoding="utf-8")
+    if "# Results Report" not in content:
+        errors.append(f"{experiment_name}: {declared_path} missing Results Report heading")
+    if "Generated deterministically from `results.json`" not in content:
+        errors.append(f"{experiment_name}: {declared_path} missing deterministic provenance note")
+    return errors
+
+
+def _validate_analysis_namespace(experiment_dir: Path, manifest: Dict[str, Any]) -> List[str]:
+    errors: List[str] = []
+    experiment_name = experiment_dir.name
+    artifacts = manifest.get("artifacts") if isinstance(manifest.get("artifacts"), dict) else {}
+    analysis_dir = artifacts.get("analysis_dir")
+    if not analysis_dir:
+        return errors
+
+    path = experiment_dir / str(analysis_dir)
+    if not path.exists():
+        errors.append(f"{experiment_name}: {analysis_dir} missing")
+        return errors
+    if not path.is_dir():
+        errors.append(f"{experiment_name}: {analysis_dir} must be a directory")
+        return errors
+    readme = path / "README.md"
+    if not readme.exists():
+        readme_label = str(Path(str(analysis_dir)) / "README.md")
+        errors.append(f"{experiment_name}: {readme_label} missing")
+    for child in path.iterdir():
+        if child.name == "README.md" or child.name.startswith("."):
+            continue
+        if child.is_dir() and not ANALYSIS_REPORT_DIR_PATTERN.match(child.name):
+            errors.append(
+                f"{experiment_name}: {analysis_dir}/{child.name} must match "
+                "analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>"
+            )
     return errors
 
 
@@ -555,6 +703,8 @@ def validate_research_tree(
         errors.extend(_validate_manifest(manifest_path, manifest))
         errors.extend(_validate_results(manifest_path.parent, manifest))
         errors.extend(_validate_markdown_facts(manifest_path.parent, manifest))
+        errors.extend(_validate_results_markdown_report(manifest_path.parent, manifest))
+        errors.extend(_validate_analysis_namespace(manifest_path.parent, manifest))
 
     errors.extend(_validate_index(research_dir, index_path, write_index))
     return errors
@@ -607,6 +757,8 @@ __all__ = [
     "_validate_manifest",
     "_validate_results",
     "_validate_markdown_facts",
+    "_validate_results_markdown_report",
+    "_validate_analysis_namespace",
 ]
 
 

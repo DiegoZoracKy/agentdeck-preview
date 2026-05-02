@@ -12,25 +12,70 @@ research/<experiment-id>/
 ├── matrix.yaml        # Benchmark grid definition (optional)
 ├── results.json       # Objective results (generated)
 ├── results.csv        # Match-level results (generated)
-├── analysis.md        # Interpretation (optional)
+├── results.md         # Human-readable factual report (generated)
+├── analysis/          # Authored human/AI interpretation workspace (optional)
 ├── artifacts/         # Plots/tables (optional)
 ├── notes/             # Human run notes (optional)
 ├── recordings/        # External pointers only (no raw JSON)
 └── scripts/           # Experiment scripts (optional)
 ```
 
+## Path Naming Idiom
+
+AgentDeck uses a shared timestamp core for instanced artifacts:
+
+```text
+YYYYMMDD_HHMMSS
+```
+
+Examples:
+
+```text
+agentdeck_runs/session_20260423_174802_d5ae44/
+analysis/analysis_20260428_143001_codex_results_review/
+analysis/analysis_20260428_144215_claude_seat_effects/
+```
+
+Runtime sessions use `session_YYYYMMDD_HHMMSS_<suffix>`. Authored analysis
+directories use `analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>`. Process-created
+research packages MUST use the `research_` prefix. The explicit prefixes are
+intentionally redundant with their parent directories because they make grep,
+glob, and AI-assisted search easier.
+
+Research package folders remain long-lived public study identifiers and SHOULD
+use a prefixed date-slug when named directly by a human:
+
+```text
+research/research_YYYY-MM-DD-<kebab-slug>/
+```
+
+Examples:
+
+```text
+research/research_2026-04-27-agentic-edge-strategy-stack/
+research/research_20260423_174802_d5ae44/
+```
+
+When a research package is created from a session without an explicit
+experiment ID, the packager rewrites `session_YYYYMMDD_HHMMSS_<suffix>` to
+`research_YYYYMMDD_HHMMSS_<suffix>`. Human-authored slugs SHOULD be lowercase
+ASCII. Use kebab-case for public research package slugs and snake_case for
+timestamped analysis topic slugs.
+
 ## Status-Based Completeness Rules
 
 Packages are validated differently depending on `manifest.status`:
 
-- `planned`: placeholders are allowed in `README.md` and `analysis.md`.
+- `planned`: placeholders are allowed in `README.md`; generated outputs may be absent.
 - `running`: partial factual updates are allowed; interpretive sections may remain placeholders.
-- `complete` with `run.matches_completed > 0`: factual blocks in `README.md` and
-  `analysis.md` MUST be populated (no placeholder values).
+- `complete` with `run.matches_completed > 0`: factual blocks in `README.md` MUST
+  be populated (no placeholder values). If a legacy `analysis.md` exists, its
+  factual block is also validated. Packages declaring `artifacts.results_md`
+  MUST have generated `results.md`.
 - `archived`: treated like `complete` for validation purposes.
 
-Interpretive sections (conclusions/limitations/next steps) are always human-owned.
-Automation should only write factual content.
+`results.md` is generated and deterministic. Interpretive documents under
+`analysis/` are human/AI-authored and are not canonical factual artifacts.
 
 ## manifest.yaml (Required)
 
@@ -63,6 +108,7 @@ When `matrix.yaml` is present, it should be the source of truth for:
 - benchmark cells/phases
 - sampling policy (pilot/expansion)
 - expansion rules and overrides
+- package aggregation phase scope
 
 If an experiment is single-run or smoke-test oriented, `matrix.yaml` may be omitted.
 In that case, `run.matrix_source` and `artifacts.matrix_yaml` SHOULD be omitted as well.
@@ -70,7 +116,7 @@ In that case, `run.matrix_source` and `artifacts.matrix_yaml` SHOULD be omitted 
 ### Example
 ```yaml
 schema_version: 1
-experiment_id: 2025-11-08-openai-benchmarks
+experiment_id: research_2025-11-08-openai-benchmarks
 title: OpenAI Strategic Benchmarks
 status: running
 question: How do OpenAI model configs compare in strategic gameplay?
@@ -98,6 +144,8 @@ analysis_plan:
 artifacts:
   results_json: results.json
   results_csv: results.csv
+  results_md: results.md
+  analysis_dir: analysis/
 notes: ""
 ```
 
@@ -113,6 +161,9 @@ notes: ""
 
 Optional source extension:
 - `source.recordings_dirs` (array of strings) for multi-session checkpoint aggregation.
+- `source.aggregation_scope` (`cell|study_phases|explicit_phase|explicit_cells|all_phases`)
+- `source.phase` and `source.cell_id` for cell exports.
+- `source.phases_included` and `source.cells_included` for matrix package exports.
 - `generated_at` (ISO-8601) unless the export intentionally omitted it via `--no-generated-at`.
 - `behavioral_profile` (object; optional game-specific behavioral scorer output)
 
@@ -143,6 +194,24 @@ Per-player:
 - `p_value`
 - `effect_size`
 - `effect_label` (`negligible|small|medium|large`)
+
+Optional `pairwise_comparisons` entries are direct head-to-head only. A pairwise
+entry must be derived only from matches where both `player_a` and `player_b`
+appear in the same `matches[*].players` array; package-level aggregate wins from
+unrelated cells must not be used as pairwise evidence.
+
+Per-pair fields:
+- `player_a`, `player_b`
+- `comparison_scope: direct_head_to_head`
+- `wins_a`, `wins_b`
+- `head_to_head_matches`
+- `head_to_head_decisive`
+- `win_rate_a`
+- `ci_a`
+- `p_value`
+- `effect_size`
+- `effect_label`
+- `is_significant`
 
 ### format_strictness Fields (Minimum)
 - `overall` and `by_player`
@@ -242,11 +311,26 @@ Each cell SHOULD define at minimum:
 
 Suggested top-level sections:
 - `frozen_inputs` (git tag/commit, template version, pricing snapshot)
+- `phase_model` (default package aggregation scope)
 - `player_registry`
 - `config_registry`
 - `sampling_policy`
 - `execution_plan`
 - `cells`
+
+### phase_model
+
+Multi-phase matrices SHOULD declare phase scope before top-level package export.
+
+Recommended fields:
+- `study_phases`: phases included in default `--package` aggregation.
+- `preflight_phases`: smoke/setup phases excluded from default `--package` aggregation.
+- `main_phases`: scaled study phases, when distinct from pilot phases.
+- `excluded_phases`: phases intentionally excluded from default package aggregation.
+
+If `study_phases` is missing and the matrix has multiple non-empty phases,
+`agentdeck-research-export --package` fails fast unless `--phase` or `--cell`
+is provided explicitly.
 
 ### config_registry.prompt_builder
 
@@ -269,13 +353,60 @@ Recommended cell/preflight notes:
 ### execution_plan.preflight
 
 Recommended fields:
+- `phase_id` (for example, `P0`)
 - `cell_ids` (list of benchmark cell IDs to run in reduced scale preflight)
 - `matches_per_cell`
 - `required_checks` (list of explicit causal / contract checks reviewed before scale-up)
 
 If `cell_ids` is empty, preflight is treated as intentionally skipped.
 
-## Markdown Factual Blocks (README.md / analysis.md)
+## results.md (Generated)
+
+`results.md` is the deterministic human-readable report generated from
+`results.json` and, for matrix package exports, sibling cell artifacts under
+`artifacts/<cell_id>/results.json`.
+
+It SHOULD include:
+- source scope and phase/cell membership
+- aggregate summary metrics
+- player results with confidence intervals when available
+- direct head-to-head comparisons
+- position/seat splits
+- per-cell overview and per-cell seat splits for matrix package exports
+- format strictness
+- cost summaries
+- behavioral profile summaries when present
+- artifact validation status
+- warnings for heterogeneous package aggregates, high position skew, or
+  non-significant direct comparisons
+
+`results.md` is generated factual content. It MUST NOT contain human or LLM
+interpretation beyond deterministic warnings derived from exported metrics.
+
+## Authored Analysis (`analysis/`)
+
+`analysis/` is the authored interpretation namespace for humans and AI agents.
+Each independent analysis SHOULD live in its own timestamped subdirectory using
+the project timestamp core:
+
+```text
+analysis/analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>/
+├── analysis.md
+├── provenance.yaml
+└── support/
+```
+
+`analysis/README.md` SHOULD document an agent quickstart, provenance rules,
+artifact citation expectations, and the boundary between generated facts and
+interpretation. Package root `README.md` SHOULD link to `analysis/README.md`
+so a human or AI agent can discover the reporting workflow from the experiment
+root. Quantitative claims in authored analyses SHOULD cite generated artifacts.
+
+Legacy packages MAY still use `analysis.md`; validators treat it as an
+authored legacy document and validate its `AUTO_FACTS` block only when it
+exists or is declared in `manifest.artifacts.analysis_md`.
+
+## Markdown Factual Blocks (README.md / legacy analysis.md)
 
 To keep automation deterministic and interpretation human-owned, templates SHOULD
 include a fenced factual block with markers:
@@ -287,7 +418,9 @@ Tooling may rewrite only content between those markers.
 Anything outside those markers is considered human-authored narrative.
 
 For completed or archived experiments with `run.matches_completed > 0`:
-- `README.md` and `analysis.md` MUST contain these marker blocks
+- `README.md` MUST contain these marker blocks
+- legacy `analysis.md` MUST contain these marker blocks when present or declared
+  in `manifest.artifacts.analysis_md`
 - the factual block contents MUST contain real values, not placeholders like `TBD`
 - `agentdeck-research-package` and `agentdeck-research-export --package` are the
   supported ways to refresh those blocks automatically
@@ -312,5 +445,7 @@ from manifest.yaml files and updated whenever experiments change.
     - `--experiment-dir <path> --cell <id>`
     - `--experiment-dir <path> --phase <id>`
     - `--experiment-dir <path> --package`
+    - `--experiment-dir <path> --package --phase <id>`
+    - `--experiment-dir <path> --package --cell <id>`
 - The shared index surface (`agentdeck-research-index`, `python -m agentdeck.research.index`, or compatibility `python scripts/research_index.py`) generates `research/INDEX.md` from manifests.
 - `agentdeck-research-package` / `python scripts/research_package.py` creates a research package from one or more session directories.

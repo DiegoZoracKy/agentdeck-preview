@@ -2,7 +2,7 @@
 
 **Status**: see `manifest.yaml`  
 **Research Question**: see `manifest.yaml`  
-**Experiment ID**: use folder name (must match `manifest.yaml.experiment_id`)
+**Experiment ID**: use folder name (must match `manifest.yaml.experiment_id`; process-created folders use `research_...`)
 
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
@@ -34,13 +34,20 @@
 - Expansion rule:
 
 ## Results
-- See `results.json` and `results.csv`
+- See `results.md`, `results.json`, and `results.csv`.
+
+## Authored Analysis
+`results.md` is the generated factual report. Independent human or AI-authored
+interpretation belongs under `analysis/`.
+
+To analyze this experiment, read `analysis/README.md` and create a new
+timestamped `analysis_...` subdirectory under `analysis/`.
 
 ## Artifacts
 - `matrix.yaml` (optional; benchmark grid definition)
 - `manifest.yaml` (repro metadata)
-- `results.json` / `results.csv` (objective outputs)
-- `analysis.md` (interpretation)
+- `results.json` / `results.csv` / `results.md` (generated outputs)
+- `analysis/` (authored interpretation workspace)
 - `artifacts/` (derived tables/plots/highlights)
 - `notes/` (human run notes)
 - `recordings/` (external pointers only)

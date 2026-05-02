@@ -25,6 +25,36 @@ def test_compute_inferential_statistics_two_player() -> None:
     assert stats["players"]["Alice"]["wins"] == 2
     assert stats["players"]["Bob"]["wins"] == 1
     assert "Alice_vs_Bob" in stats["pairwise_comparisons"]
+    comparison = stats["pairwise_comparisons"]["Alice_vs_Bob"]
+    assert comparison["comparison_scope"] == "direct_head_to_head"
+    assert comparison["wins_a"] == 2
+    assert comparison["wins_b"] == 1
+    assert comparison["head_to_head_matches"] == 4
+    assert comparison["head_to_head_decisive"] == 3
+
+
+def test_compute_inferential_statistics_pairwise_uses_direct_matches_only() -> None:
+    players = [
+        {"name": "Alice"},
+        {"name": "Bob"},
+        {"name": "Carol"},
+        {"name": "Dana"},
+    ]
+    matches = [
+        {"winner": "Alice", "players": ["Alice", "Bob"]},
+        {"winner": "Bob", "players": ["Bob", "Alice"]},
+        {"winner": "Carol", "players": ["Carol", "Dana"]},
+        {"winner": "Carol", "players": ["Dana", "Carol"]},
+    ]
+
+    stats = compute_inferential_statistics(players=players, matches=matches)
+    pairwise = stats["pairwise_comparisons"]
+
+    assert set(pairwise) == {"Alice_vs_Bob", "Carol_vs_Dana"}
+    assert pairwise["Alice_vs_Bob"]["wins_a"] == 1
+    assert pairwise["Alice_vs_Bob"]["wins_b"] == 1
+    assert pairwise["Carol_vs_Dana"]["wins_a"] == 2
+    assert pairwise["Carol_vs_Dana"]["wins_b"] == 0
 
 
 def test_compute_format_strictness_mixed_contracts() -> None:

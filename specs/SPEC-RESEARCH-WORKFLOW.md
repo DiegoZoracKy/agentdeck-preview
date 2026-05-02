@@ -66,8 +66,9 @@ The export surface MUST support two modes:
 - `--cell` / `--phase`:
   - export selected cells into `artifacts/<cell_id>/results.json` and `results.csv`
 - `--package`:
-  - export top-level package `results.json` and `results.csv`
-  - refresh factual marker blocks in top-level `README.md` and `analysis.md`
+  - export top-level package `results.json`, `results.csv`, and `results.md`
+  - refresh factual marker blocks in top-level `README.md` and legacy `analysis.md`
+    when the legacy file exists
   - merge canonical `source.recordings_dir(s)` from cell artifacts with discovered
     `agentdeck_runs/<cell_id>/session_*/records`
   - prefer canonical cell-artifact sources first when both exist and remain usable
@@ -138,9 +139,17 @@ The workflow MUST NOT require model/config registries for export-only operations
   validation to determine aggregation scope, included phases, and included cells.
 - **RW6**: Package export MUST preserve deterministic outputs when `--no-generated-at` is used.
 - **RW6a**: Package export MUST refresh top-level factual marker blocks when
-  `README.md` / `analysis.md` contain `AUTO_FACTS` markers.
+  `README.md` / legacy `analysis.md` contain `AUTO_FACTS` markers.
 - **RW6b**: Factual marker blocks for matrix package aggregates MUST identify the
   aggregation scope and avoid presenting pooled multi-cell winners as study toplines.
+- **RW6c**: Every export MUST write a deterministic `results.md` report next to
+  `results.json`. Matrix package reports SHOULD include per-cell outcome and
+  seat-split tables when matching `artifacts/<cell_id>/results.json` files exist.
+  Per-cell rows SHOULD surface direct comparison p-values and effect labels when
+  available.
+- **RW6d**: `results.md` is generated factual output. Human or AI-authored
+  interpretation belongs under `analysis/` (or legacy `analysis.md` for older
+  packages) and MUST NOT be required for export.
 - **RW7**: Shared tooling MUST NOT own or infer experiment execution policy; it only exports, scores, aggregates, and indexes outputs.
 - **RW8**: The minimal template `scripts/run_experiment.py` MUST remain package-local and framework-agnostic beyond stable public AgentDeck APIs.
 - **RW9**: Workflow logic MUST live in `src/agentdeck/research/`; any `scripts/` entry file for export or index MUST be a thin wrapper over the package-owned implementation.
@@ -177,13 +186,13 @@ The workflow MUST NOT require model/config registries for export-only operations
 ```bash
 agentdeck-research-export \
   --recordings-dir agentdeck_runs/session_x/records \
-  --output-dir research/2026-03-26-demo
+  --output-dir research/research_2026-03-26-demo
 ```
 
 ### Export one matrix cell
 ```bash
 agentdeck-research-export \
-  --experiment-dir research/2026-03-25-variable-damage-parity-1 \
+  --experiment-dir research/research_2026-03-25-variable-damage-parity-1 \
   --cell p1_c01_flash_lite_rc_risk_vs_flash_ao \
   --no-generated-at
 ```
@@ -191,7 +200,7 @@ agentdeck-research-export \
 ### Export full package from matrix cell sources
 ```bash
 agentdeck-research-export \
-  --experiment-dir research/2026-03-25-variable-damage-parity-1 \
+  --experiment-dir research/research_2026-03-25-variable-damage-parity-1 \
   --package \
   --no-generated-at
 ```

@@ -1,5 +1,5 @@
 schema_version: 1
-experiment_id: YYYY-MM-DD-slug
+experiment_id: research_YYYY-MM-DD-slug
 created_at: "YYYY-MM-DDTHH:MM:SSZ"
 purpose: >-
   Optional matrix definition for benchmark-style research campaigns.
@@ -11,6 +11,12 @@ frozen_inputs:
   prompt_template_version: null
   pricing_snapshot: src/agentdeck/config/pricing.yaml
   note: Fill before running.
+
+phase_model:
+  preflight_phases: [P0]
+  study_phases: [A1]
+  main_phases: []
+  excluded_phases: []
 
 player_registry:
   weak_model:
@@ -73,6 +79,7 @@ sampling_policy:
 
 execution_plan:
   preflight:
+    phase_id: P0
     cell_ids: []
     interpretation: if empty, preflight is intentionally skipped
     matches_per_cell: 6

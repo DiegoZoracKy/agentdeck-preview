@@ -61,6 +61,12 @@
     - `print_summary()`
     - `export_markdown(path)`
     - `export_json(path)`
+
+`compute_pairwise_comparisons()` MUST compare only direct head-to-head matches.
+For sessions or aggregates with more than two players, pairwise entries MUST be
+included only for player pairs that actually appeared in the same recorded
+matches. It MUST NOT compare players by subtracting or normalizing their
+package-level aggregate wins when they did not directly face each other.
 - `PerformanceAnalysis.from_session(session_id: str, recordings_dir: Path = Path("agentdeck_runs"), baseline_duration=None, baseline_cost=None) -> PerformanceAnalysis`
   - Methods:
     - `compute_duration_stats()`

@@ -170,6 +170,23 @@ def test_complete_with_factual_blocks_passes(tmp_path):
     assert errors == []
 
 
+def test_complete_without_legacy_analysis_md_passes_markdown_facts(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    readme = (
+        "# Experiment\n\n"
+        "## Factual Snapshot\n"
+        "<!-- AUTO_FACTS:BEGIN -->\n"
+        "- Topline Winner: Alice (100.0%)\n"
+        "<!-- AUTO_FACTS:END -->\n"
+    )
+    (experiment_dir / "README.md").write_text(readme, encoding="utf-8")
+
+    errors = validator._validate_markdown_facts(experiment_dir, _manifest("complete", 1))
+    assert errors == []
+
+
 def test_planned_allows_placeholders(tmp_path):
     validator = _load_validator_module()
     experiment_dir = tmp_path / "exp"
@@ -206,6 +223,77 @@ def test_complete_results_with_statistics_block_pass(tmp_path):
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []
+
+
+def test_results_pairwise_must_match_direct_matches(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    results_payload: Dict[str, Any] = {
+        "schema_version": 3,
+        "experiment_id": experiment_dir.name,
+        "source": {"recordings_dir": "agentdeck_runs/session_x/records"},
+        "summary": {"total_matches": 2},
+        "players": [{"name": "Alice"}, {"name": "Bob"}, {"name": "Carol"}],
+        "matches": [
+            {"match_id": "m1", "winner": "Alice", "players": ["Alice", "Bob"]},
+            {"match_id": "m2", "winner": "Carol", "players": ["Alice", "Carol"]},
+        ],
+        "statistics": {
+            "method": "exact_binomial",
+            "confidence_level": 0.95,
+            "alpha": 0.05,
+            "null_win_rate": 0.5,
+            "n_total": 2,
+            "n_decisive": 2,
+            "players": {
+                "Alice": {"wins": 1},
+                "Bob": {"wins": 0},
+                "Carol": {"wins": 1},
+            },
+            "pairwise_comparisons": {
+                "Alice_vs_Bob": {
+                    "player_a": "Alice",
+                    "player_b": "Bob",
+                    "comparison_scope": "direct_head_to_head",
+                    "wins_a": 2,
+                    "wins_b": 0,
+                    "head_to_head_matches": 2,
+                    "head_to_head_decisive": 2,
+                }
+            },
+        },
+        "format_strictness": {"overall": {}, "by_player": {}},
+        "position_effect": {
+            "total_matches": 2,
+            "first_player_wins": 0,
+            "first_player_win_rate": 0.0,
+            "second_player_wins": 0,
+            "upset_rate": 0.0,
+            "by_player": {},
+        },
+        "artifact_validation": {
+            "matches_checked": 2,
+            "all_passed": True,
+            "checks": {
+                "monotonic_gameplay_timeline": {"passed": 2, "failed": 0},
+                "top_level_timing_consistency": {"passed": 2, "failed": 0},
+                "prompt_turn_number_coherence": {"passed": 2, "failed": 0},
+                "winner_final_state_consistency": {"passed": 2, "failed": 0},
+            },
+            "failures": [],
+        },
+    }
+    (experiment_dir / "results.json").write_text(json.dumps(results_payload), encoding="utf-8")
+    (experiment_dir / "results.csv").write_text(
+        "match_id,winner,turns,outcome,seed,duration,cost,player_order_source,first_player,players,player_costs\n",
+        encoding="utf-8",
+    )
+
+    errors = validator._validate_results(experiment_dir, {"status": "complete"})
+
+    assert any(".Alice_vs_Bob.wins_a must equal direct wins for player_a (1)" in e for e in errors)
+    assert any(".Alice_vs_Bob.head_to_head_matches must equal direct match count (1)" in e for e in errors)
 
 
 def test_phase_aware_package_results_pass_validation(tmp_path):
@@ -356,6 +444,79 @@ def test_results_without_generated_at_are_valid_for_deterministic_exports(tmp_pa
     }
     errors = validator._validate_results(experiment_dir, manifest)
     assert errors == []
+
+
+def test_declared_results_markdown_required_for_complete_package(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+        "artifacts": {"results_md": "results.md"},
+    }
+    errors = validator._validate_results_markdown_report(experiment_dir, manifest)
+    assert any("results.md missing" in e for e in errors)
+
+
+def test_declared_results_markdown_passes_with_generated_provenance(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    (experiment_dir / "results.md").write_text(
+        "# Results Report\n\n"
+        "> Generated deterministically from `results.json`. Authored interpretation belongs under `analysis/`.\n",
+        encoding="utf-8",
+    )
+
+    manifest = {
+        "status": "complete",
+        "run": {"matches_completed": 1},
+        "artifacts": {"results_md": "results.md"},
+    }
+    errors = validator._validate_results_markdown_report(experiment_dir, manifest)
+    assert errors == []
+
+
+def test_analysis_namespace_requires_readme_when_declared(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    (experiment_dir / "analysis").mkdir()
+
+    errors = validator._validate_analysis_namespace(
+        experiment_dir,
+        {"artifacts": {"analysis_dir": "analysis/"}},
+    )
+    assert any("analysis/README.md missing" in e for e in errors)
+
+
+def test_analysis_namespace_requires_prefixed_report_dirs(tmp_path):
+    validator = _load_validator_module()
+    experiment_dir = tmp_path / "exp"
+    experiment_dir.mkdir()
+    analysis_dir = experiment_dir / "analysis"
+    analysis_dir.mkdir()
+    (analysis_dir / "README.md").write_text("# Analysis\n", encoding="utf-8")
+    (analysis_dir / "20260428_143001_codex_results_review").mkdir()
+
+    errors = validator._validate_analysis_namespace(
+        experiment_dir,
+        {"artifacts": {"analysis_dir": "analysis/"}},
+    )
+    assert any("analysis_YYYYMMDD_HHMMSS" in e for e in errors)
+
+    (analysis_dir / "20260428_143001_codex_results_review").rename(
+        analysis_dir / "analysis_20260428_143001_codex_results_review"
+    )
+    assert (
+        validator._validate_analysis_namespace(
+            experiment_dir,
+            {"artifacts": {"analysis_dir": "analysis/"}},
+        )
+        == []
+    )
 
 
 def test_behavioral_profile_shape_is_valid_when_present(tmp_path):

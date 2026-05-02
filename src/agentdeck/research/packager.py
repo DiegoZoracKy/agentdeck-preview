@@ -15,6 +15,21 @@ from .factual_blocks import write_factual_markdown_blocks
 from .index import generate_index
 from .provider_utils import provider_from_module
 
+RESEARCH_EXPERIMENT_PREFIX = "research_"
+SESSION_PREFIX = "session_"
+
+
+def normalize_research_experiment_id(experiment_id: str) -> str:
+    """Return the process-owned research package id with the research_ prefix."""
+    normalized = str(experiment_id or "").strip()
+    if not normalized:
+        raise ValueError("experiment_id must be non-empty")
+    if normalized.startswith(RESEARCH_EXPERIMENT_PREFIX):
+        return normalized
+    if normalized.startswith(SESSION_PREFIX):
+        return f"{RESEARCH_EXPERIMENT_PREFIX}{normalized[len(SESSION_PREFIX):]}"
+    return f"{RESEARCH_EXPERIMENT_PREFIX}{normalized}"
+
 
 def _resolve_session_paths(
     session_dir: Optional[Path],
@@ -344,6 +359,7 @@ def build_manifest(
     status: Optional[str] = None,
     title: Optional[str] = None,
 ) -> Dict[str, Any]:
+    experiment_id = normalize_research_experiment_id(experiment_id)
     manifest = yaml.safe_load(template_path.read_text(encoding="utf-8"))
     metadata = batch_data.get("metadata") or {}
     match_refs = batch_data.get("match_refs") or []
@@ -471,7 +487,7 @@ def package_session(
     batch_data = _merge_batch_payloads(session_batches)
     match_files = _load_match_files_from_sessions(records_dirs)
 
-    experiment_id = experiment_id or resolved_session_ids[0]
+    experiment_id = normalize_research_experiment_id(experiment_id or resolved_session_ids[0])
     template_dir = research_dir / "_templates"
     if not template_dir.is_dir():
         raise FileNotFoundError(f"Missing templates directory: {template_dir}")
@@ -565,7 +581,12 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--run-dir", type=Path, default=Path("agentdeck_runs"))
     parser.add_argument("--research-dir", type=Path, default=Path("research"))
-    parser.add_argument("--experiment-id", type=str, default=None)
+    parser.add_argument(
+        "--experiment-id",
+        type=str,
+        default=None,
+        help="Experiment id. The research_ prefix is added when omitted.",
+    )
     parser.add_argument("--question", type=str, required=True)
     parser.add_argument(
         "--status", type=str, choices=["planned", "running", "complete", "archived"]

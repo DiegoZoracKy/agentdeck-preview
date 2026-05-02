@@ -258,6 +258,10 @@ def test_export_results_includes_behavioral_profile(tmp_path, monkeypatch) -> No
     payload = json.loads((output_dir / "results.json").read_text(encoding="utf-8"))
     assert "behavioral_profile" in payload
     assert payload["behavioral_profile"]["profile_id"] == "fixed_damage_behavioral"
+    report = (output_dir / "results.md").read_text(encoding="utf-8")
+    assert "# Results Report" in report
+    assert "Generated deterministically from `results.json`" in report
+    assert "Alpha" in report
     assert payload["behavioral_profile"]["quality_flags"]["complete"] is True
     assert payload["behavioral_profile"]["evidence"]["aggregate_metrics"] == {}
     alpha_evidence = payload["behavioral_profile"]["evidence"]["per_player"]["Alpha"]
@@ -468,6 +472,41 @@ def test_export_matrix_package_hydrates_auto_facts_blocks(tmp_path, monkeypatch)
     assert "Sample size (`n`): 1" in analysis
     assert "Statistical method:" in analysis
     assert "Human interpretation stays here." in analysis
+    report = (experiment_dir / "results.md").read_text(encoding="utf-8")
+    assert "# Results Report" in report
+    assert "Package aggregate spans multiple cells" not in report
+
+
+def test_export_matrix_package_results_report_includes_cell_seat_splits(
+    tmp_path, monkeypatch
+) -> None:
+    _pass_artifact_validation(monkeypatch)
+    experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])
+    records_dir = experiment_dir / "agentdeck_runs" / "p1_c01_demo" / "session_001" / "records"
+    _write_match(records_dir, "match_001")
+
+    research_export.export_matrix_cells(
+        experiment_dir,
+        matrix_path=None,
+        phase="P1",
+        cell_ids=None,
+        include_generated_at=False,
+    )
+    research_export.export_matrix_package(
+        experiment_dir,
+        matrix_path=None,
+        include_generated_at=False,
+    )
+
+    report = (experiment_dir / "results.md").read_text(encoding="utf-8")
+    assert "## Cell Overview" in report
+    assert "## Cell Seat Splits" in report
+    assert "## Package Aggregate Player Exposure" in report
+    assert "p-value" in report
+    assert "Effect" in report
+    assert "p1_c01_demo" in report
+    assert "Alpha" in report
+    assert "1/1 (100.0%)" in report
 
 
 @pytest.mark.parametrize("dead_kind", ["missing", "empty"])

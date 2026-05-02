@@ -344,34 +344,31 @@ class StatisticalAnalysis:
         if self._pairwise is not None:
             return self._pairwise
 
-        win_rates = self.compute_win_rates()
-
-        # Count wins per player
-        wins = {player: 0 for player in self.player_names}
-        for match_ref in self.match_refs:
-            winner = match_ref.get("winner")
-            if winner and winner in wins:
-                wins[winner] += 1
-
-        total_decisive = sum(wins.values())
-
         comparisons: Dict[Tuple[str, str], ComparisonStats] = {}
 
-        # Generate all pairwise comparisons (CPC2)
+        # Generate direct pairwise comparisons (CPC2). A pair is included only
+        # when both players actually appeared in the same recorded match.
         for i, player_a in enumerate(self.player_names):
             for j, player_b in enumerate(self.player_names):
                 if i >= j:  # Only compare each pair once
                     continue
 
-                # Compute comparison stats
-                win_a = wins[player_a]
-                win_b = wins[player_b]
-                rate_a = win_rates[player_a]
-                rate_b = win_rates[player_b]
+                direct_matches = [
+                    match_ref
+                    for match_ref in self.match_refs
+                    if {player_a, player_b}.issubset(self._players_for_match(match_ref))
+                ]
+                if not direct_matches:
+                    continue
+
+                win_a = sum(1 for match_ref in direct_matches if match_ref.get("winner") == player_a)
+                win_b = sum(1 for match_ref in direct_matches if match_ref.get("winner") == player_b)
+                head_to_head_matches = win_a + win_b
+                rate_a = win_a / head_to_head_matches if head_to_head_matches > 0 else 0.0
+                rate_b = win_b / head_to_head_matches if head_to_head_matches > 0 else 0.0
 
                 # Significance test (binomial test for Player A vs Player B)
                 # Test if A's wins are significantly different from 50% in A+B matches
-                head_to_head_matches = win_a + win_b
                 try:
                     p_value = statistical_significance(win_a, head_to_head_matches, 0.5)
                 except ImportError:
@@ -430,6 +427,19 @@ class StatisticalAnalysis:
             self._pairwise = PairwiseComparison(comparisons=comparisons, matrix=matrix)
 
         return self._pairwise
+
+    def _players_for_match(self, match_ref: Dict[str, Any]) -> set[str]:
+        if isinstance(match_ref.get("players"), list):
+            return {str(name) for name in match_ref["players"] if name is not None}
+        if isinstance(match_ref.get("player_order"), list):
+            return {str(name) for name in match_ref["player_order"] if name is not None}
+        if isinstance(match_ref.get("player_summaries"), list):
+            return {
+                str(player["name"])
+                for player in match_ref["player_summaries"]
+                if isinstance(player, dict) and player.get("name") is not None
+            }
+        return set()
 
     def _format_comparison_matrix(
         self, comparisons: Dict[Tuple[str, str], ComparisonStats]

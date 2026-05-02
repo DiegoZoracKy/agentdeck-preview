@@ -144,7 +144,7 @@ def test_build_manifest_infers_required_fields(tmp_path):
         match_files=match_files,
     )
 
-    assert manifest["experiment_id"] == "2026-01-20-demo"
+    assert manifest["experiment_id"] == "research_2026-01-20-demo"
     assert manifest["question"] == "Does Alice beat Bob?"
     assert manifest["game"]["name"] == "FixedDamageGame"
     assert manifest["run"]["matches_planned"] == 2
@@ -202,9 +202,12 @@ def test_package_session_creates_outputs(tmp_path):
     )
 
     experiment_dir = Path(result["experiment_dir"])
+    assert experiment_dir.name == "research_2026-01-20-demo"
     assert (experiment_dir / "manifest.yaml").exists()
     assert (experiment_dir / "results.json").exists()
     assert (experiment_dir / "results.csv").exists()
+    assert (experiment_dir / "results.md").exists()
+    assert (experiment_dir / "analysis" / "README.md").exists()
     assert (experiment_dir / "recordings" / "README.md").exists()
     assert not (experiment_dir / "matrix.yaml").exists()
     assert (research_dir / "INDEX.md").exists()
@@ -214,7 +217,8 @@ def test_package_session_creates_outputs(tmp_path):
     assert "matrix_yaml" not in manifest["artifacts"]
 
     readme = (experiment_dir / "README.md").read_text(encoding="utf-8")
-    analysis = (experiment_dir / "analysis.md").read_text(encoding="utf-8")
+    report = (experiment_dir / "results.md").read_text(encoding="utf-8")
+    analysis_readme = (experiment_dir / "analysis" / "README.md").read_text(encoding="utf-8")
     results = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
 
     assert "statistics" in results
@@ -226,10 +230,10 @@ def test_package_session_creates_outputs(tmp_path):
     assert "first_player_win_rate" in results["position_effect"]
     assert results["artifact_validation"]["all_passed"] is True
     assert "Topline Winner: Alice (100.0%)" in readme
-    assert "Sample size (`n`): 1" in analysis
-    assert "Statistical method:" in analysis
-    assert "First-player win rate:" in analysis
-    assert "Strict contract rate:" in analysis
+    assert "# Results Report" in report
+    assert "Sample size (`n`): 1" not in report
+    assert "Alice" in report
+    assert "analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>" in analysis_readme
     assert "One-paragraph motivation and intended audience." in readme
 
 
@@ -319,8 +323,8 @@ def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
         dry_run=False,
     )
 
-    assert calls["experiment_id"] == "2026-01-20-direct-helpers"
-    assert calls["output_dir"] == research_dir / "2026-01-20-direct-helpers"
+    assert calls["experiment_id"] == "research_2026-01-20-direct-helpers"
+    assert calls["output_dir"] == research_dir / "research_2026-01-20-direct-helpers"
     assert calls["index_called"] is True
 
 
@@ -354,7 +358,7 @@ def test_package_session_existing_dir_fails(tmp_path):
     """RP6: Fail fast when experiment directory already exists."""
     session_dir = _make_session(tmp_path)
     research_dir = _prepare_research_dir(tmp_path)
-    (research_dir / "2026-01-20-demo").mkdir(parents=True)
+    (research_dir / "research_2026-01-20-demo").mkdir(parents=True)
 
     with pytest.raises(FileExistsError):
         package_session(
@@ -369,6 +373,28 @@ def test_package_session_existing_dir_fails(tmp_path):
             include_matrix=False,
             dry_run=False,
         )
+
+
+def test_package_session_default_id_rewrites_session_prefix(tmp_path):
+    """Process-created package ids use research_ even when derived from session ids."""
+    session_dir = _make_session(tmp_path)
+    research_dir = _prepare_research_dir(tmp_path)
+
+    result = package_session(
+        session_dir=session_dir,
+        session_id=None,
+        run_dir=tmp_path / "agentdeck_runs",
+        research_dir=research_dir,
+        experiment_id=None,
+        question="Does Alice beat Bob?",
+        status=None,
+        title=None,
+        include_matrix=False,
+        dry_run=True,
+    )
+
+    assert Path(result["experiment_dir"]).name == "research_20260120_000000_abcd12"
+    assert result["manifest"]["experiment_id"] == "research_20260120_000000_abcd12"
 
 
 def test_package_session_missing_model_fails(tmp_path):

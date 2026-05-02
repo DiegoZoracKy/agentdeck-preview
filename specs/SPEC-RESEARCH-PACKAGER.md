@@ -20,18 +20,27 @@
 ## 3. Responsibilities
 - Create a new experiment directory under `research/` using `_templates/`.
 - Pre-fill `manifest.yaml` with required fields using session metadata and CLI inputs.
-- Generate `results.json` and `results.csv` by invoking the shared export surface.
+- Generate `results.json`, `results.csv`, and `results.md` by invoking the shared export surface.
 - Update `research/INDEX.md` by invoking the shared index surface.
 - Create or update `recordings/README.md` with a pointer to the source session.
-- Auto-populate factual markdown blocks in `README.md` and `analysis.md`.
+- Auto-populate factual markdown blocks in `README.md` and legacy `analysis.md` when present.
 - Support checkpoint-style aggregation from multiple compatible sessions in one package.
 - Implement core logic in `src/agentdeck/research/packager.py` with a thin CLI wrapper in `scripts/research_package.py` and an installable `agentdeck-research-package` entry point.
 
 ## 4. Data Structures
 - **manifest.yaml**: MUST follow `research/SCHEMA.md` and `SPEC-RESEARCH-EXPERIMENT.md`.
 - **recordings/README.md**: MUST include `session_id` and the absolute or repo-relative source path.
-- **README.md / analysis.md factual blocks**: MUST use `<!-- AUTO_FACTS:BEGIN --> ... <!-- AUTO_FACTS:END -->`
+- **README.md / legacy analysis.md factual blocks**: MUST use `<!-- AUTO_FACTS:BEGIN --> ... <!-- AUTO_FACTS:END -->`
   markers; only this block is auto-written by tooling.
+- **results.md**: generated deterministic factual report.
+- **analysis/**: authored human/AI interpretation namespace. The template SHOULD
+  include `analysis/README.md` with agent quickstart, provenance, and
+  artifact-citation rules. The package root `README.md` SHOULD link to it.
+- **experiment directory**: process-created research packages MUST use a
+  `research_`-prefixed `experiment_id`. If the user passes an ID without the
+  prefix, the packager MUST add it. If no ID is passed and the ID is derived
+  from `session_YYYYMMDD_HHMMSS_<suffix>`, the packager MUST rewrite it to
+  `research_YYYYMMDD_HHMMSS_<suffix>`.
 
 ### Manifest Field Mapping (Minimum)
 - `schema_version`: 1
@@ -71,7 +80,8 @@ python scripts/research_package.py \
 - `--session-ids` (str list, optional): Multiple session identifiers resolved under `--run-dir`.
 - `--run-dir` (Path, default: `agentdeck_runs`): Base directory for session lookup.
 - `--research-dir` (Path, default: `research`): Destination root for experiment packages.
-- `--experiment-id` (str, optional): Defaults to `session_id`.
+- `--experiment-id` (str, optional): Defaults to the source `session_id`
+  rewritten with the `research_` prefix.
 - `--question` (str, required): Research question to store in manifest.
 - `--status` (`planned|running|complete|archived`, optional): Overrides derived status.
 - `--title` (str, optional): Title stored in manifest and experiment README.
@@ -82,22 +92,29 @@ python scripts/research_package.py \
 1. **RP1**: Tool MUST be opt-in; it MUST NOT run automatically after sessions.
 2. **RP2**: Tool MUST NOT copy raw recordings into `research/`.
 3. **RP3**: Tool MUST write a manifest that satisfies required fields in `research/SCHEMA.md`.
-4. **RP4**: Tool MUST generate `results.json`/`results.csv` by calling the shared export surface implemented in `agentdeck.research.export`.
+4. **RP4**: Tool MUST generate `results.json`/`results.csv`/`results.md` by calling the shared export surface implemented in `agentdeck.research.export`.
 5. **RP5**: Tool MUST update `research/INDEX.md` by calling the shared index surface implemented in `agentdeck.research.index`.
 6. **RP6**: Tool MUST fail if the experiment directory already exists (no implicit overwrite).
 7. **RP7**: Tool MUST fail fast if required fields cannot be inferred and no CLI override is supplied.
 8. **RP8**: Provider inference MUST reuse the same mapping as `agentdeck.research.provider_utils.provider_from_module`.
 9. **RP9**: `matrix.yaml` MUST be optional by default; it is included only when explicitly requested.
 10. **RP10**: If `matrix.yaml` is not included, manifest MUST omit `run.matrix_source` and `artifacts.matrix_yaml`.
-11. **RP11**: Tool MUST auto-populate factual markdown blocks in `README.md` and `analysis.md`, and MUST NOT overwrite narrative sections outside marker blocks.
+11. **RP11**: Tool MUST auto-populate factual markdown blocks in `README.md` and legacy `analysis.md` when present, and MUST NOT overwrite narrative sections outside marker blocks.
 12. **RP12**: When a session contains multiple `batch_*.json` files (e.g., side-swap split runs), tool MUST aggregate them into a single packaging view for `match_refs`, `matches_planned`, `matches_completed`, `seeds_used`, and time window (`started_at`/`ended_at`).
 13. **RP13**: Tool MUST support checkpoint packaging from multiple sessions. When multiple sessions are supplied, tool MUST aggregate all compatible `match_*.json` into one experiment export and MUST record all source sessions in `recordings/README.md`.
 14. **RP14**: Multi-session packaging MUST fail fast when compatibility checks fail (mismatched game name or mismatched player identity/model/controller tuple).
 15. **RP15**: Packager implementation MUST import shared research surfaces directly from the package; it MUST NOT dynamically load repo script files by path.
+16. **RP16**: Packager-created experiment directories and manifest
+    `experiment_id` values MUST use the `research_` prefix. User-provided IDs
+    without the prefix MUST be normalized before writing files.
 
 ## 7. Data Flow & Interaction
 - Package: CLI → resolve session records → copy templates → write manifest → run export → update index.
-- Markdown hydration: after export, fill factual blocks in `README.md` and `analysis.md`.
+- Markdown hydration: after export, fill factual blocks in `README.md` and legacy `analysis.md` when present.
+- Authored analysis: package templates provide `analysis/README.md`; independent
+  human/AI analysis documents live in timestamped subdirectories under `analysis/`
+  using the project timestamp core:
+  `analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>`.
 - Validation: CLI → `research_validate` surface (optional follow-up, not required by tool).
 - References: `SPEC-RECORDER.md` for batch metadata, `SPEC-RESEARCH-EXPERIMENT.md` for schema.
 

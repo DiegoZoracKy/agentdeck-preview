@@ -3,7 +3,7 @@
 Delete this file if the package does not need a custom behavioral profile.
 If you keep it, customize the scorer below before running:
 
-    agentdeck-research-score --experiment-dir research/YYYY-MM-DD-your-experiment
+    agentdeck-research-score --experiment-dir research/research_YYYY-MM-DD-your-experiment
 """
 
 from __future__ import annotations

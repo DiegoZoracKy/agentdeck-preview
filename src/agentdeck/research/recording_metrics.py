@@ -53,6 +53,13 @@ def _player_names(players: List[Dict[str, Any]], matches: List[Dict[str, Any]]) 
     return sorted(inferred)
 
 
+def _match_players(match: Dict[str, Any]) -> set[str]:
+    players = match.get("players") or []
+    if not isinstance(players, list):
+        return set()
+    return {str(name) for name in players if name is not None}
+
+
 def compute_inferential_statistics(
     *,
     players: List[Dict[str, Any]],
@@ -120,8 +127,14 @@ def compute_inferential_statistics(
 
     pairwise: Dict[str, Dict[str, Any]] = {}
     for left, right in combinations(player_names, 2):
-        left_wins = wins[left]
-        right_wins = wins[right]
+        direct_matches = [
+            match for match in matches if {left, right}.issubset(_match_players(match))
+        ]
+        if not direct_matches:
+            continue
+
+        left_wins = sum(1 for match in direct_matches if match.get("winner") == left)
+        right_wins = sum(1 for match in direct_matches if match.get("winner") == right)
         head_to_head = left_wins + right_wins
 
         if head_to_head > 0:
@@ -149,8 +162,10 @@ def compute_inferential_statistics(
         pairwise[key] = {
             "player_a": left,
             "player_b": right,
+            "comparison_scope": "direct_head_to_head",
             "wins_a": left_wins,
             "wins_b": right_wins,
+            "head_to_head_matches": len(direct_matches),
             "head_to_head_decisive": head_to_head,
             "win_rate_a": left_rate,
             "ci_a": [float(ci_lower), float(ci_upper)],

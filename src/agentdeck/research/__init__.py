@@ -24,6 +24,7 @@ from .recording_metrics import (
     compute_inferential_statistics,
     compute_position_effect,
 )
+from .results_markdown import render_results_markdown, write_results_markdown_report
 from .statistical import (
     TestResult,
     aggregate_metrics,
@@ -69,6 +70,8 @@ __all__ = [
     "compute_inferential_statistics",
     "compute_format_strictness",
     "compute_position_effect",
+    "render_results_markdown",
+    "write_results_markdown_report",
     # Post-hoc data structures (SPEC-RESEARCH v1.1.0)
     "PairwiseComparison",
     "ComparisonStats",

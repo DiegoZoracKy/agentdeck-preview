@@ -66,7 +66,7 @@ python scripts/research_score.py
 
 Package-local scorer convention:
 ```text
-research/YYYY-MM-DD-your-experiment/scripts/behavioral_scorer.py
+research/research_YYYY-MM-DD-your-experiment/scripts/behavioral_scorer.py
 ```
 
 That module MAY expose either:
@@ -139,30 +139,30 @@ If both exist, `SCORER` wins.
 
 ```bash
 # Auto-detect scorer and rescore
-agentdeck-research-score --experiment-dir research/2026-03-26-variable-damage-premium-final-1
+agentdeck-research-score --experiment-dir research/research_2026-03-26-variable-damage-premium-final-1
 
 # Rescore a specific cell in a matrix experiment
 agentdeck-research-score \
-  --experiment-dir research/2026-03-26-variable-damage-arc-1 \
+  --experiment-dir research/research_2026-03-26-variable-damage-arc-1 \
   --cell flash_lite_rc_risk
 
 # Preview without writing
 agentdeck-research-score \
-  --experiment-dir research/2026-03-25-fixed-damage-baseline-completion-2 \
+  --experiment-dir research/research_2026-03-25-fixed-damage-baseline-completion-2 \
   --dry-run
 
 # Package-local scorer inside the experiment package
 agentdeck-research-score \
-  --experiment-dir research/2026-04-09-signal-cache-controller-2
+  --experiment-dir research/research_2026-04-09-signal-cache-controller-2
 
 # Matrix package: rescore one cell artifact
 agentdeck-research-score \
-  --experiment-dir research/2026-04-10-your-matrix-study \
+  --experiment-dir research/research_2026-04-10-your-matrix-study \
   --cell p1_c01_example
 
 # Override recordings path (e.g., after moving runs to a new location)
 agentdeck-research-score \
-  --experiment-dir research/2026-03-23-fixed-damage-exit-1 \
+  --experiment-dir research/research_2026-03-23-fixed-damage-exit-1 \
   --recordings-dir /mnt/recovered/agentdeck_runs/session-abc123/records
 ```
 

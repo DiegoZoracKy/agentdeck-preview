@@ -32,12 +32,23 @@ research/<experiment-id>/
 ├── matrix.yaml        # Benchmark grid definition (optional)
 ├── results.json       # Objective results (generated)
 ├── results.csv        # Match-level results (generated)
-├── analysis.md        # Interpretation (optional)
+├── results.md         # Human-readable factual report (generated)
+├── analysis/          # Authored human/AI interpretation workspace (optional)
 ├── artifacts/         # Plots/tables (optional)
 ├── logs/              # Narrative logs (optional)
 ├── recordings/        # External pointers only (no raw JSON)
 └── scripts/           # Experiment scripts (optional)
 ```
+
+AgentDeck uses the timestamp core `YYYYMMDD_HHMMSS` for instanced artifacts.
+Runtime sessions use `session_YYYYMMDD_HHMMSS_<suffix>`. Authored analysis
+directories SHOULD use `analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>` under
+`analysis/`, so independent human and AI reports sort chronologically, remain
+attributable, avoid same-day collisions, and remain grep-friendly. Process-created
+research package folders MUST use the `research_` prefix. Human-named packages
+SHOULD use `research_YYYY-MM-DD-<kebab-slug>`; packages derived from sessions
+SHOULD rewrite `session_YYYYMMDD_HHMMSS_<suffix>` to
+`research_YYYYMMDD_HHMMSS_<suffix>`.
 
 ### 4.2 manifest.yaml (Required)
 Required fields (minimum contract):
@@ -60,7 +71,7 @@ Recommended fields (non-exhaustive):
 - `run.matrix_source` (when `matrix.yaml` exists)
 - `phase_model` (when a package has multiple execution phases and no `matrix.yaml`)
 - `analysis_plan` (ci_method, alpha, effect_size)
-- `artifacts` (paths for results.json/results.csv/plots)
+- `artifacts` (paths for results.json/results.csv/results.md/plots/analysis)
 - `notes`
 
 The canonical schema and examples live in `research/SCHEMA.md`.
@@ -104,6 +115,52 @@ Extended required fields for `schema_version >= 2`:
 Extended required fields for `schema_version >= 3`:
 - `artifact_validation` (object; game-agnostic recording invariant summary)
 
+### 4.3a results.md (Generated)
+Exports MUST write `results.md` next to `results.json`.
+
+`results.md` is a deterministic human-readable factual report generated from
+`results.json`. For matrix package exports, it SHOULD also read sibling cell
+artifacts under `artifacts/<cell_id>/results.json` when
+`source.cells_included` is present, so users can inspect per-cell outcomes and
+seat splits without opening JSON.
+
+`results.md` SHOULD include:
+- source scope and included phases/cells
+- aggregate summary metrics
+- player results and direct head-to-head comparisons
+- position effects and seat splits by player
+- per-cell outcome, p-value/effect, and seat-split tables for matrix packages
+- format strictness
+- costs
+- behavioral profile summary when present
+- artifact validation status
+
+The report MUST remain factual and deterministic. It MUST NOT call an LLM and
+MUST NOT include authored interpretation beyond warnings derived mechanically
+from exported metrics, such as high first-player skew, non-significant direct
+comparisons, or heterogeneous package aggregation.
+
+### 4.3b Authored Analysis Namespace
+New packages SHOULD use `analysis/` as the authored interpretation namespace
+instead of a single `analysis.md` file. The package root `README.md` SHOULD
+point analysts to `analysis/README.md`. `analysis/README.md` SHOULD explain how
+humans and AI agents write independent analysis subdirectories:
+
+```text
+analysis/analysis_YYYYMMDD_HHMMSS_<author>_<topic_slug>/
+├── analysis.md
+├── provenance.yaml
+└── support/
+```
+
+Each analysis subdirectory SHOULD include provenance describing author identity
+(`human` or `ai`), model/tool when relevant, date, source artifacts, review
+status, and whether LLM assistance was used. Quantitative claims SHOULD cite
+generated artifacts.
+
+Legacy `analysis.md` remains valid for existing packages but is no longer the
+preferred canonical analysis shape.
+
 ### 4.4 statistics (Generated in results.json)
 Minimum contract:
 - `method` (string; e.g., `exact_binomial`)
@@ -122,7 +179,26 @@ Player-level required fields:
 - `effect_size` (float)
 - `effect_label` (`negligible|small|medium|large`)
 
-Pairwise comparison is RECOMMENDED for 2-player experiments and MAY be omitted for larger setups.
+Pairwise comparison is RECOMMENDED for direct 2-player experiments and MAY be omitted for larger setups.
+When present, `statistics.pairwise_comparisons` MUST contain only direct
+head-to-head comparisons derived from matches where both named players appear in
+the same `results.json.matches[*].players` array. It MUST NOT compare players
+using package-level aggregate wins from unrelated cells or pools.
+
+Pairwise entry fields:
+- `player_a` (string)
+- `player_b` (string)
+- `comparison_scope` (`direct_head_to_head`)
+- `wins_a` (int; direct wins by `player_a` against `player_b`)
+- `wins_b` (int; direct wins by `player_b` against `player_a`)
+- `head_to_head_matches` (int; all direct matches containing both players)
+- `head_to_head_decisive` (int; `wins_a + wins_b`)
+- `win_rate_a` (float; `wins_a / head_to_head_decisive` when decisive > 0)
+- `ci_a` (2-float array)
+- `p_value` (float)
+- `effect_size` (float)
+- `effect_label` (`negligible|small|medium|large`)
+- `is_significant` (bool)
 
 ### 4.5 format_strictness (Generated in results.json)
 Minimum contract:
@@ -268,8 +344,8 @@ Preferred surfaces:
 - **RE8**: Export scripts MUST produce deterministic output for identical recordings, excluding `generated_at` timestamps. Use `--no-generated-at` to omit the timestamp for diff-sensitive checks.
 - **RE9**: Status-gated markdown completeness MUST be enforced by validation:
   - `planned`/`running`: placeholders allowed.
-  - `complete`/`archived` with `run.matches_completed > 0`: factual markdown blocks in `README.md` and `analysis.md` MUST be populated.
-- **RE10**: Auto-written markdown content MUST be limited to the factual marker block (`<!-- AUTO_FACTS:BEGIN -->` ... `<!-- AUTO_FACTS:END -->`). Narrative sections remain human-authored.
+  - `complete`/`archived` with `run.matches_completed > 0`: factual markdown blocks in `README.md` MUST be populated. Legacy `analysis.md` factual blocks MUST be populated when the file exists or is declared.
+- **RE10**: Auto-written markdown content in `README.md` and legacy `analysis.md` MUST be limited to the factual marker block (`<!-- AUTO_FACTS:BEGIN -->` ... `<!-- AUTO_FACTS:END -->`). Authored analysis belongs under `analysis/`.
 - **RE11**: For `results.json.schema_version >= 2`, `results.json.statistics` MUST be produced by the shared export surface for every exported dataset with one or more matches.
 - **RE12**: For `results.json.schema_version >= 2`, `results.json.format_strictness` MUST be produced by the shared export surface for every exported dataset with one or more matches and MUST be derived from recorder events only (game-agnostic).
 - **RE13**: For `results.json.schema_version >= 2`, `results.json.position_effect` MUST be produced by the shared export surface for every exported dataset with one or more matches and MUST be derived from first-player metadata and winners only (game-agnostic).
@@ -283,10 +359,16 @@ Preferred surfaces:
   excluded, or otherwise non-study phases.
 - **RE19**: Validation MUST reject phase-contaminated package results when a phase
   model exists or source-scope metadata is present.
-- **RE20**: The shared export surface MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
+- **RE20**: `statistics.pairwise_comparisons` MUST be direct-head-to-head only.
+  Validation MUST reject pairwise entries whose wins, direct match count, or
+  decisive count do not match the subset of `results.json.matches` containing
+  both compared players.
+- **RE21**: The shared export surface MUST fail fast when artifact invariants fail rather than writing partially valid `results.json`.
+- **RE22**: The shared export surface MUST generate `results.md` from exported artifacts without LLM calls or handwritten interpretation. Validation MUST require it when declared in `manifest.artifacts.results_md` for completed or archived packages.
+- **RE23**: New templates SHOULD provide `analysis/README.md` as the authored analysis policy surface. Validation MUST accept legacy `analysis.md` for existing packages.
 
 ## 7. Data Flow & Interaction
-- Export: `recordings/ -> agentdeck.research.export -> results.json + results.csv`
+- Export: `recordings/ -> agentdeck.research.export -> results.json + results.csv + results.md`
 - Index: `manifest.yaml -> agentdeck.research.index -> research/INDEX.md`
 - Validation: `manifest.yaml + INDEX.md -> agentdeck.research.validate -> pass/fail`
 
@@ -295,20 +377,21 @@ Preferred surfaces:
   `FileNotFoundError` (export).
 - Missing required manifest fields → validator exits non-zero with detail.
 - Out-of-date index → validator exits non-zero unless `--write-index` used.
-- Completed experiment with placeholder factual block in README/analysis → validator exits non-zero with detail.
+- Completed experiment with placeholder factual block in README or legacy analysis.md → validator exits non-zero with detail.
+- Completed experiment declaring `artifacts.results_md` but missing `results.md` → validator exits non-zero with detail.
 
 ## 9. Examples
 
 ### 9.1 Create a New Experiment
 ```bash
-cp -R research/_templates research/2026-01-19-example
+cp -R research/_templates research/research_2026-01-19-example
 ```
 
 ### 9.2 Export Results
 ```bash
 agentdeck-research-export \
   --recordings-dir recordings \
-  --output-dir research/2026-01-19-example
+  --output-dir research/research_2026-01-19-example
 ```
 
 ### 9.3 Validate Research Tree
