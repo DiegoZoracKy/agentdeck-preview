@@ -32,6 +32,7 @@ RendererRegistry.register('FixedDamageGame', 'debug', CombatDebugRenderer);
 RendererRegistry.register('FixedDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
 RendererRegistry.register('VariableDamageGame', 'debug', CombatDebugRenderer);
 RendererRegistry.register('VariableDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
+RendererRegistry.register('ArchivistChoiceGame', 'debug', CombatDebugRenderer);
 
 const manifestPath = path.join(repoRoot, 'viewer/matches/manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -92,15 +93,59 @@ function runSampleSmoke(entry, expectedGame) {
   };
 }
 
+function runDebugOnlySampleSmoke(entry, expectedGame) {
+  assert(typeof entry.subtitle === 'string' && entry.subtitle.trim(), `Expected subtitle for ${entry.path}`);
+  assert(typeof entry.synopsis === 'string' && entry.synopsis.trim(), `Expected synopsis for ${entry.path}`);
+  assert(Array.isArray(entry.highlights) && entry.highlights.length > 0, `Expected highlights for ${entry.path}`);
+
+  const samplePath = path.join(repoRoot, 'viewer', entry.path);
+  const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
+  const matchData = RecordLoader.load(raw);
+
+  assert(matchData.game === expectedGame, `Expected sample game to be ${expectedGame}, got ${matchData.game}`);
+  assert(Array.isArray(matchData.frames) && matchData.frames.length > 0, 'Expected sample to contain frames');
+
+  const debugRenderer = RendererRegistry.create(matchData, 'debug');
+  assert(debugRenderer, 'RendererRegistry.create(matchData, "debug") returned falsy');
+
+  const timeline = new Timeline(matchData);
+  let frames = 0;
+  let ended = false;
+
+  timeline.onFrame(() => {
+    frames += 1;
+  });
+  timeline.onEnd(() => {
+    ended = true;
+  });
+
+  for (let i = 0; i < timeline.totalFrames; i += 1) {
+    timeline.step(1);
+  }
+
+  assert(frames === timeline.totalFrames, `Expected ${timeline.totalFrames} frames, got ${frames}`);
+  assert(ended, 'Expected Timeline to emit onEnd after last frame');
+
+  return {
+    label: entry.label,
+    game: matchData.game,
+    schemaVersion: matchData.schemaVersion,
+    frames,
+  };
+}
+
 const fixedSample = manifest.matches.find((entry) => entry.path === 'matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json');
 const variableSample = manifest.matches.find((entry) => entry.path === 'matches/variable-damage-01-flashlite-rc-risk-vs-gpt5mini.json');
+const archivistSample = manifest.matches.find((entry) => entry.path === 'matches/archivist-choice-01-conservator-vs-cataloger.json');
 
 assert(fixedSample, 'Expected bundled FixedDamage sample in manifest');
 assert(variableSample, 'Expected bundled VariableDamage sample in manifest');
+assert(archivistSample, 'Expected bundled ArchivistChoice sample in manifest');
 
 const results = [
   runSampleSmoke(fixedSample, 'FixedDamageGame'),
   runSampleSmoke(variableSample, 'VariableDamageGame'),
+  runDebugOnlySampleSmoke(archivistSample, 'ArchivistChoiceGame'),
 ];
 
 console.log('viewer smoke-check OK', results);

@@ -8,15 +8,16 @@ If you are new to the repo, run these in order:
 
 1. `mock_demo.py`
 2. `first_game_walkthrough.py`
-3. `minimal_experiment.py`
-4. `spectator_example.py`
-5. `replay_minimal.py`
-6. `test_parallel_execution.py`
-7. `replay_curate_match.py`
+3. `archivist_choice_demo.py`
+4. `minimal_experiment.py`
+5. `spectator_example.py`
+6. `replay_minimal.py`
+7. `test_parallel_execution.py`
+8. `replay_curate_match.py`
 
-These seven examples form the intended onboarding ladder: no-provider install
-check, custom game authoring, minimal LLM experiment, spectators, replay,
-parallel execution, then replay-driven viewer curation.
+These examples form the intended onboarding ladder: no-provider install check,
+custom game authoring, a non-combat benchmark-style game, minimal LLM experiment,
+spectators, replay, parallel execution, then replay-driven viewer curation.
 
 ## Quick Start Examples
 
@@ -52,7 +53,23 @@ python examples/first_game_walkthrough.py
 
 ---
 
-### 3. Minimal Configuration (`minimal_experiment.py`)
+### 3. Non-Combat Benchmark (`archivist_choice_demo.py`)
+
+**Purpose**: Show a maintained non-combat game where agents triage manuscripts instead of fighting.
+
+**What You'll Learn**:
+- Independent per-player decision queues that avoid first-player advantage
+- Deterministic mock policies for policy comparison
+- Viewer-compatible recordings for a non-combat game
+
+**Usage**:
+```bash
+python examples/archivist_choice_demo.py
+```
+
+---
+
+### 4. Minimal Configuration (`minimal_experiment.py`)
 
 **Purpose**: Demonstrate the simplest possible setup for running LLM agent experiments.
 
@@ -80,7 +97,7 @@ Runs a single match by default so you can validate credentials, recordings, and 
 
 ---
 
-### 4. Spectator Monitoring (`spectator_example.py`)
+### 5. Spectator Monitoring (`spectator_example.py`)
 
 **Purpose**: Show how to use spectators for experiment monitoring and analysis.
 
@@ -102,7 +119,7 @@ python examples/spectator_example.py
 
 ---
 
-### 5. Parallel Execution (`test_parallel_execution.py`)
+### 6. Parallel Execution (`test_parallel_execution.py`)
 
 **Purpose**: Demonstrate parallel match execution with configurable concurrency.
 
@@ -127,7 +144,7 @@ python examples/test_parallel_execution.py
 
 ---
 
-### 6. Replay Engine (`replay_minimal.py`)
+### 7. Replay Engine (`replay_minimal.py`)
 
 **Purpose**: Replay a previously recorded match with full lifecycle observation.
 
@@ -154,7 +171,7 @@ python examples/replay_minimal.py --recording agentdeck_runs/session_XXX/records
 
 ---
 
-### 7. Match Curation (`replay_curate_match.py`)
+### 8. Match Curation (`replay_curate_match.py`)
 
 **Purpose**: Generate viewer-ready sidecar metadata from an existing match
 record.

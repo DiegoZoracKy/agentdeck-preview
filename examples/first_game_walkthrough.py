@@ -17,10 +17,10 @@ from agentdeck import (
     ActionOnlyController,
     ActionResult,
     AgentDeck,
+    AgentDeckConfig,
     GameStatus,
     MatchReporter,
     MockPlayer,
-    Recorder,
     ReplayEngine,
     StatsTracker,
     TurnBasedGame,
@@ -113,19 +113,20 @@ def build_mock_players():
 
 def run_and_replay():
     game = TinyBattleGame()
-    recorder = Recorder(output_dir="agentdeck_records/first_game")
+    config = AgentDeckConfig(run_dir="agentdeck_records/first_game")
     stats = StatsTracker()
     players = build_mock_players()
 
     # Record a single match with reporting
-    with AgentDeck(game=game, spectators=[recorder, MatchReporter(), stats]) as deck:
+    with AgentDeck(game=game, spectators=[MatchReporter(), stats], session=config) as deck:
         results = deck.play(players=players, matches=1, seed=7)
+        record_dir = Path(deck.session.record_directory)
 
     summary = stats.get_stats()
     print(f"\nWin rates: {results.win_rates}")
     print(f"Avg match duration: {summary.get('avg_match_duration', 0):.2f}s")
 
-    latest_recording = sorted(Path(recorder.output_dir).rglob("match_*.json"))[-1]
+    latest_recording = sorted(record_dir.glob("match_*.json"))[-1]
     print(f"\nReplaying latest recording from: {latest_recording}")
 
     with latest_recording.open("r", encoding="utf-8") as handle:

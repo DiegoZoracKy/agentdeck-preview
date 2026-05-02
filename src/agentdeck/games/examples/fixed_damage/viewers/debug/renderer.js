@@ -372,6 +372,7 @@ class CombatDebugRenderer {
 
 // Register renderer for the bundled combat games (if registry present).
 if (typeof RendererRegistry !== 'undefined') {
+  RendererRegistry.register('ArchivistChoiceGame', 'debug', CombatDebugRenderer);
   RendererRegistry.register('FixedDamageGame', 'debug', CombatDebugRenderer);
   RendererRegistry.register('VariableDamageGame', 'debug', CombatDebugRenderer);
 }

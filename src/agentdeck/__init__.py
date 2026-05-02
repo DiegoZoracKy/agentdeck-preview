@@ -39,6 +39,7 @@ from .core.types import (
 )
 
 # Game examples
+from .games.examples.archivist_choice import ArchivistChoiceGame
 from .games.examples.fixed_damage import FixedDamageGame
 from .games.examples.hangman import HangmanGame
 from .games.examples.variable_damage import VariableDamageGame
@@ -109,6 +110,7 @@ __all__ = [
     "MatchReporter",
     "curate_match_file",
     # Games
+    "ArchivistChoiceGame",
     "FixedDamageGame",
     "HangmanGame",
     "VariableDamageGame",

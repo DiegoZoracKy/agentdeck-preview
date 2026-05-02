@@ -243,7 +243,8 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 - Required properties: `instructions`, `allowed_actions`, `default_handshake_template`
 - Core methods: `setup()`, `get_view()`, `update()`, `status()`
 - State is JSON-serializable dicts (no complex objects)
-- Example: [FixedDamageGame](src/agentdeck/games/examples/fixed_damage/)
+- Examples: [FixedDamageGame](src/agentdeck/games/examples/fixed_damage/) and
+  [ArchivistChoiceGame](src/agentdeck/games/examples/archivist_choice.py)
 
 **Players** are AI agents making decisions
 - Three-phase lifecycle: Handshake → Turn → Conclusion

@@ -98,10 +98,11 @@ viewer/index.html?match=http://example.com/match.json
 ## Supported Records
 
 The viewer supports AgentDeck match records with schema version **1.3+**.
-The bundled combat skins currently support:
+The bundled skins currently support:
 
-- **FixedDamageGame**
-- **VariableDamageGame**
+- **ArchivistChoiceGame** (`debug`)
+- **FixedDamageGame** (`debug`, `retro_jrpg_scene`)
+- **VariableDamageGame** (`debug`, `retro_jrpg_scene`)
 
 Other games require registering a custom renderer. The current viewer is
 offline playback only.

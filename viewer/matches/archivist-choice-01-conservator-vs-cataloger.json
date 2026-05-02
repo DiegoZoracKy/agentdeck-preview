@@ -1,0 +1,3294 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_002b600a",
+  "game": "ArchivistChoiceGame",
+  "players": [
+    "Cataloger",
+    "Conservator"
+  ],
+  "winner": "Conservator",
+  "final_state": {
+    "turn": 9,
+    "scores": {
+      "Cataloger": 3,
+      "Conservator": 11
+    },
+    "case_index": {
+      "Cataloger": 4,
+      "Conservator": 4
+    },
+    "processed": {
+      "Cataloger": [
+        {
+          "manuscript_id": "field-journal",
+          "action": "CATALOG",
+          "best_action": "RESTORE",
+          "score_delta": 1
+        },
+        {
+          "manuscript_id": "port-ledger",
+          "action": "CATALOG",
+          "best_action": "QUARANTINE",
+          "score_delta": -1
+        },
+        {
+          "manuscript_id": "letters",
+          "action": "CATALOG",
+          "best_action": "CATALOG",
+          "score_delta": 2
+        },
+        {
+          "manuscript_id": "treaty-draft",
+          "action": "CATALOG",
+          "best_action": "RESTORE",
+          "score_delta": 1
+        }
+      ],
+      "Conservator": [
+        {
+          "manuscript_id": "field-journal",
+          "action": "RESTORE",
+          "best_action": "RESTORE",
+          "score_delta": 3
+        },
+        {
+          "manuscript_id": "port-ledger",
+          "action": "QUARANTINE",
+          "best_action": "QUARANTINE",
+          "score_delta": 3
+        },
+        {
+          "manuscript_id": "letters",
+          "action": "CATALOG",
+          "best_action": "CATALOG",
+          "score_delta": 2
+        },
+        {
+          "manuscript_id": "treaty-draft",
+          "action": "RESTORE",
+          "best_action": "RESTORE",
+          "score_delta": 3
+        }
+      ]
+    },
+    "last_action": {
+      "Cataloger": "CATALOG",
+      "Conservator": "RESTORE"
+    },
+    "manuscripts": [
+      {
+        "id": "field-journal",
+        "title": "Water-damaged field journal",
+        "condition": "fragile",
+        "risk": "low contamination",
+        "best_action": "RESTORE",
+        "scores": {
+          "CATALOG": 1,
+          "RESTORE": 3,
+          "QUARANTINE": 0
+        }
+      },
+      {
+        "id": "port-ledger",
+        "title": "Mold-spotted port ledger",
+        "condition": "unstable",
+        "risk": "high contamination",
+        "best_action": "QUARANTINE",
+        "scores": {
+          "CATALOG": -1,
+          "RESTORE": -2,
+          "QUARANTINE": 3
+        }
+      },
+      {
+        "id": "letters",
+        "title": "Stable correspondence bundle",
+        "condition": "stable",
+        "risk": "low handling risk",
+        "best_action": "CATALOG",
+        "scores": {
+          "CATALOG": 2,
+          "RESTORE": 0,
+          "QUARANTINE": -1
+        }
+      },
+      {
+        "id": "treaty-draft",
+        "title": "Faded treaty draft",
+        "condition": "fragile",
+        "risk": "historically significant",
+        "best_action": "RESTORE",
+        "scores": {
+          "CATALOG": 1,
+          "RESTORE": 3,
+          "QUARANTINE": 0
+        }
+      }
+    ],
+    "_turn_count": 8,
+    "_first_player_idx": 0
+  },
+  "seed": 11,
+  "events": [
+    {
+      "type": "player_handshake_start",
+      "data": {
+        "player": "Cataloger",
+        "match_id": "match_002b600a",
+        "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1776994178.1630418,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": null,
+        "timestamp": 1776994178.1630418,
+        "monotonic_time": 20703.875300479
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Cataloger",
+        "accepted": true,
+        "normalized_response": "OK",
+        "response_text": "OK",
+        "controller_metadata": {
+          "allowed": [
+            "OK"
+          ],
+          "player": "Cataloger"
+        },
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "renderer_output": null,
+        "usage_info": null,
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "response_text": "OK",
+          "renderer_output": null,
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "controller_metadata": {
+            "allowed": [
+              "OK"
+            ],
+            "player": "Cataloger"
+          },
+          "usage_info": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1776994178.163432,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": null,
+        "timestamp": 1776994178.163432,
+        "monotonic_time": 20703.875690079
+      }
+    },
+    {
+      "type": "player_handshake_start",
+      "data": {
+        "player": "Conservator",
+        "match_id": "match_002b600a",
+        "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1776994178.1646304,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": null,
+        "timestamp": 1776994178.1646304,
+        "monotonic_time": 20703.876888678
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "Conservator",
+        "accepted": true,
+        "normalized_response": "OK",
+        "response_text": "OK",
+        "controller_metadata": {
+          "allowed": [
+            "OK"
+          ],
+          "player": "Conservator"
+        },
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "renderer_output": null,
+        "usage_info": null,
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Archivist Choice\n\nYou are triaging manuscripts for a public archive. Each turn shows one manuscript.\n\nActions:\n- CATALOG: document the item and move it into normal access\n- RESTORE: preserve fragile high-value material before access\n- QUARANTINE: isolate material that may contaminate the collection\n\nGoal:\n- Choose the best preservation action for each manuscript\n- Highest archive quality score after all manuscripts wins",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: CATALOG, QUARANTINE, RESTORE",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "response_text": "OK",
+          "renderer_output": null,
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "controller_metadata": {
+            "allowed": [
+              "OK"
+            ],
+            "player": "Conservator"
+          },
+          "usage_info": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1776994178.1650581,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": null,
+        "timestamp": 1776994178.1650581,
+        "monotonic_time": 20703.877316478
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: Cataloger (index 0)",
+        "level": "debug",
+        "log_context": {}
+      },
+      "timestamp": 1776994178.1927633,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": null,
+        "timestamp": 1776994178.1927633,
+        "monotonic_time": 20703.90502175
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Cataloger",
+        "action": "CATALOG",
+        "reasoning": null,
+        "state_before": {
+          "turn": 1,
+          "scores": {
+            "Cataloger": 0,
+            "Conservator": 0
+          },
+          "case_index": {
+            "Cataloger": 0,
+            "Conservator": 0
+          },
+          "processed": {
+            "Cataloger": [],
+            "Conservator": []
+          },
+          "last_action": {
+            "Cataloger": null,
+            "Conservator": null
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 2,
+          "scores": {
+            "Cataloger": 1,
+            "Conservator": 0
+          },
+          "case_index": {
+            "Cataloger": 1,
+            "Conservator": 0
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": []
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": null
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "CATALOG"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Cataloger\nTurn: 1\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 1\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 1
+              }
+            }
+          ],
+          "prompt_length": 413,
+          "raw_response": "CATALOG",
+          "turn_number": 1,
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "Cataloger",
+            "started_at": 1776994178.195644,
+            "duration": 0.0005862712860107422,
+            "ended_at": 1776994178.1962302,
+            "rng_seed": 2366446542,
+            "rng_label": "turn-1-Cataloger"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "Cataloger",
+          "started_at": 1776994178.195644,
+          "duration": 0.0005862712860107422,
+          "ended_at": 1776994178.1962302,
+          "rng_seed": 2366446542,
+          "rng_label": "turn-1-Cataloger"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 1,
+          "prompt_text": "=== Current Game State ===\nYou are: Cataloger\nTurn: 1\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 1\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 1
+              }
+            }
+          ],
+          "response_text": "CATALOG",
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 1
+          },
+          "duration": 0.0005862712860107422
+        }
+      },
+      "timestamp": 1776994178.197105,
+      "duration": 0.0005862712860107422,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1776994178.197105,
+        "monotonic_time": 20703.909363846
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Conservator",
+        "action": "RESTORE",
+        "reasoning": null,
+        "state_before": {
+          "turn": 2,
+          "scores": {
+            "Cataloger": 1,
+            "Conservator": 0
+          },
+          "case_index": {
+            "Cataloger": 1,
+            "Conservator": 0
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": []
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": null
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 3,
+          "scores": {
+            "Cataloger": 1,
+            "Conservator": 3
+          },
+          "case_index": {
+            "Cataloger": 1,
+            "Conservator": 1
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "RESTORE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "RESTORE"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Conservator\nTurn: 2\n\nPlayer: Conservator\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 2\n\nPlayer: Conservator\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 2
+              }
+            }
+          ],
+          "prompt_length": 417,
+          "raw_response": "RESTORE",
+          "turn_number": 2,
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 2
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 2,
+            "turn_index": 1,
+            "player": "Conservator",
+            "started_at": 1776994178.2058475,
+            "duration": 0.000431060791015625,
+            "ended_at": 1776994178.2062786,
+            "rng_seed": 20666462,
+            "rng_label": "turn-2-Conservator"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 2,
+          "turn_index": 1,
+          "player": "Conservator",
+          "started_at": 1776994178.2058475,
+          "duration": 0.000431060791015625,
+          "ended_at": 1776994178.2062786,
+          "rng_seed": 20666462,
+          "rng_label": "turn-2-Conservator"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "turn_index": 1,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 2,
+          "prompt_text": "=== Current Game State ===\nYou are: Conservator\nTurn: 2\n\nPlayer: Conservator\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 2\n\nPlayer: Conservator\n\nYour Score: 0\n\nCases Completed: 0\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: field-journal\n  title: Water-damaged field journal\n  condition: fragile\n  risk: low contamination\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 2
+              }
+            }
+          ],
+          "response_text": "RESTORE",
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 2
+          },
+          "duration": 0.000431060791015625
+        }
+      },
+      "timestamp": 1776994178.2076735,
+      "duration": 0.000431060791015625,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 1,
+        "turn_index": 1,
+        "timestamp": 1776994178.2076735,
+        "monotonic_time": 20703.919932836
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Cataloger",
+        "action": "CATALOG",
+        "reasoning": null,
+        "state_before": {
+          "turn": 3,
+          "scores": {
+            "Cataloger": 1,
+            "Conservator": 3
+          },
+          "case_index": {
+            "Cataloger": 1,
+            "Conservator": 1
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "RESTORE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 4,
+          "scores": {
+            "Cataloger": 0,
+            "Conservator": 3
+          },
+          "case_index": {
+            "Cataloger": 2,
+            "Conservator": 1
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "RESTORE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "CATALOG"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Cataloger\nTurn: 3\n\nPlayer: Cataloger\n\nYour Score: 1\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 3\n\nPlayer: Cataloger\n\nYour Score: 1\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 3
+              }
+            }
+          ],
+          "prompt_length": 415,
+          "raw_response": "CATALOG",
+          "turn_number": 3,
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 3
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 3,
+            "turn_index": 2,
+            "player": "Cataloger",
+            "started_at": 1776994178.2141182,
+            "duration": 0.00035834312438964844,
+            "ended_at": 1776994178.2144766,
+            "rng_seed": 2930145963,
+            "rng_label": "turn-3-Cataloger"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 3,
+          "turn_index": 2,
+          "player": "Cataloger",
+          "started_at": 1776994178.2141182,
+          "duration": 0.00035834312438964844,
+          "ended_at": 1776994178.2144766,
+          "rng_seed": 2930145963,
+          "rng_label": "turn-3-Cataloger"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 2,
+        "turn_index": 2,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 3,
+          "prompt_text": "=== Current Game State ===\nYou are: Cataloger\nTurn: 3\n\nPlayer: Cataloger\n\nYour Score: 1\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 3\n\nPlayer: Cataloger\n\nYour Score: 1\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 3
+              }
+            }
+          ],
+          "response_text": "CATALOG",
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 3
+          },
+          "duration": 0.00035834312438964844
+        }
+      },
+      "timestamp": 1776994178.2152975,
+      "duration": 0.00035834312438964844,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 2,
+        "turn_index": 2,
+        "timestamp": 1776994178.2152975,
+        "monotonic_time": 20703.927556728
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Conservator",
+        "action": "QUARANTINE",
+        "reasoning": null,
+        "state_before": {
+          "turn": 4,
+          "scores": {
+            "Cataloger": 0,
+            "Conservator": 3
+          },
+          "case_index": {
+            "Cataloger": 2,
+            "Conservator": 1
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "RESTORE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 5,
+          "scores": {
+            "Cataloger": 0,
+            "Conservator": 6
+          },
+          "case_index": {
+            "Cataloger": 2,
+            "Conservator": 2
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "QUARANTINE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "QUARANTINE"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Conservator\nTurn: 4\n\nPlayer: Conservator\n\nYour Score: 3\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 4\n\nPlayer: Conservator\n\nYour Score: 3\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 4
+              }
+            }
+          ],
+          "prompt_length": 419,
+          "raw_response": "QUARANTINE",
+          "turn_number": 4,
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 4
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 4,
+            "turn_index": 3,
+            "player": "Conservator",
+            "started_at": 1776994178.2245884,
+            "duration": 0.0004801750183105469,
+            "ended_at": 1776994178.2250686,
+            "rng_seed": 3761665432,
+            "rng_label": "turn-4-Conservator"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 4,
+          "turn_index": 3,
+          "player": "Conservator",
+          "started_at": 1776994178.2245884,
+          "duration": 0.0004801750183105469,
+          "ended_at": 1776994178.2250686,
+          "rng_seed": 3761665432,
+          "rng_label": "turn-4-Conservator"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 3,
+        "turn_index": 3,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 4,
+          "prompt_text": "=== Current Game State ===\nYou are: Conservator\nTurn: 4\n\nPlayer: Conservator\n\nYour Score: 3\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 4\n\nPlayer: Conservator\n\nYour Score: 3\n\nCases Completed: 1\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: port-ledger\n  title: Mold-spotted port ledger\n  condition: unstable\n  risk: high contamination\n  best_action: QUARANTINE\n  scores:\n    CATALOG: -1\n    RESTORE: -2\n    QUARANTINE: 3\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 4
+              }
+            }
+          ],
+          "response_text": "QUARANTINE",
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 4
+          },
+          "duration": 0.0004801750183105469
+        }
+      },
+      "timestamp": 1776994178.2265794,
+      "duration": 0.0004801750183105469,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 3,
+        "turn_index": 3,
+        "timestamp": 1776994178.2265794,
+        "monotonic_time": 20703.938839217
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Cataloger",
+        "action": "CATALOG",
+        "reasoning": null,
+        "state_before": {
+          "turn": 5,
+          "scores": {
+            "Cataloger": 0,
+            "Conservator": 6
+          },
+          "case_index": {
+            "Cataloger": 2,
+            "Conservator": 2
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "QUARANTINE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 6,
+          "scores": {
+            "Cataloger": 2,
+            "Conservator": 6
+          },
+          "case_index": {
+            "Cataloger": 3,
+            "Conservator": 2
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "QUARANTINE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "CATALOG"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Cataloger\nTurn: 5\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 5\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 5
+              }
+            }
+          ],
+          "prompt_length": 408,
+          "raw_response": "CATALOG",
+          "turn_number": 5,
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 5
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 5,
+            "turn_index": 4,
+            "player": "Cataloger",
+            "started_at": 1776994178.236779,
+            "duration": 0.0012612342834472656,
+            "ended_at": 1776994178.2380402,
+            "rng_seed": 1151614774,
+            "rng_label": "turn-5-Cataloger"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 5,
+          "turn_index": 4,
+          "player": "Cataloger",
+          "started_at": 1776994178.236779,
+          "duration": 0.0012612342834472656,
+          "ended_at": 1776994178.2380402,
+          "rng_seed": 1151614774,
+          "rng_label": "turn-5-Cataloger"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 4,
+        "turn_index": 4,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 5,
+          "prompt_text": "=== Current Game State ===\nYou are: Cataloger\nTurn: 5\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 5\n\nPlayer: Cataloger\n\nYour Score: 0\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 5
+              }
+            }
+          ],
+          "response_text": "CATALOG",
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 5
+          },
+          "duration": 0.0012612342834472656
+        }
+      },
+      "timestamp": 1776994178.2393072,
+      "duration": 0.0012612342834472656,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 4,
+        "turn_index": 4,
+        "timestamp": 1776994178.2393072,
+        "monotonic_time": 20703.951566205
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Conservator",
+        "action": "CATALOG",
+        "reasoning": null,
+        "state_before": {
+          "turn": 6,
+          "scores": {
+            "Cataloger": 2,
+            "Conservator": 6
+          },
+          "case_index": {
+            "Cataloger": 3,
+            "Conservator": 2
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "QUARANTINE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 7,
+          "scores": {
+            "Cataloger": 2,
+            "Conservator": 8
+          },
+          "case_index": {
+            "Cataloger": 3,
+            "Conservator": 3
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "CATALOG"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "CATALOG"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Conservator\nTurn: 6\n\nPlayer: Conservator\n\nYour Score: 6\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 6\n\nPlayer: Conservator\n\nYour Score: 6\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 6
+              }
+            }
+          ],
+          "prompt_length": 412,
+          "raw_response": "CATALOG",
+          "turn_number": 6,
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 6
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 6,
+            "turn_index": 5,
+            "player": "Conservator",
+            "started_at": 1776994178.2484078,
+            "duration": 0.0007765293121337891,
+            "ended_at": 1776994178.2491844,
+            "rng_seed": 1600102217,
+            "rng_label": "turn-6-Conservator"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 6,
+          "turn_index": 5,
+          "player": "Conservator",
+          "started_at": 1776994178.2484078,
+          "duration": 0.0007765293121337891,
+          "ended_at": 1776994178.2491844,
+          "rng_seed": 1600102217,
+          "rng_label": "turn-6-Conservator"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 5,
+        "turn_index": 5,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 6,
+          "prompt_text": "=== Current Game State ===\nYou are: Conservator\nTurn: 6\n\nPlayer: Conservator\n\nYour Score: 6\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 6\n\nPlayer: Conservator\n\nYour Score: 6\n\nCases Completed: 2\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: letters\n  title: Stable correspondence bundle\n  condition: stable\n  risk: low handling risk\n  best_action: CATALOG\n  scores:\n    CATALOG: 2\n    RESTORE: 0\n    QUARANTINE: -1\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 6
+              }
+            }
+          ],
+          "response_text": "CATALOG",
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 6
+          },
+          "duration": 0.0007765293121337891
+        }
+      },
+      "timestamp": 1776994178.251378,
+      "duration": 0.0007765293121337891,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 5,
+        "turn_index": 5,
+        "timestamp": 1776994178.251378,
+        "monotonic_time": 20703.963637993
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Cataloger",
+        "action": "CATALOG",
+        "reasoning": null,
+        "state_before": {
+          "turn": 7,
+          "scores": {
+            "Cataloger": 2,
+            "Conservator": 8
+          },
+          "case_index": {
+            "Cataloger": 3,
+            "Conservator": 3
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "CATALOG"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 8,
+          "scores": {
+            "Cataloger": 3,
+            "Conservator": 8
+          },
+          "case_index": {
+            "Cataloger": 4,
+            "Conservator": 3
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              },
+              {
+                "manuscript_id": "treaty-draft",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "CATALOG"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "CATALOG"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Cataloger\nTurn: 7\n\nPlayer: Cataloger\n\nYour Score: 2\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 7\n\nPlayer: Cataloger\n\nYour Score: 2\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 7
+              }
+            }
+          ],
+          "prompt_length": 410,
+          "raw_response": "CATALOG",
+          "turn_number": 7,
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 7
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 7,
+            "turn_index": 6,
+            "player": "Cataloger",
+            "started_at": 1776994178.2622416,
+            "duration": 0.0008599758148193359,
+            "ended_at": 1776994178.2631016,
+            "rng_seed": 983162410,
+            "rng_label": "turn-7-Cataloger"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 7,
+          "turn_index": 6,
+          "player": "Cataloger",
+          "started_at": 1776994178.2622416,
+          "duration": 0.0008599758148193359,
+          "ended_at": 1776994178.2631016,
+          "rng_seed": 983162410,
+          "rng_label": "turn-7-Cataloger"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 6,
+        "turn_index": 6,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 7,
+          "prompt_text": "=== Current Game State ===\nYou are: Cataloger\nTurn: 7\n\nPlayer: Cataloger\n\nYour Score: 2\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Cataloger\nTurn: 7\n\nPlayer: Cataloger\n\nYour Score: 2\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Cataloger",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 7
+              }
+            }
+          ],
+          "response_text": "CATALOG",
+          "renderer_output": {
+            "format": "text",
+            "player": "Cataloger",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 7
+          },
+          "duration": 0.0008599758148193359
+        }
+      },
+      "timestamp": 1776994178.2658558,
+      "duration": 0.0008599758148193359,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 6,
+        "turn_index": 6,
+        "timestamp": 1776994178.2658558,
+        "monotonic_time": 20703.978115478
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "Conservator",
+        "action": "RESTORE",
+        "reasoning": null,
+        "state_before": {
+          "turn": 8,
+          "scores": {
+            "Cataloger": 3,
+            "Conservator": 8
+          },
+          "case_index": {
+            "Cataloger": 4,
+            "Conservator": 3
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              },
+              {
+                "manuscript_id": "treaty-draft",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "CATALOG"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "state_after": {
+          "turn": 9,
+          "scores": {
+            "Cataloger": 3,
+            "Conservator": 11
+          },
+          "case_index": {
+            "Cataloger": 4,
+            "Conservator": 4
+          },
+          "processed": {
+            "Cataloger": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "CATALOG",
+                "best_action": "QUARANTINE",
+                "score_delta": -1
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              },
+              {
+                "manuscript_id": "treaty-draft",
+                "action": "CATALOG",
+                "best_action": "RESTORE",
+                "score_delta": 1
+              }
+            ],
+            "Conservator": [
+              {
+                "manuscript_id": "field-journal",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "port-ledger",
+                "action": "QUARANTINE",
+                "best_action": "QUARANTINE",
+                "score_delta": 3
+              },
+              {
+                "manuscript_id": "letters",
+                "action": "CATALOG",
+                "best_action": "CATALOG",
+                "score_delta": 2
+              },
+              {
+                "manuscript_id": "treaty-draft",
+                "action": "RESTORE",
+                "best_action": "RESTORE",
+                "score_delta": 3
+              }
+            ]
+          },
+          "last_action": {
+            "Cataloger": "CATALOG",
+            "Conservator": "RESTORE"
+          },
+          "manuscripts": [
+            {
+              "id": "field-journal",
+              "title": "Water-damaged field journal",
+              "condition": "fragile",
+              "risk": "low contamination",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            },
+            {
+              "id": "port-ledger",
+              "title": "Mold-spotted port ledger",
+              "condition": "unstable",
+              "risk": "high contamination",
+              "best_action": "QUARANTINE",
+              "scores": {
+                "CATALOG": -1,
+                "RESTORE": -2,
+                "QUARANTINE": 3
+              }
+            },
+            {
+              "id": "letters",
+              "title": "Stable correspondence bundle",
+              "condition": "stable",
+              "risk": "low handling risk",
+              "best_action": "CATALOG",
+              "scores": {
+                "CATALOG": 2,
+                "RESTORE": 0,
+                "QUARANTINE": -1
+              }
+            },
+            {
+              "id": "treaty-draft",
+              "title": "Faded treaty draft",
+              "condition": "fragile",
+              "risk": "historically significant",
+              "best_action": "RESTORE",
+              "scores": {
+                "CATALOG": 1,
+                "RESTORE": 3,
+                "QUARANTINE": 0
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "RESTORE",
+            "QUARANTINE",
+            "CATALOG"
+          ],
+          "candidates": [
+            "RESTORE"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: Conservator\nTurn: 8\n\nPlayer: Conservator\n\nYour Score: 8\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 8\n\nPlayer: Conservator\n\nYour Score: 8\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 8
+              }
+            }
+          ],
+          "prompt_length": 414,
+          "raw_response": "RESTORE",
+          "turn_number": 8,
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 8
+          },
+          "template_id": "turn",
+          "turn_context": {
+            "match_id": "match_002b600a",
+            "turn_number": 8,
+            "turn_index": 7,
+            "player": "Conservator",
+            "started_at": 1776994178.2913284,
+            "duration": 0.0005438327789306641,
+            "ended_at": 1776994178.2918723,
+            "rng_seed": 49674013,
+            "rng_label": "turn-8-Conservator"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_002b600a",
+          "turn_number": 8,
+          "turn_index": 7,
+          "player": "Conservator",
+          "started_at": 1776994178.2913284,
+          "duration": 0.0005438327789306641,
+          "ended_at": 1776994178.2918723,
+          "rng_seed": 49674013,
+          "rng_label": "turn-8-Conservator"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 7,
+        "turn_index": 7,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 8,
+          "prompt_text": "=== Current Game State ===\nYou are: Conservator\nTurn: 8\n\nPlayer: Conservator\n\nYour Score: 8\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: Conservator\nTurn: 8\n\nPlayer: Conservator\n\nYour Score: 8\n\nCases Completed: 3\n\nCases Total: 4\n\nCurrent Manuscript:\n  id: treaty-draft\n  title: Faded treaty draft\n  condition: fragile\n  risk: historically significant\n  best_action: RESTORE\n  scores:\n    CATALOG: 1\n    RESTORE: 3\n    QUARANTINE: 0\n\nAllowed Actions:\n  - CATALOG\n  - RESTORE\n  - QUARANTINE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "Conservator",
+                "sections": [
+                  "turn",
+                  "player",
+                  "your_score",
+                  "cases_completed",
+                  "cases_total",
+                  "current_manuscript",
+                  "allowed_actions"
+                ],
+                "turn_number": 8
+              }
+            }
+          ],
+          "response_text": "RESTORE",
+          "renderer_output": {
+            "format": "text",
+            "player": "Conservator",
+            "sections": [
+              "turn",
+              "player",
+              "your_score",
+              "cases_completed",
+              "cases_total",
+              "current_manuscript",
+              "allowed_actions"
+            ],
+            "turn_number": 8
+          },
+          "duration": 0.0005438327789306641
+        }
+      },
+      "timestamp": 1776994178.2932673,
+      "duration": 0.0005438327789306641,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "phase_index": 7,
+        "turn_index": 7,
+        "timestamp": 1776994178.2932673,
+        "monotonic_time": 20704.005526152
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Cataloger",
+        "reflection_text": "",
+        "outcome": "Conservator won the match.",
+        "prompt_text": "Match concluded.",
+        "prompt_blocks": [
+          {
+            "key": "outcome",
+            "content": "Conservator won the match.",
+            "metadata": {}
+          }
+        ],
+        "response_text": "",
+        "renderer_output": {},
+        "controller_format": "",
+        "controller_metadata": {
+          "reflection": ""
+        },
+        "usage_info": null,
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "prompt_text": "Match concluded.",
+          "prompt_blocks": [
+            {
+              "key": "outcome",
+              "content": "Conservator won the match.",
+              "metadata": {}
+            }
+          ],
+          "response_text": "",
+          "renderer_output": {},
+          "controller_format": "",
+          "controller_metadata": {
+            "reflection": ""
+          },
+          "usage_info": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1776994178.3072326,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "timestamp": 1776994178.3072326,
+        "monotonic_time": 20704.019491238
+      }
+    },
+    {
+      "type": "player_conclusion",
+      "data": {
+        "player": "Conservator",
+        "reflection_text": "",
+        "outcome": "Conservator won the match.",
+        "prompt_text": "Match concluded.",
+        "prompt_blocks": [
+          {
+            "key": "outcome",
+            "content": "You (Conservator) won the match.",
+            "metadata": {}
+          }
+        ],
+        "response_text": "",
+        "renderer_output": {},
+        "controller_format": "",
+        "controller_metadata": {
+          "reflection": ""
+        },
+        "usage_info": null,
+        "prompt": {
+          "phase": "conclusion",
+          "turn_number": null,
+          "prompt_text": "Match concluded.",
+          "prompt_blocks": [
+            {
+              "key": "outcome",
+              "content": "You (Conservator) won the match.",
+              "metadata": {}
+            }
+          ],
+          "response_text": "",
+          "renderer_output": {},
+          "controller_format": "",
+          "controller_metadata": {
+            "reflection": ""
+          },
+          "usage_info": null,
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1776994178.3216171,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "timestamp": 1776994178.3216171,
+        "monotonic_time": 20704.033875824
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2026-04-24T01:29:38.159593+00:00",
+    "session_id": "session_20260423_222938_0c80fe",
+    "batch_id": "batch_1e7e83e2",
+    "context": {
+      "session_id": "session_20260423_222938_0c80fe",
+      "batch_id": "batch_1e7e83e2",
+      "match_index": 0,
+      "total_matches_in_batch": 1,
+      "end": {
+        "session_id": "session_20260423_222938_0c80fe",
+        "batch_id": "batch_1e7e83e2",
+        "match_id": "match_002b600a",
+        "timestamp": 1776994178.341696,
+        "monotonic_time": 20704.053955304
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.1",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "92c17fafde728fd4f26581730b411482534f1a5f",
+        "branch": "main",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "Cataloger": {
+        "type": "MockPlayer",
+        "module": "agentdeck.players.mock",
+        "model": "gpt-4"
+      },
+      "Conservator": {
+        "type": "MockPlayer",
+        "module": "agentdeck.players.mock",
+        "model": "gpt-4"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "Cataloger",
+        "type": "MockPlayer",
+        "actions": [
+          "CATALOG",
+          "CATALOG",
+          "CATALOG",
+          "CATALOG"
+        ],
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "total_cost": 0.0
+      },
+      {
+        "name": "Conservator",
+        "type": "MockPlayer",
+        "actions": [
+          "RESTORE",
+          "QUARANTINE",
+          "CATALOG",
+          "RESTORE"
+        ],
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "total_cost": 0.0
+      }
+    ],
+    "game_config": {
+      "name": "ArchivistChoiceGame",
+      "module": "agentdeck.games.examples.archivist_choice"
+    },
+    "match": {
+      "seed": 11,
+      "player_order": [
+        0,
+        1
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "Cataloger",
+        "index": 0,
+        "ordered_index": 0
+      },
+      "fairness_policy": {
+        "pairing_policy": "none",
+        "first_player_policy": "random",
+        "effective_player_order": [
+          0,
+          1
+        ],
+        "effective_first_player": {
+          "name": "Cataloger",
+          "index": 0,
+          "ordered_index": 0
+        }
+      },
+      "game": "ArchivistChoiceGame",
+      "players": [
+        "Cataloger",
+        "Conservator"
+      ],
+      "player_names": [
+        "Cataloger",
+        "Conservator"
+      ],
+      "duration": 0.14746475219726562,
+      "duration_seconds": 0.14746475219726562,
+      "started_at": "2026-04-24T01:29:38.159593+00:00",
+      "ended_at": "2026-04-24T01:29:38.307057+00:00",
+      "handshake_completed": true,
+      "batch_id": "batch_1e7e83e2",
+      "truncated_by_max_turns": false,
+      "turns": 8,
+      "player_costs": {
+        "Cataloger": 0.0,
+        "Conservator": 0.0
+      },
+      "cost": 0.0,
+      "schema_version": "1.3"
+    },
+    "session": {
+      "session_id": "session_20260423_222938_0c80fe",
+      "started_at": 1776994178.125082,
+      "seed": 11
+    },
+    "ended_at": "2026-04-24T01:29:38.307057+00:00",
+    "duration_seconds": 0.14746475219726562,
+    "players": [
+      "Cataloger",
+      "Conservator"
+    ],
+    "game": "ArchivistChoiceGame",
+    "match_id": "match_002b600a",
+    "winner": "Conservator",
+    "seed": 11
+  },
+  "batch_id": "batch_1e7e83e2",
+  "started_at": "2026-04-24T01:29:38.159593+00:00",
+  "ended_at": "2026-04-24T01:29:38.307057+00:00",
+  "duration_seconds": 0.14746475219726562
+}

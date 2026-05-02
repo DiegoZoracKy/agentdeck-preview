@@ -426,7 +426,7 @@ class TurnLoop:
 
         self.runtime.log(
             f"First player selected: {self.players[first_idx].name} (index {first_idx})",
-            level=LogLevel.INFO,
+            level=LogLevel.DEBUG,
         )
 
     def _execute_turn(self, state: Dict[str, Any]) -> TurnResult:

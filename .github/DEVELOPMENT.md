@@ -4,7 +4,7 @@ This guide helps contributors set up their local development environment for Age
 
 ## Prerequisites
 
-- Python 3.9+ (3.11 recommended)
+- Python 3.10+ (3.11 recommended)
 - Git
 - Virtual environment tool (venv, conda, etc.)
 
@@ -125,7 +125,7 @@ pytest -k "test_handshake"
 
 Our GitHub Actions CI runs:
 
-1. **Tests** (Python 3.9, 3.10, 3.11)
+1. **Tests** (Python 3.10, 3.11)
    - Full test suite with coverage
    - Coverage uploaded to Codecov
 

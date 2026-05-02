@@ -151,12 +151,58 @@ const RecordLoader = {
    * @private
    */
   _normalizeState(state) {
+    const normalized = this._normalizeKeys(state || {});
     return {
-      health: state.health || {},
-      potions: state.potions || {},
-      turn: state.turn || 0,
-      lastAction: state.last_action || {}
+      health: normalized.health || {},
+      potions: normalized.potions || {},
+      turn: normalized.turn || 0,
+      lastAction: normalized.lastAction || {},
+      ...Object.fromEntries(
+        Object.entries(normalized).filter(
+          ([key]) => !['health', 'potions', 'turn', 'lastAction'].includes(key)
+        )
+      )
     };
+  },
+
+  /**
+   * Recursively normalize snake_case object keys to camelCase.
+   * @private
+   */
+  _normalizeKeys(value, preserveObjectKeys = false) {
+    if (Array.isArray(value)) {
+      return value.map((item) => this._normalizeKeys(item));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, nested]) => {
+          const normalizedKey = preserveObjectKeys ? key : this._snakeToCamel(key);
+          return [
+            normalizedKey,
+            this._normalizeKeys(nested, this._preservesNestedKeys(normalizedKey))
+          ];
+        })
+      );
+    }
+
+    return value;
+  },
+
+  /**
+   * State fields that are dictionaries keyed by player/model/user-provided ids.
+   * @private
+   */
+  _preservesNestedKeys(key) {
+    return ['health', 'potions', 'lastAction', 'scores', 'caseIndex', 'processed'].includes(key);
+  },
+
+  /**
+   * Convert a snake_case key to camelCase.
+   * @private
+   */
+  _snakeToCamel(key) {
+    return String(key).replace(/_([a-z])/g, (_match, letter) => letter.toUpperCase());
   },
 
   /**

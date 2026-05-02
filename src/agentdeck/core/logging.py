@@ -237,7 +237,7 @@ class AgentDeckLogger:
                 lines.append(f"Δ {diff}")
 
         lines.append(f"Turn Duration: {duration:.2f}s")
-        self._info("\n".join(lines))
+        self._debug("\n".join(lines))
 
     # ------------------------------------------------------------------
     # LLM helpers

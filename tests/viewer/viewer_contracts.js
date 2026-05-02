@@ -207,6 +207,42 @@ async function testRecordLoader() {
   });
   assert.strictEqual(sparse.frames[0].prompt, null);
 
+  const generic = RecordLoader.load({
+    schema_version: '1.3',
+    match_id: 'generic',
+    game: 'ArchivistChoiceGame',
+    players: ['Cataloger', 'Conservator'],
+    events: [
+      {
+        type: 'gameplay',
+        data: {
+          player: 'Conservator',
+          action: 'RESTORE',
+          state_before: {
+            turn: 1,
+            current_manuscript: { case_id: 'field-journal', risk_level: 'low' },
+            scores: { Cataloger: 0, Conservator: 0 }
+          },
+          state_after: {
+            turn: 2,
+            current_manuscript: { case_id: 'port-ledger', risk_level: 'high' },
+            scores: { Cataloger: 0, archive_bot: 3 }
+          }
+        },
+        context: { turn_index: 0 },
+        timestamp: 1
+      }
+    ]
+  });
+  assert.deepStrictEqual(generic.frames[0].stateBefore.currentManuscript, {
+    caseId: 'field-journal',
+    riskLevel: 'low'
+  });
+  assert.deepStrictEqual(generic.frames[0].stateAfter.scores, {
+    Cataloger: 0,
+    archive_bot: 3
+  });
+
   await assert.rejects(
     () =>
       RecordLoader.loadFromFile({
