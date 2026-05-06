@@ -1,0 +1,3586 @@
+{
+  "schema_version": "1.3",
+  "schema_type": "match",
+  "match_id": "match_0316b96b",
+  "game": "FixedDamageGame",
+  "players": [
+    "FlashLite-S0-AO",
+    "GPT4oMini-S0-AO"
+  ],
+  "winner": "GPT4oMini-S0-AO",
+  "final_state": {
+    "health": {
+      "FlashLite-S0-AO": 0,
+      "GPT4oMini-S0-AO": 10
+    },
+    "potions": {
+      "FlashLite-S0-AO": 3,
+      "GPT4oMini-S0-AO": 0
+    },
+    "last_action": {
+      "FlashLite-S0-AO": "ATTACK",
+      "GPT4oMini-S0-AO": "ATTACK"
+    },
+    "turn": 17,
+    "_turn_count": 16,
+    "_first_player_idx": 0
+  },
+  "seed": 2026045723,
+  "events": [
+    {
+      "type": "player_handshake_start",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "match_id": "match_0316b96b",
+        "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1777340996.3254051,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": null,
+        "timestamp": 1777340996.3254051,
+        "monotonic_time": 155171.076457445
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "accepted": true,
+        "normalized_response": "OK",
+        "response_text": "OK",
+        "controller_metadata": {
+          "allowed": [
+            "OK"
+          ],
+          "player": "FlashLite-S0-AO"
+        },
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "renderer_output": null,
+        "usage_info": {
+          "tokens": 180,
+          "total_tokens": 180,
+          "prompt_tokens": 179,
+          "completion_tokens": 1,
+          "cost": 1.8299999999999998e-05,
+          "total_cost": 1.8299999999999998e-05,
+          "latency_ms": 1307.1,
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "call_id": "75541dbd"
+        },
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "response_text": "OK",
+          "renderer_output": null,
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "controller_metadata": {
+            "allowed": [
+              "OK"
+            ],
+            "player": "FlashLite-S0-AO"
+          },
+          "usage_info": {
+            "tokens": 180,
+            "total_tokens": 180,
+            "prompt_tokens": 179,
+            "completion_tokens": 1,
+            "cost": 1.8299999999999998e-05,
+            "total_cost": 1.8299999999999998e-05,
+            "latency_ms": 1307.1,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "75541dbd"
+          },
+          "call_id": "75541dbd",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1777340997.6341226,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": null,
+        "timestamp": 1777340997.6341226,
+        "monotonic_time": 155172.385173949
+      }
+    },
+    {
+      "type": "player_handshake_start",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "match_id": "match_0316b96b",
+        "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1777340997.6343095,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": null,
+        "timestamp": 1777340997.6343095,
+        "monotonic_time": 155172.385360549
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "accepted": true,
+        "normalized_response": "OK",
+        "response_text": "OK",
+        "controller_metadata": {
+          "allowed": [
+            "OK"
+          ],
+          "player": "GPT4oMini-S0-AO"
+        },
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "renderer_output": null,
+        "usage_info": {
+          "tokens": 175,
+          "total_tokens": 175,
+          "prompt_tokens": 173,
+          "completion_tokens": 2,
+          "cost": 2.715e-05,
+          "total_cost": 2.715e-05,
+          "latency_ms": 580.8,
+          "model": "gpt-4o-mini",
+          "provider": "openai",
+          "call_id": "3efd118d",
+          "provider_model": "gpt-4o-mini-2024-07-18"
+        },
+        "prompt": {
+          "phase": "handshake",
+          "turn_number": null,
+          "prompt_text": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible\n\nWhen gameplay begins, use this response format:\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.\n",
+          "prompt_blocks": [
+            {
+              "key": "game_instructions",
+              "content": "Fixed Damage Combat Game\n\nStarting Conditions:\n- Each player starts with 100 HP\n- Each player has 3 potions\n\nActions:\n- ATTACK: Deals 20 damage to opponent\n- POTION: Restores 30 HP (max 100)\n\nWin Condition:\n- First player to reduce opponent to 0 HP wins\n- If both reach 0 HP simultaneously, the match is a draw\n\nInformation Level: partial\n- \"full\": Players see all stats (opponent HP/potions)\n- \"partial\": Players see only their own HP/potions, but last actions remain visible",
+              "metadata": {}
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            },
+            {
+              "key": "handshake_controller_format",
+              "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+              "metadata": {}
+            }
+          ],
+          "response_text": "OK",
+          "renderer_output": null,
+          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+          "controller_metadata": {
+            "allowed": [
+              "OK"
+            ],
+            "player": "GPT4oMini-S0-AO"
+          },
+          "usage_info": {
+            "tokens": 175,
+            "total_tokens": 175,
+            "prompt_tokens": 173,
+            "completion_tokens": 2,
+            "cost": 2.715e-05,
+            "total_cost": 2.715e-05,
+            "latency_ms": 580.8,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "3efd118d",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "3efd118d",
+          "duration": 0.1
+        }
+      },
+      "timestamp": 1777340998.2159357,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": null,
+        "timestamp": 1777340998.2159357,
+        "monotonic_time": 155172.966987406
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: FlashLite-S0-AO (index 0)",
+        "level": "debug",
+        "log_context": {}
+      },
+      "timestamp": 1777340998.2162762,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": null,
+        "timestamp": 1777340998.2162762,
+        "monotonic_time": 155172.967327006
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 100
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 3
+          },
+          "last_action": {
+            "FlashLite-S0-AO": null,
+            "GPT4oMini-S0-AO": null
+          },
+          "turn": 1
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 3
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": null
+          },
+          "turn": 2
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: None\n  GPT4oMini-S0-AO: None\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: None\n  GPT4oMini-S0-AO: None\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 240,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 1,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 269,
+            "total_tokens": 449,
+            "prompt_tokens": 265,
+            "completion_tokens": 4,
+            "cost": 2.81e-05,
+            "total_cost": 4.6399999999999996e-05,
+            "latency_ms": 452.6,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "10d325be"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 1,
+            "turn_index": 0,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777340998.2166922,
+            "duration": 0.4533672332763672,
+            "ended_at": 1777340998.6700594,
+            "rng_seed": 2923119743,
+            "rng_label": "turn-1-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 1,
+          "turn_index": 0,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777340998.2166922,
+          "duration": 0.4533672332763672,
+          "ended_at": 1777340998.6700594,
+          "rng_seed": 2923119743,
+          "rng_label": "turn-1-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "turn_index": 0,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 1,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: None\n  GPT4oMini-S0-AO: None\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 1\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: None\n  GPT4oMini-S0-AO: None\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 1
+          },
+          "usage_info": {
+            "tokens": 269,
+            "total_tokens": 449,
+            "prompt_tokens": 265,
+            "completion_tokens": 4,
+            "cost": 2.81e-05,
+            "total_cost": 4.6399999999999996e-05,
+            "latency_ms": 452.6,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "10d325be"
+          },
+          "call_id": "10d325be",
+          "duration": 0.4533672332763672
+        }
+      },
+      "timestamp": 1777340998.6705258,
+      "duration": 0.4533672332763672,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 0,
+        "turn_index": 0,
+        "timestamp": 1777340998.6705258,
+        "monotonic_time": 155173.421576673
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "POTION",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 3
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": null
+          },
+          "turn": 2
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 100
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 2
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 3
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: None\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: None\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 241,
+          "raw_response": "ACTION: POTION",
+          "turn_number": 2,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 266,
+            "total_tokens": 441,
+            "prompt_tokens": 261,
+            "completion_tokens": 5,
+            "cost": 4.2149999999999995e-05,
+            "total_cost": 6.929999999999999e-05,
+            "latency_ms": 1436.2,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "9735786a",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 2,
+            "turn_index": 1,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777340998.6708996,
+            "duration": 1.4372754096984863,
+            "ended_at": 1777341000.108175,
+            "rng_seed": 1065481886,
+            "rng_label": "turn-2-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 2,
+          "turn_index": 1,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777340998.6708996,
+          "duration": 1.4372754096984863,
+          "ended_at": 1777341000.108175,
+          "rng_seed": 1065481886,
+          "rng_label": "turn-2-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "turn_index": 1,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 2,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: None\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 2\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: None\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: POTION",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 2
+          },
+          "usage_info": {
+            "tokens": 266,
+            "total_tokens": 441,
+            "prompt_tokens": 261,
+            "completion_tokens": 5,
+            "cost": 4.2149999999999995e-05,
+            "total_cost": 6.929999999999999e-05,
+            "latency_ms": 1436.2,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "9735786a",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "9735786a",
+          "duration": 1.4372754096984863
+        }
+      },
+      "timestamp": 1777341000.1095433,
+      "duration": 1.4372754096984863,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 1,
+        "turn_index": 1,
+        "timestamp": 1777341000.1095433,
+        "monotonic_time": 155174.860595267
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 100
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 2
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 3
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 2
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 4
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 3,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 360,
+            "total_tokens": 809,
+            "prompt_tokens": 356,
+            "completion_tokens": 4,
+            "cost": 3.7199999999999996e-05,
+            "total_cost": 8.36e-05,
+            "latency_ms": 399.9,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "ddda5fe4"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 3,
+            "turn_index": 2,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341000.110146,
+            "duration": 0.4009079933166504,
+            "ended_at": 1777341000.511054,
+            "rng_seed": 3927365020,
+            "rng_label": "turn-3-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 3,
+          "turn_index": 2,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341000.110146,
+          "duration": 0.4009079933166504,
+          "ended_at": 1777341000.511054,
+          "rng_seed": 3927365020,
+          "rng_label": "turn-3-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 2,
+        "turn_index": 2,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 3,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 3\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 3
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 3
+          },
+          "usage_info": {
+            "tokens": 360,
+            "total_tokens": 809,
+            "prompt_tokens": 356,
+            "completion_tokens": 4,
+            "cost": 3.7199999999999996e-05,
+            "total_cost": 8.36e-05,
+            "latency_ms": 399.9,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "ddda5fe4"
+          },
+          "call_id": "ddda5fe4",
+          "duration": 0.4009079933166504
+        }
+      },
+      "timestamp": 1777341000.5115073,
+      "duration": 0.4009079933166504,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 2,
+        "turn_index": 2,
+        "timestamp": 1777341000.5115073,
+        "monotonic_time": 155175.262558338
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "POTION",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 2
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 4
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 100
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 5
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 243,
+          "raw_response": "ACTION: POTION",
+          "turn_number": 4,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 358,
+            "total_tokens": 799,
+            "prompt_tokens": 353,
+            "completion_tokens": 5,
+            "cost": 5.595e-05,
+            "total_cost": 0.00012524999999999998,
+            "latency_ms": 655.5,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "ff19ac3e",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 4,
+            "turn_index": 3,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341000.511783,
+            "duration": 0.6566388607025146,
+            "ended_at": 1777341001.1684217,
+            "rng_seed": 3363490674,
+            "rng_label": "turn-4-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 4,
+          "turn_index": 3,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341000.511783,
+          "duration": 0.6566388607025146,
+          "ended_at": 1777341001.1684217,
+          "rng_seed": 3363490674,
+          "rng_label": "turn-4-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 3,
+        "turn_index": 3,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 4,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 4\n\nHealth:\n  You: 80\n\nPotions:\n  You: 2\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 4
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: POTION",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 4
+          },
+          "usage_info": {
+            "tokens": 358,
+            "total_tokens": 799,
+            "prompt_tokens": 353,
+            "completion_tokens": 5,
+            "cost": 5.595e-05,
+            "total_cost": 0.00012524999999999998,
+            "latency_ms": 655.5,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "ff19ac3e",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "ff19ac3e",
+          "duration": 0.6566388607025146
+        }
+      },
+      "timestamp": 1777341001.1697264,
+      "duration": 0.6566388607025146,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 3,
+        "turn_index": 3,
+        "timestamp": 1777341001.1697264,
+        "monotonic_time": 155175.92077839
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 100
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 5
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 6
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 5\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 5\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 5,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 451,
+            "total_tokens": 1260,
+            "prompt_tokens": 447,
+            "completion_tokens": 4,
+            "cost": 4.63e-05,
+            "total_cost": 0.0001299,
+            "latency_ms": 479.1,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "b611c218"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 5,
+            "turn_index": 4,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341001.1705434,
+            "duration": 0.48085904121398926,
+            "ended_at": 1777341001.6514025,
+            "rng_seed": 969784836,
+            "rng_label": "turn-5-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 5,
+          "turn_index": 4,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341001.1705434,
+          "duration": 0.48085904121398926,
+          "ended_at": 1777341001.6514025,
+          "rng_seed": 969784836,
+          "rng_label": "turn-5-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 4,
+        "turn_index": 4,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 5,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 5\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 5\n\nHealth:\n  You: 100\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 5
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 5
+          },
+          "usage_info": {
+            "tokens": 451,
+            "total_tokens": 1260,
+            "prompt_tokens": 447,
+            "completion_tokens": 4,
+            "cost": 4.63e-05,
+            "total_cost": 0.0001299,
+            "latency_ms": 479.1,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "b611c218"
+          },
+          "call_id": "b611c218",
+          "duration": 0.48085904121398926
+        }
+      },
+      "timestamp": 1777341001.6528656,
+      "duration": 0.48085904121398926,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 4,
+        "turn_index": 4,
+        "timestamp": 1777341001.6528656,
+        "monotonic_time": 155176.403918754
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 100,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 6
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 7
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 6\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 6\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 243,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 6,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 450,
+            "total_tokens": 1249,
+            "prompt_tokens": 445,
+            "completion_tokens": 5,
+            "cost": 6.975e-05,
+            "total_cost": 0.00019499999999999997,
+            "latency_ms": 625.9,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "7aca4f46",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 6,
+            "turn_index": 5,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341001.654015,
+            "duration": 0.628162145614624,
+            "ended_at": 1777341002.2821772,
+            "rng_seed": 925187402,
+            "rng_label": "turn-6-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 6,
+          "turn_index": 5,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341001.654015,
+          "duration": 0.628162145614624,
+          "ended_at": 1777341002.2821772,
+          "rng_seed": 925187402,
+          "rng_label": "turn-6-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 5,
+        "turn_index": 5,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 6,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 6\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 6\n\nHealth:\n  You: 80\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 6
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 6
+          },
+          "usage_info": {
+            "tokens": 450,
+            "total_tokens": 1249,
+            "prompt_tokens": 445,
+            "completion_tokens": 5,
+            "cost": 6.975e-05,
+            "total_cost": 0.00019499999999999997,
+            "latency_ms": 625.9,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "7aca4f46",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "7aca4f46",
+          "duration": 0.628162145614624
+        }
+      },
+      "timestamp": 1777341002.283352,
+      "duration": 0.628162145614624,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 5,
+        "turn_index": 5,
+        "timestamp": 1777341002.283352,
+        "monotonic_time": 155177.034404908
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 80
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 7
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 60
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 8
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 243,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 7,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 541,
+            "total_tokens": 1801,
+            "prompt_tokens": 537,
+            "completion_tokens": 4,
+            "cost": 5.53e-05,
+            "total_cost": 0.0001852,
+            "latency_ms": 422.5,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "946c2844"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 7,
+            "turn_index": 6,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341002.2840848,
+            "duration": 0.4236156940460205,
+            "ended_at": 1777341002.7077005,
+            "rng_seed": 3313904321,
+            "rng_label": "turn-7-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 7,
+          "turn_index": 6,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341002.2840848,
+          "duration": 0.4236156940460205,
+          "ended_at": 1777341002.7077005,
+          "rng_seed": 3313904321,
+          "rng_label": "turn-7-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 6,
+        "turn_index": 6,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 7,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 7\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 7
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 7
+          },
+          "usage_info": {
+            "tokens": 541,
+            "total_tokens": 1801,
+            "prompt_tokens": 537,
+            "completion_tokens": 4,
+            "cost": 5.53e-05,
+            "total_cost": 0.0001852,
+            "latency_ms": 422.5,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "946c2844"
+          },
+          "call_id": "946c2844",
+          "duration": 0.4236156940460205
+        }
+      },
+      "timestamp": 1777341002.7081072,
+      "duration": 0.4236156940460205,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 6,
+        "turn_index": 6,
+        "timestamp": 1777341002.7081072,
+        "monotonic_time": 155177.459158177
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "POTION",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 60
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 1
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 8
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 90
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 9
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "POTION"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 8\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 8\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 243,
+          "raw_response": "ACTION: POTION",
+          "turn_number": 8,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 542,
+            "total_tokens": 1791,
+            "prompt_tokens": 537,
+            "completion_tokens": 5,
+            "cost": 8.355000000000001e-05,
+            "total_cost": 0.00027854999999999997,
+            "latency_ms": 2441.7,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "b0a024e7",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 8,
+            "turn_index": 7,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341002.7084005,
+            "duration": 2.4425432682037354,
+            "ended_at": 1777341005.1509438,
+            "rng_seed": 1347574019,
+            "rng_label": "turn-8-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 8,
+          "turn_index": 7,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341002.7084005,
+          "duration": 2.4425432682037354,
+          "ended_at": 1777341005.1509438,
+          "rng_seed": 1347574019,
+          "rng_label": "turn-8-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 7,
+        "turn_index": 7,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 8,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 8\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 8\n\nHealth:\n  You: 60\n\nPotions:\n  You: 1\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 8
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: POTION",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 8
+          },
+          "usage_info": {
+            "tokens": 542,
+            "total_tokens": 1791,
+            "prompt_tokens": 537,
+            "completion_tokens": 5,
+            "cost": 8.355000000000001e-05,
+            "total_cost": 0.00027854999999999997,
+            "latency_ms": 2441.7,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "b0a024e7",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "b0a024e7",
+          "duration": 2.4425432682037354
+        }
+      },
+      "timestamp": 1777341005.1515746,
+      "duration": 2.4425432682037354,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 7,
+        "turn_index": 7,
+        "timestamp": 1777341005.1515746,
+        "monotonic_time": 155179.902626163
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 90
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 9
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 70
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 10
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 9\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 9\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 243,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 9,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 631,
+            "total_tokens": 2432,
+            "prompt_tokens": 627,
+            "completion_tokens": 4,
+            "cost": 6.429999999999999e-05,
+            "total_cost": 0.0002495,
+            "latency_ms": 453.1,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "26652995"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 9,
+            "turn_index": 8,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341005.1520274,
+            "duration": 0.45427799224853516,
+            "ended_at": 1777341005.6063054,
+            "rng_seed": 2336746301,
+            "rng_label": "turn-9-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 9,
+          "turn_index": 8,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341005.1520274,
+          "duration": 0.45427799224853516,
+          "ended_at": 1777341005.6063054,
+          "rng_seed": 2336746301,
+          "rng_label": "turn-9-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 8,
+        "turn_index": 8,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 9,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 9\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 9\n\nHealth:\n  You: 80\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 9
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 9
+          },
+          "usage_info": {
+            "tokens": 631,
+            "total_tokens": 2432,
+            "prompt_tokens": 627,
+            "completion_tokens": 4,
+            "cost": 6.429999999999999e-05,
+            "total_cost": 0.0002495,
+            "latency_ms": 453.1,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "26652995"
+          },
+          "call_id": "26652995",
+          "duration": 0.45427799224853516
+        }
+      },
+      "timestamp": 1777341005.606868,
+      "duration": 0.45427799224853516,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 8,
+        "turn_index": 8,
+        "timestamp": 1777341005.606868,
+        "monotonic_time": 155180.357919151
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 80,
+            "GPT4oMini-S0-AO": 70
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "POTION"
+          },
+          "turn": 10
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 60,
+            "GPT4oMini-S0-AO": 70
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 11
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 10,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 10
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 634,
+            "total_tokens": 2425,
+            "prompt_tokens": 629,
+            "completion_tokens": 5,
+            "cost": 9.735000000000001e-05,
+            "total_cost": 0.0003759,
+            "latency_ms": 976.2,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "022fe99b",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 10,
+            "turn_index": 9,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341005.6072824,
+            "duration": 0.9772465229034424,
+            "ended_at": 1777341006.584529,
+            "rng_seed": 34708376,
+            "rng_label": "turn-10-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 10,
+          "turn_index": 9,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341005.6072824,
+          "duration": 0.9772465229034424,
+          "ended_at": 1777341006.584529,
+          "rng_seed": 34708376,
+          "rng_label": "turn-10-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 9,
+        "turn_index": 9,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 10,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 10\n\nHealth:\n  You: 70\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: POTION\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 10
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 10
+          },
+          "usage_info": {
+            "tokens": 634,
+            "total_tokens": 2425,
+            "prompt_tokens": 629,
+            "completion_tokens": 5,
+            "cost": 9.735000000000001e-05,
+            "total_cost": 0.0003759,
+            "latency_ms": 976.2,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "022fe99b",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "022fe99b",
+          "duration": 0.9772465229034424
+        }
+      },
+      "timestamp": 1777341006.5854664,
+      "duration": 0.9772465229034424,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 9,
+        "turn_index": 9,
+        "timestamp": 1777341006.5854664,
+        "monotonic_time": 155181.336518424
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 60,
+            "GPT4oMini-S0-AO": 70
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 11
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 60,
+            "GPT4oMini-S0-AO": 50
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 12
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 11\n\nHealth:\n  You: 60\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 11\n\nHealth:\n  You: 60\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 11
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 11,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 11
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 722,
+            "total_tokens": 3154,
+            "prompt_tokens": 718,
+            "completion_tokens": 4,
+            "cost": 7.34e-05,
+            "total_cost": 0.0003229,
+            "latency_ms": 388.5,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "f0056b9f"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 11,
+            "turn_index": 10,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341006.5861402,
+            "duration": 0.3899223804473877,
+            "ended_at": 1777341006.9760625,
+            "rng_seed": 2228320961,
+            "rng_label": "turn-11-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 11,
+          "turn_index": 10,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341006.5861402,
+          "duration": 0.3899223804473877,
+          "ended_at": 1777341006.9760625,
+          "rng_seed": 2228320961,
+          "rng_label": "turn-11-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 10,
+        "turn_index": 10,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 11,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 11\n\nHealth:\n  You: 60\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 11\n\nHealth:\n  You: 60\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 11
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 11
+          },
+          "usage_info": {
+            "tokens": 722,
+            "total_tokens": 3154,
+            "prompt_tokens": 718,
+            "completion_tokens": 4,
+            "cost": 7.34e-05,
+            "total_cost": 0.0003229,
+            "latency_ms": 388.5,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "f0056b9f"
+          },
+          "call_id": "f0056b9f",
+          "duration": 0.3899223804473877
+        }
+      },
+      "timestamp": 1777341006.976607,
+      "duration": 0.3899223804473877,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 10,
+        "turn_index": 10,
+        "timestamp": 1777341006.976607,
+        "monotonic_time": 155181.727657914
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 60,
+            "GPT4oMini-S0-AO": 50
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 12
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 40,
+            "GPT4oMini-S0-AO": 50
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 13
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 12
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 12,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 12
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 726,
+            "total_tokens": 3151,
+            "prompt_tokens": 721,
+            "completion_tokens": 5,
+            "cost": 0.00011114999999999999,
+            "total_cost": 0.00048704999999999994,
+            "latency_ms": 1014.6,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "63a83dbf",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 12,
+            "turn_index": 11,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341006.97691,
+            "duration": 1.0164413452148438,
+            "ended_at": 1777341007.9933515,
+            "rng_seed": 4142651857,
+            "rng_label": "turn-12-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 12,
+          "turn_index": 11,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341006.97691,
+          "duration": 1.0164413452148438,
+          "ended_at": 1777341007.9933515,
+          "rng_seed": 4142651857,
+          "rng_label": "turn-12-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 11,
+        "turn_index": 11,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 12,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 12\n\nHealth:\n  You: 50\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 12
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 12
+          },
+          "usage_info": {
+            "tokens": 726,
+            "total_tokens": 3151,
+            "prompt_tokens": 721,
+            "completion_tokens": 5,
+            "cost": 0.00011114999999999999,
+            "total_cost": 0.00048704999999999994,
+            "latency_ms": 1014.6,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "63a83dbf",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "63a83dbf",
+          "duration": 1.0164413452148438
+        }
+      },
+      "timestamp": 1777341007.994911,
+      "duration": 1.0164413452148438,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 11,
+        "turn_index": 11,
+        "timestamp": 1777341007.994911,
+        "monotonic_time": 155182.745963587
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 40,
+            "GPT4oMini-S0-AO": 50
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 13
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 40,
+            "GPT4oMini-S0-AO": 30
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 14
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 13\n\nHealth:\n  You: 40\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 13\n\nHealth:\n  You: 40\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 13
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 13,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 13
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 813,
+            "total_tokens": 3967,
+            "prompt_tokens": 809,
+            "completion_tokens": 4,
+            "cost": 8.250000000000001e-05,
+            "total_cost": 0.0004054,
+            "latency_ms": 474.9,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "78a71637"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 13,
+            "turn_index": 12,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341007.995952,
+            "duration": 0.47763705253601074,
+            "ended_at": 1777341008.473589,
+            "rng_seed": 3826428335,
+            "rng_label": "turn-13-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 13,
+          "turn_index": 12,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341007.995952,
+          "duration": 0.47763705253601074,
+          "ended_at": 1777341008.473589,
+          "rng_seed": 3826428335,
+          "rng_label": "turn-13-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 12,
+        "turn_index": 12,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 13,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 13\n\nHealth:\n  You: 40\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 13\n\nHealth:\n  You: 40\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 13
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 13
+          },
+          "usage_info": {
+            "tokens": 813,
+            "total_tokens": 3967,
+            "prompt_tokens": 809,
+            "completion_tokens": 4,
+            "cost": 8.250000000000001e-05,
+            "total_cost": 0.0004054,
+            "latency_ms": 474.9,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "78a71637"
+          },
+          "call_id": "78a71637",
+          "duration": 0.47763705253601074
+        }
+      },
+      "timestamp": 1777341008.475985,
+      "duration": 0.47763705253601074,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 12,
+        "turn_index": 12,
+        "timestamp": 1777341008.475985,
+        "monotonic_time": 155183.227039774
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 40,
+            "GPT4oMini-S0-AO": 30
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 14
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 20,
+            "GPT4oMini-S0-AO": 30
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 15
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 14
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 14,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 14
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 818,
+            "total_tokens": 3969,
+            "prompt_tokens": 813,
+            "completion_tokens": 5,
+            "cost": 0.00012495,
+            "total_cost": 0.0006119999999999999,
+            "latency_ms": 780.0,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "130584e5",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 14,
+            "turn_index": 13,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341008.4775977,
+            "duration": 0.7824826240539551,
+            "ended_at": 1777341009.2600803,
+            "rng_seed": 1423020428,
+            "rng_label": "turn-14-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 14,
+          "turn_index": 13,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341008.4775977,
+          "duration": 0.7824826240539551,
+          "ended_at": 1777341009.2600803,
+          "rng_seed": 1423020428,
+          "rng_label": "turn-14-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 13,
+        "turn_index": 13,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 14,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 14\n\nHealth:\n  You: 30\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 14
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 14
+          },
+          "usage_info": {
+            "tokens": 818,
+            "total_tokens": 3969,
+            "prompt_tokens": 813,
+            "completion_tokens": 5,
+            "cost": 0.00012495,
+            "total_cost": 0.0006119999999999999,
+            "latency_ms": 780.0,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "130584e5",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "130584e5",
+          "duration": 0.7824826240539551
+        }
+      },
+      "timestamp": 1777341009.2620296,
+      "duration": 0.7824826240539551,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 13,
+        "turn_index": 13,
+        "timestamp": 1777341009.2620296,
+        "monotonic_time": 155184.013083253
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "FlashLite-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 20,
+            "GPT4oMini-S0-AO": 30
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 15
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 20,
+            "GPT4oMini-S0-AO": 10
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 16
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 15\n\nHealth:\n  You: 20\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 15\n\nHealth:\n  You: 20\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 15
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 15,
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 15
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 904,
+            "total_tokens": 4871,
+            "prompt_tokens": 900,
+            "completion_tokens": 4,
+            "cost": 9.16e-05,
+            "total_cost": 0.000497,
+            "latency_ms": 444.8,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "4542f3f8"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 15,
+            "turn_index": 14,
+            "player": "FlashLite-S0-AO",
+            "started_at": 1777341009.263253,
+            "duration": 0.447115421295166,
+            "ended_at": 1777341009.7103684,
+            "rng_seed": 1491647991,
+            "rng_label": "turn-15-FlashLite-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 15,
+          "turn_index": 14,
+          "player": "FlashLite-S0-AO",
+          "started_at": 1777341009.263253,
+          "duration": 0.447115421295166,
+          "ended_at": 1777341009.7103684,
+          "rng_seed": 1491647991,
+          "rng_label": "turn-15-FlashLite-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 14,
+        "turn_index": 14,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 15,
+          "prompt_text": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 15\n\nHealth:\n  You: 20\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: FlashLite-S0-AO\nTurn: 15\n\nHealth:\n  You: 20\n\nPotions:\n  You: 3\n\nLast Action:\n  You: ATTACK\n  GPT4oMini-S0-AO: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "FlashLite-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 15
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "FlashLite-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 15
+          },
+          "usage_info": {
+            "tokens": 904,
+            "total_tokens": 4871,
+            "prompt_tokens": 900,
+            "completion_tokens": 4,
+            "cost": 9.16e-05,
+            "total_cost": 0.000497,
+            "latency_ms": 444.8,
+            "model": "gemini-2.5-flash-lite",
+            "provider": "google",
+            "call_id": "4542f3f8"
+          },
+          "call_id": "4542f3f8",
+          "duration": 0.447115421295166
+        }
+      },
+      "timestamp": 1777341009.7110443,
+      "duration": 0.447115421295166,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 14,
+        "turn_index": 14,
+        "timestamp": 1777341009.7110443,
+        "monotonic_time": 155184.462095941
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "player": "GPT4oMini-S0-AO",
+        "action": "ATTACK",
+        "reasoning": null,
+        "state_before": {
+          "health": {
+            "FlashLite-S0-AO": 20,
+            "GPT4oMini-S0-AO": 10
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 16
+        },
+        "state_after": {
+          "health": {
+            "FlashLite-S0-AO": 0,
+            "GPT4oMini-S0-AO": 10
+          },
+          "potions": {
+            "FlashLite-S0-AO": 3,
+            "GPT4oMini-S0-AO": 0
+          },
+          "last_action": {
+            "FlashLite-S0-AO": "ATTACK",
+            "GPT4oMini-S0-AO": "ATTACK"
+          },
+          "turn": 17
+        },
+        "metadata": {
+          "validated": true,
+          "allowed_actions": [
+            "POTION",
+            "ATTACK"
+          ],
+          "candidates": [
+            "ATTACK"
+          ],
+          "allowed_candidates": [],
+          "resolution_strategy": "primary",
+          "parser_success": true,
+          "raw_prompt": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 16
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "prompt_length": 244,
+          "raw_response": "ACTION: ATTACK",
+          "turn_number": 16,
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 16
+          },
+          "template_id": "turn",
+          "usage_info": {
+            "tokens": 910,
+            "total_tokens": 4879,
+            "prompt_tokens": 905,
+            "completion_tokens": 5,
+            "cost": 0.00013874999999999998,
+            "total_cost": 0.0007507499999999999,
+            "latency_ms": 792.2,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "5742de0c",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "turn_context": {
+            "match_id": "match_0316b96b",
+            "turn_number": 16,
+            "turn_index": 15,
+            "player": "GPT4oMini-S0-AO",
+            "started_at": 1777341009.7114801,
+            "duration": 0.7936389446258545,
+            "ended_at": 1777341010.505119,
+            "rng_seed": 235425898,
+            "rng_label": "turn-16-GPT4oMini-S0-AO"
+          }
+        },
+        "turn_context": {
+          "match_id": "match_0316b96b",
+          "turn_number": 16,
+          "turn_index": 15,
+          "player": "GPT4oMini-S0-AO",
+          "started_at": 1777341009.7114801,
+          "duration": 0.7936389446258545,
+          "ended_at": 1777341010.505119,
+          "rng_seed": 235425898,
+          "rng_label": "turn-16-GPT4oMini-S0-AO"
+        },
+        "mechanic": "turn_based",
+        "phase_index": 15,
+        "turn_index": 15,
+        "prompt": {
+          "phase": "turn",
+          "turn_number": 16,
+          "prompt_text": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================\n\nRespond with: ACTION: <action>\nAllowed actions: ATTACK, POTION\n",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: GPT4oMini-S0-AO\nTurn: 16\n\nHealth:\n  You: 10\n\nPotions:\n  You: 0\n\nLast Action:\n  FlashLite-S0-AO: ATTACK\n  You: ATTACK\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "GPT4oMini-S0-AO",
+                "sections": [
+                  "turn",
+                  "health",
+                  "potions",
+                  "last_action"
+                ],
+                "turn_number": 16
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Respond with: ACTION: <action>\nAllowed actions: ATTACK, POTION",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: ATTACK",
+          "renderer_output": {
+            "format": "text",
+            "player": "GPT4oMini-S0-AO",
+            "sections": [
+              "turn",
+              "health",
+              "potions",
+              "last_action"
+            ],
+            "turn_number": 16
+          },
+          "usage_info": {
+            "tokens": 910,
+            "total_tokens": 4879,
+            "prompt_tokens": 905,
+            "completion_tokens": 5,
+            "cost": 0.00013874999999999998,
+            "total_cost": 0.0007507499999999999,
+            "latency_ms": 792.2,
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "call_id": "5742de0c",
+            "provider_model": "gpt-4o-mini-2024-07-18"
+          },
+          "call_id": "5742de0c",
+          "duration": 0.7936389446258545
+        }
+      },
+      "timestamp": 1777341010.5060713,
+      "duration": 0.7936389446258545,
+      "context": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "phase_index": 15,
+        "turn_index": 15,
+        "timestamp": 1777341010.5060713,
+        "monotonic_time": 155185.25712312
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2026-04-28T01:49:56.324007+00:00",
+    "session_id": "session_20260427_224646_81f317",
+    "batch_id": "batch_f26cb7f7",
+    "context": {
+      "session_id": "session_20260427_224646_81f317",
+      "batch_id": "batch_f26cb7f7",
+      "match_index": 44,
+      "total_matches_in_batch": 48,
+      "end": {
+        "session_id": "session_20260427_224646_81f317",
+        "match_id": "match_0316b96b",
+        "batch_id": "batch_f26cb7f7",
+        "timestamp": 1777341010.5118132,
+        "monotonic_time": 155185.262865919
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.1.1",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "07d247a23d04020c17137a2105f0f889778083bf",
+        "branch": "study/agentic-edge-strategy-stack",
+        "dirty": true
+      }
+    },
+    "player_configs": {
+      "FlashLite-S0-AO": {
+        "type": "GeminiPlayer",
+        "module": "agentdeck.players.google_player",
+        "model": "gemini-2.5-flash-lite",
+        "temperature": 0.2,
+        "max_tokens": null
+      },
+      "GPT4oMini-S0-AO": {
+        "type": "GPTPlayer",
+        "module": "agentdeck.players.openai_player",
+        "model": "gpt-4o-mini",
+        "temperature": 0.2,
+        "max_tokens": null,
+        "api_key_prefix": "***7lgJ"
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "FlashLite-S0-AO",
+        "type": "GeminiPlayer",
+        "model": "gemini-2.5-flash-lite",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "temperature": 0.2,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.000497
+      },
+      {
+        "name": "GPT4oMini-S0-AO",
+        "type": "GPTPlayer",
+        "model": "gpt-4o-mini",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "temperature": 0.2,
+        "max_tokens": null,
+        "max_retries": 3,
+        "retry_delay": 1.0,
+        "total_cost": 0.0007507499999999999
+      }
+    ],
+    "game_config": {
+      "name": "FixedDamageGame",
+      "module": "agentdeck.games.examples.fixed_damage.game"
+    },
+    "match": {
+      "seed": 2026045723,
+      "player_order": [
+        0,
+        1
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "FlashLite-S0-AO",
+        "index": 0,
+        "ordered_index": 0
+      },
+      "fairness_policy": {
+        "pairing_policy": "paired_side_swap",
+        "first_player_policy": "random",
+        "effective_player_order": [
+          0,
+          1
+        ],
+        "effective_first_player": {
+          "name": "FlashLite-S0-AO",
+          "index": 0,
+          "ordered_index": 0
+        }
+      },
+      "game": "FixedDamageGame",
+      "players": [
+        "FlashLite-S0-AO",
+        "GPT4oMini-S0-AO"
+      ],
+      "player_names": [
+        "FlashLite-S0-AO",
+        "GPT4oMini-S0-AO"
+      ],
+      "duration": 14.18236756324768,
+      "duration_seconds": 14.18236756324768,
+      "started_at": "2026-04-28T01:49:56.324007+00:00",
+      "ended_at": "2026-04-28T01:50:10.506375+00:00",
+      "handshake_completed": true,
+      "batch_id": "batch_f26cb7f7",
+      "truncated_by_max_turns": false,
+      "turns": 16,
+      "player_costs": {
+        "FlashLite-S0-AO": 0.000497,
+        "GPT4oMini-S0-AO": 0.0007507499999999999
+      },
+      "cost": 0.00124775,
+      "schema_version": "1.3"
+    },
+    "session": {
+      "session_id": "session_20260427_224646_81f317",
+      "started_at": 1777340806.1083913,
+      "seed": 2026045701
+    },
+    "ended_at": "2026-04-28T01:50:10.506375+00:00",
+    "duration_seconds": 14.18236756324768,
+    "players": [
+      "FlashLite-S0-AO",
+      "GPT4oMini-S0-AO"
+    ],
+    "game": "FixedDamageGame",
+    "match_id": "match_0316b96b",
+    "winner": "GPT4oMini-S0-AO",
+    "seed": 2026045723
+  },
+  "batch_id": "batch_f26cb7f7",
+  "started_at": "2026-04-28T01:49:56.324007+00:00",
+  "ended_at": "2026-04-28T01:50:10.506375+00:00",
+  "duration_seconds": 14.18236756324768,
+  "api_usage_summary": {
+    "total_calls": 18,
+    "total_tokens": 9750,
+    "total_prompt_tokens": 9675,
+    "total_completion_tokens": 75,
+    "total_cost": 0.00125,
+    "average_latency_ms": 784.8,
+    "total_latency_ms": 14125.6,
+    "models_used": {
+      "gemini-2.5-flash-lite": 9,
+      "gpt-4o-mini": 9
+    }
+  }
+}

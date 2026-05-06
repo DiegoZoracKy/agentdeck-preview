@@ -1,7 +1,117 @@
 {
   "version": 1,
-  "updated_at": "2026-05-02T00:00:00.000Z",
+  "updated_at": "2026-05-04T12:51:08.236Z",
   "matches": [
+    {
+      "label": "Study 1: Baseline Failure - FlashLite Never Heals",
+      "path": "matches/study-fd-01-s0-failure-flashlite-ao-vs-gpt4omini.json",
+      "subtitle": "Attacks until death with all 3 potions unused",
+      "synopsis": "This is the unscaffolded baseline. FlashLite-S0-AO attacks every turn, reaches HP=20 with all three potions still unused, and attacks again instead of healing. GPT4oMini-S0-AO wins because it uses its recovery resources. The replay shows the behavior the study was designed to repair: the weaker model has the tools to survive, but does not use them.",
+      "highlights": [
+        {
+          "turn": 15,
+          "label": "HP=20, 3 potions unused",
+          "kind": "mistake"
+        },
+        {
+          "turn": 16,
+          "label": "Dies while still holding every potion",
+          "kind": "mistake"
+        }
+      ]
+    },
+    {
+      "label": "Study 2: Reasoning Pivot - FlashLite Survives",
+      "path": "matches/study-fd-02-s1-pivot-flashlite-rc-vs-gpt4omini.json",
+      "subtitle": "The same HP=20 moment becomes a heal",
+      "synopsis": "This replay isolates the S1 step. FlashLite-S1-RC has a reasoning-and-action format, but no explicit HP survival rule. At the same HP=20 danger point where S0 attacked and died, S1 uses POTION, survives two more low-HP checks, and wins. The lesson is narrow and concrete: asking for structured reasoning changed the decision at the critical moment.",
+      "highlights": [
+        {
+          "turn": 15,
+          "label": "HP=20 - uses POTION",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 19,
+          "label": "HP=10 - second potion keeps it alive",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 21,
+          "label": "HP=20 - final potion before closing",
+          "kind": "smart_move"
+        }
+      ]
+    },
+    {
+      "label": "Study 3: Grounded Stack - The Policy Runs",
+      "path": "matches/study-fd-03-s3-policy-flashlite-hp-vs-gpt4omini.json",
+      "subtitle": "HP grounding makes the critical heal explicit",
+      "synopsis": "S3 adds game-specific grounding to the reasoning format. The prompt tells the agent to check whether one more 20-damage attack would leave it alive. In this replay, FlashLite-S3-HP repeatedly reasons through HP and resources, then reaches the decisive HP=20 moment and explicitly heals because 20 minus 20 would not survive. This is the strategy stack becoming an operational procedure.",
+      "highlights": [
+        {
+          "turn": 6,
+          "label": "HP=60 - early resource decision",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 12,
+          "label": "HP=50 - keeps recovery buffer",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 20,
+          "label": "HP=20 - survival rule fires exactly",
+          "kind": "turning_point"
+        }
+      ]
+    },
+    {
+      "label": "Study 4: Risk Grounding - Handling Uncertainty",
+      "path": "matches/study-vd-01-risk-policy-flashlite-risk-vs-flashlite-ao.json",
+      "subtitle": "Risk bands replace fixed HP thresholds",
+      "synopsis": "VariableDamage is harder because incoming damage is uncertain. S3-RISK replaces the FixedDamage HP rule with risk bands. In this replay, FlashLite-S3-RISK manages that uncertainty by healing before the endgame becomes lethal, while FlashLite-S0-AO reacts too late and runs out of resources. This is the transfer story: the stack structure carries over, but the grounding has to match the game.",
+      "highlights": [
+        {
+          "turn": 5,
+          "label": "HP=54 - proactive risk response",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 9,
+          "label": "HP=39 - danger-band heal",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 19,
+          "label": "HP=16 - lethal-zone heal",
+          "kind": "turning_point"
+        }
+      ]
+    },
+    {
+      "label": "Study 5: Caveat - Good Policy Still Loses",
+      "path": "matches/study-vd-02-caveat-flashlite-risk-vs-gpt4omini.json",
+      "subtitle": "Correct risk behavior loses by 2 HP from second seat",
+      "synopsis": "This is the cautionary replay. FlashLite-S3-RISK follows its risk-band policy and still loses to GPT4oMini-S0-AO by 2 HP. GPT4oMini went first and gained just enough tempo to survive. The match explains why the VariableDamage cross-tier headline needs a caveat: good scaffolding improved behavior, but seat effects and stochastic damage still shaped the outcome.",
+      "highlights": [
+        {
+          "turn": 10,
+          "label": "HP=46 - risk policy engages",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 16,
+          "label": "HP=31 - second risk-band heal",
+          "kind": "smart_move"
+        },
+        {
+          "turn": 25,
+          "label": "Loses by 2 HP from second seat",
+          "kind": "surprise"
+        }
+      ]
+    },
     {
       "label": "FixedDamage 1: FlashLite-AO collapse vs Flash-AO",
       "path": "matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json",

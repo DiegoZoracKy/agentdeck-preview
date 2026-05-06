@@ -5,6 +5,7 @@
  *
  * Goals:
  * - Ensure shipped local sample records parse with RecordLoader.
+ * - Ensure curated study replay records parse with RecordLoader.
  * - Ensure bundled combat games resolve to registered renderers.
  * - Ensure Timeline can step through all frames and emits onEnd.
  *
@@ -21,12 +22,15 @@ function assert(condition, message) {
 }
 
 const repoRoot = path.join(__dirname, '..');
+const viewerRoot = process.env.VIEWER_ROOT
+  ? path.resolve(process.env.VIEWER_ROOT)
+  : path.join(repoRoot, 'viewer');
 
-const RecordLoader = require(path.join(repoRoot, 'viewer/js/record-loader.js'));
-const Timeline = require(path.join(repoRoot, 'viewer/js/timeline.js'));
-const RendererRegistry = require(path.join(repoRoot, 'viewer/js/renderers/index.js'));
-const CombatDebugRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/debug/renderer.js'));
-const CombatRetroJrpgSceneRenderer = require(path.join(repoRoot, 'src/agentdeck/games/examples/fixed_damage/viewers/retro_jrpg_scene/renderer.js'));
+const RecordLoader = require(path.join(viewerRoot, 'js/record-loader.js'));
+const Timeline = require(path.join(viewerRoot, 'js/timeline.js'));
+const RendererRegistry = require(path.join(viewerRoot, 'js/renderers/index.js'));
+const CombatDebugRenderer = require(path.join(viewerRoot, 'renderers/fixed_damage/debug/renderer.js'));
+const CombatRetroJrpgSceneRenderer = require(path.join(viewerRoot, 'renderers/fixed_damage/retro_jrpg_scene/renderer.js'));
 
 RendererRegistry.register('FixedDamageGame', 'debug', CombatDebugRenderer);
 RendererRegistry.register('FixedDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
@@ -34,7 +38,7 @@ RendererRegistry.register('VariableDamageGame', 'debug', CombatDebugRenderer);
 RendererRegistry.register('VariableDamageGame', 'retro_jrpg_scene', CombatRetroJrpgSceneRenderer);
 RendererRegistry.register('ArchivistChoiceGame', 'debug', CombatDebugRenderer);
 
-const manifestPath = path.join(repoRoot, 'viewer/matches/manifest.json');
+const manifestPath = path.join(viewerRoot, 'matches/manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 assert(Array.isArray(manifest.matches) && manifest.matches.length > 0, 'Expected viewer/matches/manifest.json to contain entries');
 const validHighlightKinds = new Set(['mistake', 'smart_move', 'surprise', 'turning_point']);
@@ -44,7 +48,7 @@ function runSampleSmoke(entry, expectedGame) {
   assert(typeof entry.synopsis === 'string' && entry.synopsis.trim(), `Expected synopsis for ${entry.path}`);
   assert(Array.isArray(entry.highlights) && entry.highlights.length > 0, `Expected highlights for ${entry.path}`);
 
-  const samplePath = path.join(repoRoot, 'viewer', entry.path);
+  const samplePath = path.join(viewerRoot, entry.path);
   const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
   const matchData = RecordLoader.load(raw);
 
@@ -98,7 +102,7 @@ function runDebugOnlySampleSmoke(entry, expectedGame) {
   assert(typeof entry.synopsis === 'string' && entry.synopsis.trim(), `Expected synopsis for ${entry.path}`);
   assert(Array.isArray(entry.highlights) && entry.highlights.length > 0, `Expected highlights for ${entry.path}`);
 
-  const samplePath = path.join(repoRoot, 'viewer', entry.path);
+  const samplePath = path.join(viewerRoot, entry.path);
   const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
   const matchData = RecordLoader.load(raw);
 
@@ -137,15 +141,23 @@ function runDebugOnlySampleSmoke(entry, expectedGame) {
 const fixedSample = manifest.matches.find((entry) => entry.path === 'matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json');
 const variableSample = manifest.matches.find((entry) => entry.path === 'matches/variable-damage-01-flashlite-rc-risk-vs-gpt5mini.json');
 const archivistSample = manifest.matches.find((entry) => entry.path === 'matches/archivist-choice-01-conservator-vs-cataloger.json');
+const studySamples = manifest.matches.filter((entry) => entry.path.startsWith('matches/study-'));
 
-assert(fixedSample, 'Expected bundled FixedDamage sample in manifest');
-assert(variableSample, 'Expected bundled VariableDamage sample in manifest');
-assert(archivistSample, 'Expected bundled ArchivistChoice sample in manifest');
+if (!process.env.VIEWER_ROOT) {
+  assert(fixedSample, 'Expected bundled FixedDamage sample in manifest');
+  assert(variableSample, 'Expected bundled VariableDamage sample in manifest');
+  assert(archivistSample, 'Expected bundled ArchivistChoice sample in manifest');
+}
+assert(studySamples.length === 5, `Expected exactly 5 curated study samples, got ${studySamples.length}`);
 
 const results = [
-  runSampleSmoke(fixedSample, 'FixedDamageGame'),
-  runSampleSmoke(variableSample, 'VariableDamageGame'),
-  runDebugOnlySampleSmoke(archivistSample, 'ArchivistChoiceGame'),
+  ...(fixedSample ? [runSampleSmoke(fixedSample, 'FixedDamageGame')] : []),
+  ...(variableSample ? [runSampleSmoke(variableSample, 'VariableDamageGame')] : []),
+  ...(archivistSample ? [runDebugOnlySampleSmoke(archivistSample, 'ArchivistChoiceGame')] : []),
+  ...studySamples.map((entry) => {
+    const expectedGame = entry.path.includes('study-vd-') ? 'VariableDamageGame' : 'FixedDamageGame';
+    return runSampleSmoke(entry, expectedGame);
+  }),
 ];
 
-console.log('viewer smoke-check OK', results);
+console.log('viewer smoke-check OK', { viewerRoot, results });

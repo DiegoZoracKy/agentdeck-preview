@@ -50,19 +50,22 @@ If a canonical `*.meta.json` sidecar already exists, the example writes
 
 ### Curated Research Matches
 
-The bundled local library now mixes rebuilt `FixedDamage` and `VariableDamage`
-research replays:
+The repository viewer includes general demo matches plus five curated replays
+from the Agentic Edge strategy-stack study:
 
-1. plain `FlashLite-AO` collapse against `Flash-AO`
-2. `ReasoningController` partially repairing that collapse
-3. the final `FlashLite-RC-TR-HP-exit` stack winning as second player
-4. `gpt-4o-mini RC` backfiring against `gpt-5-mini`
-5. Haiku's seat-conditioned pathology against `Flash-AO`
-6. a premium plain-baseline reference match: `Flash-AO` vs `GPT5Mini-AO`
-7. the VariableDamage premium ceiling check: `FlashLite-RC-RISK` vs `GPT5Mini-AO`
-8. the compressed VariableDamage top tier: `GPT5Mini-AO` vs `Flash-AO`
+1. `Study 1` - S0 baseline failure: FlashLite attacks until death with all
+   three potions unused.
+2. `Study 2` - S1 reasoning pivot: the same HP=20 threshold moment becomes a
+   heal without adding an explicit HP rule.
+3. `Study 3` - S3 grounded policy: HP grounding makes the critical heal
+   explicit.
+4. `Study 4` - VariableDamage risk policy: risk-band grounding handles
+   stochastic damage.
+5. `Study 5` - VariableDamage caveat: correct-looking policy still loses from
+   second seat.
 
-These matches are meant to show behavioral contrast, not just winners.
+These matches are meant to show behavioral contrast, not just winners. The
+hosted study bundle intentionally includes only those five `Study *` examples.
 
 ### Option 2: With a local server (recommended)
 
@@ -73,8 +76,21 @@ python -m http.server 8080
 # Then open http://localhost:8080/viewer/
 ```
 
-Serve the repository root, not the `viewer/` directory by itself. The bundled
-skins load shared assets from `src/agentdeck/games/examples/...`.
+The viewer is self-contained. You can serve either the repository root and open
+`/viewer/`, or serve the `viewer/` directory directly and open `/`.
+
+The study replay bundle can also be deployed as static hosting without the rest
+of the repository. The first hosted study demo is the private Hugging Face Space:
+
+```text
+https://huggingface.co/spaces/agentdeck/agentic-edge-viewer
+```
+
+To smoke-check a stripped static bundle, point the viewer smoke test at its root:
+
+```bash
+VIEWER_ROOT=/tmp/agentic-edge-viewer-space node scripts/viewer_smoke_check.js
+```
 
 ### Option 3: Load from URL
 
@@ -137,21 +153,11 @@ viewer/
 │   ├── record-loader.js       # Schema validation & parsing
 │   ├── timeline.js            # Core playback engine
 │   └── renderers/index.js     # Renderer registry (game + skin)
+├── renderers/
+│   └── fixed_damage/          # Portable bundled debug + retro combat renderers
 ├── css/
 │   └── base.css               # Layout + shell styles
 └── README.md                  # This file
-
-src/agentdeck/games/examples/fixed_damage/
-├── game.py                    # Game logic
-└── viewers/                   # Bundled combat viewers reused by both games
-    ├── retro_jrpg_scene/
-    │   ├── renderer.js
-    │   ├── styles.css
-    │   └── assets/
-    │       └── bg-placeholder.svg
-    └── debug/
-        ├── renderer.js
-        └── styles.css
 ```
 
 ## Architecture
