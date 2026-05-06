@@ -1,9 +1,9 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
 > **Status**: Final
-> **Version**: 0.5.0
-> **Last Updated**: 2026-04-01
-> **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check) / 🚧 Planned (curation sidecars + metadata UI)
+> **Version**: 0.6.0
+> **Last Updated**: 2026-05-05
+> **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check, curation metadata UI, portable static bundle)
 > **Audience**: Viewer developers, skin authors, integration engineers
 
 ## 1. Purpose
@@ -53,6 +53,14 @@
   - timeline highlight markers
   - active-frame highlight annotation inside the replay surface, separate from the global controls
 - Keep optional long-form `transcript` out of the runtime manifest payload
+
+### 3.6 Portable Static Bundle
+- Allow `viewer/` to be served as a self-contained static site, independent of
+  the repository root.
+- Allow a hosted bundle to include a curated subset of `viewer/matches/` while
+  preserving the same loader, timeline, renderer, and metadata contracts.
+- Keep runtime renderer CSS, JS, and assets under the viewer root so static
+  hosts can serve the bundle without access to `src/`.
 
 ## 4. Data Structures
 
@@ -308,6 +316,20 @@ updateManifestFromSidecars(matchesDir: string): ManifestPayload
 17. **MU5**: When playback reaches a highlighted turn, the viewer MUST surface the matching `label` as the active key-moment annotation inside the replay surface, not only in the global controls area.
 18. **MU6**: Highlight markers MUST map by 1-based turn number, not by raw frame index, so curated metadata remains readable and stable across renderer implementations.
 19. **MU7**: When a highlight `kind` is present, the viewer SHOULD render a compact expressive indicator (emoji or equivalent icon) consistently for that kind while keeping the timeline markers visually neutral.
+20. **MU8**: Selecting a different manifest entry in the match picker SHOULD load that match immediately. An explicit reload control MAY remain available for manual recovery or reloading the current selection.
+
+### 6.5 Static Hosting (SH)
+21. **SH1**: The viewer MUST work when serving either the repository root at
+    `/viewer/` or the `viewer/` directory itself at `/`.
+22. **SH2**: Bundled renderer runtime dependencies MUST NOT reference paths
+    outside the viewer root.
+23. **SH3**: A hosted bundle MAY include only curated match records, but every
+    manifest entry it includes MUST load and validate with `RecordLoader`.
+24. **SH4**: Renderer-owned visual assets SHOULD be resolved from the app
+    origin, not from host-rewritten stylesheet-relative URLs when that would
+    break private/static deployments.
+25. **SH5**: Victory/conclusion overlays MUST render above background, actor,
+    status, and highlight scene layers.
 
 ## 7. Error Handling
 
@@ -402,6 +424,7 @@ document.addEventListener('keydown', (e) => {
 | Renderer registry | RR1 | Register renderer, create instance, assert error on unknown game |
 | Manifest promotion | MP1-MP4, MU1 | Merge sidecars, preserve fallback entries, exclude transcript |
 | Metadata UI | MU2-MU7 | Subtitle preview, synopsis panel, timeline markers, in-view active highlight annotation |
+| Static hosting | SH1-SH5 | Serve repo root and viewer root, smoke-check curated bundle, visually verify hosted overlay/assets |
 | Error handling | All error cases | Invalid inputs produce expected errors |
 
 ## 10. Design Rationale
@@ -417,7 +440,7 @@ document.addEventListener('keydown', (e) => {
 - **Multi-game support**: Abstract game-specific state handling
 - **Narration integration**: Connect to Spectator-derived narration streams
 - **Export**: Single-file HTML bundle, animated GIF
-- **Hosted viewer**: Load records from URLs
+- **Hosted URL loading**: Load records from arbitrary remote URLs
 
 ## 12. References
 

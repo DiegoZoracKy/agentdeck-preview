@@ -321,9 +321,9 @@ function getEntryForPath(path) {
 function renderSelectedMatchPreview(path) {
   if (!matchPreview || !matchPreviewTitle || !matchPreviewSubtitle) return
 
-  // Only surface the picker preview when no match is loaded yet.
-  // While a match is loaded, dropdown changes queue the next load but do not
-  // displace the synopsis (which reflects the currently loaded match).
+  // Only surface the picker preview before the first match loads. After that,
+  // match selection loads immediately and the synopsis belongs to the loaded
+  // match.
   if (matchData) {
     matchPreview.style.display = 'none'
     return
@@ -719,11 +719,13 @@ if (mobileSkinSelect) {
 if (matchSelect && mobileMatchSelect) {
   matchSelect.addEventListener('change', () => {
     mobileMatchSelect.value = matchSelect.value
-    renderSelectedMatchPreview(matchSelect.value)
+    if (matchSelect.value && matchSelect.value !== currentMatchSource) loadFromUrl(matchSelect.value)
+    else renderSelectedMatchPreview(matchSelect.value)
   })
   mobileMatchSelect.addEventListener('change', () => {
     matchSelect.value = mobileMatchSelect.value
-    renderSelectedMatchPreview(mobileMatchSelect.value)
+    if (mobileMatchSelect.value && mobileMatchSelect.value !== currentMatchSource) loadFromUrl(mobileMatchSelect.value)
+    else renderSelectedMatchPreview(mobileMatchSelect.value)
   })
 }
 

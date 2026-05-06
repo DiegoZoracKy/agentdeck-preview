@@ -1,0 +1,954 @@
+/**
+ * Retro JRPG Scene Renderer Styles
+ * Logo-knights + simplified UI inspired by classic JRPG battles.
+ */
+
+:root {
+  --scene-bg-dark: #0a0b1c;
+  --scene-bg-deep: #12142a;
+  --scene-border: #4a4a8a;
+  --scene-text: #f5f6ff;
+  --scene-text-dim: #b0b4d9;
+  --scene-gold: #ffd866;
+  --scene-action-attack: #ff8b9a;
+  --scene-action-potion: #7af2a0;
+  --scene-hp-high: #2ecc71;
+  --scene-hp-low: #f1c40f;
+  --scene-hp-critical: #e74c3c;
+  --scene-hit-glow: rgba(255, 92, 104, 0.72);
+  --scene-shadow: rgba(0, 0, 0, 0.45);
+}
+
+.retro-jrpg-scene {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  color: var(--scene-text);
+  border: 4px solid var(--scene-border);
+  border-radius: 10px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background-image:
+    linear-gradient(180deg, var(--scene-bg-dark) 0%, var(--scene-bg-deep) 100%);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
+
+.scene-bg-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.scene-message {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border: 2px solid var(--scene-border);
+  border-radius: 8px;
+  background: rgba(8, 10, 24, 0.7);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.scene-message-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.scene-message-right {
+  display: none;
+}
+
+.scene-action {
+  color: var(--scene-gold);
+  font-size: 12px;
+  letter-spacing: 2px;
+  width: 100%;
+}
+
+.scene-action.is-attack {
+  color: var(--scene-action-attack);
+}
+
+.scene-action.is-potion {
+  color: var(--scene-action-potion);
+}
+
+.scene-detail {
+  color: var(--scene-text-dim);
+  font-size: 9px;
+  width: 100%;
+}
+
+.scene-message-meta {
+  display: none;
+}
+
+.scene-detail-action {
+  color: var(--scene-gold);
+}
+
+.scene-detail-effect {
+  font-weight: bold;
+}
+
+.scene-detail-effect.damage {
+  color: #ff8b9a;
+}
+
+.scene-detail-effect.heal {
+  color: #7af2a0;
+}
+
+.scene-playback-status {
+  font-size: 9px;
+  text-align: center;
+  min-width: 86px;
+  padding: 6px 8px;
+  border: 2px solid var(--scene-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--scene-text-dim);
+}
+
+.scene-playback-status.is-ready {
+  color: var(--scene-text-dim);
+}
+
+.scene-playback-status.is-playing {
+  color: #7af2a0;
+}
+
+.scene-playback-status.is-paused {
+  color: #ffd866;
+}
+
+.scene-playback-status.is-complete {
+  color: #ffe28f;
+}
+
+.scene-playback-status.is-error {
+  color: #ff8b9a;
+}
+
+.scene-turn {
+  font-size: 9px;
+  color: var(--scene-text);
+  text-align: center;
+  min-width: 106px;
+  padding: 6px 10px;
+  border: 2px solid var(--scene-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.scene-arena {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 26px 64px;
+  min-height: 220px;
+}
+
+.scene-highlight {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%) translateY(6px);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  width: min(360px, calc(100% - 52px));
+  padding: 8px 12px;
+  border: 2px solid rgba(255, 216, 102, 0.68);
+  border-radius: 999px;
+  background: rgba(8, 10, 24, 0.84);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.36);
+  color: #fff1b7;
+  text-shadow: 2px 2px 0 #000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s ease;
+}
+
+.scene-highlight.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.scene-highlight-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  text-shadow: none;
+  transform: translateY(-2px);
+}
+
+.scene-highlight-text {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+  transform: translateY(-3px);
+}
+
+.scene-reasoning {
+  position: absolute;
+  z-index: 20;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 58%;
+  padding: 8px 10px;
+  border: 2px solid rgba(106, 90, 138, 0.55);
+  border-radius: 10px;
+  background: rgba(244, 247, 255, 0.88);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.38);
+  font-size: 8px;
+  line-height: 1.4;
+  text-shadow: none;
+  color: #1b1f2f;
+}
+
+.scene-reasoning.hidden {
+  display: none;
+}
+
+.scene-reasoning::after {
+  content: "";
+  position: absolute;
+  top: 66%;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  transform: translateY(-50%);
+}
+
+.scene-reasoning.tail-left::after {
+  left: -10px;
+  border-right: 12px solid rgba(244, 247, 255, 0.88);
+}
+
+.scene-reasoning.tail-right::after {
+  right: -10px;
+  border-left: 12px solid rgba(244, 247, 255, 0.88);
+}
+
+.scene-reasoning-header {
+  font-size: 8px;
+  color: #6a5a8a;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.scene-reasoning-text {
+  max-height: 92px;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: #202437;
+}
+
+.scene-reasoning.empty .scene-reasoning-text {
+  color: #888;
+  font-style: italic;
+}
+
+/* =========================================================================
+   Desktop tweaks
+   ========================================================================= */
+
+@media (min-width: 900px) {
+  .scene-reasoning {
+    max-width: 420px;
+    font-size: 10px;
+    padding: 10px 14px;
+  }
+
+  .scene-reasoning-header {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  .scene-reasoning-text {
+    max-height: 130px;
+  }
+}
+
+.scene-knight {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 8;
+  text-align: center;
+}
+
+.scene-crest {
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  border: 2px solid var(--scene-border);
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7);
+}
+
+.scene-logo {
+  font-size: 14px;
+  color: var(--scene-gold);
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.scene-logo-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 #000);
+}
+
+.scene-right .scene-logo-img {
+  transform: scaleX(-1);
+}
+
+.scene-hit {
+  position: absolute;
+  inset: -8px;
+  border-radius: 14px;
+  opacity: 0;
+}
+
+.scene-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-shadow: 2px 2px 0 #000;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+.scene-name-text {
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  color: var(--scene-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-model {
+  display: block;
+  width: 100%;
+  font-size: 9px;
+  color: var(--scene-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-status {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 16px 14px;
+  background: rgba(8, 10, 24, 0.75);
+  border-top: 2px solid var(--scene-border);
+}
+
+.scene-status-card {
+  border: 2px solid var(--scene-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.scene-status-name {
+  font-size: 11px;
+  color: var(--scene-gold);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.scene-status-model {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  font-size: 9px;
+  color: var(--scene-text-dim);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-status-hp {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  margin-bottom: 6px;
+}
+
+.scene-status-label {
+  color: var(--scene-text-dim);
+}
+
+.scene-hp-bar {
+  height: 8px;
+  background: #0f1020;
+  border: 1px solid var(--scene-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.scene-hp-fill {
+  height: 100%;
+  background: var(--scene-hp-high);
+  transition: width 0.2s ease;
+}
+
+.scene-hp-fill.low {
+  background: var(--scene-hp-low);
+}
+
+.scene-hp-fill.critical {
+  background: var(--scene-hp-critical);
+}
+
+.scene-hp-value {
+  color: var(--scene-text);
+  font-size: 8px;
+}
+
+.scene-status-potions {
+  font-size: 8px;
+  color: var(--scene-text-dim);
+}
+
+/* Animations */
+.scene-knight.is-attacking.scene-left {
+  animation: scene-attack-right 0.4s ease-out;
+}
+
+.scene-knight.is-attacking.scene-right {
+  animation: scene-attack-left 0.4s ease-out;
+}
+
+.scene-knight.is-hit .scene-crest {
+  animation: scene-hit-shake 0.3s ease-out, scene-hit-glow 0.3s ease-out;
+}
+
+.scene-knight.is-healing .scene-crest {
+  animation: scene-heal-glow 0.4s ease-out;
+}
+
+@keyframes scene-attack-right {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(24px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes scene-attack-left {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(-24px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes scene-hit-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes scene-hit-glow {
+  0% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
+  40% { box-shadow: 0 0 14px var(--scene-hit-glow); }
+  100% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
+}
+
+@keyframes scene-heal-glow {
+  0% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
+  50% { box-shadow: 0 0 14px rgba(92, 255, 152, 0.7); }
+  100% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
+}
+
+/* Victory overlay */
+.scene-victory {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  text-align: center;
+  pointer-events: none;
+}
+
+.scene-victory.visible {
+  opacity: 1;
+}
+
+.scene-victory-title {
+  font-size: 20px;
+  color: var(--scene-gold);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.scene-victory-winner {
+  font-size: 14px;
+  color: var(--scene-text);
+}
+
+.scene-victory-sub {
+  font-size: 9px;
+  color: var(--scene-text-dim);
+}
+
+/* =========================================================================
+   Controls layout for Retro JRPG Scene skin
+   ========================================================================= */
+
+.viewer-controls.skin-retro-jrpg-scene {
+  background: var(--scene-bg-dark);
+  border: 2px solid var(--scene-border);
+  border-radius: 0 0 8px 8px;
+  padding: 12px 16px;
+  color: var(--scene-text);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.viewer-controls.skin-retro-jrpg-scene button {
+  font-family: inherit;
+  padding: 8px 10px;
+  font-size: 10px;
+  background: var(--scene-bg-deep);
+  border: 2px solid var(--scene-border);
+  border-radius: 4px;
+  color: var(--scene-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.viewer-controls.skin-retro-jrpg-scene button.viewer-progress-marker {
+  padding: 0;
+  width: 18px;
+  height: 12px;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.viewer-controls.skin-retro-jrpg-scene #btn-play {
+  min-width: 92px;
+  padding: 8px 14px;
+  border-color: #ffd866;
+  background: linear-gradient(180deg, #3a3f76 0%, #2a2e5c 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 216, 102, 0.22) inset,
+    0 0 10px rgba(255, 216, 102, 0.2);
+}
+
+.viewer-controls.skin-retro-jrpg-scene #btn-play:hover:not(:disabled) {
+  background: linear-gradient(180deg, #454c8e 0%, #30366b 100%);
+  border-color: #ffe28f;
+}
+
+.viewer-controls.skin-retro-jrpg-scene #btn-prev,
+.viewer-controls.skin-retro-jrpg-scene #btn-next {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.viewer-controls.skin-retro-jrpg-scene .viewer-nav-icon {
+  display: block;
+  line-height: 1;
+  transform: translateY(-3px);
+}
+
+.viewer-controls.skin-retro-jrpg-scene label {
+  font-family: inherit;
+  font-size: 10px;
+  gap: 4px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.viewer-controls.skin-retro-jrpg-scene select {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 4px 6px;
+  background: var(--scene-bg-deep);
+  border: 2px solid var(--scene-border);
+  border-radius: 4px;
+  color: var(--scene-text);
+}
+
+.viewer-controls.skin-retro-jrpg-scene .viewer-progress {
+  flex: 1 1 220px;
+  min-width: 160px;
+  max-width: none;
+  height: 4px;
+  background: var(--scene-bg-dark);
+  border: 1px solid var(--scene-border);
+  border-radius: 2px;
+  overflow: visible;
+  margin: 0 8px;
+}
+
+.viewer-controls.skin-retro-jrpg-scene .viewer-progress-fill {
+  background: #ffd866;
+  background-image: none;
+}
+
+.viewer-controls.skin-retro-jrpg-scene .spacer {
+  display: none;
+}
+
+.viewer-controls.skin-retro-jrpg-scene .status {
+  display: none;
+}
+
+.viewer-controls.skin-retro-jrpg-scene button:hover:not(:disabled) {
+  background: #2a2d49;
+  border-color: #ffd866;
+}
+
+.viewer-controls.skin-retro-jrpg-scene button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 980px) and (min-width: 701px) {
+  .viewer-controls.skin-retro-jrpg-scene {
+    gap: 6px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene button {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene #btn-play {
+    padding: 6px 12px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene label {
+    font-size: 9px;
+    gap: 4px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene select {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene .viewer-progress {
+    flex: 1 1 150px;
+    min-width: 110px;
+    max-width: none;
+    height: 4px;
+    margin: 0 6px;
+  }
+
+}
+
+/* =========================================================================
+   Mobile tweaks
+   ========================================================================= */
+
+@media (max-width: 700px) {
+  .retro-jrpg-scene {
+    min-height: 320px;
+  }
+
+  .scene-message {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin: 10px 10px 0;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .scene-message-left {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 4px;
+    align-content: start;
+  }
+
+  .scene-message-right {
+    display: none;
+  }
+
+  .scene-action {
+    font-size: 10px;
+    line-height: 1.2;
+    min-height: 1.2em;
+    letter-spacing: 1.2px;
+  }
+
+  .scene-detail {
+    font-size: 8px;
+    line-height: 1.4;
+    min-height: calc(1.4em * 2);
+    max-height: calc(1.4em * 2);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .scene-turn {
+    font-size: 8px;
+    line-height: 1.2;
+    padding: 4px 8px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .scene-playback-status {
+    font-size: 8px;
+    line-height: 1.2;
+    min-width: 0;
+    padding: 4px 6px;
+    width: 100%;
+  }
+
+  .scene-arena {
+    padding: 76px 10px 58px;
+    min-height: 210px;
+    align-items: flex-start;
+  }
+
+  .scene-highlight {
+    bottom: 8px;
+    width: calc(100% - 20px);
+    padding: 7px 10px;
+    gap: 6px;
+  }
+
+  .scene-highlight-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 20px;
+  }
+
+  .scene-highlight-text {
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  .scene-knight {
+    width: 124px;
+    gap: 6px;
+  }
+
+  .scene-reasoning {
+    top: 8px;
+    width: min(72%, 240px);
+    max-width: min(72%, 240px);
+    font-size: 8px;
+    line-height: 1.45;
+    padding: 9px 11px;
+  }
+
+  .scene-reasoning-header {
+    margin-bottom: 3px;
+    letter-spacing: 0.8px;
+  }
+
+  .scene-reasoning::after {
+    bottom: -10px;
+    top: auto;
+    border-top: 10px solid rgba(244, 247, 255, 0.88);
+    border-bottom: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    transform: none;
+  }
+
+  .scene-reasoning.tail-left::after {
+    left: 14px;
+    right: auto;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+
+  .scene-reasoning.tail-right::after {
+    right: 14px;
+    left: auto;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+
+  .scene-reasoning-text {
+    max-height: 60px;
+    line-height: 1.4;
+  }
+
+  .scene-crest {
+    width: 84px;
+    height: 84px;
+  }
+
+  .scene-logo-img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .scene-name-text {
+    font-size: 10px;
+  }
+
+  .scene-model {
+    font-size: 8px;
+  }
+
+  .scene-status {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 12px 12px;
+  }
+
+  .scene-status-card {
+    padding: 7px 8px;
+  }
+
+  .scene-status-name {
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    margin-bottom: 3px;
+  }
+
+  .scene-status-model {
+    font-size: 8px;
+    margin-bottom: 5px;
+  }
+
+  .scene-status-hp {
+    font-size: 8px;
+    gap: 5px;
+    margin-bottom: 5px;
+  }
+
+  .scene-hp-bar {
+    height: 6px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene button {
+    min-height: 34px;
+    padding: 6px 9px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene #btn-play {
+    min-width: 92px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene #btn-prev,
+  .viewer-controls.skin-retro-jrpg-scene #btn-next {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene label {
+    gap: 6px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene select {
+    min-height: 34px;
+    padding: 4px 8px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene .viewer-progress {
+    flex: 1 1 100%;
+    max-width: none;
+    min-width: 0;
+    height: 7px;
+    margin: 0;
+    order: 5;
+    border-radius: 3px;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene .spacer {
+    display: none;
+  }
+
+  .viewer-controls.skin-retro-jrpg-scene .status {
+    display: none;
+  }
+}
