@@ -1,6 +1,6 @@
 # Research Index
 
-Last updated: 2026-04-27T16:35:30.352111Z
+Last updated: 2026-05-03T22:02:00.406094Z
 
 | Experiment | Status | Game | Players | Matches | Results |
 |---|---|---|---|---|---|
@@ -39,4 +39,4 @@ Last updated: 2026-04-27T16:35:30.352111Z
 | [VariableDamage Arc 1](2026-03-26-variable-damage-arc-1/README.md) | complete | VariableDamageGame | local:AttackBot, local:PotionAt80Bot, google:gemini-2.5-flash-lite, google:gemini-2.5-flash, openai:gpt-4o-mini, openai:gpt-4o, openai:gpt-5-mini, anthropic:claude-haiku-4-5-20251001 | 0/0 | See README |
 | [VariableDamage Premium Final 1](2026-03-26-variable-damage-premium-final-1/README.md) | complete | VariableDamageGame | google:gemini-2.5-flash-lite, openai:gpt-5-mini | 24/24 | FlashLite-RC-RISK 54.2% |
 | [FixedDamage RC Replication — Flash-Lite RC vs GPT-4o-mini RC](2026-04-08-fixed-damage-rc-replication-1/README.md) | complete | FixedDamageGame | google:gemini-2.5-flash-lite, openai:gpt-4o-mini | 0/20 | Gemini 60.0% |
-| [The Agentic Edge: Strategy Stack Effects on LLM Agency](2026-04-27-agentic-edge-strategy-stack/README.md) | *planned* | MixedFixedVariableBenchmark | google:gemini-2.5-flash-lite, openai:gpt-4o-mini | 0/108 | TBD |
+| [The Agentic Edge: Strategy Stack Effects on LLM Agency](2026-04-27-agentic-edge-strategy-stack/README.md) | complete | MixedFixedVariableBenchmark | google:gemini-2.5-flash-lite, openai:gpt-4o-mini | 540/540 | See README |

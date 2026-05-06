@@ -1,7 +1,8 @@
 # Reproduction
 
-This package is execution-ready once credentials, budget limits, and the frozen
-commit fields in `matrix.yaml` are filled.
+This package has completed P0, P1, P2, and P3. The official study aggregate
+includes P2 and the targeted P3 FixedDamage S1 ladder-completion cell. P0
+remains preflight-only and P1 remains pilot-only.
 
 ## Environment
 
@@ -32,6 +33,8 @@ python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.p
 ```bash
 python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P0 --dry-run
 python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P1 --dry-run
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P2 --dry-run
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P3 --dry-run
 ```
 
 ## Local Preflight
@@ -96,10 +99,114 @@ Before adding `P2` cells:
 - lock the S2 controller choice if S2 is added
 - name the exact prior FixedDamage package being replicated
 - keep all paired-side-swap match counts even
-- update `analysis.md` with pilot gates and expansion decisions
+- update the authored analysis directory with pilot gates and expansion
+  decisions
+
+## Main Run
+
+P2 was executed as the primary fixed-N study phase. P3 was then run as the
+targeted FixedDamage S1 cross-tier ladder-completion cell. The package aggregate
+is scoped to P2 and P3 by `matrix.yaml`:
+
+```yaml
+phase_model:
+  study_phases: [P2, P3]
+```
+
+Export and validate:
+
+```bash
+python3 scripts/research_export.py \
+  --experiment-dir research/2026-04-27-agentic-edge-strategy-stack \
+  --package \
+  --no-generated-at
+
+python3 scripts/research_validate.py --research-dir research --write-index
+```
+
+## P3 Ladder Completion
+
+P3 fills the FixedDamage S1 cross-tier tuning-ladder step:
+
+```bash
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py \
+  --cell p3_fd_frontier_s1 \
+  --concurrency 2
+
+python3 scripts/research_export.py \
+  --experiment-dir research/2026-04-27-agentic-edge-strategy-stack \
+  --cell p3_fd_frontier_s1 \
+  --no-generated-at
+```
+
+P3 is included in the package aggregate so the official study artifact contains
+the full FixedDamage S0 -> S1 -> S3 tuning arc.
 
 Raw recordings belong in external storage, not git. Store only artifact pointers
 under `recordings/`.
+
+## External Artifact Download
+
+The complete raw-recording and processed-artifact payload is stored in the
+Hugging Face dataset:
+
+```text
+https://huggingface.co/datasets/agentdeck/agentic-edge-strategy-stack-study
+```
+
+Initial full artifact snapshot:
+
+```text
+13b95490cdc21dbfb1c164c683e485755f90a271
+```
+
+Latest study-arc aggregate refresh:
+
+```text
+f7ac119f69da08261269bc5cf85fb65741e8ae88
+```
+
+The curated replay viewer is hosted separately as a Hugging Face Space:
+
+```text
+https://huggingface.co/spaces/agentdeck/agentic-edge-viewer
+```
+
+Latest curated replay Space snapshot:
+
+```text
+27ca787db947a393d21ed9847a8a4b44b2cbc317
+```
+
+To download it locally, authenticate with a Hugging Face token if the dataset is
+still private during pre-launch review, then run:
+
+```bash
+.venv/bin/hf auth login
+
+.venv/bin/hf download \
+  agentdeck/agentic-edge-strategy-stack-study \
+  --repo-type dataset \
+  --local-dir /tmp/agentic-edge-hf-download
+```
+
+The downloaded dataset contains:
+
+```text
+metadata/
+prompts/
+analysis/
+reports/
+p0_preflight/
+p1_pilot/
+p2_main/
+p3_supplemental/
+checksums.sha256
+upload_manifest.json
+```
+
+The Space contains only the five curated study replay examples. The dataset is
+the canonical raw and processed artifact store.
 
 ## Development Checkout Fallbacks
 
@@ -109,6 +216,7 @@ scripts are unavailable, use the repo-local wrappers:
 ```bash
 python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --list-cells
 python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --phase P1 --no-generated-at
+python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --cell p3_fd_frontier_s1 --no-generated-at
 python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --package --no-generated-at
 python3 scripts/research_validate.py --research-dir research
 ```

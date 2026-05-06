@@ -1,7 +1,7 @@
 schema_version: 1
 experiment_id: 2026-04-27-agentic-edge-strategy-stack
 title: "The Agentic Edge: Strategy Stack Effects on LLM Agency"
-status: planned
+status: complete
 question: >-
   Can strategy stacks change LLM agent behavior enough to overcome model-tier
   differences in sequential decision environments?
@@ -48,8 +48,8 @@ variants:
     first_player_policy: random
 run:
   seed_base: 2026042701
-  matches_planned: 108
-  matches_completed: 0
+  matches_planned: 540
+  matches_completed: 540
   concurrency: 8
   max_turns: 40
   matrix_source: matrix.yaml
@@ -62,7 +62,8 @@ artifacts:
   matrix_yaml: matrix.yaml
   results_json: results.json
   results_csv: results.csv
-  analysis_md: analysis.md
+  results_md: results.md
+  analysis_dir: analysis/
   reproduction_md: reproduction.md
   prompt_dir: prompts/
 storage:
@@ -74,6 +75,12 @@ storage:
     repo_path: research/2026-04-27-agentic-edge-strategy-stack
   viewer_curation:
     repo_path: viewer/matches
+    backend: huggingface_space
+    space: agentdeck/agentic-edge-viewer
+    url: https://huggingface.co/spaces/agentdeck/agentic-edge-viewer
+    snapshot: 27ca787db947a393d21ed9847a8a4b44b2cbc317
 notes: >-
-  This package is scaffolded for the pilot. Before live execution, verify
-  provider model availability, credentials, pricing snapshot, and budget.
+  P2 is the primary fixed-N study phase. P3 is a targeted FixedDamage S1
+  cross-tier ladder completion. The official package aggregate includes P2 and
+  P3 through matrix.yaml phase_model.study_phases. P0 remains preflight and P1
+  remains pilot-only.

@@ -6,15 +6,18 @@
 
 ## Factual Snapshot (Auto-generated)
 <!-- AUTO_FACTS:BEGIN -->
-- Status: planned
-- Matches: 0/108
+- Status: complete
+- Matches: 432/540
 - Game: MixedFixedVariableBenchmark
 - Players: flashlite=google:gemini-2.5-flash-lite, gpt4omini=openai:gpt-4o-mini
 - Seed Base: 2026042701
-- Topline Winner: Potion80Bot-AO (58.3%)
-- Avg Turns: 15.916666666666666
-- Avg Duration (s): 0.14326727390289307
-- Total Cost: $0.000000
+- Topline Winner: See per-cell results (matrix aggregate)
+- Avg Turns: 19.90277777777778
+- Avg Duration (s): 17.787702986487634
+- Total Cost: $1.128308
+- Aggregation Scope: study_phases
+- Phases Included: P2, P3
+- Cells Included: 9
 <!-- AUTO_FACTS:END -->
 
 ## Why This Exists
@@ -25,6 +28,9 @@ differences in sequential decision environments.
 The package is intentionally matrix-first. `matrix.yaml` is the source of truth
 for pilot cells, prompt/config references, fairness policy, seed offsets, and
 expansion gates.
+
+For the final project definition and public framing, see
+[`study_overview.md`](study_overview.md).
 
 ## Design Snapshot
 - Games: `FixedDamageGame(information_level="partial")` and `VariableDamageGame(information_level="partial")`
@@ -41,7 +47,8 @@ expansion gates.
 ## Execution Plan
 - `P0`: no-provider preflight cells using local policy bots.
 - `P1`: 8 live-provider pilot cells, 12 matches each.
-- `P2`: reserved for selected main-run cells after pilot review.
+- `P2`: primary fixed-N study phase, 8 cells x 48 matches each.
+- `P3`: targeted FixedDamage S1 cross-tier ladder-completion cell.
 
 Pilot expansion gates:
 - runner dry-run succeeds
@@ -52,15 +59,83 @@ Pilot expansion gates:
 - built-in behavioral scorer coverage is sufficient for the hypothesis tested
 
 ## Results
-No live results yet. After pilot execution, cell artifacts should be exported
-under `artifacts/<cell_id>/`, then aggregated into top-level `results.json`.
+The official study arc is complete. P2 ran 8 cells x 48 matches, and P3 ran the
+targeted FixedDamage S1 cross-tier ladder-completion cell. `results.json` is
+scoped by `phase_model.study_phases: [P2, P3]`; P0 smoke and P1 pilot matches
+are excluded. See `results.md` for the generated factual report, including
+cell-level results and seat splits.
+
+Headline: strategy stack effects replicate at n=48/cell. FlashLite S3-HP beats GPT4oMini 79.2% in FD; FlashLite S3-RISK beats GPT4oMini 58.3% in VD (frontier narrowed from pilot; position effects in VD are high). H1-H3 and H6 confirmed; H5 confirmed with caveats in VD; H4 inconclusive. Use `analysis/README.md` for instructions on writing independent interpretation reports.
+
+P1 pilot: 8 cells x 12 matches each (96 matches). See `artifacts/p1_*/` for
+pilot cell artifacts.
+
+P3 ladder-completion result: `FlashLite-S1-RC` beat `GPT4oMini-S0-AO` 34/48
+matches (70.8%, p=0.0055), filling the FixedDamage S0 -> S1 -> S3 progression.
+See `artifacts/p3_fd_frontier_s1/results.md` and the authored follow-up analysis
+under `analysis/analysis_20260428_152909_codex_official_study_analysis/support/`.
+
+## External Artifacts
+
+Raw recordings and the full staged artifact payload are stored in the Hugging
+Face dataset:
+
+```text
+https://huggingface.co/datasets/agentdeck/agentic-edge-strategy-stack-study
+```
+
+The curated replay viewer is deployed as a Hugging Face Space:
+
+```text
+https://huggingface.co/spaces/agentdeck/agentic-edge-viewer
+```
+
+Initial full artifact snapshot:
+
+```text
+13b95490cdc21dbfb1c164c683e485755f90a271
+```
+
+Latest study-arc aggregate refresh:
+
+```text
+f7ac119f69da08261269bc5cf85fb65741e8ae88
+```
+
+Latest curated replay Space snapshot:
+
+```text
+27ca787db947a393d21ed9847a8a4b44b2cbc317
+```
+
+The dataset includes metadata, prompts, authored analysis, generated reports,
+per-cell artifacts, and P0/P1/P2/P3 raw recordings. See
+`recordings/README.md` for the storage layout and checksum pointers. The Space
+contains only the five curated viewer matches, not the full raw recording set.
+
+## Authored Analysis
+`results.md` is the generated factual report for the official study aggregate. New
+human or AI-authored interpretation belongs under `analysis/`.
+
+To analyze this experiment, read `analysis/README.md` and create a new
+timestamped `analysis_...` subdirectory under `analysis/`.
+
+Existing authored reviews:
+- `analysis/analysis_20260428_152909_codex_official_study_analysis/analysis.md`
+- `analysis/analysis_20260428_152909_codex_official_study_analysis/support/s1_frontier_followup.md`
+- `analysis/analysis_20260428_152909_codex_official_study_analysis/support/behavioral_metrics_digest.md`
+- `analysis/analysis_20260428_152909_codex_official_study_analysis/support/protocol_and_prompt_audit.md`
+- `analysis/analysis_20260428_152909_codex_official_study_analysis/support/layman_business_explainer.md`
 
 ## Artifacts
 - `manifest.yaml` - package metadata and current run envelope
+- `study_overview.md` - final study definition and public framing
 - `matrix.yaml` - pilot matrix and expansion plan
 - `prompts/` - frozen prompt templates used by matrix configs
 - `scripts/run_experiment.py` - package-local runner
-- `analysis.md` - human-owned interpretation shell
+- `results.md` - generated factual report
+- `analysis/README.md` - authored analysis instructions
+- `analysis/` - authored human/AI interpretation workspace
 - `reproduction.md` - execution and export commands
 - `recordings/README.md` - external storage pointer policy
 

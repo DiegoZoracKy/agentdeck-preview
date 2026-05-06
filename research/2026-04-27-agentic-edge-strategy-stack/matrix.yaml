@@ -15,10 +15,16 @@ frozen_inputs:
   pricing_snapshot_updated_at: "2026-02-13"
   note: >-
     git_commit (f8ec301) is the substantive study package commit containing
-    runner, matrix, and prompts. run_commit (a21ed8f) is the git_commit freeze
-    commit. P1 artifacts will be launched from the commit following this field
-    addition; update run_commit to HEAD immediately before execution if any
-    further commits are made before P1 runs.
+    runner, matrix, and prompts. run_commit (faddb17) is the gate-prep freeze
+    commit immediately before P1 execution; the actual P1 launch HEAD was
+    bbe91d6 (one downstream metadata commit). Substantive study content is
+    identical between faddb17 and bbe91d6.
+
+phase_model:
+  preflight_phases: [P0]
+  study_phases: [P2, P3]
+  main_phases: [P2, P3]
+  excluded_phases: [P1]
 
 player_registry:
   attack_bot:
@@ -152,9 +158,29 @@ execution_plan:
         - p1_vd_full_stack_effect_s3
         - p1_vd_frontier_s3
     - phase_id: P2
-      name: Main run - selected cells only
-      tracks: []
-      cell_ids: []
+      name: Main run - all 8 pilot cells retained
+      tracks: [fixed_damage, variable_damage]
+      concurrency_policy:
+        default: 4
+        overrides:
+          p2_fd_full_stack_effect_s3: 2
+          p2_fd_frontier_s3: 2
+          p2_vd_full_stack_effect_s3: 2
+          p2_vd_frontier_s3: 2
+      cell_ids:
+        - p2_fd_tier_gap_s0
+        - p2_fd_controller_effect_s1
+        - p2_fd_full_stack_effect_s3
+        - p2_fd_frontier_s3
+        - p2_vd_tier_gap_s0
+        - p2_vd_controller_effect_s1
+        - p2_vd_full_stack_effect_s3
+        - p2_vd_frontier_s3
+    - phase_id: P3
+      name: Targeted ladder completion - S1 cross-tier frontier
+      tracks: [fixed_damage]
+      cell_ids:
+        - p3_fd_frontier_s1
 
 highlight_tag_rules:
   critical_potion:
@@ -349,5 +375,192 @@ cells:
     matches: 12
     seed_offset: 2300
     player_a: { name: FlashLite-S3-RISK, player_ref: flashlite, config_ref: S3_VARIABLE_FULL }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: true
+
+  # ── P2: Main Run ──────────────────────────────────────────────────────────
+  # Same 8 cells as P1. 48 matches each (24 AB/BA seed pairs).
+  # S3/frontier cells capped at concurrency=2; S0/S1 at concurrency=4.
+  # study_phases=[P2, P3]: package export aggregates the main run plus the
+  # targeted S1 ladder completion. P1 stays pilot-only.
+
+  - id: p2_fd_tier_gap_s0
+    track: fixed_damage
+    phase: P2
+    question: What is the raw FixedDamage model-tier gap under AO baselines? (main run)
+    intent: Confirm unscaffolded tier gap at n=48.
+    causal_factor: model_tier
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; report position effects before topline claims
+    matches: 48
+    seed_offset: 3000
+    concurrency: 4
+    player_a: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: false
+
+  - id: p2_fd_controller_effect_s1
+    track: fixed_damage
+    phase: P2
+    question: Does ReasoningController change Flash-Lite FixedDamage behavior without explicit HP grounding? (main run)
+    intent: Confirm controller effect at n=48.
+    causal_factor: controller
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; same model, different controller condition
+    matches: 48
+    seed_offset: 3100
+    concurrency: 4
+    player_a: { name: FlashLite-S1-RC, player_ref: flashlite, config_ref: S1_RC }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p2_fd_full_stack_effect_s3
+    track: fixed_damage
+    phase: P2
+    question: Does full HP-grounded scaffolding improve Flash-Lite over its own AO baseline? (main run)
+    intent: Confirm strategy-stack effect at n=48.
+    causal_factor: strategy_stack
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; same model, full stack versus AO
+    matches: 48
+    seed_offset: 3200
+    concurrency: 2
+    player_a: { name: FlashLite-S3-HP, player_ref: flashlite, config_ref: S3_FIXED_FULL }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p2_fd_frontier_s3
+    track: fixed_damage
+    phase: P2
+    question: Can scaffolded Flash-Lite approach or beat unscaffolded GPT-4o-mini in FixedDamage? (main run)
+    intent: Confirm cost-quality frontier claim at n=48.
+    causal_factor: cost_quality_frontier
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; compare cost-adjusted behavior, not only wins
+    matches: 48
+    seed_offset: 3300
+    concurrency: 2
+    player_a: { name: FlashLite-S3-HP, player_ref: flashlite, config_ref: S3_FIXED_FULL }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p2_vd_tier_gap_s0
+    track: variable_damage
+    phase: P2
+    question: What is the raw VariableDamage model-tier gap under AO baselines? (main run)
+    intent: Confirm unscaffolded transfer-environment tier gap at n=48.
+    causal_factor: model_tier
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; report risk-band and position effects
+    matches: 48
+    seed_offset: 4000
+    concurrency: 4
+    player_a: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: false
+
+  - id: p2_vd_controller_effect_s1
+    track: variable_damage
+    phase: P2
+    question: Does ReasoningController change Flash-Lite VariableDamage behavior without risk grounding? (main run)
+    intent: Confirm controller-only transfer at n=48.
+    causal_factor: controller
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; same model, different controller condition
+    matches: 48
+    seed_offset: 4100
+    concurrency: 4
+    player_a: { name: FlashLite-S1-RC, player_ref: flashlite, config_ref: S1_RC }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p2_vd_full_stack_effect_s3
+    track: variable_damage
+    phase: P2
+    question: Does risk-grounded scaffolding improve Flash-Lite over its own AO baseline? (main run)
+    intent: Confirm strategy-stack transfer at n=48.
+    causal_factor: strategy_stack_transfer
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; same model, risk stack versus AO
+    matches: 48
+    seed_offset: 4200
+    concurrency: 2
+    player_a: { name: FlashLite-S3-RISK, player_ref: flashlite, config_ref: S3_VARIABLE_FULL }
+    player_b: { name: FlashLite-S0-AO, player_ref: flashlite, config_ref: S0_AO }
+    viewer_priority: true
+
+  - id: p2_vd_frontier_s3
+    track: variable_damage
+    phase: P2
+    question: Can risk-grounded Flash-Lite approach or beat unscaffolded GPT-4o-mini in VariableDamage? (main run)
+    intent: Confirm cost-quality frontier claim under stochastic damage at n=48.
+    causal_factor: cost_quality_frontier_transfer
+    game:
+      name: VariableDamageGame
+      config:
+        information_level: partial
+        min_attack_damage: 15
+        max_attack_damage: 25
+    fairness_notes: paired side-swap enabled; compare cost-adjusted risk behavior
+    matches: 48
+    seed_offset: 4300
+    concurrency: 2
+    player_a: { name: FlashLite-S3-RISK, player_ref: flashlite, config_ref: S3_VARIABLE_FULL }
+    player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
+    viewer_priority: true
+
+  # ── P3: Targeted ladder completion ───────────────────────────────────────
+  # S1 cross-tier cell: fills the tuning-ladder step between
+  # S0 (0/48) and S3 (38/48) for FlashLite vs GPT4oMini in FixedDamage.
+  # phase_model.study_phases includes P3 so the package aggregate tells the full
+  # FixedDamage S0 → S1 → S3 tuning arc.
+
+  - id: p3_fd_frontier_s1
+    track: fixed_damage
+    phase: P3
+    question: Can ReasoningController-only Flash-Lite beat unscaffolded GPT-4o-mini in FixedDamage?
+    intent: Fill the missing cross-tier tuning ladder step between S0 baseline and S3 full-stack frontier.
+    causal_factor: controller_frontier
+    game:
+      name: FixedDamageGame
+      config:
+        information_level: partial
+        attack_damage: 20
+    fairness_notes: paired side-swap enabled; compare S1 reasoning-only against unscaffolded GPT4oMini
+    matches: 48
+    seed_offset: 5000
+    concurrency: 2
+    player_a: { name: FlashLite-S1-RC, player_ref: flashlite, config_ref: S1_RC }
     player_b: { name: GPT4oMini-S0-AO, player_ref: gpt4omini, config_ref: S0_AO }
     viewer_priority: true
