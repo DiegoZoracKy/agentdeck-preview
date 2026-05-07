@@ -18,8 +18,9 @@ Hosted replay viewer:
 https://huggingface.co/spaces/agentdeck/agentic-edge-viewer
 ```
 
-The Space is currently a private draft. Treat public narrative files as launch
-drafts until the dataset and Space are made public.
+The dataset and Space are public. Treat public narrative files as downstream
+story material; canonical factual sources remain the generated results,
+study overview, and authored analysis listed above.
 
 ## Files
 

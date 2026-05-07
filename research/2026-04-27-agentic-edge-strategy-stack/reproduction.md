@@ -194,12 +194,9 @@ Latest curated replay Space snapshot:
 27ca787db947a393d21ed9847a8a4b44b2cbc317
 ```
 
-To download it locally, authenticate with a Hugging Face token if the dataset is
-still private during pre-launch review, then run:
+To download it locally, run:
 
 ```bash
-.venv/bin/hf auth login
-
 .venv/bin/hf download \
   agentdeck/agentic-edge-strategy-stack-study \
   --repo-type dataset \

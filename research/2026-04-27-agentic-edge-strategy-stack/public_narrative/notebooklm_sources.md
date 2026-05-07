@@ -10,9 +10,7 @@ checklist, not a copied bundle. Upload the files below as-is.
 Avoid `.json` and `.yaml` files for NotebookLM. Use the markdown reports and
 support docs that already summarize those artifacts in human-readable form.
 
-Hugging Face links point to the private draft dataset for canonical study
-sources. They work for authenticated users now and will become public links if
-the dataset is made public.
+Hugging Face links point to the public dataset for canonical study sources.
 
 This directory itself is downstream public-narrative work. It is intentionally
 not part of the study dataset. Upload local `public_narrative/*.md` files to
