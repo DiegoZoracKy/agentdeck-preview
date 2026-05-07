@@ -501,9 +501,7 @@ def export_results(
     if len(normalized_dirs) > 1:
         source["recordings_dirs"] = [str(path) for path in normalized_dirs]
     if source_metadata:
-        source.update(
-            {key: value for key, value in source_metadata.items() if value is not None}
-        )
+        source.update({key: value for key, value in source_metadata.items() if value is not None})
 
     results: Dict[str, Any] = {
         "schema_version": 3,

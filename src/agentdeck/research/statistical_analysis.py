@@ -361,8 +361,12 @@ class StatisticalAnalysis:
                 if not direct_matches:
                     continue
 
-                win_a = sum(1 for match_ref in direct_matches if match_ref.get("winner") == player_a)
-                win_b = sum(1 for match_ref in direct_matches if match_ref.get("winner") == player_b)
+                win_a = sum(
+                    1 for match_ref in direct_matches if match_ref.get("winner") == player_a
+                )
+                win_b = sum(
+                    1 for match_ref in direct_matches if match_ref.get("winner") == player_b
+                )
                 head_to_head_matches = win_a + win_b
                 rate_a = win_a / head_to_head_matches if head_to_head_matches > 0 else 0.0
                 rate_b = win_b / head_to_head_matches if head_to_head_matches > 0 else 0.0

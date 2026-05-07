@@ -293,7 +293,9 @@ def test_results_pairwise_must_match_direct_matches(tmp_path):
     errors = validator._validate_results(experiment_dir, {"status": "complete"})
 
     assert any(".Alice_vs_Bob.wins_a must equal direct wins for player_a (1)" in e for e in errors)
-    assert any(".Alice_vs_Bob.head_to_head_matches must equal direct match count (1)" in e for e in errors)
+    assert any(
+        ".Alice_vs_Bob.head_to_head_matches must equal direct match count (1)" in e for e in errors
+    )
 
 
 def test_phase_aware_package_results_pass_validation(tmp_path):

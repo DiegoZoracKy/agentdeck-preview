@@ -15,7 +15,6 @@ from agentdeck import (
 from agentdeck.controllers import ActionOnlyController
 from agentdeck.core.logging import InMemoryLogHandler
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 

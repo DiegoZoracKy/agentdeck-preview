@@ -68,7 +68,9 @@ def _table(headers: Sequence[str], rows: Sequence[Sequence[Any]]) -> List[str]:
     ]
     for row in rows:
         padded = list(row) + [""] * max(0, len(headers) - len(row))
-        lines.append("| " + " | ".join(_escape_cell(value) for value in padded[: len(headers)]) + " |")
+        lines.append(
+            "| " + " | ".join(_escape_cell(value) for value in padded[: len(headers)]) + " |"
+        )
     return lines
 
 
@@ -279,7 +281,9 @@ def _winner(results: Mapping[str, Any]) -> str:
     return f"{name} ({_fmt_pct(rate)})"
 
 
-def _load_cell_artifacts(output_dir: Path, source: Mapping[str, Any]) -> List[tuple[str, Dict[str, Any]]]:
+def _load_cell_artifacts(
+    output_dir: Path, source: Mapping[str, Any]
+) -> List[tuple[str, Dict[str, Any]]]:
     cells = source.get("cells_included")
     if not isinstance(cells, list):
         return []
@@ -331,7 +335,9 @@ def _cell_position_rows(cells: Iterable[tuple[str, Mapping[str, Any]]]) -> List[
     return rows
 
 
-def _warning_lines(results: Mapping[str, Any], cells: Sequence[tuple[str, Mapping[str, Any]]]) -> List[str]:
+def _warning_lines(
+    results: Mapping[str, Any], cells: Sequence[tuple[str, Mapping[str, Any]]]
+) -> List[str]:
     warnings: List[str] = []
     source = results.get("source") or {}
     if isinstance(source.get("cells_included"), list) and len(source["cells_included"]) > 1:
@@ -442,7 +448,9 @@ def render_results_markdown(results: Mapping[str, Any], *, output_dir: Path | No
             )
         )
 
-    player_heading = "## Package Aggregate Player Exposure" if has_cell_artifacts else "## Player Results"
+    player_heading = (
+        "## Package Aggregate Player Exposure" if has_cell_artifacts else "## Player Results"
+    )
     lines.extend(["", player_heading])
     if has_cell_artifacts:
         lines.extend(
@@ -460,7 +468,9 @@ def render_results_markdown(results: Mapping[str, Any], *, output_dir: Path | No
     )
 
     h2h_heading = (
-        "## Package Aggregate Direct Head-to-Head" if has_cell_artifacts else "## Direct Head-to-Head"
+        "## Package Aggregate Direct Head-to-Head"
+        if has_cell_artifacts
+        else "## Direct Head-to-Head"
     )
     lines.extend(["", h2h_heading])
     if has_cell_artifacts:

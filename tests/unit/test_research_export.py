@@ -157,9 +157,7 @@ def _write_matrix_experiment(tmp_path: Path, *, cell_ids: list[str]) -> Path:
     return experiment_dir
 
 
-def _write_multiphase_matrix_experiment(
-    tmp_path: Path, *, phase_model: dict | None = None
-) -> Path:
+def _write_multiphase_matrix_experiment(tmp_path: Path, *, phase_model: dict | None = None) -> Path:
     experiment_dir = tmp_path / "research" / "2026-03-26-matrix-demo"
     experiment_dir.mkdir(parents=True)
     (experiment_dir / "manifest.yaml").write_text(

@@ -51,9 +51,7 @@ AUTO_FACTS_PLACEHOLDER_PATTERNS = (
     r"Topline Winner:\s*TBD",
     r"Topline winner:\s*TBD",
 )
-ANALYSIS_REPORT_DIR_PATTERN = re.compile(
-    r"^analysis_\d{8}_\d{6}_[a-z0-9]+_[a-z0-9][a-z0-9_]*$"
-)
+ANALYSIS_REPORT_DIR_PATTERN = re.compile(r"^analysis_\d{8}_\d{6}_[a-z0-9]+_[a-z0-9][a-z0-9_]*$")
 
 
 def _get_nested(data: Dict[str, Any], path: Tuple[str, ...]) -> Tuple[Any, bool]:
@@ -573,9 +571,7 @@ def _validate_markdown_facts(experiment_dir: Path, manifest: Dict[str, Any]) -> 
     return errors
 
 
-def _validate_results_markdown_report(
-    experiment_dir: Path, manifest: Dict[str, Any]
-) -> List[str]:
+def _validate_results_markdown_report(experiment_dir: Path, manifest: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
     experiment_name = experiment_dir.name
     status = manifest.get("status")
