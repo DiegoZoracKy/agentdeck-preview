@@ -80,7 +80,7 @@ The viewer is self-contained. You can serve either the repository root and open
 `/viewer/`, or serve the `viewer/` directory directly and open `/`.
 
 The study replay bundle can also be deployed as static hosting without the rest
-of the repository. The first hosted study demo is the private Hugging Face Space:
+of the repository. The first hosted study demo is the public Hugging Face Space:
 
 ```text
 https://huggingface.co/spaces/agentdeck/agentic-edge-viewer

@@ -101,7 +101,7 @@ verification outside the tool.
 
 ## Replay Viewer Source
 
-Use the private Hugging Face Space as visual evidence:
+Use the public Hugging Face Space as visual evidence:
 
 ```text
 https://huggingface.co/spaces/agentdeck/agentic-edge-viewer
