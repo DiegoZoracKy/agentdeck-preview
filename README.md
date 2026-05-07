@@ -1,8 +1,8 @@
 # AgentDeck 🎮
 
-**A research platform for analyzing AI agent behavior through game scenarios**
+**The game console for AI agents.**
 
-*Bring your idea and turn it into a runnable, replayable experiment*
+A research platform for analyzing AI agent behavior through game scenarios.
 
 [Why Games?](#-why-games) · [Quick Start](#-quick-start) · [Examples](examples/README.md) · [How to Run a Study](docs/how-to-run-a-study.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
 
@@ -33,7 +33,9 @@ Game scenarios work well because they make the important variables legible:
 ## 🚀 Quick Start
 
 > **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
-> **Runtime**: Python 3.10+ (CI covers 3.10–3.11) · 75% coverage gate
+>
+> **AI-first prompt**: Ask Claude, Codex, or your coding agent:
+> “Learn AgentDeck from the README, create a tiny tic-tac-toe game, run a few matches, then analyze the recorded behavior.”
 
 ### Installation
 
@@ -64,7 +66,13 @@ pip install -e ".[dev]"
 
 ### Your First Experiment
 ```python
-from agentdeck import AgentDeck, GPTPlayer, FixedDamageGame, ActionOnlyController
+from agentdeck import (
+    ActionOnlyController,
+    AgentDeck,
+    FixedDamageGame,
+    GPTPlayer,
+    ReasoningController,
+)
 
 # 1. Create a game
 game = FixedDamageGame(
@@ -75,19 +83,19 @@ game = FixedDamageGame(
     information_level="full",  # use "partial" to hide opponent HP/potions
 )
 
-# 2. Create AI players
+# 2. Create AI players: same model, different behavioral interface
 players = [
     GPTPlayer(
-        name="Player-1",
+        name="SameModel-AO",
         model="gpt-4o-mini",
         temperature=0.7,
         controller=ActionOnlyController(),
     ),
     GPTPlayer(
-        name="Player-2",
+        name="SameModel-RC",
         model="gpt-4o-mini",
         temperature=0.7,
-        controller=ActionOnlyController(),
+        controller=ReasoningController(),
     ),
 ]
 
