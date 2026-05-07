@@ -6,11 +6,12 @@ Last updated: 2026-05-06
 
 The flagship study execution is **complete**. Hugging Face artifact storage is
 in place as a private draft, and the curated static viewer is deployed as a
-private Hugging Face Space. Current focus is local merge to `main`, optional
+private Hugging Face Space. Current focus is post-merge validation, optional
 deck/video production, and then final launch. Hugging Face public visibility
 remains a final step after the rest of this roadmap is complete.
 
-Branch `study/agentic-edge-strategy-stack`.
+Prepared on branch `study/agentic-edge-strategy-stack`; intended landing target:
+`main`.
 
 ```text
 research/2026-04-27-agentic-edge-strategy-stack/
@@ -27,11 +28,10 @@ caveated by seat effects and non-significance.
 
 ## Immediate Work Order
 
-1. Merge the approved local study branch into `main`.
-2. Re-run viewer and research validation from `main`.
-3. Produce the first visual deck/video draft from the vetted public-narrative
+1. Re-run viewer and research validation from `main`.
+2. Produce the first visual deck/video draft from the vetted public-narrative
    sources and replay Space, if we want launch collateral before publication.
-4. Final launch: make the Hugging Face dataset and Space public, validate public
+3. Final launch: make the Hugging Face dataset and Space public, validate public
    URLs, and update any remaining launch wording.
 
 ## Current Study Package
