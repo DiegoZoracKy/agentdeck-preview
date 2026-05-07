@@ -113,6 +113,26 @@ per-cell artifacts, and P0/P1/P2/P3 raw recordings. See
 `recordings/README.md` for the storage layout and checksum pointers. The Space
 contains only the five curated viewer matches, not the full raw recording set.
 
+## Code References
+
+The live runs and artifact generation used the execution freeze recorded in
+`matrix.yaml`. The current GitHub study package is represented locally by:
+
+```text
+study_package_commit: e9dc6a77b3495dc80b6deed71b07a2af83c1cc64
+portable_viewer_commit: f98e05c5efbbb558594aaccd08fd370d92360d85
+curated_viewer_examples_commit: b8771c4d21ab5591b3d37aee44eaf307acaee13f
+```
+
+The Hugging Face dataset also records the implementation/code-reference commit:
+
+```text
+d659bdf244d1f0462c0d43aa2609be6c3c4a7672
+```
+
+After this branch is merged and pushed, these hashes can be resolved through
+GitHub commit URLs.
+
 ## Authored Analysis
 `results.md` is the generated factual report for the official study aggregate. New
 human or AI-authored interpretation belongs under `analysis/`.

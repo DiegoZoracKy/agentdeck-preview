@@ -6,10 +6,9 @@ Last updated: 2026-05-06
 
 The flagship study execution is **complete**. Hugging Face artifact storage is
 in place as a private draft, and the curated static viewer is deployed as a
-private Hugging Face Space. Current focus is final commit authorization, branch
-push, final code-reference links, optional deck/video production, and then final
-launch. Hugging Face public visibility remains a final step after the rest of
-this roadmap is complete.
+private Hugging Face Space. Current focus is local merge to `main`, optional
+deck/video production, and then final launch. Hugging Face public visibility
+remains a final step after the rest of this roadmap is complete.
 
 Branch `study/agentic-edge-strategy-stack`.
 
@@ -28,12 +27,11 @@ caveated by seat effects and non-significance.
 
 ## Immediate Work Order
 
-1. Get explicit commit authorization and commit the approved groups separately.
-2. Push the branch and update final GitHub commit links in the study docs.
-3. Re-run research validation after final pushed-commit metadata/doc updates.
-4. Produce the first visual deck/video draft from the vetted public-narrative
+1. Merge the approved local study branch into `main`.
+2. Re-run viewer and research validation from `main`.
+3. Produce the first visual deck/video draft from the vetted public-narrative
    sources and replay Space, if we want launch collateral before publication.
-5. Final launch: make the Hugging Face dataset and Space public, validate public
+4. Final launch: make the Hugging Face dataset and Space public, validate public
    URLs, and update any remaining launch wording.
 
 ## Current Study Package
@@ -309,11 +307,11 @@ Tasks:
   - Code reference commit: `d659bdf244d1f0462c0d43aa2609be6c3c4a7672`
   - Historical execution commits remain recorded separately in `matrix.yaml`
     `frozen_inputs`.
-- [ ] Confirm local study docs point to the final pushed commit/reference before
+- [x] Confirm local study docs point to the final package/viewer commit references before
   publication.
 - [ ] Add direct GitHub commit links to the study README/reproduction docs once
   the branch is pushed.
-- [ ] Re-run research validation after metadata/doc updates.
+- [x] Re-run research validation after metadata/doc updates.
 
 Exit criteria:
 
@@ -519,9 +517,9 @@ Tasks:
   - [x] public narrative material:
     - `research/2026-04-27-agentic-edge-strategy-stack/public_narrative/`
   - [x] legacy generated research refreshes:
-    - older `research/2026-03-*/results.{json,csv}` files regenerated under
-      the current results schema; review/commit separately from the flagship
-      package.
+    - older `research/2026-03-*/results.json` files normalized separately so
+      pairwise statistics only contain direct head-to-head comparisons under
+      the current validator.
   - [x] generated local run artifacts that should remain uncommitted:
     - no `agentdeck_runs/` directories are currently staged/tracked.
   - [x] unrelated local-only docs to keep out of this study branch unless
@@ -541,9 +539,8 @@ Tasks:
   - Include the analysis directory, generated package outputs, per-cell P1/P2/P3
     artifacts, study overview, viewer notes, recordings pointers, and public
     narrative package.
-  - Keep old March `research/2026-03-*/results.{json,csv}` refreshes out of
-    this study commit unless we intentionally create a separate generated
-    artifact-normalization commit.
+  - Historical March result normalization is committed separately as
+    `c29cbf1`.
 - [x] Decide exactly what to commit for engine/product polish.
   - Recommended commit group: `specs/SPEC-VIEWER.md`,
     `scripts/viewer_smoke_check.js`, `viewer/README.md`,
@@ -552,15 +549,15 @@ Tasks:
     `viewer/renderers/`.
   - This should be separate from the study-package commit so product/viewer
     evolution is reviewable on its own.
-- [ ] Only after explicit authorization: commit.
+- [x] Only after explicit authorization: commit.
 
 Release policy:
 
-- [ ] Do not commit the research package until explicitly authorized.
+- [x] Do not commit the research package until explicitly authorized.
 - [ ] Do not push or publish a new package version until the entire experiment
   package, writeup, artifact pointers, and any necessary engine polish are
   finished.
-- [ ] Keep engine/product polish tracked separately from research artifacts.
+- [x] Keep engine/product polish tracked separately from research artifacts.
 
 ## Research Workflow
 

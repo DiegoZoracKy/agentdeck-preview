@@ -22,6 +22,24 @@ Before live execution, record:
 - pricing snapshot
 - approved pilot/main/expansion budget limits
 
+## Code References
+
+The execution freeze and live-run notes remain in `matrix.yaml`. The published
+study package and viewer updates are represented locally by these commits:
+
+```text
+study_package_commit: e9dc6a77b3495dc80b6deed71b07a2af83c1cc64
+portable_viewer_commit: f98e05c5efbbb558594aaccd08fd370d92360d85
+curated_viewer_examples_commit: b8771c4d21ab5591b3d37aee44eaf307acaee13f
+implementation_reference_commit: d659bdf244d1f0462c0d43aa2609be6c3c4a7672
+```
+
+The implementation-reference commit is the code snapshot recorded in the
+Hugging Face metadata for game, controller, recorder, exporter, validator, and
+behavioral-scorer code. The study-package commit is the curated Git package
+state containing the final matrix, generated results, analysis, and
+documentation.
+
 ## Inspect the Matrix
 
 ```bash

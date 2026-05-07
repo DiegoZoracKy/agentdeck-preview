@@ -76,6 +76,18 @@ Latest curated replay Space snapshot:
 27ca787db947a393d21ed9847a8a4b44b2cbc317
 ```
 
+Local Git references for the package and viewer:
+
+```text
+study_package_commit: e9dc6a77b3495dc80b6deed71b07a2af83c1cc64
+portable_viewer_commit: f98e05c5efbbb558594aaccd08fd370d92360d85
+curated_viewer_examples_commit: b8771c4d21ab5591b3d37aee44eaf307acaee13f
+implementation_reference_commit: d659bdf244d1f0462c0d43aa2609be6c3c4a7672
+```
+
+The execution freeze remains documented in `matrix.yaml`; these local Git
+references document the curated package and viewer commits prepared for merge.
+
 The official aggregate includes the primary fixed-N study phase plus the
 targeted FixedDamage S1 ladder-completion cell.
 
