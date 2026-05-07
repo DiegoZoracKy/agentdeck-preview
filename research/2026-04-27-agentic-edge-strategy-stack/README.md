@@ -116,22 +116,15 @@ contains only the five curated viewer matches, not the full raw recording set.
 ## Code References
 
 The live runs and artifact generation used the execution freeze recorded in
-`matrix.yaml`. The current GitHub study package is represented locally by:
+`matrix.yaml`. Key GitHub commits:
 
-```text
-study_package_commit: e9dc6a77b3495dc80b6deed71b07a2af83c1cc64
-portable_viewer_commit: f98e05c5efbbb558594aaccd08fd370d92360d85
-curated_viewer_examples_commit: b8771c4d21ab5591b3d37aee44eaf307acaee13f
-```
+- Study package: [`e9dc6a77`](https://github.com/agentdeck/agentdeck/commit/e9dc6a77b3495dc80b6deed71b07a2af83c1cc64)
+- Portable viewer: [`f98e05c5`](https://github.com/agentdeck/agentdeck/commit/f98e05c5efbbb558594aaccd08fd370d92360d85)
+- Curated viewer examples: [`b8771c4d`](https://github.com/agentdeck/agentdeck/commit/b8771c4d21ab5591b3d37aee44eaf307acaee13f)
 
 The Hugging Face dataset also records the implementation/code-reference commit:
 
-```text
-d659bdf244d1f0462c0d43aa2609be6c3c4a7672
-```
-
-After this branch is merged and pushed, these hashes can be resolved through
-GitHub commit URLs.
+[`d659bdf2`](https://github.com/agentdeck/agentdeck/commit/d659bdf244d1f0462c0d43aa2609be6c3c4a7672)
 
 ## Authored Analysis
 `results.md` is the generated factual report for the official study aggregate. New

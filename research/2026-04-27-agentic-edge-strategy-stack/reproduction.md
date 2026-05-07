@@ -25,14 +25,12 @@ Before live execution, record:
 ## Code References
 
 The execution freeze and live-run notes remain in `matrix.yaml`. The published
-study package and viewer updates are represented locally by these commits:
+study package and viewer updates are represented by these GitHub commits:
 
-```text
-study_package_commit: e9dc6a77b3495dc80b6deed71b07a2af83c1cc64
-portable_viewer_commit: f98e05c5efbbb558594aaccd08fd370d92360d85
-curated_viewer_examples_commit: b8771c4d21ab5591b3d37aee44eaf307acaee13f
-implementation_reference_commit: d659bdf244d1f0462c0d43aa2609be6c3c4a7672
-```
+- Study package: [`e9dc6a77`](https://github.com/agentdeck/agentdeck/commit/e9dc6a77b3495dc80b6deed71b07a2af83c1cc64)
+- Portable viewer: [`f98e05c5`](https://github.com/agentdeck/agentdeck/commit/f98e05c5efbbb558594aaccd08fd370d92360d85)
+- Curated viewer examples: [`b8771c4d`](https://github.com/agentdeck/agentdeck/commit/b8771c4d21ab5591b3d37aee44eaf307acaee13f)
+- Implementation reference: [`d659bdf2`](https://github.com/agentdeck/agentdeck/commit/d659bdf244d1f0462c0d43aa2609be6c3c4a7672)
 
 The implementation-reference commit is the code snapshot recorded in the
 Hugging Face metadata for game, controller, recorder, exporter, validator, and
