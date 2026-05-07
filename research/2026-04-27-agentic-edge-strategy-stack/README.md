@@ -25,9 +25,9 @@ aggregate includes 432 matches from P2 and P3; P0 smoke tests and P1 pilot
 cells are excluded from topline claims.
 
 ## Why This Exists
-This package prepares the next flagship AgentDeck study. The study asks whether
-strategy stacks can change LLM agent behavior enough to overcome model-tier
-differences in sequential decision environments.
+This package contains the completed flagship AgentDeck study. The study asks
+whether strategy stacks can change LLM agent behavior enough to overcome
+model-tier differences in sequential decision environments.
 
 The package is intentionally matrix-first. `matrix.yaml` is the source of truth
 for pilot cells, prompt/config references, fairness policy, seed offsets, and
@@ -38,7 +38,7 @@ For the final project definition and public framing, see
 
 ## Design Snapshot
 - Games: `FixedDamageGame(information_level="partial")` and `VariableDamageGame(information_level="partial")`
-- Main model tiers in the pilot: Gemini Flash-Lite and GPT-4o-mini
+- Main live model tiers: Gemini Flash-Lite and GPT-4o-mini
 - Strategy conditions:
   - `S0_AO`: Action-only baseline
   - `S1_RC`: ReasoningController without explicit grounding
