@@ -20,6 +20,10 @@
 - Cells Included: 9
 <!-- AUTO_FACTS:END -->
 
+Note: 540 total staged matches were run across P0-P3. The official study
+aggregate includes 432 matches from P2 and P3; P0 smoke tests and P1 pilot
+cells are excluded from topline claims.
+
 ## Why This Exists
 This package prepares the next flagship AgentDeck study. The study asks whether
 strategy stacks can change LLM agent behavior enough to overcome model-tier

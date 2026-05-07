@@ -193,10 +193,13 @@ with AgentDeck(game=game, session=config) as deck:
 This repo ships release-facing benchmark packages, arc summaries, and a cross-game synthesis layer alongside the engine.
 
 Start here:
+- **[The Agentic Edge](research/2026-04-27-agentic-edge-strategy-stack/README.md)** - Flagship study: strategy-stack effects, FixedDamage tier inversion, VariableDamage caveats, and public replay artifacts
+- **[How To Run A Study](docs/how-to-run-a-study.md)** - Supported end-to-end workflow for creating, running, exporting, and validating a study
+
+Supporting arcs:
 - **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic flagship arc: diagnosis, intervention ladder, and final carry-forward stack
 - **[VariableDamage Arc 1](research/2026-03-26-variable-damage-arc-1/README.md)** - Uncertainty arc: risk-band metrics, transfer failures, and premium ceiling check
 - **[Cross-Game Comparison 1](research/2026-03-26-cross-game-comparison-1/README.md)** - What transferred, what broke, and why the metrics had to evolve
-- **[How To Run A Study](docs/how-to-run-a-study.md)** - Supported end-to-end workflow for creating, running, exporting, and validating a study
 
 Deeper references:
 - **[Research Guide](research/README.md)** - How experiment packages are organized
@@ -206,20 +209,16 @@ Deeper references:
 
 ---
 
-## 🚦 Release Status
+## 🚦 Current Capabilities
 
-AgentDeck is currently published as a **public beta**.
-
-Ready today:
+AgentDeck currently supports:
 - Core match execution through the `AgentDeck` facade
 - Provider-backed and mock-player experiments
 - Recording, replay, and event-driven observability
-- Native fairness controls for paired side-swap and diagnostic first-player policies
-- Research export, packaging, invariant validation, and post-hoc analysis workflows
-
-Not `1.0` yet:
-- The default benchmark regime is still evolving
-- Viewer and replay UI work are still a curated beta surface, not a stable product UI
+- Native fairness controls for paired side-swap and explicit first-player policies
+- Matrix-based research packages
+- Research export, artifact validation, behavioral profiles, and post-hoc analysis workflows
+- Curated replay/viewer workflows for selected studies
 
 ---
 
@@ -352,7 +351,6 @@ This provides rich data for analyzing AI behavior patterns.
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Workflow, local setup, tests
 - **[Specs](specs/SPEC.md)** - Specification index (source of truth)
-- **[ROADMAP.md](ROADMAP.md)** - Implementation progress and future plans
 - **[Examples](examples/README.md)** - Runnable examples and tutorials
 
 ### AI Assistants
