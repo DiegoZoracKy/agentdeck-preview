@@ -1,6 +1,6 @@
 """AgentDeck - Research platform for studying AI behavior through game scenarios."""
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Controller implementations
 from .controllers import ActionOnlyController, ReasoningController

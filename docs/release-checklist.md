@@ -1,12 +1,7 @@
 # Release Checklist
 
-This checklist tracks the next public package release. It is operational release
-prep, not a product roadmap.
-
-## Next Release Target
-
-- Version: `0.1.2`
-- Purpose: publish the public-launch cleanup after `0.1.1`
+This checklist tracks public package releases. It is operational release prep,
+not a product roadmap.
 
 ## Before Tagging
 
@@ -25,10 +20,10 @@ python -m build --sdist --wheel
 
 ## Release Steps
 
-- Bump `src/agentdeck/__init__.py` to `0.1.2`.
+- Bump `src/agentdeck/__init__.py`.
 - Build fresh `sdist` and wheel artifacts.
 - Publish to PyPI.
-- Create a GitHub Release for `v0.1.2` with concise release notes.
+- Create a GitHub Release for the version tag with concise release notes.
 - Verify the PyPI page, GitHub README, Hugging Face dataset, and Hugging Face
   Space point to consistent public surfaces.
 
