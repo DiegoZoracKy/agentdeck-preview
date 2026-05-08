@@ -4,7 +4,7 @@
 
 A research platform for analyzing AI agent behavior through game scenarios.
 
-[Why Games?](#-why-games) · [Quick Start](#-quick-start) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
+[Why Games?](#-why-games) · [Quick Start](#-quick-start) · [AI-First](#spec-driven-and-ai-first-by-design) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
 
 ---
 
@@ -15,6 +15,29 @@ AgentDeck helps you turn a behavioral question into a concrete study: define a g
 It is useful when static prompt-response evaluation is not enough. By putting agents inside structured games, AgentDeck makes state, incentives, and resource tradeoffs explicit so behavior is easier to observe, compare, replay, and explain.
 
 ![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
+
+---
+
+## 🚦 Current Capabilities
+
+AgentDeck currently supports:
+- Core match execution through the `AgentDeck` facade
+- Provider-backed and mock-player experiments
+- Recording, replay, and event-driven observability
+- Native fairness controls for paired side-swap and explicit first-player policies
+- Matrix-based research packages
+- Research export, artifact validation, behavioral profiles, and post-hoc analysis workflows
+- Curated replay/viewer workflows for selected studies
+
+---
+
+## Spec-Driven and AI-First by Design
+
+AgentDeck is human-led and AI-written: a codebase built with AI agents, designed for humans and AI agents, and validated through tests, replayable experiments, research artifacts, and blind QA rounds performed by autonomous agents.
+
+Specs are the source of truth. They define intent, contracts, boundaries, and expected behavior. Code, tests, docs, examples, and research workflows derive from that specification layer and are validated through execution.
+
+AgentDeck is therefore designed to be legible to both humans and AI agents, treating AI agents as first-class users, contributors, evaluators, and research operators.
 
 ---
 
@@ -222,21 +245,6 @@ Deeper references:
 - **[Research Index](research/INDEX.md)** - Registry of experiments and status
 - **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
 - **[Research Templates](research/_templates/)** - Boilerplate for new experiment packages
-
----
-
-## 🚦 Current Capabilities
-
-AgentDeck currently supports:
-- Core match execution through the `AgentDeck` facade
-- Provider-backed and mock-player experiments
-- Recording, replay, and event-driven observability
-- Native fairness controls for paired side-swap and explicit first-player policies
-- Matrix-based research packages
-- Research export, artifact validation, behavioral profiles, and post-hoc analysis workflows
-- Curated replay/viewer workflows for selected studies
-
----
 
 ## ⚙️ Architecture
 
