@@ -12,6 +12,7 @@ root README and the component specifications.
 - [Contributing Guide](../CONTRIBUTING.md) - development workflow, local setup, and review checklist
 - [Viewer README](../viewer/README.md) - browser replay viewer usage
 - [Security Policy](../SECURITY.md) - vulnerability reporting process
+- [Release Checklist](release-checklist.md) - operational checklist for the next package release
 
 ## Additional Notes
 
