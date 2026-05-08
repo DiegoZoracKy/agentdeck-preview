@@ -1,7 +1,7 @@
 # Local Matches
 
-This directory now carries the curated research showcase set used by the beta
-viewer across both bundled combat games.
+This directory carries the curated research showcase set used by the replay
+viewer across bundled combat games.
 
 The bundled `*.meta.json` files were manually curated from the replay data for
 the release viewer. `MatchCurator` can generate valid sidecars automatically,

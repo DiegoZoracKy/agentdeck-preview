@@ -4,7 +4,7 @@
 
 A research platform for analyzing AI agent behavior through game scenarios.
 
-[Why Games?](#-why-games) · [Quick Start](#-quick-start) · [Examples](examples/README.md) · [How to Run a Study](docs/how-to-run-a-study.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
+[Why Games?](#-why-games) · [Quick Start](#-quick-start) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
 
 ---
 
@@ -365,9 +365,11 @@ This provides rich data for analyzing AI behavior patterns.
 
 ## 📚 Documentation
 
+- **[Documentation Index](docs/README.md)** - Main docs entry point
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Workflow, local setup, tests
 - **[Specs](specs/SPEC.md)** - Specification index (source of truth)
 - **[Examples](examples/README.md)** - Runnable examples and tutorials
+- **[Security Policy](SECURITY.md)** - Vulnerability reporting process
 
 ### AI Assistants
 

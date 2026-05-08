@@ -1,8 +1,8 @@
 # AgentDeck Replay Viewer
 
-Browser-based replay viewer for AgentDeck match records. This is a beta offline
-surface: useful for inspecting and sharing replays, but secondary to the record
-contract itself.
+Browser-based replay viewer for AgentDeck match records. This is a curated
+replay surface: useful for inspecting and sharing replays, but secondary to the
+record contract itself.
 
 ## Quick Start
 
@@ -238,7 +238,7 @@ RendererRegistry.create(matchData, 'my-skin');
 
 - [SPEC-VIEWER.md](../specs/SPEC-VIEWER.md) - Viewer contract
 - [SPEC-RECORDER.md](../specs/SPEC-RECORDER.md) - Record schema
-- [ROADMAP.md](../ROADMAP.md) - Development roadmap
+- [VIEWER_STATUS.md](../VIEWER_STATUS.md) - Current scope and limits
 
 ## License
 
