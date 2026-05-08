@@ -331,7 +331,7 @@ Use these patterns as litmus tests while drafting.
 1. Gather feedback from the people reviewing the change.
 2. Iterate on checklist & template alignment.
 3. Finalize this guideline doc (mark Status as "Final").
-4. Reference it in `ROADMAP.md` once agreed.
+4. Reference it from the relevant spec or issue once agreed.
 5. Begin drafting SPEC-AGENTDECK.md using these guidelines.
 
 > _Please add comments, suggestions, or objections so we converge on a shared spec-writing discipline before diving into SPEC-AGENTDECK._  

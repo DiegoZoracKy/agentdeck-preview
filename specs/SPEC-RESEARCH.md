@@ -91,7 +91,7 @@ package-level aggregate wins when they did not directly face each other.
     - `compare_win_rates() -> ComparisonTable`
     - `print_comparison_table() -> None`
     - `export_markdown(path) -> None`
-- Beta note:
+- Scope note:
   - Cross-session comparison currently covers aggregated win-rate views and meta-analysis only.
   - Cross-session cost tables, performance tables, and generalized model-comparison matrices are out of scope for this release.
 
@@ -220,7 +220,7 @@ class ComparisonTable:
 - **RS7**: Post-hoc analysis tools MUST read from the unified session layout `agentdeck_runs/<session_id>/records/`.
 - **RS8**: Post-hoc analysis tools MUST fail fast with clear `FileNotFoundError` when the session directory, `records/`, or required batch recording is missing.
 - **RS9**: Post-hoc statistical analysis for completed sessions MUST derive player identities and outcomes from recorded batch summaries. It MAY use match JSONs indirectly via recorder-produced summaries, but it does not own artifact-integrity validation.
-- **RS10**: `ComparisonAnalysis` MUST support meta-analysis and win-rate comparison tables across multiple sessions. Broader cross-session tables are out of scope for this beta.
+- **RS10**: `ComparisonAnalysis` MUST support meta-analysis and win-rate comparison tables across multiple sessions. Broader cross-session tables are out of scope for this release.
 - **RS11**: Research spectators MUST remain thin wrappers that delegate to standalone analysis classes and MUST NOT duplicate analysis logic.
 
 ## 7. Data Flow & Interaction

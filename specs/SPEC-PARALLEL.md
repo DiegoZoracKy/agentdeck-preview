@@ -50,7 +50,7 @@
 - **Deterministic seeding:** worker scheduler MUST derive per-match seeds from `(base_seed + match_index)`; absence of seed keeps prior entropy semantics.  
 - **Event ordering:** spectators and recorder observe events replayed strictly by `match_index` (MATCH 0 → MATCH 1 → …) regardless of worker completion. Console MAY buffer early-completing matches until preceding indices have replayed, preserving live progress semantics.
 - **Session integrity:** console emits a single `SESSION_START`/`BATCH_START`/`MATCH_*` sequence even when matches execute in parallel.  
-- **Player order hook (v1.0 limitation):** the current beta implementation conservatively treats any game override of `get_player_order` as incompatible with parallel execution. Console MUST detect overrides of the base implementation and fall back to sequential execution with a warning.  
+- **Player order hook (v1.0 limitation):** the current implementation conservatively treats any game override of `get_player_order` as incompatible with parallel execution. Console MUST detect overrides of the base implementation and fall back to sequential execution with a warning.  
 - **Isolation:** each worker runs on deep-copied game and player instances with dedicated RNG; no mutable state is shared across matches.  
 - **Failure propagation:** first worker failure emits `BATCH_END` with partial results + error payload, and raises to caller. Best-effort cancellation of remaining workers is attempted but not guaranteed; results from failed matches are not counted.  
 - **Cloning failure:** if deep-copy fails for game or any player, console raises `ParallelExecutionError` before launching workers.

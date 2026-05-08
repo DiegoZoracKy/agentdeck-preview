@@ -638,7 +638,7 @@ def test_token_usage_tracker_handles_missing_usage():
 
 ## 11. Success Criteria
 
-**Phase 1 Success (from ROADMAP.md)**:
+**Phase 1 Success**:
 
 - [ ] TokenUsageTracker shows real costs (not $0.00)
 - [ ] Full action metadata pipeline restored (usage_info in ActionResult.metadata)
@@ -655,7 +655,6 @@ def test_token_usage_tracker_handles_missing_usage():
 - **SPEC-PLAYER** - ActionResult.metadata requirements
 - **SPEC-SPECTATOR** - TokenUsageTracker interface
 - **INTEGRATION_PROPOSAL.md** - Phase 1 pricing system requirements
-- **ROADMAP.md** - Task #14 checklist
 
 ---
 

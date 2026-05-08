@@ -30,6 +30,22 @@ Game scenarios work well because they make the important variables legible:
 
 ---
 
+## 🔎 Flagship Evidence
+
+The [Agentic Edge study](research/2026-04-27-agentic-edge-strategy-stack/README.md) uses AgentDeck to test whether agent design can overcome model-tier gaps in sequential decision games.
+
+In FixedDamage, the same lower-tier model moves from failure to a tier inversion as the agent wrapper changes:
+
+| Agent configuration | Opponent | Result |
+| --- | --- | --- |
+| FlashLite S0 action-only | GPT-4o-mini S0 action-only | 0/48 wins (0.0%) |
+| FlashLite S1 reasoning controller | GPT-4o-mini S0 action-only | 34/48 wins (70.8%) |
+| FlashLite S3 reasoning + HP grounding | GPT-4o-mini S0 action-only | 38/48 wins (79.2%) |
+
+The VariableDamage transfer result is more cautious: the adapted risk-grounded stack wins its same-model mechanism test, but the cross-tier result is seat-sensitive and not statistically strong. That caveat is the point: AgentDeck is built to expose behavior, not hide messy evidence.
+
+---
+
 ## 🚀 Quick Start
 
 > **Install**: `pip install agentdeck-ai` (import as `agentdeck`)

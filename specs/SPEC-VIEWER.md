@@ -3,7 +3,7 @@
 > **Status**: Final
 > **Version**: 0.6.0
 > **Last Updated**: 2026-05-05
-> **Implementation**: ✅ Offline beta surface (schema v1.3+ loader, local library, smoke-check, curation metadata UI, portable static bundle)
+> **Implementation**: ✅ Curated replay surface (schema v1.3+ loader, local library, smoke-check, curation metadata UI, portable static bundle)
 > **Audience**: Viewer developers, skin authors, integration engineers
 
 ## 1. Purpose
@@ -446,5 +446,4 @@ document.addEventListener('keydown', (e) => {
 
 - [SPEC-RECORDER.md](SPEC-RECORDER.md) v1.3 - Record schema
 - [SPEC-REPLAY.md](SPEC-REPLAY.md) - Python replay engine
-- [ROADMAP.md](../ROADMAP.md) - Implementation roadmap
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Development workflow

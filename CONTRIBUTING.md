@@ -614,7 +614,7 @@ Before submitting a PR, verify:
 - [ ] Specs updated if behavior changed
 - [ ] Docstrings added/updated with type hints
 - [ ] Examples work and are up-to-date
-- [ ] ROADMAP.md updated if needed
+- [ ] Public docs updated if needed
 
 ### Process
 - [ ] Phase A complete (specs approved) before implementation
@@ -718,7 +718,6 @@ Contributor: "SPEC-PRICING draft ready for review."
 
 - **[SPEC.md](specs/SPEC.md)** - Master specification and architectural principles
 - **[specs/GUIDELINES.md](specs/GUIDELINES.md)** - Complete specification authoring guidelines
-- **[ROADMAP.md](ROADMAP.md)** - Current task status and project phases
 - **[specs/](specs/)** - Component specifications
 - **[examples/](examples/)** - Working examples and tutorials
 
@@ -745,7 +744,6 @@ Contributor: "SPEC-PRICING draft ready for review."
 
 ### For Current Work, Use:
 - ✅ **`specs/`** - Component contracts and requirements
-- ✅ **`ROADMAP.md`** - Current priorities and status
 - ✅ **`CONTRIBUTING.md`** - Workflow and standards (this file!)
 
 ### Why This Matters:

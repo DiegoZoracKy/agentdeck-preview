@@ -67,8 +67,8 @@ jobs:
 
       - name: Run mypy (type check)
         run: |
-          # Note: 120+ type errors still exist in v0.1.1 (technical debt)
-          # Errors are displayed but don't block CI for preview release
+          # Note: existing type debt is tracked separately from the launch gate.
+          # Errors are displayed but don't block CI while strict typing is phased in.
           # Goal: Fix incrementally in v0.1.x releases
           mypy src/agentdeck --no-error-summary --no-pretty || true
 

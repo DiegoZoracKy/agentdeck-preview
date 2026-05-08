@@ -650,7 +650,7 @@ The observability system was implemented across seven phases:
 6. **Integration Testing** - Replay parity verification
 7. **Cleanup & Documentation** - Final polish and migration guide
 
-See `ROADMAP.md` for detailed implementation notes.
+Implementation history is preserved in git; this spec is the current contract.
 
 ---
 

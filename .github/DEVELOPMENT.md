@@ -205,7 +205,6 @@ pip install -e ".[dev]"
 ## Additional Resources
 
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
-- [ROADMAP.md](../ROADMAP.md) - Project roadmap
 - [specs/SPEC.md](../specs/SPEC.md) - Specification hub
 
 ## Getting Help
