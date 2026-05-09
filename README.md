@@ -18,19 +18,6 @@ It is useful when static prompt-response evaluation is not enough. By putting ag
 
 ---
 
-## 🚦 Current Capabilities
-
-AgentDeck currently supports:
-- Core match execution through the `AgentDeck` facade
-- Provider-backed and mock-player experiments
-- Recording, replay, and event-driven observability
-- Native fairness controls for paired side-swap and explicit first-player policies
-- Matrix-based research packages
-- Research export, artifact validation, behavioral profiles, and post-hoc analysis workflows
-- Curated replay/viewer workflows for selected studies
-
----
-
 ## Spec-Driven and AI-First by Design
 
 AgentDeck is human-led and AI-written: a codebase built with AI agents, designed for humans and AI agents, and validated through tests, replayable experiments, research artifacts, and blind QA rounds performed by autonomous agents.
