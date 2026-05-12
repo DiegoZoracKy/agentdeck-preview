@@ -4,7 +4,7 @@
 
 A research platform for analyzing AI agent behavior through game scenarios.
 
-[Why Games?](#-why-games) · [Quick Start](#-quick-start) · [AI-First](#spec-driven-and-ai-first-by-design) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Research](research/README.md) · [Specs](specs/SPEC.md)
+[Why Games?](#-why-games) · [Replay](#-run-record-replay) · [Quick Start](#-quick-start) · [Research](research/README.md) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Specs](specs/SPEC.md) · [AI-First](#spec-driven-and-ai-first-by-design)
 
 ---
 
@@ -18,13 +18,11 @@ It is useful when static prompt-response evaluation is not enough. By putting ag
 
 ---
 
-## Spec-Driven and AI-First by Design
+## 🎬 Run, Record, Replay
 
-AgentDeck is human-led and AI-written: a codebase built with AI agents, designed for humans and AI agents, and validated through tests, replayable experiments, research artifacts, and blind QA rounds performed by autonomous agents.
+Run AI-agent matches from Python, record every turn as structured artifacts, then replay the decisions in a browser viewer for inspection and storytelling.
 
-Specs are the source of truth. They define intent, contracts, boundaries, and expected behavior. Code, tests, docs, examples, and research workflows derive from that specification layer and are validated through execution.
-
-AgentDeck is therefore designed to be legible to both humans and AI agents, treating AI agents as first-class users, contributors, evaluators, and research operators.
+![AgentDeck CLI and Replay Viewer](docs/images/agentdeck-cli-plus-replay-viewer.gif)
 
 ---
 
@@ -366,13 +364,6 @@ This provides rich data for analyzing AI behavior patterns.
 - **[Examples](examples/README.md)** - Runnable examples and tutorials
 - **[Security Policy](SECURITY.md)** - Vulnerability reporting process
 
-### AI Assistants
-
-Project assistants for exploration, development, and research:
-
-[![GPT Assistant](https://img.shields.io/badge/GPT-AgentDeck-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/g/g-6923cdbde5648191a202c3f9a8a8796c-agentdeck)
-[![Gemini Gem](https://img.shields.io/badge/Gem-AgentDeck-4285F4?logo=google&logoColor=white)](https://gemini.google.com/gem/1i6xn0HwFMaCNNeo392WCw1yQQzEsUxix?usp=sharing)
-
 ---
 
 ## 🎯 Design Principles
@@ -385,6 +376,16 @@ Project assistants for exploration, development, and research:
 
 ---
 
+## Spec-Driven and AI-First by Design
+
+AgentDeck is human-led and AI-written: a codebase built with AI agents, designed for humans and AI agents, and validated through tests, replayable experiments, research artifacts, and blind QA rounds performed by autonomous agents.
+
+Specs are the source of truth. They define intent, contracts, boundaries, and expected behavior. Code, tests, docs, examples, and research workflows derive from that specification layer and are validated through execution.
+
+AgentDeck is therefore designed to be legible to both humans and AI agents, treating AI agents as first-class users, contributors, evaluators, and research operators.
+
+---
+
 ## 📝 License
 
 MIT License (see [LICENSE](LICENSE)).
@@ -392,5 +393,3 @@ MIT License (see [LICENSE](LICENSE)).
 ---
 
 **Built with ❤️ for AI researchers**
-
-*Spec-Driven Architecture for AI Behavioral Research*
