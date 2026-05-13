@@ -52,6 +52,10 @@ In FixedDamage, the same lower-tier model moves from failure to a tier inversion
 
 The VariableDamage transfer result is more cautious: the adapted risk-grounded stack wins its same-model mechanism test, but the cross-tier result is seat-sensitive and not statistically strong. That caveat is the point: AgentDeck is built to expose behavior, not hide messy evidence.
 
+Study artifacts are mirrored on Hugging Face:
+[dataset + recordings](https://huggingface.co/datasets/agentdeck/agentic-edge-strategy-stack-study) ·
+[curated replay viewer](https://agentdeck-agentic-edge-viewer.static.hf.space/)
+
 ---
 
 ## 🚀 Quick Start
