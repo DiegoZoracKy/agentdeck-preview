@@ -1,9 +1,9 @@
 # AgentDeck Observability & Event Specification
 
 > Status: Final
-> Version: 1.2.0
-> Last Updated: 2026-02-03
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Version: 2.0.0
+> Last Updated: 2026-05-30
+> Implementation: ⬜ Planned (canonical GameplayEventData v2 + recorder/replay parity)
 > Audience: Core developers, game authors, spectator authors
 
 ---
@@ -104,37 +104,39 @@ These fields enable faithful match replay per SPEC-REPLAY and support A/B testin
 
 ### 3.2 Structural Gameplay Event
 
-- `EventType.GAMEPLAY` replaces the old turn-centric event.  
-- Emitted once per phase by the execution helper (e.g., TurnLoop).  
-- Payload guarantees:
+- `EventType.GAMEPLAY` is the canonical mechanic-agnostic decision event.
+- Emitted once per phase by the execution helper (e.g., TurnLoop).
+- Payload shape is defined by [SPEC-GAMEPLAY-EVENT-DATA.md](SPEC-GAMEPLAY-EVENT-DATA.md).
+- Games **never** emit `GAMEPLAY` directly; they rely on the mechanic helper.
+
+Minimal shape:
 
 ```python
 {
-    "mechanic": "turn_based",           # or "simultaneous", "quiz", etc.
-    "phase_index": 0,                   # zero-based progression counter
-    "turn_index": 0,                    # alias for phase_index
-    "state_before": {...},              # deep copy
-    "state_after": {...},               # deep copy
-    # Optional mechanic annotations:
+    "mechanic": "turn_based",
+    "phase_index": 0,
+    "state_before": {...},
+    "state_after": {...},
     "player": "Alice",
     "action": {
-        "action": "ATTACK",
+        "value": "ATTACK",
         "reasoning": "...",
         "metadata": {...},
-        "raw_response": "ACTION: ATTACK",
     },
-    "prompt_text": "...",               # optional prompt transcript fields
-    "response_text": "...",
-    "prompt_blocks": [...],
-    "controller_metadata": {...},
-    "usage_info": {...},
-    "actions": {"Alice": "...", ...},   # simultaneous patterns
-    "response_times": {"Alice": 1.2},   # quiz/simul helpers
-    "turn_context": {...},              # richer metadata
+    "interaction": {
+        "prompt_text": "...",
+        "prompt_blocks": [...],
+        "response_text": "...",
+        "usage_info": {...},
+        "renderer_output": {...},
+        "controller_format": "...",
+        "controller_metadata": {...},
+    },
+    "turn_context": {...},
 }
 ```
 
-Games **never** emit `GAMEPLAY` directly; they rely on the mechanic helper.
+Structural gameplay events MUST NOT emit `turn_index`, `action.raw_response`, or top-level prompt transcript fields. Human-facing turn numbers belong in `turn_context`.
 
 ### 3.3 Domain Events
 
@@ -167,11 +169,10 @@ class Event:
 | `batch_id` | Optional[str] | Present between `BATCH_START`/`END`. |
 | `match_id` | Optional[str] | Present between `MATCH_START`/`END`. |
 | `phase_index` | Optional[int] | Zero-based; present during gameplay or domain events when known. |
-| `turn_index` | Optional[int] | Alias for `phase_index` (always matches `phase_index` value). |
 | `timestamp` | float | Wall-clock time (`time.time()`), or preserved emission timestamp when supplied by upstream replay/worker context. |
 | `monotonic_time` | float | Monotonic clock (`time.monotonic()`), or preserved emission monotonic value when supplied upstream. |
 
-Both `phase_index` and `turn_index` are set to the same value during gameplay events.
+`phase_index` is the only structural phase key. `turn_index` is intentionally not part of the v2 event envelope.
 
 ---
 
@@ -230,7 +231,6 @@ class GameEventEmitter:
         Automatically injects into the payload dict:
         - match_id (if set)
         - phase_index (if set)
-        - turn_index as alias for phase_index (if set)
 
         Games may override these by passing them explicitly in payload.
         """
@@ -241,7 +241,6 @@ class GameEventEmitter:
 
         if self._phase_index is not None:
             data.setdefault("phase_index", self._phase_index)
-            data.setdefault("turn_index", self._phase_index)  # Alias for phase_index
 
         self._event_bus.emit(event_type, **data)
 ```
@@ -250,7 +249,7 @@ Key points:
 
 - Games never interact with `EventBus` directly.
 - Constructor takes `match_id` directly (simpler than extracting from `MatchContext`).
-- **Both `phase_index` and `turn_index` are injected into the payload dict** when the execution layer has set them.
+- `phase_index` is injected into the payload dict when the execution layer has set it.
 - `EventBus` adds the remaining envelope (`session_id`, `timestamp`, `monotonic_time`, batch context).
 - Games may override auto-injected values by passing them explicitly in the payload.
 - Helper is **bound per match** and cleared in a `finally` block (mirrors `event_factory` binding).
@@ -302,43 +301,42 @@ class EventFactory:
             action: ActionResult from player.decide()
             state_before: Game state before action (will be deep-copied)
             state_after: Game state after action (will be deep-copied)
-            turn_context: Turn metadata (turn_number, turn_index, duration, rng)
+            turn_context: Turn metadata (turn_number, phase_index, duration, rng)
 
         Returns:
-            Event with:
-                type: "gameplay"
-                data: {
-                    match_id, player, mechanic, phase_index, turn_index,
-                    action: {
-                        action, reasoning, metadata, raw_response
-                    },
-                    state_before, state_after, turn_context,
-                    prompt_text, response_text, prompt_blocks,
-                    controller_metadata, controller_format,
-                    renderer_output, usage_info
-                }
-                context: {match_id, phase_index, turn_index}
+            Event with GameplayEventData v2 (SPEC-GAMEPLAY-EVENT-DATA.md):
+                action.value + action.reasoning + action.metadata
+                interaction.prompt_text + interaction.response_text + usage/cost metadata
+                state_before + state_after + turn_context
 
         Guarantees:
-            - Preserves the canonical nested `action` payload used by live turn recording
+            - Emits the canonical v2 payload used by live turn recording
             - Deep copies state_before and state_after (SPEC-GAME-MECHANIC-TURN-BASED EC1)
-            - Deep copies action metadata and prompt metadata to prevent mutations
+            - Deep copies action metadata and interaction metadata to prevent mutations
             - Sets mechanic="turn_based" (SPEC-GAME-MECHANIC-TURN-BASED EC2)
-            - Sets phase_index = turn_context.turn_index (SPEC-GAME-MECHANIC-TURN-BASED EC3)
+            - Sets phase_index = turn_context.phase_index (SPEC-GAME-MECHANIC-TURN-BASED EC3)
         """
+        metadata = copy.deepcopy(action.metadata) if hasattr(action, "metadata") else {}
         return Event(
             type="gameplay",
             data={
                 "match_id": self._match_id,
                 "mechanic": "turn_based",
-                "phase_index": turn_context.turn_index,
-                "turn_index": turn_context.turn_index,
+                "phase_index": turn_context.phase_index,
                 "player": player,
                 "action": {
-                    "action": action.action,
+                    "value": action.action,
                     "reasoning": action.reasoning if hasattr(action, 'reasoning') else None,
-                    "metadata": copy.deepcopy(action.metadata) if hasattr(action, 'metadata') else {},
-                    "raw_response": action.raw_response if hasattr(action, 'raw_response') else None,
+                    "metadata": metadata,
+                },
+                "interaction": {
+                    "prompt_text": metadata.get("prompt_text"),
+                    "prompt_blocks": metadata.get("prompt_blocks", []),
+                    "response_text": metadata.get("response_text") or getattr(action, "raw_response", None),
+                    "usage_info": metadata.get("usage_info"),
+                    "renderer_output": metadata.get("renderer_output"),
+                    "controller_format": metadata.get("controller_format"),
+                    "controller_metadata": metadata.get("controller_metadata"),
                 },
                 "state_before": copy.deepcopy(state_before),
                 "state_after": copy.deepcopy(state_after),
@@ -346,8 +344,7 @@ class EventFactory:
             },
             context={
                 "match_id": self._match_id,
-                "phase_index": turn_context.turn_index,
-                "turn_index": turn_context.turn_index,  # Alias for phase_index
+                "phase_index": turn_context.phase_index,
             }
         )
 
@@ -379,10 +376,9 @@ class EventFactory:
         context = {"match_id": self._match_id}
 
         if turn_context:
-            phase_index = turn_context.turn_index
+            phase_index = turn_context.phase_index
             data.setdefault("phase_index", phase_index)
             context["phase_index"] = phase_index
-            context["turn_index"] = phase_index  # Alias
 
         return Event(type=event_type, data=data, context=context)
 ```
@@ -497,24 +493,17 @@ This schema is consistent across MatchResult objects, MATCH_END events, and reco
 
 ### 9.2 Structural Gameplay (framework-owned)
 
+`SPEC-GAMEPLAY-EVENT-DATA.md` is authoritative. This table is a navigation summary.
+
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
 | `mechanic` | str | ✓ | `"turn_based"`, `"simultaneous"`, `"quiz"`, etc. |
 | `phase_index` | int | ✓ | Zero-based canonical counter. |
-| `turn_index` | int | ✓ | Alias for `phase_index`. |
 | `state_before` | Dict | ✓ | Deep copy for replay. |
 | `state_after` | Dict | ✓ | Deep copy for replay. |
 | `player` | str | Optional | Present in sequential mechanics. |
-| `action` | Dict | Optional | Canonical action object with `action`, `reasoning`, `metadata`, and optional `raw_response`. |
-| `prompt_text` | str | Optional | Prompt transcript text when available. |
-| `response_text` | str | Optional | Raw model response when available. |
-| `prompt_blocks` | List[Dict] | Optional | PromptBuilder metadata when available. |
-| `controller_metadata` | Dict | Optional | Parsed controller metadata when available. |
-| `controller_format` | str | Optional | Controller format instructions when available. |
-| `usage_info` | Dict | Optional | Token/cost/latency payload when available. |
-| `renderer_output` | Dict | Optional | Renderer metadata when available. |
-| `actions` | Dict[str, str] | Optional | Simultaneous style. |
-| `response_times` | Dict[str, float] | Optional | Quiz/simul metadata. |
+| `action` | Dict | ✓ | Canonical action object with `value`, `reasoning`, and `metadata`. |
+| `interaction` | Dict | ✓ | Prompt, response, usage, renderer, and controller metadata. |
 | `turn_context` / `round_context` | Dict | Optional | Mechanic-specific context dictionaries. |
 
 ### 9.3 Domain Events (game-owned)
@@ -536,7 +525,7 @@ class AuctionGame(TurnBasedGame):
         return {"bids": {p: 0 for p in players}, "leader": None}
 
     def update(self, state, player, action, *, rng):
-        bid = int(action.action)
+        bid = int(action.action)  # Game update receives ActionResult; GAMEPLAY events serialize this as action.value.
         previous = state["leader"]
         state["bids"][player] = bid
         if previous is None or bid > state["bids"][previous]:
@@ -617,10 +606,11 @@ See SPEC-SPECTATOR §5.5 and SPEC-CONSOLE §6.8 P4 for complete logger injection
 
 ## 11. Replay & Recording
 
-- Recorder serializes the entire event stream (`Event` objects).  
-- Domain payloads **must** be JSON-serializable.  
-- Replay rehydrates `EventContext` faithfully and replays events in order.  
-- `ReplayEngine` emits the same `Event` objects observers would receive live.  
+- Recorder serializes the event stream as canonical event payloads.
+- `GAMEPLAY` data MUST follow `SPEC-GAMEPLAY-EVENT-DATA.md` and be written by Recorder v2.0 without structural reshaping.
+- Domain payloads **must** be JSON-serializable.
+- Replay rehydrates `EventContext` faithfully and replays events in order.
+- `ReplayEngine` emits the same event payloads observers would receive live.
 - Custom events need no special handling; they flow through the recorder identically.
 
 ---
@@ -725,17 +715,16 @@ class PromptAnalyzer:
     def _capture_prompt(self, event: Event, phase: str) -> None:
         """Extract prompt metadata from any player lifecycle event."""
         data = event.data
-        prompt = data.get("prompt", {})
         self.prompt_log.append({
             "phase": phase,
             "player": data["player"],
             "match_id": data.get("match_id"),
-            "prompt_text": prompt.get("prompt_text"),
-            "prompt_blocks": prompt.get("prompt_blocks"),
-            "response_text": prompt.get("response_text"),
-            "renderer_output": prompt.get("renderer_output"),
-            "controller_format": prompt.get("controller_format"),
-            "controller_metadata": prompt.get("controller_metadata"),
+            "prompt_text": data.get("prompt_text"),
+            "prompt_blocks": data.get("prompt_blocks"),
+            "response_text": data.get("response_text"),
+            "renderer_output": data.get("renderer_output"),
+            "controller_format": data.get("controller_format"),
+            "controller_metadata": data.get("controller_metadata"),
         })
 
     def on_player_handshake_complete(self, event: Event) -> None:
@@ -769,7 +758,7 @@ class PromptAnalyzer:
 | **GameEventEmitter** | Injects match context; sets/clears phase index; refuses to emit when unbound. |
 | **Execution helpers** | `TurnLoop` sets phase index correctly; emits `GAMEPLAY` with zero-based counter; binds/unbinds helpers in `finally`. |
 | **Player Lifecycle Events** | Emits `PLAYER_HANDSHAKE_START` → `PLAYER_HANDSHAKE_COMPLETE|ABORT` before first turn; emits `PLAYER_ACTION_PARSE_FAILED` on parsing failures; emits `PLAYER_CONCLUSION` before `MATCH_END` when enabled; includes full prompt metadata and failure diagnostics. |
-| **Recorder/Replay** | Round-trip structural + domain events; ensure replays recreate the same `Event` objects; verify prompt metadata preserved. |
+| **Recorder/Replay** | Round-trip structural + domain events; ensure replay emits the same canonical payloads live spectators received; verify interaction/prompt metadata preserved. |
 | **Spectators** | Example spectators receive both structural and domain events; `event.context` contains expected metadata; JSON serialization validated. |
 
 Automated tests should cover:
@@ -777,7 +766,7 @@ Automated tests should cover:
 - Multiple custom events per phase; correct `phase_index`.
 - Spectator errors (ensure logging via `EventBus`).
 - Missing JSON serialization raises early (e.g., by validating in recorder).
-- Replay integrity: recorded stream matches live stream.
+- Replay integrity: recorded stream matches live stream with deep structural comparison of `GAMEPLAY` data.
 - **Handshake phase**: Verify `PLAYER_HANDSHAKE_START` emitted before `PLAYER_HANDSHAKE_COMPLETE|ABORT`; verify prompt metadata fields (`prompt_text`, `prompt_blocks`, `response_text`, `renderer_output`, `controller_format`, `controller_metadata`) present in COMPLETE/ABORT events.
 - **Parse failure phase**: Validate `PLAYER_ACTION_PARSE_FAILED` is emitted before policy resolution, includes serialized ParseResult, policy outcome, and optional prompt snapshot.
 - **Conclusion phase**: Verify `PLAYER_CONCLUSION` emitted for policy-selected players (even if reflection is empty); verify prompt metadata present.
@@ -802,6 +791,7 @@ Automated tests should cover:
 
 - `SPEC.md` — Vision, architecture overview, success criteria.
 - `CONTRIBUTING.md` — Engineering philosophy and workflow guidelines.
+- `SPEC-GAMEPLAY-EVENT-DATA.md` — Canonical structural gameplay payload.
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` — TurnLoop orchestration, EventFactory integration, StateAdapter, parse failure propagation.
 - `SPEC-CONSOLE.md` — Match orchestration, lifecycle event emission, parse failure handling, logger injection.
 - `SPEC-SPECTATOR.md` — Spectator contract, logger injection, error isolation.

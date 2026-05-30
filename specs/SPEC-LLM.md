@@ -91,7 +91,7 @@
 
 ### 5.6 Prompt Metadata Capture (PM)
 18. **PM1**: `_invoke_model` MUST return metadata dict containing `usage_info` (tokens, cost, latency_ms, model, provider) for Player to include in `ActionResult.metadata` / `HandshakeResult.metadata`.
-19. **PM2**: Metadata MUST include `response_text` (raw LLM output before controller parsing) so Recorder can embed it in the event `prompt` payload (SPEC-RECORDER v1.3 §6.7).
+19. **PM2**: Metadata MUST include `response_text` (raw LLM output before controller parsing) so Recorder can preserve it in lifecycle payloads or gameplay `interaction` payloads (SPEC-RECORDER v2.0 §6.7).
 20. **PM3**: MUST capture phase context (`phase: LifecyclePhase`) in metadata to distinguish handshake/turn/conclusion calls in recorder events.
 21. **PM4**: All metadata values MUST be JSON-serializable (no lambda functions, no non-serializable SDK objects).
 

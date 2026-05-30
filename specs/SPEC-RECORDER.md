@@ -1,9 +1,9 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
 > Status: Final
-> Version: 1.3.1
-> Last Updated: 2026-03-17
-> Implementation: ✅ Complete (schema v1.3 event enrichment)
+> Version: 2.0.0
+> Last Updated: 2026-05-30
+> Implementation: ⬜ Planned (canonical event persistence)
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose
@@ -26,8 +26,9 @@
 - **Game Configuration Capture**: Record game settings (`information_level`, `allowed_actions`) and persist player configuration snapshots (model, controller, key parameters) via `player_summaries` for reproducibility and provenance.
 - **API Usage Tracking**: Aggregate token counts, costs, latencies across LLM calls via the built-in `APIUsageTracker`.
 - **Batch Aggregation**: Produce batch summary files with match references and aggregate statistics (win rates, turn counts).
-- **Schema Versioning**: Tag recordings with schema version (`1.3` for match recordings, `1.0` for batches) and enforce exact version checks in `load_match()` for current-only validation.
-- **Normalization**: Provide `load_match()` utility that normalizes current schema artifacts into a consistent structure.
+- **Schema Versioning**: Tag recordings with schema version (`2.0` for match recordings, `1.0` for batches) and enforce exact version checks in `load_match()` for current-only validation.
+- **Canonical Event Persistence**: Persist framework events without structural reshaping so live and replay spectators receive equivalent payloads.
+- **Normalization**: Provide `load_match()` utility that validates current schema artifacts into a consistent structure without accepting legacy gameplay shapes.
 ## 4. Data Structures
 
 ### MatchRecording (Internal)
@@ -38,7 +39,7 @@ class MatchRecording:
     match_id: str
     game_name: str
     players: List[str]
-    schema_version: str = "1.3"
+    schema_version: str = "2.0"
     schema_type: str = "match"  # Required by SV1
     metadata: Dict[str, Any]
     events: List[Dict[str, Any]] = field(default_factory=list)
@@ -102,7 +103,7 @@ class RecorderCollector(Protocol):
 
 ## 5. Public API
 
-### Recorder(output_dir="agentdeck_records", *, session=None, collectors=None, schema_version="1.3")
+### Recorder(output_dir="agentdeck_records", *, session=None, collectors=None, schema_version="2.0")
 
 Create Recorder instance with optional session binding and custom collectors.
 
@@ -110,7 +111,7 @@ Create Recorder instance with optional session binding and custom collectors.
 - `output_dir`: Base directory for recordings (defaults to `records/`). When a session is bound the recorder MUST redirect writes to `{run_dir}/{session_id}/records/`.
 - `session`: `SessionContext` for accessing session ID, seed, directories (bound automatically by Console).
 - `collectors`: List of `RecorderCollector` instances for extended data capture.
-- `schema_version`: Schema version tag (default `"1.3"` for match recordings with enriched prompt metadata events and parse failure support).
+- `schema_version`: Schema version tag (default `"2.0"` for match recordings with canonical gameplay payloads and verbatim event persistence).
 
 **Guarantees**:
 - MUST create output directory if missing (uses `session.record_directory` when session bound).
@@ -159,16 +160,16 @@ Late-binding helper for attaching session context after construction.
 - MUST preserve timing context and flush progressively.
 
 #### on_gameplay(event: Event)
-- Extracts `state_before`, `state_after`, `action`, `reasoning`, and `metadata` from the GAMEPLAY event.
-- Deep copies state snapshots to prevent mutation; preserves `phase_index`, `turn_index`, `mechanic`, and `turn_context` when present.
+- Persists canonical `GameplayEventData` from the GAMEPLAY event as defined by `SPEC-GAMEPLAY-EVENT-DATA.md`.
+- Deep copies state snapshots to prevent mutation; preserves `phase_index`, `mechanic`, and `turn_context` when present.
 - MUST sanitize engine-internal state keys (prefix `_`) from recorded gameplay `state_before` / `state_after` payloads.
-- MUST embed prompt metadata directly in the recorded event under a `prompt` payload (PM1-PM6) when supplied by the controller/action metadata.
-- MUST extract API usage from `metadata.get("usage_info")` and aggregate via `APIUsageTracker`.
+- MUST NOT flatten `action`, split `reasoning`, or move interaction fields under a `prompt` payload.
+- MUST extract API usage from `event.data["interaction"]["usage_info"]` and aggregate via `APIUsageTracker`.
 - Invokes collector `on_gameplay()` hooks.
 - **MUST flush match file progressively** after processing.
 
 #### on_player_action_parse_failed(event: Event)
-- Captures controller parsing failures (schema v1.3).
+- Captures controller parsing failures.
 - MUST append event entry containing: `player`, `turn_number`, `match_id`, `timestamp`, `monotonic_time`, serialized `parse_result` (success, error, raw_response, candidates, metadata), `policy_outcome`, and any available prompt snapshot (PM1-PM6 fields).
 - MUST flush immediately after recording the failure to guarantee durability.
 
@@ -199,7 +200,7 @@ Late-binding helper for attaching session context after construction.
 Load match JSON from disk and normalize structure.
 
 **Guarantees**:
-- MUST enforce `schema_version` presence and exact compatibility with the current match schema (`1.3`).
+- MUST enforce `schema_version` presence and exact compatibility with the current match schema (`2.0`).
 - MUST normalize `metadata["match_id"]` (falls back to filename stem if missing).
 - MUST return consistent structure: `{schema_version, events, winner, final_state, seed, metadata, api_usage_summary, collector_data}`.
 - MUST raise `ValueError` for missing/unsupported schema versions.
@@ -218,9 +219,9 @@ Load match JSON from disk and normalize structure.
 6. **AW3**: MUST generate deterministic filenames (`{match_id}.json`, `batch_{batch_id}.json`) within resolved output directory.
 
 ### 6.3 Schema Versioning (SV)
-7. **SV1**: MUST tag all recordings with `schema_version` field (currently `"1.3"` for match recordings with enriched prompt events, `"1.0"` for batch recordings) and `schema_type` field (`"match"` or `"batch"`).
+7. **SV1**: MUST tag all recordings with `schema_version` field (currently `"2.0"` for match recordings with canonical event payloads, `"1.0"` for batch recordings) and `schema_type` field (`"match"` or `"batch"`).
 8. **SV2**: MUST enforce schema version checks in `load_match()` and raise `ValueError` for missing or incompatible versions.
-9. **SV3**: MUST validate against the exact current match schema version (`1.3`) in `load_match()` (no major-version wildcard acceptance).
+9. **SV3**: MUST validate against the exact current match schema version (`2.0`) in `load_match()` (no major-version wildcard acceptance).
 
 ### 6.4 Metadata Completeness (MC)
 10. **MC1**: MUST capture match metadata: `match_id`, `session_id`, `batch_id`, `started_at`, `ended_at`, `duration_seconds`, `winner`, `seed` (per-match seed), `players` (ordered list post-ordering), `player_order` (original indices in effective order), `player_order_source` (console/game), `first_player` (actual first actor with original `index` and `ordered_index`), and `fairness_policy` when supplied by Console.
@@ -241,18 +242,22 @@ Load match JSON from disk and normalize structure.
 18. **SR4**: MUST record complete player ordering metadata (per SPEC-CONSOLE M4 and SPEC-OBSERVABILITY §9.1): `players` (ordered list post-ordering), `player_order` (List[int] of original indices in effective order), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int, "ordered_index": int}, resolved to actual first actor), and `fairness_policy` when supplied by Console.
 
 ### 6.6 API Usage & Collectors (UC)
-19. **UC1**: MUST extract `usage_info` from `ActionResult.metadata` during `on_gameplay()` when present.
+19. **UC1**: MUST extract `usage_info` from `event.data["interaction"]["usage_info"]` during `on_gameplay()` when present.
 20. **UC2**: MUST aggregate per-match totals: `total_calls`, `total_tokens`, `total_cost`, `average_latency_ms`, `models_used`.
 21. **UC3**: MUST include `api_usage_summary` in match recordings when usage data is present.
 22. **UC4**: MUST invoke collector hooks (`on_match_start`, `on_gameplay`, `on_match_end`) in registration order when collectors configured.
 23. **UC5**: MUST namespace collector outputs by class name (dedupe via suffix) to avoid collisions in `collector_data`.
 24. **UC6**: MUST tolerate collector errors without destabilizing recording (errors logged but not propagated).
 
-### 6.7 Prompt Metadata Capture (PM)
+### 6.7 Prompt / Interaction Metadata Capture (PM)
 
-**Status**: Finalized for schema `1.3`.
+**Status**: Finalized for schema `2.0`.
 
-Recorder embeds prompt metadata directly inside the lifecycle events captured in the `events` array. Handshake, turn, conclusion, and parse-failure events each carry a `prompt` payload describing the full exchange (no separate dialogue array).
+Recorder v2.0 serializes events in the shape emitted by Core. It MUST NOT reshape live event payloads while writing JSON.
+
+- `GAMEPLAY` events carry LLM I/O under `event.data["interaction"]` per `SPEC-GAMEPLAY-EVENT-DATA.md`.
+- Player lifecycle and parse-failure events carry the prompt metadata fields emitted by Console for those event types.
+- ReplayEngine MUST re-emit the same payload shape read from disk.
 
 **Requirements**:
 
@@ -266,53 +271,45 @@ Recorder embeds prompt metadata directly inside the lifecycle events captured in
 
 **Normalized Prompt Payload**:
 
-Recorder stores prompt metadata under a `prompt` object within each recorded event:
+For `GAMEPLAY`, Recorder stores prompt and response metadata under the canonical `interaction` object:
 
 ```python
 {
-  "type": "player_handshake_complete",  # or player_handshake_abort, gameplay, player_conclusion, player_action_parse_failed
+  "type": "gameplay",
   "data": {
     "player": "Alice",
-    "accepted": True,
-    "normalized_response": "OK",
-    "prompt": {
-      "phase": "handshake",
-      "turn_number": None,
+    "action": {"value": "ATTACK", "reasoning": "...", "metadata": {...}},
+    "interaction": {
       "prompt_text": "You are playing FixedDamageGame...",
       "prompt_blocks": [...],
-      "response_text": "OK",
-      "controller_format": "Reply with OK",
-      "controller_metadata": {"accepted": True},
+      "response_text": "ACTION: ATTACK",
+      "controller_format": "Reply with ACTION",
+      "controller_metadata": {"validated": True},
       "renderer_output": null,
       "usage_info": {"tokens": 12, "cost": 0.0001},
-      "call_id": "ab12cd34",
-      "duration": 0.234,
-      "retries": 0
     }
   },
   "timestamp": 1705499452.123,
   "duration": 0.234,
-  "context": {"match_id": "match_123", "session_id": "session_abc", "phase_index": None}
+  "context": {"match_id": "match_123", "session_id": "session_abc", "phase_index": 0}
 }
 ```
 
-- `phase` MUST be one of `handshake`, `turn`, `conclusion`, or `parse_failure`.
-- `turn_number` MUST hold the 1-based turn number for turn/parse_failure events (`null` for handshake/conclusion).
-- `renderer_output`, `usage_info`, and `retries` are optional but SHOULD be included when provided by upstream components.
+- `renderer_output` and `usage_info` are optional but SHOULD be included when provided by upstream components.
 - `call_id` is optional but SHOULD be included when exposed by upstream player metadata.
 
-**Metadata Sources**: Per `SPEC-PLAYER.md` and `SPEC-OBSERVABILITY.md` §3.1.1, lifecycle events already expose the required fields. Recorder MUST deep-copy these payloads to avoid later mutation.
+**Metadata Sources**: Per `SPEC-PLAYER.md`, `SPEC-OBSERVABILITY.md`, and `SPEC-GAMEPLAY-EVENT-DATA.md`, Core events already expose the required fields. Recorder MUST deep-copy these payloads to avoid later mutation.
 
 ### Parse Failure Capture (PF)
 31. **PF1**: Recorder MUST persist `PLAYER_ACTION_PARSE_FAILED` events with full context (`parse_result`, `policy_outcome`, optional prompt snapshot) exactly as emitted by Console (SPEC-OBSERVABILITY §3.1.2).
-32. **PF2**: Recorded parse-failure events MUST include a `prompt` payload with `phase="parse_failure"`, `turn_number`, `prompt_text`, `prompt_blocks`, and raw `response_text` so downstream tools can analyze the failing exchange without a separate transcript structure.
+32. **PF2**: Recorded parse-failure events MUST preserve the prompt fields emitted by Console so downstream tools can analyze the failing exchange without a separate transcript structure.
 
 **Template Provenance** (already captured per MC3):
 - Template sources (`inline` vs `file:path/to/template.txt`)
 - Controller format instructions (strict parser expectations)
 - Game-specific `allowed_actions` bound to controller
 
-**Alignment**: Player lifecycle events are fully defined in `SPEC-OBSERVABILITY.md` §3.1.1-3.1.2. This spec defines the event serialization contract (prompt payload embedding, parse-failure capture) for Recorder schema `1.3`. See `SPEC-REPLAY.md` for how replays reconstruct lifecycle events from the enriched `events` stream.
+**Alignment**: Player lifecycle events are fully defined in `SPEC-OBSERVABILITY.md` §3.1.1-3.1.2. Gameplay interaction payloads are defined in `SPEC-GAMEPLAY-EVENT-DATA.md`. This spec defines the event serialization contract for Recorder schema `2.0`. See `SPEC-REPLAY.md` for how replays emit the persisted `events` stream.
 
 ## 7. Data Flow & Interaction
 
@@ -426,7 +423,7 @@ deck = AgentDeck(recorder=recorder, session=config)
 
 ```json
 {
-  "schema_version": "1.3",
+  "schema_version": "2.0",
   "schema_type": "match",
  "match_id": "20250121_143052",
   "batch_id": "exec_001",
@@ -457,22 +454,16 @@ deck = AgentDeck(recorder=recorder, session=config)
         "player": "Alice",
         "accepted": true,
         "normalized_response": "OK",
-        "prompt": {
-          "phase": "handshake",
-          "turn_number": null,
-          "prompt_text": "You are playing FixedDamageGame...\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
-          "prompt_blocks": [
-            {"key": "game_instructions", "content": "You are playing...", "length": 45},
-            {"key": "controller_format", "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.", "length": 80}
-          ],
-          "response_text": "OK",
-          "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
-          "controller_metadata": {"accepted": true, "normalized_response": "OK"},
-          "renderer_output": null,
-          "usage_info": {"tokens": 12, "cost": 0.0001, "latency_ms": 234},
-          "duration": 0.234,
-          "retries": 0
-        }
+        "prompt_text": "You are playing FixedDamageGame...\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {"key": "game_instructions", "content": "You are playing...", "length": 45},
+          {"key": "controller_format", "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.", "length": 80}
+        ],
+        "response_text": "OK",
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "controller_metadata": {"accepted": true, "normalized_response": "OK"},
+        "renderer_output": null,
+        "usage_info": {"tokens": 12, "cost": 0.0001, "latency_ms": 234}
       }
     },
     {
@@ -495,13 +486,15 @@ deck = AgentDeck(recorder=recorder, session=config)
         "mechanic": "turn_based",
         "phase_index": 0,
         "player": "Alice",
-        "action": "ATTACK",
-        "reasoning": "Attack is best strategy",
+        "action": {
+          "value": "ATTACK",
+          "reasoning": "Attack is best strategy",
+          "metadata": {"validated": true}
+        },
         "state_before": {"health": {"Alice": 100, "Bob": 100}, "potions": {"Alice": 3, "Bob": 3}},
         "state_after": {"health": {"Alice": 100, "Bob": 80}, "potions": {"Alice": 3, "Bob": 3}},
-        "prompt": {
-          "phase": "turn",
-          "turn_number": 1,
+        "turn_context": {"turn_number": 1, "duration": 1.234},
+        "interaction": {
           "prompt_text": "Current game state:\n...\n\nWhat is your action?",
           "prompt_blocks": [
             {"key": "game_view", "content": "Current game state...", "length": 150},
@@ -511,9 +504,7 @@ deck = AgentDeck(recorder=recorder, session=config)
           "controller_format": "Respond with one of: ATTACK, POTION",
           "controller_metadata": {"validated": true, "candidates": ["ATTACK", "POTION"]},
           "renderer_output": {"sections": ["game_view"], "total_length": 150},
-          "usage_info": {"tokens": 150, "cost": 0.002, "latency_ms": 1234},
-          "duration": 1.234,
-          "retries": 0
+          "usage_info": {"tokens": 150, "cost": 0.002, "latency_ms": 1234}
         }
       }
     },
@@ -718,7 +709,7 @@ For perfect reproducibility, recordings MUST capture:
 - Should `load_match()` support loading from URLs or just local paths?
 - Do we need a `RecorderConfig` dataclass for advanced options (compression, flush frequency)?
 - Should batch files include aggregated API usage across all matches?
-- Migration strategy for schema version 2.0 (if needed)?
+- One-shot historical record conversion lives outside runtime compatibility; see `docs/planning/ROADMAP-MATCH-SURFACE.md`.
 
 ### Usability
 - Should we provide helper methods for extracting template file references from recordings?
@@ -734,5 +725,5 @@ For perfect reproducibility, recordings MUST capture:
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` (turn execution, EventFactory integration, parse failure propagation)
 - `SPEC-AGENTDECK.md` (SessionState, MatchResult structures)
 - `SPEC-GAME.md` (game configuration, `information_level`, `allowed_actions`, parse-failure policy hook)
-- `SPEC-REPLAY.md` (Replay requirements using enriched event prompt metadata)
+- `SPEC-REPLAY.md` (Replay requirements using canonical event payloads)
 - Implementation: `src/agentdeck/core/recorder.py`

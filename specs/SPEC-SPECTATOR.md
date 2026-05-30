@@ -1,9 +1,9 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 1.5.0
-> Last Updated: 2026-04-01
-> Implementation: ✅ Complete (reporter default + logger injection) / 🚧 Planned (curator sidecars)
+> Version: 2.0.0
+> Last Updated: 2026-05-30
+> Implementation: ⬜ Planned (canonical GameplayEventData v2 + Match Surface projector)
 > Audience: Spectator authors, analytics engineers, observability contributors
 
 ## 1. Purpose
@@ -41,10 +41,10 @@
     - **Domain events**: `on_event(event: Event, context=None)`, `on_<custom_event>(event: Event)` (game-specific)
     - **Logging**: `on_log(message, level, log_context, context=None)`
   - Optional event-specific handlers routed by `EventBus` / replay:
-    - **Player lifecycle** (Recorder schema v1.3): `on_player_handshake_start(event: Event)`, `on_player_handshake_complete(event: Event)`, `on_player_handshake_abort(event: Event)`, `on_player_conclusion(event: Event)`
+    - **Player lifecycle**: `on_player_handshake_start(event: Event)`, `on_player_handshake_complete(event: Event)`, `on_player_handshake_abort(event: Event)`, `on_player_conclusion(event: Event)`
   - Helper: `context_from(context) -> SpectatorContext` (convert EventContext dict to typed object)
 - Spectators MAY override any subset of handlers; unimplemented handlers are silently skipped (duck-typing).
-- Prompt metadata for handshake/turn/conclusion/parse_failure events is exposed via `event.data["prompt"]` (Recorder schema v1.3). Spectators SHOULD read prompt transcripts from this payload rather than expecting separate dialogue callbacks.
+- Gameplay prompt/response metadata is exposed via `event.data["interaction"]` per `SPEC-GAMEPLAY-EVENT-DATA.md`. Player lifecycle prompt metadata is exposed in the lifecycle event payload exactly as emitted by Console. Spectators SHOULD consume those canonical payloads rather than accepting multiple historical shapes.
 
 ## 5. Reference Spectators
 
@@ -59,6 +59,7 @@
 
 - **Purpose**: Generate viewer-ready curation metadata for a recorded match without changing the underlying match JSON.
 - **Scope**: `MatchCurator` consumes live or replayed match events, assembles a full match snapshot, and MAY write a `*.meta.json` sidecar adjacent to a recording or to an explicit output path.
+- **Canonical input**: v2 implementations consume `GameplayEventData` and MUST NOT normalize old flat-action/nested-prompt gameplay shapes.
 - **Output contract**: The sidecar is the portable artifact. It contains:
   - `subtitle`: short lesson-oriented summary for the picker
   - `synopsis`: compact narrative summary naming the decisive event
@@ -66,6 +67,13 @@
   - `transcript` (optional): richer turn-by-turn commentary kept out of the runtime manifest
 - **Generation strategy**: The curation strategy is pluggable. Implementations MAY use deterministic heuristics, an injected callable, or provider-backed analysis. The stable contract is the sidecar payload, not the generation mechanism.
 - **Usage**: MatchCurator is intended for replay-driven post-analysis (`ReplayEngine(...).replay(spectators=[MatchCurator(...)])`) and curated showcase pipelines.
+
+### MatchSurfaceProjector (Core / Viewer Projection)
+
+- **Purpose**: Produce the stable Match Surface protocol consumed by viewer fronts such as agentdeck.tv.
+- **Scope**: `MatchSurfaceProjector` is a read-only spectator over canonical Core events. It projects decisions, state deltas, interaction metadata, economics, and optional marker provenance into sink output.
+- **Contract**: Defined in `SPEC-MATCH-SURFACE-PROJECTION.md`.
+- **Boundary**: It does not run game logic, parse recorder files directly, or compute research findings.
 
 ### Reserved Spectator Names
 
@@ -103,7 +111,7 @@
 5. **SS1**: Session spectators MUST receive all events (session, batch, match, gameplay) across deck lifetime until `on_session_end`.
 6. **SS2**: Execution spectators MUST receive only batch/match/gameplay events for the current `play`/`replay` call. Framework MUST unsubscribe after `on_batch_end`.
 7. **SS3**: Spectators MUST manage their own state resets between executions (e.g., clear counters in `on_batch_start` or `on_match_start`).
-8. **SS4**: Spectators MUST tolerate missing context fields (legacy recordings or early lifecycle events may omit `phase_index`, `match_id`, etc.). Use `.get()` or `SpectatorContext` helper.
+8. **SS4**: Spectators MUST tolerate missing context fields on early lifecycle events (`phase_index`, `match_id`, etc.). Use `.get()` or `SpectatorContext` helper.
 
 ### 6.3 Error Isolation (EI)
 9. **EI1**: Spectator exceptions MUST be caught and logged by framework. Execution MUST continue with remaining spectators (fail gracefully, not globally).
