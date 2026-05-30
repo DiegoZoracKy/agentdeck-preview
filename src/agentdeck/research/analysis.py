@@ -117,7 +117,12 @@ class ResultsAnalyzer:
             for event in match.events:
                 if event.type == "gameplay" and "player" in event.data and "action" in event.data:
                     player = event.data["player"]
-                    action = event.data["action"]
+                    action_payload = event.data["action"]
+                    action = (
+                        action_payload.get("value", "UNKNOWN")
+                        if isinstance(action_payload, dict)
+                        else "UNKNOWN"
+                    )
 
                     if player not in action_counts:
                         action_counts[player] = {}

@@ -1,6 +1,6 @@
 # ROADMAP: Match Surface Core Cleanup
 
-> Status: Approved execution roadmap
+> Status: Phase B/C complete on `match-surface-core-cleanup`
 > Date: 2026-05-30
 > Repository: AgentDeck Core
 > Workflow: Follows `CONTRIBUTING.md` Phase A/B/C. This is a temporary planning note, not an authoritative spec.

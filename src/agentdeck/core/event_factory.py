@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from .types import ActionResult, Event, EventContext, TurnContext
 
@@ -11,8 +11,35 @@ from .types import ActionResult, Event, EventContext, TurnContext
 class EventFactory:
     """Build canonical event payloads for recordings and spectators."""
 
+    _INTERACTION_METADATA_KEYS = {
+        "raw_prompt",
+        "prompt_text",
+        "prompt_blocks",
+        "raw_response",
+        "response_text",
+        "usage_info",
+        "renderer_output",
+        "controller_format",
+        "controller_metadata",
+        "prompt_length",
+        "template_id",
+        "call_id",
+        "duration",
+        "turn_number",
+        "turn_context",
+    }
+
     def __init__(self, match_id: str):
         self.match_id = match_id
+
+    @staticmethod
+    def _public_state_snapshot(state: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep-copy game state while omitting engine-internal keys."""
+        return {
+            key: copy.deepcopy(value)
+            for key, value in state.items()
+            if not (isinstance(key, str) and key.startswith("_"))
+        }
 
     def turn(
         self,
@@ -22,47 +49,53 @@ class EventFactory:
         state_before: Dict[str, Any],
         state_after: Dict[str, Any],
         turn_context: TurnContext,
+        prompt_blocks: Optional[List[Any]] = None,
     ) -> Event:
         """Create the standardized turn event payload."""
+        metadata = copy.deepcopy(action.metadata) if action.metadata else {}
+        action_metadata = {
+            key: copy.deepcopy(value)
+            for key, value in metadata.items()
+            if key not in self._INTERACTION_METADATA_KEYS
+        }
+        serialized_prompt_blocks: List[Any]
+        if prompt_blocks is not None:
+            serialized_prompt_blocks = copy.deepcopy(
+                [block.to_dict() if hasattr(block, "to_dict") else block for block in prompt_blocks]
+            )
+        else:
+            serialized_prompt_blocks = copy.deepcopy(metadata.get("prompt_blocks", []))
+        interaction = {
+            "prompt_text": metadata.get("prompt_text") or metadata.get("raw_prompt"),
+            "prompt_blocks": serialized_prompt_blocks,
+            "response_text": metadata.get("response_text")
+            or metadata.get("raw_response")
+            or action.raw_response,
+            "usage_info": copy.deepcopy(metadata.get("usage_info")),
+            "renderer_output": copy.deepcopy(metadata.get("renderer_output")),
+            "controller_format": metadata.get("controller_format"),
+            "controller_metadata": copy.deepcopy(metadata.get("controller_metadata")),
+        }
         turn_payload = {
             "match_id": self.match_id,
             "mechanic": "turn_based",
-            "phase_index": turn_context.turn_index,
-            "turn_index": turn_context.turn_index,
+            "phase_index": turn_context.phase_index,
             "player": player,
             "action": {
-                "action": action.action,
+                "value": action.action,
                 "reasoning": action.reasoning,
-                "metadata": copy.deepcopy(action.metadata) if action.metadata else {},
-                "raw_response": action.raw_response,
+                "metadata": action_metadata,
             },
-            "state_before": copy.deepcopy(state_before),
-            "state_after": copy.deepcopy(state_after),
+            "interaction": interaction,
+            "state_before": self._public_state_snapshot(state_before),
+            "state_after": self._public_state_snapshot(state_after),
             "turn_context": turn_context.to_dict(),
         }
-        if action.raw_response:
-            turn_payload["response_text"] = action.raw_response
-        if action.metadata:
-            if "raw_prompt" in action.metadata:
-                turn_payload["prompt_text"] = action.metadata["raw_prompt"]
-            if "prompt_blocks" in action.metadata:
-                turn_payload["prompt_blocks"] = copy.deepcopy(action.metadata["prompt_blocks"])
-            if "controller_metadata" in action.metadata:
-                turn_payload["controller_metadata"] = copy.deepcopy(
-                    action.metadata["controller_metadata"]
-                )
-            if "controller_format" in action.metadata:
-                turn_payload["controller_format"] = action.metadata["controller_format"]
-            if "usage_info" in action.metadata:
-                turn_payload["usage_info"] = copy.deepcopy(action.metadata["usage_info"])
-            if "renderer_output" in action.metadata:
-                turn_payload["renderer_output"] = copy.deepcopy(action.metadata["renderer_output"])
         context: EventContext = cast(
             EventContext,
             {
                 "match_id": self.match_id,
-                "phase_index": turn_context.turn_index,
-                "turn_index": turn_context.turn_index,
+                "phase_index": turn_context.phase_index,
             },
         )
         return Event(type="gameplay", data=turn_payload, context=context)
@@ -81,7 +114,6 @@ class EventFactory:
             data.setdefault("turn_context", turn_context.to_dict())
         context_dict: Dict[str, Any] = {"match_id": self.match_id}
         if turn_context is not None:
-            context_dict["phase_index"] = turn_context.turn_index
-            context_dict["turn_index"] = turn_context.turn_index
+            context_dict["phase_index"] = turn_context.phase_index
         context = cast(EventContext, context_dict)
         return Event(type=event_type, data=data, context=context)

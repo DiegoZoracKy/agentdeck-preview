@@ -96,7 +96,6 @@ class EventContext(TypedDict, total=False):
 
     Phase semantics:
     - phase_index: Zero-based canonical counter (SPEC-OBSERVABILITY §4.1)
-    - turn_index: Alias for phase_index (always same value when present)
     """
 
     # Core correlation IDs
@@ -106,7 +105,6 @@ class EventContext(TypedDict, total=False):
 
     # Phase progression (present in GAMEPLAY events)
     phase_index: int  # Zero-based canonical phase counter
-    turn_index: int  # Alias for phase_index (deprecated but supported)
 
     # Timing metadata (present in all events)
     timestamp: float  # Wall-clock time (time.time())
@@ -168,7 +166,6 @@ class SpectatorContext:
     batch_id: Optional[str] = None
     match_id: Optional[str] = None
     phase_index: Optional[int] = None
-    turn_index: Optional[int] = None  # Alias for phase_index
     timestamp: Optional[float] = None
     monotonic_time: Optional[float] = None
 
@@ -193,7 +190,6 @@ class SpectatorContext:
             batch_id=context.get("batch_id"),
             match_id=context.get("match_id"),
             phase_index=context.get("phase_index"),
-            turn_index=context.get("turn_index"),
             timestamp=context.get("timestamp"),
             monotonic_time=context.get("monotonic_time"),
         )
@@ -1033,7 +1029,7 @@ class TurnContext:
     Fields:
         match_id: Match identifier
         turn_number: 1-based counter (human-friendly)
-        turn_index: 0-based index (array indexing)
+        turn_index: 0-based phase index (internal constructor name retained)
         player: Current player's name
         started_at: Turn start timestamp
         duration: Turn duration in seconds
@@ -1054,12 +1050,17 @@ class TurnContext:
 
     match_id: str
     turn_number: int  # 1-based counter for display
-    turn_index: int  # 0-based index for arrays
+    turn_index: int  # 0-based phase index
     player: str
     started_at: float
     duration: float
     rng_seed: Optional[int] = None
     rng_label: Optional[str] = None
+
+    @property
+    def phase_index(self) -> int:
+        """Canonical zero-based phase index."""
+        return self.turn_index
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -1076,7 +1077,7 @@ class TurnContext:
         payload = {
             "match_id": self.match_id,
             "turn_number": self.turn_number,
-            "turn_index": self.turn_index,
+            "phase_index": self.phase_index,
             "player": self.player,
             "started_at": self.started_at,
             "duration": self.duration,

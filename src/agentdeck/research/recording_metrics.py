@@ -225,14 +225,12 @@ def _controller_contract_kind(controller_name: str | None) -> str | None:
 
 
 def _raw_response_from_event(event_data: Dict[str, Any]) -> str:
-    metadata = event_data.get("metadata") or {}
-    prompt = event_data.get("prompt") or {}
+    interaction = event_data.get("interaction") or {}
 
     value = (
-        metadata.get("raw_response")
-        or event_data.get("raw_response")
-        or prompt.get("response_text")
+        interaction.get("response_text")
         or event_data.get("response_text")
+        or event_data.get("raw_response")
         or ""
     )
     return str(value).strip()
@@ -300,7 +298,10 @@ def compute_format_strictness(match_payloads: Iterable[Dict[str, Any]]) -> Dict[
             row = rows.setdefault(player, _initial_strictness_row())
             row["turn_attempts"] += 1
 
-            metadata = event_data.get("metadata") or {}
+            action = event_data.get("action") or {}
+            metadata = action.get("metadata") if isinstance(action, dict) else {}
+            if not isinstance(metadata, dict):
+                metadata = {}
             parse_success = bool(metadata.get("parser_success", True))
             parse_failed = event_type == "player_action_parse_failed" or not parse_success
             if parse_failed:

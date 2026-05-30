@@ -12,7 +12,7 @@ Tests verify that MatchReporter:
 
 import time
 
-from agentdeck.core.types import ActionResult, Event, MatchResult
+from agentdeck.core.types import Event, MatchResult
 from agentdeck.spectators.reporter import MatchReporter
 
 
@@ -102,15 +102,15 @@ def test_reporter_turn_reporting():
             "mechanic": "turn_based",
             "phase_index": 0,
             "player": "Alice",
-            "action": "ATTACK",
+            "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
             "state_before": {"health": {"Alice": 100, "Bob": 100}},
             "state_after": {"health": {"Alice": 100, "Bob": 80}},
-            "metadata": {
+            "interaction": {
                 "usage_info": {"prompt_tokens": 153, "completion_tokens": 2, "total_tokens": 155}
             },
             "turn_context": {"turn_number": 1, "duration": 1.04},
         },
-        context={"match_id": "match-1", "turn_index": 0},
+        context={"match_id": "match-1", "phase_index": 0},
     )
 
     reporter.on_gameplay(turn_event)
@@ -139,20 +139,20 @@ def test_reporter_first_player_selection():
 
     test_logger.info_calls.clear()
 
-    # First turn (turn_index = 0)
+    # First turn (phase_index = 0)
     first_turn = Event(
         type="gameplay",
         data={
             "mechanic": "turn_based",
             "phase_index": 0,
             "player": "Bob",
-            "action": "DEFEND",
+            "action": {"value": "DEFEND", "reasoning": None, "metadata": {}},
             "state_before": {},
             "state_after": {},
             "metadata": {},
             "turn_context": {"turn_number": 1},
         },
-        context={"turn_index": 0},
+        context={"phase_index": 0},
     )
 
     reporter.on_gameplay(first_turn)
@@ -181,7 +181,7 @@ def test_reporter_state_delta_computation():
             "mechanic": "turn_based",
             "phase_index": 5,
             "player": "Alice",
-            "action": "POTION",
+            "action": {"value": "POTION", "reasoning": None, "metadata": {}},
             "state_before": {
                 "health": {"Alice": 80, "Bob": 100},
                 "potions": {"Alice": 3, "Bob": 3},
@@ -195,7 +195,7 @@ def test_reporter_state_delta_computation():
             "metadata": {},
             "turn_context": {"turn_number": 6},
         },
-        context={"turn_index": 5},
+        context={"phase_index": 5},
     )
 
     reporter.on_gameplay(turn_event)
@@ -281,7 +281,11 @@ def test_reporter_without_logger_silent():
     reporter.on_gameplay(
         Event(
             type="gameplay",
-            data={"mechanic": "turn_based", "player": "Alice", "action": "MOVE"},
+            data={
+                "mechanic": "turn_based",
+                "player": "Alice",
+                "action": {"value": "MOVE", "reasoning": None, "metadata": {}},
+            },
             context={},
         )
     )
@@ -337,13 +341,13 @@ def test_reporter_disable_state_changes():
             "mechanic": "turn_based",
             "phase_index": 0,
             "player": "Alice",
-            "action": "MOVE",
+            "action": {"value": "MOVE", "reasoning": None, "metadata": {}},
             "state_before": {"x": 0},
             "state_after": {"x": 1},
             "metadata": {},
             "turn_context": {"turn_number": 1},
         },
-        context={"turn_index": 0},
+        context={"phase_index": 0},
     )
 
     reporter.on_gameplay(turn_event)
@@ -382,16 +386,8 @@ def test_reporter_non_turn_based_mechanic_ignored():
     assert len(test_logger.info_calls) == 0
 
 
-def test_reporter_with_action_result_dataclass():
-    """
-    Verify reporter handles real ActionResult dataclass from live engine.
-
-    This tests Codex's finding: GAMEPLAY events carry ActionResult dataclass
-    with nested metadata, not plain strings. The reporter must extract:
-    - action text from action_result.action
-    - reasoning from action_result.reasoning (Phase 2.8)
-    - usage_info from action_result.metadata["usage_info"]
-    """
+def test_reporter_with_canonical_action_mapping():
+    """Verify reporter handles canonical GameplayEventData action and interaction."""
     reporter = MatchReporter()
     test_logger = MockLogger()
     reporter.logger = test_logger
@@ -403,31 +399,30 @@ def test_reporter_with_action_result_dataclass():
 
     test_logger.info_calls.clear()
 
-    # Create real ActionResult as the engine would
-    action_result = ActionResult(
-        action="ATTACK",
-        reasoning="Opponent is weak, go aggressive",
-        metadata={
-            "usage_info": {"prompt_tokens": 200, "completion_tokens": 5, "total_tokens": 205},
-            "validated": True,
-            "allowed_actions": ["ATTACK", "DEFEND", "POTION"],
-        },
-        raw_response="REASONING: Opponent is weak\nACTION: ATTACK",
-    )
-
-    # Simulate GAMEPLAY event with ActionResult (as live engine does)
+    # Simulate canonical GAMEPLAY event.
     turn_event = Event(
         type="gameplay",
         data={
             "mechanic": "turn_based",
             "phase_index": 3,
             "player": "Alice",
-            "action": action_result,  # ActionResult dataclass, not string
+            "action": {
+                "value": "ATTACK",
+                "reasoning": "Opponent is weak, go aggressive",
+                "metadata": {
+                    "validated": True,
+                    "allowed_actions": ["ATTACK", "DEFEND", "POTION"],
+                },
+            },
+            "interaction": {
+                "usage_info": {"prompt_tokens": 200, "completion_tokens": 5, "total_tokens": 205},
+                "response_text": "REASONING: Opponent is weak\nACTION: ATTACK",
+            },
             "state_before": {"health": {"Alice": 100, "Bob": 100}},
             "state_after": {"health": {"Alice": 100, "Bob": 80}},
             "turn_context": {"turn_number": 4, "duration": 1.2},
         },
-        context={"match_id": "match-1", "turn_index": 3},
+        context={"match_id": "match-1", "phase_index": 3},
     )
 
     reporter.on_gameplay(turn_event)
@@ -436,27 +431,24 @@ def test_reporter_with_action_result_dataclass():
     output = "\n".join(test_logger.info_calls)
     assert (
         "Reasoning: Opponent is weak, go aggressive" in output
-    ), "Should display reasoning from ActionResult"
-    assert "Action: ATTACK" in output, "Should extract action text from ActionResult.action"
+    ), "Should display reasoning from canonical action"
+    assert "Action: ATTACK" in output, "Should extract action text from action.value"
 
-    # Verify reporter found usage_info in ActionResult.metadata
-    assert "tokens=205" in output, "Should find usage_info in ActionResult.metadata"
+    # Verify reporter found usage_info in interaction metadata.
+    assert "tokens=205" in output, "Should find usage_info in interaction.usage_info"
     assert "prompt=200" in output
     assert "completion=5" in output
 
     # Verify state changes shown
     assert "health.Bob:100->80" in output
 
-    # Should NOT see repr of ActionResult object
-    assert "ActionResult" not in output, "Should not log repr of ActionResult"
-
 
 def test_reporter_with_reasoning_from_dict():
     """
     Verify reporter displays reasoning when action is dict format from Console.
 
-    Console emits action as dict: {"action": "...", "reasoning": "...", "metadata": {...}}
-    This test ensures reasoning is properly extracted and displayed (Phase 2.8).
+    Gameplay emits action as dict: {"value": "...", "reasoning": "..."}.
+    This test ensures reasoning is properly extracted and displayed.
     """
     reporter = MatchReporter()
     test_logger = MockLogger()
@@ -469,7 +461,7 @@ def test_reporter_with_reasoning_from_dict():
 
     test_logger.info_calls.clear()
 
-    # Console emits action as dict with reasoning field
+    # Canonical gameplay emits action as dict with reasoning field.
     turn_event = Event(
         type="gameplay",
         data={
@@ -477,21 +469,22 @@ def test_reporter_with_reasoning_from_dict():
             "phase_index": 0,
             "player": "Alice",
             "action": {
-                "action": "DEFEND",
+                "value": "DEFEND",
                 "reasoning": "My health is low, I need to be defensive",
-                "metadata": {
-                    "usage_info": {
-                        "prompt_tokens": 150,
-                        "completion_tokens": 10,
-                        "total_tokens": 160,
-                    }
-                },
+                "metadata": {},
+            },
+            "interaction": {
+                "usage_info": {
+                    "prompt_tokens": 150,
+                    "completion_tokens": 10,
+                    "total_tokens": 160,
+                }
             },
             "state_before": {"health": {"Alice": 30, "Bob": 100}},
             "state_after": {"health": {"Alice": 30, "Bob": 100}},
             "turn_context": {"turn_number": 5, "duration": 0.8},
         },
-        context={"match_id": "match-1", "turn_index": 4},
+        context={"match_id": "match-1", "phase_index": 4},
     )
 
     reporter.on_gameplay(turn_event)

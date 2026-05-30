@@ -19,7 +19,8 @@ class TokenUsageTracker(Spectator):
     - EI1-EI3: Error-safe, no execution mutations
     - LO1: Uses logger for structured output
 
-    Extracts usage data from ActionResult.metadata in GAMEPLAY events.
+    Extracts usage data from `interaction.usage_info` in GAMEPLAY events and
+    top-level `usage_info` in lifecycle events.
     Compatible with Player implementations that include API usage metadata.
 
     Usage:
@@ -72,7 +73,7 @@ class TokenUsageTracker(Spectator):
         self._seen_call_ids.clear()
 
     def _normalize_usage(self, usage: Any) -> Optional[Dict[str, Any]]:
-        """Normalize usage metadata across live, replay, and legacy event shapes."""
+        """Normalize provider usage metadata into tracker counters."""
         if not isinstance(usage, dict):
             return None
 
@@ -97,28 +98,16 @@ class TokenUsageTracker(Spectator):
             "call_id": usage.get("call_id"),
         }
 
-    def _extract_usage(self, data: Any) -> Optional[Dict[str, Any]]:
-        """Extract usage from event shapes emitted live or replayed from recordings."""
+    def _extract_usage(self, event_type: str, data: Any) -> Optional[Dict[str, Any]]:
+        """Extract usage from canonical lifecycle or gameplay event payloads."""
         if not isinstance(data, dict):
             return None
 
-        action_data = data.get("action")
-        if isinstance(action_data, dict):
-            action_metadata = action_data.get("metadata")
+        if event_type == "gameplay":
+            interaction = data.get("interaction")
+            candidates = [interaction.get("usage_info") if isinstance(interaction, dict) else None]
         else:
-            action_metadata = getattr(action_data, "metadata", None)
-
-        metadata = data.get("metadata")
-        prompt = data.get("prompt")
-
-        candidates = [
-            data.get("usage_info"),
-            action_metadata,
-            action_metadata.get("usage_info") if isinstance(action_metadata, dict) else None,
-            metadata,
-            metadata.get("usage_info") if isinstance(metadata, dict) else None,
-            prompt.get("usage_info") if isinstance(prompt, dict) else None,
-        ]
+            candidates = [data.get("usage_info")]
 
         for candidate in candidates:
             normalized = self._normalize_usage(candidate)
@@ -137,7 +126,8 @@ class TokenUsageTracker(Spectator):
             if not player:
                 return
 
-            usage = self._extract_usage(data)
+            event_type = getattr(event.type, "value", event.type)
+            usage = self._extract_usage(str(event_type), data)
             if not usage:
                 return
 

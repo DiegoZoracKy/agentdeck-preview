@@ -62,18 +62,20 @@ def _decision_key(
 
 def _extract_turn_number(event_data: Mapping[str, Any]) -> int:
     turn_context = event_data.get("turn_context") or {}
-    metadata = event_data.get("metadata") or {}
-    prompt = event_data.get("prompt") or {}
-
-    for value in (
-        turn_context.get("turn_number"),
-        metadata.get("turn_number"),
-        (metadata.get("turn_context") or {}).get("turn_number"),
-        prompt.get("turn_number"),
-    ):
-        if value is not None:
-            return int(value)
+    value = turn_context.get("turn_number")
+    if value is not None:
+        return int(value)
     raise ValueError("Missing turn_number in gameplay event")
+
+
+def _extract_action_value(event_data: Mapping[str, Any]) -> str:
+    action = event_data.get("action")
+    if not isinstance(action, Mapping):
+        raise ValueError("Gameplay event action must be a canonical mapping")
+    value = action.get("value")
+    if value is None:
+        raise ValueError("Gameplay event action missing value")
+    return str(value).upper()
 
 
 def _game_name(payload: Mapping[str, Any]) -> str:
@@ -332,7 +334,7 @@ class VariableDamageBehavioralScorer(BehavioralScorer):
                     )
 
                 opponent = next(name for name in match_players if name != player)
-                action = str(event_data.get("action") or "").upper()
+                action = _extract_action_value(event_data)
                 record: NormalizedTurn = {
                     "match_id": match_id,
                     "player": player,

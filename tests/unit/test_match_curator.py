@@ -40,12 +40,12 @@ def _gameplay_event(
         data={
             "mechanic": "turn_based",
             "player": player,
-            "action": action,
+            "action": {"value": action, "reasoning": None, "metadata": {}},
             "state_before": before,
             "state_after": after,
             "turn_context": {"turn_number": turn},
         },
-        context={"turn_index": turn - 1, "match_id": "match-test"},
+        context={"phase_index": turn - 1, "match_id": "match-test"},
     )
 
 
@@ -216,7 +216,7 @@ def test_match_curator_rejects_invalid_highlight_kind():
 def test_curate_match_file_replays_and_writes_sidecar(tmp_path: Path):
     match_path = tmp_path / "match_demo.json"
     match_payload = {
-        "schema_version": "1.3",
+        "schema_version": "2.0",
         "match_id": "match-demo",
         "game": "FixedDamageGame",
         "players": ["Alice", "Bob"],
@@ -228,10 +228,11 @@ def test_curate_match_file_replays_and_writes_sidecar(tmp_path: Path):
             {
                 "type": "gameplay",
                 "timestamp": 1,
-                "context": {"turn_index": 0, "match_id": "match-demo"},
+                "context": {"phase_index": 0, "match_id": "match-demo"},
                 "data": {
                     "player": "Alice",
-                    "action": "ATTACK",
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                    "interaction": {},
                     "state_before": {"health": {"Alice": 60, "Bob": 60}, "turn": 1},
                     "state_after": {"health": {"Alice": 60, "Bob": 20}, "turn": 2},
                     "turn_context": {"turn_number": 1},
@@ -240,10 +241,11 @@ def test_curate_match_file_replays_and_writes_sidecar(tmp_path: Path):
             {
                 "type": "gameplay",
                 "timestamp": 2,
-                "context": {"turn_index": 1, "match_id": "match-demo"},
+                "context": {"phase_index": 1, "match_id": "match-demo"},
                 "data": {
                     "player": "Alice",
-                    "action": "ATTACK",
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                    "interaction": {},
                     "state_before": {"health": {"Alice": 60, "Bob": 20}, "turn": 2},
                     "state_after": {"health": {"Alice": 60, "Bob": 0}, "turn": 3},
                     "turn_context": {"turn_number": 2},

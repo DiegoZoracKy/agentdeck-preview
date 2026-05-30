@@ -34,13 +34,9 @@ def rehydrate_context(stored: dict | None) -> SpectatorContext:
         "batch_id": stored.get("batch_id"),
         "match_id": stored.get("match_id"),
         "phase_index": stored.get("phase_index"),
-        "phase_index": stored.get("phase_index"),
-        "turn_index": stored.get("turn_index"),
         "timestamp": stored.get("timestamp"),
         "monotonic_time": stored.get("monotonic_time"),
     }
-    if context["phase_index"] is None and context["turn_index"] is not None:
-        context["phase_index"] = context["turn_index"]
     return SpectatorContext.from_event(context)
 
 

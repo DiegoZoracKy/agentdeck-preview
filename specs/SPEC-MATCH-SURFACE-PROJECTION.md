@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.1.0
 > Last Updated: 2026-05-30
-> Implementation: ⬜ Planned
+> Implementation: ✅ Implemented in `agentdeck.spectators.match_surface`
 > Review State: consensus-approved
 > Audience: Core contributors, agentdeck.tv implementers, spectator authors, artifact pipeline maintainers
 

@@ -182,9 +182,9 @@ class MatchReporter(Spectator):
         if not player:
             return
 
-        # Check if this is turn 0 (first turn) - log first player selection
-        turn_index = ctx.get("turn_index", 0)
-        if turn_index == 0 and not self.first_player_selected:
+        # Check if this is phase 0 (first turn) - log first player selection
+        phase_index = ctx.get("phase_index", data.get("phase_index", 0))
+        if phase_index == 0 and not self.first_player_selected:
             player_index = self.player_names.index(player) if player in self.player_names else -1
             if player_index >= 0:
                 self.logger.info(f"🎲 First player selected: {player} (index {player_index})")
@@ -193,36 +193,19 @@ class MatchReporter(Spectator):
         # Start timing this turn
         self.turn_start_time = time.time()
 
-        # Extract action info (handle ActionResult dataclass, dict, or string)
+        # Extract action info from canonical GameplayEventData.
         action_obj = data.get("action")
-        if action_obj is None:
+        if not isinstance(action_obj, dict):
             return  # No action to report
 
-        # Normalize action text and metadata based on type
-        if isinstance(action_obj, dict):
-            # Console emits action as dict: {"action": "...", "metadata": {...}, ...}
-            action_text = action_obj.get("action", str(action_obj))
-            reasoning = action_obj.get("reasoning")
-            metadata = action_obj.get("metadata", {})
-        elif hasattr(action_obj, "action"):
-            # ActionResult dataclass from tests or future TurnLoop
-            action_text = getattr(action_obj, "action", str(action_obj))
-            reasoning = getattr(action_obj, "reasoning", None)
-            action_metadata = getattr(action_obj, "metadata", {}) or {}
-            data_metadata = data.get("metadata", {})
-            metadata = action_metadata or data_metadata
-        else:
-            # Plain string action
-            action_text = str(action_obj)
-            reasoning = None
-            metadata = data.get("metadata", {})
-
+        action_text = action_obj.get("value", "UNKNOWN")
+        reasoning = action_obj.get("reasoning")
         if not isinstance(action_text, str):
             action_text = str(action_text)
 
         # Extract turn context if available
         turn_context = data.get("turn_context", {})
-        turn_number = turn_context.get("turn_number", turn_index + 1)  # 1-based for display
+        turn_number = turn_context.get("turn_number", int(phase_index) + 1)  # 1-based for display
 
         # Log turn header
         self.logger.info(f"Turn {turn_number}: {player}")
@@ -233,8 +216,9 @@ class MatchReporter(Spectator):
 
         self.logger.info(f"Action: {action_text}")
 
-        # Show token usage if available in metadata
-        usage_info = metadata.get("usage_info")
+        # Show token usage if available in canonical interaction metadata.
+        interaction = data.get("interaction") or {}
+        usage_info = interaction.get("usage_info") if isinstance(interaction, dict) else None
         if usage_info:
             prompt_tokens = usage_info.get("prompt_tokens", 0)
             completion_tokens = usage_info.get("completion_tokens", 0)

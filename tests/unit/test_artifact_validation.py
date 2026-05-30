@@ -29,7 +29,6 @@ def _match_payload() -> dict:
                 "timestamp": 10.0,
                 "data": {
                     "turn_context": {"turn_number": 1},
-                    "prompt": {"phase": "turn", "turn_number": 1},
                 },
             },
             {
@@ -37,7 +36,6 @@ def _match_payload() -> dict:
                 "timestamp": 11.0,
                 "data": {
                     "turn_context": {"turn_number": 2},
-                    "prompt": {"phase": "turn", "turn_number": 2},
                 },
             },
         ],
@@ -79,26 +77,26 @@ def test_detects_top_level_timing_mismatch() -> None:
     )
 
 
-def test_detects_prompt_turn_number_mismatch() -> None:
+def test_detects_missing_turn_number() -> None:
     payload = _match_payload()
-    payload["events"][1]["data"]["prompt"]["turn_number"] = 3
+    payload["events"][1]["data"]["turn_context"] = {}
 
     validation = validate_artifact_invariants([payload])
 
     assert validation["all_passed"] is False
     messages = [failure["message"] for failure in validation["failures"]]
-    assert any("prompt.turn_number mismatch" in message for message in messages)
+    assert any("missing turn_context.turn_number" in message for message in messages)
 
 
-def test_detects_conflicting_turn_number_sources() -> None:
+def test_detects_monotonic_turn_number_regression() -> None:
     payload = _match_payload()
-    payload["events"][1]["data"]["metadata"] = {"turn_number": 5}
+    payload["events"][1]["data"]["turn_context"]["turn_number"] = 1
 
     validation = validate_artifact_invariants([payload])
 
     assert validation["all_passed"] is False
     messages = [failure["message"] for failure in validation["failures"]]
-    assert any("conflicting turn numbers" in message for message in messages)
+    assert any("turn number did not increase" in message for message in messages)
 
 
 def test_detects_winner_final_state_inconsistency() -> None:

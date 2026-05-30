@@ -218,7 +218,7 @@ def test_parse_failure_abort_and_record():
             match_data = json.load(f)
 
         # Verify schema version
-        assert match_data["schema_version"] == "1.3"
+        assert match_data["schema_version"] == "2.0"
         assert match_data.get("schema_type") == "match"
 
         # Verify match metadata shows abort

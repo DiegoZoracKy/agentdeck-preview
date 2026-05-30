@@ -276,7 +276,7 @@ def test_replay_engine_injects_logger_into_spectators():
             "match_id": "test-match-1",
             "game": "TestGame",
             "players": ["Player-1", "Player-2"],
-            "schema_version": "1.3",  # Required for v1.3.0 schema validation
+            "schema_version": "2.0",
         },
     )
 

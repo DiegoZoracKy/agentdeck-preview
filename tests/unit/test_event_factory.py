@@ -54,29 +54,23 @@ def test_event_factory_turn_matches_canonical_gameplay_shape():
     assert event.type == "gameplay"
     assert event.context["match_id"] == "match-1"
     assert event.context["phase_index"] == 2
-    assert event.context["turn_index"] == 2
+    assert "turn_index" not in event.context
     assert event.data["mechanic"] == "turn_based"
     assert event.data["phase_index"] == 2
-    assert event.data["turn_index"] == 2
     assert event.data["action"] == {
-        "action": "ATTACK",
+        "value": "ATTACK",
         "reasoning": "Finish the match.",
-        "metadata": {
-            "raw_prompt": "Take your turn.",
-            "prompt_blocks": [{"role": "system", "content": "Take your turn."}],
-            "controller_metadata": {"parser": "action_only"},
-            "controller_format": "ACTION: <MOVE>",
-            "usage_info": {"input_tokens": 10, "output_tokens": 4},
-            "renderer_output": {"template_id": "default"},
-        },
-        "raw_response": "ACTION: ATTACK",
+        "metadata": {},
     }
-    assert event.data["prompt_text"] == "Take your turn."
-    assert event.data["response_text"] == "ACTION: ATTACK"
-    assert event.data["prompt_blocks"] == [{"role": "system", "content": "Take your turn."}]
-    assert event.data["controller_metadata"] == {"parser": "action_only"}
-    assert event.data["usage_info"] == {"input_tokens": 10, "output_tokens": 4}
-    assert event.data["renderer_output"] == {"template_id": "default"}
+    assert "raw_response" not in event.data["action"]
+    assert event.data["interaction"]["prompt_text"] == "Take your turn."
+    assert event.data["interaction"]["response_text"] == "ACTION: ATTACK"
+    assert event.data["interaction"]["prompt_blocks"] == [
+        {"role": "system", "content": "Take your turn."}
+    ]
+    assert event.data["interaction"]["controller_metadata"] == {"parser": "action_only"}
+    assert event.data["interaction"]["usage_info"] == {"input_tokens": 10, "output_tokens": 4}
+    assert event.data["interaction"]["renderer_output"] == {"template_id": "default"}
     assert event.data["state_before"]["health"]["Bob"] == 20
 
 
@@ -92,11 +86,11 @@ def test_event_factory_custom_injects_context_without_overwriting_explicit_paylo
     assert event.type == "card_drawn"
     assert event.data["match_id"] == "override"
     assert event.data["card"] == "Ace"
-    assert event.data["turn_context"]["turn_index"] == 4
+    assert event.data["turn_context"]["phase_index"] == 4
+    assert "turn_index" not in event.data["turn_context"]
     assert event.context == {
         "match_id": "match-1",
         "phase_index": 4,
-        "turn_index": 4,
     }
 
 
@@ -125,7 +119,6 @@ def test_game_event_emitter_injects_match_and_phase_metadata():
     assert first.data == {
         "match_id": "match-1",
         "phase_index": 3,
-        "turn_index": 3,
         "card": "Ace",
     }
     assert second.data == {
