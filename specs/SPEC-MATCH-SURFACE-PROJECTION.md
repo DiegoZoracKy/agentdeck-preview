@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 0.1.0
-> Last Updated: 2026-05-30
+> Last Updated: 2026-05-31
 > Implementation: ✅ Implemented in `agentdeck.spectators.match_surface`
 > Review State: consensus-approved
 > Audience: Core contributors, agentdeck.tv implementers, spectator authors, artifact pipeline maintainers
@@ -147,7 +147,8 @@ class MatchSurfaceSink(Protocol):
 - Writes one deterministic JSON artifact per match.
 - MUST use atomic write semantics.
 - MUST sort object keys where practical and avoid nondeterministic generated timestamps unless supplied by caller/source metadata.
-- MUST apply the redactor before writing.
+- Receives the document after `MatchSurfaceProjector` has applied any configured redactor.
+- v0 JSON artifact export is intended for replay-from-record inputs, not live `play()` runs, so source timestamps come from the record rather than wall-clock playback.
 
 ## 6. Invariants & Guarantees
 
@@ -157,14 +158,14 @@ class MatchSurfaceSink(Protocol):
 4. **MSP4 Live/Replay Equivalence**: The same match through `.play()`, `.replay(match=...)`, and `.replay(path=...)` MUST produce equivalent Match Surface documents, ignoring explicitly allowed source timestamps.
 5. **MSP5 Presentation, Not Research**: The projector MAY compute mechanical convenience data, such as state deltas and costs, but MUST NOT compute research findings.
 6. **MSP6 Marker Provenance**: Every marker MUST declare whether it was computed by projection or imported from upstream.
-7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable sink mechanism. Publishing policy and redaction rules are owned by the caller, such as agentdeck.tv.
+7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Publishing policy and redaction rules are owned by the caller, such as agentdeck.tv. The v0 implementation applies redaction to the completed document before `finish`; future streaming sinks MUST apply the same policy before every externally emitted `start`, `frame`, or `finish` payload.
 8. **MSP8 Sink Isolation**: Sink failures MUST be isolated like spectator failures: logged and surfaced without corrupting playback or game execution.
 
 ## 7. Data Flow & Interaction
 
 ```text
 Live:
-  AgentDeck.play() -> EventBus -> MatchSurfaceProjector -> JsonArtifactSink
+  AgentDeck.play() -> EventBus -> MatchSurfaceProjector -> future streaming sink
 
 Replay:
   AgentDeck.replay() / ReplayEngine -> EventBus -> MatchSurfaceProjector -> JsonArtifactSink
@@ -177,6 +178,7 @@ Tests:
 
 - Missing canonical gameplay fields SHOULD fail the projection test suite rather than silently producing partial frames.
 - Redactor exceptions MUST fail artifact writing for that match; publishing unredacted data is worse than no artifact.
+- Streaming sinks MUST NOT emit unredacted per-frame payloads; per-frame redaction is deferred with the streaming sink work and is not implemented by the v0 `JsonArtifactSink` path.
 - Marker provider exceptions MUST be isolated and recorded in projector diagnostics; they MUST NOT prevent base frames from being emitted unless configured as strict.
 - Projector output MUST remain useful for partial-information games; it must not require hidden state or omniscient game logic.
 

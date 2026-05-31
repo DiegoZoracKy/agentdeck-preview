@@ -2,7 +2,7 @@
 
 > Status: Final
 > Version: 2.0.0
-> Last Updated: 2026-05-30
+> Last Updated: 2026-05-31
 > Implementation: ✅ Implemented in `EventFactory.turn`, `MatchRuntime.record_turn`, `Recorder`, `ReplayEngine`, and parity tests
 > Review State: consensus-approved
 > Audience: Core contributors, spectator authors, recorder/replay implementers, research tooling maintainers
@@ -92,6 +92,15 @@ GameplayEventData = {
 | `controller_metadata` | object or null | yes | Parse/validation metadata from the controller. |
 
 Implementations MAY include additive JSON-safe keys under `interaction` when a player/provider exposes them, but they MUST NOT duplicate the required keys elsewhere in the gameplay payload.
+
+### 4.5 State Snapshots
+
+`state_before` and `state_after` are public gameplay snapshots, not full engine
+runtime snapshots. Framework-owned private keys whose names begin with `_`, such
+as `_turn_count` and `_first_player_idx`, MUST NOT appear in gameplay event state
+snapshots. When those values are needed for replay, scoring, or reproducibility,
+they belong in lifecycle metadata, match metadata, final state, or
+`turn_context`, not in the public game-domain state.
 
 ## 5. Public API
 
