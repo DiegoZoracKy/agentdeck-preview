@@ -219,11 +219,16 @@ def test_mr2_record_turn_emits_gameplay_and_preserves_snapshots():
     assert emitted.type == EventType.GAMEPLAY.value
     assert emitted.data["player"] == "Alice"
     assert emitted.data["phase_index"] == 0
-    assert emitted.data["turn_index"] == 0
+    assert "turn_index" not in emitted.data
     assert emitted.data["state_before"]["hp"]["Bob"] == 25
     assert emitted.data["state_after"]["hp"]["Bob"] == 5
-    assert emitted.data["usage_info"]["input_tokens"] == 10
-    assert emitted.data["prompt_blocks"] == [{"role": "system", "content": "Take your turn."}]
+    assert emitted.data["action"]["value"] == "ATTACK"
+    assert emitted.data["action"]["metadata"] == {}
+    assert "raw_response" not in emitted.data["action"]
+    assert emitted.data["interaction"]["usage_info"]["input_tokens"] == 10
+    assert emitted.data["interaction"]["prompt_blocks"] == [
+        {"role": "system", "content": "Take your turn."}
+    ]
     assert console._current_phase_index == 0
     assert "phase_index" not in console.event_bus._base_context
     assert "turn_index" not in console.event_bus._base_context
@@ -232,7 +237,7 @@ def test_mr2_record_turn_emits_gameplay_and_preserves_snapshots():
     snapshot = events[0]
     assert snapshot.type == EventType.GAMEPLAY.value
     assert snapshot.data["state_before"]["hp"]["Bob"] == 25
-    assert snapshot.data["usage_info"]["input_tokens"] == 10
+    assert snapshot.data["interaction"]["usage_info"]["input_tokens"] == 10
 
 
 def test_mr3_handle_parse_failure_delegates_shared_pipeline_and_returns_policy():

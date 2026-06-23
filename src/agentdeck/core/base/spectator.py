@@ -106,7 +106,7 @@ class Spectator:
 
     # on_dialogue_turn removed in schema v1.3
     # Prompt metadata now in lifecycle events (PLAYER_HANDSHAKE_COMPLETE, GAMEPLAY, etc.)
-    # Access via event.data["prompt"] in recordings
+    # Access gameplay prompt metadata via event.data["interaction"] in recordings.
 
     def on_match_end(self, result: MatchResult, context: Optional[EventContext] = None):
         """Match ended.

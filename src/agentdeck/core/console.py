@@ -412,6 +412,7 @@ class _MatchWorker:
                 events=runtime.events,
                 result=match_result,
             )
+            match_result.events = list(runtime.events)
 
         except MatchAbortedError as abort_error:
             # PF4: Match aborted due to parse failure - emit MATCH_END with aborted metadata
@@ -457,7 +458,7 @@ class _MatchWorker:
                 metadata["abort_turn_context"] = {
                     "match_id": abort_error.turn_context.match_id,
                     "turn_number": abort_error.turn_context.turn_number,
-                    "turn_index": abort_error.turn_context.turn_index,
+                    "phase_index": abort_error.turn_context.phase_index,
                     "player": abort_error.turn_context.player,
                     "started_at": abort_error.turn_context.started_at,
                     "duration": abort_error.turn_context.duration,
@@ -497,6 +498,7 @@ class _MatchWorker:
                 events=runtime.events,
                 result=match_result,
             )
+            match_result.events = list(runtime.events)
 
             # Clear context
             self.event_bus.clear_context("match_id", "phase_index")
@@ -556,7 +558,7 @@ class _MatchWorker:
                 metadata["forfeit_turn_context"] = {
                     "match_id": forfeit_error.turn_context.match_id,
                     "turn_number": forfeit_error.turn_context.turn_number,
-                    "turn_index": forfeit_error.turn_context.turn_index,
+                    "phase_index": forfeit_error.turn_context.phase_index,
                     "player": forfeit_error.turn_context.player,
                     "started_at": forfeit_error.turn_context.started_at,
                     "duration": forfeit_error.turn_context.duration,
@@ -984,36 +986,40 @@ class _MatchWorker:
         """Worker-scoped gameplay emission that mirrors Console.emit_turn()."""
         if isinstance(turn_context, dict):
             ctx_dict = dict(turn_context)
-            turn_index = ctx_dict.get("turn_index", 0)
+            phase_index = ctx_dict.get("phase_index", 0)
             match_id = ctx_dict.get("match_id", state_before.get("match_id"))
+            event_turn_context = type(
+                "TurnContextAdapter",
+                (),
+                {"phase_index": phase_index, "to_dict": lambda self: dict(ctx_dict)},
+            )()
         else:
             ctx_dict = turn_context.to_dict()
-            turn_index = turn_context.turn_index
+            phase_index = turn_context.phase_index
             match_id = turn_context.match_id
+            event_turn_context = turn_context
 
-        # Update event bus context for turn_index (E3)
-        self.event_bus.update_context(phase_index=turn_index, turn_index=turn_index)
+        # Update event bus context for phase_index (E3)
+        self.event_bus.update_context(phase_index=phase_index)
 
-        # Build payload matching Console.emit_turn format
-        payload = {
-            "mechanic": "turn_based",  # SPEC-OBSERVABILITY §3.2: mechanic field required
-            "match_id": match_id,
-            "player": player,
-            "turn_context": ctx_dict,
-            "state_before": copy.deepcopy(state_before),
-            "state_after": copy.deepcopy(state_after),
-            "action": {
-                "action": action.action,
-                "reasoning": action.reasoning,
-                "metadata": copy.deepcopy(action.metadata) if action.metadata else {},
-                "raw_response": action.raw_response,
-            },
-        }
+        from .event_factory import EventFactory
+
+        payload = (
+            EventFactory(str(match_id))
+            .turn(
+                player=player,
+                action=action,
+                state_before=state_before,
+                state_after=state_after,
+                turn_context=event_turn_context,
+            )
+            .data
+        )
 
         self._dispatch_event(EventType.GAMEPLAY, events=events, **payload)
 
-        # Clear turn_index from context after emission
-        self.event_bus.clear_context("phase_index", "turn_index")
+        # Clear phase_index from context after emission
+        self.event_bus.clear_context("phase_index")
 
     def _safe_status(self, state: Any) -> GameStatus:
         """Get game status (isolated)."""
@@ -2218,7 +2224,7 @@ class Console:
                 metadata["abort_turn_context"] = {
                     "match_id": abort_error.turn_context.match_id,
                     "turn_number": abort_error.turn_context.turn_number,
-                    "turn_index": abort_error.turn_context.turn_index,
+                    "phase_index": abort_error.turn_context.phase_index,
                     "player": abort_error.turn_context.player,
                     "started_at": abort_error.turn_context.started_at,
                     "duration": abort_error.turn_context.duration,
@@ -2303,7 +2309,7 @@ class Console:
                 metadata["forfeit_turn_context"] = {
                     "match_id": forfeit_error.turn_context.match_id,
                     "turn_number": forfeit_error.turn_context.turn_number,
-                    "turn_index": forfeit_error.turn_context.turn_index,
+                    "phase_index": forfeit_error.turn_context.phase_index,
                     "player": forfeit_error.turn_context.player,
                     "started_at": forfeit_error.turn_context.started_at,
                     "duration": forfeit_error.turn_context.duration,
@@ -2398,6 +2404,7 @@ class Console:
             events=runtime.events,
             result=match_result,  # Recorder expects result: MatchResult
         )
+        match_result.events = list(runtime.events)
 
         self.event_bus.clear_context("match_id", "phase_index")
         self._current_match_id = None
@@ -2642,36 +2649,41 @@ class Console:
         """Emit turn gameplay event with deep-copied states."""
         if isinstance(turn_context, dict):
             ctx_dict = dict(turn_context)
-            turn_index = ctx_dict.get("turn_index", 0)
+            phase_index = ctx_dict.get("phase_index", 0)
             match_id = ctx_dict.get("match_id")
+            event_turn_context = type(
+                "TurnContextAdapter",
+                (),
+                {"phase_index": phase_index, "to_dict": lambda self: dict(ctx_dict)},
+            )()
         else:
             ctx_dict = turn_context.to_dict()
-            turn_index = turn_context.turn_index
+            phase_index = turn_context.phase_index
             match_id = turn_context.match_id
+            event_turn_context = turn_context
 
-        self._current_phase_index = turn_index
+        self._current_phase_index = phase_index
 
-        # Update EventBus context so GAMEPLAY events include turn_index (E3)
-        self.event_bus.update_context(phase_index=turn_index, turn_index=turn_index)
+        # Update EventBus context so GAMEPLAY events include phase_index (E3)
+        self.event_bus.update_context(phase_index=phase_index)
 
-        payload = {
-            "mechanic": "turn_based",  # SPEC-OBSERVABILITY §3.2: mechanic field required
-            "match_id": match_id,
-            "player": player,
-            "turn_context": ctx_dict,
-            "state_before": copy.deepcopy(state_before),
-            "state_after": copy.deepcopy(state_after),
-            "action": {
-                "action": action.action,
-                "reasoning": action.reasoning,
-                "metadata": copy.deepcopy(action.metadata) if action.metadata else {},
-                "raw_response": action.raw_response,
-            },
-        }
+        from .event_factory import EventFactory
+
+        payload = (
+            EventFactory(str(match_id))
+            .turn(
+                player=player,
+                action=action,
+                state_before=state_before,
+                state_after=state_after,
+                turn_context=event_turn_context,
+            )
+            .data
+        )
         self._dispatch_event(EventType.GAMEPLAY, events=events, **payload)
 
-        # Clear turn_index from EventBus context after emission
-        self.event_bus.clear_context("phase_index", "turn_index")
+        # Clear phase_index from EventBus context after emission
+        self.event_bus.clear_context("phase_index")
         self._current_phase_index = None
 
     def emit_event(self, event: Event) -> None:
@@ -3208,7 +3220,6 @@ class Console:
             context["match_id"] = self._current_match_id
         if self._current_phase_index is not None:
             context["phase_index"] = self._current_phase_index
-            context["turn_index"] = self._current_phase_index
 
         # Selectively deepcopy payload for snapshot, excluding unpicklable objects
         snapshot_data = {}

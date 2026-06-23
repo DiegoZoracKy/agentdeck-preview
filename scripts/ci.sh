@@ -3,11 +3,19 @@ set -euo pipefail
 
 # Run the same checks as GitHub Actions locally.
 
-VENV_PYTEST="./venv/bin/pytest"
-VENV_BLACK="./venv/bin/black"
+if [ -x "./venv/bin/pytest" ]; then
+  VENV_DIR="./venv"
+elif [ -x "./.venv/bin/pytest" ]; then
+  VENV_DIR="./.venv"
+else
+  VENV_DIR="./venv"
+fi
+
+VENV_PYTEST="$VENV_DIR/bin/pytest"
+VENV_BLACK="$VENV_DIR/bin/black"
 
 if [ ! -x "$VENV_PYTEST" ] || [ ! -x "$VENV_BLACK" ]; then
-  echo "Please ensure the virtualenv is set up (expected ./venv/bin/pytest and ./venv/bin/black)." >&2
+  echo "Please ensure the virtualenv is set up (expected ./venv or ./.venv with pytest and black)." >&2
   exit 1
 fi
 

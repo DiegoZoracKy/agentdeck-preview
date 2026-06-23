@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Set, Union, cast
 from .base.spectator import Spectator
 from .event_bus import EventBus
 from .replay_utils import ReplayScheduler, rehydrate_context, rehydrate_players
-from .types import ActionResult, Event, EventContext, EventType, MatchResult
+from .types import Event, EventContext, EventType, MatchResult
 
 
 @dataclass
@@ -131,22 +131,43 @@ class ReplayEngine:
                 last_event = event
                 start_index += 1
 
-            game_name = self.metadata.get("game") or self.match_metadata.get("game") or "ReplayGame"
-            mock_game = type(game_name, (), {})()
-            player_names = (
-                self.match_metadata.get("players")
-                or self.metadata.get("players")
-                or self.replay_context.players
-                or []
-            )
-            mock_players = rehydrate_players(player_names)
-            self.event_bus.emit(
-                EventType.MATCH_START,
-                game=mock_game,
-                players=mock_players,
-                match_id=self.metadata.get("match_id") or self.replay_context.match_id,
-            )
+            emitted_match_start = False
+            if start_index < total_events:
+                next_event = self.events[start_index]
+                next_type = (
+                    next_event.type.value
+                    if isinstance(next_event.type, EventType)
+                    else next_event.type
+                )
+                if next_type == EventType.MATCH_START.value:
+                    delay = self.scheduler.compute_delay(last_event, next_event)
+                    if delay > 0:
+                        time.sleep(delay)
+                    self._emit_recorded_event(next_event)
+                    last_event = next_event
+                    start_index += 1
+                    emitted_match_start = True
 
+            if not emitted_match_start:
+                game_name = (
+                    self.metadata.get("game") or self.match_metadata.get("game") or "ReplayGame"
+                )
+                mock_game = type(game_name, (), {})()
+                player_names = (
+                    self.match_metadata.get("players")
+                    or self.metadata.get("players")
+                    or self.replay_context.players
+                    or []
+                )
+                mock_players = rehydrate_players(player_names)
+                self.event_bus.emit(
+                    EventType.MATCH_START,
+                    game=mock_game,
+                    players=mock_players,
+                    match_id=self.metadata.get("match_id") or self.replay_context.match_id,
+                )
+
+            emitted_match_end = False
             for event in self.events[start_index:]:
                 delay = self.scheduler.compute_delay(last_event, event)
                 if delay > 0:
@@ -154,19 +175,23 @@ class ReplayEngine:
 
                 self._emit_recorded_event(event)
                 last_event = event
+                event_type = event.type.value if isinstance(event.type, EventType) else event.type
+                if event_type == EventType.MATCH_END.value:
+                    emitted_match_end = True
 
-            match_metadata = dict(self.match_metadata or {})
-            match_result = MatchResult(
-                winner=self.winner,
-                final_state=self.final_state,
-                events=self.events,
-                seed=self.seed,
-                metadata=match_metadata,
-            )
-            self.event_bus.emit(
-                EventType.MATCH_END,
-                result=match_result,
-            )
+            if not emitted_match_end:
+                match_metadata = dict(self.match_metadata or {})
+                match_result = MatchResult(
+                    winner=self.winner,
+                    final_state=self.final_state,
+                    events=self.events,
+                    seed=self.seed,
+                    metadata=match_metadata,
+                )
+                self.event_bus.emit(
+                    EventType.MATCH_END,
+                    result=match_result,
+                )
             self._handshake_started.clear()
             self._handshake_prompt_cache.clear()
 
@@ -180,9 +205,6 @@ class ReplayEngine:
             entry = dict(data)
             payload = dict(entry.get("data", {}))
             context_dict = dict(entry.get("context", {}))
-            # Provide legacy fallback for turn_index
-            if "phase_index" not in context_dict and "turn_index" in context_dict:
-                context_dict["phase_index"] = context_dict["turn_index"]
             events.append(
                 Event(
                     type=entry["type"],
@@ -213,19 +235,9 @@ class ReplayEngine:
 
         self._apply_event_context(context)
 
-        if event_type == EventType.MATCH_END.value:
-            return
-
         if event_type == EventType.PLAYER_HANDSHAKE_START.value:
             player = payload.get("player")
-            prompt_payload = payload.get("prompt") or {}
             if player:
-                if not payload.get("prompt_text") and prompt_payload.get("prompt_text"):
-                    payload["prompt_text"] = prompt_payload["prompt_text"]
-                if "prompt_blocks" not in payload and "prompt_blocks" in prompt_payload:
-                    payload["prompt_blocks"] = prompt_payload["prompt_blocks"]
-                if not payload.get("controller_format") and prompt_payload.get("controller_format"):
-                    payload["controller_format"] = prompt_payload["controller_format"]
                 cached = self._handshake_prompt_cache.get(player, {})
                 if not payload.get("prompt_text") and cached.get("prompt_text"):
                     payload["prompt_text"] = cached["prompt_text"]
@@ -254,11 +266,7 @@ class ReplayEngine:
             self.event_bus.emit(event_type, **payload)
             return
 
-        if event_type in {"turn", "gameplay"}:
-            action_payload = payload.get("action")
-            if isinstance(action_payload, dict):
-                payload["action"] = self._rehydrate_action(action_payload)
-        elif event_type == "event":
+        if event_type == "event":
             # Legacy custom events already contain Event objects
             payload = {"event": event}
 
@@ -276,12 +284,11 @@ class ReplayEngine:
         if context.batch_id:
             updates["batch_id"] = context.batch_id
 
-        phase_index = context.phase_index if context.phase_index is not None else context.turn_index
+        phase_index = context.phase_index
         if phase_index is not None:
             updates["phase_index"] = phase_index
-            updates["turn_index"] = phase_index
         else:
-            self.event_bus.clear_context("phase_index", "turn_index")
+            self.event_bus.clear_context("phase_index")
 
         if updates:
             self.event_bus.update_context(**updates)
@@ -300,14 +307,9 @@ class ReplayEngine:
             player = payload.get("player")
             if not player:
                 continue
-            prompt_payload = payload.get("prompt") or {}
-            prompt_text = payload.get("prompt_text") or prompt_payload.get("prompt_text")
+            prompt_text = payload.get("prompt_text")
             prompt_blocks = payload.get("prompt_blocks")
-            if prompt_blocks is None:
-                prompt_blocks = prompt_payload.get("prompt_blocks")
-            controller_format = payload.get("controller_format") or prompt_payload.get(
-                "controller_format"
-            )
+            controller_format = payload.get("controller_format")
             cached = self._handshake_prompt_cache.setdefault(player, {})
             if prompt_text and not cached.get("prompt_text"):
                 cached["prompt_text"] = prompt_text
@@ -321,12 +323,9 @@ class ReplayEngine:
         start_payload: Dict[str, Any] = {
             "player": payload.get("player"),
         }
-        prompt_payload = payload.get("prompt") or {}
-        prompt_text = payload.get("prompt_text") or prompt_payload.get("prompt_text")
-        prompt_blocks = payload.get("prompt_blocks") or prompt_payload.get("prompt_blocks")
-        controller_format = payload.get("controller_format") or prompt_payload.get(
-            "controller_format"
-        )
+        prompt_text = payload.get("prompt_text")
+        prompt_blocks = payload.get("prompt_blocks")
+        controller_format = payload.get("controller_format")
         player = start_payload.get("player")
         cached = self._handshake_prompt_cache.get(player, {}) if player else {}
         if not prompt_text:
@@ -349,32 +348,18 @@ class ReplayEngine:
         if player:
             self._handshake_started.add(player)
 
-    def _rehydrate_action(self, action_payload: Dict[str, Any]) -> ActionResult:
-        """Convert serialized action payload back into ActionResult."""
-        metadata = action_payload.get("metadata")
-        metadata_copy = copy.deepcopy(metadata) if metadata else None
-        action = ActionResult(
-            action=action_payload.get("action"),
-            reasoning=action_payload.get("reasoning"),
-            metadata=metadata_copy,
-        )
-        raw_response = action_payload.get("raw_response")
-        if raw_response is not None:
-            action.raw_response = raw_response
-        return action
-
     def _validate_schema_version(self, payload: Dict[str, Any]) -> str:
         """Ensure recordings declare a supported schema_version."""
         schema_version_value = payload.get("schema_version")
         schema_version = str(schema_version_value).strip() if schema_version_value else ""
         if not schema_version:
             raise ValueError(
-                "ReplayEngine requires recording schema_version (expected 1.x). "
-                "Re-export the match with Recorder v1.3+."
+                "ReplayEngine requires recording schema_version (expected 2.0). "
+                "Re-export the match with Recorder v2.0."
             )
-        if not schema_version.startswith("1"):
+        if schema_version != "2.0":
             raise ValueError(
                 f"Unsupported recording schema_version '{schema_version}'. "
-                "ReplayEngine only supports Recorder v1.x artifacts."
+                "ReplayEngine only supports Recorder v2.0 artifacts."
             )
         return schema_version

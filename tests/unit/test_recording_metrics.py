@@ -71,24 +71,24 @@ def test_compute_format_strictness_mixed_contracts() -> None:
                     "type": "gameplay",
                     "data": {
                         "player": "Alice",
-                        "metadata": {"raw_response": "ACTION: ATTACK", "parser_success": True},
+                        "action": {"value": "ATTACK", "metadata": {"parser_success": True}},
+                        "interaction": {"response_text": "ACTION: ATTACK"},
                     },
                 },
                 {
                     "type": "gameplay",
                     "data": {
                         "player": "Bob",
-                        "metadata": {
-                            "raw_response": "REASONING: safe\nACTION: POTION",
-                            "parser_success": True,
-                        },
+                        "action": {"value": "POTION", "metadata": {"parser_success": True}},
+                        "interaction": {"response_text": "REASONING: safe\nACTION: POTION"},
                     },
                 },
                 {
                     "type": "gameplay",
                     "data": {
                         "player": "Bob",
-                        "metadata": {"raw_response": "POTION", "parser_success": True},
+                        "action": {"value": "POTION", "metadata": {"parser_success": True}},
+                        "interaction": {"response_text": "POTION"},
                     },
                 },
                 {

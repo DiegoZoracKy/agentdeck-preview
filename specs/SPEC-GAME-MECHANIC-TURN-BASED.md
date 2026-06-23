@@ -133,8 +133,8 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 
 ### TL4 – Prompt/Response Capture
 - After every successful `player.decide`, mechanics MUST call `runtime.record_turn(...)` with the turn’s prompt metadata (prompt blocks, raw response, normalized action result, usage/cost data, and `TurnContext`).  
-- `runtime.record_turn` is responsible for emitting the canonical `EventType.GAMEPLAY` payload via the runtime’s event bus so Recorder (and any spectators) can persist the transcript per `SPEC-RECORDER v1.3.0`.  
-- GAMEPLAY payloads MUST contain all PM1–PM6 fields (see `SPEC-RECORDER` §6.7) so recordings remain self-contained; no direct recorder API is permitted.
+- `runtime.record_turn` is responsible for emitting the canonical `EventType.GAMEPLAY` payload via the runtime’s event bus so Recorder (and any spectators) can persist the transcript per `SPEC-GAMEPLAY-EVENT-DATA.md` and `SPEC-RECORDER v2.0.0`.
+- GAMEPLAY payloads MUST contain the canonical `action` and `interaction` fields so recordings remain self-contained; no direct recorder API is permitted.
 
 ### TL5 – Error Propagation
 - `ActionParseError` handling MUST follow policies defined in `SPEC-GAME.md` §7.  
@@ -158,6 +158,7 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 
 ## 7. References
 - `SPEC-GAME.md` – Game author contract and parse-failure policies  
+- `SPEC-GAMEPLAY-EVENT-DATA.md` – Canonical GAMEPLAY payload emitted through `runtime.record_turn`
 - `SPEC-MATCH-RUNTIME.md` – Runtime infrastructure available to mechanics  
 - `SPEC-CONSOLE.md` – Orchestration lifecycle and runtime creation  
 - `SPEC-OBSERVABILITY.md` – Event payload requirements  

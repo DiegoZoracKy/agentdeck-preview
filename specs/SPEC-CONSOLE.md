@@ -191,7 +191,7 @@ Internal helper invoked by TurnLoop when a controller fails to parse an action.
 - Accept: failing `player`, `ActionParseError` (with embedded `ParseResult`), immutable `TurnContext` snapshot.
 - Perform the following steps in order:
   1. Emit `PLAYER_ACTION_PARSE_FAILED` with payload containing player name, match/batch/session identifiers, `turn_number`, serialized `parse_result`, optional `prompt_text`/`prompt_blocks`, and `candidates` metadata.
-  2. Append failure entry to Recorder (enriched event with prompt payload) and flush immediately.
+  2. Append failure entry to Recorder (canonical event payload) and flush immediately.
   3. Log warning-level message summarizing failure and candidates.
   4. Call `game.on_action_parse_failure(player.name, error, turn_context)` to obtain a `ParseFailurePolicy` value.
   5. Return the policy outcome to TurnLoop.
@@ -452,7 +452,7 @@ finally:
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` v2.0.0 (TurnBasedGame + TurnLoop + MatchRuntime integration, EventFactory usage, parse failure propagation)
 - `SPEC-MATCH-RUNTIME.md` v1.0.0 (Runtime contract provided to `game.run`)
 - `SPEC-OBSERVABILITY.md` v1.2.0 (Event types, payloads, emission boundaries, parse failure events)
-- `SPEC-RECORDER.md` v1.3.0 (Recording contract, parse failure capture)
+- `SPEC-RECORDER.md` v2.0.0 (Recording contract, parse failure capture)
 - `SPEC-SPECTATOR.md` v1.2.0 (Logger injection contract §5.5 LI1-LI5, spectator lifecycle)
 - `GUIDELINES.md` §4.4 (Public API documentation format)
 - Implementation references: `src/agentdeck/core/console.py`, `src/agentdeck/core/event_bus.py`, `src/agentdeck/core/session.py`, `src/agentdeck/core/turn_loop.py`

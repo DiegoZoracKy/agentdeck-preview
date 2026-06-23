@@ -21,6 +21,7 @@ Critical invariants:
 
 from __future__ import annotations
 
+import copy
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -230,103 +231,44 @@ class MatchRuntime:
         prompt metadata (PM1-PM6), ensuring Recorder and spectators receive the
         full transcript via the event bus.
 
-        Automatically extracts PM metadata from ActionResult:
-        - PM1 (response_text): from action.raw_response
-        - PM2-PM6 (controller metadata, usage_info): from action.metadata
+        Automatically extracts interaction metadata from ActionResult:
+        - response_text: from action metadata or ActionResult.raw_response
+        - controller metadata and usage_info: from action.metadata
         - prompt_blocks: from action.metadata if available, or explicit parameter
 
         Args:
             player: Player name
             state_before: Game state before action applied
             state_after: Game state after action applied
-            action: Parsed action result (contains raw_response and metadata)
+            action: Parsed action result (metadata becomes the canonical interaction)
             turn_context: Turn metadata (turn_number, match_id, timestamps, etc.)
             prompt_blocks: Optional explicit prompt blocks (if not in action.metadata)
 
         Invariants:
             - MR2: Emits GAMEPLAY event via runtime event bus
             - TL4: Every successful player.decide produces GAMEPLAY event
-            - PM1-PM6: Always includes raw_response and available metadata
+            - PM1-PM6: Always includes response text and available metadata
         """
-        import copy
-
         from .types import EventType
+        from .event_factory import EventFactory
 
-        # Build GAMEPLAY event payload (SPEC-OBSERVABILITY §3.2)
-        payload = {
-            "mechanic": "turn_based",
-            "match_id": turn_context.match_id,
-            "player": player,
-            "turn_context": turn_context.to_dict(),
-            "state_before": copy.deepcopy(state_before),
-            "state_after": copy.deepcopy(state_after),
-            "action": {
-                "action": action.action,
-                "reasoning": action.reasoning,
-                "metadata": copy.deepcopy(action.metadata) if action.metadata else {},
-                "raw_response": action.raw_response,
-            },
-        }
-
-        # Extract and include PM1-PM6 prompt metadata at top level (TL4 requirement)
-        # Per SPEC-RECORDER v1.3.0 §6.7, recorder's _extract_prompt_payload looks for
-        # PM fields in event.data (top-level), not nested in event.data["prompt"].
-        # The recorder will extract these and embed in event_data["data"]["prompt"].
-
-        # PM1: Prompt text (raw prompt rendered by PromptBuilder)
-        if action.metadata and "raw_prompt" in action.metadata:
-            payload["prompt_text"] = action.metadata["raw_prompt"]
-
-        # PM3: Raw response text (ActionResult.raw_response)
-        if action.raw_response:
-            payload["response_text"] = action.raw_response
-
-        # PM2-PM6: Extract from action.metadata if present (deep-copy for immutability)
-        if action.metadata:
-            # prompt_blocks from metadata (if embedded by controller) - DEEP COPY
-            if "prompt_blocks" in action.metadata and not prompt_blocks:
-                payload["prompt_blocks"] = copy.deepcopy(action.metadata["prompt_blocks"])
-
-            # Controller format/metadata - deep copy controller_metadata
-            if "controller_format" in action.metadata:
-                payload["controller_format"] = action.metadata["controller_format"]
-            if "controller_metadata" in action.metadata:
-                payload["controller_metadata"] = copy.deepcopy(
-                    action.metadata["controller_metadata"]
-                )
-
-            # Usage info (tokens, cost, latency) - already deep-copied above
-            if "usage_info" in action.metadata:
-                payload["usage_info"] = copy.deepcopy(action.metadata["usage_info"])
-
-            # Renderer output (if present) - DEEP COPY
-            if "renderer_output" in action.metadata:
-                payload["renderer_output"] = copy.deepcopy(action.metadata["renderer_output"])
-
-            # Prompt text (if present) - string, no need to copy
-            if "prompt_text" in action.metadata:
-                payload["prompt_text"] = action.metadata["prompt_text"]
-
-        # Override with explicitly provided prompt_blocks - DEEP COPY
-        if prompt_blocks:
-            payload["prompt_blocks"] = copy.deepcopy(
-                [block.to_dict() if hasattr(block, "to_dict") else block for block in prompt_blocks]
-            )
-
-        # Inject phase_index/turn_index for observers (TL6 / SPEC-OBSERVABILITY §3.4)
-        phase_index = turn_context.turn_index
-        payload["phase_index"] = phase_index
-        payload["turn_index"] = phase_index
+        event = EventFactory(turn_context.match_id).turn(
+            player=player,
+            action=action,
+            state_before=state_before,
+            state_after=state_after,
+            turn_context=turn_context,
+            prompt_blocks=prompt_blocks,
+        )
+        payload = event.data
+        phase_index = turn_context.phase_index
 
         # Update Console's phase tracking so MATCH_END/other events get correct context
         if hasattr(self._console, "_current_phase_index"):
             self._console._current_phase_index = phase_index
 
-        # Temporarily update EventBus context so Event.context carries phase indices
-        self._console.event_bus.update_context(
-            phase_index=phase_index,
-            turn_index=phase_index,
-        )
+        # Temporarily update EventBus context so Event.context carries phase index
+        self._console.event_bus.update_context(phase_index=phase_index)
         try:
             # Emit via runtime event bus (not directly to recorder)
             self.emit_event(EventType.GAMEPLAY, **payload)
@@ -340,7 +282,6 @@ class MatchRuntime:
                 context: EventContext = {
                     **self._console.event_bus._base_context,
                     "phase_index": phase_index,
-                    "turn_index": phase_index,
                     "timestamp": time.time(),
                     "monotonic_time": time.monotonic(),
                 }
@@ -353,7 +294,7 @@ class MatchRuntime:
                 )
                 self._events_list.append(event_snapshot)
         finally:
-            self._console.event_bus.clear_context("phase_index", "turn_index")
+            self._console.event_bus.clear_context("phase_index")
 
     def handle_parse_failure(
         self,

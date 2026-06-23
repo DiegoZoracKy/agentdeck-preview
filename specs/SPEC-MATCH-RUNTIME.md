@@ -1,9 +1,9 @@
 # SPEC-MATCH-RUNTIME: Match Infrastructure Context
 
 > Status: Final
-> Version: 1.0.0
-> Last Updated: 2026-03-17
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Version: 1.1.0
+> Last Updated: 2026-05-30
+> Implementation: ⬜ Planned (GameplayEventData v2 delegation)
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
 
 ## 1. Purpose
@@ -14,7 +14,7 @@
 ## 2. Scope & Philosophy Alignment
 - Extends the spec-driven workflow described in `CONTRIBUTING.md`: all mechanics consume the same runtime contract.  
 - Complements `SPEC-GAME.md` (game responsibilities) and `SPEC-CONSOLE.md` (orchestration) by defining the glue between them.  
-- Non-goals: Recorder schema (`SPEC-RECORDER.md`), event payload definitions (`SPEC-OBSERVABILITY.md`), controller behaviour (`SPEC-CONTROLLER.md`).
+- Non-goals: Recorder schema (`SPEC-RECORDER.md`), canonical gameplay payload definitions (`SPEC-GAMEPLAY-EVENT-DATA.md`), controller behaviour (`SPEC-CONTROLLER.md`).
 
 ## 3. Responsibilities
 - Encapsulate per-match state (session_id, batch_id, match_id, seed, RNG) and expose deterministic RNG forks.
@@ -96,11 +96,12 @@ class MatchRuntime:
 - Automatically enforces `SPEC-OBSERVABILITY` payload requirements (phase_index, mechanic name, etc.).
 
 ### 4.3 `record_turn`
-- Builds the canonical `EventType.GAMEPLAY` payload (per `SPEC-OBSERVABILITY` + PM1–PM6 requirements) and emits it through the runtime’s event bus.  
-- Ensures JSON-serialisability and guarantees that Recorder/spectators receive the full prompt/response/action transcript via events (aligned with `SPEC-RECORDER v1.3.0`).  
+- Builds the canonical `EventType.GAMEPLAY` payload by delegating to the shared builder defined in `SPEC-GAMEPLAY-EVENT-DATA.md`, then emits it through the runtime’s event bus.
+- Ensures JSON-serialisability and guarantees that Recorder/spectators receive the full action + interaction transcript via events (aligned with `SPEC-RECORDER v2.0.0`).
 - Mechanics MUST call this whenever an LLM player produces a response that leads to an action (even if the action later fails validation or gets skipped).  
 - `TurnContext` contains `turn_number`, `player_name`, `phase_index`, `rng_label`, `started_at`, `duration`, `match_id` (see `SPEC-GAME-MECHANIC-TURN-BASED.md` §4.2). Mechanics supply the context; runtime includes it in the emitted event for downstream consumers.
-- `state_before` and `state_after` are the canonical state snapshots associated with the action. `response_text` is derived from `action.raw_response`; prompt metadata is derived from `action.metadata` plus any explicit `prompt_blocks`.
+- `state_before` and `state_after` are the canonical state snapshots associated with the action. The parsed decision is serialized as `action.value`; raw model output is serialized once as `interaction.response_text`.
+- `record_turn` MUST NOT hand-build a second gameplay payload shape. One builder owns live, recorded, and replayed `GAMEPLAY` data.
 
 ### 4.4 `handle_parse_failure`
 - Invokes the shared parse-failure policy pipeline (events, recorder, logging, `game.on_action_parse_failure`).  
@@ -164,6 +165,7 @@ final_state, mechanic_events, truncated = game.run(runtime, ordered_players)
 - `SPEC-GAME.md` – `run(runtime, players)` contract and parse-failure policies.  
 - `SPEC-GAME-MECHANIC-TURN-BASED.md` – Default mechanic implementation using runtime.  
 - `SPEC-CONSOLE.md` – Lifecycle orchestration and runtime creation.  
-- `SPEC-RECORDER.md` – Dialogue array format used by `record_turn`.  
-- `SPEC-OBSERVABILITY.md` – Event payload schema enforced by `emit_event`.  
+- `SPEC-GAMEPLAY-EVENT-DATA.md` – Canonical gameplay payload emitted by `record_turn`.
+- `SPEC-RECORDER.md` – Recording schema used by `record_turn`.
+- `SPEC-OBSERVABILITY.md` – Event envelope and routing schema enforced by `emit_event`.
 - `SPEC-PARALLEL.md` – Seed derivation and RNG requirements satisfied by `fork_rng`.

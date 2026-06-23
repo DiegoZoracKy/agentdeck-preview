@@ -17,8 +17,8 @@ from scripts import research_export as research_export_wrapper
 
 def _match_payload(match_id: str) -> dict:
     return {
-        "schema_version": 1,
-        "schema_type": "match_recording",
+        "schema_version": "2.0",
+        "schema_type": "match",
         "match_id": match_id,
         "game": "FixedDamageGame",
         "players": ["Alpha", "Beta"],
@@ -35,7 +35,12 @@ def _match_payload(match_id: str) -> dict:
                 "type": "gameplay",
                 "data": {
                     "player": "Alpha",
-                    "action": "ATTACK",
+                    "action": {
+                        "value": "ATTACK",
+                        "reasoning": None,
+                        "metadata": {"parser_success": True},
+                    },
+                    "interaction": {"response_text": "ACTION: ATTACK"},
                     "state_before": {
                         "health": {"Alpha": 80, "Beta": 80},
                         "potions": {"Alpha": 3, "Beta": 3},
@@ -48,13 +53,7 @@ def _match_payload(match_id: str) -> dict:
                         "last_action": {"Alpha": "ATTACK", "Beta": None},
                         "turn": 2,
                     },
-                    "metadata": {
-                        "parser_success": True,
-                        "raw_response": "ACTION: ATTACK",
-                        "turn_number": 1,
-                    },
                     "turn_context": {"turn_number": 1, "player": "Alpha"},
-                    "prompt": {"turn_number": 1},
                 },
                 "timestamp": 1.0,
                 "duration": 0.1,
@@ -63,7 +62,6 @@ def _match_payload(match_id: str) -> dict:
                     "batch_id": "batch_x",
                     "match_id": match_id,
                     "phase_index": 0,
-                    "turn_index": 0,
                     "timestamp": 1.0,
                     "monotonic_time": 1.0,
                 },

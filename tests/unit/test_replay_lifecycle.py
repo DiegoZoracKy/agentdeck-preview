@@ -58,9 +58,9 @@ class EventCapture:
 
 @pytest.fixture
 def sample_recording_with_handshakes():
-    """Create a sample recording with handshake events aligned to SPEC-RECORDER v1.3.0."""
+    """Create a sample recording with handshake events aligned to SPEC-RECORDER v2.0."""
     return {
-        "schema_version": "1.3",
+        "schema_version": "2.0",
         "schema_type": "match",
         "match_id": "match_test",
         "game": "TestGame",
@@ -85,20 +85,6 @@ def sample_recording_with_handshakes():
                     "prompt_text": "Handshake prompt for Player-1",
                     "prompt_blocks": [],
                     "renderer_output": None,
-                    "prompt": {
-                        "phase": "handshake",
-                        "turn_number": None,
-                        "prompt_text": "Handshake prompt for Player-1",
-                        "prompt_blocks": [],
-                        "response_text": "OK",
-                        "controller_format": "Reply with OK",
-                        "controller_metadata": {
-                            "allowed": ["READY", "OK", "YES"],
-                            "player": "Player-1",
-                            "match_id": "match_test",
-                        },
-                        "renderer_output": None,
-                    },
                 },
                 "context": {"match_id": "match_test"},
                 "timestamp": 950,
@@ -119,20 +105,6 @@ def sample_recording_with_handshakes():
                     "prompt_text": "Handshake prompt for Player-2",
                     "prompt_blocks": [],
                     "renderer_output": None,
-                    "prompt": {
-                        "phase": "handshake",
-                        "turn_number": None,
-                        "prompt_text": "Handshake prompt for Player-2",
-                        "prompt_blocks": [],
-                        "response_text": "READY",
-                        "controller_format": "Reply with OK",
-                        "controller_metadata": {
-                            "allowed": ["READY", "OK", "YES"],
-                            "player": "Player-2",
-                            "match_id": "match_test",
-                        },
-                        "renderer_output": None,
-                    },
                 },
                 "context": {"match_id": "match_test"},
                 "timestamp": 980,
@@ -142,12 +114,16 @@ def sample_recording_with_handshakes():
                 "data": {
                     "player": "Player-1",
                     "action": {
-                        "action": "ATTACK",
+                        "value": "ATTACK",
                         "reasoning": "Attack first",
                         "metadata": {
                             "prompt_text": "Turn prompt",
                         },
-                        "raw_response": "ACTION: ATTACK",
+                    },
+                    "interaction": {
+                        "prompt_text": "Turn prompt",
+                        "prompt_blocks": [],
+                        "response_text": "ACTION: ATTACK",
                     },
                     "state_before": {"_turn_count": 1},
                     "state_after": {"_turn_count": 2},
@@ -180,7 +156,7 @@ def sample_recording_with_handshakes():
 def sample_recording_with_conclusions():
     """Create a sample recording with conclusion events."""
     return {
-        "schema_version": "1.3",
+        "schema_version": "2.0",
         "schema_type": "match",
         "match_id": "match_conclusion",
         "game": "TestGame",
@@ -194,9 +170,11 @@ def sample_recording_with_conclusions():
                 "data": {
                     "player": "Player-1",
                     "action": {
-                        "action": "ATTACK",
-                        "raw_response": "ACTION: ATTACK",
+                        "value": "ATTACK",
+                        "reasoning": None,
+                        "metadata": {},
                     },
+                    "interaction": {"response_text": "ACTION: ATTACK"},
                     "state_before": {"_turn_count": 1},
                     "state_after": {"_turn_count": 2},
                     "phase_index": 0,
@@ -310,7 +288,7 @@ class TestHandshakeReplay:
         Scenario mirrors MatchResult snapshots captured in-memory (runtime.events includes START).
         """
         recording = {
-            "schema_version": "1.3",
+            "schema_version": "2.0",
             "schema_type": "match",
             "match_id": "match_start_prefixed",
             "game": "TestGame",
@@ -354,7 +332,8 @@ class TestHandshakeReplay:
                     "type": "gameplay",
                     "data": {
                         "player": "Player-1",
-                        "action": {"action": "ATTACK"},
+                        "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                        "interaction": {},
                         "state_before": {"_turn_count": 1},
                         "state_after": {"_turn_count": 2},
                         "phase_index": 0,
@@ -387,7 +366,7 @@ class TestHandshakeReplay:
         ReplayEngine should enrich missing handshake START prompt_text using COMPLETE payloads.
         """
         recording = {
-            "schema_version": "1.3",
+            "schema_version": "2.0",
             "schema_type": "match",
             "match_id": "match_missing_prompt",
             "game": "TestGame",
@@ -536,9 +515,9 @@ class TestContextHydration:
         Per CR1: Modern spectators access via event.context
         Per CR2: Legacy handlers receive as context kwarg
         """
-        # Create recording with full context metadata (v1.3.0 format)
+        # Create recording with full context metadata (v2.0 format)
         recording = {
-            "schema_version": "1.3",
+            "schema_version": "2.0",
             "schema_type": "match",
             "match_id": "match_ctx_test",
             "game": "TestGame",

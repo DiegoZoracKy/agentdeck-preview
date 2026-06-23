@@ -1,10 +1,12 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
-> **Status**: Final
+> **Status**: Legacy / Frozen
 > **Version**: 0.6.0
-> **Last Updated**: 2026-05-05
-> **Implementation**: ✅ Curated replay surface (schema v1.3+ loader, local library, smoke-check, curation metadata UI, portable static bundle)
+> **Last Updated**: 2026-05-30
+> **Implementation**: ✅ Curated replay surface for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0
 > **Audience**: Viewer developers, skin authors, integration engineers
+
+> **Disposition**: This spec documents the current bundled browser viewer that was used for the Agentic Edge research artifact. It is frozen at the Recorder v1.3 record shape. New viewer-facing work uses `SPEC-MATCH-SURFACE-PROJECTION.md` and the Core-produced Match Surface protocol instead of extending this bundle.
 
 ## 1. Purpose
 
@@ -24,7 +26,7 @@
 ## 3. Responsibilities
 
 ### 3.1 Record Loader
-- Validate incoming JSON against schema v1.3+
+- Validate incoming JSON against schema v1.3+ legacy artifacts
 - Extract gameplay frames from `events[]`
 - Provide normalized `MatchData` structure to timeline and renderers
 - Reject incompatible schema versions with clear error messages
@@ -183,7 +185,7 @@ RecordLoader.validate(json: object): ValidationResult
 **Guarantees:**
 - V1: MUST reject schema versions < 1.3
 - V2: MUST extract all `type: "gameplay"` events into frames
-- V3: MUST preserve frame ordering by `context.turn_index` (alias of `phase_index`) when present
+- V3: MUST preserve frame ordering by `context.turn_index` or `context.phase_index` when present in legacy artifacts
 - V4: MUST normalize state keys to camelCase for JS consumption
 
 ### 5.2 Timeline
@@ -290,14 +292,14 @@ updateManifestFromSidecars(matchesDir: string): ManifestPayload
 ## 6. Invariants & Guarantees
 
 ### 6.1 Record Compatibility (RC)
-1. **RC1**: Viewer MUST support schema v1.3+ records from SPEC-RECORDER
+1. **RC1**: Viewer MUST support legacy schema v1.3+ records from SPEC-RECORDER as frozen at the `agentic-edge-research` tag
 2. **RC2**: Viewer MUST fail fast with clear error on unsupported schema
 3. **RC3**: Unknown event types MUST be skipped, not crash playback
 4. **RC4**: Missing optional fields MUST use sensible defaults
 5. **RC5**: Bundled combat skins MUST accept both `FixedDamageGame` and `VariableDamageGame` records when the normalized state contains `health`, `potions`, `turn`, and `lastAction`
 
 ### 6.2 Playback Integrity (PI)
-5. **PI1**: Frame order MUST match original event order (by `turn_index`/`phase_index`)
+5. **PI1**: Frame order MUST match original event order (by legacy `turn_index` or `phase_index`)
 6. **PI2**: State transitions MUST be accurate (stateBefore → stateAfter)
 7. **PI3**: Playback MUST be deterministic (same record → same frames)
 8. **PI4**: Speed changes MUST not skip or duplicate frames
@@ -417,7 +419,7 @@ document.addEventListener('keydown', (e) => {
 
 | Focus | Invariants | Verification |
 |-------|------------|--------------|
-| Schema validation | RC1-RC4 | Load v1.3 records, reject v1.2, skip unknown events |
+| Schema validation | RC1-RC4 | Load frozen v1.3 records, reject v1.2, skip unknown events |
 | Frame extraction | PI1-PI3 | Compare extracted frames to source events |
 | Playback timing | T1, PI4 | Measure frame intervals at different speeds |
 | Renderer contract | R1-R4, RI1-RI4 | Mock renderer, verify callbacks |
@@ -429,7 +431,7 @@ document.addEventListener('keydown', (e) => {
 
 ## 10. Design Rationale
 
-- **Record-first**: Viewer is a **consumer** of the record contract. Changes to visualization don't require record format changes.
+- **Record-first**: Viewer is a **consumer** of the legacy record contract. New public viewer surfaces consume Match Surface artifacts instead.
 - **Pluggable renderers**: Separation allows a retro-JRPG skin, debug view, future Unity renderer, etc. without core changes.
 - **No framework dependency**: Vanilla JS ensures viewer works anywhere (iframe, Jupyter, standalone).
 - **Fail-safe playback**: Renderer errors don't crash timeline; unknown events are skipped.
@@ -437,13 +439,14 @@ document.addEventListener('keydown', (e) => {
 ## 11. Future Work
 
 - **Debug renderer**: Show prompts, responses, and controller metadata
-- **Multi-game support**: Abstract game-specific state handling
+- **Multi-game support**: Superseded by `SPEC-MATCH-SURFACE-PROJECTION.md` for new work
 - **Narration integration**: Connect to Spectator-derived narration streams
 - **Export**: Single-file HTML bundle, animated GIF
 - **Hosted URL loading**: Load records from arbitrary remote URLs
 
 ## 12. References
 
-- [SPEC-RECORDER.md](SPEC-RECORDER.md) v1.3 - Record schema
+- [SPEC-RECORDER.md](SPEC-RECORDER.md) v1.3 at `agentic-edge-research` - legacy record schema
+- [SPEC-MATCH-SURFACE-PROJECTION.md](SPEC-MATCH-SURFACE-PROJECTION.md) - replacement projection contract for new viewer surfaces
 - [SPEC-REPLAY.md](SPEC-REPLAY.md) - Python replay engine
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Development workflow

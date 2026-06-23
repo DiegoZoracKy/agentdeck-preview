@@ -44,7 +44,7 @@ def _variable_gameplay_event(
         "type": "gameplay",
         "data": {
             "player": player,
-            "action": action,
+            "action": {"value": action, "reasoning": None, "metadata": {}},
             "state_before": {
                 "health": {player: own_hp, opponent: opponent_hp_before},
                 "potions": {player: own_potions, opponent: 3},
@@ -66,9 +66,6 @@ def _variable_gameplay_event(
             "turn_context": {
                 "turn_number": turn_number,
                 "player": player,
-            },
-            "metadata": {
-                "turn_number": turn_number,
             },
         },
     }
