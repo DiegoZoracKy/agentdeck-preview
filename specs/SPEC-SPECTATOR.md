@@ -70,7 +70,7 @@
 
 ### MatchSurfaceProjector (Core / Viewer Projection)
 
-- **Purpose**: Produce the stable Match Surface protocol consumed by viewer fronts such as agentdeck.tv.
+- **Purpose**: Produce the stable Match Surface protocol consumed by viewer-facing tools.
 - **Scope**: `MatchSurfaceProjector` is a read-only spectator over canonical Core events. It projects decisions, state deltas, interaction metadata, economics, and optional marker provenance into sink output.
 - **Contract**: Defined in `SPEC-MATCH-SURFACE-PROJECTION.md`.
 - **Boundary**: It does not run game logic, parse recorder files directly, or compute research findings.

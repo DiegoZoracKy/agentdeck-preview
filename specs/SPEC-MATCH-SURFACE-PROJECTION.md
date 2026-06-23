@@ -5,13 +5,13 @@
 > Last Updated: 2026-05-31
 > Implementation: ✅ Implemented in `agentdeck.spectators.match_surface`
 > Review State: consensus-approved
-> Audience: Core contributors, agentdeck.tv implementers, spectator authors, artifact pipeline maintainers
+> Audience: Core contributors, spectator authors, artifact pipeline maintainers
 
 ## 1. Purpose
 
-Define the Core-owned projection layer that turns AgentDeck match events into a stable Match Surface protocol for viewers such as agentdeck.tv.
+Define the Core-owned projection layer that turns AgentDeck match events into a stable Match Surface protocol for viewer-facing consumers.
 
-The projector is not a replay engine and not a research scorer. It is a read-only spectator that consumes canonical Core events from live play or replay and emits viewer-ready surface data through pluggable sinks.
+The projector is not a replay engine and not a research scorer. It is a read-only spectator that consumes canonical Core events from live play or replay and emits surface data through pluggable sinks.
 
 ## 2. Scope & Philosophy Alignment
 
@@ -19,13 +19,13 @@ The projector is not a replay engine and not a research scorer. It is a read-onl
 - Builds on `SPEC-SPECTATOR.md`: `MatchSurfaceProjector` is an observer, not a game participant.
 - Builds on `SPEC-GAMEPLAY-EVENT-DATA.md`: the projector consumes one canonical gameplay shape.
 - Preserves replay parity: the same match through live play or replay must produce equivalent Match Surface output.
-- Non-goals: frontend routing, web UI layout, publishing policy, social sharing, research findings, game runtime logic, and live human input.
+- Non-goals: frontend routing, UI layout, external distribution policy, research findings, game runtime logic, and interactive human input.
 
 ## 3. Responsibilities
 
 - Consume lifecycle and gameplay events as a read-only spectator.
 - Project canonical `GAMEPLAY` events into frame objects suitable for inspection.
-- Preserve enough raw state, action, reasoning, interaction, cost, and timing data for a viewer to explain each decision.
+- Preserve enough raw state, action, reasoning, interaction, cost, and timing data for downstream inspection of each decision.
 - Expose sinks for static JSON artifacts and in-memory tests.
 - Provide a redaction hook so callers can remove private fields before writing artifacts.
 - Avoid computing research findings or editorial claims.
@@ -158,7 +158,7 @@ class MatchSurfaceSink(Protocol):
 4. **MSP4 Live/Replay Equivalence**: The same match through `.play()`, `.replay(match=...)`, and `.replay(path=...)` MUST produce equivalent Match Surface documents, ignoring explicitly allowed source timestamps.
 5. **MSP5 Presentation, Not Research**: The projector MAY compute mechanical convenience data, such as state deltas and costs, but MUST NOT compute research findings.
 6. **MSP6 Marker Provenance**: Every marker MUST declare whether it was computed by projection or imported from upstream.
-7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Publishing policy and redaction rules are owned by the caller, such as agentdeck.tv. The v0 implementation applies redaction to the completed document before `finish`; future streaming sinks MUST apply the same policy before every externally emitted `start`, `frame`, or `finish` payload.
+7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Redaction rules are owned by the caller. The JSON artifact implementation applies redaction to the completed document before `finish`; future streaming sinks MUST apply the same policy before every externally emitted `start`, `frame`, or `finish` payload.
 8. **MSP8 Sink Isolation**: Sink failures MUST be isolated like spectator failures: logged and surfaced without corrupting playback or game execution.
 
 ## 7. Data Flow & Interaction
@@ -177,7 +177,7 @@ Tests:
 ## 8. Error Handling & Edge Cases
 
 - Missing canonical gameplay fields SHOULD fail the projection test suite rather than silently producing partial frames.
-- Redactor exceptions MUST fail artifact writing for that match; publishing unredacted data is worse than no artifact.
+- Redactor exceptions MUST fail artifact writing for that match; emitting unredacted data is worse than no artifact.
 - Streaming sinks MUST NOT emit unredacted per-frame payloads; per-frame redaction is deferred with the streaming sink work and is not implemented by the v0 `JsonArtifactSink` path.
 - Marker provider exceptions MUST be isolated and recorded in projector diagnostics; they MUST NOT prevent base frames from being emitted unless configured as strict.
 - Projector output MUST remain useful for partial-information games; it must not require hidden state or omniscient game logic.
@@ -222,8 +222,8 @@ assert sink.document["frames"][0]["action"]["value"] == "ATTACK"
 ## 11. Design Rationale
 
 - Core owns the projection seam because it already owns play/replay parity and spectators.
-- agentdeck.tv should consume a stable Match Surface protocol rather than parse Core recorder internals.
-- A sink interface keeps static v0 artifacts and future live streaming on the same projection contract without building live features now.
+- Viewer-facing consumers should consume a stable Match Surface protocol rather than parse Core recorder internals.
+- A sink interface keeps static artifacts and future streaming on the same projection contract without building streaming features now.
 
 ## 12. Open Questions / Future Work
 
