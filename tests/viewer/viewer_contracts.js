@@ -134,6 +134,30 @@ async function testRecordLoader() {
   assert.strictEqual(validationOld.valid, false);
   assert(validationOld.errors.some((e) => e.includes('Unsupported schema version: 1.2')));
 
+  // Legacy viewer must reject schema 2.0+ with a clear message
+  const validationV2 = RecordLoader.validate({
+    schema_version: '2.0',
+    match_id: 'm',
+    game: 'FixedDamageGame',
+    players: [],
+    events: []
+  });
+  assert.strictEqual(validationV2.valid, false, 'schema 2.0 must be rejected by the legacy viewer');
+  assert(
+    validationV2.errors.some((e) => e.includes('2.0') && e.includes('legacy viewer')),
+    'rejection message must mention 2.0 and legacy viewer'
+  );
+
+  // 2.1 must also be rejected
+  const validationV21 = RecordLoader.validate({
+    schema_version: '2.1',
+    match_id: 'm',
+    game: 'FixedDamageGame',
+    players: [],
+    events: []
+  });
+  assert.strictEqual(validationV21.valid, false, 'schema 2.1 must also be rejected');
+
   const record = makeRecord();
   const matchData = RecordLoader.load(record);
   const matchDataAgain = RecordLoader.load(record);

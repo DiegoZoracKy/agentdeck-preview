@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-"""One-shot migration for Agentic Edge match records to Recorder v2.0.
+"""Migration utility for AgentDeck match records to Recorder v2.0.
 
-This is intentionally not runtime compatibility. It rewrites the irreplaceable
-Agentic Edge research records once so current Core code can stay cleanly v2-only.
+Safe mode (default): use --output-dir to write derived records to a new
+location. The originals are never touched.
+
+Dangerous mode: --write rewrites records in place. Refused for paths under
+viewer/matches/ unless --force is also supplied.
 """
 
 from __future__ import annotations
 
 import argparse
 import copy
+import datetime
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple
 
-DEFAULT_ROOT = Path("research/2026-04-27-agentic-edge-strategy-stack")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_ROOT = REPO_ROOT / "research/2026-04-27-agentic-edge-strategy-stack"
+
+PROTECTED_DIRS = frozenset([REPO_ROOT / "viewer" / "matches"])
 
 INTERACTION_METADATA_KEYS = {
     "raw_prompt",
@@ -174,10 +181,30 @@ def _migrate_lifecycle_event(event: Dict[str, Any]) -> Dict[str, Any]:
     return migrated
 
 
-def migrate_match_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+def _build_provenance(
+    payload: Dict[str, Any],
+    *,
+    source_path: Optional[Path] = None,
+) -> Dict[str, Any]:
+    return {
+        "source_schema_version": str(payload.get("schema_version", "unknown")),
+        "source_match_id": payload.get("match_id"),
+        "source_artifact": str(source_path.resolve()) if source_path else None,
+        "migration_script": "scripts/migrate_agentic_edge_records_v2.py",
+        "migration_target_schema": "2.0",
+        "migrated_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+
+
+def migrate_match_payload(
+    payload: Dict[str, Any],
+    *,
+    source_path: Optional[Path] = None,
+) -> Dict[str, Any]:
     migrated = _copy(payload)
     migrated["schema_version"] = "2.0"
     migrated["schema_type"] = "match"
+    migrated["migration_provenance"] = _build_provenance(payload, source_path=source_path)
 
     events = []
     for event in migrated.get("events") or []:
@@ -309,13 +336,88 @@ def iter_match_records(root: Path) -> Iterable[Path]:
     return sorted(root.glob("agentdeck_runs/**/records/match_*.json"))
 
 
+def _is_protected(path: Path) -> bool:
+    resolved = path.resolve()
+    for protected in PROTECTED_DIRS:
+        try:
+            resolved.relative_to(protected.resolve())
+            return True
+        except ValueError:
+            pass
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
-    parser.add_argument("--write", action="store_true", help="rewrite records in place")
+    parser.add_argument(
+        "records",
+        nargs="*",
+        type=Path,
+        help="explicit record paths to migrate (alternative to --root)",
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help=f"scan for match_*.json under this directory (default: {DEFAULT_ROOT})",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        dest="output_dir",
+        help="write derived records here; originals are never modified (safe mode)",
+    )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="rewrite records in place (dangerous; refused for viewer/matches/ without --force)",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="allow --write on protected paths such as viewer/matches/",
+    )
     args = parser.parse_args()
 
-    paths = list(iter_match_records(args.root))
+    if args.output_dir and args.write:
+        parser.error("--output-dir and --write are mutually exclusive")
+
+    if args.records:
+        paths = [Path(p) for p in args.records]
+    elif args.root:
+        paths = list(iter_match_records(args.root))
+    else:
+        paths = list(iter_match_records(DEFAULT_ROOT))
+
+    if args.write and not args.force:
+        protected = [p for p in paths if _is_protected(p)]
+        if protected:
+            names = ", ".join(str(p) for p in protected)
+            print(
+                f"ERROR: --write refused for protected path(s): {names}\n"
+                "These are historical study artifacts. Use --output-dir to write derived "
+                "records to a separate location, or pass --force to override."
+            )
+            return 1
+
+    if args.output_dir:
+        seen: set[str] = set()
+        dupes: list[str] = []
+        for p in paths:
+            if p.name in seen:
+                dupes.append(p.name)
+            else:
+                seen.add(p.name)
+        if dupes:
+            print(
+                f"ERROR: output filename collision(s) in --output-dir: {', '.join(sorted(set(dupes)))}\n"
+                "Two or more source records share the same filename. "
+                "Resolve by passing explicit unique paths or organising inputs into separate directories."
+            )
+            return 1
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+
     migrated_count = 0
     already_current = 0
 
@@ -325,18 +427,25 @@ def main() -> int:
             assert_canonical_v2(original, path)
             already_current += 1
             continue
-        migrated = migrate_match_payload(original)
+        migrated = migrate_match_payload(original, source_path=path)
         assert_lossless(original, migrated, path)
         assert_canonical_v2(migrated, path)
         migrated_count += 1
-        if args.write:
-            path.write_text(
-                json.dumps(migrated, indent=2, sort_keys=False, ensure_ascii=False) + "\n",
-                encoding="utf-8",
-            )
+        serialized = json.dumps(migrated, indent=2, sort_keys=False, ensure_ascii=False) + "\n"
+        if args.output_dir:
+            out_path = args.output_dir / path.name
+            out_path.write_text(serialized, encoding="utf-8")
+            print(f"  derived: {path} -> {out_path}")
+        elif args.write:
+            path.write_text(serialized, encoding="utf-8")
 
-    action = "migrated" if args.write else "validated"
-    print(f"{action} {migrated_count} records; {already_current} already v2.0")
+    if args.output_dir:
+        action = f"derived to {args.output_dir}"
+    elif args.write:
+        action = "migrated in place"
+    else:
+        action = "validated (dry run)"
+    print(f"{action}: {migrated_count} records migrated; {already_current} already v2.0")
     return 0
 
 

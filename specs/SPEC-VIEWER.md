@@ -1,9 +1,9 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
 > **Status**: Legacy / Frozen
-> **Version**: 0.6.0
-> **Last Updated**: 2026-05-30
-> **Implementation**: ✅ Curated replay surface for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0
+> **Version**: 0.7.0
+> **Last Updated**: 2026-06-25
+> **Implementation**: ✅ Curated replay surface for Recorder v1.3 artifacts; explicitly rejects Recorder v2.0+
 > **Audience**: Viewer developers, skin authors, integration engineers
 
 > **Disposition**: This spec documents the current bundled browser viewer that was used for the Agentic Edge research artifact. It is frozen at the Recorder v1.3 record shape. New viewer-facing work uses `SPEC-MATCH-SURFACE-PROJECTION.md` and the Core-produced Match Surface protocol instead of extending this bundle.
@@ -187,6 +187,7 @@ RecordLoader.validate(json: object): ValidationResult
 - V2: MUST extract all `type: "gameplay"` events into frames
 - V3: MUST preserve frame ordering by `context.turn_index` or `context.phase_index` when present in legacy artifacts
 - V4: MUST normalize state keys to camelCase for JS consumption
+- V5: MUST reject schema versions >= 2.0 with a message that explicitly identifies this as a legacy viewer and directs callers to a v2-compatible surface
 
 ### 5.2 Timeline
 
@@ -297,6 +298,7 @@ updateManifestFromSidecars(matchesDir: string): ManifestPayload
 3. **RC3**: Unknown event types MUST be skipped, not crash playback
 4. **RC4**: Missing optional fields MUST use sensible defaults
 5. **RC5**: Bundled combat skins MUST accept both `FixedDamageGame` and `VariableDamageGame` records when the normalized state contains `health`, `potions`, `turn`, and `lastAction`
+6. **RC6**: Viewer MUST reject schema >= 2.0 explicitly. Accepting a 2.0 record silently would produce corrupted frames (action shape, interaction field, and prompt metadata differ). The ceiling is enforced via `MAX_SCHEMA_VERSION` in `RecordLoader`; 2.1 and later are also rejected. New records must use a v2-compatible viewer surface (`SPEC-MATCH-SURFACE-PROJECTION.md`).
 
 ### 6.2 Playback Integrity (PI)
 5. **PI1**: Frame order MUST match original event order (by legacy `turn_index` or `phase_index`)
@@ -339,6 +341,7 @@ updateManifestFromSidecars(matchesDir: string): ManifestPayload
 |-----------|----------|--------------|
 | Invalid JSON | Reject load | "Invalid JSON format" |
 | Schema < 1.3 | Reject load | "Unsupported schema version: {v}. Requires 1.3+" |
+| Schema >= 2.0 | Reject load | "Schema version {v} is not supported by this legacy viewer (supports 1.3–1.x only). Use a v2-compatible viewer for schema 2.0+ records." |
 | Missing required field | Reject load | "Missing required field: {field}" |
 | No gameplay events | Allow load, warn | "No gameplay events found" |
 | Renderer throws | Log, continue | (silent, playback continues) |
