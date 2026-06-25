@@ -1,9 +1,9 @@
 """
-Tests for Recorder lifecycle event handling (schema v1.3).
+Tests for Recorder lifecycle event handling (schema v2.0).
 
-These tests validate SPEC-RECORDER v1.3.0 requirements for capturing
-prompt metadata (PM1-PM6) in lifecycle events, including pre-match
-event buffering for handshakes that arrive before MATCH_START.
+These tests validate SPEC-RECORDER v2.0 requirements for preserving canonical
+event payloads verbatim, including pre-match event buffering for handshakes that
+arrive before MATCH_START.
 """
 
 import json
@@ -34,7 +34,7 @@ def recorder(temp_recorder_dir):
 
 class TestHandshakeEventBuffering:
     """
-    Test 2A.1: Validate pre-match event buffering (schema v1.3).
+    Test 2A.1: Validate pre-match event buffering (schema v2.0).
 
     Handshake events arrive BEFORE MATCH_START when current_match is None.
     Recorder must buffer these events and flush them when MATCH_START fires.
@@ -104,8 +104,9 @@ class TestHandshakeEventBuffering:
         buffered_event = recorder._pending_events[0]
         assert buffered_event["type"] == "player_handshake_complete"
         assert buffered_event["data"]["player"] == "Player-1"
-        assert "prompt" in buffered_event["data"], "Should have prompt payload"
-        assert buffered_event["data"]["prompt"]["phase"] == "handshake"
+        assert buffered_event["data"]["prompt_text"] == (
+            "You are playing TestGame. Reply OK to start."
+        )
 
         # Step 3: Emit MATCH_START (flushes buffer to match recording)
         recorder.on_match_start(
@@ -136,18 +137,16 @@ class TestHandshakeEventBuffering:
         assert handshake_event["data"]["player"] == "Player-1"
         assert handshake_event["data"]["accepted"] is True
 
-        # Verify prompt payload (PM1-PM6)
-        prompt = handshake_event["data"]["prompt"]
-        assert prompt["phase"] == "handshake"
-        assert prompt["turn_number"] is None
-        assert prompt["prompt_text"] == "You are playing TestGame. Reply OK to start."  # PM1
-        assert prompt["response_text"] == "OK"  # PM3
-        assert "prompt_blocks" in prompt  # PM2
+        # Verify lifecycle interaction metadata is preserved verbatim.
+        data = handshake_event["data"]
+        assert data["prompt_text"] == "You are playing TestGame. Reply OK to start."
+        assert data["response_text"] == "OK"
+        assert "prompt_blocks" in data
         assert (
-            prompt["controller_format"]
+            data["controller_format"]
             == "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
-        )  # PM5
-        assert "usage_info" in prompt  # PM4
+        )
+        assert "usage_info" in data
 
     def test_clears_buffer_on_match_end(self, recorder, temp_recorder_dir):
         """
@@ -300,19 +299,19 @@ class TestHandshakeMetadata:
         ]
         assert len(handshake_events) == 1
 
-        prompt = handshake_events[0]["data"]["prompt"]
+        data = handshake_events[0]["data"]
 
-        # Verify PM1-PM6
-        assert prompt["prompt_text"] == "Full handshake prompt"  # PM1
-        assert len(prompt["prompt_blocks"]) == 2  # PM2
-        assert prompt["response_text"] == "OK"  # PM3
-        assert prompt["usage_info"]["tokens"] == 50  # PM4
-        assert prompt["usage_info"]["model"] == "gpt-4o-mini"
+        # Verify lifecycle metadata is preserved verbatim.
+        assert data["prompt_text"] == "Full handshake prompt"
+        assert len(data["prompt_blocks"]) == 2
+        assert data["response_text"] == "OK"
+        assert data["usage_info"]["tokens"] == 50
+        assert data["usage_info"]["model"] == "gpt-4o-mini"
         assert (
-            prompt["controller_format"]
+            data["controller_format"]
             == "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
-        )  # PM5
-        assert prompt["controller_metadata"]["accepted"] is True  # PM6
+        )
+        assert data["controller_metadata"]["accepted"] is True
 
         # Verify accepted flag
         assert handshake_events[0]["data"]["accepted"] is True
@@ -366,7 +365,7 @@ class TestHandshakeMetadata:
         start_events = [e for e in match_data["events"] if e["type"] == "player_handshake_start"]
         assert len(start_events) == 1
         assert start_events[0]["data"]["player"] == "Player-1"
-        assert start_events[0]["data"]["prompt"]["phase"] == "handshake"
+        assert start_events[0]["data"]["prompt_text"] == "You are playing TestGame"
 
     def test_match_timestamps_use_event_context(self, recorder, temp_recorder_dir):
         """Match started/ended timestamps should come from lifecycle event context."""
@@ -479,7 +478,11 @@ class TestHandshakeMetadata:
                 type=EventType.GAMEPLAY,
                 data={
                     "player": "Player-1",
-                    "action": {"action": "ATTACK", "reasoning": "Aggressive opening"},
+                    "action": {
+                        "value": "ATTACK",
+                        "reasoning": "Aggressive opening",
+                        "metadata": {},
+                    },
                     "state_before": {
                         "health": {"Player-1": 100, "Player-2": 100},
                         "_turn_count": 1,
@@ -491,7 +494,7 @@ class TestHandshakeMetadata:
                         "_first_player_idx": 0,
                     },
                     "turn_context": {"turn_number": 1, "duration": 1.25},
-                    "metadata": {
+                    "interaction": {
                         "prompt_text": "Turn 1",
                         "response_text": "ACTION: ATTACK",
                         "usage_info": {"call_id": "c111aaaa", "tokens": 10, "cost": 0.0001},
@@ -512,7 +515,7 @@ class TestHandshakeMetadata:
                 type=EventType.GAMEPLAY,
                 data={
                     "player": "Player-2",
-                    "action": {"action": "POTION", "reasoning": "Recover"},
+                    "action": {"value": "POTION", "reasoning": "Recover", "metadata": {}},
                     "state_before": {
                         "health": {"Player-1": 100, "Player-2": 80},
                         "_turn_count": 2,
@@ -524,7 +527,7 @@ class TestHandshakeMetadata:
                         "_first_player_idx": 0,
                     },
                     "turn_context": {"turn_number": 2, "duration": 2.5},
-                    "metadata": {
+                    "interaction": {
                         "prompt_text": "Turn 2",
                         "response_text": "ACTION: POTION",
                         "call_id": "c222bbbb",
@@ -572,9 +575,9 @@ class TestHandshakeMetadata:
         assert gameplay_events[0]["duration"] == 1.25
         assert gameplay_events[1]["duration"] == 2.5
 
-        # Prompt payload should carry concrete turn numbers.
-        assert gameplay_events[0]["data"]["prompt"]["turn_number"] == 1
-        assert gameplay_events[1]["data"]["prompt"]["turn_number"] == 2
+        # Turn context carries concrete turn numbers.
+        assert gameplay_events[0]["data"]["turn_context"]["turn_number"] == 1
+        assert gameplay_events[1]["data"]["turn_context"]["turn_number"] == 2
 
         # Engine-internal keys should be sanitized from recorded gameplay snapshots.
         assert "_turn_count" not in gameplay_events[0]["data"]["state_before"]
@@ -582,9 +585,9 @@ class TestHandshakeMetadata:
         assert "_turn_count" not in gameplay_events[1]["data"]["state_after"]
         assert "_first_player_idx" not in gameplay_events[1]["data"]["state_after"]
 
-        # call_id should be explicit in prompt payload for request/response log correlation.
-        assert gameplay_events[0]["data"]["prompt"]["call_id"] == "c111aaaa"
-        assert gameplay_events[1]["data"]["prompt"]["call_id"] == "c222bbbb"
+        # call_id should be explicit in interaction payload for request/response correlation.
+        assert gameplay_events[0]["data"]["interaction"]["usage_info"]["call_id"] == "c111aaaa"
+        assert gameplay_events[1]["data"]["interaction"]["usage_info"]["call_id"] == "c222bbbb"
 
 
 class TestMatchCostAndIds:
@@ -651,7 +654,8 @@ class TestMatchCostAndIds:
                 data={
                     "player": "Player-1",
                     "action": {
-                        "action": "ATTACK",
+                        "value": "ATTACK",
+                        "reasoning": None,
                         "metadata": {
                             "usage_info": {
                                 "prompt_tokens": 20,
@@ -661,6 +665,15 @@ class TestMatchCostAndIds:
                                 "model": "gpt-4o-mini",
                             }
                         },
+                    },
+                    "interaction": {
+                        "usage_info": {
+                            "prompt_tokens": 20,
+                            "completion_tokens": 10,
+                            "tokens": 30,
+                            "cost": 0.0002,
+                            "model": "gpt-4o-mini",
+                        }
                     },
                     "state_before": {},
                     "state_after": {},
@@ -878,10 +891,8 @@ class TestHandshakeAbort:
         assert abort_event["data"]["accepted"] is False
         assert abort_event["data"]["reason"] == "Player declined participation"
 
-        prompt = abort_event["data"]["prompt"]
-        assert prompt["phase"] == "handshake"
-        assert prompt["prompt_text"] == "Handshake prompt"
-        assert prompt["response_text"] == "I refuse to play"
+        assert abort_event["data"]["prompt_text"] == "Handshake prompt"
+        assert abort_event["data"]["response_text"] == "I refuse to play"
 
 
 class TestConclusionDialogue:
@@ -892,8 +903,8 @@ class TestConclusionDialogue:
         Verify PLAYER_CONCLUSION event captures post-match reflection.
 
         Assert:
-            - Event has prompt payload with phase="conclusion"
-            - Prompt includes PM1-PM3
+            - Event preserves conclusion prompt fields verbatim
+            - Prompt includes PM1-PM3 as top-level lifecycle data
         """
 
         class MockGame:
@@ -946,11 +957,10 @@ class TestConclusionDialogue:
         conclusion_events = [e for e in match_data["events"] if e["type"] == "player_conclusion"]
         assert len(conclusion_events) == 1
 
-        prompt = conclusion_events[0]["data"]["prompt"]
-        assert prompt["phase"] == "conclusion"
-        assert prompt["prompt_text"] == "Reflect on your performance."
-        assert prompt["response_text"] == "I played well and won!"
-        assert prompt["controller_format"] == "Provide a brief reflection"
+        data = conclusion_events[0]["data"]
+        assert data["prompt_text"] == "Reflect on your performance."
+        assert data["response_text"] == "I played well and won!"
+        assert data["controller_format"] == "Provide a brief reflection"
 
 
 class TestDialogueOrdering:
@@ -1014,13 +1024,15 @@ class TestDialogueOrdering:
                 type=EventType.GAMEPLAY,
                 data={
                     "player": "Player-1",
-                    "action": {"action": "ATTACK"},
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
                     "state_before": {},
                     "state_after": {},
-                    "metadata": {
+                    "turn_context": {
                         "turn_number": 1,
-                        "raw_prompt": "Turn 1 prompt",
-                        "raw_response": "ACTION: ATTACK",
+                    },
+                    "interaction": {
+                        "prompt_text": "Turn 1 prompt",
+                        "response_text": "ACTION: ATTACK",
                         "usage_info": {"tokens": 30},
                     },
                 },
@@ -1058,16 +1070,16 @@ class TestDialogueOrdering:
 
         assert len(lifecycle_events) == 3, "Should have 3 lifecycle events"
 
-        # Verify ordering and phases
+        # Verify ordering and canonical prompt homes.
         assert lifecycle_events[0]["type"] == "player_handshake_complete"
-        assert lifecycle_events[0]["data"]["prompt"]["phase"] == "handshake"
+        assert lifecycle_events[0]["data"]["prompt_text"] == "Handshake prompt"
 
         assert lifecycle_events[1]["type"] == "gameplay"
-        assert lifecycle_events[1]["data"]["prompt"]["phase"] == "turn"
-        assert lifecycle_events[1]["data"]["prompt"]["turn_number"] == 1
+        assert lifecycle_events[1]["data"]["interaction"]["prompt_text"] == "Turn 1 prompt"
+        assert lifecycle_events[1]["data"]["turn_context"]["turn_number"] == 1
 
         assert lifecycle_events[2]["type"] == "player_conclusion"
-        assert lifecycle_events[2]["data"]["prompt"]["phase"] == "conclusion"
+        assert lifecycle_events[2]["data"]["prompt_text"] == "Conclusion prompt"
 
 
 class TestPlayerSummariesMetadata:

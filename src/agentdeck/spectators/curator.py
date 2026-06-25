@@ -157,17 +157,20 @@ class MatchCurator(Spectator):
         action = self._normalize_action_text(data.get("action"))
         context = event.context or {}
         turn = self._turn_number(data, context, fallback=len(self.frames) + 1)
-        prompt_payload = data.get("prompt") or {}
+        interaction = data.get("interaction") or {}
+        action_payload = data.get("action") if isinstance(data.get("action"), dict) else {}
         frame = CuratorFrame(
             turn=turn,
             player=player,
             action=action,
-            reasoning=data.get("reasoning"),
+            reasoning=action_payload.get("reasoning"),
             state_before=self._copy_mapping(data.get("state_before")),
             state_after=self._copy_mapping(data.get("state_after")),
             timestamp=event.timestamp,
-            prompt_text=prompt_payload.get("prompt_text") or prompt_payload.get("raw_prompt"),
-            response_text=prompt_payload.get("response_text") or prompt_payload.get("raw_response"),
+            prompt_text=interaction.get("prompt_text") if isinstance(interaction, dict) else None,
+            response_text=(
+                interaction.get("response_text") if isinstance(interaction, dict) else None
+            ),
         )
         self.frames.append(frame)
 
@@ -444,26 +447,18 @@ class MatchCurator(Spectator):
 
     def _turn_number(self, data: Dict[str, Any], context: Dict[str, Any], *, fallback: int) -> int:
         turn_context = data.get("turn_context") or {}
-        turn = (
-            turn_context.get("turn_number")
-            or context.get("turn_index")
-            or context.get("phase_index")
-            or data.get("turn")
-        )
+        turn = turn_context.get("turn_number") or data.get("turn")
         if isinstance(turn, int) and turn > 0:
-            if "turn_index" in context or "phase_index" in context:
-                return turn if turn_context.get("turn_number") else turn + 1
             return turn
+        phase_index = context.get("phase_index") or data.get("phase_index")
+        if isinstance(phase_index, int):
+            return phase_index + 1
         return fallback
 
     def _normalize_action_text(self, action: Any) -> str:
         if isinstance(action, dict):
-            return str(action.get("action", "UNKNOWN"))
-        if hasattr(action, "action"):
-            return str(getattr(action, "action", "UNKNOWN"))
-        if action is None:
-            return "UNKNOWN"
-        return str(action)
+            return str(action.get("value", "UNKNOWN"))
+        return "UNKNOWN"
 
     def _copy_mapping(self, value: Any) -> Dict[str, Any]:
         if isinstance(value, dict):

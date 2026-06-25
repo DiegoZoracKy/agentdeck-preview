@@ -10,9 +10,12 @@
 
 const RecordLoader = {
   /**
-   * Minimum supported schema version
+   * Supported schema version range: [MIN_SCHEMA_VERSION, MAX_SCHEMA_VERSION)
+   * This viewer is frozen at the Recorder v1.x record shape.
+   * Records at schema 2.0+ must use a v2-compatible viewer.
    */
   MIN_SCHEMA_VERSION: '1.3',
+  MAX_SCHEMA_VERSION: '2.0',
 
   /**
    * Validate a match record JSON
@@ -27,6 +30,12 @@ const RecordLoader = {
       errors.push('Missing required field: schema_version');
     } else if (this._compareVersions(json.schema_version, this.MIN_SCHEMA_VERSION) < 0) {
       errors.push(`Unsupported schema version: ${json.schema_version}. Requires ${this.MIN_SCHEMA_VERSION}+`);
+    } else if (this._compareVersions(json.schema_version, this.MAX_SCHEMA_VERSION) >= 0) {
+      errors.push(
+        `Schema version ${json.schema_version} is not supported by this legacy viewer ` +
+        `(supports ${this.MIN_SCHEMA_VERSION}–1.x only). ` +
+        `Use a v2-compatible viewer for schema ${this.MAX_SCHEMA_VERSION}+ records.`
+      );
     }
 
     if (!json.match_id) errors.push('Missing required field: match_id');

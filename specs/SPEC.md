@@ -1,8 +1,8 @@
 # AgentDeck Implementation Specification
 
-**Version**: 2.1 (Lean Navigation)
+**Version**: 2.2 (Match Surface Preparation)
 **Status**: Active
-**Last Updated**: 2026-04-01
+**Last Updated**: 2026-05-30
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -101,7 +101,7 @@ session_start
       ├── player_handshake_complete      # per player, on acceptance
       ├── player_handshake_abort         # per player, on rejection
       └── match_start
-          ├── gameplay                   # mechanic-agnostic phase event
+          ├── gameplay                   # canonical GameplayEventData payload
           ├── player_action_parse_failed # optional, emitted before policy handling
           ├── <custom domain events>     # snake_case strings from games
           ├── player_conclusion          # optional per-player reflection
@@ -191,22 +191,23 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [AgentDeck](SPEC-AGENTDECK.md) | 0.3.1 | Final | Public API facade for the framework |
 | [Console](SPEC-CONSOLE.md) | 0.7.2 | Final | Execution engine for session/match lifecycle |
-| [Observability / EventBus](SPEC-OBSERVABILITY.md) | 1.2.0 | Final | Event distribution, emission responsibilities, and spectator routing |
+| [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
+| [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.7.1 | Final | Game author contract (rules, state, narrative, lifecycle hooks) |
 | [Player](SPEC-PLAYER.md) | 1.3.2 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.3.1 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
-| [Spectator](SPEC-SPECTATOR.md) | 1.4.0 | Final | Observation and analysis interface |
+| [Spectator](SPEC-SPECTATOR.md) | 2.0.0 | Final | Observation and analysis interface |
 
 ### 4.2 Infrastructure Components
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Recorder](SPEC-RECORDER.md) | 1.3.1 | Final | Match persistence with enriched prompt payloads |
-| [ReplayEngine](SPEC-REPLAY.md) | 1.1.0 | Final | Exact replay with enriched event prompt payloads |
+| [Recorder](SPEC-RECORDER.md) | 2.0.0 | Final | Match persistence with canonical event payloads |
+| [ReplayEngine](SPEC-REPLAY.md) | 2.0.0 | Final | Exact replay of canonical event payloads |
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
-| [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.0.0 | Final | Per-match infrastructure context (`runtime`) |
+| [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.1.0 | Final | Per-match infrastructure context (`runtime`) |
 | [Pricing](SPEC-PRICING.md) | 1.0.1 | Final | Cost tracking system for LLM usage |
 | [LLM](SPEC-LLM.md) | 1.1.4 | Final | LLM provider integration contract |
 | [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
@@ -225,7 +226,8 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Viewer](SPEC-VIEWER.md) | 0.4.0 | Final | Offline browser replay viewer for recorded match artifacts |
+| [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.1.0 | Final | Core spectator projection and static artifact sinks for viewer surfaces |
+| [Viewer](SPEC-VIEWER.md) | 0.6.0 | Legacy / Frozen | Offline browser replay viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
 
 ---
 

@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from ..core.base.spectator import Spectator
-from ..core.types import ActionResult, Event, EventContext, MatchResult
+from ..core.types import Event, EventContext, MatchResult
 from .utils import CounterMap, DurationTracker
 
 
@@ -55,10 +55,10 @@ class StatsTracker(Spectator):
             return
 
         action_obj = data.get("action")
-        if isinstance(action_obj, ActionResult):
-            action_record = action_obj.action
+        if isinstance(action_obj, dict):
+            action_record = str(action_obj.get("value", "UNKNOWN"))
         else:
-            action_record = str(action_obj)
+            action_record = "UNKNOWN"
 
         self.actions.increment(player, action_record)
         self.total_turns[player] += 1

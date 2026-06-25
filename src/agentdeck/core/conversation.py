@@ -24,7 +24,6 @@ class DialogueTurn:
         }
         if self.turn_context is not None:
             payload["turn_context"] = self.turn_context.to_dict()
-            payload["turn_index"] = self.turn_context.turn_index
         if self.metadata:
             payload["metadata"] = self.metadata
         return payload

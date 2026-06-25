@@ -32,6 +32,5 @@ class GameEventEmitter:
 
         if self._phase_index is not None:
             data.setdefault("phase_index", self._phase_index)
-            data.setdefault("turn_index", self._phase_index)  # Legacy alias for compatibility
 
         self._event_bus.emit(event_type, **data)

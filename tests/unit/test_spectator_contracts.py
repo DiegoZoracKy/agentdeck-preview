@@ -86,11 +86,11 @@ class TestStatsTracker:
         assert tracker.current_players == ["Alice", "Bob"]
         assert tracker.current_match_start is not None
 
-    def test_on_gameplay_tracks_action_result(self):
-        """on_gameplay() tracks actions from ActionResult."""
+    def test_on_gameplay_tracks_canonical_action(self):
+        """on_gameplay() tracks actions from canonical GameplayEventData."""
         tracker = StatsTracker()
 
-        action = ActionResult(action="ATTACK", reasoning="Test")
+        action = {"value": "ATTACK", "reasoning": "Test", "metadata": {}}
         event = make_event("gameplay", {"player": "Alice", "action": action})
 
         tracker.on_gameplay(event)
@@ -100,8 +100,8 @@ class TestStatsTracker:
         assert "Alice" in actions_dict
         assert actions_dict["Alice"]["ATTACK"] == 1
 
-    def test_on_gameplay_handles_string_action(self):
-        """on_gameplay() handles string actions (legacy format)."""
+    def test_on_gameplay_rejects_noncanonical_action(self):
+        """on_gameplay() counts malformed noncanonical actions as UNKNOWN."""
         tracker = StatsTracker()
 
         event = make_event("gameplay", {"player": "Bob", "action": "DEFEND"})
@@ -109,6 +109,7 @@ class TestStatsTracker:
         tracker.on_gameplay(event)
 
         assert tracker.total_turns["Bob"] == 1
+        assert tracker.actions.as_dict()["Bob"]["UNKNOWN"] == 1
 
     def test_on_gameplay_ignores_missing_player(self):
         """on_gameplay() ignores events without player."""
@@ -273,22 +274,25 @@ class TestTokenUsageTracker:
         assert len(tracker.player_tokens) == 0
 
     def test_on_gameplay_extracts_usage_info(self):
-        """on_gameplay() extracts tokens from usage_info format."""
+        """on_gameplay() extracts tokens from canonical interaction.usage_info."""
         tracker = TokenUsageTracker()
 
-        action = ActionResult(
-            action="ATTACK",
-            metadata={
-                "usage_info": {
-                    "prompt_tokens": 100,
-                    "completion_tokens": 50,
-                    "tokens": 150,
-                    "cost": 0.001,
-                    "model": "gpt-4o-mini",
-                }
+        event = make_event(
+            "gameplay",
+            {
+                "player": "Alice",
+                "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                "interaction": {
+                    "usage_info": {
+                        "prompt_tokens": 100,
+                        "completion_tokens": 50,
+                        "tokens": 150,
+                        "cost": 0.001,
+                        "model": "gpt-4o-mini",
+                    }
+                },
             },
         )
-        event = make_event("gameplay", {"player": "Alice", "action": action})
 
         tracker.on_gameplay(event)
 
@@ -300,62 +304,21 @@ class TestTokenUsageTracker:
         assert tracker.player_tokens["Alice"]["total_tokens"] == 150
         assert "gpt-4o-mini" in tracker.model_usage
 
-    def test_on_gameplay_extracts_legacy_format(self):
-        """on_gameplay() handles legacy direct metadata format."""
-        tracker = TokenUsageTracker()
-
-        action = ActionResult(
-            action="ATTACK",
-            metadata={
-                "prompt_tokens": 80,
-                "completion_tokens": 40,
-                "total_tokens": 120,
-                "cost": 0.0005,
-                "model": "gpt-3.5-turbo",
-            },
-        )
-        event = make_event("gameplay", {"player": "Bob", "action": action})
-
-        tracker.on_gameplay(event)
-
-        assert tracker.total_tokens == 120
-        assert tracker.player_tokens["Bob"]["total_tokens"] == 120
-
-    def test_on_gameplay_handles_dict_action(self):
-        """on_gameplay() handles dict action format."""
+    def test_on_gameplay_extracts_input_output_token_names(self):
+        """on_gameplay() normalizes provider input/output token names."""
         tracker = TokenUsageTracker()
 
         event = make_event(
             "gameplay",
             {
-                "player": "Alice",
-                "action": {
-                    "action": "ATTACK",
-                    "metadata": {"usage_info": {"tokens": 100, "cost": 0.001, "model": "test"}},
-                },
-            },
-        )
-
-        tracker.on_gameplay(event)
-
-        assert tracker.total_tokens == 100
-
-    def test_on_gameplay_extracts_replay_flattened_metadata_usage(self):
-        """on_gameplay() handles replay-style flattened metadata payloads."""
-        tracker = TokenUsageTracker()
-
-        event = make_event(
-            "gameplay",
-            {
-                "player": "Alice",
-                "action": "ATTACK",
-                "metadata": {
+                "player": "Bob",
+                "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                "interaction": {
                     "usage_info": {
-                        "prompt_tokens": 90,
-                        "completion_tokens": 10,
-                        "tokens": 100,
-                        "cost": 0.001,
-                        "model": "gpt-4o-mini",
+                        "input_tokens": 80,
+                        "output_tokens": 40,
+                        "cost": 0.0005,
+                        "model": "gpt-3.5-turbo",
                     }
                 },
             },
@@ -363,19 +326,59 @@ class TestTokenUsageTracker:
 
         tracker.on_gameplay(event)
 
+        assert tracker.total_tokens == 120
+        assert tracker.player_tokens["Bob"]["total_tokens"] == 120
+
+    def test_on_gameplay_handles_canonical_dict_action(self):
+        """on_gameplay() handles canonical dict action format."""
+        tracker = TokenUsageTracker()
+
+        event = make_event(
+            "gameplay",
+            {
+                "player": "Alice",
+                "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                "interaction": {"usage_info": {"tokens": 100, "cost": 0.001, "model": "test"}},
+            },
+        )
+
+        tracker.on_gameplay(event)
+
+        assert tracker.total_tokens == 100
+
+    def test_on_lifecycle_extracts_top_level_usage(self):
+        """Lifecycle events use top-level usage_info."""
+        tracker = TokenUsageTracker()
+
+        event = make_event(
+            "player_handshake_complete",
+            {
+                "player": "Alice",
+                "usage_info": {
+                    "prompt_tokens": 90,
+                    "completion_tokens": 10,
+                    "tokens": 100,
+                    "cost": 0.001,
+                    "model": "gpt-4o-mini",
+                },
+            },
+        )
+
+        tracker.on_player_handshake_complete(event)
+
         assert tracker.total_calls == 1
         assert tracker.total_tokens == 100
         assert tracker.player_tokens["Alice"]["total_tokens"] == 100
 
-    def test_on_gameplay_extracts_top_level_usage_info(self):
-        """on_gameplay() handles top-level usage_info payloads."""
+    def test_on_gameplay_ignores_top_level_usage_info(self):
+        """Gameplay usage must live under interaction.usage_info."""
         tracker = TokenUsageTracker()
 
         event = make_event(
             "gameplay",
             {
                 "player": "Bob",
-                "action": "ATTACK",
+                "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
                 "usage_info": {
                     "prompt_tokens": 80,
                     "completion_tokens": 20,
@@ -389,9 +392,8 @@ class TestTokenUsageTracker:
 
         tracker.on_gameplay(event)
 
-        assert tracker.total_calls == 1
-        assert tracker.total_tokens == 100
-        assert tracker.player_tokens["Bob"]["total_tokens"] == 100
+        assert tracker.total_calls == 0
+        assert tracker.total_tokens == 0
 
     def test_handshake_complete_counts_usage(self):
         """Handshake usage should be counted as a real provider call."""
@@ -568,11 +570,16 @@ class TestTokenUsageTracker:
         tracker = TokenUsageTracker()
 
         for i in range(3):
-            action = ActionResult(
-                action="ATTACK",
-                metadata={"usage_info": {"tokens": 100, "cost": 0.001, "model": "gpt-4o-mini"}},
+            event = make_event(
+                "gameplay",
+                {
+                    "player": "Alice",
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                    "interaction": {
+                        "usage_info": {"tokens": 100, "cost": 0.001, "model": "gpt-4o-mini"}
+                    },
+                },
             )
-            event = make_event("gameplay", {"player": "Alice", "action": action})
             tracker.on_gameplay(event)
 
         assert tracker.total_calls == 3

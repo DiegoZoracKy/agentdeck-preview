@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Union, cast
 
 from .session import SessionContext
-from .types import ActionResult, Event, EventContext, MatchResult
+from .types import Event, EventContext, MatchResult
 
 
 class RecorderCollector(Protocol):
@@ -164,7 +164,7 @@ class Recorder:
     Responds to event callbacks via duck typing (``on_*`` methods).
     """
 
-    SCHEMA_VERSION = "1.3"  # v1.3.0: Removed dialogue array, embed prompts in events
+    SCHEMA_VERSION = "2.0"
     BATCH_SCHEMA_VERSION = "1.0"  # SPEC-RECORDER SV1: batch schema remains 1.0
 
     def __init__(
@@ -201,122 +201,6 @@ class Recorder:
         self.output_dir = session.record_directory
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def _extract_prompt_payload(self, event: Event, phase: str) -> Dict[str, Any]:
-        """
-        Extract PM1-PM6 metadata from event data and reshape into canonical prompt object.
-
-        Per SPEC-RECORDER v1.3.0 §6.7, the prompt payload should contain:
-        - PM1: prompt_text (exact text sent to LLM)
-        - PM2: prompt_blocks (PromptBuilder composition)
-        - PM3: response_text (raw LLM output)
-        - PM4: renderer_output (RenderResult metadata)
-        - PM5: controller_format (format instructions)
-        - PM6: controller_metadata (parsing results)
-
-        Args:
-            event: Event to extract from
-            phase: Lifecycle phase (handshake, turn, conclusion, parse_failure)
-
-        Returns:
-            Prompt payload dictionary
-        """
-        data = event.data
-        metadata = data.get("metadata") or {}
-
-        # Turn number - check data first, then metadata (gameplay events store it in metadata)
-        turn_number = data.get("turn_number")
-        if turn_number is None and "turn_number" in metadata:
-            turn_number = metadata["turn_number"]
-        if turn_number is None:
-            turn_context = data.get("turn_context")
-            if isinstance(turn_context, dict):
-                turn_number = turn_context.get("turn_number")
-            elif isinstance(metadata.get("turn_context"), dict):
-                turn_number = metadata["turn_context"].get("turn_number")
-        if phase in {"handshake", "conclusion"} or turn_number == 0:
-            turn_number = None
-
-        prompt_payload: Dict[str, Any] = {
-            "phase": phase,
-            "turn_number": turn_number,
-        }
-
-        # PM1: prompt_text - check data first, then metadata.raw_prompt
-        if "prompt_text" in data:
-            prompt_payload["prompt_text"] = data["prompt_text"]
-        elif "raw_prompt" in metadata:
-            prompt_payload["prompt_text"] = metadata["raw_prompt"]
-
-        # PM2: prompt_blocks - check data first, then metadata
-        if "prompt_blocks" in data:
-            prompt_payload["prompt_blocks"] = copy.deepcopy(data["prompt_blocks"])
-        elif "prompt_blocks" in metadata:
-            prompt_payload["prompt_blocks"] = copy.deepcopy(metadata["prompt_blocks"])
-
-        # PM3: response_text - check multiple sources
-        if "response_text" in data:
-            prompt_payload["response_text"] = data["response_text"]
-        elif "response" in data:
-            prompt_payload["response_text"] = data["response"]
-        elif "raw_response" in metadata:
-            prompt_payload["response_text"] = metadata["raw_response"]
-
-        # PM4: renderer_output - check data first, then metadata
-        if "renderer_output" in data:
-            prompt_payload["renderer_output"] = copy.deepcopy(data["renderer_output"])
-        elif "renderer_output" in metadata:
-            prompt_payload["renderer_output"] = copy.deepcopy(metadata["renderer_output"])
-
-        # PM5: controller_format - check data first, then metadata
-        if "controller_format" in data:
-            prompt_payload["controller_format"] = data["controller_format"]
-        elif "controller_format" in metadata:
-            prompt_payload["controller_format"] = metadata["controller_format"]
-
-        # PM6: controller_metadata - check data first, then metadata
-        if "controller_metadata" in data:
-            prompt_payload["controller_metadata"] = copy.deepcopy(data["controller_metadata"])
-        elif "controller_metadata" in metadata:
-            prompt_payload["controller_metadata"] = copy.deepcopy(metadata["controller_metadata"])
-
-        # Usage info (part of PM4/PM6) - check data first, then metadata
-        if "usage_info" in data:
-            prompt_payload["usage_info"] = copy.deepcopy(data["usage_info"])
-        elif "usage_info" in metadata:
-            prompt_payload["usage_info"] = copy.deepcopy(metadata["usage_info"])
-
-        # Call correlation ID (mirrors debug log request/response call_id).
-        if "call_id" in data:
-            prompt_payload["call_id"] = data["call_id"]
-        elif "call_id" in metadata:
-            prompt_payload["call_id"] = metadata["call_id"]
-        else:
-            usage_info = prompt_payload.get("usage_info")
-            if isinstance(usage_info, dict) and usage_info.get("call_id"):
-                prompt_payload["call_id"] = usage_info["call_id"]
-
-        # Duration/retries
-        if phase in {"turn", "parse_failure"}:
-            turn_context = data.get("turn_context")
-            if isinstance(turn_context, dict) and isinstance(
-                turn_context.get("duration"), (int, float)
-            ):
-                prompt_payload["duration"] = float(turn_context["duration"])
-            elif isinstance(metadata.get("turn_context"), dict) and isinstance(
-                metadata["turn_context"].get("duration"), (int, float)
-            ):
-                prompt_payload["duration"] = float(metadata["turn_context"]["duration"])
-            elif hasattr(event, "duration"):
-                prompt_payload["duration"] = event.duration
-        elif hasattr(event, "duration"):
-            prompt_payload["duration"] = event.duration
-        if "retries" in data:
-            prompt_payload["retries"] = data["retries"]
-        elif "retries" in metadata:
-            prompt_payload["retries"] = metadata["retries"]
-
-        return prompt_payload
-
     @staticmethod
     def _normalize_usage_payload(payload: Any) -> Optional[Dict[str, Any]]:
         """Normalize usage metadata across lifecycle and gameplay payload shapes."""
@@ -345,26 +229,17 @@ class Recorder:
         }
 
     def _extract_usage_payload(self, data: Any) -> Optional[Dict[str, Any]]:
-        """Extract usage metadata from live event payloads or serialized recordings."""
+        """Extract usage metadata from canonical event payloads."""
         if not isinstance(data, dict):
             return None
 
-        action_data = data.get("action")
-        if isinstance(action_data, dict):
-            action_metadata = action_data.get("metadata")
-        else:
-            action_metadata = getattr(action_data, "metadata", None)
-
+        interaction = data.get("interaction")
         metadata = data.get("metadata")
-        prompt = data.get("prompt")
 
         candidates = [
-            data.get("usage_info"),
-            action_metadata.get("usage_info") if isinstance(action_metadata, dict) else None,
-            action_metadata,
+            interaction.get("usage_info") if isinstance(interaction, dict) else None,
+            data.get("usage_info"),  # lifecycle events
             metadata.get("usage_info") if isinstance(metadata, dict) else None,
-            metadata,
-            prompt.get("usage_info") if isinstance(prompt, dict) else None,
         ]
 
         for candidate in candidates:
@@ -545,53 +420,24 @@ class Recorder:
         if not self.current_match:
             return
 
-        data = event.data
-        player = data.get("player")
-        action_obj = data.get("action")
-
-        if isinstance(action_obj, ActionResult):
-            # ActionResult object (legacy path)
-            action_value = action_obj.action
-            reasoning = action_obj.reasoning
-            metadata_snapshot = copy.deepcopy(action_obj.metadata) if action_obj.metadata else None
-        elif isinstance(action_obj, dict):
-            # Dict from Console.emit_turn() (current path)
-            action_value = action_obj.get("action")
-            reasoning = action_obj.get("reasoning")
-            metadata_snapshot = (
-                copy.deepcopy(action_obj.get("metadata")) if action_obj.get("metadata") else None
-            )
-        else:
-            # Fallback for unknown types
-            action_value = str(action_obj) if action_obj is not None else None
-            reasoning = data.get("reasoning")
-            metadata_snapshot = copy.deepcopy(data.get("metadata"))
-
-        turn_payload: Dict[str, Any] = {
-            "player": player,
-            "action": action_value,
-            "reasoning": reasoning,
-            "state_before": self._sanitize_gameplay_state_for_recording(data.get("state_before")),
-            "state_after": self._sanitize_gameplay_state_for_recording(data.get("state_after")),
-            "metadata": metadata_snapshot,
-        }
-        if data.get("turn_context") is not None:
-            turn_payload["turn_context"] = copy.deepcopy(data["turn_context"])
-        if data.get("mechanic") is not None:
-            turn_payload["mechanic"] = data["mechanic"]
-        if data.get("phase_index") is not None:
-            turn_payload["phase_index"] = data["phase_index"]
-        if data.get("turn_index") is not None:
-            turn_payload["turn_index"] = data["turn_index"]
-
         event_context = cast(EventContext, dict(event.context) if event.context else {})
         event_duration = event.duration
-        if data.get("turn_context") is not None:
-            turn_context = data["turn_context"]
+        if event.data.get("turn_context") is not None:
+            turn_context = event.data["turn_context"]
             if isinstance(turn_context, dict) and isinstance(
                 turn_context.get("duration"), (int, float)
             ):
                 event_duration = float(turn_context["duration"])
+
+        turn_payload = copy.deepcopy(event.data)
+        if "state_before" in turn_payload:
+            turn_payload["state_before"] = self._sanitize_gameplay_state_for_recording(
+                turn_payload.get("state_before")
+            )
+        if "state_after" in turn_payload:
+            turn_payload["state_after"] = self._sanitize_gameplay_state_for_recording(
+                turn_payload.get("state_after")
+            )
 
         recorded_event = Event(
             type="gameplay",
@@ -603,10 +449,6 @@ class Recorder:
         event_data = self._serialize_event(recorded_event)
         if event_context:
             event_data["context"] = dict(event_context)
-
-        # Embed prompt payload per SPEC-RECORDER v1.3.0 §6.7
-        # Use original event (not recorded_event) since it has the metadata
-        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "turn")
 
         self.current_match.events.append(event_data)
         self._record_usage_from_payload(event.data)
@@ -629,20 +471,11 @@ class Recorder:
         self._flush_current_match()
 
     def on_player_handshake_complete(self, event: Event) -> None:
-        """
-        Record PLAYER_HANDSHAKE_COMPLETE event with embedded prompt metadata.
-
-        Per SPEC-RECORDER v1.3.0 §5, lifecycle events contain prompt payload
-        in event.data["prompt"] with PM1-PM6 metadata.
-
-        Handshakes arrive before MATCH_START, so buffer them until match recording exists.
-        """
+        """Record PLAYER_HANDSHAKE_COMPLETE exactly as emitted."""
         event_data = self._serialize_event(event)
         if event.context:
             event_data["context"] = dict(event.context)
 
-        # Embed prompt payload per SPEC-RECORDER v1.3.0 §6.7
-        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "handshake")
         event_data["data"]["accepted"] = True
 
         if not self.current_match:
@@ -665,8 +498,6 @@ class Recorder:
         if event.context:
             event_data["context"] = dict(event.context)
 
-        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "handshake")
-
         if not self.current_match:
             self._pending_events.append(event_data)
         else:
@@ -674,20 +505,11 @@ class Recorder:
             self._flush_current_match()
 
     def on_player_handshake_abort(self, event: Event) -> None:
-        """
-        Record PLAYER_HANDSHAKE_ABORT event with embedded prompt metadata.
-
-        Per SPEC-RECORDER v1.3.0 §5, includes prompt payload plus accepted=False
-        and rejection reason.
-
-        Handshakes arrive before MATCH_START, so buffer them until match recording exists.
-        """
+        """Record PLAYER_HANDSHAKE_ABORT exactly as emitted."""
         event_data = self._serialize_event(event)
         if event.context:
             event_data["context"] = dict(event.context)
 
-        # Embed prompt payload per SPEC-RECORDER v1.3.0 §6.7
-        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "handshake")
         event_data["data"]["accepted"] = False
         event_data["data"]["reason"] = event.data.get("reason", "No reason provided")
 
@@ -701,22 +523,13 @@ class Recorder:
             self._flush_current_match()
 
     def on_player_action_parse_failed(self, event: Event) -> None:
-        """
-        Record action parsing failure per SPEC-RECORDER v1.3.0 §5 and §6.7 PF1-PF2.
-
-        Per SPEC-CONSOLE v0.5.0, this event is emitted before policy resolution, so we
-        record the raw parse result with contextual metadata including prompt payload.
-        """
+        """Record action parsing failure exactly as emitted."""
         if not self.current_match:
             return
 
-        # Serialize event exactly as emitted by Console (PF1)
         event_data = self._serialize_event(event)
         if event.context:
             event_data["context"] = dict(event.context)
-
-        # Embed prompt payload per SPEC-RECORDER v1.3.0 §6.7 PF2
-        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "parse_failure")
 
         self.current_match.events.append(event_data)
         self._record_usage_from_payload(event.data)
@@ -725,21 +538,13 @@ class Recorder:
         self._flush_current_match()
 
     def on_player_conclusion(self, event: Event) -> None:
-        """
-        Record PLAYER_CONCLUSION event with embedded prompt metadata.
-
-        Per SPEC-RECORDER v1.3.0 §5, conclusion events contain prompt payload
-        with post-match reflection metadata (PM1-PM6).
-        """
+        """Record PLAYER_CONCLUSION exactly as emitted."""
         if not self.current_match:
             return
 
         event_data = self._serialize_event(event)
         if event.context:
             event_data["context"] = dict(event.context)
-
-        # Embed prompt payload per SPEC-RECORDER v1.3.0 §6.7
-        event_data["data"]["prompt"] = self._extract_prompt_payload(event, "conclusion")
 
         self.current_match.events.append(event_data)
         self._record_usage_from_payload(event.data)

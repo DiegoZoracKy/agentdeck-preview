@@ -76,36 +76,13 @@ def _source_turn_numbers(event_data: Dict[str, Any]) -> List[Tuple[str, int]]:
         if turn_number is not None:
             values.append(("data.turn_context.turn_number", turn_number))
 
-    metadata = event_data.get("metadata")
-    if isinstance(metadata, dict):
-        turn_number = _as_int(metadata.get("turn_number"))
-        if turn_number is not None:
-            values.append(("data.metadata.turn_number", turn_number))
-
-        meta_turn_context = metadata.get("turn_context")
-        if isinstance(meta_turn_context, dict):
-            turn_number = _as_int(meta_turn_context.get("turn_number"))
-            if turn_number is not None:
-                values.append(("data.metadata.turn_context.turn_number", turn_number))
-
     return values
-
-
-def _prompt_turn_number(event_data: Dict[str, Any]) -> Optional[int]:
-    prompt = event_data.get("prompt")
-    if not isinstance(prompt, dict):
-        return None
-    return _as_int(prompt.get("turn_number"))
 
 
 def _resolve_consistent_turn_number(
     event_data: Dict[str, Any],
 ) -> Tuple[Optional[int], Optional[str]]:
-    values: List[Tuple[str, int]] = []
-    prompt_turn_number = _prompt_turn_number(event_data)
-    if prompt_turn_number is not None:
-        values.append(("data.prompt.turn_number", prompt_turn_number))
-    values.extend(_source_turn_numbers(event_data))
+    values = _source_turn_numbers(event_data)
 
     if not values:
         return None, None
@@ -208,7 +185,7 @@ def _check_prompt_turn_number_coherence(payload: Dict[str, Any], match_id: str) 
         return [f"{match_id}: events must be a list"]
 
     for event_index, event in enumerate(events):
-        if not isinstance(event, dict) or event.get("type") not in {"gameplay", "parse_failure"}:
+        if not isinstance(event, dict) or event.get("type") != "gameplay":
             continue
 
         data = event.get("data")
@@ -218,26 +195,14 @@ def _check_prompt_turn_number_coherence(payload: Dict[str, Any], match_id: str) 
             )
             continue
 
-        prompt_turn_number = _prompt_turn_number(data)
         source_turns = _source_turn_numbers(data)
         unique_turn_numbers = sorted({turn for _, turn in source_turns})
 
-        if len(unique_turn_numbers) > 1:
+        if not unique_turn_numbers:
             failures.append(
-                f"{match_id}: {event.get('type')} event {event_index} has conflicting source turn numbers"
+                f"{match_id}: gameplay event {event_index} missing turn_context.turn_number"
             )
             continue
-
-        if unique_turn_numbers and prompt_turn_number is None:
-            failures.append(
-                f"{match_id}: {event.get('type')} event {event_index} missing prompt.turn_number"
-            )
-            continue
-
-        if unique_turn_numbers and prompt_turn_number != unique_turn_numbers[0]:
-            failures.append(
-                f"{match_id}: {event.get('type')} event {event_index} prompt.turn_number mismatch"
-            )
 
     return failures
 
