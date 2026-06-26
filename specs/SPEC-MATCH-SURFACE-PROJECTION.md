@@ -1,8 +1,8 @@
 # SPEC-MATCH-SURFACE-PROJECTION: Match Surface Projector
 
 > Status: Final
-> Version: 0.1.0
-> Last Updated: 2026-05-31
+> Version: 0.2.0
+> Last Updated: 2026-06-26
 > Implementation: ✅ Implemented in `agentdeck.spectators.match_surface`
 > Review State: consensus-approved
 > Audience: Core contributors, spectator authors, artifact pipeline maintainers
@@ -54,6 +54,7 @@ MatchSurfaceDocument = {
     "players": [...],
     "frames": [...],
     "markers": [],
+    "curation": {...},  # optional, only when a curation sidecar is imported
     "economics": {...},
 }
 ```
@@ -108,6 +109,43 @@ Markers are optional projection annotations, not raw gameplay data.
 
 The projector MAY attach mechanical markers from explicit marker providers. It MUST NOT invent behavioral findings such as "panicked" or "underreacted" unless those findings are imported from an upstream scorer with provenance.
 
+### 4.4 Static Curation Metadata
+
+Static artifact export MAY import a `MatchCurator` sidecar for the same record.
+
+```python
+MatchSurfaceCuration = {
+    "version": 1,
+    "subtitle": "Short replay subtitle",
+    "synopsis": "Replay synopsis for viewer selection and context.",
+    "source": {
+        "type": "curation_sidecar",
+        "artifact": "match_123.meta.json",
+    },
+}
+```
+
+Imported `highlights` become normal Match Surface markers:
+
+```python
+{
+    "id": "curation-highlight-7-1",
+    "phase_index": 6,
+    "turn": 7,
+    "source": "upstream",
+    "rule": "curation_sidecar.highlight",
+    "label": "Critical missed heal",
+    "severity": "info",
+    "data": {
+        "kind": "mistake",
+        "sidecar_version": 1,
+        "sidecar_artifact": "match_123.meta.json",
+    },
+}
+```
+
+Sidecar `turn` values are 1-based viewer turns. The imported marker `phase_index` MUST be `turn - 1`. Sidecar `transcript`, when present, remains in the sidecar and MUST NOT be embedded in the Match Surface artifact.
+
 ## 5. Public API
 
 ### 5.1 MatchSurfaceProjector
@@ -150,6 +188,15 @@ class MatchSurfaceSink(Protocol):
 - Receives the document after `MatchSurfaceProjector` has applied any configured redactor.
 - v0 JSON artifact export is intended for replay-from-record inputs, not live `play()` runs, so source timestamps come from the record rather than wall-clock playback.
 
+### 5.5 Static Export Utility
+
+`scripts/match_surface_export.py` is the thin CLI wrapper for static artifacts.
+
+- Input: Recorder v2.0 match records.
+- Output: one Match Surface JSON artifact per record.
+- Optional sidecar input: a directory containing `<record-stem>.meta.json` curation sidecars.
+- The utility MUST NOT contain viewer/product routing, frontend code, or external distribution policy.
+
 ## 6. Invariants & Guarantees
 
 1. **MSP1 Read-Only**: The projector MUST NOT mutate game state, event payloads, players, or match results.
@@ -160,6 +207,8 @@ class MatchSurfaceSink(Protocol):
 6. **MSP6 Marker Provenance**: Every marker MUST declare whether it was computed by projection or imported from upstream.
 7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Redaction rules are owned by the caller. The JSON artifact implementation applies redaction to the completed document before `finish`; future streaming sinks MUST apply the same policy before every externally emitted `start`, `frame`, or `finish` payload.
 8. **MSP8 Sink Isolation**: Sink failures MUST be isolated like spectator failures: logged and surfaced without corrupting playback or game execution.
+9. **MSP9 Source Provenance**: Static artifact export MUST propagate record-level `migration_provenance` into `MatchSurfaceDocument.source.provenance` when present.
+10. **MSP10 Curation Import**: Static artifact export MAY import `MatchCurator` sidecars. Imported subtitle/synopsis MUST remain presentation metadata, imported highlights MUST become upstream markers, and sidecar transcripts MUST NOT be embedded.
 
 ## 7. Data Flow & Interaction
 
@@ -181,6 +230,8 @@ Tests:
 - Streaming sinks MUST NOT emit unredacted per-frame payloads; per-frame redaction is deferred with the streaming sink work and is not implemented by the v0 `JsonArtifactSink` path.
 - Marker provider exceptions MUST be isolated and recorded in projector diagnostics; they MUST NOT prevent base frames from being emitted unless configured as strict.
 - Projector output MUST remain useful for partial-information games; it must not require hidden state or omniscient game logic.
+- Missing adjacent sidecars are tolerated when no sidecar directory is configured.
+- When a sidecar directory is explicitly configured, a missing or invalid matching sidecar MUST fail export for that record.
 
 ## 9. Examples
 
@@ -216,14 +267,18 @@ assert sink.document["frames"][0]["action"]["value"] == "ATTACK"
 - Integration-test projector output equivalence for `.play()`, `.replay(match=...)`, and `.replay(path=...)`.
 - Unit-test deterministic JSON output for identical input.
 - Unit-test redactor application before disk write.
+- Unit-test static artifact post-processing before disk write.
 - Unit-test sink failure isolation.
 - Unit-test marker provenance rules.
+- Unit-test static export propagation of `migration_provenance`.
+- Unit-test static export sidecar import for curation metadata and highlight markers.
 
 ## 11. Design Rationale
 
 - Core owns the projection seam because it already owns play/replay parity and spectators.
 - Viewer-facing consumers should consume a stable Match Surface protocol rather than parse Core recorder internals.
 - A sink interface keeps static artifacts and future streaming on the same projection contract without building streaming features now.
+- Static export imports sidecars at the artifact boundary so `MatchSurfaceProjector` remains a Core event spectator and never parses recorder or sidecar files directly.
 
 ## 12. Open Questions / Future Work
 

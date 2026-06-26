@@ -1,7 +1,7 @@
 # ROADMAP: Match Surface Core Cleanup
 
-> Status: Phase B/C complete on `match-surface-core-cleanup`
-> Date: 2026-05-30
+> Status: Core cleanup merged; static artifact completeness in progress
+> Date: 2026-06-26
 > Repository: AgentDeck Core
 > Workflow: Follows `CONTRIBUTING.md` Phase A/B/C. This is a temporary planning note, not an authoritative spec.
 
@@ -151,7 +151,39 @@ Additional checks:
 - Verify generated Match Surface JSON is deterministic for identical input records.
 - Verify behavioral and research scorer outputs remain stable after dual-shape cleanup.
 
-## 8. Deferred Core Work
+## 8. Static Artifact Completeness
+
+Current Core slice:
+
+```text
+historical v1.3 records
+  -> safe migration bridge
+  -> Recorder v2.0 derived records
+  -> ReplayEngine + MatchSurfaceProjector + JsonArtifactSink
+  -> complete Match Surface JSON artifact
+```
+
+Core deliverables:
+
+1. Propagate record provenance into `MatchSurfaceDocument.source.provenance`.
+   - Derived records already carry `migration_provenance`.
+   - Static export must preserve that relationship in the surface artifact.
+2. Import optional `MatchCurator` sidecars during static export.
+   - `subtitle` and `synopsis` become surface curation metadata.
+   - `highlights` become upstream markers with deterministic provenance.
+   - `transcript` remains sidecar-only and is not embedded in the surface artifact.
+3. Keep viewer work out of Core.
+   - Core ends at complete Match Surface JSON artifacts.
+   - External viewers consume the artifact through their own `SurfaceDocumentLoader`.
+   - No product-specific naming or routing belongs in this repository.
+
+Validation:
+
+- Run historical records through migration and static export without mutating originals.
+- Verify every exported artifact has frames, action, interaction, state deltas, source provenance, and curation markers when sidecars are provided.
+- Verify missing adjacent sidecars remain optional, while an explicit sidecar directory fails fast if a matching sidecar is absent or invalid.
+
+## 9. Deferred Core Work
 
 - Streaming sinks.
 - Browser or remote human input bridges.
@@ -162,7 +194,7 @@ Additional checks:
 
 These should get separate specs if they become Core work.
 
-## 9. Resolved Review Decisions
+## 10. Resolved Review Decisions
 
 1. The LLM I/O container is named `interaction`.
 2. `phase_index` is the only structural phase key.
@@ -170,7 +202,7 @@ These should get separate specs if they become Core work.
 4. Runtime code remains v2-only.
 5. `SPEC-GAMEPLAY-EVENT-DATA.md` remains standalone and is referenced by Observability, MatchRuntime, Recorder, Replay, and Spectator.
 
-## 10. References
+## 11. References
 
 - `CONTRIBUTING.md` - spec-first workflow and testing requirements.
 - `specs/SPEC.md` - Core design principles.
