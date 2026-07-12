@@ -78,6 +78,9 @@ def get_behavioral_scorer(
     from agentdeck.games.examples.fixed_damage.behavioral import (
         FixedDamageBehavioralScorer,
     )
+    from agentdeck.games.examples.archivist_choice_behavioral import (
+        ArchivistChoiceBehavioralScorer,
+    )
     from agentdeck.games.examples.variable_damage.behavioral import (
         VariableDamageBehavioralScorer,
     )
@@ -85,6 +88,7 @@ def get_behavioral_scorer(
     scorers = [
         FixedDamageBehavioralScorer(),
         VariableDamageBehavioralScorer(),
+        ArchivistChoiceBehavioralScorer(),
     ]
     for scorer in scorers:
         if normalized_profile == scorer.profile_id.lower():
