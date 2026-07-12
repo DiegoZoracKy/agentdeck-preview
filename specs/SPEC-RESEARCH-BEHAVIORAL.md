@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-03-26
-> Implementation: ✅ Complete (`src/agentdeck/research/behavioral.py`, `src/agentdeck/games/examples/fixed_damage/behavioral.py`, `src/agentdeck/games/examples/variable_damage/behavioral.py`)
+> Implementation: ✅ Complete (`src/agentdeck/research/behavioral.py`, game-specific scorer modules)
 > Audience: Research engineers, game authors, contributors
 
 ## 1. Purpose
@@ -210,6 +210,7 @@ Adjacent ownership:
 - Recorder payload ownership: `SPEC-RECORDER.md`
 - Experiment package schema ownership: `SPEC-RESEARCH-EXPERIMENT.md`
 - Game-specific metric meaning: profile-local spec (for example a FixedDamage behavioral profile)
+- Archivist Choice score, completion, and post-hoc action-fit semantics: [SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md](SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md)
 
 ## 8. Error Handling & Edge Cases
 - Missing required recorder fields MUST raise clear `ValueError` or `KeyError` with the missing field names.

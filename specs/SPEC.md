@@ -219,6 +219,7 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
 | [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.2.0 | Final | Global behavioral scorer contract and extension interface for game-specific profiles |
+| [Archivist Choice Behavioral](SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md) | 0.1.0 | Final | Deterministic Archivist Choice score, completion, and post-hoc action-fit profile |
 | [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.6.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.3.0 | Final | Session-to-experiment package helper |
 
