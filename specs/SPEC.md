@@ -222,6 +222,7 @@ All component specifications follow the lean spec format with numbered invariant
 | [Archivist Choice Behavioral](SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md) | 0.1.0 | Final | Deterministic Archivist Choice score, completion, and post-hoc action-fit profile |
 | [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.6.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.3.0 | Final | Session-to-experiment package helper |
+| [Research Packager Context](SPEC-RESEARCH-PACKAGER-CONTEXT-v0.1.0.md) | 0.1.0 | Final | Optional confirmed world configuration for package behavioral export |
 
 ### 4.4 Viewer Surface
 

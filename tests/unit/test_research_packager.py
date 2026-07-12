@@ -310,6 +310,7 @@ def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
     monkeypatch.setattr("agentdeck.research.packager.export_results", _fake_export)
     monkeypatch.setattr("agentdeck.research.packager.generate_index", _fake_index)
 
+    game_config = {"attack_damage": 20, "nested": {"starting_potions": 3}}
     package_session(
         session_dir=session_dir,
         session_id=None,
@@ -319,13 +320,20 @@ def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
         question="Does the packager use direct helpers?",
         status=None,
         title="Direct Helper Demo",
+        game_config=game_config,
         include_matrix=False,
         dry_run=False,
     )
 
     assert calls["experiment_id"] == "research_2026-01-20-direct-helpers"
     assert calls["output_dir"] == research_dir / "research_2026-01-20-direct-helpers"
+    assert calls["kwargs"] == {"behavioral_config": game_config}
     assert calls["index_called"] is True
+    game_config["nested"]["starting_potions"] = 0
+    manifest = yaml.safe_load(
+        (research_dir / "research_2026-01-20-direct-helpers" / "manifest.yaml").read_text(encoding="utf-8")
+    )
+    assert manifest["game"]["config"] == {"attack_damage": 20, "nested": {"starting_potions": 3}}
 
 
 def test_package_session_include_matrix_keeps_matrix_scaffold(tmp_path):

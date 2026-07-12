@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import yaml
 
@@ -358,6 +359,7 @@ def build_manifest(
     match_files: List[Path],
     status: Optional[str] = None,
     title: Optional[str] = None,
+    game_config: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     experiment_id = normalize_research_experiment_id(experiment_id)
     manifest = yaml.safe_load(template_path.read_text(encoding="utf-8"))
@@ -389,6 +391,10 @@ def build_manifest(
     manifest["question"] = question
     manifest.setdefault("game", {})
     manifest["game"]["name"] = game_name
+    if game_config is not None:
+        if not isinstance(game_config, Mapping):
+            raise ValueError("game_config must be a mapping when provided.")
+        manifest["game"]["config"] = copy.deepcopy(dict(game_config))
     manifest["players"] = players
     variants = _infer_variants(players)
     if variants:
@@ -467,6 +473,7 @@ def package_session(
     experiment_id: Optional[str] = None,
     status: Optional[str] = None,
     title: Optional[str] = None,
+    game_config: Optional[Mapping[str, Any]] = None,
     include_matrix: bool = False,
     dry_run: bool = False,
 ) -> Dict[str, Any]:
@@ -504,6 +511,7 @@ def package_session(
         match_files=match_files,
         status=status,
         title=title,
+        game_config=game_config,
     )
     if len(resolved_session_ids) > 1:
         manifest.setdefault("run", {})
@@ -538,10 +546,21 @@ def package_session(
         list(zip(resolved_session_ids, session_roots)),
     )
 
+    behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
     if len(records_dirs) == 1:
-        export_results(records_dirs[0], dest_dir, experiment_id)
+        export_results(
+            records_dirs[0],
+            dest_dir,
+            experiment_id,
+            behavioral_config=behavioral_config,
+        )
     else:
-        export_results(records_dirs, dest_dir, experiment_id)
+        export_results(
+            records_dirs,
+            dest_dir,
+            experiment_id,
+            behavioral_config=behavioral_config,
+        )
     write_factual_markdown_blocks(dest_dir, manifest)
 
     index_content = generate_index(research_dir)

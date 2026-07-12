@@ -19,6 +19,7 @@ from .multi_session import (
     MetaAnalysisResult,
 )
 from .performance_analysis import PerformanceAnalysis
+from .packager import package_session
 from .recording_metrics import (
     compute_format_strictness,
     compute_inferential_statistics,
@@ -72,6 +73,7 @@ __all__ = [
     "compute_position_effect",
     "render_results_markdown",
     "write_results_markdown_report",
+    "package_session",
     # Post-hoc data structures (SPEC-RESEARCH v1.1.0)
     "PairwiseComparison",
     "ComparisonStats",
