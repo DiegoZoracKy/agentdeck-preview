@@ -174,22 +174,26 @@ def test_match_surface_projects_handshake_and_agent_self_report():
             timestamp=12.0,
         )
     )
-    projector.on_match_end(MatchResult(winner="Alice", final_state={}, events=[], seed=1, metadata={"turns": 0}))
+    projector.on_match_end(
+        MatchResult(winner="Alice", final_state={}, events=[], seed=1, metadata={"turns": 0})
+    )
 
     assert sink.document is not None
     assert sink.document["schema_version"] == "0.2"
     assert [entry["state"] for entry in sink.document["handshakes"]] == ["started", "accepted"]
-    assert sink.document["conclusions"] == [{
-        "player": "Alice",
-        "state": "agent_self_report",
-        "phase": "conclusion",
-        "prompt_text": None,
-        "prompt_blocks": None,
-        "response_text": "I used a potion at low health.",
-        "controller_metadata": None,
-        "usage_info": None,
-        "timestamp": 12.0,
-    }]
+    assert sink.document["conclusions"] == [
+        {
+            "player": "Alice",
+            "state": "agent_self_report",
+            "phase": "conclusion",
+            "prompt_text": None,
+            "prompt_blocks": None,
+            "response_text": "I used a potion at low health.",
+            "controller_metadata": None,
+            "usage_info": None,
+            "timestamp": 12.0,
+        }
+    ]
 
 
 def test_match_surface_redacts_start_and_frame_emissions():

@@ -159,12 +159,17 @@ def _build_static_post_processor(
     def post_process(document: dict[str, Any]) -> dict[str, Any]:
         try:
             document = copy.deepcopy(document)
+            # The projector also emits safe partial start/frame payloads. Static
+            # curation annotates the completed document only, once every
+            # highlighted turn is available for validation.
+            if "frames" not in document:
+                return document
             source = document.setdefault("source", {})
             source["record_schema_version"] = str(raw_record.get("schema_version"))
             source["match_id"] = raw_record.get("match_id") or source.get("match_id")
             if isinstance(raw_record.get("migration_provenance"), dict):
                 source["provenance"] = copy.deepcopy(raw_record["migration_provenance"])
-            if sidecar is not None:
+            if sidecar is not None and (document.get("match") or {}).get("final_state") is not None:
                 _apply_sidecar(document, sidecar)
             return document
         except Exception as exc:

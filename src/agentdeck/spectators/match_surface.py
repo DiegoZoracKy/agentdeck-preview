@@ -221,7 +221,8 @@ class MatchSurfaceProjector(Spectator):
                     or data.get("normalized_response")
                     or interaction.get("response_text")
                 ),
-                "controller_metadata": data.get("controller_metadata") or interaction.get("controller_metadata"),
+                "controller_metadata": data.get("controller_metadata")
+                or interaction.get("controller_metadata"),
                 "usage_info": data.get("usage_info") or interaction.get("usage_info"),
                 "timestamp": event.timestamp,
             }
