@@ -331,7 +331,9 @@ def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
     assert calls["index_called"] is True
     game_config["nested"]["starting_potions"] = 0
     manifest = yaml.safe_load(
-        (research_dir / "research_2026-01-20-direct-helpers" / "manifest.yaml").read_text(encoding="utf-8")
+        (research_dir / "research_2026-01-20-direct-helpers" / "manifest.yaml").read_text(
+            encoding="utf-8"
+        )
     )
     assert manifest["game"]["config"] == {"attack_damage": 20, "nested": {"starting_potions": 3}}
 

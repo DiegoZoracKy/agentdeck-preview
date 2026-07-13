@@ -108,7 +108,9 @@ class ArchivistChoiceBehavioralScorer(BehavioralScorer):
 
             events = payload.get("events") or []
             turns_total += sum(
-                1 for event in events if isinstance(event, Mapping) and event.get("type") == "gameplay"
+                1
+                for event in events
+                if isinstance(event, Mapping) and event.get("type") == "gameplay"
             )
 
             final_state = payload.get("final_state")
@@ -227,8 +229,12 @@ class ArchivistChoiceBehavioralScorer(BehavioralScorer):
                 unsupported.add("mean_score_delta_per_processed_case")
             by_manuscript[manuscript_id] = {
                 "processed_cases": int(metrics["processed_cases"]),
-                "best_action_rate": metrics["best_action_hits"] / action_total if action_total else None,
-                "mean_score_delta": metrics["score_delta_sum"] / delta_total if delta_total else None,
+                "best_action_rate": (
+                    metrics["best_action_hits"] / action_total if action_total else None
+                ),
+                "mean_score_delta": (
+                    metrics["score_delta_sum"] / delta_total if delta_total else None
+                ),
             }
             evidence_by_manuscript[manuscript_id] = {
                 "best_action_numerator": int(metrics["best_action_hits"]),

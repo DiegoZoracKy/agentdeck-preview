@@ -101,16 +101,23 @@ def test_archivist_profile_scores_recorded_final_state_and_post_hoc_action_fit()
 
 
 def test_archivist_profile_is_deterministic_and_does_not_mutate_records() -> None:
-    records = [_payload(match_id="match_001"), _payload(match_id="match_002", alpha_action="CATALOG")]
+    records = [
+        _payload(match_id="match_001"),
+        _payload(match_id="match_002", alpha_action="CATALOG"),
+    ]
     original = copy.deepcopy(records)
     scorer = ArchivistChoiceBehavioralScorer()
 
     first = scorer.score(players=[{"name": "Alpha"}, {"name": "Beta"}], match_payloads=records)
-    second = scorer.score(players=[{"name": "Alpha"}, {"name": "Beta"}], match_payloads=list(reversed(records)))
+    second = scorer.score(
+        players=[{"name": "Alpha"}, {"name": "Beta"}], match_payloads=list(reversed(records))
+    )
 
     assert scorer.canonical_json(first) == scorer.canonical_json(second)
     assert records == original
-    assert json.loads(scorer.canonical_json(first))["per_player"]["Alpha"]["best_action_rate"] == 0.75
+    assert (
+        json.loads(scorer.canonical_json(first))["per_player"]["Alpha"]["best_action_rate"] == 0.75
+    )
 
 
 def test_archivist_profile_surfaces_missing_post_hoc_fields_without_fabricating_values() -> None:
