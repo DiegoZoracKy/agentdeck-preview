@@ -1,10 +1,10 @@
 # SPEC-MATCH-SURFACE-PROJECTION: Match Surface Projector
 
-> Status: Final baseline with Phase A draft amendment in §12
-> Version: 0.2.1-draft
+> Status: Final
+> Version: 0.3.0
 > Last Updated: 2026-07-02
-> Implementation: ✅ Baseline implemented in `agentdeck.spectators.match_surface`; ⬜ §12 draft amendment not implemented
-> Review State: consensus-approved baseline; Phase A draft under review
+> Implementation: ✅ Lifecycle projection implemented in `agentdeck.spectators.match_surface`
+> Review State: consensus-approved
 > Audience: Core contributors, spectator authors, artifact pipeline maintainers
 
 ## 1. Purpose
@@ -37,7 +37,7 @@ The projector is not a replay engine and not a research scorer. It is a read-onl
 ```python
 MatchSurfaceDocument = {
     "schema_type": "match_surface",
-    "schema_version": "0.1",
+    "schema_version": "0.2",
     "source": {
         "record_schema_version": "2.0",
         "match_id": "match_123",
@@ -51,8 +51,10 @@ MatchSurfaceDocument = {
         "turns": 23,
         "metadata": {...},
     },
-    "players": [...],  # see §12 for draft player stack projection amendment
+    "players": [...],
+    "handshakes": [...],
     "frames": [...],
+    "conclusions": [...],
     "markers": [],
     "curation": {...},  # optional, only when a curation sidecar is imported
     "economics": {...},
@@ -241,7 +243,11 @@ class MatchSurfaceProjector(Spectator):
     ) -> None: ...
 
     def on_match_start(self, game, players, match_id=None, context=None, **kwargs) -> None: ...
+    def on_player_handshake_start(self, event: Event) -> None: ...
+    def on_player_handshake_complete(self, event: Event) -> None: ...
+    def on_player_handshake_abort(self, event: Event) -> None: ...
     def on_gameplay(self, event: Event) -> None: ...
+    def on_player_conclusion(self, event: Event) -> None: ...
     def on_match_end(self, result, context=None) -> None: ...
 ```
 
@@ -285,22 +291,31 @@ class MatchSurfaceSink(Protocol):
 4. **MSP4 Live/Replay Equivalence**: The same match through `.play()`, `.replay(match=...)`, and `.replay(path=...)` MUST produce equivalent Match Surface documents, ignoring explicitly allowed source timestamps.
 5. **MSP5 Presentation, Not Research**: The projector MAY compute mechanical convenience data, such as state deltas and costs, but MUST NOT compute research findings.
 6. **MSP6 Marker Provenance**: Every marker MUST declare whether it was computed by projection or imported from upstream.
-7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Redaction rules are owned by the caller. The JSON artifact implementation applies redaction to the completed document before `finish`; future streaming sinks MUST apply the same policy before every externally emitted `start`, `frame`, or `finish` payload.
+7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Redaction rules are owned by the caller and MUST apply before every externally emitted `start`, `frame`, or `finish` payload.
 8. **MSP8 Sink Isolation**: Sink failures MUST be isolated like spectator failures: logged and surfaced without corrupting playback or game execution.
 9. **MSP9 Source Provenance**: Static artifact export MUST propagate record-level `migration_provenance` into `MatchSurfaceDocument.source.provenance` when present.
 10. **MSP10 Curation Import**: Static artifact export MAY import `MatchCurator` sidecars. Imported subtitle/synopsis MUST remain presentation metadata, imported highlights MUST become upstream markers, and sidecar transcripts MUST NOT be embedded.
 
-### 6.1 Phase A Draft Player Projection Invariants
+### 6.1 Lifecycle Projection Invariants
+
+11. **MSP11 Handshake Projection**: The projector MUST preserve handshake start,
+acceptance, and rejection events with their captured interaction when present.
+12. **MSP12 Conclusion Projection**: The projector MUST preserve a conclusion as
+an `agent_self_report`, never as a research finding.
+13. **MSP13 Lifecycle Parity**: Live and replay projections MUST preserve the
+same handshake, gameplay, and conclusion content given equivalent records.
+
+### 6.2 Player Projection Invariants
 
 The following invariants are proposed by the §12 Phase A amendment. They are not
 implemented by the v0.2.0 baseline until Phase B/C work lands.
 
-11. **MSP11 Agent Stack Projection**: When record-derived player metadata is available, `players[]` SHOULD include a redacted `stack` subset suitable for viewer-facing display.
-12. **MSP12 Editorial Separation**: `players[]` MUST contain only record-derived or redacted projection fields. Editorial labels MUST NOT be embedded into `players[]`.
-13. **MSP13 No Name Parsing**: Projectors and views MUST NOT infer provider, model, controller, renderer, tier, role, economics, or latency from `player.name`.
-14. **MSP14 Redaction Safety**: Redactors MAY remove any player `stack` or `economics` field before public export. Views MUST handle missing fields as absence.
-15. **MSP15 Curation Agents**: Static export MAY import `curation.agents` from a sidecar. These labels MUST carry source provenance and MUST remain separate from record-derived player fields.
-16. **MSP16 Live/Replay Shape**: Given equivalent source metadata and redaction policy, live and replay projection MUST emit equivalent `players[]` shape.
+14. **MSP14 Agent Stack Projection**: When record-derived player metadata is available, `players[]` SHOULD include a redacted `stack` subset suitable for viewer-facing display.
+15. **MSP15 Editorial Separation**: `players[]` MUST contain only record-derived or redacted projection fields. Editorial labels MUST NOT be embedded into `players[]`.
+16. **MSP16 No Name Parsing**: Projectors and views MUST NOT infer provider, model, controller, renderer, tier, role, economics, or latency from `player.name`.
+17. **MSP17 Redaction Safety**: Redactors MAY remove any player `stack` or `economics` field before public export. Views MUST handle missing fields as absence.
+18. **MSP18 Curation Agents**: Static export MAY import `curation.agents` from a sidecar. These labels MUST carry source provenance and MUST remain separate from record-derived player fields.
+19. **MSP19 Live/Replay Shape**: Given equivalent source metadata and redaction policy, live and replay projection MUST emit equivalent `players[]` shape.
 
 ## 7. Data Flow & Interaction
 
@@ -319,7 +334,7 @@ Tests:
 
 - Missing canonical gameplay fields SHOULD fail the projection test suite rather than silently producing partial frames.
 - Redactor exceptions MUST fail artifact writing for that match; emitting unredacted data is worse than no artifact.
-- Streaming sinks MUST NOT emit unredacted per-frame payloads; per-frame redaction is deferred with the streaming sink work and is not implemented by the v0 `JsonArtifactSink` path.
+- Sinks MUST NOT emit unredacted `start`, `frame`, or `finish` payloads.
 - Marker provider exceptions MUST be isolated and recorded in projector diagnostics; they MUST NOT prevent base frames from being emitted unless configured as strict.
 - Projector output MUST remain useful for partial-information games; it must not require hidden state or omniscient game logic.
 - Missing adjacent sidecars are tolerated when no sidecar directory is configured.

@@ -144,3 +144,66 @@ def test_match_surface_marker_provider_isolated():
 
     assert projector.diagnostics[0]["kind"] == "marker_provider_error"
     assert sink.frames[0]["markers"] == []
+
+
+def test_match_surface_projects_handshake_and_agent_self_report():
+    sink = InMemorySink()
+    projector = MatchSurfaceProjector(sink=sink)
+    projector.on_match_start(MockGame(), [MockPlayer("Alice")], "match-1")
+    projector.on_player_handshake_start(
+        Event(
+            type="player_handshake_start",
+            data={"player": "Alice", "prompt_text": "Acknowledge the rules."},
+            context={"match_id": "match-1"},
+            timestamp=10.0,
+        )
+    )
+    projector.on_player_handshake_complete(
+        Event(
+            type="player_handshake_complete",
+            data={"player": "Alice", "response_text": "OK"},
+            context={"match_id": "match-1"},
+            timestamp=11.0,
+        )
+    )
+    projector.on_player_conclusion(
+        Event(
+            type="player_conclusion",
+            data={"player": "Alice", "response_text": "I used a potion at low health."},
+            context={"match_id": "match-1"},
+            timestamp=12.0,
+        )
+    )
+    projector.on_match_end(MatchResult(winner="Alice", final_state={}, events=[], seed=1, metadata={"turns": 0}))
+
+    assert sink.document is not None
+    assert sink.document["schema_version"] == "0.2"
+    assert [entry["state"] for entry in sink.document["handshakes"]] == ["started", "accepted"]
+    assert sink.document["conclusions"] == [{
+        "player": "Alice",
+        "state": "agent_self_report",
+        "phase": "conclusion",
+        "prompt_text": None,
+        "prompt_blocks": None,
+        "response_text": "I used a potion at low health.",
+        "controller_metadata": None,
+        "usage_info": None,
+        "timestamp": 12.0,
+    }]
+
+
+def test_match_surface_redacts_start_and_frame_emissions():
+    sink = InMemorySink()
+
+    def redactor(payload):
+        payload.pop("interaction", None)
+        if "players" in payload:
+            payload["players"] = [{"name": "REDACTED"}]
+        return payload
+
+    projector = MatchSurfaceProjector(sink=sink, redactor=redactor)
+    projector.on_match_start(MockGame(), [MockPlayer("Alice")], "match-1")
+    projector.on_gameplay(_gameplay_event())
+
+    assert sink.started["players"] == [{"name": "REDACTED"}]
+    assert "interaction" not in sink.frames[0]

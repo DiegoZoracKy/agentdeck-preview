@@ -104,6 +104,8 @@ class MatchSurfaceProjector(Spectator):
         self.document: Optional[Dict[str, Any]] = None
         self.frames: List[Dict[str, Any]] = []
         self.markers: List[Dict[str, Any]] = []
+        self.handshakes: List[Dict[str, Any]] = []
+        self.conclusions: List[Dict[str, Any]] = []
 
     def on_match_start(
         self,
@@ -117,10 +119,12 @@ class MatchSurfaceProjector(Spectator):
         match_id = match_id or (context or {}).get("match_id") or "unknown_match"
         self.frames = []
         self.markers = []
+        self.handshakes = []
+        self.conclusions = []
         self.diagnostics = []
         self.document = {
             "schema_type": "match_surface",
-            "schema_version": "0.1",
+            "schema_version": "0.2",
             "source": {
                 "record_schema_version": "2.0",
                 "match_id": match_id,
@@ -143,12 +147,26 @@ class MatchSurfaceProjector(Spectator):
                 },
             },
             "players": [self._player_summary(player) for player in players],
+            "handshakes": self.handshakes,
             "frames": self.frames,
+            "conclusions": self.conclusions,
             "markers": self.markers,
             "economics": self._empty_economics(),
             "diagnostics": self.diagnostics,
         }
-        self._call_sink("start", self.document)
+        self._emit_sink("start", self.document)
+
+    def on_player_handshake_start(self, event: Event) -> None:
+        self._append_lifecycle_event("started", event, self.handshakes)
+
+    def on_player_handshake_complete(self, event: Event) -> None:
+        self._append_lifecycle_event("accepted", event, self.handshakes)
+
+    def on_player_handshake_abort(self, event: Event) -> None:
+        self._append_lifecycle_event("rejected", event, self.handshakes)
+
+    def on_player_conclusion(self, event: Event) -> None:
+        self._append_lifecycle_event("agent_self_report", event, self.conclusions)
 
     def on_gameplay(self, event: Event) -> None:
         """Project one canonical gameplay event into one frame."""
@@ -163,7 +181,7 @@ class MatchSurfaceProjector(Spectator):
         self.frames.append(frame)
         self.markers.extend(frame_markers)
         self._accumulate_economics(frame.get("economics") or {})
-        self._call_sink("frame", frame)
+        self._emit_sink("frame", frame)
 
     def on_match_end(
         self, result: MatchResult, context: Optional[EventContext] = None, **kwargs: Any
@@ -181,10 +199,39 @@ class MatchSurfaceProjector(Spectator):
         if result.metadata:
             match["metadata"].update(copy.deepcopy(result.metadata))
 
-        document = self.document
+        self._emit_sink("finish", self.document)
+
+    def _append_lifecycle_event(
+        self, state: str, event: Event, target: List[Dict[str, Any]]
+    ) -> None:
+        if self.document is None:
+            match_id = (event.context or {}).get("match_id") or (event.data or {}).get("match_id")
+            self.on_match_start(None, [], match_id=match_id)
+        data = copy.deepcopy(event.data or {})
+        interaction = copy.deepcopy(data.get("interaction") or {})
+        target.append(
+            {
+                "player": data.get("player"),
+                "state": state,
+                "phase": "handshake" if target is self.handshakes else "conclusion",
+                "prompt_text": data.get("prompt_text") or interaction.get("prompt_text"),
+                "prompt_blocks": data.get("prompt_blocks") or interaction.get("prompt_blocks"),
+                "response_text": (
+                    data.get("response_text")
+                    or data.get("normalized_response")
+                    or interaction.get("response_text")
+                ),
+                "controller_metadata": data.get("controller_metadata") or interaction.get("controller_metadata"),
+                "usage_info": data.get("usage_info") or interaction.get("usage_info"),
+                "timestamp": event.timestamp,
+            }
+        )
+
+    def _emit_sink(self, method: str, payload: Dict[str, Any]) -> None:
+        emitted = copy.deepcopy(payload)
         if self.redactor is not None:
-            document = self.redactor(copy.deepcopy(document))
-        self._call_sink("finish", document)
+            emitted = self.redactor(emitted)
+        self._call_sink(method, emitted)
 
     def _project_frame(self, event: Event, data: Dict[str, Any]) -> Dict[str, Any]:
         self._assert_canonical(data)
