@@ -13,6 +13,7 @@ root README and the component specifications.
 - [Viewer README](../viewer/README.md) - browser replay viewer usage
 - [Security Policy](../SECURITY.md) - vulnerability reporting process
 - [Release Checklist](release-checklist.md) - operational checklist for the next package release
+- [Release Notes](releases/0.2.0.md) - current public package release notes
 
 ## Additional Notes
 
