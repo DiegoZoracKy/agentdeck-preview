@@ -87,7 +87,7 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/agentdeck/agentdeck.git
+git clone https://github.com/agentdeck/agentdeck-core.git
 cd agentdeck
 pip install -e ".[dev]"
 ```
