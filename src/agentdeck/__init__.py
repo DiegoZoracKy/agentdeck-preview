@@ -34,6 +34,7 @@ from .core.types import (
     PromptBlock,
     PromptBundle,
     PromptContext,
+    RenderResult,
     TemplateError,
     TurnContext,
 )
@@ -85,6 +86,7 @@ __all__ = [
     "PromptBundle",
     "PromptBlock",
     "PromptContext",
+    "RenderResult",
     "TemplateError",
     "HandshakeContext",
     "HandshakeResponse",
