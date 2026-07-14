@@ -196,6 +196,37 @@ def test_match_surface_projects_handshake_and_agent_self_report():
     ]
 
 
+def test_match_surface_preserves_handshakes_emitted_before_match_start():
+    """Replay lifecycle emits Handshake before MATCH_START (SPEC-REPLAY LC2)."""
+    sink = InMemorySink()
+    projector = MatchSurfaceProjector(sink=sink)
+    projector.on_player_handshake_start(
+        Event(
+            type="player_handshake_start",
+            data={"player": "Alice", "prompt_text": "Acknowledge the rules."},
+            context={"match_id": "match-1"},
+            timestamp=10.0,
+        )
+    )
+    projector.on_player_handshake_complete(
+        Event(
+            type="player_handshake_complete",
+            data={"player": "Alice", "response_text": "OK"},
+            context={"match_id": "match-1"},
+            timestamp=11.0,
+        )
+    )
+
+    projector.on_match_start(MockGame(), [MockPlayer("Alice")], "match-1")
+    projector.on_match_end(
+        MatchResult(winner="Alice", final_state={}, events=[], seed=1, metadata={"turns": 0})
+    )
+
+    assert sink.document is not None
+    assert sink.document["players"] == [{"name": "Alice", "type": "MockPlayer"}]
+    assert [entry["state"] for entry in sink.document["handshakes"]] == ["started", "accepted"]
+
+
 def test_match_surface_redacts_start_and_frame_emissions():
     sink = InMemorySink()
 

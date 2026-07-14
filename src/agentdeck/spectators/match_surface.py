@@ -117,6 +117,26 @@ class MatchSurfaceProjector(Spectator):
     ) -> None:
         """Initialize a Match Surface document at match start."""
         match_id = match_id or (context or {}).get("match_id") or "unknown_match"
+        if (
+            self.document is not None
+            and (self.document.get("source") or {}).get("match_id") == match_id
+        ):
+            # Replay emits Handshake events before MATCH_START. Those events
+            # create a provisional document; enrich it here instead of
+            # resetting the lifecycle data that is already part of the match.
+            match = self.document["match"]
+            match["game"] = (
+                game
+                if isinstance(game, str)
+                else (game.__class__.__name__ if game is not None else kwargs.get("game"))
+            )
+            if players:
+                self.document["players"] = [self._player_summary(player) for player in players]
+            provenance = kwargs.get("provenance")
+            if provenance is not None:
+                self.document["source"]["provenance"] = copy.deepcopy(provenance)
+            self._emit_sink("start", self.document)
+            return
         self.frames = []
         self.markers = []
         self.handshakes = []
@@ -204,16 +224,21 @@ class MatchSurfaceProjector(Spectator):
     def _append_lifecycle_event(
         self, state: str, event: Event, target: List[Dict[str, Any]]
     ) -> None:
+        is_handshake = target is self.handshakes
         if self.document is None:
             match_id = (event.context or {}).get("match_id") or (event.data or {}).get("match_id")
             self.on_match_start(None, [], match_id=match_id)
+        # The caller passes the current list before a provisional document is
+        # created. Resolve it again after MATCH_START because initialization
+        # intentionally resets per-match collections.
+        target = self.handshakes if is_handshake else self.conclusions
         data = copy.deepcopy(event.data or {})
         interaction = copy.deepcopy(data.get("interaction") or {})
         target.append(
             {
                 "player": data.get("player"),
                 "state": state,
-                "phase": "handshake" if target is self.handshakes else "conclusion",
+                "phase": "handshake" if is_handshake else "conclusion",
                 "prompt_text": data.get("prompt_text") or interaction.get("prompt_text"),
                 "prompt_blocks": data.get("prompt_blocks") or interaction.get("prompt_blocks"),
                 "response_text": (
