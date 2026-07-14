@@ -1,7 +1,7 @@
 # SPEC-RENDERER: Game View Formatting Contract
 
 > Status: Final
-> Version: 0.3.1
+> Version: 0.3.2
 > Last Updated: 2026-03-17
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Renderer implementers, player authors, observability contributors
@@ -39,6 +39,9 @@ class RenderResult:
 - `text`: Primary rendered output passed to PromptBuilder.
 - `metadata`: JSON-serialisable dict describing sections, formatting hints, token estimates, etc.
 - MUST: Remain immutable once instantiated so recorder hashes remain stable.
+- MUST: Be re-exported as `agentdeck.RenderResult`. Extension authors MUST NOT
+  need to import `agentdeck.core.types` to implement the public `Renderer`
+  contract.
 
 ### render(game_view: Dict[str, Any], player: str, *, turn_context: Optional[TurnContext] = None) -> RenderResult
 - Accept: `game_view` already filtered by the Game; acting `player` name for convenience; optional `turn_context` injected by console (turn number, match id, max turns, etc.).
