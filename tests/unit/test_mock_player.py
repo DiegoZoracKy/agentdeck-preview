@@ -18,3 +18,9 @@ def test_mock_player_cycles_through_actions() -> None:
     third = player.get_response("Turn 3 prompt")
 
     assert [first, second, third] == ["ATTACK", "POTION", "ATTACK"]
+
+
+def test_mock_player_summary_retains_model_provenance() -> None:
+    player = MockPlayer(name="Tester", model="deterministic-smoke")
+
+    assert player.get_summary()["model"] == "deterministic-smoke"

@@ -105,6 +105,7 @@ class MockPlayer(Player):
         return {
             "name": self.name,
             "type": "MockPlayer",
+            "model": self.model,
             "actions": self.actions,
             "controller": self.controller.__class__.__name__,
             "renderer": self.renderer.__class__.__name__,
