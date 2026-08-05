@@ -13,6 +13,12 @@ from .comparison import (
     run_benchmark,
 )
 from .cost_analysis import CostAnalysis
+from .intervention_comparison import (
+    InterventionComparisonArtifact,
+    InterventionComparisonError,
+    OutcomeEvidence,
+    compare_intervention_results,
+)
 from .multi_session import (
     ComparisonAnalysis,
     ComparisonTable,
@@ -74,6 +80,10 @@ __all__ = [
     "render_results_markdown",
     "write_results_markdown_report",
     "package_session",
+    "compare_intervention_results",
+    "InterventionComparisonArtifact",
+    "InterventionComparisonError",
+    "OutcomeEvidence",
     # Post-hoc data structures (SPEC-RESEARCH v1.1.0)
     "PairwiseComparison",
     "ComparisonStats",
