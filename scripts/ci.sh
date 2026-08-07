@@ -3,6 +3,28 @@ set -euo pipefail
 
 # Run the same checks as GitHub Actions locally.
 
+CI_TMP_ROOT="${AGENTDECK_CI_TMP_ROOT:-/tmp}"
+CI_TMP_DIR="$(mktemp -d "$CI_TMP_ROOT/agentdeck-core-ci.XXXXXX")"
+trap 'rm -rf "$CI_TMP_DIR"' EXIT
+export TMPDIR="$CI_TMP_DIR"
+export TMP="$CI_TMP_DIR"
+export TEMP="$CI_TMP_DIR"
+
+if ! command -v node >/dev/null 2>&1; then
+  NVM_NODE_ROOT="${NVM_DIR:-$HOME/.nvm}/versions/node"
+  if [ -d "$NVM_NODE_ROOT" ]; then
+    NODE_BIN_DIR="$(find "$NVM_NODE_ROOT" -mindepth 3 -maxdepth 3 -type f -name node -printf '%h\n' 2>/dev/null | sort -V | tail -n 1)"
+    if [ -n "$NODE_BIN_DIR" ]; then
+      export PATH="$NODE_BIN_DIR:$PATH"
+    fi
+  fi
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "Please install Node.js or expose it on PATH for the viewer contract checks." >&2
+  exit 1
+fi
+
 if [ -x "./venv/bin/python" ]; then
   VENV_DIR="./venv"
 elif [ -x "./.venv/bin/python" ]; then
