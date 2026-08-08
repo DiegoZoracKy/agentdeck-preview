@@ -1,8 +1,8 @@
 # SPEC-MATCH-SURFACE-PROJECTION: Match Surface Projector
 
 > Status: Final
-> Version: 0.3.0
-> Last Updated: 2026-07-02
+> Version: 0.4.0
+> Last Updated: 2026-08-07
 > Implementation: ✅ Lifecycle projection implemented in `agentdeck.spectators.match_surface`
 > Review State: consensus-approved
 > Audience: Core contributors, spectator authors, artifact pipeline maintainers
@@ -271,6 +271,8 @@ class MatchSurfaceSink(Protocol):
 - Writes one deterministic JSON artifact per match.
 - MUST use atomic write semantics.
 - MUST sort object keys where practical and avoid nondeterministic generated timestamps unless supplied by caller/source metadata.
+- MUST validate the projected `match_id` as a portable artifact identifier and resolve
+  the destination under `output_dir` before writing.
 - Receives the document after `MatchSurfaceProjector` has applied any configured redactor.
 - v0 JSON artifact export is intended for replay-from-record inputs, not live `play()` runs, so source timestamps come from the record rather than wall-clock playback.
 
@@ -316,6 +318,7 @@ implemented by the v0.2.0 baseline until Phase B/C work lands.
 17. **MSP17 Redaction Safety**: Redactors MAY remove any player `stack` or `economics` field before public export. Views MUST handle missing fields as absence.
 18. **MSP18 Curation Agents**: Static export MAY import `curation.agents` from a sidecar. These labels MUST carry source provenance and MUST remain separate from record-derived player fields.
 19. **MSP19 Live/Replay Shape**: Given equivalent source metadata and redaction policy, live and replay projection MUST emit equivalent `players[]` shape.
+20. **MSP20 Artifact Containment**: `JsonArtifactSink` MUST enforce `SPEC-ARTIFACT-SAFETY` AS1-AS5 for match identifiers and strict JSON output; an invalid source record MUST fail closed without writing outside or partially replacing an artifact.
 
 ## 7. Data Flow & Interaction
 

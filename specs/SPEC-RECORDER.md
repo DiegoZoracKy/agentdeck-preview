@@ -1,9 +1,9 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (canonical event persistence)
+> Version: 2.1.0
+> Last Updated: 2026-08-07
+> Implementation: Partial (complete effective snapshots and strict writes planned in Wave C0)
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose
@@ -139,7 +139,10 @@ Late-binding helper for attaching session context after construction.
 - Captures environment (Python version, AgentDeck version, git state).
 - Records game configuration (`information_level`, `allowed_actions`).
 - Records player template sources (inline vs Path, file references if applicable).
-- Captures `player_summaries` from `Player.get_summary()` (model, controller, prompt config) and stores them in match metadata for provenance.
+- Captures `player_summaries` from `Player.get_summary()` for display compatibility and
+  complete `player_configs` from `Player.describe()` for method provenance.
+- Captures `game_config` from `Game.describe()`; a class name alone is not an effective
+  configuration snapshot.
 - Invokes collector `on_match_start()` hooks.
 - **MUST flush initial match stub immediately** for crash recovery.
 
@@ -217,6 +220,8 @@ Load match JSON from disk and normalize structure.
 4. **AW1**: MUST use atomic file replacement (write to temp file, `os.replace()`) to prevent corruption from crashes or concurrent writes.
 5. **AW2**: MUST create parent directories (`os.makedirs`) before atomic write attempts.
 6. **AW3**: MUST generate deterministic filenames (`{match_id}.json`, `batch_{batch_id}.json`) within resolved output directory.
+7. **AW4**: Match and batch IDs used in paths MUST satisfy `SPEC-ARTIFACT-SAFETY` AS1-AS3, and the resolved output MUST remain under `output_dir`.
+8. **AW5**: Recorder MUST encode canonical payloads as strict JSON without `default`, custom coercion, or lossy fallback; serialization failure MUST leave the prior artifact unchanged.
 
 ### 6.3 Schema Versioning (SV)
 7. **SV1**: MUST tag all recordings with `schema_version` field (currently `"2.0"` for match recordings with canonical event payloads, `"1.0"` for batch recordings) and `schema_type` field (`"match"` or `"batch"`).
@@ -229,10 +234,11 @@ Load match JSON from disk and normalize structure.
 10b. **MC1b**: Match payload MUST expose top-level `started_at`, `ended_at`, and `duration_seconds` aligned with metadata and batch match refs for completed matches.
 10c. **MC1c**: `player_order` MUST be stored as the list of original input indices in effective play order (for example, `[1, 0]` means original player 1 is first, original player 0 is second). `first_player` captures the actual first actor for the recorded match and MUST include both the original `index` and the in-order `ordered_index`.
 11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, `git_info` (commit, branch, dirty status).
-12. **MC3**: MUST capture player configurations: `name`, `type`, `module`, `model`, `temperature`, `max_tokens`, masked `api_key_prefix`, template sources (inline vs file paths) and persist them in recording metadata via `player_summaries` for each player.
+12. **MC3**: MUST capture complete effective player configurations via `Player.describe()`: `name`, `type`, `module`, `model`, JSON-safe provider parameters, controller descriptor, renderer descriptor, and exact effective lifecycle templates or immutable content hashes plus resolvable sources. Credentials MUST be omitted; masked fragments are optional display metadata, never reproducibility inputs. The canonical snapshots live in `player_configs`; `player_summaries` remain a compact compatibility projection.
 12a. **MC3a**: `player_summaries[].total_cost` MUST reflect finalized per-match player costs after `on_match_end()` when `metadata.match.player_costs` is available.
 12b. **MC3b**: `Recorder.on_match_start()` MUST receive `context["batch_id"]`; missing batch context is invalid for the current schema.
-13. **MC4**: MUST capture game configuration: `name`, `module`, `information_level` (when present), `allowed_actions` (when game exposes property).
+13. **MC4**: MUST capture `Game.describe()` as `game_config`, including `name`, `module`, `allowed_actions`, and every effective rule/visibility/lifecycle parameter under `config`.
+13a. **MC4a**: Batch `metadata.configuration` and each match `metadata.game_config`/`metadata.player_configs` MUST describe the same effective method, except for explicitly match-scoped values such as seed and seat order.
 14. **MC5**: MUST capture batch context: `session_id`, `matches_planned`, `matches_completed`, `seeds_used` (list of all per-match seeds), and batch-level `fairness_policy` when supplied by Console.
 
 ### 6.5 Seed & Reproducibility (SR)

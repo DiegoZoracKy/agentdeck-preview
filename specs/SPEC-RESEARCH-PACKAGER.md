@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-PACKAGER: Session to Experiment Packager
 
 > Status: Final
-> Version: 0.3.2
-> Last Updated: 2026-03-26
+> Version: 0.4.0
+> Last Updated: 2026-08-07
 > Implementation: ✅ Complete (`agentdeck.research.packager`, `agentdeck.research.export`, `agentdeck.research.index`)
 > Audience: Research engineers, contributors, experiment authors
 
@@ -107,6 +107,8 @@ python scripts/research_package.py \
 16. **RP16**: Packager-created experiment directories and manifest
     `experiment_id` values MUST use the `research_` prefix. User-provided IDs
     without the prefix MUST be normalized before writing files.
+17. **RP17**: Normalization MUST NOT make an unsafe identifier safe. The normalized `experiment_id` and every caller-supplied session identifier MUST satisfy `SPEC-ARTIFACT-SAFETY` AS1-AS3, and all resolved inputs/outputs MUST remain inside their declared run/research roots.
+18. **RP18**: Package manifests and generated factual artifacts MUST satisfy strict JSON/YAML data contracts; executable scorer modules are trusted Python code and MUST be loaded only under an explicitly declared execution trust mode.
 
 ## 7. Data Flow & Interaction
 - Package: CLI → resolve session records → copy templates → write manifest → run export → update index.

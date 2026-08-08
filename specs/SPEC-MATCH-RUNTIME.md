@@ -1,9 +1,9 @@
 # SPEC-MATCH-RUNTIME: Match Infrastructure Context
 
 > Status: Final
-> Version: 1.1.0
-> Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (GameplayEventData v2 delegation)
+> Version: 1.2.0
+> Last Updated: 2026-08-07
+> Implementation: Partial (strict JSON enforcement planned in Wave C0)
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
 
 ## 1. Purpose
@@ -114,8 +114,15 @@ class MatchRuntime:
 - Ensures reproducibility across sequential and parallel runs (SPEC-PARALLEL).
 
 ### 4.6 `validate_state`
-- Calls `game.validate_state` when provided; raises `ValueError` on failure and logs context.  
-- Mechanics SHOULD call after setup and each update; runtime may enforce periodic validation (configurable via console).
+- Requires a dict, verifies strict JSON serialisability without fallback coercion, then
+  calls `game.validate_state`; raises `ValueError` with match context on failure.
+- Mechanics MUST call after setup and each update. Stock mechanics enforce this.
+
+### 4.6.1 `validate_view`
+
+- Requires a dict and verifies strict JSON serialisability without fallback coercion.
+- Stock mechanics MUST call it after `game.get_view()` and before renderer/player use.
+- It does not decide visibility correctness; Game/package fixtures own oracle-leak tests.
 
 ### 4.7 `log`
 - Writes structured log entries and emits `LOG` events.  
@@ -131,6 +138,9 @@ class MatchRuntime:
 2. **Recorder Consistency (MR2)**: `record_turn` emits `GAMEPLAY` events in execution order so Recorder captures an ordered transcript directly from the event stream.
 3. **Parse Failure Integrity (MR3)**: `handle_parse_failure` MUST emit `PLAYER_ACTION_PARSE_FAILED`, log warning, update recorder, and return a policy outcome.
 4. **RNG Traceability (MR4)**: Every RNG fork label is recorded in debug logs so researchers can trace randomness sources.
+5. **Canonical State Enforcement (MR5)**: `validate_state` MUST reject non-dict or non-strict-JSON state before it reaches Recorder, replay, or spectators.
+6. **Visible View Enforcement (MR6)**: Stock mechanics MUST reject non-dict or non-strict-JSON player views before rendering or model invocation.
+7. **No Coercive Evidence (MR7)**: Runtime validation MUST NOT stringify, drop, or otherwise normalize an unsupported value to make it serialisable.
 
 > **Note**: Event ordering (lifecycle ordering, mechanic metadata injection) and exception-safety bindings are handled by mechanics (e.g., TurnLoop) rather than enforced by MatchRuntime. Backward compatibility is a versioning policy, not a runtime invariant.
 

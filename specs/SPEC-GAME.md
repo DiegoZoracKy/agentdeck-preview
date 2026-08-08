@@ -1,8 +1,8 @@
-# SPEC-GAME: Game Author Contract v0.7.1
+# SPEC-GAME: Game Author Contract v0.8.0
 
 > Status: Final
-> Version: 0.7.1
-> Last Updated: 2026-03-17
+> Version: 0.8.0
+> Last Updated: 2026-08-07
 > Base Version: 0.6.0 (Final)
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Review State: Consensus-approved
@@ -78,6 +78,17 @@
 - Raise: MUST raise `ValueError` with descriptive message when invariants break.
 - MUST NOT: Mutate the provided `game_state`.
 - Default: No-op; games opt in for stronger integrity checks.
+
+### describe() -> Dict[str, Any]
+
+- Return: Strict JSON descriptor of the effective Game configuration used for execution.
+- MUST include `name`, `module`, `allowed_actions`, and `config`.
+- `config` MUST include every constructor option or effective parameter that can change
+  rules, state, visibility, ordering, lifecycle, or outcomes.
+- MUST NOT include runtime-bound emitters, factories, caches, callables, credentials, or
+  derived state.
+- The base implementation MAY describe JSON-compatible public instance attributes for
+  backward compatibility. Evidence-ready Games MUST provide an explicit descriptor.
 
 ### get_events(game_state: Dict[str, Any], player: str, action: ActionResult) -> List[Event]
 - Role: Optional hook to publish additional observability events besides structural gameplay events.
@@ -367,6 +378,8 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 2. **GS2**: `update` MUST return a dict representing the new canonical `game_state`; in-place mutation is allowed, but the returned object MUST reflect the authoritative data for the next turn.
 3. **GS3**: `game_state` MUST remain free of unserialised objects or callable handles; derived caches MAY live on the Game instance but cannot influence behaviour unless reflected in the dict.
 4. **GS4**: `get_view` and recorder snapshots MUST be able to deep copy `game_state` without raising.
+5. **GS5**: The runtime MUST reject canonical state and player-visible views that are not strict JSON values. Custom encoder fallbacks and `default=str` do not satisfy this invariant.
+6. **GS6**: `describe()` MUST return a strict JSON descriptor containing every effective Game parameter that can change the recorded method.
 
 ### 5.2 Determinism (DT)
 5. **DT1**: All randomness inside `update` (and helpers it calls) MUST come from the provided `rng` fork.
