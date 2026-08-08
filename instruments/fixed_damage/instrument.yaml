@@ -1,0 +1,52 @@
+schema_version: "1.0"
+instrument:
+  id: fixed-damage
+  version: "1.0.0"
+  title: Fixed Damage
+  summary: The canonical AgentDeck combat instrument packaged through the public certification contract.
+game:
+  entry_point: fixed_damage_instrument.entrypoints:FixedDamageGame
+  config:
+    max_health: 100
+    attack_damage: 20
+    potion_heal: 30
+    starting_potions: 3
+    information_level: partial
+  config_schema:
+    max_health:
+      type: integer
+      minimum: 1
+      default: 100
+    attack_damage:
+      type: integer
+      minimum: 1
+      default: 20
+    potion_heal:
+      type: integer
+      minimum: 1
+      default: 30
+    starting_potions:
+      type: integer
+      minimum: 0
+      default: 3
+    information_level:
+      type: string
+      enum: [full, partial]
+      default: partial
+fixture:
+  entry_point: fixed_damage_instrument.entrypoints:create_players
+  player_count: 2
+  matches: 2
+  seed: 42
+  max_turns: 40
+  expected_winners: [Alpha, Alpha]
+evidence:
+  scorer_entry_point: fixed_damage_instrument.entrypoints:FixedDamageBehavioralScorer
+  profile: behavioral-profile.yaml
+presentation:
+  redactor_entry_point: fixed_damage_instrument.entrypoints:visible_state
+  oracle_paths:
+    Alpha: [/health/Beta, /potions/Beta]
+    Beta: [/health/Alpha, /potions/Alpha]
+claims:
+  requested: [runnable, evidence_ready, presentable]

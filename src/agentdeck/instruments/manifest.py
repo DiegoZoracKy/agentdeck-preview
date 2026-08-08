@@ -32,7 +32,12 @@ INSTRUMENT_KEYS = {"id", "version", "title", "summary"}
 GAME_KEYS = {"entry_point", "config", "config_schema"}
 FIXTURE_KEYS = {"entry_point", "player_count", "matches", "seed", "max_turns", "expected_winners"}
 EVIDENCE_KEYS = {"scorer_entry_point", "profile"}
-PRESENTATION_KEYS = {"redactor_entry_point", "viewer", "oracle_values"}
+PRESENTATION_KEYS = {
+    "redactor_entry_point",
+    "viewer",
+    "oracle_paths",
+    "oracle_values",
+}
 CLAIMS_KEYS = {"requested"}
 SCHEMA_KEYS = {"type", "default", "enum", "minimum", "maximum", "items"}
 SCHEMA_TYPES = {"string", "integer", "number", "boolean", "array"}
@@ -244,7 +249,12 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
             _required_string(evidence, "scorer_entry_point", "evidence"),
             "evidence.scorer_entry_point",
         )
-        _contained_file(root, _required_string(evidence, "profile", "evidence"), "evidence.profile")
+        profile_path = _contained_file(
+            root, _required_string(evidence, "profile", "evidence"), "evidence.profile"
+        )
+        from .profile import load_behavioral_profile
+
+        load_behavioral_profile(profile_path)
     if "evidence_ready" in requested and evidence is None:
         raise InstrumentManifestError("evidence_ready requires an evidence declaration")
 
@@ -263,6 +273,22 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
             not isinstance(value, str) or not value for value in oracle_values
         ):
             raise InstrumentManifestError("presentation.oracle_values must be a list of strings")
+        oracle_paths = presentation.get("oracle_paths", {})
+        if not isinstance(oracle_paths, dict):
+            raise InstrumentManifestError("presentation.oracle_paths must be a mapping")
+        for player, pointers in oracle_paths.items():
+            if (
+                not isinstance(player, str)
+                or not player
+                or not isinstance(pointers, list)
+                or any(
+                    not isinstance(pointer, str) or not pointer.startswith("/")
+                    for pointer in pointers
+                )
+            ):
+                raise InstrumentManifestError(
+                    "presentation.oracle_paths must map Player names to JSON Pointer lists"
+                )
     if "presentable" in requested and presentation is None:
         raise InstrumentManifestError("presentable requires a presentation declaration")
 

@@ -20,6 +20,11 @@ fixture:
   seed: 42
   max_turns: 20
   expected_winners: [Alpha, Alpha]
+evidence:
+  scorer_entry_point: number_duel.behavioral:NumberDuelBehavioralScorer
+  profile: behavioral-profile.yaml
+presentation:
+  redactor_entry_point: number_duel.presentation:visible_state
+  oracle_values: [NEVER_VISIBLE_SENTINEL]
 claims:
-  requested: [runnable]
-
+  requested: [runnable, evidence_ready, presentable]

@@ -57,6 +57,7 @@ from .players import ClaudePlayer, GeminiPlayer, GPTPlayer, MockPlayer
 
 # Renderer implementations
 from .renderers import TextRenderer
+from .research.behavioral import BehavioralScorer
 
 # Spectator implementations
 from .spectators import (
@@ -111,6 +112,7 @@ __all__ = [
     # Controllers
     "ActionOnlyController",
     "ReasoningController",
+    "BehavioralScorer",
     # Spectators
     "StatsTracker",
     "ProgressDisplay",

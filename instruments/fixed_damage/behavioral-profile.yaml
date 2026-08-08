@@ -1,0 +1,18 @@
+schema_version: "1.0"
+profile_id: fixed_damage_behavioral
+profile_version: "0.2.0"
+metrics:
+  - id: all_attack_match_rate
+    output_pointer: /aggregate_metrics/all_attack_match_rate/value
+    record_pointers:
+      - /0/winner
+    allow_unsupported: false
+  - id: unused_potions_on_loss_rate
+    output_pointer: /aggregate_metrics/unused_potions_on_loss_rate/value
+    record_pointers:
+      - /0/final_state/potions/Alpha
+    allow_unsupported: false
+calibration:
+  expected:
+    /coverage/matches_total: 2
+    /aggregate_metrics/all_attack_match_rate/value: 0.5

@@ -78,7 +78,7 @@ def test_ip4_external_game_certifies_without_registry(tmp_path: Path) -> None:
     package = _copy_fixture(tmp_path)
     report = certify_instrument(package, trust_mode="trusted-local", output_dir=tmp_path / "output")
     assert report.valid, report.to_dict()
-    assert report.awarded_tiers == ["runnable"]
+    assert report.awarded_tiers == ["runnable", "evidence_ready", "presentable"]
     assert _check(report, "IP4")["status"] == "passed"
 
 
@@ -145,6 +145,7 @@ def test_ip11_rejects_undeclared_tier_prerequisites(tmp_path: Path) -> None:
     """IP11: requested capability tiers require their own declarations."""
     package = _copy_fixture(tmp_path)
     manifest = _manifest(package)
+    manifest.pop("evidence")
     manifest["claims"]["requested"] = ["runnable", "evidence_ready"]
     _write_manifest(package, manifest)
     report = validate_instrument(package)

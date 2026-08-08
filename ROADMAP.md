@@ -30,7 +30,7 @@ The implementation rationale and verified baseline are recorded in
 | C0 | Canonical evidence and artifact safety | Complete | Path escapes, lossy JSON, incomplete configuration snapshots, and undeclared trust fail safely |
 | C1 | Instrument Package Contract | Complete | An external package reaches `runnable` through deterministic `inspect`, `validate`, and `certify` APIs |
 | C2 | Machine-verifiable spec system | Complete | Active authoring contracts and compliance evidence are selected and validated mechanically |
-| C3 | Golden instrument certification | Pending | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
+| C3 | Golden instrument certification | Complete | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
 | C4 | Runtime boundary and typed authoring API | Pending | Extensions use public runtime mechanics, strict public typing, and real security gates |
 | B0 | AgentDeck Builder bootstrap | Pending | A separate Builder invokes Codex CLI and produces a certified isolated package from intent |
 
@@ -72,11 +72,16 @@ profile is a closed, ordered, deterministic context rather than an all-spec glob
 
 ## C3: Golden Instruments
 
-- [ ] Specify the FixedDamage behavioral profile.
-- [ ] Package FixedDamage without changing its current semantics.
-- [ ] Add a tiny external instrument fixture outside `src/agentdeck`.
-- [ ] Certify runnable, evidence-ready, and presentable capabilities independently.
-- [ ] Reject oracle leaks, nondeterminism, malformed metrics, invalid state, and path escapes.
+- [x] Specify the FixedDamage behavioral profile.
+- [x] Package FixedDamage without changing its current semantics.
+- [x] Add a tiny external instrument fixture outside `src/agentdeck`.
+- [x] Certify runnable, evidence-ready, and presentable capabilities independently.
+- [x] Reject oracle leaks, nondeterminism, malformed metrics, invalid state, and path escapes.
+
+Validation: canonical FixedDamage and external NumberDuel both receive `runnable`,
+`evidence_ready`, and `presentable` from the same public certifier. The evidence tier
+resolves exact scorer and record pointers; the presentation tier rebuilds Match Surfaces
+from Player-visible state and rejects declared oracle paths.
 
 ## C4: Runtime And Public Authoring Surface
 

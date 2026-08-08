@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-08-07
-> Implementation: Partial (`runnable` complete; `evidence_ready` and `presentable` specified for Wave C3)
+> Implementation: Complete (Wave C3 tiered certifier)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 

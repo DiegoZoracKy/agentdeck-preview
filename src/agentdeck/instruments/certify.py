@@ -17,9 +17,12 @@ from agentdeck.core.agentdeck import AgentDeck
 from agentdeck.core.base import Game, Player
 from agentdeck.core.replay import ReplayEngine
 from agentdeck.core.session import AgentDeckConfig
+from agentdeck.research.behavioral import BehavioralScorer
+from agentdeck.spectators.match_surface import InMemorySink, MatchSurfaceProjector
 
 from .manifest import InstrumentManifestError, load_validated_manifest
 from .models import InstrumentReport
+from .profile import load_behavioral_profile, resolve_json_pointer
 
 EXECUTABLE_TRUST_MODES = {"trusted-local", "isolated"}
 
@@ -118,7 +121,18 @@ def _captured_signature(event: Any) -> Dict[str, Any]:
 
 def _semantic(value: Any) -> Any:
     """Remove recorder identity and timing without weakening behavioral comparison."""
-    volatile = {"match_id", "started_at", "ended_at", "duration", "timestamp", "monotonic_time"}
+    volatile = {
+        "batch_id",
+        "duration",
+        "duration_seconds",
+        "ended_at",
+        "match_id",
+        "monotonic_time",
+        "run_id",
+        "session_id",
+        "started_at",
+        "timestamp",
+    }
     if isinstance(value, dict):
         return {key: _semantic(item) for key, item in value.items() if key not in volatile}
     if isinstance(value, list):
@@ -193,7 +207,7 @@ def _run_once(
     manifest: Mapping[str, Any],
     load: Callable[[str], Any],
     run_root: Path,
-) -> tuple[List[Dict[str, Any]], List[str]]:
+) -> tuple[List[Dict[str, Any]], List[str], List[Dict[str, Any]]]:
     game_declaration = manifest["game"]
     fixture = manifest["fixture"]
     game_type = load(game_declaration["entry_point"])
@@ -249,7 +263,202 @@ def _run_once(
     relative_records = [
         path.relative_to(run_root).as_posix() for path in sorted(record_directory.glob("*.json"))
     ]
-    return payloads, relative_records
+    summaries = [copy.deepcopy(player.get_summary()) for player in players]
+    return payloads, relative_records, summaries
+
+
+def _score_evidence(
+    *,
+    root: Path,
+    manifest: Mapping[str, Any],
+    load: Callable[[str], Any],
+    first_payloads: Sequence[Mapping[str, Any]],
+    second_payloads: Sequence[Mapping[str, Any]],
+    players: List[Mapping[str, Any]],
+) -> Dict[str, Any]:
+    declaration = manifest["evidence"]
+    scorer_type = load(declaration["scorer_entry_point"])
+    if not isinstance(scorer_type, type) or not issubclass(scorer_type, BehavioralScorer):
+        raise TypeError("evidence.scorer_entry_point must name a BehavioralScorer subclass")
+    scorer = scorer_type()
+    if not scorer.supports(match_payloads=first_payloads):
+        raise ValueError("declared BehavioralScorer does not support generated records")
+    first = scorer.score(
+        players=copy.deepcopy(players),
+        match_payloads=copy.deepcopy(list(first_payloads)),
+        config=copy.deepcopy(manifest["game"]["config"]),
+    )
+    second = scorer.score(
+        players=copy.deepcopy(players),
+        match_payloads=copy.deepcopy(list(second_payloads)),
+        config=copy.deepcopy(manifest["game"]["config"]),
+    )
+    require_json_value(first, field="behavioral scorer output")
+    require_json_value(second, field="behavioral scorer output")
+    if first != second:
+        raise AssertionError("behavioral scorer output is not deterministic")
+    profile_path = ensure_contained_path(root, root / declaration["profile"])
+    profile = load_behavioral_profile(profile_path)
+    if first.get("profile_id") != profile["profile_id"]:
+        raise AssertionError("scorer profile_id differs from behavioral profile")
+    if first.get("profile_version") != profile["profile_version"]:
+        raise AssertionError("scorer profile_version differs from behavioral profile")
+    for metric in profile["metrics"]:
+        value = resolve_json_pointer(first, metric["output_pointer"])
+        if value is None and not metric["allow_unsupported"]:
+            raise AssertionError(f"required metric is unsupported: {metric['id']}")
+        for pointer in metric["record_pointers"]:
+            resolve_json_pointer(list(first_payloads), pointer)
+    for pointer, expected in profile["calibration"]["expected"].items():
+        actual = resolve_json_pointer(first, pointer)
+        if actual != expected or type(actual) is not type(expected):
+            raise AssertionError(
+                f"calibration mismatch at {pointer}: expected {expected!r}, got {actual!r}"
+            )
+    return first
+
+
+def _visible_state(
+    redactor: Callable[..., Any],
+    state: Mapping[str, Any],
+    player: str,
+    config: Mapping[str, Any],
+) -> Dict[str, Any]:
+    candidate = copy.deepcopy(dict(state))
+    before = copy.deepcopy(candidate)
+    first = redactor(candidate, player, copy.deepcopy(dict(config)))
+    if candidate != before:
+        raise AssertionError("presentation redactor mutated canonical state")
+    second = redactor(copy.deepcopy(dict(state)), player, copy.deepcopy(dict(config)))
+    if first != second:
+        raise AssertionError("presentation redactor is not deterministic")
+    if not isinstance(first, dict):
+        raise TypeError("presentation redactor must return a dict")
+    require_json_value(first, field="visible state")
+    return first
+
+
+def _assert_pointer_absent(document: Any, pointer: str) -> None:
+    try:
+        resolve_json_pointer(document, pointer)
+    except InstrumentManifestError:
+        return
+    raise AssertionError(f"declared oracle path is visible: {pointer}")
+
+
+def _project_surface(
+    *,
+    payload: Mapping[str, Any],
+    redactor: Callable[..., Any],
+    config: Mapping[str, Any],
+    oracle_paths: Mapping[str, Sequence[str]],
+) -> Dict[str, Any]:
+    def redact_document(document: Dict[str, Any]) -> Dict[str, Any]:
+        redacted = copy.deepcopy(document)
+        for frame in redacted.get("frames", []):
+            player = frame.get("player")
+            if not isinstance(player, str):
+                raise AssertionError("Match Surface frame lacks acting Player")
+            for field in ("state_before", "state_after"):
+                view = _visible_state(redactor, frame[field], player, config)
+                for pointer in oracle_paths.get(player, []):
+                    _assert_pointer_absent(view, pointer)
+                frame[field] = view
+            frame.pop("state_delta", None)
+        match = redacted.get("match") or {}
+        final_state = match.pop("final_state", None)
+        if isinstance(final_state, dict):
+            players = [
+                item.get("name")
+                for item in redacted.get("players", [])
+                if isinstance(item, dict) and isinstance(item.get("name"), str)
+            ]
+            final_views = {}
+            for player in players:
+                view = _visible_state(redactor, final_state, player, config)
+                for pointer in oracle_paths.get(player, []):
+                    _assert_pointer_absent(view, pointer)
+                final_views[player] = view
+            match["final_state_views"] = final_views
+        return redacted
+
+    sink = InMemorySink()
+    projector = MatchSurfaceProjector(sink=sink, redactor=redact_document)
+    ReplayEngine(dict(payload)).replay(spectators=[projector], speed=0.0)
+    if sink.document is None or projector.diagnostics:
+        raise AssertionError("generic Match Surface projection did not complete cleanly")
+    document = sink.document
+    if not document.get("frames") or not document.get("handshakes"):
+        raise AssertionError("Match Surface lacks gameplay or handshake lifecycle")
+    if not document.get("conclusions"):
+        raise AssertionError("Match Surface lacks conclusion lifecycle")
+    require_json_value(document, field="Match Surface")
+    return document
+
+
+def _certify_presentation(
+    *,
+    manifest: Mapping[str, Any],
+    load: Callable[[str], Any],
+    first_payloads: Sequence[Mapping[str, Any]],
+    second_payloads: Sequence[Mapping[str, Any]],
+) -> List[Dict[str, Any]]:
+    declaration = manifest["presentation"]
+    redactor = load(declaration["redactor_entry_point"])
+    if not callable(redactor):
+        raise TypeError("presentation.redactor_entry_point must name a callable")
+    config = manifest["game"]["config"]
+    oracle_paths = declaration.get("oracle_paths", {})
+    for payload in first_payloads:
+        for event in payload.get("events", []):
+            if event.get("type") != "gameplay":
+                continue
+            data = event.get("data") or {}
+            player = data.get("player")
+            if not isinstance(player, str):
+                raise AssertionError("gameplay evidence lacks acting Player")
+            for field in ("state_before", "state_after"):
+                view = _visible_state(redactor, data[field], player, config)
+                for pointer in oracle_paths.get(player, []):
+                    _assert_pointer_absent(view, pointer)
+    first = [
+        _project_surface(
+            payload=payload,
+            redactor=redactor,
+            config=config,
+            oracle_paths=oracle_paths,
+        )
+        for payload in first_payloads
+    ]
+    second = [
+        _project_surface(
+            payload=payload,
+            redactor=redactor,
+            config=config,
+            oracle_paths=oracle_paths,
+        )
+        for payload in second_payloads
+    ]
+    if _semantic(first) != _semantic(second):
+        raise AssertionError("repeated Match Surface projections differ semantically")
+    oracle_values = declaration.get("oracle_values", [])
+    serialized = json.dumps(first, sort_keys=True, ensure_ascii=True, allow_nan=False)
+    for value in oracle_values:
+        if value in serialized:
+            raise AssertionError("declared oracle value leaked into Match Surface")
+    return first
+
+
+def _write_json_artifact(output_root: Path, relative: str, value: Any) -> None:
+    target = ensure_contained_path(output_root, output_root / relative)
+    require_json_value(value, field=relative)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_suffix(target.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(temporary, target)
 
 
 def _write_report(output_root: Path, report: InstrumentReport) -> None:
@@ -289,48 +498,84 @@ def certify_instrument(
         output_root = Path(output_dir).expanduser().resolve()
         output_root.mkdir(parents=True, exist_ok=True)
 
+    current_check = "IP5"
     try:
         with _package_import_scope(root) as load:
-            first_payloads, first_records = _run_once(
+            first_payloads, first_records, player_summaries = _run_once(
                 root=root,
                 manifest=manifest,
                 load=load,
                 run_root=ensure_contained_path(output_root, output_root / "execution-1"),
             )
-            second_payloads, second_records = _run_once(
+            second_payloads, second_records, _ = _run_once(
                 root=root,
                 manifest=manifest,
                 load=load,
                 run_root=ensure_contained_path(output_root, output_root / "execution-2"),
             )
-        report.checked("IP5", True, "Game and fixture satisfy public AgentDeck contracts")
-        report.checked("IP6", True, "Declared, effective, and recorded Game config agree")
-        report.checked("IP7", True, "Offline fixture completed without provider credentials")
-        report.checked(
-            "IP8",
-            _deterministic_signature(first_payloads) == _deterministic_signature(second_payloads),
-            "Repeated seeded executions have equal semantic traces",
-        )
-        report.checked("IP9", True, "Every generated match replayed with event/data parity")
-        report.checked("IP10", True, "Generated runnable artifacts satisfy strict JSON")
-        if not report.valid:
-            return report
-        report.awarded_tiers.append("runnable")
-        report.artifacts = ["execution-1", "execution-2"]
-        report.checked("IP11", True, "The requested runnable tier was mechanically awarded")
-        report.checked("IP15", True, "Report excludes volatile execution identifiers and timing")
-        if set(manifest["claims"]["requested"]) - {"runnable"}:
+            report.checked("IP5", True, "Game and fixture satisfy public AgentDeck contracts")
+            report.checked("IP6", True, "Declared, effective, and recorded Game config agree")
+            report.checked("IP7", True, "Offline fixture completed without provider credentials")
             report.checked(
-                "IP11",
-                False,
-                "Evidence-ready and presentable certification are not implemented in Wave C1",
+                "IP8",
+                _deterministic_signature(first_payloads)
+                == _deterministic_signature(second_payloads),
+                "Repeated seeded executions have equal semantic traces",
             )
+            report.checked("IP9", True, "Every generated match replayed with event/data parity")
+            report.checked("IP10", True, "Generated runnable artifacts satisfy strict JSON")
+            if not report.valid:
+                return report
+            report.awarded_tiers.append("runnable")
+            report.artifacts = ["execution-1", "execution-2"]
+
+            requested = manifest["claims"]["requested"]
+            if "evidence_ready" in requested:
+                current_check = "IP12"
+                evidence = _score_evidence(
+                    root=root,
+                    manifest=manifest,
+                    load=load,
+                    first_payloads=first_payloads,
+                    second_payloads=second_payloads,
+                    players=player_summaries,
+                )
+                report.checked("IP12", True, "Every declared metric and record pointer resolved")
+                report.awarded_tiers.append("evidence_ready")
+                report.artifacts.append("evidence/profile.json")
+                if output_dir is not None:
+                    _write_json_artifact(output_root, "evidence/profile.json", evidence)
+
+            if "presentable" in requested:
+                current_check = "IP13"
+                surfaces = _certify_presentation(
+                    manifest=manifest,
+                    load=load,
+                    first_payloads=first_payloads,
+                    second_payloads=second_payloads,
+                )
+                report.checked(
+                    "IP13", True, "Visible states and Match Surfaces exclude declared oracles"
+                )
+                report.awarded_tiers.append("presentable")
+                report.artifacts.append("presentation/match-surfaces.json")
+                if output_dir is not None:
+                    _write_json_artifact(output_root, "presentation/match-surfaces.json", surfaces)
+        current_check = "IP11"
+        report.checked(
+            "IP11", True, "Only requested tiers with completed checks were mechanically awarded"
+        )
+        report.checked("IP15", True, "Report excludes volatile execution identifiers and timing")
         if output_dir is not None:
             _write_report(output_root, report)
         del first_records, second_records
         return report
     except Exception as exc:  # Certification must preserve the failed check as data.
-        report.checked("IP5", False, f"Trusted certification failed: {type(exc).__name__}: {exc}")
+        report.checked(
+            current_check,
+            False,
+            f"Trusted certification failed: {type(exc).__name__}: {exc}",
+        )
         if output_dir is not None:
             _write_report(output_root, report)
         return report
