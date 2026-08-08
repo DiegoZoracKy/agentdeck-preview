@@ -1,7 +1,7 @@
 # SPEC-MATCH-RUNTIME: Match Infrastructure Context
 
 > Status: Final
-> Version: 1.2.0
+> Version: 1.3.0
 > Last Updated: 2026-08-07
 > Implementation: Complete
 > Review State: Consensus-approved
@@ -77,6 +77,29 @@ class MatchRuntime:
         prompt_blocks: Optional[list[PromptBlock]] = None,
     ) -> None: ...
     def handle_parse_failure(self, player: Player, error: ActionParseError, *, turn_context: TurnContext) -> ParseFailurePolicy: ...
+    def create_game_event_emitter(self) -> GameEventEmitter: ...
+    def set_first_player(self, *, name: str, index: int) -> None: ...
+    def get_player_action(
+        self,
+        player_view: dict[str, Any],
+        player: Player,
+        *,
+        turn_context: TurnContext,
+        extras: Optional[dict[str, Any]] = None,
+    ) -> ActionResult: ...
+    def log_turn(
+        self,
+        *,
+        turn_number: int,
+        player: str,
+        action: Any,
+        reasoning: Optional[str],
+        state_before: dict[str, Any],
+        state_after: dict[str, Any],
+        duration: float,
+        usage_info: Optional[dict[str, Any]] = None,
+    ) -> None: ...
+    def warn(self, message: str) -> None: ...
     def fork_rng(self, label: str) -> RandomGenerator: ...
     def validate_state(self, state: dict[str, Any]) -> None: ...
     def log(self, message: str, level: LogLevel = LogLevel.INFO, **extra) -> None: ...
@@ -114,6 +137,17 @@ class MatchRuntime:
 - Mechanics MUST call `fork_rng` whenever randomness is required (setup, per-turn, tie-breakers).  
 - Ensures reproducibility across sequential and parallel runs (SPEC-PARALLEL).
 
+### 4.5.1 Mechanic infrastructure helpers
+
+- `create_game_event_emitter` returns a match-scoped emitter for Game hooks without
+  exposing the Console EventBus.
+- `set_first_player` records the resolved first Player for canonical match metadata.
+- `get_player_action` invokes the configured Player and the shared parse-failure policy.
+- `log_turn` writes the canonical structured turn log when logging is configured.
+- `warn` records a mechanic-authoring warning when logging is configured.
+- Stock mechanics MUST use these public helpers and MUST NOT read or mutate
+  `runtime._console` or any other private runtime attribute.
+
 ### 4.6 `validate_state`
 - Requires a dict, verifies strict JSON serialisability without fallback coercion, then
   calls `game.validate_state`; raises `ValueError` with match context on failure.
@@ -142,6 +176,7 @@ class MatchRuntime:
 5. **Canonical State Enforcement (MR5)**: `validate_state` MUST reject non-dict or non-strict-JSON state before it reaches Recorder, replay, or spectators.
 6. **Visible View Enforcement (MR6)**: Stock mechanics MUST reject non-dict or non-strict-JSON player views before rendering or model invocation.
 7. **No Coercive Evidence (MR7)**: Runtime validation MUST NOT stringify, drop, or otherwise normalize an unsupported value to make it serialisable.
+8. **Public Mechanics Boundary (MR8)**: Stock mechanics MUST access orchestration, events, Player invocation, match metadata, and logging only through public `MatchRuntime` methods. Direct access to `runtime._console` is prohibited outside `MatchRuntime` itself.
 
 > **Note**: Event ordering (lifecycle ordering, mechanic metadata injection) and exception-safety bindings are handled by mechanics (e.g., TurnLoop) rather than enforced by MatchRuntime. Backward compatibility is a versioning policy, not a runtime invariant.
 
