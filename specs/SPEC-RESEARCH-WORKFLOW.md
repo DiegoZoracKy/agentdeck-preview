@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-04-27
-> Implementation: ✅ Complete (`agentdeck.research.export`, `agentdeck.research.index`, thin `scripts/` wrappers)
+> Implementation: Complete (`agentdeck.research.export`, `agentdeck.research.index`, thin `scripts/` wrappers)
+> Review State: Legacy-approved
 > Audience: Research engineers, experiment authors, contributors
 
 ## 1. Purpose

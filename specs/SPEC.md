@@ -183,7 +183,7 @@ deck = AgentDeck(game=MyGame(), session=config)
 
 ## 4. Component Specifications
 
-All component specifications follow the lean spec format with numbered invariants, examples, and testing strategies. For implementation details, consult the individual specs.
+All component specifications follow the lean spec format with numbered invariants, examples, and testing strategies. `registry.json` is the deterministic lifecycle/version index governed by [SPEC-SPEC-REGISTRY](SPEC-SPEC-REGISTRY.md); the tables below are human navigation, not an independent authority.
 
 ### 4.1 Core Components
 
@@ -195,9 +195,9 @@ All component specifications follow the lean spec format with numbered invariant
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract (rules, state, narrative, lifecycle hooks, effective config) |
 | [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.1.0 | Final | External manifest, inspection, certification, and capability tiers |
-| [Player](SPEC-PLAYER.md) | 1.3.2 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
-| [Controller](SPEC-CONTROLLER.md) | 1.3.1 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
-| [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
+| [Player](SPEC-PLAYER.md) | 1.3.3 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Controller](SPEC-CONTROLLER.md) | 1.3.2 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
+| [Renderer](SPEC-RENDERER.md) | 0.3.2 | Final | State formatting for AI consumption |
 | [Spectator](SPEC-SPECTATOR.md) | 2.0.0 | Final | Observation and analysis interface |
 
 ### 4.2 Infrastructure Components
@@ -206,7 +206,7 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [Recorder](SPEC-RECORDER.md) | 2.1.0 | Final | Strict match persistence with complete effective configuration snapshots |
 | [ReplayEngine](SPEC-REPLAY.md) | 2.0.0 | Final | Exact replay of canonical event payloads |
-| [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
+| [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.1 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.2.0 | Final | Per-match infrastructure context with strict state/view validation |
 | [Pricing](SPEC-PRICING.md) | 1.0.1 | Final | Cost tracking system for LLM usage |
@@ -218,11 +218,11 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
+| [Research](SPEC-RESEARCH.md) | 1.2.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
 | [Intervention Comparison](SPEC-RESEARCH-INTERVENTION-COMPARISON.md) | 0.1.0 | Final | Exact cross-run difference artifact for a declared baseline and intervention |
 | [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.2.0 | Final | Global behavioral scorer contract and extension interface for game-specific profiles |
 | [Archivist Choice Behavioral](SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md) | 0.1.0 | Final | Deterministic Archivist Choice score, completion, and post-hoc action-fit profile |
-| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.6.0 | Final | Experiment package, manifest/results/index contracts |
+| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.7.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.4.0 | Final | Contained session-to-experiment package helper |
 | [Research Packager Context](SPEC-RESEARCH-PACKAGER-CONTEXT-v0.1.0.md) | 0.1.0 | Final | Optional confirmed world configuration for package behavioral export |
 
@@ -232,7 +232,8 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.0 | Final | Core spectator projection and contained static artifact sinks |
 | [Artifact Safety](SPEC-ARTIFACT-SAFETY.md) | 0.1.0 | Final | Portable identity, output containment, strict JSON, and executable trust boundary |
-| [Viewer](SPEC-VIEWER.md) | 0.6.0 | Legacy / Frozen | Offline browser replay viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
+| [Spec Registry](SPEC-SPEC-REGISTRY.md) | 0.1.0 | Final | Deterministic lifecycle, authoring profiles, and compliance evidence |
+| [Viewer](SPEC-VIEWER.md) | 0.7.0 | Deprecated | Frozen browser viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
 
 ---
 

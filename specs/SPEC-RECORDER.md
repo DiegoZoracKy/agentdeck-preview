@@ -4,6 +4,7 @@
 > Version: 2.1.0
 > Last Updated: 2026-08-07
 > Implementation: Complete
+> Review State: Consensus-approved
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose

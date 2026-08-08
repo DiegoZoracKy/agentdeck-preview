@@ -123,6 +123,7 @@ def test_ip9_every_recording_replays_with_event_data_parity(tmp_path: Path) -> N
 
 
 def test_ip10_manifest_rejects_non_json_yaml_scalar(tmp_path: Path) -> None:
+    """IP10: non-JSON YAML scalar types are rejected without coercion."""
     package = _copy_fixture(tmp_path)
     path = package / "instrument.yaml"
     path.write_text(
@@ -134,12 +135,14 @@ def test_ip10_manifest_rejects_non_json_yaml_scalar(tmp_path: Path) -> None:
 
 
 def test_ip11_structural_mode_cannot_award_capability(tmp_path: Path) -> None:
+    """IP11: structural trust cannot award executable capability tiers."""
     report = certify_instrument(_copy_fixture(tmp_path), trust_mode="structural")
     assert not report.valid
     assert report.awarded_tiers == []
 
 
 def test_ip11_rejects_undeclared_tier_prerequisites(tmp_path: Path) -> None:
+    """IP11: requested capability tiers require their own declarations."""
     package = _copy_fixture(tmp_path)
     manifest = _manifest(package)
     manifest["claims"]["requested"] = ["runnable", "evidence_ready"]
@@ -150,6 +153,7 @@ def test_ip11_rejects_undeclared_tier_prerequisites(tmp_path: Path) -> None:
 
 
 def test_ip14_failed_certification_preserves_prior_success_report(tmp_path: Path) -> None:
+    """IP14: failed certification cannot replace a prior successful report."""
     package = _copy_fixture(tmp_path)
     output = tmp_path / "output"
     success = certify_instrument(package, trust_mode="trusted-local", output_dir=output)
@@ -164,6 +168,7 @@ def test_ip14_failed_certification_preserves_prior_success_report(tmp_path: Path
 
 
 def test_ip15_equal_package_and_execution_produce_equal_reports(tmp_path: Path) -> None:
+    """IP15: equal package execution produces byte-identical reports."""
     package = _copy_fixture(tmp_path)
     first = certify_instrument(package, trust_mode="trusted-local", output_dir=tmp_path / "one")
     second = certify_instrument(package, trust_mode="trusted-local", output_dir=tmp_path / "two")

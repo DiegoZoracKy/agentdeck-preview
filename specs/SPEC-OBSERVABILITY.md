@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 2.0.0
 > Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (canonical GameplayEventData v2 + recorder/replay parity)
+> Implementation: Complete (canonical GameplayEventData v2 and recorder/replay parity)
+> Review State: Legacy-approved
 > Audience: Core developers, game authors, spectator authors
 
 ---

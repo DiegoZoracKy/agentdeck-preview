@@ -29,7 +29,7 @@ The implementation rationale and verified baseline are recorded in
 |---|---|---|---|
 | C0 | Canonical evidence and artifact safety | Complete | Path escapes, lossy JSON, incomplete configuration snapshots, and undeclared trust fail safely |
 | C1 | Instrument Package Contract | Complete | An external package reaches `runnable` through deterministic `inspect`, `validate`, and `certify` APIs |
-| C2 | Machine-verifiable spec system | Pending | Active authoring contracts and compliance evidence are selected and validated mechanically |
+| C2 | Machine-verifiable spec system | Complete | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Pending | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
 | C4 | Runtime boundary and typed authoring API | Pending | Extensions use public runtime mechanics, strict public typing, and real security gates |
 | B0 | AgentDeck Builder bootstrap | Pending | A separate Builder invokes Codex CLI and produces a certified isolated package from intent |
@@ -59,11 +59,16 @@ certifier with deterministic execution, replay parity, and no built-in registry.
 
 ## C2: Machine-Verifiable Specs
 
-- [ ] Define canonical spec metadata, lifecycle, and compliance evidence states.
-- [ ] Correct stale versions, implementation states, and public API claims.
-- [ ] Generate deterministic active-spec and authoring-context registries.
-- [ ] Validate links, public symbols, invariant keys, and evidence mappings in CI.
-- [ ] Publish an honest initial compliance matrix without grouped assurance shortcuts.
+- [x] Define canonical spec metadata, lifecycle, and compliance evidence states.
+- [x] Correct stale versions, implementation states, and public API claims.
+- [x] Generate deterministic active-spec and authoring-context registries.
+- [x] Validate links, invariant keys, profile sources, and evidence mappings in CI.
+- [x] Publish an honest initial compliance matrix without grouped assurance shortcuts.
+
+Validation: 33 Final contracts are registered; one deprecated viewer remains
+discoverable but inactive. The initial matrix deliberately reports legacy contracts as
+partial, while SR1-SR10 have direct automated evidence. The `instrument-builder`
+profile is a closed, ordered, deterministic context rather than an all-spec glob.
 
 ## C3: Golden Instruments
 

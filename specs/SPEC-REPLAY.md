@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 2.0.0
 > Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (Recorder v2.0 canonical event parity)
+> Implementation: Complete (Recorder v2.0 canonical event parity)
+> Review State: Legacy-approved
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors
 
 ## 1. Purpose

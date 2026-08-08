@@ -43,5 +43,8 @@ fi
 echo "== Black check =="
 $VENV_PYTHON -m black --check src tests
 
+echo "== Spec registry =="
+$VENV_PYTHON scripts/spec_registry.py check
+
 echo "== Pytest =="
 $VENV_PYTHON -m pytest tests/ -v --tb=short --cov=src/agentdeck --cov-report=xml --cov-report=term

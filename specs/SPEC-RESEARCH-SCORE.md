@@ -1,9 +1,10 @@
 # SPEC-RESEARCH-SCORE: Standalone Behavioral Rescore CLI
 
-> Status: ✅ Implemented
+> Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-04-09
-> Implementation: ✅ Complete (`src/agentdeck/research/score.py`, `scripts/research_score.py`)
+> Implementation: Complete (`src/agentdeck/research/score.py`, `scripts/research_score.py`)
+> Review State: Legacy-approved
 > Audience: Research engineers, contributors
 
 ## 1. Purpose

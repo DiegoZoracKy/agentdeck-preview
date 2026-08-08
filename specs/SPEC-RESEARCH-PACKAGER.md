@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 0.4.0
 > Last Updated: 2026-08-07
-> Implementation: ✅ Complete (`agentdeck.research.packager`, `agentdeck.research.export`, `agentdeck.research.index`)
+> Implementation: Complete (`agentdeck.research.packager`, `agentdeck.research.export`, `agentdeck.research.index`)
+> Review State: Legacy-approved
 > Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose

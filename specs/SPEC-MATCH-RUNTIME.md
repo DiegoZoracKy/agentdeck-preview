@@ -4,6 +4,7 @@
 > Version: 1.2.0
 > Last Updated: 2026-08-07
 > Implementation: Complete
+> Review State: Consensus-approved
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
 
 ## 1. Purpose

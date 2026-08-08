@@ -3,8 +3,8 @@
 > Status: Final
 > Version: 2.0.0
 > Last Updated: 2026-05-31
-> Implementation: ✅ Implemented in `EventFactory.turn`, `MatchRuntime.record_turn`, `Recorder`, `ReplayEngine`, and parity tests
-> Review State: consensus-approved
+> Implementation: Complete (`EventFactory.turn`, `MatchRuntime.record_turn`, `Recorder`, `ReplayEngine`, and parity tests)
+> Review State: Consensus-approved
 > Audience: Core contributors, spectator authors, recorder/replay implementers, research tooling maintainers
 
 ## 1. Purpose

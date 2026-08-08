@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 2.0.0
 > Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (canonical GameplayEventData v2 + Match Surface projector)
+> Implementation: Complete (canonical GameplayEventData v2 and Match Surface projector)
+> Review State: Legacy-approved
 > Audience: Spectator authors, analytics engineers, observability contributors
 
 ## 1. Purpose

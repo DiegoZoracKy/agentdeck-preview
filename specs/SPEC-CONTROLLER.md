@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 1.3.2
 > Last Updated: 2026-03-17
-> Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
+> Implementation: Complete (`src/agentdeck/core/base/controller.py`)
+> Review State: Legacy-approved
 > Audience: Player authors, controller implementers, validation tooling
 
 ## 1. Purpose

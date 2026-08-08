@@ -1,6 +1,10 @@
 # SPEC-RESEARCH-PACKAGER-CONTEXT v0.1.0
 
 > Status: Final
+> Version: 0.1.0
+> Last Updated: 2026-07-20
+> Implementation: Complete (`agentdeck.research.packager`)
+> Review State: Legacy-approved
 > Audience: Research engineers and external execution integrators
 
 ## 1. Purpose

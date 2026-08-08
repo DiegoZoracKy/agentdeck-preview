@@ -3,6 +3,8 @@
 > Status: Final
 > Version: 0.1.0
 > Last Updated: 2026-08-04
+> Implementation: Complete (`agentdeck.research.intervention`)
+> Review State: Legacy-approved
 > Audience: research engineers, product integrators
 
 ## 1. Purpose

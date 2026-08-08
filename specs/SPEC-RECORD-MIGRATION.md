@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 1.1.0
 > Last Updated: 2026-06-25
-> Implementation: ✅ Complete — `scripts/migrate_agentic_edge_records_v2.py`
+> Implementation: Complete (`scripts/migrate_agentic_edge_records_v2.py`)
+> Review State: Legacy-approved
 > Audience: Contributors running migrations, researchers preserving study artifacts
 
 ## 1. Purpose

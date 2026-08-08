@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 1.7.0
 > Last Updated: 2026-04-27
-> Implementation: ✅ Complete (`research/SCHEMA.md`, `agentdeck.research.export`, `agentdeck.research.index`, `agentdeck.research.validate`, compatibility `scripts/` wrappers)
+> Implementation: Complete (`research/SCHEMA.md`, `agentdeck.research.export`, `agentdeck.research.index`, `agentdeck.research.validate`, compatibility `scripts/` wrappers)
+> Review State: Legacy-approved
 > Audience: Research engineers, contributors, experiment authors
 
 ## 1. Purpose

@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 0.7.2
 > Last Updated: 2026-03-31
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Implementation: Complete (Phase 6-8 compliance verified)
+> Review State: Legacy-approved
 > Audience: Core contributors, engine implementers
 
 ## 1. Purpose

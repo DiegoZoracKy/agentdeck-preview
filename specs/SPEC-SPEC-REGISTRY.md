@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.1.0
 > Last Updated: 2026-08-07
-> Implementation: Planned (Wave C2)
+> Implementation: Complete (Wave C2)
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 
@@ -48,7 +48,7 @@ with `Superseded By: <filename>` and that target MUST exist and be Final.
 ## 4. Invariant Identity
 
 An invariant is machine-addressable only when the normative spec declares a unique
-identifier in bold, such as `**IP8 Reproducible Execution**`. Identifiers MUST be
+identifier in bold, using the pattern `prefix + number + title`. Identifiers MUST be
 unique across active contracts. Prose containing MUST without an identifier remains
 normative but cannot support automated assurance until it receives a stable ID.
 

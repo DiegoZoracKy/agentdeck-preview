@@ -1,9 +1,10 @@
 # SPEC-VIEWER: Browser Replay Viewer Contract
 
-> **Status**: Legacy / Frozen
-> **Version**: 0.7.0
-> **Last Updated**: 2026-06-25
-> **Implementation**: ✅ Curated replay surface for Recorder v1.3 artifacts; explicitly rejects Recorder v2.0+
+> Status: Deprecated
+> Version: 0.7.0
+> Last Updated: 2026-06-25
+> Implementation: Complete (frozen Recorder v1.3 viewer; rejects Recorder v2.0+)
+> Review State: Legacy-approved
 > **Audience**: Viewer developers, skin authors, integration engineers
 
 > **Disposition**: This spec documents the current bundled browser viewer that was used for the Agentic Edge research artifact. It is frozen at the Recorder v1.3 record shape. New viewer-facing work uses `SPEC-MATCH-SURFACE-PROJECTION.md` and the Core-produced Match Surface protocol instead of extending this bundle.

@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 2.0.0
 > Last Updated: 2026-03-17
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Implementation: Complete (Phase 6-8 compliance verified)
+> Review State: Legacy-approved
 > Audience: Game authors implementing turn-based mechanics, core contributors, tooling authors
 
 ## 1. Purpose

@@ -1,7 +1,10 @@
 # SPEC-BEHAVIORAL-ARCHIVIST-CHOICE v0.1.0
 
 > Status: Final
-> Implementation: `src/agentdeck/games/examples/archivist_choice_behavioral.py`
+> Version: 0.1.0
+> Last Updated: 2026-07-21
+> Implementation: Complete (`src/agentdeck/games/examples/archivist_choice_behavioral.py`)
+> Review State: Legacy-approved
 > Audience: Research engineers, game authors, product execution engineers
 
 ## 1. Purpose

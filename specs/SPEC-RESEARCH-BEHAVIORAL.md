@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-03-26
-> Implementation: ✅ Complete (`src/agentdeck/research/behavioral.py`, game-specific scorer modules)
+> Implementation: Complete (`src/agentdeck/research/behavioral.py`, game-specific scorer modules)
+> Review State: Legacy-approved
 > Audience: Research engineers, game authors, contributors
 
 ## 1. Purpose

@@ -3,8 +3,8 @@
 > Status: Final
 > Version: 0.4.0
 > Last Updated: 2026-08-07
-> Implementation: ✅ Lifecycle projection implemented in `agentdeck.spectators.match_surface`
-> Review State: consensus-approved
+> Implementation: Complete (lifecycle projection in `agentdeck.spectators.match_surface`)
+> Review State: Consensus-approved
 > Audience: Core contributors, spectator authors, artifact pipeline maintainers
 
 ## 1. Purpose

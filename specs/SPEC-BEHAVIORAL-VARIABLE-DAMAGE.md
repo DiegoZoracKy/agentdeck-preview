@@ -3,7 +3,8 @@
 > Status: Final
 > Version: 0.1.0
 > Last Updated: 2026-03-26
-> Implementation: ✅ Complete (`src/agentdeck/games/examples/variable_damage/behavioral.py`)
+> Implementation: Complete (`src/agentdeck/games/examples/variable_damage/behavioral.py`)
+> Review State: Legacy-approved
 > Audience: Research engineers, experiment authors, contributors
 
 ## 1. Purpose
