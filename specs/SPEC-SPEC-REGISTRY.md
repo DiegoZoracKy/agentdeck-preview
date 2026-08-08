@@ -1,9 +1,9 @@
 # AgentDeck Spec Registry Specification
 
 > Status: Final
-> Version: 0.2.0
+> Version: 0.2.1
 > Last Updated: 2026-08-08
-> Implementation: Complete (Wave C5 exact evidence and debt visibility)
+> Implementation: Partial (active-summary scope specified; implementation pending)
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 
@@ -58,6 +58,10 @@ outside that span, for example `**RS1**: ...`. The registry MUST expose these as
 `unregistered_invariants`. They remain normative, but they are not addressable evidence
 keys and prevent the contract from claiming `verified` until normalized. This migration
 signal MUST NOT silently invent titles or rewrite source specifications.
+
+The aggregate `invariant_summary` MUST declare `scope: active_contracts` and count only
+Final contracts. Superseded and Deprecated contracts remain discoverable in the
+per-contract projection but MUST NOT inflate the active normative coverage totals.
 
 ## 5. Compliance Evidence
 
@@ -134,6 +138,7 @@ CI validates declarations; it MUST NOT upgrade assurance automatically.
 11. **SR11 Exact Evidence Locator**: Executable evidence MUST resolve to an existing test function that names the mapped invariant explicitly.
 12. **SR12 Non-Vacuous Verification**: A contract with zero registered invariants, any unregistered invariant, or mapped-only assurance MUST NOT claim verified.
 13. **SR13 Legacy Gap Visibility**: Invariant-shaped legacy identifiers that are not machine-addressable MUST remain visible in the registry and compliance summary until normalized.
+14. **SR14 Active Summary Scope**: Aggregate invariant totals MUST identify and count only active contracts while inactive contracts remain individually discoverable.
 
 ## 9. Compatibility
 
