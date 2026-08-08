@@ -124,6 +124,13 @@ class GameWithNonJSONSerializableEvents(TurnBasedGame):
         ]
 
 
+class GameWithNonJSONView(GameWithJSONSerializableEvents):
+    """Game whose player-visible projection cannot round-trip through JSON."""
+
+    def get_view(self, game_state: Dict[str, Any], player: str) -> Dict[str, Any]:
+        return {"player": player, "hidden_bug": {"not", "json"}}
+
+
 # Test: TL6 - JSON-serializability validation
 
 
@@ -137,6 +144,16 @@ def test_tl6_json_serializable_events_accepted(tmp_path):
         # Should complete without errors
         results = deck.play(players=players, matches=1)
         assert results.single.winner == "Alice"
+
+
+def test_mr6_stock_turn_loop_rejects_non_json_view(tmp_path):
+    """MR6: TurnLoop validates the Game view before invoking a Player."""
+    config = AgentDeckConfig(seed=42, run_dir=tmp_path)
+    with AgentDeck(game=GameWithNonJSONView(), session=config) as deck:
+        players = [MockPlayer("Alice", actions=["END"]), MockPlayer("Bob")]
+
+        with pytest.raises(RuntimeError, match="get_view"):
+            deck.play(players=players, matches=1)
 
 
 def test_tl6_non_json_serializable_events_raise_typeerror(tmp_path):

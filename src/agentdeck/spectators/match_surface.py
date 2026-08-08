@@ -9,6 +9,11 @@ import tempfile
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Protocol
 
+from ..core.artifact_safety import (
+    ensure_contained_path,
+    require_json_value,
+    validate_artifact_id,
+)
 from ..core.base.spectator import Spectator
 from ..core.types import Event, EventContext, MatchResult
 
@@ -64,10 +69,24 @@ class JsonArtifactSink:
         return None
 
     def finish(self, document: Dict[str, Any]) -> None:
-        self.output_dir.mkdir(parents=True, exist_ok=True)
         match_id = str((document.get("match") or {}).get("match_id") or "match")
-        target = self.output_dir / f"{match_id}.json"
-        payload = json.dumps(document, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+        validate_artifact_id(match_id, field="match_id")
+        require_json_value(document, field="match_surface")
+        target = ensure_contained_path(
+            self.output_dir,
+            self.output_dir / f"{match_id}.json",
+        )
+        payload = (
+            json.dumps(
+                document,
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=False,
+                allow_nan=False,
+            )
+            + "\n"
+        )
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         fd, tmp_name = tempfile.mkstemp(
             prefix=f".{target.name}.", suffix=".tmp", dir=str(self.output_dir)

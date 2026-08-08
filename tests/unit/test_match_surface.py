@@ -132,6 +132,29 @@ def test_match_surface_redactor_runs_before_json_write(tmp_path: Path):
     assert sink.last_path == artifact
 
 
+def test_msp20_json_sink_rejects_path_escape_before_write(tmp_path: Path):
+    """MSP20: record-provided match IDs cannot escape the artifact root."""
+    sink = JsonArtifactSink(tmp_path / "surfaces")
+    document = {"match": {"match_id": "../escaped"}, "frames": []}
+
+    with pytest.raises(ValueError, match="match_id"):
+        sink.finish(document)
+
+    assert not (tmp_path / "escaped.json").exists()
+
+
+def test_msp20_json_sink_rejects_non_json_without_replacing(tmp_path: Path):
+    """MSP20/AS5: strict JSON failure leaves the previous artifact unchanged."""
+    sink = JsonArtifactSink(tmp_path)
+    artifact = tmp_path / "match-1.json"
+    artifact.write_text('{"preserved": true}\n', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="strict JSON"):
+        sink.finish({"match": {"match_id": "match-1"}, "bad": {"set"}})
+
+    assert artifact.read_text(encoding="utf-8") == '{"preserved": true}\n'
+
+
 def test_match_surface_marker_provider_isolated():
     class BrokenProvider:
         def markers_for_frame(self, frame):

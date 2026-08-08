@@ -488,6 +488,7 @@ class TurnLoop:
         state_copy_for_view = copy.deepcopy(adapter.before)
         try:
             player_view = self.game.get_view(state_copy_for_view, current_player_name)
+            self.runtime.validate_view(player_view)
         except Exception as e:
             # TL5: Include match_id in exception messages
             raise RuntimeError(

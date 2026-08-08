@@ -110,3 +110,9 @@ class MockPlayer(Player):
             "controller": self.controller.__class__.__name__,
             "renderer": self.renderer.__class__.__name__,
         }
+
+    def describe(self):
+        """Include the deterministic action policy in the effective snapshot."""
+        descriptor = super().describe()
+        descriptor["config"]["actions"] = list(self.actions)
+        return descriptor

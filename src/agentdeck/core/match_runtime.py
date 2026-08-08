@@ -25,6 +25,7 @@ import copy
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from .artifact_safety import require_json_value
 from .types import (
     ActionParseError,
     ActionResult,
@@ -396,6 +397,9 @@ class MatchRuntime:
             >>> runtime.validate_state(state)  # Validate after update
         """
         try:
+            if not isinstance(state, dict):
+                raise ValueError(f"game_state must be a dict, got {type(state).__name__}")
+            require_json_value(state, field="game_state")
             self._game.validate_state(state)
         except Exception as e:
             # Log validation failure with context
@@ -404,6 +408,12 @@ class MatchRuntime:
                 error=e,
             )
             raise
+
+    def validate_view(self, view: Dict[str, Any]) -> None:
+        """Require a strict JSON player-visible view (MR6-MR7)."""
+        if not isinstance(view, dict):
+            raise ValueError(f"player_view must be a dict, got {type(view).__name__}")
+        require_json_value(view, field="player_view")
 
     def log(
         self,

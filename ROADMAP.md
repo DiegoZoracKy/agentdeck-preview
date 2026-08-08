@@ -27,7 +27,7 @@ The implementation rationale and verified baseline are recorded in
 
 | Wave | Outcome | Status | Exit gate |
 |---|---|---|---|
-| C0 | Canonical evidence and artifact safety | In progress | Path escapes, lossy JSON, incomplete configuration snapshots, and undeclared trust fail safely |
+| C0 | Canonical evidence and artifact safety | Complete | Path escapes, lossy JSON, incomplete configuration snapshots, and undeclared trust fail safely |
 | C1 | Instrument Package Contract | Pending | An external package reaches `runnable` through deterministic `inspect`, `validate`, and `certify` APIs |
 | C2 | Machine-verifiable spec system | Pending | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Pending | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
@@ -36,13 +36,15 @@ The implementation rationale and verified baseline are recorded in
 
 ## C0: Canonical Evidence And Artifact Safety
 
-- [ ] Approve strict JSON, complete snapshot, safe path, and trusted-code contracts.
-- [ ] Reject unsafe artifact identifiers and prove output containment.
-- [ ] Enforce strict JSON state and visible views at the runtime boundary.
-- [ ] Remove coercive serialization from canonical Recorder artifacts.
-- [ ] Record effective Game, Player, Controller, Renderer, prompt, and lifecycle config.
-- [ ] Preserve compatibility with official Games and valid historical records.
-- [ ] Add adversarial tests for all corrected paths.
+- [x] Approve strict JSON, complete snapshot, safe path, and trusted-code contracts.
+- [x] Reject unsafe artifact identifiers and prove output containment.
+- [x] Enforce strict JSON state and visible views at the runtime boundary.
+- [x] Remove coercive serialization from canonical Recorder artifacts.
+- [x] Record effective Game, Player, Controller, Renderer, prompt, and lifecycle config.
+- [x] Preserve compatibility with official Games and valid historical records.
+- [x] Add adversarial tests for all corrected paths.
+
+Validation: Core CI passed with `620 passed, 2 skipped` on 2026-08-07.
 
 ## C1: Instrument Package Contract
 

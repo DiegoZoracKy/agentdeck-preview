@@ -31,6 +31,22 @@ Security-sensitive issues include:
 - accidental exposure of provider credentials or environment variables
 - unsafe handling of untrusted replay JSON or metadata sidecars
 
+## Executable Extension Trust
+
+Games, Players, Controllers, Renderers, Spectators, package-local behavioral scorers,
+and certification fixtures are Python code. Importing any of them can execute arbitrary
+code with the permissions of the current process.
+
+Core distinguishes structural inspection from execution:
+
+- `structural` operations parse data contracts only and do not import package code.
+- `trusted-local` explicitly authorizes in-process execution of locally trusted code.
+- `isolated` declares that the caller launched Core inside an isolation boundary.
+
+AgentDeck Core does not provide an OS sandbox and never labels in-process imports as safe
+for untrusted code. Products and autonomous builders must execute generated or
+user-supplied packages in a separately controlled process or container before promotion.
+
 Model behavior, prompt quality, benchmark conclusions, and ordinary research
 limitations should be filed as regular issues instead.
 

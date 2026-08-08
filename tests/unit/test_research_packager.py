@@ -557,3 +557,38 @@ def test_package_session_multi_session_incompatible_fails(tmp_path):
             include_matrix=False,
             dry_run=False,
         )
+
+
+@pytest.mark.parametrize("experiment_id", ["../outside", "a/b", "C:drive"])
+def test_rp17_rejects_unsafe_experiment_id_before_write(tmp_path, experiment_id):
+    """RP17: experiment IDs cannot escape or be silently normalized."""
+    session_dir = _make_session(tmp_path)
+    research_dir = _prepare_research_dir(tmp_path)
+
+    with pytest.raises(ValueError, match="experiment_id"):
+        package_session(
+            session_dir=session_dir,
+            session_id=None,
+            run_dir=tmp_path / "agentdeck_runs",
+            research_dir=research_dir,
+            experiment_id=experiment_id,
+            question="Can this identifier escape?",
+            dry_run=False,
+        )
+
+    assert not (tmp_path / "outside").exists()
+
+
+def test_rp17_rejects_unsafe_session_id_under_run_root(tmp_path):
+    """RP17: a caller-supplied session ID must be a portable path segment."""
+    research_dir = _prepare_research_dir(tmp_path)
+
+    with pytest.raises(ValueError, match="session_id"):
+        package_session(
+            session_dir=None,
+            session_id="../outside",
+            run_dir=tmp_path / "agentdeck_runs",
+            research_dir=research_dir,
+            question="Can this session escape?",
+            dry_run=True,
+        )

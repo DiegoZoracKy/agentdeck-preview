@@ -13,6 +13,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Union, cast
 
+from .artifact_safety import (
+    ensure_contained_path,
+    require_json_value,
+    validate_artifact_id,
+)
 from .session import SessionContext
 from .types import Event, EventContext, MatchResult
 
@@ -285,6 +290,7 @@ class Recorder:
         context: Optional[EventContext] = None,
         **kwargs: Any,
     ) -> None:
+        validate_artifact_id(batch_id, field="batch_id")
         started_at = self._context_iso_timestamp(context) or datetime.now(timezone.utc).isoformat()
         metadata = {
             "session_id": self._context_value(context, "session_id"),
@@ -313,6 +319,7 @@ class Recorder:
         **kwargs: Any,  # Accept player ordering fields (seed, player_order, etc.)
     ) -> None:
         match_id = match_id or datetime.now().strftime("%Y%m%d_%H%M%S")
+        validate_artifact_id(match_id, field="match_id")
         self.current_match_id = match_id
         match_index = len(self.current_batch.match_refs) if self.current_batch else 0
         batch_id = self._context_value(context, "batch_id")
@@ -342,10 +349,7 @@ class Recorder:
                 player.get_summary() if hasattr(player, "get_summary") else {"name": player.name}
                 for player in players
             ],  # Per SPEC-RECORDER MC3
-            "game_config": {
-                "name": game.__class__.__name__,
-                "module": game.__class__.__module__,
-            },
+            "game_config": self._get_game_config(game),
         }
         match_metadata = {
             key: copy.deepcopy(value)
@@ -379,7 +383,12 @@ class Recorder:
             schema_version=self.schema_version,
             metadata=metadata,
         )
-        self.current_match_path = os.path.join(self.output_dir, f"{match_id}.json")
+        self.current_match_path = str(
+            ensure_contained_path(
+                self.output_dir,
+                Path(self.output_dir) / f"{match_id}.json",
+            )
+        )
 
         # Flush buffered pre-match events (handshakes) to match recording
         for event_data in self._pending_events:
@@ -730,8 +739,12 @@ class Recorder:
         if "seeds_used" in kwargs:
             self.current_batch.metadata["seeds_used"] = kwargs["seeds_used"]
 
-        batch_path = os.path.join(self.output_dir, f"batch_{batch_id}.json")
-        self._atomic_write(batch_path, self.current_batch.to_dict())
+        validate_artifact_id(batch_id, field="batch_id")
+        batch_path = ensure_contained_path(
+            self.output_dir,
+            Path(self.output_dir) / f"batch_{batch_id}.json",
+        )
+        self._atomic_write(str(batch_path), self.current_batch.to_dict())
         self.current_batch = None
         self.batch_match_ids = []
 
@@ -763,11 +776,19 @@ class Recorder:
         }
 
     def _atomic_write(self, path: str, payload: Dict[str, Any]) -> None:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with tempfile.NamedTemporaryFile("w", delete=False, dir=os.path.dirname(path)) as tmp_file:
-            json.dump(payload, tmp_file, indent=2, default=str)
+        target = ensure_contained_path(self.output_dir, path)
+        require_json_value(payload, field="recorder payload")
+        serialized = json.dumps(payload, indent=2, allow_nan=False)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            "w",
+            delete=False,
+            dir=target.parent,
+            encoding="utf-8",
+        ) as tmp_file:
+            tmp_file.write(serialized)
             tmp_path = tmp_file.name
-        os.replace(tmp_path, path)
+        os.replace(tmp_path, target)
 
     @staticmethod
     def load_match(path: Union[str, os.PathLike[str]]) -> Dict[str, Any]:
@@ -859,40 +880,37 @@ class Recorder:
     def _get_player_configs(self, players) -> Dict[str, Dict[str, Any]]:
         configs: Dict[str, Dict[str, Any]] = {}
         for player in players:
-            config = {
-                "type": player.__class__.__name__,
-                "module": player.__class__.__module__,
-            }
-            if hasattr(player, "model"):
-                config["model"] = player.model
-            if hasattr(player, "temperature"):
-                config["temperature"] = player.temperature
-            if hasattr(player, "max_tokens"):
-                config["max_tokens"] = player.max_tokens
-            if hasattr(player, "api_key"):
-                key = str(getattr(player, "api_key", ""))
-                if key and len(key) > 8:
-                    config["api_key_prefix"] = f"***{key[-4:]}"
+            if hasattr(player, "describe"):
+                config = copy.deepcopy(player.describe())
+            else:
+                config = {
+                    "name": player.name,
+                    "type": player.__class__.__name__,
+                    "module": player.__class__.__module__,
+                }
+            require_json_value(config, field=f"player_configs.{player.name}")
             configs[player.name] = config
         return configs
+
+    def _get_game_config(self, game) -> Dict[str, Any]:
+        if hasattr(game, "describe"):
+            config = copy.deepcopy(game.describe())
+        else:
+            config = {
+                "name": game.__class__.__name__,
+                "module": game.__class__.__module__,
+                "allowed_actions": list(getattr(game, "allowed_actions", [])),
+                "config": {},
+            }
+        require_json_value(config, field="game_config")
+        return config
 
     def _get_configuration(self, game, players) -> Dict[str, Any]:
         configuration = {
             "agentdeck_version": self._get_agentdeck_version(),
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-            "timestamp": datetime.now().isoformat(),
-            "game": {
-                "name": game.__class__.__name__,
-                "module": game.__class__.__module__,
-            },
-            "players": [
-                {
-                    "name": player.name,
-                    "type": player.__class__.__name__,
-                    "module": player.__class__.__module__,
-                }
-                for player in players
-            ],
+            "game": self._get_game_config(game),
+            "players": list(self._get_player_configs(players).values()),
         }
         return configuration
 

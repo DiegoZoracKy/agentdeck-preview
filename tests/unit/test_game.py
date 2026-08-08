@@ -144,6 +144,33 @@ def test_GS4_get_view_deep_copyable():
         pytest.fail(f"Deep copy failed: {e}")
 
 
+def test_GS6_describe_captures_complete_fixed_damage_config():
+    """GS6: Game.describe() captures every effective FixedDamage parameter."""
+    game = FixedDamageGame(
+        max_health=120,
+        attack_damage=17,
+        potion_heal=29,
+        starting_potions=2,
+        information_level="partial",
+    )
+
+    descriptor = game.describe()
+
+    assert descriptor == {
+        "name": "FixedDamageGame",
+        "module": "agentdeck.games.examples.fixed_damage.game",
+        "allowed_actions": ["ATTACK", "POTION"],
+        "config": {
+            "max_health": 120,
+            "attack_damage": 17,
+            "potion_heal": 29,
+            "starting_potions": 2,
+            "information_level": "partial",
+        },
+    }
+    json.dumps(descriptor, allow_nan=False)
+
+
 # ============================================================================
 # DT1-DT3: Determinism Tests
 # ============================================================================

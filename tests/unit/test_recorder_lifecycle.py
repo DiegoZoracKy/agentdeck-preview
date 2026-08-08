@@ -15,6 +15,8 @@ import pytest
 
 from agentdeck.core.recorder import Recorder
 from agentdeck.core.types import Event, EventType, MatchResult
+from agentdeck.games.examples.fixed_damage.game import FixedDamageGame
+from agentdeck.players.mock import MockPlayer as CoreMockPlayer
 
 
 @pytest.fixture
@@ -219,6 +221,84 @@ class TestHandshakeEventBuffering:
 
         # Verify buffer is still empty (no leaks)
         assert len(recorder._pending_events) == 0, "Buffer should remain empty after match end"
+
+
+def test_aw4_rejects_match_path_escape_before_artifact_write(recorder, temp_recorder_dir):
+    """AW4: a record-provided match ID cannot escape Recorder.output_dir."""
+    recorder.on_batch_start(
+        batch_id="batch_001",
+        game=FixedDamageGame(),
+        players=[CoreMockPlayer("Alice"), CoreMockPlayer("Bob")],
+        matches=1,
+        context={"session_id": "test_session"},
+    )
+
+    with pytest.raises(ValueError, match="match_id"):
+        recorder.on_match_start(
+            game=FixedDamageGame(),
+            players=[CoreMockPlayer("Alice"), CoreMockPlayer("Bob")],
+            match_id="../escaped",
+            context={"session_id": "test_session", "batch_id": "batch_001"},
+        )
+
+    assert not (temp_recorder_dir.parent / "escaped.json").exists()
+
+
+def test_aw5_strict_json_failure_preserves_existing_artifact(recorder, temp_recorder_dir):
+    """AW5: Recorder never uses default=str and never replaces valid prior evidence."""
+    target = temp_recorder_dir / "match_existing.json"
+    target.write_text('{"preserved": true}', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="strict JSON"):
+        recorder._atomic_write(str(target), {"bad": {"set"}})
+
+    assert target.read_text(encoding="utf-8") == '{"preserved": true}'
+
+
+def test_mc3_mc4_capture_complete_effective_method(recorder, temp_recorder_dir):
+    """MC3/MC4: match metadata preserves exact Game and Player configurations."""
+    game = FixedDamageGame(
+        max_health=120,
+        attack_damage=17,
+        potion_heal=29,
+        starting_potions=2,
+        information_level="partial",
+    )
+    players = [
+        CoreMockPlayer("Alice", actions=["POTION", "ATTACK"], turn_template="A:{game_view}"),
+        CoreMockPlayer("Bob", actions=["ATTACK"], turn_template="B:{game_view}"),
+    ]
+    recorder.on_batch_start(
+        batch_id="batch_001",
+        game=game,
+        players=players,
+        matches=1,
+        context={"session_id": "test_session"},
+    )
+    recorder.on_match_start(
+        game=game,
+        players=players,
+        match_id="match_001",
+        context={"session_id": "test_session", "batch_id": "batch_001"},
+    )
+
+    payload = json.loads((temp_recorder_dir / "match_001.json").read_text(encoding="utf-8"))
+    assert payload["metadata"]["game_config"]["config"] == {
+        "max_health": 120,
+        "attack_damage": 17,
+        "potion_heal": 29,
+        "starting_potions": 2,
+        "information_level": "partial",
+    }
+    alice = payload["metadata"]["player_configs"]["Alice"]
+    assert alice["config"]["actions"] == ["POTION", "ATTACK"]
+    assert alice["controller"]["type"] == "ActionOnlyController"
+    assert alice["renderer"]["name"] == "TextRenderer"
+    assert alice["templates"]["turn"] == "A:{game_view}"
+    assert (
+        recorder.current_batch.metadata["configuration"]["game"]
+        == payload["metadata"]["game_config"]
+    )
 
 
 class TestHandshakeMetadata:

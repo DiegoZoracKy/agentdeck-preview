@@ -107,6 +107,22 @@ class LLMPlayer(Player, ABC):
         # Initialize client
         self._initialize_client()
 
+    def describe(self) -> Dict[str, Any]:
+        """Return effective provider configuration without credentials or clients."""
+        descriptor = super().describe()
+        descriptor["provider"] = getattr(self, "PROVIDER", self.__class__.__module__)
+
+        provider_config: Dict[str, Any] = {}
+        if hasattr(self, "_project_id"):
+            provider_config["project_id"] = self._project_id
+        if hasattr(self, "_location"):
+            provider_config["location"] = self._location
+        if hasattr(self, "_generation_overrides"):
+            provider_config["generation_config"] = copy.deepcopy(self._generation_overrides)
+        if provider_config:
+            descriptor["provider_config"] = provider_config
+        return descriptor
+
     def clone(self) -> "LLMPlayer":
         """
         Create an isolated copy of the player for parallel execution.

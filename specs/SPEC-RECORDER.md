@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 2.1.0
 > Last Updated: 2026-08-07
-> Implementation: Partial (complete effective snapshots and strict writes planned in Wave C0)
+> Implementation: Complete
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose

@@ -638,19 +638,26 @@ class Player(ABC):
             print(info["model"])  # "gpt-4"
             print(info["controller"])  # {"name": "ActionOnlyController", ...}
         """
-        return {
+        effective_config = copy.deepcopy(self.config)
+        for attribute in ("temperature", "max_tokens", "max_retries", "retry_delay"):
+            if hasattr(self, attribute):
+                effective_config[attribute] = copy.deepcopy(getattr(self, attribute))
+
+        descriptor = {
             "name": self.name,
             "type": self.__class__.__name__,
+            "module": self.__class__.__module__,
             "model": self.model,
-            "config": dict(self.config),
+            "config": effective_config,
             "controller": self._describe_component(self.controller),
             "renderer": self._describe_component(self.renderer),
             "templates": {
-                "handshake": self._truncate_template(self.prompt_builder._handshake_template),
-                "turn": self._truncate_template(self.prompt_builder._turn_template),
-                "conclusion": self._truncate_template(self.prompt_builder._conclusion_template),
+                "handshake": self.prompt_builder._handshake_template,
+                "turn": self.prompt_builder._turn_template,
+                "conclusion": self.prompt_builder._conclusion_template,
             },
         }
+        return descriptor
 
     def get_summary(self) -> Dict[str, Any]:
         """

@@ -148,7 +148,7 @@ def test_rescore_experiment_uses_package_local_scorer(tmp_path: Path) -> None:
         _base_profile() + "\nSCORER = CustomBehavioralScorer()\n",
     )
 
-    result = rescore_experiment(experiment_dir=experiment_dir)
+    result = rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
 
     assert result["scorer_found"] is True
     assert result["scorer_source"] == "package_local"
@@ -166,7 +166,7 @@ def test_rescore_experiment_package_local_supports_false_fails(tmp_path: Path) -
     )
 
     with pytest.raises(ValueError, match="does not support"):
-        rescore_experiment(experiment_dir=experiment_dir)
+        rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
 
 
 def test_rescore_experiment_package_local_single_subclass_without_scorer_works(
@@ -175,7 +175,7 @@ def test_rescore_experiment_package_local_single_subclass_without_scorer_works(
     experiment_dir = _create_experiment(tmp_path)
     _write_package_local_scorer(experiment_dir, _base_profile())
 
-    result = rescore_experiment(experiment_dir=experiment_dir)
+    result = rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
 
     assert result["scorer_found"] is True
     assert result["scorer_source"] == "package_local"
@@ -191,7 +191,7 @@ def test_rescore_experiment_package_local_invalid_scorer_fails(tmp_path: Path) -
     )
 
     with pytest.raises(ValueError, match="not a BehavioralScorer instance"):
-        rescore_experiment(experiment_dir=experiment_dir)
+        rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
 
 
 def test_rescore_experiment_package_local_multiple_subclasses_fail(tmp_path: Path) -> None:
@@ -206,7 +206,7 @@ class AnotherScorer(CustomBehavioralScorer):
     )
 
     with pytest.raises(ValueError, match="multiple BehavioralScorer subclasses"):
-        rescore_experiment(experiment_dir=experiment_dir)
+        rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
 
 
 def test_rescore_experiment_dry_run_reports_package_local_source(tmp_path: Path) -> None:
@@ -221,3 +221,26 @@ def test_rescore_experiment_dry_run_reports_package_local_source(tmp_path: Path)
     assert result["dry_run"] is True
     assert result["scorer_found"] is True
     assert result["scorer_source"] == "package_local"
+    assert result["execution_required"] is True
+    assert result["profile_id"] is None
+
+
+def test_rp18_structural_mode_does_not_import_package_scorer(tmp_path: Path) -> None:
+    """RP18/AS6-AS7: structural inspection never executes package Python."""
+    experiment_dir = _create_experiment(tmp_path)
+    marker = tmp_path / "imported.txt"
+    _write_package_local_scorer(
+        experiment_dir,
+        f"from pathlib import Path\nPath({str(marker)!r}).write_text('executed')\n"
+        + _base_profile()
+        + "\nSCORER = CustomBehavioralScorer()\n",
+    )
+
+    result = rescore_experiment(experiment_dir=experiment_dir, dry_run=True)
+
+    assert result["execution_required"] is True
+    assert not marker.exists()
+
+    with pytest.raises(ValueError, match="executable Python"):
+        rescore_experiment(experiment_dir=experiment_dir)
+    assert not marker.exists()

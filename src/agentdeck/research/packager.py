@@ -11,6 +11,11 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import yaml
 
+from ..core.artifact_safety import (
+    contained_path,
+    ensure_contained_path,
+    validate_artifact_id,
+)
 from .export import export_results
 from .factual_blocks import write_factual_markdown_blocks
 from .index import generate_index
@@ -26,10 +31,12 @@ def normalize_research_experiment_id(experiment_id: str) -> str:
     if not normalized:
         raise ValueError("experiment_id must be non-empty")
     if normalized.startswith(RESEARCH_EXPERIMENT_PREFIX):
-        return normalized
-    if normalized.startswith(SESSION_PREFIX):
-        return f"{RESEARCH_EXPERIMENT_PREFIX}{normalized[len(SESSION_PREFIX):]}"
-    return f"{RESEARCH_EXPERIMENT_PREFIX}{normalized}"
+        result = normalized
+    elif normalized.startswith(SESSION_PREFIX):
+        result = f"{RESEARCH_EXPERIMENT_PREFIX}{normalized[len(SESSION_PREFIX):]}"
+    else:
+        result = f"{RESEARCH_EXPERIMENT_PREFIX}{normalized}"
+    return validate_artifact_id(result, field="experiment_id")
 
 
 def _resolve_session_paths(
@@ -48,11 +55,14 @@ def _resolve_session_paths(
         else:
             raise FileNotFoundError(f"Session directory must contain records/: {session_dir}")
         session_id = session_root.name
+        validate_artifact_id(session_id, field="session_id")
+        ensure_contained_path(session_root, records_dir)
     else:
         if not session_id:
             raise ValueError("Provide --session-dir or --session-id.")
-        session_root = run_dir / session_id
-        records_dir = session_root / "records"
+        validate_artifact_id(session_id, field="session_id")
+        session_root = contained_path(run_dir, session_id)
+        records_dir = ensure_contained_path(session_root, session_root / "records")
 
     if not records_dir.is_dir():
         raise FileNotFoundError(f"Records directory not found: {records_dir}")
@@ -495,11 +505,12 @@ def package_session(
     match_files = _load_match_files_from_sessions(records_dirs)
 
     experiment_id = normalize_research_experiment_id(experiment_id or resolved_session_ids[0])
-    template_dir = research_dir / "_templates"
+    research_dir = research_dir.resolve()
+    template_dir = ensure_contained_path(research_dir, research_dir / "_templates")
     if not template_dir.is_dir():
         raise FileNotFoundError(f"Missing templates directory: {template_dir}")
 
-    dest_dir = research_dir / experiment_id
+    dest_dir = contained_path(research_dir, experiment_id)
     if dest_dir.exists():
         raise FileExistsError(f"Experiment directory already exists: {dest_dir}")
 

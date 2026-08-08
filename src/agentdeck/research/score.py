@@ -19,6 +19,9 @@ from .export import (
     recordings_dirs_for_cell,
 )
 
+EXECUTABLE_TRUST_MODES = {"trusted-local", "isolated"}
+TRUST_MODES = {"structural", *EXECUTABLE_TRUST_MODES}
+
 
 def _load_yaml(path: Path) -> Dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -130,7 +133,16 @@ def _resolve_scorer(
     experiment_dir: Path,
     match_payloads: List[Dict[str, Any]],
     profile_id: str,
+    trust_mode: str,
 ) -> Tuple[BehavioralScorer | None, str | None]:
+    scorer_path = _package_local_scorer_path(experiment_dir)
+    if scorer_path.exists() and trust_mode not in EXECUTABLE_TRUST_MODES:
+        raise ValueError(
+            "Package-local behavioral_scorer.py is executable Python. "
+            "Choose trust_mode='trusted-local' for trusted code or invoke this command "
+            "inside an isolated process with trust_mode='isolated'."
+        )
+
     package_scorer = _load_package_local_scorer(experiment_dir)
     if package_scorer is not None:
         if not package_scorer.supports(match_payloads=match_payloads):
@@ -152,8 +164,14 @@ def rescore_experiment(
     recordings_dir: Optional[Path] = None,
     profile_id: str = "auto",
     dry_run: bool = False,
+    trust_mode: str = "structural",
 ) -> Dict[str, Any]:
     experiment_dir = experiment_dir.resolve()
+
+    if trust_mode not in TRUST_MODES:
+        raise ValueError(
+            f"Unsupported trust_mode {trust_mode!r}; expected one of {sorted(TRUST_MODES)}"
+        )
 
     if not experiment_dir.is_dir():
         raise FileNotFoundError(f"Experiment directory not found: {experiment_dir}")
@@ -198,10 +216,26 @@ def rescore_experiment(
     match_payloads, metadata_list = load_match_payloads_from_dirs(resolved_recordings_dirs)
     players = collect_players(metadata_list)
     behavioral_config = behavioral_config_from_manifest(experiment_dir)
+    package_scorer_path = _package_local_scorer_path(experiment_dir)
+    if dry_run and package_scorer_path.exists() and trust_mode == "structural":
+        return {
+            "dry_run": True,
+            "scorer_found": True,
+            "scorer_source": "package_local",
+            "profile_id": None,
+            "profile_version": None,
+            "recordings_dirs": [str(d) for d in resolved_recordings_dirs],
+            "match_count": len(match_payloads),
+            "results_path": str(results_path),
+            "trust_mode": trust_mode,
+            "execution_required": True,
+        }
+
     scorer, scorer_source = _resolve_scorer(
         experiment_dir=experiment_dir,
         match_payloads=match_payloads,
         profile_id=profile_id,
+        trust_mode=trust_mode,
     )
 
     if dry_run:
@@ -214,6 +248,7 @@ def rescore_experiment(
             "recordings_dirs": [str(d) for d in resolved_recordings_dirs],
             "match_count": len(match_payloads),
             "results_path": str(results_path),
+            "trust_mode": trust_mode,
         }
 
     if scorer is None:
@@ -223,6 +258,7 @@ def rescore_experiment(
             "profile_id": profile_id,
             "results_path": str(results_path),
             "updated": False,
+            "trust_mode": trust_mode,
         }
 
     behavioral_profile = scorer.score(
@@ -238,6 +274,7 @@ def rescore_experiment(
             "profile_id": profile_id,
             "results_path": str(results_path),
             "updated": False,
+            "trust_mode": trust_mode,
         }
 
     results = json.loads(results_path.read_text(encoding="utf-8"))
@@ -253,6 +290,7 @@ def rescore_experiment(
         "match_count": len(match_payloads),
         "results_path": str(results_path),
         "updated": True,
+        "trust_mode": trust_mode,
     }
 
 
@@ -290,6 +328,16 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print resolved scorer and coverage; do not write any files.",
     )
+    parser.add_argument(
+        "--trust-mode",
+        choices=sorted(TRUST_MODES),
+        default="structural",
+        help=(
+            "Trust declaration for package-local Python. 'structural' never imports it; "
+            "'trusted-local' executes trusted code in-process; 'isolated' declares that "
+            "the caller placed this command in an isolated process."
+        ),
+    )
     return parser
 
 
@@ -308,6 +356,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             recordings_dir=args.recordings_dir,
             profile_id=args.profile_id,
             dry_run=args.dry_run,
+            trust_mode=args.trust_mode,
         )
     except (FileNotFoundError, ValueError) as exc:
         print(f"Error: {exc}")

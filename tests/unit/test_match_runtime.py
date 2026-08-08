@@ -183,6 +183,29 @@ def test_mr1_match_runtime_instances_are_isolated():
     assert events_b == []
 
 
+@pytest.mark.parametrize(
+    "state",
+    [set(["bad"]), {"bad": {"set"}}, {1: "key"}, {"bad": float("nan")}],
+)
+def test_mr5_mr7_validate_state_rejects_non_strict_json(state: object):
+    """MR5/MR7: runtime rejects invalid state instead of coercing evidence."""
+    runtime, _, logger, _ = _make_runtime()
+
+    with pytest.raises(ValueError):
+        runtime.validate_state(state)  # type: ignore[arg-type]
+
+    assert logger.error_calls
+
+
+def test_mr6_validate_view_requires_strict_json_dict():
+    """MR6: visible views must be strict JSON dictionaries."""
+    runtime, _, _, _ = _make_runtime()
+
+    runtime.validate_view({"visible": ["A", "B"]})
+    with pytest.raises(ValueError, match="player_view"):
+        runtime.validate_view({"bad": bytes([1])})
+
+
 def test_mr2_record_turn_emits_gameplay_and_preserves_snapshots():
     """SPEC-MATCH-RUNTIME MR2: record_turn emits ordered GAMEPLAY events and snapshots."""
     events: List[Any] = []

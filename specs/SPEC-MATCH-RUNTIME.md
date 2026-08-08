@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 1.2.0
 > Last Updated: 2026-08-07
-> Implementation: Partial (strict JSON enforcement planned in Wave C0)
+> Implementation: Complete
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
 
 ## 1. Purpose
