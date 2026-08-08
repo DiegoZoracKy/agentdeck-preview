@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from ..core.artifact_safety import atomic_write_text
+
 AUTO_FACTS_BEGIN = "<!-- AUTO_FACTS:BEGIN -->"
 AUTO_FACTS_END = "<!-- AUTO_FACTS:END -->"
 
@@ -40,7 +42,7 @@ def _replace_auto_facts_block(path: Path, lines: List[str]) -> None:
     insert_start = begin_idx + len(AUTO_FACTS_BEGIN)
     replacement = "\n" + "\n".join(lines).rstrip() + "\n"
     updated = content[:insert_start] + replacement + content[end_idx:]
-    path.write_text(updated, encoding="utf-8")
+    atomic_write_text(path, updated)
 
 
 def _player_label(player: Dict[str, Any]) -> str:

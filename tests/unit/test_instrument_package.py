@@ -82,7 +82,9 @@ def test_ip4_external_game_certifies_without_registry(tmp_path: Path) -> None:
     assert _check(report, "IP4")["status"] == "passed"
 
 
-def test_ip5_ip6_ip7_public_types_config_and_offline_fixture(tmp_path: Path) -> None:
+def test_as8_ip5_ip6_ip7_public_types_config_and_honest_fixture_boundary(
+    tmp_path: Path,
+) -> None:
     report = certify_instrument(
         _copy_fixture(tmp_path),
         trust_mode="trusted-local",
@@ -90,6 +92,14 @@ def test_ip5_ip6_ip7_public_types_config_and_offline_fixture(tmp_path: Path) -> 
     )
     for invariant in ("IP5", "IP6", "IP7"):
         assert _check(report, invariant)["status"] == "passed"
+    fixture_boundary = _check(report, "IP7")
+    assert fixture_boundary["details"] == {
+        "core_supplied_provider_credentials": False,
+        "core_supplied_user_input": False,
+        "repeated_execution_checked": True,
+        "ambient_isolation": "not_proven",
+    }
+    assert "offline" not in fixture_boundary["message"].lower()
 
 
 def test_ip6_rejects_effective_config_drift(tmp_path: Path) -> None:

@@ -35,7 +35,7 @@
     },
     {
       "active": true,
-      "implementation": "Partial (Wave C5 specified; implementation follows)",
+      "implementation": "Complete (Wave C5 strict atomic writers and staged publication)",
       "invariants": [
         "AS1",
         "AS2",
@@ -50,7 +50,7 @@
       "last_updated": "2026-08-08",
       "path": "specs/SPEC-ARTIFACT-SAFETY.md",
       "review_state": "Consensus-approved",
-      "sha256": "23ef2bce1c9b59d8924fd83262f2ba6bb07a4248c7960da16212ac067210b156",
+      "sha256": "b227513174feaa816f7115bb948164c407a11f7721fddbb4cc9332f074cc2be5",
       "spec_id": "SPEC-ARTIFACT-SAFETY",
       "status": "Final",
       "superseded_by": null,
@@ -112,7 +112,16 @@
       "spec_id": "SPEC-BEHAVIORAL-VARIABLE-DAMAGE",
       "status": "Final",
       "superseded_by": null,
-      "unregistered_invariants": [],
+      "unregistered_invariants": [
+        "VD-B1",
+        "VD-B2",
+        "VD-B2a",
+        "VD-B3",
+        "VD-B4",
+        "VD-B5",
+        "VD-B6",
+        "VD-B7"
+      ],
       "version": "0.1.0"
     },
     {
@@ -168,9 +177,13 @@
         "P3",
         "P4",
         "L1",
+        "Controller",
+        "Console",
+        "Game",
         "PF1",
         "PF2",
         "PF3",
+        "FORFEIT",
         "PF4",
         "PF5",
         "PF6",
@@ -237,7 +250,10 @@
       "spec_id": "SPEC-GAME-MECHANIC-TURN-BASED",
       "status": "Final",
       "superseded_by": null,
-      "unregistered_invariants": [],
+      "unregistered_invariants": [
+        "ActionParseError",
+        "events"
+      ],
       "version": "2.0.0"
     },
     {
@@ -252,11 +268,6 @@
       "status": "Final",
       "superseded_by": null,
       "unregistered_invariants": [
-        "HS1",
-        "HS2",
-        "HS3",
-        "HS4",
-        "HS5",
         "GS1",
         "GS2",
         "GS3",
@@ -294,6 +305,11 @@
         "ME3",
         "ME4",
         "ME5",
+        "HS1",
+        "HS2",
+        "HS3",
+        "HS4",
+        "HS5",
         "LH1",
         "LH2",
         "LH3",
@@ -330,7 +346,7 @@
     },
     {
       "active": true,
-      "implementation": "Partial (Wave C5 boundary correction specified; implementation follows)",
+      "implementation": "Complete (Wave C5 honest fixture boundary)",
       "invariants": [
         "IP1",
         "IP2",
@@ -351,7 +367,7 @@
       "last_updated": "2026-08-08",
       "path": "specs/SPEC-INSTRUMENT-PACKAGE.md",
       "review_state": "Consensus-approved",
-      "sha256": "d5303e3a5c372b893cb4bcbdc59584ca5f8180c3bbd93c28629ea223594bc0a4",
+      "sha256": "2ea2d5b2bcda4c604fb76b32abf373a1d7fa232100769dcc7314143641cbdb08",
       "spec_id": "SPEC-INSTRUMENT-PACKAGE",
       "status": "Final",
       "superseded_by": null,
@@ -677,6 +693,7 @@
         "UC4",
         "UC5",
         "UC6",
+        "GAMEPLAY",
         "PM1",
         "PM2",
         "PM3",
@@ -895,7 +912,7 @@
     },
     {
       "active": true,
-      "implementation": "Partial (strict atomic replacement specified; implementation follows)",
+      "implementation": "Complete (strict atomic behavioral profile replacement)",
       "invariants": [
         "RS1",
         "RS2",
@@ -911,13 +928,12 @@
         "RS12",
         "RS13",
         "RS14",
-        "RS15",
-        "RS7"
+        "RS15"
       ],
       "last_updated": "2026-08-08",
       "path": "specs/SPEC-RESEARCH-SCORE.md",
       "review_state": "Legacy-approved",
-      "sha256": "d330a2e2947ffded9ed28e1f5f476e5ed6d140587860a4c6a8340ac1bed724ba",
+      "sha256": "d2afb14debde55a710e9363b0a392ae18944f4fdf40e6f79a13e85a4dc2309eb",
       "spec_id": "SPEC-RESEARCH-SCORE",
       "status": "Final",
       "superseded_by": null,
@@ -941,7 +957,15 @@
         "RW3",
         "RW4",
         "RW5",
+        "RW5a",
+        "RW5b",
+        "RW5c",
+        "RW5d",
         "RW6",
+        "RW6a",
+        "RW6b",
+        "RW6c",
+        "RW6d",
         "RW7",
         "RW8",
         "RW9",
@@ -1039,6 +1063,9 @@
         "CU1",
         "CU2",
         "CU3",
+        "turn",
+        "label",
+        "kind",
         "CU4",
         "CU5",
         "CU6",
@@ -1094,8 +1121,8 @@
     "sha256": "d4b862074846622d7c3d74c67ea68f0b01e1bdeee276ee553bbc8d6b07029be8"
   },
   "invariant_summary": {
-    "registered": 117,
-    "unregistered": 424
+    "registered": 116,
+    "unregistered": 450
   },
   "schema_version": 2
 }

@@ -103,6 +103,15 @@ def test_sr4_rejects_duplicate_active_invariants(tmp_path: Path) -> None:
     with pytest.raises(registry.SpecRegistryError, match="duplicate active invariant EX1"):
         registry.build_registry(root)
 
+    root = _repo(tmp_path / "same-contract")
+    path = _write_spec(root)
+    path.write_text(
+        path.read_text(encoding="utf-8") + "\n2. **EX1 Duplicate Rule**: Duplicate.\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(registry.SpecRegistryError, match="duplicate invariant declarations"):
+        registry.build_registry(root)
+
 
 def test_sr5_rejects_unresolved_relative_links(tmp_path: Path) -> None:
     """SR5: relative spec links resolve inside the repository."""
@@ -311,13 +320,14 @@ def test_sr13_exposes_unregistered_legacy_invariants(tmp_path: Path) -> None:
     path = _write_spec(root)
     path.write_text(
         path.read_text(encoding="utf-8")
-        + "\n- **EX2**: This legacy invariant remains normative.\n",
+        + "\n- **EX2**: This legacy invariant remains normative.\n"
+        + "- `VD-B2a`: Hyphenated legacy identities remain visible too.\n",
         encoding="utf-8",
     )
     built = registry.build_registry(root)
     contract = built["contracts"][0]
-    assert contract["unregistered_invariants"] == ["EX2"]
-    assert built["invariant_summary"] == {"registered": 1, "unregistered": 1}
+    assert contract["unregistered_invariants"] == ["EX2", "VD-B2a"]
+    assert built["invariant_summary"] == {"registered": 1, "unregistered": 2}
 
     test_path = root / "tests" / "test_example.py"
     test_path.write_text(

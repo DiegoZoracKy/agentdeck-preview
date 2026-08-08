@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Sequence
 
 import yaml
 
+from ..core.artifact_safety import atomic_write_text
+
 
 def _iso_timestamp() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -110,7 +112,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     content = generate_index(args.research_dir)
     output_path = args.output if args.output is not None else args.research_dir / "INDEX.md"
-    output_path.write_text(content, encoding="utf-8")
+    atomic_write_text(output_path, content)
     return 0
 
 

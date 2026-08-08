@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
+from ..core.artifact_safety import atomic_write_text
+
 
 def _load_json(path: Path) -> Dict[str, Any]:
     if not path.exists():
@@ -582,7 +584,7 @@ def write_results_markdown_report(output_dir: Path) -> None:
     results = _load_json(output_dir / "results.json")
     if not results:
         return
-    (output_dir / "results.md").write_text(
+    atomic_write_text(
+        output_dir / "results.md",
         render_results_markdown(results, output_dir=output_dir),
-        encoding="utf-8",
     )

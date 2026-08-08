@@ -5,14 +5,17 @@ from __future__ import annotations
 import copy
 import importlib
 import json
-import os
 import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, Sequence
 
-from agentdeck.core.artifact_safety import ensure_contained_path, require_json_value
+from agentdeck.core.artifact_safety import (
+    atomic_write_text,
+    ensure_contained_path,
+    require_json_value,
+)
 from agentdeck.core.agentdeck import AgentDeck
 from agentdeck.core.base import Game, Player
 from agentdeck.core.replay import ReplayEngine
@@ -452,13 +455,10 @@ def _certify_presentation(
 def _write_json_artifact(output_root: Path, relative: str, value: Any) -> None:
     target = ensure_contained_path(output_root, output_root / relative)
     require_json_value(value, field=relative)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    temporary = target.with_suffix(target.suffix + ".tmp")
-    temporary.write_text(
+    atomic_write_text(
+        target,
         json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False) + "\n",
-        encoding="utf-8",
     )
-    os.replace(temporary, target)
 
 
 def _write_report(output_root: Path, report: InstrumentReport) -> None:
@@ -466,9 +466,7 @@ def _write_report(output_root: Path, report: InstrumentReport) -> None:
     if not report.valid and path.exists():
         return
     payload = report.canonical_json() + "\n"
-    temporary = path.with_suffix(".json.tmp")
-    temporary.write_text(payload, encoding="utf-8")
-    os.replace(temporary, path)
+    atomic_write_text(path, payload)
 
 
 def certify_instrument(
@@ -515,7 +513,17 @@ def certify_instrument(
             )
             report.checked("IP5", True, "Game and fixture satisfy public AgentDeck contracts")
             report.checked("IP6", True, "Declared, effective, and recorded Game config agree")
-            report.checked("IP7", True, "Offline fixture completed without provider credentials")
+            report.checked(
+                "IP7",
+                True,
+                "Core supplied no provider credential or user input; ambient isolation is caller-owned",
+                details={
+                    "core_supplied_provider_credentials": False,
+                    "core_supplied_user_input": False,
+                    "repeated_execution_checked": True,
+                    "ambient_isolation": "not_proven",
+                },
+            )
             report.checked(
                 "IP8",
                 _deterministic_signature(first_payloads)

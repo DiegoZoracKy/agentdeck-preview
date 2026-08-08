@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 from agentdeck.core.artifact_safety import (
+    atomic_write_json,
+    atomic_write_text,
     contained_path,
     ensure_contained_path,
     require_json_value,
@@ -72,3 +74,33 @@ def test_as4_accepts_nested_strict_json() -> None:
         {"turn": 1, "state": {"hp": [100, 80]}, "terminal": False},
         field="payload",
     )
+
+
+def test_as5_as9_atomic_json_rejection_preserves_destination(tmp_path: Path) -> None:
+    """AS5/AS9: strict validation completes before replacement or temp creation."""
+    destination = tmp_path / "results.json"
+    destination.write_text('{"status":"before"}', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="strict JSON"):
+        atomic_write_json(destination, {"bad": float("nan")}, field="results")
+
+    assert destination.read_text(encoding="utf-8") == '{"status":"before"}'
+    assert list(tmp_path.glob(".results.json.*.tmp")) == []
+
+
+def test_as9_atomic_text_failure_cleans_temp_and_preserves_destination(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """AS9: replacement failure cannot expose partial text or orphan its temp file."""
+    destination = tmp_path / "artifact.txt"
+    destination.write_text("before", encoding="utf-8")
+
+    def fail_replace(_source: Path, _target: Path) -> None:
+        raise OSError("injected replace failure")
+
+    monkeypatch.setattr("agentdeck.core.artifact_safety.os.replace", fail_replace)
+    with pytest.raises(OSError, match="injected replace failure"):
+        atomic_write_text(destination, "after")
+
+    assert destination.read_text(encoding="utf-8") == "before"
+    assert list(tmp_path.glob(".artifact.txt.*.tmp")) == []

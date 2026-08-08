@@ -326,7 +326,10 @@ def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
     )
 
     assert calls["experiment_id"] == "research_2026-01-20-direct-helpers"
-    assert calls["output_dir"] == research_dir / "research_2026-01-20-direct-helpers"
+    staged_output = Path(calls["output_dir"])
+    assert staged_output.parent == research_dir
+    assert staged_output.name.startswith(".research_2026-01-20-direct-helpers.")
+    assert staged_output.name.endswith(".tmp")
     assert calls["kwargs"] == {"behavioral_config": game_config}
     assert calls["index_called"] is True
     game_config["nested"]["starting_potions"] = 0
@@ -336,6 +339,35 @@ def test_package_session_uses_package_owned_helpers(monkeypatch, tmp_path):
         )
     )
     assert manifest["game"]["config"] == {"attack_damage": 20, "nested": {"starting_potions": 3}}
+
+
+def test_as5_rp18_failed_package_build_leaves_no_published_or_staged_artifact(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """AS5/RP18: a failed staged build publishes no package and leaves no staging tree."""
+    session_dir = _make_session(tmp_path)
+    research_dir = _prepare_research_dir(tmp_path)
+    existing_index = research_dir / "INDEX.md"
+    existing_index.write_text("before\n", encoding="utf-8")
+
+    def fail_export(*_args, **_kwargs):
+        raise RuntimeError("injected export failure")
+
+    monkeypatch.setattr("agentdeck.research.packager.export_results", fail_export)
+    with pytest.raises(RuntimeError, match="injected export failure"):
+        package_session(
+            session_dir=session_dir,
+            session_id=None,
+            run_dir=tmp_path / "agentdeck_runs",
+            research_dir=research_dir,
+            experiment_id="2026-01-20-atomic-failure",
+            question="Does a failed package remain invisible?",
+            dry_run=False,
+        )
+
+    assert not (research_dir / "research_2026-01-20-atomic-failure").exists()
+    assert list(research_dir.glob(".research_2026-01-20-atomic-failure.*.tmp")) == []
+    assert existing_index.read_text(encoding="utf-8") == "before\n"
 
 
 def test_package_session_include_matrix_keeps_matrix_scaffold(tmp_path):

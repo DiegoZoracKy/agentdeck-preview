@@ -32,7 +32,7 @@ The implementation rationale and verified baseline are recorded in
 | C2 | Machine-verifiable spec system | Complete | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Complete | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
 | C4 | Runtime boundary and typed authoring API | Complete | Extensions use public runtime mechanics, strict public typing, and real security gates |
-| C5 | Honest compliance and artifact publication | In progress | Assurance is non-vacuous; canonical writes and package publication fail atomically |
+| C5 | Honest compliance and artifact publication | Complete | Assurance is non-vacuous; canonical writes and package publication fail atomically |
 | B0 | AgentDeck Builder bootstrap | Complete | A separate Builder invokes Codex CLI and produces a certified contained package from intent |
 
 ## C0: Canonical Evidence And Artifact Safety
@@ -133,8 +133,8 @@ does not silently broaden the meaning of the already-awarded tiers.
 - [x] Define strict atomic single-file writes and staged package publication.
 - [x] Replace impossible byte-preservation language with semantic JSON preservation.
 - [x] Implement exact registry evidence and public authoring imports.
-- [ ] Implement the writer, packager, rescore, and certification changes.
-- [ ] Add adversarial tests and regenerate the compliance projections.
+- [x] Implement the writer, packager, rescore, and certification changes.
+- [x] Add adversarial tests and regenerate the compliance projections.
 
 This wave intentionally adds no research-quality gate and no semantic judgment about a
 Game's instructions, metrics, or hypotheses. It strengthens only claims the Core can

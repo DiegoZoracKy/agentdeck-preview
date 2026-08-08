@@ -268,6 +268,32 @@ def test_export_results_includes_behavioral_profile(tmp_path, monkeypatch) -> No
     assert payload["behavioral_profile"]["evidence"]["state_metrics"] == {}
 
 
+def test_as4_re21_export_rejects_non_finite_facts_before_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """AS4/RE21: canonical research facts reject NaN before publishing outputs."""
+    recordings_dir = tmp_path / "records"
+    _write_match(recordings_dir, "match_001")
+    _pass_artifact_validation(monkeypatch)
+    monkeypatch.setattr(
+        research_export,
+        "compute_inferential_statistics",
+        lambda **_kwargs: {"effect_size": float("nan")},
+    )
+    output_dir = tmp_path / "out"
+
+    with pytest.raises(ValueError, match="strict JSON"):
+        research_export.export_results(
+            recordings_dir,
+            output_dir,
+            experiment_id="strict-json-export",
+            include_generated_at=False,
+            behavioral_profile_id="none",
+        )
+
+    assert not output_dir.exists()
+
+
 def test_export_matrix_cells_uses_discovered_session_recordings(tmp_path, monkeypatch) -> None:
     _pass_artifact_validation(monkeypatch)
     experiment_dir = _write_matrix_experiment(tmp_path, cell_ids=["p1_c01_demo"])

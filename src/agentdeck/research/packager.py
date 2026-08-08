@@ -6,12 +6,14 @@ import argparse
 import copy
 import json
 import shutil
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import yaml
 
 from ..core.artifact_safety import (
+    atomic_write_text,
     contained_path,
     ensure_contained_path,
     validate_artifact_id,
@@ -426,7 +428,7 @@ def build_manifest(
 
 
 def _write_manifest(path: Path, manifest: Dict[str, Any]) -> None:
-    path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+    atomic_write_text(path, yaml.safe_dump(manifest, sort_keys=False))
 
 
 def _write_recordings_readme(path: Path, session_sources: Sequence[Tuple[str, Path]]) -> None:
@@ -458,7 +460,7 @@ def _write_recordings_readme(path: Path, session_sources: Sequence[Tuple[str, Pa
         ]
     )
     content = "\n".join(lines)
-    path.write_text(content, encoding="utf-8")
+    atomic_write_text(path, content)
 
 
 def _prune_matrix_references(manifest: Dict[str, Any]) -> None:
@@ -542,40 +544,57 @@ def package_session(
             "manifest": manifest,
         }
 
-    shutil.copytree(template_dir, dest_dir)
-    if not include_matrix:
-        matrix_path = dest_dir / "matrix.yaml"
-        if matrix_path.exists():
-            matrix_path.unlink()
-
-    _write_manifest(dest_dir / "manifest.yaml", manifest)
-
-    recordings_dir = dest_dir / "recordings"
-    recordings_dir.mkdir(parents=True, exist_ok=True)
-    _write_recordings_readme(
-        recordings_dir / "README.md",
-        list(zip(resolved_session_ids, session_roots)),
+    staging_dir = Path(
+        tempfile.mkdtemp(
+            dir=research_dir,
+            prefix=f".{experiment_id}.",
+            suffix=".tmp",
+        )
     )
+    published = False
+    try:
+        shutil.copytree(template_dir, staging_dir, dirs_exist_ok=True)
+        if not include_matrix:
+            matrix_path = staging_dir / "matrix.yaml"
+            if matrix_path.exists():
+                matrix_path.unlink()
 
-    behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
-    if len(records_dirs) == 1:
-        export_results(
-            records_dirs[0],
-            dest_dir,
-            experiment_id,
-            behavioral_config=behavioral_config,
-        )
-    else:
-        export_results(
-            records_dirs,
-            dest_dir,
-            experiment_id,
-            behavioral_config=behavioral_config,
-        )
-    write_factual_markdown_blocks(dest_dir, manifest)
+        _write_manifest(staging_dir / "manifest.yaml", manifest)
 
-    index_content = generate_index(research_dir)
-    (research_dir / "INDEX.md").write_text(index_content, encoding="utf-8")
+        recordings_dir = staging_dir / "recordings"
+        recordings_dir.mkdir(parents=True, exist_ok=True)
+        _write_recordings_readme(
+            recordings_dir / "README.md",
+            list(zip(resolved_session_ids, session_roots)),
+        )
+
+        behavioral_config = dict((manifest.get("game") or {}).get("config") or {})
+        if len(records_dirs) == 1:
+            export_results(
+                records_dirs[0],
+                staging_dir,
+                experiment_id,
+                behavioral_config=behavioral_config,
+            )
+        else:
+            export_results(
+                records_dirs,
+                staging_dir,
+                experiment_id,
+                behavioral_config=behavioral_config,
+            )
+        write_factual_markdown_blocks(staging_dir, manifest)
+
+        staging_dir.replace(dest_dir)
+        published = True
+        index_content = generate_index(research_dir)
+        atomic_write_text(research_dir / "INDEX.md", index_content)
+    except BaseException:
+        if staging_dir.exists():
+            shutil.rmtree(staging_dir, ignore_errors=True)
+        if published and dest_dir.exists():
+            shutil.rmtree(dest_dir, ignore_errors=True)
+        raise
 
     return {
         "session_id": resolved_session_ids[0],

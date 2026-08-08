@@ -141,13 +141,14 @@ def _create_experiment(tmp_path: Path) -> Path:
     return experiment_dir
 
 
-def test_rescore_experiment_uses_package_local_scorer(tmp_path: Path) -> None:
+def test_rs2_rescore_experiment_changes_only_behavioral_profile(tmp_path: Path) -> None:
     experiment_dir = _create_experiment(tmp_path)
     _write_package_local_scorer(
         experiment_dir,
         _base_profile() + "\nSCORER = CustomBehavioralScorer()\n",
     )
 
+    before = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
     result = rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
 
     assert result["scorer_found"] is True
@@ -155,6 +156,50 @@ def test_rescore_experiment_uses_package_local_scorer(tmp_path: Path) -> None:
     payload = json.loads((experiment_dir / "results.json").read_text(encoding="utf-8"))
     assert payload["behavioral_profile"]["profile_id"] == "custom_behavioral"
     assert payload["sentinel"] == "preserve-me"
+    assert {key: value for key, value in payload.items() if key != "behavioral_profile"} == {
+        key: value for key, value in before.items() if key != "behavioral_profile"
+    }
+
+
+def test_as4_rs15_rescore_rejects_non_finite_profile_without_replacement(
+    tmp_path: Path,
+) -> None:
+    """AS4/RS15: invalid scorer JSON leaves the prior results bytes untouched."""
+    experiment_dir = _create_experiment(tmp_path)
+    _write_package_local_scorer(
+        experiment_dir,
+        _base_profile().replace('"behavioral_score": 1.0', '"behavioral_score": float("nan")')
+        + "\nSCORER = CustomBehavioralScorer()\n",
+    )
+    results_path = experiment_dir / "results.json"
+    before = results_path.read_bytes()
+
+    with pytest.raises(ValueError, match="strict JSON"):
+        rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
+
+    assert results_path.read_bytes() == before
+
+
+def test_rs15_rescore_replace_failure_preserves_prior_bytes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """RS15: filesystem replacement failure leaves the prior results bytes untouched."""
+    experiment_dir = _create_experiment(tmp_path)
+    _write_package_local_scorer(
+        experiment_dir,
+        _base_profile() + "\nSCORER = CustomBehavioralScorer()\n",
+    )
+    results_path = experiment_dir / "results.json"
+    before = results_path.read_bytes()
+
+    def fail_replace(_source: Path, _target: Path) -> None:
+        raise OSError("injected replace failure")
+
+    monkeypatch.setattr("agentdeck.core.artifact_safety.os.replace", fail_replace)
+    with pytest.raises(OSError, match="injected replace failure"):
+        rescore_experiment(experiment_dir=experiment_dir, trust_mode="trusted-local")
+
+    assert results_path.read_bytes() == before
 
 
 def test_rescore_experiment_package_local_supports_false_fails(tmp_path: Path) -> None:
@@ -225,7 +270,9 @@ def test_rescore_experiment_dry_run_reports_package_local_source(tmp_path: Path)
     assert result["profile_id"] is None
 
 
-def test_rp18_structural_mode_does_not_import_package_scorer(tmp_path: Path) -> None:
+def test_as6_as7_rp18_structural_mode_does_not_import_package_scorer(
+    tmp_path: Path,
+) -> None:
     """RP18/AS6-AS7: structural inspection never executes package Python."""
     experiment_dir = _create_experiment(tmp_path)
     marker = tmp_path / "imported.txt"

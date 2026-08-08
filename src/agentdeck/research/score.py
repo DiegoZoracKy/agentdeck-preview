@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import yaml
 
+from ..core.artifact_safety import atomic_write_json, require_json_value
+
 from .behavioral import BehavioralScorer, get_behavioral_scorer
 from .export import (
     behavioral_config_from_manifest,
@@ -279,7 +281,8 @@ def rescore_experiment(
 
     results = json.loads(results_path.read_text(encoding="utf-8"))
     results["behavioral_profile"] = behavioral_profile
-    results_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
+    require_json_value(behavioral_profile, field="behavioral_profile")
+    atomic_write_json(results_path, results, field="rescored results")
 
     return {
         "scorer_found": True,

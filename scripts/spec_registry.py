@@ -24,9 +24,12 @@ METADATA_RE = re.compile(r"^> ([A-Za-z ]+):\s*(.+?)\s*$", re.MULTILINE)
 SEMVER_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 INVARIANT_RE = re.compile(r"\*\*([A-Z][A-Z0-9]*[0-9]+)\s+[^*]+\*\*")
 LEGACY_INVARIANT_RE = re.compile(
-    r"^\s*(?:[0-9]+\.\s+|-\s+)\*\*([A-Z][A-Z0-9]*[0-9]+)\*\*(?=\s*:|\s)",
+    r"^\s*(?:[0-9]+\.\s+|-\s+)(?:\*\*|`)"
+    r"([A-Za-z][A-Za-z0-9#]*(?:-[A-Za-z0-9]+)*)(?:\*\*|`)(?=\s*:|\s)",
     re.MULTILINE,
 )
+INVARIANT_SECTION_RE = re.compile(r"^##\s+.*\bInvariants\b.*$", re.MULTILINE)
+TOP_LEVEL_SECTION_RE = re.compile(r"^##\s+", re.MULTILINE)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 IMPLEMENTATION_PREFIXES = ("Complete", "Partial", "Planned", "Not implemented")
 LIFECYCLES = {"Final", "Superseded", "Deprecated"}
@@ -75,6 +78,15 @@ def _governed_paths(root: Path = ROOT) -> list[Path]:
     return sorted((root / "specs").glob("SPEC-*.md"), key=lambda path: path.name)
 
 
+def _invariant_sections(text: str) -> str:
+    sections: list[str] = []
+    for heading in INVARIANT_SECTION_RE.finditer(text):
+        next_heading = TOP_LEVEL_SECTION_RE.search(text, heading.end())
+        end = next_heading.start() if next_heading else len(text)
+        sections.append(text[heading.start() : end])
+    return "\n".join(sections)
+
+
 def _parse_contract(path: Path) -> Contract:
     text = path.read_text(encoding="utf-8")
     metadata = dict(METADATA_RE.findall("\n".join(text.splitlines()[:20])))
@@ -96,12 +108,18 @@ def _parse_contract(path: Path) -> Contract:
         raise SpecRegistryError(f"{path.name}: invalid Review State")
     if metadata["Status"] == "Superseded" and "Superseded By" not in metadata:
         raise SpecRegistryError(f"{path.name}: Superseded spec needs Superseded By")
-    invariants = tuple(INVARIANT_RE.findall(text))
+    invariant_text = _invariant_sections(text)
+    invariants = tuple(INVARIANT_RE.findall(invariant_text))
+    if len(invariants) != len(set(invariants)):
+        duplicates = sorted(
+            invariant for invariant in set(invariants) if invariants.count(invariant) > 1
+        )
+        raise SpecRegistryError(f"{path.name}: duplicate invariant declarations {duplicates}")
     registered = set(invariants)
     unregistered_invariants = tuple(
         dict.fromkeys(
             invariant
-            for invariant in LEGACY_INVARIANT_RE.findall(text)
+            for invariant in LEGACY_INVARIANT_RE.findall(invariant_text)
             if invariant not in registered
         )
     )

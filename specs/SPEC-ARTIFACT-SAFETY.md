@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-08-08
-> Implementation: Partial (Wave C5 specified; implementation follows)
+> Implementation: Complete (Wave C5 strict atomic writers and staged publication)
 > Review State: Consensus-approved
 > Audience: Core contributors, package authors, artifact pipeline maintainers
 

@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Tuple, Union
 
 import yaml
+
+from ..core.artifact_safety import atomic_write_text, require_json_value
 
 from .artifact_validation import (
     format_artifact_validation_errors,
@@ -28,7 +31,7 @@ from .recording_metrics import (
     compute_inferential_statistics,
     compute_position_effect,
 )
-from .results_markdown import write_results_markdown_report
+from .results_markdown import render_results_markdown
 
 
 def _iso_timestamp() -> str:
@@ -520,46 +523,49 @@ def export_results(
     if include_generated_at:
         results["generated_at"] = _iso_timestamp()
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    json_path = output_dir / "results.json"
-    json_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
+    require_json_value(results, field="research results")
+    json_payload = json.dumps(results, indent=2, ensure_ascii=True, allow_nan=False)
 
-    csv_path = output_dir / "results.csv"
-    with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.writer(handle, lineterminator="\n")
+    csv_buffer = io.StringIO(newline="")
+    writer = csv.writer(csv_buffer, lineterminator="\n")
+    writer.writerow(
+        [
+            "match_id",
+            "winner",
+            "turns",
+            "outcome",
+            "seed",
+            "duration",
+            "cost",
+            "player_order_source",
+            "first_player",
+            "players",
+            "player_costs",
+        ]
+    )
+    for match in matches:
         writer.writerow(
             [
-                "match_id",
-                "winner",
-                "turns",
-                "outcome",
-                "seed",
-                "duration",
-                "cost",
-                "player_order_source",
-                "first_player",
-                "players",
-                "player_costs",
+                match.get("match_id"),
+                match.get("winner"),
+                match.get("turns"),
+                match.get("outcome"),
+                match.get("seed"),
+                match.get("duration"),
+                match.get("cost"),
+                match.get("player_order_source"),
+                (match.get("first_player") or {}).get("name"),
+                ",".join(match.get("players") or []),
+                json.dumps(match.get("player_costs") or {}, allow_nan=False),
             ]
         )
-        for match in matches:
-            writer.writerow(
-                [
-                    match.get("match_id"),
-                    match.get("winner"),
-                    match.get("turns"),
-                    match.get("outcome"),
-                    match.get("seed"),
-                    match.get("duration"),
-                    match.get("cost"),
-                    match.get("player_order_source"),
-                    (match.get("first_player") or {}).get("name"),
-                    ",".join(match.get("players") or []),
-                    json.dumps(match.get("player_costs") or {}),
-                ]
-            )
+    csv_payload = csv_buffer.getvalue()
+    markdown_payload = render_results_markdown(results, output_dir=output_dir)
 
-    write_results_markdown_report(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    atomic_write_text(output_dir / "results.json", json_payload)
+    atomic_write_text(output_dir / "results.csv", csv_payload)
+    atomic_write_text(output_dir / "results.md", markdown_payload)
 
 
 def _build_parser() -> argparse.ArgumentParser:

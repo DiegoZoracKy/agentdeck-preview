@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.3.0
 > Last Updated: 2026-08-08
-> Implementation: Partial (Wave C5 boundary correction specified; implementation follows)
+> Implementation: Complete (Wave C5 honest fixture boundary)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
