@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.4.1
 > Last Updated: 2026-03-17
-> Implementation: Complete (Phase 6-8 compliance verified)
+> Implementation: Complete
 > Review State: Legacy-approved
 > Audience: Researchers, player implementers, prompt engineers
 

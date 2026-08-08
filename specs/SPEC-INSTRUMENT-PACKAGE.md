@@ -1,9 +1,9 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.2.0
-> Last Updated: 2026-08-07
-> Implementation: Complete (Wave C3 tiered certifier)
+> Version: 0.3.0
+> Last Updated: 2026-08-08
+> Implementation: Partial (Wave C5 boundary correction specified; implementation follows)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -82,14 +82,18 @@ claims:
 - `game.entry_point`: package-local `module.path:Symbol` naming a `Game` subclass.
 - `game.config`: strict JSON object passed to the Game constructor.
 - `game.config_schema`: one declaration per config key; unknown config keys are invalid.
-- `fixture.entry_point`: package-local callable returning deterministic offline Players.
+- `fixture.entry_point`: package-local callable returning deterministic fixture Players.
 - `fixture.player_count`, `matches`, `seed`, `max_turns`: bounded positive integers.
 - `fixture.expected_winners`: one expected value per match; `null` represents a draw.
 - `claims.requested`: non-empty subset of the capability tiers in ascending order.
 
 Entry-point functions receive only documented keyword arguments. A fixture callable has
-the contract `create_players() -> list[Player]` and MUST require no provider, credential,
-network, clock, or ambient process state.
+the contract `create_players() -> list[Player]`; the Core supplies no provider
+credential or user input. Package authors SHOULD make fixtures independent of network,
+clock, and ambient process state. In-process `trusted-local` certification can prove
+repeatable observed behavior, but cannot prove that arbitrary Python did not inspect or
+use ambient resources. Only a caller-provided `isolated` runtime may make and enforce a
+stronger environmental claim.
 
 ### Configuration schema
 
@@ -190,6 +194,8 @@ The certifier MUST prove:
 - a second execution has the same semantic trace and result under the same seed.
 - every recorded match replays with event/data parity.
 - all artifacts remain inside the certification output root.
+- the report distinguishes observed deterministic completion from environmental
+  isolation that the selected trust mode cannot prove.
 
 ### `evidence_ready`
 
@@ -220,7 +226,7 @@ Requires `runnable`. The certifier MUST additionally prove:
 4. **IP4 No Game Registry**: Inspection and certification MUST NOT branch on instrument ID, title, Game class name, or module name.
 5. **IP5 Public Contracts**: A certified Game, Player, Controller, Renderer, Spectator, and BehavioralScorer MUST satisfy their public AgentDeck types; deep private integration is not a capability.
 6. **IP6 Declared Effective Config**: Constructor config, schema defaults, `Game.describe()`, and recorded game config MUST agree exactly.
-7. **IP7 Offline Fixture**: Certification fixtures MUST be deterministic and require no provider, credential, network, clock, or user input.
+7. **IP7 Honest Fixture Boundary**: Core MUST supply no provider credential or user input to a certification fixture, MUST test repeated semantic execution, and MUST report when the selected trust mode cannot prove absence of network, clock, or ambient process state.
 8. **IP8 Reproducible Execution**: Equal package bytes, config, fixture, and seed MUST yield equal semantic traces and outcomes.
 9. **IP9 Replay Parity**: Every runnable certification match MUST replay the same ordered lifecycle and domain event data.
 10. **IP10 Strict Evidence**: Manifest, report, state, views, events, records, scorer output, and Match Surface artifacts MUST satisfy strict JSON/YAML scalar rules without coercion.
@@ -252,5 +258,7 @@ Requires `runnable`. The certifier MUST additionally prove:
 
 - A manifest is declarative authority; generated code is only an implementation claim.
 - Tiering prevents “it runs” from being confused with valid evidence or presentation.
-- Offline fixture execution tests the instrument without spending provider budget.
+- Fixture execution tests the instrument without the Core supplying provider credentials
+  or user input. Under `trusted-local`, repeatability is observed rather than confused
+  with OS-level isolation.
 - The Core certifies. Builders, products, and humans may author but cannot self-award.

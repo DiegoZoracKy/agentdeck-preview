@@ -1,8 +1,8 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
 > Status: Final
-> Version: 1.3.3
-> Last Updated: 2026-03-17
+> Version: 1.3.4
+> Last Updated: 2026-08-08
 > Implementation: Complete
 > Review State: Legacy-approved
 > Audience: Game authors, LLM player implementers, research engineers
@@ -166,7 +166,7 @@ class AggressiveBot(Player):
 
 ```python
 # Example 1b: LLMPlayer with PROVIDER constant (for pricing integration)
-from agentdeck.players import LLMPlayer
+from agentdeck import LLMPlayer
 
 class GPTPlayer(LLMPlayer):
     """OpenAI GPT player with cost tracking."""

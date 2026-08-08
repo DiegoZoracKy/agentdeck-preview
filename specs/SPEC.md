@@ -1,8 +1,8 @@
 # AgentDeck Implementation Specification
 
-**Version**: 2.4 (Instrument Package Contract)
+**Version**: 2.5 (Honest Compliance And Artifact Publication)
 **Status**: Active
-**Last Updated**: 2026-08-07
+**Last Updated**: 2026-08-08
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -194,12 +194,12 @@ All component specifications follow the lean spec format with numbered invariant
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract (rules, state, narrative, lifecycle hooks, effective config) |
-| [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.2.0 | Final | External manifest, inspection, certification, and capability tiers |
+| [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.3.0 | Final | External manifest, inspection, certification, and capability tiers |
 | [Authoring Readiness](SPEC-AUTHORING-READINESS.md) | 0.1.0 | Final | Public extension typing, runtime boundary, and blocking security gates |
-| [Player](SPEC-PLAYER.md) | 1.3.3 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
-| [Controller](SPEC-CONTROLLER.md) | 1.3.2 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
+| [Player](SPEC-PLAYER.md) | 1.3.4 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Controller](SPEC-CONTROLLER.md) | 1.3.3 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.2 | Final | State formatting for AI consumption |
-| [Spectator](SPEC-SPECTATOR.md) | 2.0.0 | Final | Observation and analysis interface |
+| [Spectator](SPEC-SPECTATOR.md) | 2.0.1 | Final | Observation and analysis interface |
 
 ### 4.2 Infrastructure Components
 
@@ -211,7 +211,7 @@ All component specifications follow the lean spec format with numbered invariant
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.3.0 | Final | Per-match infrastructure context and public mechanics gateway |
 | [Pricing](SPEC-PRICING.md) | 1.0.1 | Final | Cost tracking system for LLM usage |
-| [LLM](SPEC-LLM.md) | 1.1.4 | Final | LLM provider integration contract |
+| [LLM](SPEC-LLM.md) | 1.1.5 | Final | LLM provider integration contract |
 | [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
 | [Monitor](SPEC-MONITOR.md) | 1.0.0 | Final | Console-level observation and progress reporting |
 
@@ -226,14 +226,15 @@ All component specifications follow the lean spec format with numbered invariant
 | [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.7.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.4.0 | Final | Contained session-to-experiment package helper |
 | [Research Packager Context](SPEC-RESEARCH-PACKAGER-CONTEXT-v0.1.0.md) | 0.1.0 | Final | Optional confirmed world configuration for package behavioral export |
+| [Research Score](SPEC-RESEARCH-SCORE.md) | 0.3.0 | Final | Standalone behavioral rescoring with surgical, strict, atomic updates |
 
 ### 4.4 Viewer Surface
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.0 | Final | Core spectator projection and contained static artifact sinks |
-| [Artifact Safety](SPEC-ARTIFACT-SAFETY.md) | 0.1.0 | Final | Portable identity, output containment, strict JSON, and executable trust boundary |
-| [Spec Registry](SPEC-SPEC-REGISTRY.md) | 0.1.0 | Final | Deterministic lifecycle, authoring profiles, and compliance evidence |
+| [Artifact Safety](SPEC-ARTIFACT-SAFETY.md) | 0.2.0 | Final | Portable identity, output containment, strict JSON, and executable trust boundary |
+| [Spec Registry](SPEC-SPEC-REGISTRY.md) | 0.2.0 | Final | Deterministic lifecycle, exact evidence locators, and honest compliance evidence |
 | [Viewer](SPEC-VIEWER.md) | 0.7.0 | Deprecated | Frozen browser viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
 
 ---
@@ -355,10 +356,9 @@ from agentdeck import (
 # Research module for statistical rigor (Kaggle-inspired)
 from agentdeck.research import (
     compare_models,          # The 80% use case - rigorous model comparison
-    progressive_comparison,  # Early stopping to save API costs
-    parameter_sweep,         # Hyperparameter optimization
-    EloLeague,              # ELO rating system for ongoing competitions
-    Benchmark,              # Standardized benchmarks with exact reproducibility
+    compare_models_progressive, # Early stopping to save API costs
+    run_benchmark,           # Standardized multi-game benchmark execution
+    Benchmark,               # Benchmark declaration
     statistical_significance # P-values, confidence intervals, effect sizes
 )
 ```

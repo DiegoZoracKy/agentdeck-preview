@@ -1,9 +1,9 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.1.4
-> Last Updated: 2026-03-19
-> Implementation: Complete (Phase 6-8 compliance verified)
+> Version: 1.1.5
+> Last Updated: 2026-08-08
+> Implementation: Complete
 > Review State: Legacy-approved
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
 
@@ -127,7 +127,7 @@
 
 ## 8. Examples
 ```python
-from agentdeck.players.openai_player import GPTPlayer
+from agentdeck import GPTPlayer
 
 player = GPTPlayer(
     name="AggressiveBot",
@@ -164,9 +164,7 @@ class CustomAPIPlayer(LLMPlayer):
 ### Extended Example: Multi-Provider Tournament
 
 ```python
-from agentdeck.players.openai_player import GPTPlayer
-from agentdeck.players.anthropic_player import ClaudePlayer
-from agentdeck.players.google_player import GeminiPlayer
+from agentdeck import ClaudePlayer, GeminiPlayer, GPTPlayer
 
 # Each provider class defines PROVIDER constant for pricing (PI1):
 # GPTPlayer.PROVIDER = "openai"
@@ -213,7 +211,7 @@ for player in players:
 ### Extended Example: Conversation Manager Integration
 
 ```python
-from agentdeck.conversation import ConversationManager
+from agentdeck import ConversationManager
 
 # Create conversation manager for multi-turn reasoning
 conv_manager = ConversationManager(max_history_turns=10)
@@ -411,9 +409,7 @@ def test_prompt_metadata_capture():
 ```python
 def test_provider_constant_defined():
     """Verify all LLM player classes define PROVIDER constant."""
-    from agentdeck.players.openai_player import GPTPlayer
-    from agentdeck.players.anthropic_player import ClaudePlayer
-    from agentdeck.players.google_player import GeminiPlayer
+    from agentdeck import ClaudePlayer, GeminiPlayer, GPTPlayer
 
     # PI1: PROVIDER constant must be defined
     assert hasattr(GPTPlayer, "PROVIDER")

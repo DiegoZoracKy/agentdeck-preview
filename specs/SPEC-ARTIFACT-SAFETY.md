@@ -1,9 +1,9 @@
 # SPEC-ARTIFACT-SAFETY: Artifact Identity, Containment, And Trust
 
 > Status: Final
-> Version: 0.1.0
-> Last Updated: 2026-08-07
-> Implementation: Complete (Wave C0)
+> Version: 0.2.0
+> Last Updated: 2026-08-08
+> Implementation: Partial (Wave C5 specified; implementation follows)
 > Review State: Consensus-approved
 > Audience: Core contributors, package authors, artifact pipeline maintainers
 
@@ -58,13 +58,21 @@ def validate_artifact_id(value: str, *, field: str = "artifact_id") -> str: ...
 def contained_path(root: PathLike, *segments: str) -> Path: ...
 
 def require_json_value(value: object, *, field: str) -> None: ...
+
+def atomic_write_text(path: PathLike, text: str, *, encoding: str = "utf-8") -> None: ...
+
+def atomic_write_json(path: PathLike, value: object, *, field: str) -> None: ...
 ```
 
 - `validate_artifact_id` returns the unchanged identifier or raises `ValueError`.
 - `contained_path` validates every dynamic segment, resolves the candidate, and returns
   it only when it remains a descendant of the resolved root.
 - `require_json_value` accepts only values serializable by the standard JSON encoder
-  without `default`, custom coercion, or lossy normalization.
+  with `allow_nan=False` and without `default`, custom coercion, or lossy normalization.
+- `atomic_write_text` writes a temporary sibling, flushes it, and commits with one
+  atomic filesystem replacement. A failure leaves the previous destination unchanged.
+- `atomic_write_json` validates strict JSON completely before delegating to the atomic
+  text writer.
 
 ## 6. Invariants & Guarantees
 
@@ -72,10 +80,11 @@ def require_json_value(value: object, *, field: str) -> None: ...
 2. **AS2 Resolved Containment**: A Core-owned write MUST resolve under its declared root. Lexical prefixes alone are insufficient.
 3. **AS3 No Silent Rewriting**: Safety helpers MUST NOT silently slugify, truncate, or replace an invalid identifier. The caller must choose a new identifier explicitly.
 4. **AS4 Strict JSON Evidence**: Canonical records, Match Surfaces, manifests, certification reports, and Research Package facts MUST serialize with the standard JSON encoder and no fallback coercion.
-5. **AS5 Failure Atomicity**: Validation MUST complete before creating, replacing, or partially writing an output artifact.
+5. **AS5 Failure Atomicity**: A failed Core-owned write MUST leave the published destination absent or unchanged. Multi-file packages MAY use temporary staging inside the declared root, which MUST be removed on failure.
 6. **AS6 Structural Means Non-Executable**: Structural inspection MUST NOT import package modules, load scorers, evaluate code, or execute fixtures.
 7. **AS7 Python Is Trusted Code**: Importing a Game, Player, scorer, renderer, controller, or fixture from a package MUST be treated as arbitrary Python execution and requires `trusted-local` or `isolated` trust mode.
 8. **AS8 No Sandbox Claim**: Core MUST NOT label in-process execution as sandboxed or safe for untrusted code. Isolation policy belongs to the caller/runtime boundary.
+9. **AS9 Shared Atomic Writers**: Core-owned canonical single-file artifacts MUST use the shared strict atomic writer or prove the same validate-before-replace semantics directly.
 
 ## 7. Data Flow & Interaction
 
@@ -116,8 +125,9 @@ report = inspect_instrument(path, trust_mode="structural")
 
 - **AS1-AS3**: Table-test valid IDs and traversal, separator, control, drive, Unicode,
   empty, and overlong adversarial IDs; assert no output exists on rejection.
-- **AS4-AS5**: Attempt to write sets, bytes, datetimes, callables, and custom objects;
-  assert explicit failure and unchanged destination.
+- **AS4-AS5, AS9**: Attempt to write sets, bytes, datetimes, callables, non-finite
+  floats, and custom objects; inject replacement failures; assert explicit failure and
+  unchanged destinations. A failed multi-file package build leaves no published package.
 - **AS6-AS8**: Use a module with an import side effect; structural inspection must not
   trigger it, trusted execution must declare it, and no report may call it sandboxed.
 

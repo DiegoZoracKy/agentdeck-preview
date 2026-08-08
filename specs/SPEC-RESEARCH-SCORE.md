@@ -1,9 +1,9 @@
 # SPEC-RESEARCH-SCORE: Standalone Behavioral Rescore CLI
 
 > Status: Final
-> Version: 0.2.0
-> Last Updated: 2026-04-09
-> Implementation: Complete (`src/agentdeck/research/score.py`, `scripts/research_score.py`)
+> Version: 0.3.0
+> Last Updated: 2026-08-08
+> Implementation: Partial (strict atomic replacement specified; implementation follows)
 > Review State: Legacy-approved
 > Audience: Research engineers, contributors
 
@@ -39,7 +39,10 @@ BehavioralScorer.score(players, match_payloads, config)   ← SPEC-RESEARCH-BEHA
 targeted results.json  [behavioral_profile key updated in place]
 ```
 
-The scorer reads recordings via the same path-resolution logic used by the research export surface (`SPEC-RESEARCH-WORKFLOW.md`). All other keys in the targeted `results.json` are preserved byte-for-byte.
+The scorer reads recordings via the same path-resolution logic used by the research
+export surface (`SPEC-RESEARCH-WORKFLOW.md`). All other keys in the targeted
+`results.json` are preserved semantically: their decoded JSON values and object
+membership remain equal. Serialization whitespace and key layout are not contractual.
 
 Resolution order:
 1. package-local scorer at `{experiment_dir}/scripts/behavioral_scorer.py`
@@ -95,20 +98,21 @@ If both exist, `SCORER` wins.
 
 ## 5. Invariants
 
-- **RS1**: The scorer MUST read match payloads from raw recordings (`match_*.json` files). It MUST NOT attempt to reconstruct payloads from the existing `results.json` matches array.
-- **RS2**: On success, the scorer MUST write only the `behavioral_profile` key in the targeted `results.json`. All other keys MUST remain unchanged.
-- **RS3**: The scorer MUST be idempotent: running it twice on the same inputs MUST produce the same `behavioral_profile` output.
-- **RS4**: If `profile_id=auto` resolves to no supported scorer for the experiment's game, the scorer MUST exit with code `0` and leave `results.json` unmodified.
-- **RS5**: The scorer MUST read `game.config` from `manifest.yaml` as the behavioral config, matching the behavior of the research export surface.
-- **RS6**: If `--recordings-dir` is supplied, it MUST override the path resolved from `manifest.yaml`. If neither is available, the scorer MUST fail with a clear error.
-- **RS7**: For matrix experiments, `--cell` MUST scope both recordings discovery and results.json update to that cell's artifact. If omitted on a matrix experiment, the scorer MUST require explicit confirmation or fail with a clear error rather than silently scoring all cells.
-- **RS8**: `--dry-run` MUST print: resolved scorer `profile_id`, `profile_version`, recordings path used, and match count. It MUST NOT write any files.
-- **RS9**: The scorer MUST delegate all behavioral computation to the `BehavioralScorer.score(...)` contract. It MUST NOT implement game-specific logic directly.
-- **RS10**: If `{experiment_dir}/scripts/behavioral_scorer.py` exists, the scorer MUST attempt package-local resolution before consulting the built-in registry.
-- **RS11**: If a package-local scorer module exists but does not expose a valid, unambiguous scorer, the scorer MUST fail with exit code `1` and leave `results.json` unchanged.
-- **RS12**: If a package-local scorer resolves successfully but `supports(...)` returns `False` for the supplied payloads, the scorer MUST fail with exit code `1` rather than silently falling back to a built-in scorer.
-- **RS13**: Package-local scorer modules MUST NOT produce side effects at import time beyond defining the scorer.
-- **RS14**: `--dry-run` MUST report whether the resolved scorer source is `package_local` or `builtin`.
+- **RS1 Raw Recording Authority**: The scorer MUST read match payloads from raw recordings (`match_*.json` files). It MUST NOT attempt to reconstruct payloads from the existing `results.json` matches array.
+- **RS2 Surgical Update**: On success, the scorer MUST change only the `behavioral_profile` member in the targeted decoded JSON object. All other members MUST remain semantically equal.
+- **RS3 Idempotent Result**: The scorer MUST be idempotent: running it twice on the same inputs MUST produce the same `behavioral_profile` output.
+- **RS4 Honest No-Match No-Op**: If `profile_id=auto` resolves to no supported scorer for the experiment's game, the scorer MUST exit with code `0` and leave `results.json` unmodified.
+- **RS5 Manifest Config Authority**: The scorer MUST read `game.config` from `manifest.yaml` as the behavioral config, matching the behavior of the research export surface.
+- **RS6 Explicit Recordings Override**: If `--recordings-dir` is supplied, it MUST override the path resolved from `manifest.yaml`. If neither is available, the scorer MUST fail with a clear error.
+- **RS7 Explicit Matrix Cell**: For matrix experiments, `--cell` MUST scope both recordings discovery and results.json update to that cell's artifact. If omitted on a matrix experiment, the scorer MUST require explicit confirmation or fail with a clear error rather than silently scoring all cells.
+- **RS8 Dry Run Is Read-Only**: `--dry-run` MUST print: resolved scorer `profile_id`, `profile_version`, recordings path used, and match count. It MUST NOT write any files.
+- **RS9 Scorer Delegation**: The scorer MUST delegate all behavioral computation to the `BehavioralScorer.score(...)` contract. It MUST NOT implement game-specific logic directly.
+- **RS10 Package-Local Priority**: If `{experiment_dir}/scripts/behavioral_scorer.py` exists, the scorer MUST attempt package-local resolution before consulting the built-in registry.
+- **RS11 Invalid Local Scorer Fails**: If a package-local scorer module exists but does not expose a valid, unambiguous scorer, the scorer MUST fail with exit code `1` and leave `results.json` unchanged.
+- **RS12 Unsupported Local Scorer Fails**: If a package-local scorer resolves successfully but `supports(...)` returns `False` for the supplied payloads, the scorer MUST fail with exit code `1` rather than silently falling back to a built-in scorer.
+- **RS13 Import Side-Effect Boundary**: Package-local scorer modules MUST NOT produce side effects at import time beyond defining the scorer.
+- **RS14 Scorer Source Disclosure**: `--dry-run` MUST report whether the resolved scorer source is `package_local` or `builtin`.
+- **RS15 Strict Atomic Replacement**: A successful update MUST be strict JSON and commit by atomic replacement. Serialization or write failure MUST leave the prior `results.json` bytes unchanged.
 
 ## 6. Error Handling
 
@@ -125,7 +129,8 @@ If both exist, `SCORER` wins.
 
 ## 7. Testing Strategy
 
-- Verify RS2: targeted `results.json` keys other than `behavioral_profile` are byte-identical before and after scoring.
+- Verify RS2: decoded `results.json` members other than `behavioral_profile` remain
+  semantically equal before and after scoring.
 - Verify RS3: running twice produces the same `behavioral_profile` output.
 - Verify RS4: no-op exit on auto with no matching scorer; results.json untouched.
 - Verify RS6: `--recordings-dir` override is used when supplied.
@@ -135,6 +140,8 @@ If both exist, `SCORER` wins.
 - Verify RS10/RS11: valid package-local scorer is loaded; invalid or ambiguous package-local module fails loudly.
 - Verify RS12: package-local scorer with `supports(...) == False` fails with exit code `1`.
 - Verify RS14: `--dry-run` reports `package_local` vs `builtin`.
+- Verify RS15: reject non-finite scorer output and inject write failure; the prior file
+  remains byte-identical.
 
 ## 8. Examples
 

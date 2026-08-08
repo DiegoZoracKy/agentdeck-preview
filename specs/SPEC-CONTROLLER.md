@@ -1,8 +1,8 @@
 # SPEC-CONTROLLER: Unified Controller Contract
 
 > Status: Final
-> Version: 1.3.2
-> Last Updated: 2026-03-17
+> Version: 1.3.3
+> Last Updated: 2026-08-08
 > Implementation: Complete (`src/agentdeck/core/base/controller.py`)
 > Review State: Legacy-approved
 > Audience: Player authors, controller implementers, validation tooling

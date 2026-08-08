@@ -1,8 +1,8 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-30
+> Version: 2.0.1
+> Last Updated: 2026-08-08
 > Implementation: Complete (canonical GameplayEventData v2 and Match Surface projector)
 > Review State: Legacy-approved
 > Audience: Spectator authors, analytics engineers, observability contributors
@@ -411,7 +411,7 @@ with AgentDeck(spectators=[MatchNarrativeLogger()]) as deck:
 
 ### Example 7: TokenUsageTracker (Pricing Integration)
 ```python
-from agentdeck.spectators import Spectator
+from agentdeck import Spectator
 from agentdeck.utils.pricing import calculate_cost
 
 class TokenUsageTracker(Spectator):

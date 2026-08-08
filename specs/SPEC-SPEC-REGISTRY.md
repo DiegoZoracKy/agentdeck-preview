@@ -1,9 +1,9 @@
 # AgentDeck Spec Registry Specification
 
 > Status: Final
-> Version: 0.1.0
-> Last Updated: 2026-08-07
-> Implementation: Complete (Wave C2)
+> Version: 0.2.0
+> Last Updated: 2026-08-08
+> Implementation: Partial (Wave C5 specified; implementation follows)
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 
@@ -48,9 +48,16 @@ with `Superseded By: <filename>` and that target MUST exist and be Final.
 ## 4. Invariant Identity
 
 An invariant is machine-addressable only when the normative spec declares a unique
-identifier in bold, using the pattern `prefix + number + title`. Identifiers MUST be
-unique across active contracts. Prose containing MUST without an identifier remains
-normative but cannot support automated assurance until it receives a stable ID.
+identifier and title in one bold span, using the pattern `prefix + number + title`.
+Identifiers MUST be unique across active contracts. Prose containing MUST without an
+identifier remains normative but cannot support automated assurance until it receives
+a stable ID.
+
+Legacy contracts often bold only the identifier and place the title or requirement
+outside that span, for example `**RS1**: ...`. The registry MUST expose these as
+`unregistered_invariants`. They remain normative, but they are not addressable evidence
+keys and prevent the contract from claiming `verified` until normalized. This migration
+signal MUST NOT silently invent titles or rewrite source specifications.
 
 ## 5. Compliance Evidence
 
@@ -70,10 +77,17 @@ Valid assurance values are ordered but not interchangeable:
 - `automated`: direct executable tests name the exact invariant ID;
 - `semantic`: a recorded spec-to-code review establishes meaning beyond execution.
 
-An entry MUST NOT claim `verified` unless every invariant in the registry has at
-least one existing direct test whose source contains that invariant ID. Automated
-coverage MUST NOT be inferred from a neighboring test, filename, or grouped range.
-Semantic assurance MUST include a dated review artifact.
+Executable evidence uses the locator `<repository-relative test path>::<test function>`.
+The path and function MUST exist, and the exact invariant ID MUST appear in the test
+function name or its docstring. A function MAY cover multiple invariants only when it
+names every one explicitly. File-level comments, filenames, neighboring tests, and
+grouped contract ranges are not direct evidence.
+
+An entry MUST NOT claim `verified` unless the active contract declares at least one
+registered invariant, has no `unregistered_invariants`, and every registered invariant
+has direct evidence at the declared level. `automated` and `semantic` are the only
+assurance levels eligible for `verified`; `mapped` is never sufficient. Semantic
+assurance MUST include a dated review artifact.
 
 ## 6. Authoring Profiles
 
@@ -100,7 +114,7 @@ CI MUST fail when:
 - a relative Markdown link does not resolve;
 - a profile source is invalid or its generated bundle changes nondeterministically;
 - `registry.json` is stale;
-- compliance names an unknown contract, invariant, or test path;
+- compliance names an unknown contract, invariant, test path, or test function;
 - `verified` or `automated` is claimed without direct evidence.
 
 CI validates declarations; it MUST NOT upgrade assurance automatically.
@@ -117,6 +131,9 @@ CI validates declarations; it MUST NOT upgrade assurance automatically.
 8. **SR8 Honest Assurance**: Verified automated assurance requires direct existing tests for every registered invariant.
 9. **SR9 No Grouped Shortcut**: A test mapped to one invariant MUST NOT imply coverage of adjacent IDs or a contract range.
 10. **SR10 Checked-In Agreement**: CI rejects stale registry and compliance projections instead of silently rewriting them.
+11. **SR11 Exact Evidence Locator**: Executable evidence MUST resolve to an existing test function that names the mapped invariant explicitly.
+12. **SR12 Non-Vacuous Verification**: A contract with zero registered invariants, any unregistered invariant, or mapped-only assurance MUST NOT claim verified.
+13. **SR13 Legacy Gap Visibility**: Invariant-shaped legacy identifiers that are not machine-addressable MUST remain visible in the registry and compliance summary until normalized.
 
 ## 9. Compatibility
 

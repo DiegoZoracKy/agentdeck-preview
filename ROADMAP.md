@@ -1,7 +1,7 @@
 # AgentDeck Core Roadmap
 
 > Status: Active
-> Updated: 2026-08-07
+> Updated: 2026-08-08
 > Branch: `codex/ai-first-builder-readiness`
 > Authority: specifications in `specs/` remain the source of truth
 
@@ -32,6 +32,7 @@ The implementation rationale and verified baseline are recorded in
 | C2 | Machine-verifiable spec system | Complete | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Complete | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
 | C4 | Runtime boundary and typed authoring API | Complete | Extensions use public runtime mechanics, strict public typing, and real security gates |
+| C5 | Honest compliance and artifact publication | In progress | Assurance is non-vacuous; canonical writes and package publication fail atomically |
 | B0 | AgentDeck Builder bootstrap | Complete | A separate Builder invokes Codex CLI and produces a certified contained package from intent |
 
 ## C0: Canonical Evidence And Artifact Safety
@@ -123,6 +124,21 @@ The live acceptance also exposed a quality boundary outside current IP6: generat
 instructions can describe default values while a constructor accepts alternate config.
 The Builder records a config-variant instruction probe as its next promotion gate; Core
 does not silently broaden the meaning of the already-awarded tiers.
+
+## C5: Honest Compliance And Artifact Publication
+
+- [x] Specify exact test-function evidence and non-vacuous verification.
+- [x] Expose unregistered legacy invariants as migration debt.
+- [x] Correct the trusted-local fixture boundary without claiming OS isolation.
+- [x] Define strict atomic single-file writes and staged package publication.
+- [x] Replace impossible byte-preservation language with semantic JSON preservation.
+- [ ] Implement the registry, writer, packager, rescore, and certification changes.
+- [ ] Add adversarial tests and regenerate the compliance projections.
+
+This wave intentionally adds no research-quality gate and no semantic judgment about a
+Game's instructions, metrics, or hypotheses. It strengthens only claims the Core can
+verify mechanically while preserving the freedom to build and run unconventional
+instruments.
 
 ## Definition Of Done
 
