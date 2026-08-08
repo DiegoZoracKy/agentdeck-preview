@@ -1,0 +1,222 @@
+# SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
+
+> Status: Final
+> Version: 0.1.0
+> Last Updated: 2026-08-07
+> Implementation: Planned (Waves C1-C3)
+> Review State: Consensus-approved
+> Audience: Instrument authors, Builder authors, Core maintainers, research tooling
+
+## 1. Purpose
+
+Define a versioned, machine-readable package that lets an external author describe an
+AgentDeck Game and prove its capabilities without changing or teaching the Core about
+that Game.
+
+## 2. Scope
+
+An Instrument Package MAY contain Game, deterministic fixture, behavioral scorer,
+redaction, and viewer code. This spec governs package structure, inspection, validation,
+certification, and awarded capability tiers. It does not define research questions,
+product promotion, provider credentials, deployment, or code-generation strategy.
+
+Python in a package is executable code and follows `SPEC-ARTIFACT-SAFETY` trust modes.
+
+## 3. Package Layout
+
+The package root contains:
+
+```text
+instrument.yaml                 required declarative manifest
+<python package>/               package-local implementation
+behavioral-profile.yaml         required for evidence_ready
+presentation/                   optional viewer assets
+```
+
+All declared files and package-local entry points MUST resolve inside the package root.
+The structural inspector MUST NOT import any Python module.
+
+## 4. Manifest
+
+`instrument.yaml` is UTF-8 YAML with this canonical shape:
+
+```yaml
+schema_version: "1.0"
+instrument:
+  id: number-duel
+  version: "0.1.0"
+  title: Number Duel
+  summary: A deterministic two-player reference instrument.
+game:
+  entry_point: number_duel.game:NumberDuelGame
+  config:
+    target: 3
+  config_schema:
+    target: {type: integer, minimum: 1, default: 3}
+fixture:
+  entry_point: number_duel.fixture:create_players
+  player_count: 2
+  matches: 2
+  seed: 42
+  max_turns: 20
+  expected_winners: [Alpha, Alpha]
+evidence:
+  scorer_entry_point: number_duel.behavioral:NumberDuelScorer
+  profile: behavioral-profile.yaml
+presentation:
+  redactor_entry_point: number_duel.presentation:visible_state
+  viewer: presentation/index.html
+claims:
+  requested: [runnable]
+```
+
+### Required fields
+
+- `schema_version`: supported manifest schema string.
+- `instrument.id`: portable Artifact Identifier.
+- `instrument.version`: semantic `MAJOR.MINOR.PATCH` string.
+- `instrument.title`, `instrument.summary`: non-empty strings.
+- `game.entry_point`: package-local `module.path:Symbol` naming a `Game` subclass.
+- `game.config`: strict JSON object passed to the Game constructor.
+- `game.config_schema`: one declaration per config key; unknown config keys are invalid.
+- `fixture.entry_point`: package-local callable returning deterministic offline Players.
+- `fixture.player_count`, `matches`, `seed`, `max_turns`: bounded positive integers.
+- `fixture.expected_winners`: one expected value per match; `null` represents a draw.
+- `claims.requested`: non-empty subset of the capability tiers in ascending order.
+
+Entry-point functions receive only documented keyword arguments. A fixture callable has
+the contract `create_players() -> list[Player]` and MUST require no provider, credential,
+network, clock, or ambient process state.
+
+### Configuration schema
+
+The initial schema supports `string`, `integer`, `number`, `boolean`, and `array`, plus
+`default`, `enum`, `minimum`, `maximum`, and `items` where applicable. Every effective
+constructor option that changes behavior MUST appear. Certification compares the
+manifest config with `Game.describe()["config"]` exactly.
+
+### Optional tier declarations
+
+- `evidence.scorer_entry_point`: package-local `BehavioralScorer` subclass.
+- `evidence.profile`: strict YAML profile declaring metric IDs, meanings, evidence
+  pointers, and calibration expectations.
+- `presentation.redactor_entry_point`: callable implementing
+  `visible_state(state, player) -> dict` without mutation or oracle leakage.
+- `presentation.viewer`: contained static entry file; absence does not block a generic
+  Match Surface.
+
+## 5. Public API
+
+```python
+def inspect_instrument(package_root: PathLike) -> InstrumentReport: ...
+
+def validate_instrument(package_root: PathLike) -> InstrumentReport: ...
+
+def certify_instrument(
+    package_root: PathLike,
+    *,
+    trust_mode: str,
+    output_dir: PathLike | None = None,
+) -> InstrumentReport: ...
+```
+
+- `inspect_instrument` performs structural discovery only and never executes code.
+- `validate_instrument` performs complete declarative validation only and never executes
+  code. Errors are accumulated when continued validation is safe.
+- `certify_instrument` requires `trusted-local` or caller-provided `isolated` execution,
+  runs only requested tiers whose prerequisites pass, and emits canonical JSON.
+- Reports contain schema version, package identity, package content hash, trust mode,
+  requested/awarded tiers, checks, errors, warnings, and produced artifact pointers.
+- Reports MUST be deterministic for equal package bytes and equal semantic execution.
+  Volatile paths, UUIDs, wall-clock values, and durations MUST NOT enter the digest.
+
+CLI:
+
+```text
+agentdeck-instrument inspect <package>
+agentdeck-instrument validate <package>
+agentdeck-instrument certify <package> --trust-mode trusted-local --output <dir>
+```
+
+Commands write the report to stdout as canonical JSON. Diagnostic prose goes to stderr.
+Success exits `0`; validation/certification failure exits `1`; invocation failure exits
+`2`.
+
+## 6. Capability Tiers
+
+### `runnable`
+
+The certifier MUST prove:
+
+- Game and fixture resolve to public Core contracts.
+- setup, every visible view, update, events, and final state are strict JSON.
+- recorded effective config equals the declared config.
+- handshake precedes gameplay and conclusion/match-end ordering is valid.
+- the declared match count completes with the declared winner sequence.
+- a second execution has the same semantic trace and result under the same seed.
+- every recorded match replays with event/data parity.
+- all artifacts remain inside the certification output root.
+
+### `evidence_ready`
+
+Requires `runnable`. The certifier MUST additionally prove:
+
+- scorer resolves to `BehavioralScorer`, supports the generated payloads, and returns
+  strict JSON deterministically;
+- every declared metric is present or explicitly marked unsupported;
+- every evidence pointer resolves into the exact generated records;
+- profile ID/version and calibration expectations match scorer output.
+
+### `presentable`
+
+Requires `runnable`. The certifier MUST additionally prove:
+
+- redactor output is strict JSON, does not mutate canonical state, and is deterministic;
+- declared private/oracle fixture values do not appear in player-visible projections;
+- a generic Match Surface can project the full lifecycle;
+- a declared viewer file, when present, is contained and references only contained
+  package assets.
+
+## 7. Invariants
+
+1. **IP1 Manifest Authority**: Certification MUST use the exact manifest bytes included in the package hash; code MUST NOT silently add or rewrite declarations.
+2. **IP2 Structural Non-Execution**: Inspect and validate MUST NOT import modules, run fixtures, invoke constructors, or evaluate package Python.
+3. **IP3 Package Containment**: Every package-local path and entry point MUST resolve inside the package root before execution.
+4. **IP4 No Game Registry**: Inspection and certification MUST NOT branch on instrument ID, title, Game class name, or module name.
+5. **IP5 Public Contracts**: A certified Game, Player, Controller, Renderer, Spectator, and BehavioralScorer MUST satisfy their public AgentDeck types; deep private integration is not a capability.
+6. **IP6 Declared Effective Config**: Constructor config, schema defaults, `Game.describe()`, and recorded game config MUST agree exactly.
+7. **IP7 Offline Fixture**: Certification fixtures MUST be deterministic and require no provider, credential, network, clock, or user input.
+8. **IP8 Reproducible Execution**: Equal package bytes, config, fixture, and seed MUST yield equal semantic traces and outcomes.
+9. **IP9 Replay Parity**: Every runnable certification match MUST replay the same ordered lifecycle and domain event data.
+10. **IP10 Strict Evidence**: Manifest, report, state, views, events, records, scorer output, and Match Surface artifacts MUST satisfy strict JSON/YAML scalar rules without coercion.
+11. **IP11 Honest Tiers**: A report MUST award only requested tiers whose own checks and prerequisites pass. Partial success MUST remain explicit.
+12. **IP12 Evidence Resolution**: Evidence-ready metrics MUST identify pointers that resolve into generated immutable records; prose alone is not evidence.
+13. **IP13 Visibility Boundary**: Presentable certification MUST derive views from the declared visibility function and reject declared oracle fixture leakage.
+14. **IP14 Failure Atomicity**: A failed check MUST NOT overwrite a prior successful report or write outside the certification root.
+15. **IP15 Canonical Report**: Equal package content and semantic result MUST produce byte-identical canonical reports after excluding declared volatile artifact locations.
+
+## 8. Failure Handling
+
+- Structural errors include a stable check ID, field path, and actionable message.
+- Unknown fields are errors, preventing misspelled declarations from becoming defaults.
+- Unsupported schema versions fail before any package code executes.
+- `structural` trust mode passed to certification fails before import.
+- Runtime exceptions are recorded by check without being converted into certification.
+- Failure of one tier blocks dependent tiers but does not erase independent check results.
+
+## 9. Testing Strategy
+
+- One direct test names every `IP` invariant.
+- A tiny external fixture outside `src/agentdeck` proves no built-in registry is needed.
+- FixedDamage passes the same public path as the external fixture.
+- Adversarial variants cover traversal, import side effects during structural validation,
+  unknown fields, config drift, non-JSON values, nondeterminism, replay mismatch, scorer
+  fabrication, unresolved pointers, oracle leakage, and overstated requested tiers.
+
+## 10. Rationale
+
+- A manifest is declarative authority; generated code is only an implementation claim.
+- Tiering prevents “it runs” from being confused with valid evidence or presentation.
+- Offline fixture execution tests the instrument without spending provider budget.
+- The Core certifies. Builders, products, and humans may author but cannot self-award.
+
