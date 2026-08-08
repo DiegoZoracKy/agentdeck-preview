@@ -28,7 +28,7 @@ The implementation rationale and verified baseline are recorded in
 | Wave | Outcome | Status | Exit gate |
 |---|---|---|---|
 | C0 | Canonical evidence and artifact safety | Complete | Path escapes, lossy JSON, incomplete configuration snapshots, and undeclared trust fail safely |
-| C1 | Instrument Package Contract | In progress | An external package reaches `runnable` through deterministic `inspect`, `validate`, and `certify` APIs |
+| C1 | Instrument Package Contract | Complete | An external package reaches `runnable` through deterministic `inspect`, `validate`, and `certify` APIs |
 | C2 | Machine-verifiable spec system | Pending | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Pending | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
 | C4 | Runtime boundary and typed authoring API | Pending | Extensions use public runtime mechanics, strict public typing, and real security gates |
@@ -50,9 +50,12 @@ Validation: Core CI passed with `620 passed, 2 skipped` on 2026-08-07.
 
 - [x] Approve the versioned manifest and capability tiers.
 - [x] Define structural inspection separately from trusted execution.
-- [ ] Implement deterministic `inspect`, `validate`, and `certify` APIs and CLI.
-- [ ] Declare config schemas, entry points, fixtures, visibility, metrics, and presentation.
-- [ ] Prove that certification contains no Game-name branches.
+- [x] Implement deterministic `inspect`, `validate`, and `certify` APIs and CLI.
+- [x] Declare config schemas, entry points, fixtures, visibility, metrics, and presentation.
+- [x] Prove that certification contains no Game-name branches.
+
+Validation: the external `NumberDuel` fixture reaches `runnable` through the public
+certifier with deterministic execution, replay parity, and no built-in registry.
 
 ## C2: Machine-Verifiable Specs
 

@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.1.0
 > Last Updated: 2026-08-07
-> Implementation: Planned (Waves C1-C3)
+> Implementation: Partial (`runnable` complete; `evidence_ready` and `presentable` in Wave C3)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -219,4 +219,3 @@ Requires `runnable`. The certifier MUST additionally prove:
 - Tiering prevents “it runs” from being confused with valid evidence or presentation.
 - Offline fixture execution tests the instrument without spending provider budget.
 - The Core certifies. Builders, products, and humans may author but cannot self-award.
-

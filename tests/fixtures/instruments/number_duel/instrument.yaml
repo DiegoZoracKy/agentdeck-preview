@@ -1,0 +1,25 @@
+schema_version: "1.0"
+instrument:
+  id: number-duel
+  version: "0.1.0"
+  title: Number Duel
+  summary: A deterministic external instrument used to certify the public contract.
+game:
+  entry_point: number_duel.game:NumberDuelGame
+  config:
+    target: 3
+  config_schema:
+    target:
+      type: integer
+      minimum: 1
+      default: 3
+fixture:
+  entry_point: number_duel.fixture:create_players
+  player_count: 2
+  matches: 2
+  seed: 42
+  max_turns: 20
+  expected_winners: [Alpha, Alpha]
+claims:
+  requested: [runnable]
+

@@ -38,6 +38,13 @@ from .core.types import (
     TemplateError,
     TurnContext,
 )
+from .instruments import (
+    InstrumentCheck,
+    InstrumentReport,
+    certify_instrument,
+    inspect_instrument,
+    validate_instrument,
+)
 
 # Game examples
 from .games.examples.archivist_choice import ArchivistChoiceGame
@@ -121,6 +128,11 @@ __all__ = [
     # Recording
     "Recorder",
     "ReplayEngine",
+    "InstrumentCheck",
+    "InstrumentReport",
+    "inspect_instrument",
+    "validate_instrument",
+    "certify_instrument",
     # Version
     "__version__",
 ]
