@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.2.0
 > Last Updated: 2026-08-08
-> Implementation: Partial (Wave C5 specified; implementation follows)
+> Implementation: Complete (Wave C5 exact evidence and debt visibility)
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 

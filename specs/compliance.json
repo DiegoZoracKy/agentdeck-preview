@@ -2,23 +2,20 @@
   "contracts": [
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-AGENTDECK", "status": "partial"},
     {"assurance": "automated", "evidence": [
-      {"invariant_id": "AR1", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR2", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR3", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR4", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR5", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR6", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR7", "test": "tests/unit/test_authoring_readiness.py"},
-      {"invariant_id": "AR8", "test": "tests/unit/test_authoring_readiness.py"}
+      {"invariant_id": "AR1", "test": "tests/unit/test_authoring_readiness.py::test_ar1_external_fixture_uses_only_public_agentdeck_imports"},
+      {"invariant_id": "AR2", "test": "tests/unit/test_authoring_readiness.py::test_ar2_ar3_external_fixture_passes_declared_strict_type_boundary"},
+      {"invariant_id": "AR3", "test": "tests/unit/test_authoring_readiness.py::test_ar2_ar3_external_fixture_passes_declared_strict_type_boundary"},
+      {"invariant_id": "AR4", "test": "tests/unit/test_authoring_readiness.py::test_ar4_mr8_stock_mechanics_do_not_access_private_console"},
+      {"invariant_id": "AR5", "test": "tests/unit/test_authoring_readiness.py::test_ar5_ar6_ar7_ci_contains_blocking_audit_commands"},
+      {"invariant_id": "AR6", "test": "tests/unit/test_authoring_readiness.py::test_ar5_ar6_ar7_ci_contains_blocking_audit_commands"},
+      {"invariant_id": "AR7", "test": "tests/unit/test_authoring_readiness.py::test_ar5_ar6_ar7_ci_contains_blocking_audit_commands"},
+      {"invariant_id": "AR8", "test": "tests/unit/test_authoring_readiness.py::test_ar8_external_fixture_uses_the_public_certifier"}
     ], "spec_id": "SPEC-AUTHORING-READINESS", "status": "verified"},
     {"assurance": "automated", "evidence": [
-      {"invariant_id": "AS1", "test": "tests/unit/test_artifact_safety.py"},
-      {"invariant_id": "AS2", "test": "tests/unit/test_artifact_safety.py"},
-      {"invariant_id": "AS3", "test": "tests/unit/test_artifact_safety.py"},
-      {"invariant_id": "AS4", "test": "tests/unit/test_artifact_safety.py"},
-      {"invariant_id": "AS5", "test": "tests/unit/test_match_surface.py"},
-      {"invariant_id": "AS6", "test": "tests/unit/test_research_score.py"},
-      {"invariant_id": "AS7", "test": "tests/unit/test_research_score.py"}
+      {"invariant_id": "AS1", "test": "tests/unit/test_artifact_safety.py::test_as1_accepts_portable_artifact_ids"},
+      {"invariant_id": "AS2", "test": "tests/unit/test_artifact_safety.py::test_as2_contained_path_rejects_resolved_escape"},
+      {"invariant_id": "AS3", "test": "tests/unit/test_artifact_safety.py::test_as1_as3_reject_unsafe_ids_without_rewriting"},
+      {"invariant_id": "AS4", "test": "tests/unit/test_artifact_safety.py::test_as4_rejects_lossy_or_non_json_values"}
     ], "spec_id": "SPEC-ARTIFACT-SAFETY", "status": "violated"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-BEHAVIORAL-VARIABLE-DAMAGE", "status": "partial"},
@@ -28,25 +25,25 @@
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAME", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAMEPLAY-EVENT-DATA", "status": "partial"},
     {"assurance": "automated", "evidence": [
-      {"invariant_id": "IP1", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP2", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP3", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP4", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP5", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP6", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP7", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP8", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP9", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP10", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP11", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP12", "test": "tests/unit/test_golden_instruments.py"},
-      {"invariant_id": "IP13", "test": "tests/unit/test_golden_instruments.py"},
-      {"invariant_id": "IP14", "test": "tests/unit/test_instrument_package.py"},
-      {"invariant_id": "IP15", "test": "tests/unit/test_instrument_package.py"}
+      {"invariant_id": "IP1", "test": "tests/unit/test_instrument_package.py::test_ip1_manifest_bytes_are_package_authority"},
+      {"invariant_id": "IP2", "test": "tests/unit/test_instrument_package.py::test_ip2_structural_validation_does_not_import_python"},
+      {"invariant_id": "IP3", "test": "tests/unit/test_instrument_package.py::test_ip3_rejects_package_path_escape"},
+      {"invariant_id": "IP4", "test": "tests/unit/test_instrument_package.py::test_ip4_external_game_certifies_without_registry"},
+      {"invariant_id": "IP5", "test": "tests/unit/test_instrument_package.py::test_ip5_ip6_ip7_public_types_config_and_offline_fixture"},
+      {"invariant_id": "IP6", "test": "tests/unit/test_instrument_package.py::test_ip5_ip6_ip7_public_types_config_and_offline_fixture"},
+      {"invariant_id": "IP7", "test": "tests/unit/test_instrument_package.py::test_ip5_ip6_ip7_public_types_config_and_offline_fixture"},
+      {"invariant_id": "IP8", "test": "tests/unit/test_instrument_package.py::test_ip8_seeded_execution_has_equal_semantic_trace"},
+      {"invariant_id": "IP9", "test": "tests/unit/test_instrument_package.py::test_ip9_every_recording_replays_with_event_data_parity"},
+      {"invariant_id": "IP10", "test": "tests/unit/test_instrument_package.py::test_ip10_manifest_rejects_non_json_yaml_scalar"},
+      {"invariant_id": "IP11", "test": "tests/unit/test_instrument_package.py::test_ip11_structural_mode_cannot_award_capability"},
+      {"invariant_id": "IP12", "test": "tests/unit/test_golden_instruments.py::test_ip12_rejects_unresolved_record_evidence_pointer"},
+      {"invariant_id": "IP13", "test": "tests/unit/test_golden_instruments.py::test_ip13_rejects_declared_oracle_path_leak"},
+      {"invariant_id": "IP14", "test": "tests/unit/test_instrument_package.py::test_ip14_failed_certification_preserves_prior_success_report"},
+      {"invariant_id": "IP15", "test": "tests/unit/test_instrument_package.py::test_ip15_equal_package_and_execution_produce_equal_reports"}
     ], "spec_id": "SPEC-INSTRUMENT-PACKAGE", "status": "violated"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-LLM", "status": "partial"},
     {"assurance": "automated", "evidence": [
-      {"invariant_id": "MR8", "test": "tests/unit/test_authoring_readiness.py"}
+      {"invariant_id": "MR8", "test": "tests/unit/test_authoring_readiness.py::test_ar4_mr8_stock_mechanics_do_not_access_private_console"}
     ], "spec_id": "SPEC-MATCH-RUNTIME", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-MATCH-SURFACE-PROJECTION", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-MONITOR", "status": "partial"},
@@ -68,18 +65,21 @@
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RESEARCH-WORKFLOW", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RESEARCH", "status": "partial"},
     {"assurance": "automated", "evidence": [
-      {"invariant_id": "SR1", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR2", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR3", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR4", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR5", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR6", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR7", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR8", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR9", "test": "tests/unit/test_spec_registry.py"},
-      {"invariant_id": "SR10", "test": "tests/unit/test_spec_registry.py"}
-    ], "spec_id": "SPEC-SPEC-REGISTRY", "status": "partial"},
+      {"invariant_id": "SR1", "test": "tests/unit/test_spec_registry.py::test_sr1_rejects_incomplete_metadata"},
+      {"invariant_id": "SR2", "test": "tests/unit/test_spec_registry.py::test_sr2_validates_superseded_lifecycle_target"},
+      {"invariant_id": "SR3", "test": "tests/unit/test_spec_registry.py::test_sr3_registry_is_deterministic"},
+      {"invariant_id": "SR4", "test": "tests/unit/test_spec_registry.py::test_sr4_rejects_duplicate_active_invariants"},
+      {"invariant_id": "SR5", "test": "tests/unit/test_spec_registry.py::test_sr5_rejects_unresolved_relative_links"},
+      {"invariant_id": "SR6", "test": "tests/unit/test_spec_registry.py::test_sr6_profile_is_a_closed_ordered_source_list"},
+      {"invariant_id": "SR7", "test": "tests/unit/test_spec_registry.py::test_sr7_bundle_is_deterministic_and_ordered"},
+      {"invariant_id": "SR8", "test": "tests/unit/test_spec_registry.py::test_sr8_rejects_verified_claim_without_direct_evidence"},
+      {"invariant_id": "SR9", "test": "tests/unit/test_spec_registry.py::test_sr9_does_not_expand_one_invariant_into_a_range"},
+      {"invariant_id": "SR10", "test": "tests/unit/test_spec_registry.py::test_sr10_check_rejects_stale_checked_in_registry"},
+      {"invariant_id": "SR11", "test": "tests/unit/test_spec_registry.py::test_sr11_requires_exact_test_function_locator"},
+      {"invariant_id": "SR12", "test": "tests/unit/test_spec_registry.py::test_sr12_rejects_vacuous_verified_contract"},
+      {"invariant_id": "SR13", "test": "tests/unit/test_spec_registry.py::test_sr13_exposes_unregistered_legacy_invariants"}
+    ], "spec_id": "SPEC-SPEC-REGISTRY", "status": "verified"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-SPECTATOR", "status": "partial"}
   ],
-  "schema_version": 1
+  "schema_version": 2
 }

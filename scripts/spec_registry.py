@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -22,6 +23,10 @@ COMPLIANCE = SPECS / "compliance.json"
 METADATA_RE = re.compile(r"^> ([A-Za-z ]+):\s*(.+?)\s*$", re.MULTILINE)
 SEMVER_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 INVARIANT_RE = re.compile(r"\*\*([A-Z][A-Z0-9]*[0-9]+)\s+[^*]+\*\*")
+LEGACY_INVARIANT_RE = re.compile(
+    r"^\s*(?:[0-9]+\.\s+|-\s+)\*\*([A-Z][A-Z0-9]*[0-9]+)\*\*(?=\s*:|\s)",
+    re.MULTILINE,
+)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 IMPLEMENTATION_PREFIXES = ("Complete", "Partial", "Planned", "Not implemented")
 LIFECYCLES = {"Final", "Superseded", "Deprecated"}
@@ -39,6 +44,7 @@ class Contract:
     path: Path
     metadata: Mapping[str, str]
     invariants: tuple[str, ...]
+    unregistered_invariants: tuple[str, ...]
     links: tuple[str, ...]
 
     @property
@@ -91,8 +97,22 @@ def _parse_contract(path: Path) -> Contract:
     if metadata["Status"] == "Superseded" and "Superseded By" not in metadata:
         raise SpecRegistryError(f"{path.name}: Superseded spec needs Superseded By")
     invariants = tuple(INVARIANT_RE.findall(text))
+    registered = set(invariants)
+    unregistered_invariants = tuple(
+        dict.fromkeys(
+            invariant
+            for invariant in LEGACY_INVARIANT_RE.findall(text)
+            if invariant not in registered
+        )
+    )
     links = tuple(match.strip() for match in LINK_RE.findall(text))
-    return Contract(path=path, metadata=metadata, invariants=invariants, links=links)
+    return Contract(
+        path=path,
+        metadata=metadata,
+        invariants=invariants,
+        unregistered_invariants=unregistered_invariants,
+        links=links,
+    )
 
 
 def load_contracts(root: Path = ROOT) -> list[Contract]:
@@ -142,8 +162,15 @@ def _validate_links(contracts: Iterable[Contract], root: Path) -> None:
 def build_registry(root: Path = ROOT) -> dict[str, Any]:
     contracts = load_contracts(root)
     hub = root / "specs" / "SPEC.md"
+    active_contracts = [contract for contract in contracts if contract.active]
     return {
-        "schema_version": 1,
+        "schema_version": 2,
+        "invariant_summary": {
+            "registered": sum(len(contract.invariants) for contract in active_contracts),
+            "unregistered": sum(
+                len(contract.unregistered_invariants) for contract in active_contracts
+            ),
+        },
         "hub": {
             "path": hub.relative_to(root).as_posix(),
             "sha256": _sha256(hub.read_bytes()),
@@ -160,6 +187,7 @@ def build_registry(root: Path = ROOT) -> dict[str, Any]:
                 "spec_id": contract.spec_id,
                 "status": contract.metadata["Status"],
                 "superseded_by": contract.metadata.get("Superseded By"),
+                "unregistered_invariants": list(contract.unregistered_invariants),
                 "version": contract.metadata["Version"],
             }
             for contract in contracts
@@ -198,9 +226,51 @@ def validate_profiles(registry: Mapping[str, Any], root: Path = ROOT) -> Mapping
     return payload
 
 
+def _test_function_names_invariant(path: Path, function_name: str, invariant: str) -> bool:
+    try:
+        module = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError as exc:
+        raise SpecRegistryError(f"cannot parse evidence test {path}: {exc}") from exc
+    functions = [
+        node
+        for node in ast.walk(module)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name
+    ]
+    if len(functions) != 1:
+        raise SpecRegistryError(
+            f"evidence locator {path.name}::{function_name} must resolve to one test function"
+        )
+    node = functions[0]
+    name_names_invariant = re.search(
+        rf"(?:^|_){re.escape(invariant.lower())}(?:_|$)", node.name.lower()
+    )
+    docstring = ast.get_docstring(node) or ""
+    docstring_names_invariant = re.search(rf"\b{re.escape(invariant)}\b", docstring)
+    return bool(name_names_invariant or docstring_names_invariant)
+
+
+def _resolve_test_locator(root: Path, locator: object) -> tuple[Path, str]:
+    if not isinstance(locator, str) or locator.count("::") != 1:
+        raise SpecRegistryError(
+            f"evidence test must use repository-relative path::test_function, got {locator!r}"
+        )
+    raw_path, function_name = locator.split("::", 1)
+    if not raw_path or not function_name:
+        raise SpecRegistryError(f"invalid evidence test locator {locator!r}")
+    resolved_root = root.resolve()
+    path = (root / raw_path).resolve()
+    try:
+        path.relative_to(resolved_root)
+    except ValueError as exc:
+        raise SpecRegistryError(f"evidence test leaves repository: {locator}") from exc
+    if not path.is_file():
+        raise SpecRegistryError(f"missing evidence test {locator}")
+    return path, function_name
+
+
 def validate_compliance(registry: Mapping[str, Any], root: Path = ROOT) -> None:
     payload = _read_json(root / "specs" / "compliance.json")
-    if payload.get("schema_version") != 1 or not isinstance(payload.get("contracts"), list):
+    if payload.get("schema_version") != 2 or not isinstance(payload.get("contracts"), list):
         raise SpecRegistryError("compliance.json: invalid schema")
     active = {entry["spec_id"]: entry for entry in registry["contracts"] if entry["active"]}
     entries = payload["contracts"]
@@ -215,26 +285,40 @@ def validate_compliance(registry: Mapping[str, Any], root: Path = ROOT) -> None:
         if assurance not in {"mapped", "automated", "semantic"}:
             raise SpecRegistryError(f"{spec_id}: invalid assurance")
         declared = set(active[spec_id]["invariants"])
+        unregistered = set(active[spec_id]["unregistered_invariants"])
         evidence = entry.get("evidence", [])
         covered: set[str] = set()
         if not isinstance(evidence, list):
             raise SpecRegistryError(f"{spec_id}: evidence must be a list")
         for item in evidence:
             invariant = item.get("invariant_id")
-            test_path = item.get("test")
+            test_locator = item.get("test")
             if invariant not in declared:
                 raise SpecRegistryError(f"{spec_id}: unknown invariant {invariant}")
-            if not isinstance(test_path, str) or not (root / test_path).is_file():
-                raise SpecRegistryError(f"{spec_id}: missing evidence test {test_path}")
-            source = (root / test_path).read_text(encoding="utf-8")
-            if invariant not in source:
-                raise SpecRegistryError(f"{spec_id}: test {test_path} does not name {invariant}")
+            test_path, function_name = _resolve_test_locator(root, test_locator)
+            if not _test_function_names_invariant(test_path, function_name, invariant):
+                raise SpecRegistryError(
+                    f"{spec_id}: test {test_locator} does not name {invariant} directly"
+                )
             covered.add(invariant)
+        if status == "verified":
+            if not declared:
+                raise SpecRegistryError(
+                    f"{spec_id}: verified claim requires at least one registered invariant"
+                )
+            if unregistered:
+                raise SpecRegistryError(
+                    f"{spec_id}: verified claim has unregistered invariants {sorted(unregistered)}"
+                )
+            if assurance not in {"automated", "semantic"}:
+                raise SpecRegistryError(
+                    f"{spec_id}: verified claim needs automated or semantic assurance"
+                )
+            if covered != declared:
+                missing = sorted(declared - covered)
+                raise SpecRegistryError(f"{spec_id}: verified claim lacks {missing}")
         if assurance in {"automated", "semantic"} and not evidence:
             raise SpecRegistryError(f"{spec_id}: {assurance} assurance needs evidence")
-        if status == "verified" and covered != declared:
-            missing = sorted(declared - covered)
-            raise SpecRegistryError(f"{spec_id}: verified claim lacks {missing}")
         if assurance == "semantic":
             review = entry.get("semantic_review")
             if not isinstance(review, str) or not (root / review).is_file():

@@ -140,7 +140,7 @@ def test_sr8_rejects_verified_claim_without_direct_evidence(tmp_path: Path) -> N
     (root / "specs" / "compliance.json").write_text(
         json.dumps(
             {
-                "schema_version": 1,
+                "schema_version": 2,
                 "contracts": [
                     {
                         "spec_id": "SPEC-EXAMPLE",
@@ -153,7 +153,7 @@ def test_sr8_rejects_verified_claim_without_direct_evidence(tmp_path: Path) -> N
         ),
         encoding="utf-8",
     )
-    with pytest.raises(registry.SpecRegistryError, match="verified claim lacks"):
+    with pytest.raises(registry.SpecRegistryError, match="automated or semantic"):
         registry.validate_compliance(registry.build_registry(root), root)
 
 
@@ -166,17 +166,25 @@ def test_sr9_does_not_expand_one_invariant_into_a_range(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     test_path = root / "tests" / "test_example.py"
-    test_path.write_text("# EX1 direct\n", encoding="utf-8")
+    test_path.write_text(
+        "def test_ex1_direct():\n" '    """EX1: direct evidence."""\n' "    assert True\n",
+        encoding="utf-8",
+    )
     (root / "specs" / "compliance.json").write_text(
         json.dumps(
             {
-                "schema_version": 1,
+                "schema_version": 2,
                 "contracts": [
                     {
                         "spec_id": "SPEC-EXAMPLE",
                         "status": "verified",
                         "assurance": "automated",
-                        "evidence": [{"invariant_id": "EX1", "test": "tests/test_example.py"}],
+                        "evidence": [
+                            {
+                                "invariant_id": "EX1",
+                                "test": "tests/test_example.py::test_ex1_direct",
+                            }
+                        ],
                     }
                 ],
             }
@@ -195,7 +203,7 @@ def test_sr10_check_rejects_stale_checked_in_registry(tmp_path: Path) -> None:
     (root / "specs" / "compliance.json").write_text(
         json.dumps(
             {
-                "schema_version": 1,
+                "schema_version": 2,
                 "contracts": [
                     {
                         "spec_id": "SPEC-EXAMPLE",
@@ -211,3 +219,131 @@ def test_sr10_check_rejects_stale_checked_in_registry(tmp_path: Path) -> None:
     (root / "specs" / "registry.json").write_text("{}\n", encoding="utf-8")
     with pytest.raises(registry.SpecRegistryError, match="is stale"):
         registry.check(root)
+
+
+def test_sr11_requires_exact_test_function_locator(tmp_path: Path) -> None:
+    """SR11: file-level mentions cannot masquerade as direct executable evidence."""
+    root = _repo(tmp_path)
+    _write_spec(root)
+    test_path = root / "tests" / "test_example.py"
+    test_path.write_text(
+        "# EX1 appears only outside the test.\n"
+        "def test_neighboring_behavior():\n"
+        "    assert True\n",
+        encoding="utf-8",
+    )
+    (root / "specs" / "compliance.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "contracts": [
+                    {
+                        "spec_id": "SPEC-EXAMPLE",
+                        "status": "verified",
+                        "assurance": "automated",
+                        "evidence": [
+                            {
+                                "invariant_id": "EX1",
+                                "test": "tests/test_example.py::test_neighboring_behavior",
+                            }
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    missing_function_payload = json.loads(
+        (root / "specs" / "compliance.json").read_text(encoding="utf-8")
+    )
+    missing_function_payload["contracts"][0]["evidence"][0][
+        "test"
+    ] = "tests/test_example.py::test_missing"
+    (root / "specs" / "compliance.json").write_text(
+        json.dumps(missing_function_payload), encoding="utf-8"
+    )
+    with pytest.raises(registry.SpecRegistryError, match="must resolve to one test function"):
+        registry.validate_compliance(registry.build_registry(root), root)
+
+    missing_function_payload["contracts"][0]["evidence"][0][
+        "test"
+    ] = "tests/test_example.py::test_neighboring_behavior"
+    (root / "specs" / "compliance.json").write_text(
+        json.dumps(missing_function_payload), encoding="utf-8"
+    )
+    with pytest.raises(registry.SpecRegistryError, match="does not name EX1 directly"):
+        registry.validate_compliance(registry.build_registry(root), root)
+
+
+def test_sr12_rejects_vacuous_verified_contract(tmp_path: Path) -> None:
+    """SR12: an empty invariant set cannot satisfy verified by set equality."""
+    root = _repo(tmp_path)
+    path = _write_spec(root)
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "## Invariants\n\n1. **EX1 Exact Example**: It is exact.\n", ""
+        ),
+        encoding="utf-8",
+    )
+    (root / "specs" / "compliance.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "contracts": [
+                    {
+                        "spec_id": "SPEC-EXAMPLE",
+                        "status": "verified",
+                        "assurance": "mapped",
+                        "evidence": [],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(registry.SpecRegistryError, match="at least one registered invariant"):
+        registry.validate_compliance(registry.build_registry(root), root)
+
+
+def test_sr13_exposes_unregistered_legacy_invariants(tmp_path: Path) -> None:
+    """SR13: legacy IDs remain visible and block verified assurance."""
+    root = _repo(tmp_path)
+    path = _write_spec(root)
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + "\n- **EX2**: This legacy invariant remains normative.\n",
+        encoding="utf-8",
+    )
+    built = registry.build_registry(root)
+    contract = built["contracts"][0]
+    assert contract["unregistered_invariants"] == ["EX2"]
+    assert built["invariant_summary"] == {"registered": 1, "unregistered": 1}
+
+    test_path = root / "tests" / "test_example.py"
+    test_path.write_text(
+        "def test_ex1_direct():\n" '    """EX1: direct evidence."""\n' "    assert True\n",
+        encoding="utf-8",
+    )
+    (root / "specs" / "compliance.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "contracts": [
+                    {
+                        "spec_id": "SPEC-EXAMPLE",
+                        "status": "verified",
+                        "assurance": "automated",
+                        "evidence": [
+                            {
+                                "invariant_id": "EX1",
+                                "test": "tests/test_example.py::test_ex1_direct",
+                            }
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(registry.SpecRegistryError, match="unregistered invariants.*EX2"):
+        registry.validate_compliance(built, root)

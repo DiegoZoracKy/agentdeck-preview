@@ -7,6 +7,7 @@ from .controllers import ActionOnlyController, ReasoningController
 
 # Core imports
 from .core.agentdeck import AgentDeck
+from .core.conversation import ConversationManager
 
 # Base classes for extension
 from .core.base import Controller, Game, Player, Renderer, Spectator
@@ -32,6 +33,7 @@ from .core.types import (
     MatchContext,
     MatchResult,
     MatchResults,
+    ParseResult,
     PromptBlock,
     PromptBundle,
     PromptContext,
@@ -55,7 +57,7 @@ from .games.examples.hangman import HangmanGame
 from .games.examples.variable_damage import VariableDamageGame
 
 # Player implementations
-from .players import ClaudePlayer, GeminiPlayer, GPTPlayer, MockPlayer
+from .players import ClaudePlayer, GeminiPlayer, GPTPlayer, LLMPlayer, MockPlayer
 
 # Renderer implementations
 from .renderers import TextRenderer
@@ -106,7 +108,10 @@ __all__ = [
     "MatchContext",
     "TurnContext",
     "RandomGenerator",
+    "ParseResult",
+    "ConversationManager",
     # LLM Players
+    "LLMPlayer",
     "GPTPlayer",
     "ClaudePlayer",
     "GeminiPlayer",

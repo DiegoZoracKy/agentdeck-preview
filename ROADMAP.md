@@ -132,7 +132,8 @@ does not silently broaden the meaning of the already-awarded tiers.
 - [x] Correct the trusted-local fixture boundary without claiming OS isolation.
 - [x] Define strict atomic single-file writes and staged package publication.
 - [x] Replace impossible byte-preservation language with semantic JSON preservation.
-- [ ] Implement the registry, writer, packager, rescore, and certification changes.
+- [x] Implement exact registry evidence and public authoring imports.
+- [ ] Implement the writer, packager, rescore, and certification changes.
 - [ ] Add adversarial tests and regenerate the compliance projections.
 
 This wave intentionally adds no research-quality gate and no semantic judgment about a

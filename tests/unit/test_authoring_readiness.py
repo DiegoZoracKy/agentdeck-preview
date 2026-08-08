@@ -10,11 +10,28 @@ from pathlib import Path
 from packaging.requirements import Requirement
 from packaging.version import Version
 
-from agentdeck import MatchRuntime, RandomGenerator, TurnResult, certify_instrument
+from agentdeck import (
+    ConversationManager,
+    LLMPlayer,
+    MatchRuntime,
+    ParseResult,
+    RandomGenerator,
+    Spectator,
+    TurnResult,
+    certify_instrument,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "tests" / "fixtures" / "instruments" / "number_duel"
 FIXTURE_PACKAGE = FIXTURE / "number_duel"
+
+
+def test_public_authoring_examples_resolve_from_top_level() -> None:
+    """The symbols used by public authoring examples resolve without deep imports."""
+    assert ConversationManager is not None
+    assert LLMPlayer is not None
+    assert ParseResult is not None
+    assert Spectator is not None
 
 
 def test_ar1_external_fixture_uses_only_public_agentdeck_imports() -> None:
@@ -50,7 +67,7 @@ def test_ar2_ar3_external_fixture_passes_declared_strict_type_boundary() -> None
     assert result.returncode == 0, result.stdout + result.stderr
 
 
-def test_ar4_stock_mechanics_do_not_access_private_console() -> None:
+def test_ar4_mr8_stock_mechanics_do_not_access_private_console() -> None:
     """AR4 and MR8: mechanics rely on the public MatchRuntime gateway."""
     mechanics_root = ROOT / "src" / "agentdeck" / "core" / "mechanics"
     violations = {
