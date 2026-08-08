@@ -327,7 +327,11 @@ def test_sr13_exposes_unregistered_legacy_invariants(tmp_path: Path) -> None:
     built = registry.build_registry(root)
     contract = built["contracts"][0]
     assert contract["unregistered_invariants"] == ["EX2", "VD-B2a"]
-    assert built["invariant_summary"] == {"registered": 1, "unregistered": 2}
+    assert built["invariant_summary"] == {
+        "scope": "active_contracts",
+        "registered": 1,
+        "unregistered": 2,
+    }
 
     test_path = root / "tests" / "test_example.py"
     test_path.write_text(
@@ -357,3 +361,38 @@ def test_sr13_exposes_unregistered_legacy_invariants(tmp_path: Path) -> None:
     )
     with pytest.raises(registry.SpecRegistryError, match="unregistered invariants.*EX2"):
         registry.validate_compliance(built, root)
+
+
+def test_sr14_summary_counts_only_active_contracts(tmp_path: Path) -> None:
+    """SR14: summary scope excludes inactive debt without hiding its contract."""
+    root = _repo(tmp_path)
+    active_path = _write_spec(root, "SPEC-CURRENT.md")
+    active_path.write_text(
+        active_path.read_text(encoding="utf-8")
+        + "\n- **EX2**: Active legacy debt contributes to the summary.\n",
+        encoding="utf-8",
+    )
+    inactive_path = _write_spec(
+        root,
+        "SPEC-OLD.md",
+        status="Superseded",
+        extra="> Superseded By: SPEC-CURRENT.md\n",
+    )
+    inactive_path.write_text(
+        inactive_path.read_text(encoding="utf-8")
+        + "\n- **OLD1**: Inactive legacy debt remains discoverable.\n",
+        encoding="utf-8",
+    )
+
+    built = registry.build_registry(root)
+
+    assert built["invariant_summary"] == {
+        "scope": "active_contracts",
+        "registered": 1,
+        "unregistered": 1,
+    }
+    old_contract = next(
+        contract for contract in built["contracts"] if contract["spec_id"] == "SPEC-OLD"
+    )
+    assert old_contract["active"] is False
+    assert old_contract["unregistered_invariants"] == ["OLD1"]

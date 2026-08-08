@@ -184,6 +184,7 @@ def build_registry(root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": 2,
         "invariant_summary": {
+            "scope": "active_contracts",
             "registered": sum(len(contract.invariants) for contract in active_contracts),
             "unregistered": sum(
                 len(contract.unregistered_invariants) for contract in active_contracts

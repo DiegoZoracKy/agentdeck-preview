@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.2.1
 > Last Updated: 2026-08-08
-> Implementation: Partial (active-summary scope specified; implementation pending)
+> Implementation: Complete (Wave C5 exact evidence and active-summary scope)
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 
