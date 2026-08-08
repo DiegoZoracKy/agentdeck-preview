@@ -32,7 +32,7 @@ The implementation rationale and verified baseline are recorded in
 | C2 | Machine-verifiable spec system | Complete | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Complete | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
 | C4 | Runtime boundary and typed authoring API | Complete | Extensions use public runtime mechanics, strict public typing, and real security gates |
-| B0 | AgentDeck Builder bootstrap | Pending | A separate Builder invokes Codex CLI and produces a certified isolated package from intent |
+| B0 | AgentDeck Builder bootstrap | Complete | A separate Builder invokes Codex CLI and produces a certified contained package from intent |
 
 ## C0: Canonical Evidence And Artifact Safety
 
@@ -98,10 +98,10 @@ audit. Whole-Core legacy mypy debt remains explicitly outside this gate.
 
 ## B0: AgentDeck Builder
 
-The separate `agentdeck-builder` repository begins only after C0 and C1 gates pass.
+The separate `agentdeck-builder` repository began after the C0 and C1 gates passed.
 Its first strategy is intentionally direct: run Codex CLI against the mechanically
-selected Core authoring contracts, write into an isolated workspace, certify the result,
-and feed certification failures back into a bounded repair loop.
+selected Core authoring contracts, write into a contained `workspace-write` sandbox,
+certify the result, and feed certification failures back into a bounded repair loop.
 
 First acceptance mission:
 
@@ -110,6 +110,19 @@ First acceptance mission:
 The Builder may choose implementation details inside the package. It may not modify the
 Core, bypass certification, silently repair evidence after execution, or claim a higher
 capability tier than the certifier awards.
+
+Validation: on 2026-08-08, Builder request
+`fixed-damage-reconstruction-20260808T032849Z` used `gpt-5.5` with `xhigh` reasoning
+against Core commit `091565a`. The independently generated package imported only the
+public `agentdeck` API, passed strict consumer typing, and received `runnable`,
+`evidence_ready`, and `presentable` from the real Core certifier. Certification produced
+two deterministic seeded executions, replay parity, calibrated behavioral evidence,
+and oracle-safe Match Surfaces without any Game-specific Core change.
+
+The live acceptance also exposed a quality boundary outside current IP6: generated
+instructions can describe default values while a constructor accepts alternate config.
+The Builder records a config-variant instruction probe as its next promotion gate; Core
+does not silently broaden the meaning of the already-awarded tiers.
 
 ## Definition Of Done
 
