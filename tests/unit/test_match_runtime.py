@@ -1,5 +1,5 @@
 """
-Unit tests for MatchRuntime per SPEC-MATCH-RUNTIME v1.0.0.
+Unit tests for MatchRuntime per SPEC-MATCH-RUNTIME v1.3.0.
 
 These tests focus on the runtime-specific invariants and API surface:
 - MR1: runtime instances remain isolated per match
@@ -35,6 +35,7 @@ class DummyLogger:
         self.info_calls: List[str] = []
         self.warning_calls: List[str] = []
         self.error_calls: List[tuple[str, Exception]] = []
+        self.turn_calls: List[Dict[str, Any]] = []
 
     def debug(self, message: str) -> None:
         self.debug_calls.append(message)
@@ -47,6 +48,9 @@ class DummyLogger:
 
     def error(self, message: str, *, error: Exception) -> None:
         self.error_calls.append((message, error))
+
+    def turn(self, **payload: Any) -> None:
+        self.turn_calls.append(payload)
 
 
 class DummyGame:
@@ -71,6 +75,8 @@ class DummyConsole:
         self.dispatched_events = []
         self.parse_failure_calls = []
         self.parse_failure_events = []
+        self.first_player_info: Optional[Dict[str, Any]] = None
+        self.player_action_calls: List[Dict[str, Any]] = []
 
     def _dispatch_event(self, event_type: str, events=None, **data: Any) -> None:
         event = self.event_bus.emit(event_type, **data)
@@ -104,6 +110,26 @@ class DummyConsole:
         )
         self.parse_failure_events.append(event)
         return ParseFailurePolicy.SKIP_TURN
+
+    def get_player_action(
+        self,
+        player_view: Dict[str, Any],
+        player: DummyPlayer,
+        game: DummyGame,
+        *,
+        turn_context: TurnContext,
+        extras: Optional[Dict[str, Any]] = None,
+    ) -> ActionResult:
+        self.player_action_calls.append(
+            {
+                "player_view": player_view,
+                "player": player,
+                "game": game,
+                "turn_context": turn_context,
+                "extras": extras,
+            }
+        )
+        return ActionResult(action="GAIN", reasoning="fixture")
 
 
 def _make_runtime(
@@ -360,3 +386,65 @@ def test_log_writes_logger_and_emits_log_event():
         "level": "info",
         "log_context": {"reason": "midgame"},
     }
+
+
+def test_mr8_public_mechanic_helpers_delegate_without_exposing_console():
+    """SPEC-MATCH-RUNTIME MR8: mechanics receive public orchestration helpers."""
+    runtime, console, logger, game = _make_runtime()
+    player = DummyPlayer("Alice")
+    turn_context = _turn_context()
+
+    captured_events: List[Any] = []
+
+    class Capture:
+        def on_fixture_event(self, event: Any) -> None:
+            captured_events.append(event)
+
+    console.event_bus.subscribe(Capture())
+    emitter = runtime.create_game_event_emitter()
+    emitter.emit("fixture_event", value=3)
+    runtime.set_first_player(name="Alice", index=0)
+    action = runtime.get_player_action(
+        {"score": 2},
+        player,
+        turn_context=turn_context,
+        extras={"fixture": True},
+    )
+    runtime.log_turn(
+        turn_number=1,
+        player="Alice",
+        action=action.action,
+        reasoning=action.reasoning,
+        state_before={"score": 2},
+        state_after={"score": 3},
+        duration=0.25,
+        usage_info={"tokens": 5},
+    )
+    runtime.warn("fixture warning")
+
+    assert captured_events[-1].type == "fixture_event"
+    assert captured_events[-1].data == {"value": 3, "match_id": "match-1"}
+    assert console.first_player_info == {"name": "Alice", "index": 0}
+    assert action == ActionResult(action="GAIN", reasoning="fixture")
+    assert console.player_action_calls == [
+        {
+            "player_view": {"score": 2},
+            "player": player,
+            "game": game,
+            "turn_context": turn_context,
+            "extras": {"fixture": True},
+        }
+    ]
+    assert logger.turn_calls == [
+        {
+            "turn_number": 1,
+            "player": "Alice",
+            "action": "GAIN",
+            "reasoning": "fixture",
+            "state_before": {"score": 2},
+            "state_after": {"score": 3},
+            "duration": 0.25,
+            "usage_info": {"tokens": 5},
+        }
+    ]
+    assert logger.warning_calls == ["fixture warning"]

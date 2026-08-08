@@ -28,7 +28,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ..base.game import Game
 from ..event_factory import EventFactory
-from ..game_event_emitter import GameEventEmitter
 from ..state_adapter import StateAdapter
 from ..types import ActionResult, Event, TurnContext
 
@@ -303,10 +302,7 @@ class TurnLoop:
         # sequential runs reuse one game object serially, and parallel workers deep-copy
         # the game before invoking the mechanic. These bindings are therefore scoped to
         # a single in-flight match.
-        emitter = GameEventEmitter(
-            self.runtime._console.event_bus,  # Access via runtime's console
-            self.runtime.match_id,
-        )
+        emitter = self.runtime.create_game_event_emitter()
         self.game.bind_event_factory(self.event_factory)
         self.game.bind_event_emitter(emitter)
 
@@ -415,11 +411,7 @@ class TurnLoop:
             first_idx = first_player_rng.randint(0, len(self.players) - 1)
         state["_first_player_idx"] = first_idx
 
-        # Store in console for metadata (accessed via runtime's console reference)
-        self.runtime._console.first_player_info = {
-            "name": self.players[first_idx].name,
-            "index": first_idx,
-        }
+        self.runtime.set_first_player(name=self.players[first_idx].name, index=first_idx)
 
         # Log via runtime (TL3)
         from ..types import LogLevel
@@ -510,19 +502,14 @@ class TurnLoop:
             rng_label=turn_rng_label,
         )
 
-        # Get player action (via console helper - maintains existing interface)
-        # NOTE (TL3): Ideally this would go through runtime.get_player_action() instead
-        # of runtime._console.get_player_action(). Currently the console method handles
-        # parse failures internally with retries/abort/forfeit logic. A future refactor
-        # could expose this via runtime to maintain the runtime-gateway contract.
+        # Get player action through the public runtime gateway.
         # Wrap in try/except to capture state before abort/forfeit (PF4)
         from ..types import MatchAbortedError, MatchForfeitedError
 
         try:
-            action = self.runtime._console.get_player_action(
+            action = self.runtime.get_player_action(
                 player_view,
                 player_obj,
-                self.game,
                 turn_context=turn_ctx,
             )
         except (MatchAbortedError, MatchForfeitedError) as e:
@@ -548,18 +535,16 @@ class TurnLoop:
         turn_duration = time.time() - turn_start
         turn_ctx.duration = turn_duration
 
-        # Log turn via console logger (maintains existing interface)
-        if self.runtime._console.logger:
-            self.runtime._console.logger.turn(
-                turn_number=turn_number,
-                player=current_player_name,
-                action=action.action,
-                reasoning=action.reasoning,
-                state_before=adapter.before,
-                state_after=final_state,
-                duration=turn_duration,
-                usage_info=action.metadata.get("usage_info") if action.metadata else None,
-            )
+        self.runtime.log_turn(
+            turn_number=turn_number,
+            player=current_player_name,
+            action=action.action,
+            reasoning=action.reasoning,
+            state_before=adapter.before,
+            state_after=final_state,
+            duration=turn_duration,
+            usage_info=action.metadata.get("usage_info") if action.metadata else None,
+        )
 
         # Attach turn context to action metadata
         action.metadata = action.metadata or {}
@@ -636,7 +621,6 @@ class TurnLoop:
         class. This keeps matches from crashing with a KeyError on the next
         turn while still nudging the author to fix their update().
         """
-        console_logger = getattr(self.runtime._console, "logger", None)
         for key in self._MECHANIC_KEYS:
             if key in after:
                 continue
@@ -646,15 +630,14 @@ class TurnLoop:
             if key in self._mechanic_keys_warned:
                 continue
             self._mechanic_keys_warned.add(key)
-            if console_logger is not None:
-                console_logger.warning(
-                    f"{self.game.__class__.__name__}.update() dropped mechanic "
-                    f"key {key!r}; TurnLoop re-injected it from the pre-turn "
-                    f"snapshot. Preserve mechanic keys by starting with "
-                    f"`state = dict(game_state)` "
-                    f"(see SPEC-GAME-MECHANIC-TURN-BASED §5). "
-                    f"match_id={self.runtime.match_id}"
-                )
+            self.runtime.warn(
+                f"{self.game.__class__.__name__}.update() dropped mechanic "
+                f"key {key!r}; TurnLoop re-injected it from the pre-turn "
+                f"snapshot. Preserve mechanic keys by starting with "
+                f"`state = dict(game_state)` "
+                f"(see SPEC-GAME-MECHANIC-TURN-BASED §5). "
+                f"match_id={self.runtime.match_id}"
+            )
 
     def _apply_action(
         self,

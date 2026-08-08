@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.1.0
 > Last Updated: 2026-08-07
-> Implementation: Planned
+> Implementation: Complete (Wave C4)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, CI maintainers
 

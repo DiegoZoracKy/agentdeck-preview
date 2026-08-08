@@ -10,7 +10,8 @@ from .core.agentdeck import AgentDeck
 
 # Base classes for extension
 from .core.base import Controller, Game, Player, Renderer, Spectator
-from .core.mechanics import TurnBasedGame
+from .core.match_runtime import MatchRuntime
+from .core.mechanics import TurnBasedGame, TurnResult
 
 # Prompt composition
 from .core.prompt_builder import PromptBuilder
@@ -34,6 +35,7 @@ from .core.types import (
     PromptBlock,
     PromptBundle,
     PromptContext,
+    RandomGenerator,
     RenderResult,
     TemplateError,
     TurnContext,
@@ -83,6 +85,8 @@ __all__ = [
     "Controller",
     "Spectator",
     "TurnBasedGame",
+    "TurnResult",
+    "MatchRuntime",
     # Types
     "ActionResult",
     "GameStatus",
@@ -101,6 +105,7 @@ __all__ = [
     "HandshakeResult",
     "MatchContext",
     "TurnContext",
+    "RandomGenerator",
     # LLM Players
     "GPTPlayer",
     "ClaudePlayer",

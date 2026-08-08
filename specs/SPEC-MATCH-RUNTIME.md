@@ -169,14 +169,14 @@ class MatchRuntime:
 - Console can override to persist state snapshots for long-running experiments (runtime automatically forwards to console helper).
 
 ## 5. Invariants & Guarantees
-1. **Runtime Isolation (MR1)**: One runtime per match. No shared mutable state across matches or workers.
-2. **Recorder Consistency (MR2)**: `record_turn` emits `GAMEPLAY` events in execution order so Recorder captures an ordered transcript directly from the event stream.
-3. **Parse Failure Integrity (MR3)**: `handle_parse_failure` MUST emit `PLAYER_ACTION_PARSE_FAILED`, log warning, update recorder, and return a policy outcome.
-4. **RNG Traceability (MR4)**: Every RNG fork label is recorded in debug logs so researchers can trace randomness sources.
-5. **Canonical State Enforcement (MR5)**: `validate_state` MUST reject non-dict or non-strict-JSON state before it reaches Recorder, replay, or spectators.
-6. **Visible View Enforcement (MR6)**: Stock mechanics MUST reject non-dict or non-strict-JSON player views before rendering or model invocation.
-7. **No Coercive Evidence (MR7)**: Runtime validation MUST NOT stringify, drop, or otherwise normalize an unsupported value to make it serialisable.
-8. **Public Mechanics Boundary (MR8)**: Stock mechanics MUST access orchestration, events, Player invocation, match metadata, and logging only through public `MatchRuntime` methods. Direct access to `runtime._console` is prohibited outside `MatchRuntime` itself.
+1. **MR1 Runtime Isolation**: One runtime per match. No shared mutable state across matches or workers.
+2. **MR2 Recorder Consistency**: `record_turn` emits `GAMEPLAY` events in execution order so Recorder captures an ordered transcript directly from the event stream.
+3. **MR3 Parse Failure Integrity**: `handle_parse_failure` MUST emit `PLAYER_ACTION_PARSE_FAILED`, log warning, update recorder, and return a policy outcome.
+4. **MR4 RNG Traceability**: Every RNG fork label is recorded in debug logs so researchers can trace randomness sources.
+5. **MR5 Canonical State Enforcement**: `validate_state` MUST reject non-dict or non-strict-JSON state before it reaches Recorder, replay, or spectators.
+6. **MR6 Visible View Enforcement**: Stock mechanics MUST reject non-dict or non-strict-JSON player views before rendering or model invocation.
+7. **MR7 No Coercive Evidence**: Runtime validation MUST NOT stringify, drop, or otherwise normalize an unsupported value to make it serialisable.
+8. **MR8 Public Mechanics Boundary**: Stock mechanics MUST access orchestration, events, Player invocation, match metadata, and logging only through public `MatchRuntime` methods. Direct access to `runtime._console` is prohibited outside `MatchRuntime` itself.
 
 > **Note**: Event ordering (lifecycle ordering, mechanic metadata injection) and exception-safety bindings are handled by mechanics (e.g., TurnLoop) rather than enforced by MatchRuntime. Backward compatibility is a versioning policy, not a runtime invariant.
 

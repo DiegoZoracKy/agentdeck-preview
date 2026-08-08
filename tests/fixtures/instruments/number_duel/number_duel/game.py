@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from agentdeck import ActionResult, GameStatus, TurnBasedGame
-from agentdeck.core.types import RandomGenerator
+from agentdeck import ActionResult, GameStatus, RandomGenerator, TurnBasedGame
 
 
 class NumberDuelGame(TurnBasedGame):

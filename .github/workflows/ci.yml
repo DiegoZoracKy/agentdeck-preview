@@ -65,12 +65,13 @@ jobs:
         run: |
           pylint src/agentdeck --fail-under=9.0
 
-      - name: Run mypy (type check)
+      - name: Strict-check the external authoring boundary
         run: |
-          # Note: existing type debt is tracked separately from the launch gate.
-          # Errors are displayed but don't block CI while strict typing is phased in.
-          # Goal: Fix incrementally in v0.1.x releases
-          mypy src/agentdeck --no-error-summary --no-pretty || true
+          mypy --strict --follow-imports=silent tests/fixtures/instruments/number_duel/number_duel
+
+      - name: Run Bandit (medium/high severity, medium/high confidence)
+        run: |
+          bandit -r src/agentdeck -ll -ii -q
 
   dependency-check:
     name: Dependency Audit
@@ -85,19 +86,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install core dependencies only
+      - name: Install audit tooling
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
-
-      - name: Verify core install works
-        run: |
-          python -c "import agentdeck; print(f'AgentDeck v{agentdeck.__version__} imported successfully')"
-
-      - name: Install dev dependencies
-        run: |
           pip install -e ".[dev]"
 
-      - name: Run basic smoke tests
+      - name: Audit declared runtime dependencies
         run: |
-          python -c "from agentdeck import ActionOnlyController, TextRenderer; print('Core imports OK')"
+          pip-audit --strict --progress-spinner off --disable-pip --no-deps \
+            --requirement requirements/runtime.txt

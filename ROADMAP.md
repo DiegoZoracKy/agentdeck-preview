@@ -31,7 +31,7 @@ The implementation rationale and verified baseline are recorded in
 | C1 | Instrument Package Contract | Complete | An external package reaches `runnable` through deterministic `inspect`, `validate`, and `certify` APIs |
 | C2 | Machine-verifiable spec system | Complete | Active authoring contracts and compliance evidence are selected and validated mechanically |
 | C3 | Golden instrument certification | Complete | FixedDamage and an external fixture pass the same tiered certifier; adversarial mutations fail |
-| C4 | Runtime boundary and typed authoring API | Pending | Extensions use public runtime mechanics, strict public typing, and real security gates |
+| C4 | Runtime boundary and typed authoring API | Complete | Extensions use public runtime mechanics, strict public typing, and real security gates |
 | B0 | AgentDeck Builder bootstrap | Pending | A separate Builder invokes Codex CLI and produces a certified isolated package from intent |
 
 ## C0: Canonical Evidence And Artifact Safety
@@ -85,11 +85,16 @@ from Player-visible state and rejects declared oracle paths.
 
 ## C4: Runtime And Public Authoring Surface
 
-- [ ] Complete `MatchRuntime` as the public mechanics gateway.
-- [ ] Remove direct private Console access from the turn loop.
-- [ ] Consolidate lifecycle paths where equivalence is proven by tests.
-- [ ] Add strict typing gates for public extension examples.
-- [ ] Add real dependency and security audit jobs with reviewed baselines.
+- [x] Complete `MatchRuntime` as the public mechanics gateway.
+- [x] Remove direct private Console access from the turn loop.
+- [x] Consolidate lifecycle paths where equivalence is proven by tests.
+- [x] Add strict typing gates for public extension examples.
+- [x] Add real dependency and security audit jobs with reviewed baselines.
+
+Validation: stock mechanics contain zero private Console access; the complete external
+NumberDuel package passes strict consumer typing and the production certifier. Local and
+hosted CI now block on Bandit medium/high findings and the pinned runtime vulnerability
+audit. Whole-Core legacy mypy debt remains explicitly outside this gate.
 
 ## B0: AgentDeck Builder
 

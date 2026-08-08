@@ -2,8 +2,8 @@
 MatchRuntime: Per-match infrastructure context for game mechanics.
 
 Implements the canonical contract per:
-- SPEC-MATCH-RUNTIME v1.0.0 §4 (Public API)
-- SPEC-MATCH-RUNTIME v1.0.0 §5 (Invariants & Guarantees MR1-MR4)
+- SPEC-MATCH-RUNTIME v1.3.0 §4 (Public API)
+- SPEC-MATCH-RUNTIME v1.3.0 §5 (Invariants & Guarantees MR1-MR8)
 
 Key responsibilities:
 - Encapsulate per-match state (session_id, batch_id, match_id, seed, RNG)
@@ -23,13 +23,14 @@ from __future__ import annotations
 
 import copy
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .artifact_safety import require_json_value
 from .types import (
     ActionParseError,
     ActionResult,
     EventType,
+    Event,
     LogLevel,
     ParseFailurePolicy,
     PromptBlock,
@@ -41,6 +42,7 @@ if TYPE_CHECKING:
     from .base.game import Game
     from .base.player import Player
     from .console import Console
+    from .game_event_emitter import GameEventEmitter
     from .logging import AgentDeckLogger
     from .recorder import Recorder
 
@@ -99,7 +101,7 @@ class MatchRuntime:
         logger: AgentDeckLogger,
         rng: RandomGenerator,
         previous_match_result: Optional[Any] = None,
-        events_list: Optional[List] = None,
+        events_list: Optional[List[Event]] = None,
         initial_state: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
@@ -172,7 +174,7 @@ class MatchRuntime:
         self._initial_state = state
 
     @property
-    def events(self) -> List:
+    def events(self) -> List[Event]:
         """Events list for replay parity (TL6 - exposes exec_ctx.events)."""
         return self._events_list if self._events_list is not None else []
 
@@ -181,7 +183,7 @@ class MatchRuntime:
         """Previous match result for stateful ordering."""
         return self._previous_match_result
 
-    def emit_event(self, event_type: str, /, **data: Any) -> None:
+    def emit_event(self, event_type: Union[str, EventType], /, **data: Any) -> None:
         """
         Emit lifecycle or gameplay event with pre-populated context.
 
@@ -337,12 +339,76 @@ class MatchRuntime:
             ...         continue  # Skip to next turn
         """
         # MR3: Pass game context to console helper
-        return self._console._handle_parse_failure(
-            player=player,
-            error=error,
-            turn_context=turn_context,
-            game=self._game,
+        return cast(
+            ParseFailurePolicy,
+            self._console._handle_parse_failure(
+                player=player,
+                error=error,
+                turn_context=turn_context,
+                game=self._game,
+            ),
         )
+
+    def create_game_event_emitter(self) -> GameEventEmitter:
+        """Return a match-scoped emitter without exposing the Console EventBus."""
+        from .game_event_emitter import GameEventEmitter
+
+        return GameEventEmitter(self._console.event_bus, self._match_id)
+
+    def set_first_player(self, *, name: str, index: int) -> None:
+        """Record the resolved first Player for canonical match metadata."""
+        self._console.first_player_info = {"name": name, "index": index}
+
+    def get_player_action(
+        self,
+        player_view: Dict[str, Any],
+        player: Player,
+        *,
+        turn_context: TurnContext,
+        extras: Optional[Dict[str, Any]] = None,
+    ) -> ActionResult:
+        """Invoke a Player through the shared decision and parse-failure pipeline."""
+        return cast(
+            ActionResult,
+            self._console.get_player_action(
+                player_view,
+                player,
+                self._game,
+                turn_context=turn_context,
+                extras=extras,
+            ),
+        )
+
+    def log_turn(
+        self,
+        *,
+        turn_number: int,
+        player: str,
+        action: str,
+        reasoning: Optional[str],
+        state_before: Dict[str, Any],
+        state_after: Dict[str, Any],
+        duration: float,
+        usage_info: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """Write the canonical structured turn log when logging is configured."""
+        if self._logger is None:
+            return
+        self._logger.turn(
+            turn_number=turn_number,
+            player=player,
+            action=action,
+            reasoning=reasoning,
+            state_before=state_before,
+            state_after=state_after,
+            duration=duration,
+            usage_info=usage_info,
+        )
+
+    def warn(self, message: str) -> None:
+        """Record a mechanic-authoring warning when logging is configured."""
+        if self._logger is not None:
+            self._logger.warning(message)
 
     def fork_rng(self, label: str) -> RandomGenerator:
         """

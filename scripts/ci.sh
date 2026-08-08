@@ -46,5 +46,16 @@ $VENV_PYTHON -m black --check src tests
 echo "== Spec registry =="
 $VENV_PYTHON scripts/spec_registry.py check
 
+echo "== External authoring types (strict consumer boundary) =="
+$VENV_PYTHON -m mypy --strict --follow-imports=silent \
+  tests/fixtures/instruments/number_duel/number_duel
+
+echo "== Static security audit (medium/high severity, medium/high confidence) =="
+$VENV_PYTHON -m bandit -r src/agentdeck -ll -ii -q
+
+echo "== Runtime dependency audit =="
+$VENV_PYTHON -m pip_audit --strict --progress-spinner off \
+  --disable-pip --no-deps --requirement requirements/runtime.txt
+
 echo "== Pytest =="
 $VENV_PYTHON -m pytest tests/ -v --tb=short --cov=src/agentdeck --cov-report=xml --cov-report=term

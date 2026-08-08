@@ -798,8 +798,8 @@ class _MatchWorker:
         """
         Worker-scoped version of Console.get_player_action().
 
-        TurnLoop obtains this via runtime._console to keep legacy behaviour while the
-        worker isolates side effects from the parent console/event bus.
+        MatchRuntime.get_player_action delegates here while the worker isolates side
+        effects from the parent console/event bus.
         """
         from .types import ActionParseError, MatchAbortedError, ParseFailurePolicy
 
