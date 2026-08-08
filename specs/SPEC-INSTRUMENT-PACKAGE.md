@@ -1,9 +1,9 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.1.0
+> Version: 0.2.0
 > Last Updated: 2026-08-07
-> Implementation: Partial (`runnable` complete; `evidence_ready` and `presentable` in Wave C3)
+> Implementation: Partial (`runnable` complete; `evidence_ready` and `presentable` specified for Wave C3)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -66,6 +66,9 @@ evidence:
 presentation:
   redactor_entry_point: number_duel.presentation:visible_state
   viewer: presentation/index.html
+  oracle_paths:
+    Alpha: [/private/Beta]
+    Beta: [/private/Alpha]
 claims:
   requested: [runnable]
 ```
@@ -98,12 +101,43 @@ manifest config with `Game.describe()["config"]` exactly.
 ### Optional tier declarations
 
 - `evidence.scorer_entry_point`: package-local `BehavioralScorer` subclass.
-- `evidence.profile`: strict YAML profile declaring metric IDs, meanings, evidence
-  pointers, and calibration expectations.
+- `evidence.profile`: strict YAML profile declaring metric IDs, output pointers,
+  generated-record evidence pointers, and calibration expectations.
 - `presentation.redactor_entry_point`: callable implementing
-  `visible_state(state, player) -> dict` without mutation or oracle leakage.
+  `visible_state(state, player, game_config) -> dict` without mutation or oracle leakage.
 - `presentation.viewer`: contained static entry file; absence does not block a generic
   Match Surface.
+- `presentation.oracle_paths`: optional mapping from fixture Player name to JSON
+  Pointers that MUST be absent from that Player's visible state.
+- `presentation.oracle_values`: optional exact strings that MUST be absent from every
+  serialized visible state and generated Match Surface.
+
+### Behavioral profile schema
+
+The profile is UTF-8 YAML containing only strict JSON values:
+
+```yaml
+schema_version: "1.0"
+profile_id: number_duel_behavioral
+profile_version: "0.1.0"
+metrics:
+  - id: overbid_rate
+    output_pointer: /aggregate_metrics/overbid_rate/value
+    record_pointers:
+      - /0/events/0/data/action/value
+    allow_unsupported: false
+calibration:
+  expected:
+    /coverage/matches_total: 2
+    /aggregate_metrics/overbid_rate/value: 0.5
+```
+
+`metrics` MUST be non-empty with unique IDs. `output_pointer` MUST resolve in scorer
+output unless `allow_unsupported` is true and the resolved value is `null`.
+`record_pointers` MUST be non-empty and every pointer MUST resolve against the ordered
+list of exact generated match payloads. The pointers are evidence anchors; they do not
+authorize a semantic conclusion on their own. Every `calibration.expected` pointer MUST
+resolve in scorer output and equal the declared strict JSON value exactly.
 
 ## 5. Public API
 
@@ -164,7 +198,7 @@ Requires `runnable`. The certifier MUST additionally prove:
 - scorer resolves to `BehavioralScorer`, supports the generated payloads, and returns
   strict JSON deterministically;
 - every declared metric is present or explicitly marked unsupported;
-- every evidence pointer resolves into the exact generated records;
+- every profile record pointer resolves into the exact generated records;
 - profile ID/version and calibration expectations match scorer output.
 
 ### `presentable`
@@ -173,7 +207,8 @@ Requires `runnable`. The certifier MUST additionally prove:
 
 - redactor output is strict JSON, does not mutate canonical state, and is deterministic;
 - declared private/oracle fixture values do not appear in player-visible projections;
-- a generic Match Surface can project the full lifecycle;
+- a generic Match Surface can project the full lifecycle using only each acting
+  Player's declared visible state;
 - a declared viewer file, when present, is contained and references only contained
   package assets.
 

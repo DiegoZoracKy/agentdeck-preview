@@ -194,7 +194,7 @@ All component specifications follow the lean spec format with numbered invariant
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract (rules, state, narrative, lifecycle hooks, effective config) |
-| [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.1.0 | Final | External manifest, inspection, certification, and capability tiers |
+| [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.2.0 | Final | External manifest, inspection, certification, and capability tiers |
 | [Player](SPEC-PLAYER.md) | 1.3.3 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.3.2 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.2 | Final | State formatting for AI consumption |
