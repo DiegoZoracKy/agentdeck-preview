@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.1.2
 > Last Updated: 2026-08-08
-> Implementation: Partial (STG1-STG5 and STG7-STG8 complete; expanded STG6 planned)
+> Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, viewer hosts, Core maintainers
 

@@ -144,7 +144,13 @@ def test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification(
         "desktop",
         "mobile",
     ]
-    assert (output / "presentation" / "stage-certification.json").is_file()
+    stage_report_path = output / "presentation" / "stage-certification.json"
+    assert stage_report_path.is_file()
+    stage_report = yaml.safe_load(stage_report_path.read_text(encoding="utf-8"))
+    assert all(
+        viewport["rendered_frame_count"] == stage_report["frame_count"]
+        for viewport in stage_report["viewports"]
+    )
     for viewport in ("desktop", "mobile"):
         for frame in ("first", "last"):
             assert (output / "presentation" / f"stage-{viewport}-{frame}.png").is_file()
@@ -175,6 +181,24 @@ def test_ip18_stg6_wrong_protocol_acknowledgement_is_rejected(tmp_path: Path) ->
     assert report.awarded_tiers == ["runnable", "evidence_ready", "presentable"]
     assert _check(report, "IP18")["status"] == "failed"
     assert "protocol" in _check(report, "IP18")["message"]
+
+
+def test_ip18_stg6_middle_frame_failure_is_rejected(tmp_path: Path) -> None:
+    """IP18 STG6: first/last success cannot hide an unrenderable middle frame."""
+    html = _stage_html().replace(
+        "const render = (frame, frameIndex) => {",
+        "const render = (frame, frameIndex) => {\n"
+        "        if (frameIndex === 1) {\n"
+        '          send({type: "agentdeck:stage-error", message: "middle frame failed"});\n'
+        "          return;\n"
+        "        }",
+    )
+    report = certify_instrument(
+        _copy_stage_package(tmp_path, html=html), trust_mode="trusted-local"
+    )
+    assert not report.valid
+    assert _check(report, "IP18")["status"] == "failed"
+    assert "middle frame failed" in _check(report, "IP18")["message"]
 
 
 def test_ip18_stg7_mobile_document_overflow_is_rejected(tmp_path: Path) -> None:

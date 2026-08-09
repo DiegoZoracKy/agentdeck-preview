@@ -293,34 +293,46 @@ def certify_game_stage(
                     ):
                         raise StageRuntimeError("Game Stage loaded acknowledgement is not exact")
 
-                    probe_frames = [0, len(frames) - 1]
+                    probe_frames = (0, len(frames) - 1)
+                    capture_labels: dict[int, list[str]] = {}
+                    for label, frame_index in zip(("first", "last"), probe_frames):
+                        capture_labels.setdefault(frame_index, []).append(label)
                     frame_results = []
                     fingerprints = []
-                    for label, frame_index in zip(("first", "last"), probe_frames):
+                    for frame_index in range(len(frames)):
                         page.evaluate(
                             "frameIndex => window.__agentdeckRender(frameIndex)", frame_index
                         )
                         page.wait_for_function(
-                            "frameIndex => window.__agentdeckProbe.last_rendered === frameIndex",
+                            "frameIndex => "
+                            "window.__agentdeckProbe.last_rendered === frameIndex || "
+                            "window.__agentdeckProbe.errors.length > 0",
                             arg=frame_index,
                             timeout=10_000,
                         )
-                        page.wait_for_timeout(100)
-                        page.evaluate(
-                            "() => new Promise(resolve => requestAnimationFrame(() => "
-                            "requestAnimationFrame(resolve)))"
-                        )
-                        screenshot = page.locator("#stage").screenshot(animations="disabled")
-                        fingerprints.append(
-                            _visual_fingerprint(screenshot, field=f"{viewport['id']} {label} frame")
-                        )
-                        frame_results.append({"label": label, "frame_index": frame_index})
-                        if output_root is not None:
-                            relative = f"presentation/stage-{viewport['id']}-{label}.png"
-                            target = ensure_contained_path(output_root, output_root / relative)
-                            target.parent.mkdir(parents=True, exist_ok=True)
-                            target.write_bytes(screenshot)
-                            artifact_names.append(relative)
+                        render_errors = page.evaluate("window.__agentdeckProbe.errors")
+                        if render_errors:
+                            raise StageRuntimeError(f"Game Stage browser error: {render_errors[0]}")
+                        for label in capture_labels.get(frame_index, []):
+                            page.wait_for_timeout(100)
+                            page.evaluate(
+                                "() => new Promise(resolve => requestAnimationFrame(() => "
+                                "requestAnimationFrame(resolve)))"
+                            )
+                            screenshot = page.locator("#stage").screenshot(animations="disabled")
+                            fingerprints.append(
+                                _visual_fingerprint(
+                                    screenshot,
+                                    field=f"{viewport['id']} {label} frame",
+                                )
+                            )
+                            frame_results.append({"label": label, "frame_index": frame_index})
+                            if output_root is not None:
+                                relative = f"presentation/stage-{viewport['id']}-{label}.png"
+                                target = ensure_contained_path(output_root, output_root / relative)
+                                target.parent.mkdir(parents=True, exist_ok=True)
+                                target.write_bytes(screenshot)
+                                artifact_names.append(relative)
                     if probe_frames[0] != probe_frames[1] and len(set(fingerprints)) != 2:
                         raise StageRuntimeError(
                             f"{viewport['id']} Game Stage did not visibly change between frames"
@@ -372,6 +384,7 @@ def certify_game_stage(
                             "id": viewport["id"],
                             "width": viewport["width"],
                             "height": viewport["height"],
+                            "rendered_frame_count": len(frames),
                             "frames": frame_results,
                         }
                     )
