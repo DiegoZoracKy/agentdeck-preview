@@ -1,9 +1,9 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.4.3
-> Last Updated: 2026-08-08
-> Implementation: Complete
+> Version: 0.5.0
+> Last Updated: 2026-08-09
+> Implementation: Partial (IP1-IP17 and IP19 complete; expanded IP18 planned)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -72,7 +72,7 @@ evidence:
 presentation:
   redactor_entry_point: number_duel.presentation:visible_state
   viewer: presentation/index.html
-  viewer_protocol: agentdeck-stage/1.0
+  viewer_protocol: agentdeck-stage/1.1
   oracle_paths:
     Alpha: [/private/Beta]
     Beta: [/private/Alpha]
@@ -120,7 +120,7 @@ manifest config with `Game.describe()["config"]` exactly.
 - `presentation.viewer`: contained static entry file; absence does not block a generic
   Match Surface.
 - `presentation.viewer_protocol`: required with `stage_ready` and currently exactly
-  `agentdeck-stage/1.0`.
+  `agentdeck-stage/1.1`.
 - `presentation.oracle_paths`: optional mapping from fixture Player name to JSON
   Pointers that MUST be absent from that Player's visible state.
 - `presentation.oracle_values`: optional exact strings that MUST be absent from every
@@ -231,10 +231,10 @@ Requires `runnable`. The certifier MUST additionally prove:
 ### `stage_ready`
 
 Requires `presentable`, manifest schema `1.1`, a contained `presentation.viewer`, and
-`presentation.viewer_protocol: agentdeck-stage/1.0`. The certifier MUST additionally
-prove the portable browser contract in `SPEC-GAME-STAGE`: sandboxed Match Surface load,
-exact first/last frame acknowledgements, contained offline requests, visible output,
-and error-free desktop/mobile probes.
+`presentation.viewer_protocol: agentdeck-stage/1.1`. The certifier MUST additionally
+prove the portable browser contract in `SPEC-GAME-STAGE`: temporally bounded context and
+frame delivery, exact acknowledgement and nonblank output for every frame, contained
+offline requests, boundary progression, and error-free desktop/mobile probes.
 
 ## 7. Invariants
 
@@ -254,8 +254,8 @@ and error-free desktop/mobile probes.
 14. **IP14 Failure Atomicity**: A failed check MUST NOT overwrite a prior successful report or write outside the certification root.
 15. **IP15 Canonical Report**: Equal package content and semantic result MUST produce byte-identical canonical reports after excluding declared volatile artifact locations.
 16. **IP16 Stage Declaration**: A stage_ready claim MUST declare schema 1.1, presentable as a prerequisite, a contained presentation entry, and the supported Game Stage protocol.
-17. **IP17 Stage Isolation**: Stage certification MUST expose only the certified Match Surface inside a scripts-only sandbox and MUST reject escaping or external network requests.
-18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive an exact protocol acknowledgement for every fixture gameplay frame and nonblank, error-free, overflow-free first/last frame output at desktop and mobile viewports, with a detectable visual change when those frames have distinct indices.
+17. **IP17 Stage Isolation**: Stage certification MUST expose only minimal certified match context and the currently authorized certified frame inside a scripts-only sandbox and MUST reject escaping or external network requests.
+18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive an exact protocol acknowledgement and nonblank output for every fixture gameplay frame at desktop and mobile viewports, remain error- and overflow-free, and detect visible progression between distinct first and last frames.
 19. **IP19 Source-Clean Package**: Inspection, validation, and certification MUST reject transient runtime or tool artifacts before executing package code or hashing them as authored source.
 
 ## 8. Failure Handling

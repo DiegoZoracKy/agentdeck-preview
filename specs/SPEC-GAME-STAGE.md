@@ -1,9 +1,9 @@
 # SPEC-GAME-STAGE: Portable Browser Game Stage Contract
 
 > Status: Final
-> Version: 0.1.2
-> Last Updated: 2026-08-08
-> Implementation: Complete
+> Version: 0.2.0
+> Last Updated: 2026-08-09
+> Implementation: Partial (STG1-STG2 and STG4-STG7 complete; expanded STG3/STG8 planned)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, viewer hosts, Core maintainers
 
@@ -32,7 +32,7 @@ Manifest schema `1.1` adds:
 presentation:
   redactor_entry_point: package.presentation:visible_state
   viewer: presentation/index.html
-  viewer_protocol: agentdeck-stage/1.0
+  viewer_protocol: agentdeck-stage/1.1
 claims:
   requested: [runnable, presentable, stage_ready]
 ```
@@ -47,31 +47,41 @@ a Game can always use the generic Match Surface without declaring a custom Stage
 ## 4. Host Protocol
 
 Messages are strict JSON-compatible objects sent with `window.postMessage`. Both sides
-MUST use `protocol: "agentdeck-stage/1.0"`.
+MUST use `protocol: "agentdeck-stage/1.1"`.
 
 ### 4.1 Stage To Host
 
 ```json
-{"type":"agentdeck:stage-ready","protocol":"agentdeck-stage/1.0"}
-{"type":"agentdeck:stage-loaded","protocol":"agentdeck-stage/1.0","match_id":"...","frame_count":6}
-{"type":"agentdeck:stage-rendered","protocol":"agentdeck-stage/1.0","frame_index":0}
-{"type":"agentdeck:stage-error","protocol":"agentdeck-stage/1.0","message":"..."}
+{"type":"agentdeck:stage-ready","protocol":"agentdeck-stage/1.1"}
+{"type":"agentdeck:stage-loaded","protocol":"agentdeck-stage/1.1","match_id":"...","frame_count":6}
+{"type":"agentdeck:stage-rendered","protocol":"agentdeck-stage/1.1","frame_index":0}
+{"type":"agentdeck:stage-error","protocol":"agentdeck-stage/1.1","message":"..."}
 ```
 
 The Stage emits `ready` only after its message listener and rendering runtime are
-available. It emits `loaded` only after accepting and validating the supplied Match
-Surface. It emits one `rendered` acknowledgement after each successful render command.
+available. It emits `loaded` only after accepting and validating the supplied initial
+context. It emits one `rendered` acknowledgement after each successful render command.
 
 ### 4.2 Host To Stage
 
 ```json
-{"type":"agentdeck:stage-load","protocol":"agentdeck-stage/1.0","match_surface":{}}
-{"type":"agentdeck:stage-render","protocol":"agentdeck-stage/1.0","frame_index":0,"frame":{}}
+{"type":"agentdeck:stage-load","protocol":"agentdeck-stage/1.1","context":{"schema_version":"1.0","match":{"match_id":"...","game":"...","seed":42},"players":[{"name":"Alpha","model":"mock"}],"frame_count":6}}
+{"type":"agentdeck:stage-render","protocol":"agentdeck-stage/1.1","frame_index":0,"frame":{}}
 ```
 
-The Host supplies only the exact certified Match Surface and a frame already contained
-in it. The Stage MUST NOT fetch a record, infer a hidden state, or require a Game object.
-The Stage MAY provide its own secondary controls, but Host commands remain authoritative.
+The initial context contains exactly its schema version, minimal match identity
+(`match_id`, `game`, and `seed`), certified pre-match Player identities (`name` and
+`model`), and `frame_count`.
+It MUST NOT contain gameplay frames, winner, conclusions, markers, economics, final
+state, or other information produced after match start. For each render command, the
+Host supplies only the exact currently authorized certified frame. The Stage MUST NOT
+fetch a record, infer hidden or future state, or require a Game object. The Stage MAY
+provide secondary controls over information already delivered, but Host commands remain
+the sole authority that advances frame knowledge.
+
+Protocol `1.0` was an unreleased authoring contract and is superseded rather than kept
+as a `stage_ready` compatibility mode. Its full-surface load gave presentation code
+knowledge of future frames and match results before the Host advanced playback.
 
 ## 5. Containment And Security
 
@@ -96,13 +106,13 @@ deterministic fixture. It runs at least:
 For each viewport, it MUST:
 
 1. load the sandboxed Stage with no external network request;
-2. observe `ready` and send the exact Match Surface;
+2. observe `ready` and send the exact minimal initial context without gameplay or result data;
 3. observe `loaded` with the exact match ID and frame count;
 4. render every gameplay frame in order and observe an exact acknowledgement for each;
-5. capture the first and last rendered frames, find nonblank visual output for both,
-   and, when their indices differ, a
-   detectable visual change between them;
-6. find no page error, error-level console message, protocol error, or document overflow.
+5. capture every rendered frame in memory and find nonblank visual output for each;
+6. retain the first and last screenshots and, when their indices differ, find a
+   detectable visual change between those boundary frames;
+7. find no page error, error-level console message, protocol error, or document overflow.
 
 Screenshots are diagnostic certification artifacts. Pixel bytes and browser versions
 are not canonical report inputs; pass/fail behavior and artifact names are.
@@ -115,25 +125,25 @@ file containment.
 
 1. **STG1 Distinct Presentation Role**: A Game Stage consumes presentation data for humans and MUST NOT replace the Player Renderer, mutate gameplay, score behavior, or author research facts.
 2. **STG2 Technology-Neutral Bundle**: The contract MUST NOT require a frontend framework or drawing technology; any bundled implementation is valid when it satisfies the protocol and certification behavior.
-3. **STG3 Match-Surface-Only Input**: The Host MUST supply only the certified Match Surface and contained frames; a Stage MUST NOT require canonical records, Game objects, provider access, or hidden state.
+3. **STG3 Temporally Bounded Presentation Input**: The Host MUST initially supply only minimal certified match context and MUST subsequently supply only the currently authorized certified frame; a Stage MUST NOT receive the complete Match Surface, future frames, result data, canonical records, Game objects, provider access, or hidden state.
 4. **STG4 Contained Offline Runtime**: Every Stage dependency MUST resolve under `presentation/`, and browser certification MUST reject external network attempts or escaping paths.
 5. **STG5 Sandboxed Host Boundary**: The Host MUST run Stage code in a unique-origin iframe with scripts as its only sandbox capability.
 6. **STG6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities; browser certification MUST receive an exact render acknowledgement for every fixture gameplay frame.
 7. **STG7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
-8. **STG8 Visible Frame Projection**: The first and last fixture frames MUST produce nonblank visual output and exact render acknowledgements; distinct frame indices MUST produce detectably different output.
+8. **STG8 Visible Frame Projection**: Every fixture gameplay frame MUST produce nonblank visual output and an exact render acknowledgement; when first and last indices differ, their output MUST be detectably different without requiring consecutive frames to differ.
 
 ## 8. Failure Handling
 
 - Missing entry, protocol, prerequisite tier, or contained asset fails declarative validation.
-- Timeout, wrong acknowledgement, blank output, overflow, console/page error, or network
+- Future-data access, timeout, wrong acknowledgement, blank output, overflow, console/page error, or network
   attempt fails `stage_ready` without removing independently awarded lower tiers.
 - A failed Stage probe MUST NOT overwrite a prior successful certification report.
 
 ## 9. Testing Strategy
 
 - A tiny external Stage proves framework-neutral postMessage integration.
-- Adversarial bundles cover external fetch, wrong protocol, blank output, missing render
-  acknowledgement, console error, and mobile overflow.
+- Adversarial bundles cover external fetch, wrong protocol, future-data access, a blank
+  intermediate frame, missing render acknowledgement, console error, and mobile overflow.
 - The Builder acceptance test generates a novel Game and Stage from informal intent,
   then uses the same Core browser certifier used by hand-authored packages.
 
