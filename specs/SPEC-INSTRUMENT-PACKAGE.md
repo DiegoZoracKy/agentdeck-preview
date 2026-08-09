@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.5.1
 > Last Updated: 2026-08-09
-> Implementation: Partial (expanded IP18 load-error diagnostics planned)
+> Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 

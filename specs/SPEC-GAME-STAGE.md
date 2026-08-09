@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.2.1
 > Last Updated: 2026-08-09
-> Implementation: Partial (expanded STG6 load-error diagnostics planned)
+> Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, viewer hosts, Core maintainers
 

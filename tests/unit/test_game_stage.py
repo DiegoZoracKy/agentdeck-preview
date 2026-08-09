@@ -122,7 +122,7 @@ def test_ip17_stg3_initial_context_excludes_future_match_data() -> None:
         },
         "players": [
             {"name": "Alpha", "model": "mock-a", "total_cost": 9.99},
-            {"name": "Beta", "model": "mock-b", "conclusion": "I lost"},
+            {"name": "Beta", "type": "MockPlayer", "conclusion": "I lost"},
         ],
         "frames": [{"phase_index": 0}, {"phase_index": 1}],
         "conclusions": [{"player": "Alpha", "text": "I won"}],
@@ -134,7 +134,7 @@ def test_ip17_stg3_initial_context_excludes_future_match_data() -> None:
         "match": {"match_id": "match-1", "game": "NumberDuel", "seed": 42},
         "players": [
             {"name": "Alpha", "model": "mock-a"},
-            {"name": "Beta", "model": "mock-b"},
+            {"name": "Beta", "model": None},
         ],
         "frame_count": 2,
     }
@@ -241,6 +241,25 @@ def test_ip18_stg6_wrong_protocol_acknowledgement_is_rejected(tmp_path: Path) ->
     assert report.awarded_tiers == ["runnable", "evidence_ready", "presentable"]
     assert _check(report, "IP18")["status"] == "failed"
     assert "protocol" in _check(report, "IP18")["message"]
+
+
+def test_ip18_stg6_load_error_is_reported_without_timeout(tmp_path: Path) -> None:
+    """IP18 STG6: a valid Stage load error survives as the immediate failure."""
+    html = _stage_html().replace(
+        "context = message.context;",
+        'send({type: "agentdeck:stage-error", message: "invalid Player identity"});\n'
+        "          return;\n"
+        "          context = message.context;",
+    )
+
+    report = certify_instrument(
+        _copy_stage_package(tmp_path, html=html), trust_mode="trusted-local"
+    )
+
+    assert not report.valid
+    assert _check(report, "IP18")["status"] == "failed"
+    assert "invalid Player identity" in _check(report, "IP18")["message"]
+    assert "Timeout" not in _check(report, "IP18")["message"]
 
 
 def test_ip18_stg6_middle_frame_failure_is_rejected(tmp_path: Path) -> None:

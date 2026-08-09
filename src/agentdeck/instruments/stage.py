@@ -322,9 +322,14 @@ def certify_game_stage(
                         wait_until="domcontentloaded",
                     )
                     page.wait_for_function(
-                        "window.__agentdeckProbe && window.__agentdeckProbe.state === 'loaded'",
+                        "window.__agentdeckProbe && "
+                        "(window.__agentdeckProbe.state === 'loaded' || "
+                        "window.__agentdeckProbe.errors.length > 0)",
                         timeout=10_000,
                     )
+                    load_errors = page.evaluate("window.__agentdeckProbe.errors")
+                    if load_errors:
+                        raise StageRuntimeError(f"Game Stage browser error: {load_errors[0]}")
                     loaded = page.evaluate("window.__agentdeckProbe.loaded")
                     if not isinstance(loaded, dict) or (
                         loaded.get("match_id") != match_id
