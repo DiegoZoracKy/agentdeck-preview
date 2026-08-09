@@ -255,6 +255,63 @@ class TestHandshakeReplay:
                 start_idx < complete_idx
             ), "PLAYER_HANDSHAKE_START must precede PLAYER_HANDSHAKE_COMPLETE"
 
+    def test_match_start_rehydrates_recorded_player_identity_without_final_cost(
+        self, sample_recording_with_handshakes
+    ):
+        """SPEC-REPLAY LC3: replay preserves identity without future aggregates."""
+        sample_recording_with_handshakes["metadata"]["player_summaries"] = [
+            {
+                "name": "Player-1",
+                "type": "GPTPlayer",
+                "model": "gpt-4o-mini",
+                "controller": "ActionOnlyController",
+                "total_cost": 0.0042,
+            },
+            {
+                "name": "Player-2",
+                "type": "ClaudePlayer",
+                "model": "claude-haiku-4-5-20251001",
+                "controller": "ActionOnlyController",
+                "total_cost": 0.0084,
+            },
+        ]
+        spy = EventCapture()
+
+        ReplayEngine(sample_recording_with_handshakes).replay(spectators=[spy], speed=0.0)
+
+        match_start = next(event for event in spy.events if event.type == EventType.MATCH_START)
+        summaries = [player.get_summary() for player in match_start.data["players"]]
+        assert summaries[0]["model"] == "gpt-4o-mini"
+        assert summaries[1]["model"] == "claude-haiku-4-5-20251001"
+        assert all("total_cost" not in summary for summary in summaries)
+
+    def test_explicit_match_start_uses_recorded_player_summaries(
+        self, sample_recording_with_handshakes
+    ):
+        """SPEC-REPLAY LC3 applies to recorded and synthesized MATCH_START."""
+        sample_recording_with_handshakes["metadata"]["player_summaries"] = [
+            {"name": "Player-1", "type": "GPTPlayer", "model": "gpt-4o-mini"},
+            {"name": "Player-2", "type": "ClaudePlayer", "model": "claude-haiku"},
+        ]
+        sample_recording_with_handshakes["events"].insert(
+            2,
+            {
+                "type": "match_start",
+                "data": {"game": "TestGame", "players": ["Player-1", "Player-2"]},
+                "context": {"match_id": "match_test"},
+                "timestamp": 990,
+            },
+        )
+        spy = EventCapture()
+
+        ReplayEngine(sample_recording_with_handshakes).replay(spectators=[spy], speed=0.0)
+
+        match_start = next(event for event in spy.events if event.type == EventType.MATCH_START)
+        assert [player.get_summary()["model"] for player in match_start.data["players"]] == [
+            "gpt-4o-mini",
+            "claude-haiku",
+        ]
+
     def test_handshake_event_includes_metadata(self, sample_recording_with_handshakes):
         """
         Verify handshake events include normalized response and controller metadata.

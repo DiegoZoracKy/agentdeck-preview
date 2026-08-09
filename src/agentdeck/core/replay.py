@@ -159,7 +159,7 @@ class ReplayEngine:
                     or self.replay_context.players
                     or []
                 )
-                mock_players = rehydrate_players(player_names)
+                mock_players = self._rehydrate_players(player_names)
                 self.event_bus.emit(
                     EventType.MATCH_START,
                     game=mock_game,
@@ -235,6 +235,11 @@ class ReplayEngine:
 
         self._apply_event_context(context)
 
+        if event_type == EventType.MATCH_START.value:
+            payload["players"] = self._rehydrate_players(payload.get("players") or [])
+            self.event_bus.emit(event_type, **payload)
+            return
+
         if event_type == EventType.PLAYER_HANDSHAKE_START.value:
             player = payload.get("player")
             if player:
@@ -271,6 +276,18 @@ class ReplayEngine:
             payload = {"event": event}
 
         self.event_bus.emit(event_type, **payload)
+
+    def _rehydrate_players(self, fallback: List[Any]) -> List[Any]:
+        summaries = self.metadata.get("player_summaries")
+        if not isinstance(summaries, list):
+            summaries = self.match_metadata.get("player_summaries")
+        if (
+            isinstance(summaries, list)
+            and summaries
+            and all(isinstance(summary, dict) and summary.get("name") for summary in summaries)
+        ):
+            return rehydrate_players(summaries)
+        return rehydrate_players(fallback)
 
     def _apply_event_context(self, ctx: Dict[str, Any]) -> None:
         """Update EventBus context for the next emission."""

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from agentdeck.core.replay import ReplayEngine
 from agentdeck.core.types import Event, MatchResult
 from agentdeck.spectators.match_surface import (
     InMemorySink,
@@ -248,6 +249,48 @@ def test_match_surface_preserves_handshakes_emitted_before_match_start():
     assert sink.document is not None
     assert sink.document["players"] == [{"name": "Alice", "type": "MockPlayer"}]
     assert [entry["state"] for entry in sink.document["handshakes"]] == ["started", "accepted"]
+
+
+def test_match_surface_replay_preserves_recorded_player_models():
+    """SPEC-MATCH-SURFACE MSP19: replay keeps recorded Player identity."""
+    recording = {
+        "schema_version": "2.0",
+        "schema_type": "match",
+        "match_id": "match-identity",
+        "game": "MockGame",
+        "players": ["Alice", "Bob"],
+        "winner": None,
+        "final_state": {},
+        "seed": 1,
+        "events": [],
+        "metadata": {
+            "match_id": "match-identity",
+            "players": ["Alice", "Bob"],
+            "player_summaries": [
+                {
+                    "name": "Alice",
+                    "type": "GPTPlayer",
+                    "model": "gpt-4o-mini",
+                    "total_cost": 0.001,
+                },
+                {
+                    "name": "Bob",
+                    "type": "ClaudePlayer",
+                    "model": "claude-haiku",
+                    "total_cost": 0.002,
+                },
+            ],
+        },
+    }
+    sink = InMemorySink()
+
+    ReplayEngine(recording).replay(spectators=[MatchSurfaceProjector(sink=sink)], speed=0.0)
+
+    assert sink.document is not None
+    assert sink.document["players"] == [
+        {"name": "Alice", "type": "GPTPlayer", "model": "gpt-4o-mini"},
+        {"name": "Bob", "type": "ClaudePlayer", "model": "claude-haiku"},
+    ]
 
 
 def test_match_surface_redacts_start_and_frame_emissions():

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import List
+import copy
+from typing import Any, Dict, List, Mapping, Sequence
 
 from .types import Event, EventContext, SpectatorContext
 
@@ -40,5 +41,21 @@ def rehydrate_context(stored: dict | None) -> SpectatorContext:
     return SpectatorContext.from_event(context)
 
 
-def rehydrate_players(players: List[str]):
-    return [type("Player", (), {"name": name})() for name in players]
+class _RehydratedPlayer:
+    """Minimal recorded Player identity for spectator-compatible replay."""
+
+    def __init__(self, summary: Mapping[str, Any]) -> None:
+        self._summary: Dict[str, Any] = copy.deepcopy(dict(summary))
+        self._summary.pop("total_cost", None)
+        self.name = str(self._summary.get("name") or "UnknownPlayer")
+
+    def get_summary(self) -> Dict[str, Any]:
+        return copy.deepcopy(self._summary)
+
+
+def rehydrate_players(players: Sequence[str | Mapping[str, Any]]) -> List[Any]:
+    rehydrated: List[Any] = []
+    for player in players:
+        summary = player if isinstance(player, Mapping) else {"name": str(player)}
+        rehydrated.append(_RehydratedPlayer(summary))
+    return rehydrated
