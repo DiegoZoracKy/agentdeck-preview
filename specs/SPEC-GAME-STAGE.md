@@ -1,7 +1,7 @@
 # SPEC-GAME-STAGE: Portable Browser Game Stage Contract
 
 > Status: Final
-> Version: 0.2.1
+> Version: 0.2.2
 > Last Updated: 2026-08-09
 > Implementation: Complete
 > Review State: Consensus-approved
@@ -115,6 +115,8 @@ For each viewport, it MUST:
 6. retain the first and last screenshots and, when their indices differ, find a
    detectable visual change between those boundary frames;
 7. find no page error, error-level console message, protocol error, or document overflow.
+8. find no visible text-bearing element outside the viewport or clipped by an
+   ancestor that constrains overflow.
 
 Screenshots are diagnostic certification artifacts. Pixel bytes and browser versions
 are not canonical report inputs; pass/fail behavior and artifact names are.
@@ -133,11 +135,12 @@ file containment.
 6. **STG6 Exact And Diagnosable Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities; browser certification MUST receive an exact render acknowledgement for every fixture gameplay frame and MUST surface a valid Stage error immediately while waiting for loaded or rendered state.
 7. **STG7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
 8. **STG8 Visible Frame Projection**: Every fixture gameplay frame MUST produce nonblank visual output and an exact render acknowledgement; when first and last indices differ, their output MUST be detectably different without requiring consecutive frames to differ.
+9. **STG9 Visible Text Containment**: On every certified frame, each visible DOM element containing direct text MUST remain within the viewport and within every ancestor that clips overflow. This check does not require DOM text and does not constrain Canvas, WebGL, or other rendering technologies.
 
 ## 8. Failure Handling
 
 - Missing entry, protocol, prerequisite tier, or contained asset fails declarative validation.
-- Future-data access, timeout, wrong acknowledgement, blank output, overflow, console/page error, or network
+- Future-data access, timeout, wrong acknowledgement, blank output, overflow, clipped visible text, console/page error, or network
   attempt fails `stage_ready` without removing independently awarded lower tiers.
 - A failed Stage probe MUST NOT overwrite a prior successful certification report.
 
@@ -145,7 +148,8 @@ file containment.
 
 - A tiny external Stage proves framework-neutral postMessage integration.
 - Adversarial bundles cover external fetch, wrong protocol, future-data access, a blank
-  intermediate frame, missing render acknowledgement, console error, and mobile overflow.
+  intermediate frame, missing render acknowledgement, console error, mobile overflow,
+  and visible text clipped inside an overflow-constrained container.
 - The Builder acceptance test generates a novel Game and Stage from informal intent,
   then uses the same Core browser certifier used by hand-authored packages.
 
