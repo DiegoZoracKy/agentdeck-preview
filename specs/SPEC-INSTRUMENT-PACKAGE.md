@@ -1,9 +1,9 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.4.1
+> Version: 0.4.2
 > Last Updated: 2026-08-08
-> Implementation: Complete
+> Implementation: Partial (IP1-IP18 complete; IP19 planned)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -35,6 +35,12 @@ presentation/                   optional viewer assets
 
 All declared files and package-local entry points MUST resolve inside the package root.
 The structural inspector MUST NOT import any Python module.
+
+The package is a portable source artifact, not a development workspace snapshot. It
+MUST exclude transient runtime and tool output: Python bytecode, `__pycache__`,
+`.mypy_cache`, `.pytest_cache`, `.ruff_cache`, `.coverage`, and `.DS_Store`. This rule
+does not constrain authored source, locally bundled browser dependencies, media, WASM,
+source maps, or another implementation technology.
 
 ## 4. Manifest
 
@@ -250,6 +256,7 @@ and error-free desktop/mobile probes.
 16. **IP16 Stage Declaration**: A stage_ready claim MUST declare schema 1.1, presentable as a prerequisite, a contained presentation entry, and the supported Game Stage protocol.
 17. **IP17 Stage Isolation**: Stage certification MUST expose only the certified Match Surface inside a scripts-only sandbox and MUST reject escaping or external network requests.
 18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive exact protocol acknowledgements and nonblank, error-free, overflow-free first/last frame output at desktop and mobile viewports, with a detectable visual change when those frames have distinct indices.
+19. **IP19 Source-Clean Package**: Inspection, validation, and certification MUST reject transient runtime or tool artifacts before executing package code or hashing them as authored source.
 
 ## 8. Failure Handling
 
@@ -268,6 +275,8 @@ and error-free desktop/mobile probes.
 - Adversarial variants cover traversal, import side effects during structural validation,
   unknown fields, config drift, non-JSON values, nondeterminism, replay mismatch, scorer
   fabrication, unresolved pointers, oracle leakage, and overstated requested tiers.
+- A direct source-clean test covers Python bytecode and known tool/cache paths while a
+  locally bundled browser asset remains valid.
 
 ## 10. Rationale
 
