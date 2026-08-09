@@ -118,6 +118,30 @@ def _format_match_outcome(winner: Optional[str]) -> str:
     return f"{winner} won the match."
 
 
+def _player_visible_match_result(game: Game, result: MatchResult, player_name: str) -> MatchResult:
+    """Create the terminal result view used by a Player's default conclusion."""
+    try:
+        final_view = game.get_view(copy.deepcopy(result.final_state), player_name)
+    except Exception as exc:
+        raise RuntimeError(
+            f"{game.__class__.__name__}.get_view() failed for conclusion player " f"'{player_name}'"
+        ) from exc
+
+    if not isinstance(final_view, dict):
+        raise TypeError(
+            f"{game.__class__.__name__}.get_view() must return dict for conclusion "
+            f"player '{player_name}', got {type(final_view).__name__}"
+        )
+
+    return MatchResult(
+        winner=result.winner,
+        final_state=final_view,
+        events=result.events,
+        seed=result.seed,
+        metadata=result.metadata,
+    )
+
+
 def _resolve_concluding_players(
     policy: "ConclusionPolicy", players: List[Player], winner: Optional[str]
 ) -> List[Player]:
@@ -1091,7 +1115,8 @@ class _MatchWorker:
                 reflection = conclusion_reflection
             else:
                 match_ctx.conclusion_prompt = None
-                reflection = player.conclude(result, match_context=match_ctx)
+                visible_result = _player_visible_match_result(self.game, result, player.name)
+                reflection = player.conclude(visible_result, match_context=match_ctx)
 
             prompt_payload = player._get_last_exchange("conclusion") or {}
             _require_conclusion_prompt_payload(player, prompt_payload)
@@ -3096,6 +3121,10 @@ class Console:
         match_result: MatchResult,
         runtime: MatchExecutionContext,
     ) -> None:
+        game = self.game
+        if game is None:
+            raise RuntimeError("Conclusion phase requires a configured Game")
+
         match_ctx = PlayerMatchContext(
             match_id=runtime.match_id,
             players=[player.name for player in players],
@@ -3113,11 +3142,9 @@ class Console:
             return
 
         try:
-            concluding_player = self.game.requires_conclusion(match_result.final_state)
+            concluding_player = game.requires_conclusion(match_result.final_state)
         except Exception as exc:  # pragma: no cover - defensive
-            raise RuntimeError(
-                f"{self.game.__class__.__name__}.requires_conclusion() failed"
-            ) from exc
+            raise RuntimeError(f"{game.__class__.__name__}.requires_conclusion() failed") from exc
 
         concluding_names = {p.name for p in concluding_players}
         if concluding_player and concluding_player not in concluding_names:
@@ -3134,14 +3161,14 @@ class Console:
             target = next((p for p in concluding_players if p.name == concluding_player), None)
             if target is None:
                 raise ValueError(
-                    f"{self.game.__class__.__name__}.requires_conclusion returned unknown player '{concluding_player}'"
+                    f"{game.__class__.__name__}.requires_conclusion returned unknown player '{concluding_player}'"
                 )
 
-            prompt = self.game.get_conclusion_prompt(concluding_player, match_result.final_state)
+            prompt = game.get_conclusion_prompt(concluding_player, match_result.final_state)
             match_ctx.conclusion_prompt = prompt
             conclusion_reflection = target.conclude(match_result, match_context=match_ctx)
-            parsed = self.game.parse_conclusion(concluding_player, conclusion_reflection)
-            match_result.final_state = self.game.on_conclusion_received(
+            parsed = game.parse_conclusion(concluding_player, conclusion_reflection)
+            match_result.final_state = game.on_conclusion_received(
                 match_result.final_state, concluding_player, parsed
             )
 
@@ -3150,7 +3177,8 @@ class Console:
                 reflection = conclusion_reflection
             else:
                 match_ctx.conclusion_prompt = None
-                reflection = player.conclude(match_result, match_context=match_ctx)
+                visible_result = _player_visible_match_result(game, match_result, player.name)
+                reflection = player.conclude(visible_result, match_context=match_ctx)
 
             prompt_payload = player._get_last_exchange("conclusion") or {}
             _require_conclusion_prompt_payload(player, prompt_payload)

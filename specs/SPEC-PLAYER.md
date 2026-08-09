@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 1.3.5
 > Last Updated: 2026-08-08
-> Implementation: Planned
+> Implementation: Complete
 > Review State: Legacy-approved
 > Audience: Game authors, LLM player implementers, research engineers
 

@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.7.3
 > Last Updated: 2026-08-08
-> Implementation: Planned
+> Implementation: Complete
 > Review State: Legacy-approved
 > Audience: Core contributors, engine implementers
 
