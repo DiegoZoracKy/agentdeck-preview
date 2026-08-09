@@ -1,9 +1,9 @@
 # SPEC-GAME-STAGE: Portable Browser Game Stage Contract
 
 > Status: Final
-> Version: 0.1.1
+> Version: 0.1.2
 > Last Updated: 2026-08-08
-> Implementation: Complete
+> Implementation: Partial (STG1-STG5 and STG7-STG8 complete; expanded STG6 planned)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, viewer hosts, Core maintainers
 
@@ -98,8 +98,9 @@ For each viewport, it MUST:
 1. load the sandboxed Stage with no external network request;
 2. observe `ready` and send the exact Match Surface;
 3. observe `loaded` with the exact match ID and frame count;
-4. render the first and last gameplay frames and observe exact acknowledgements;
-5. find nonblank visual output for both probes and, when their indices differ, a
+4. render every gameplay frame in order and observe an exact acknowledgement for each;
+5. capture the first and last rendered frames, find nonblank visual output for both,
+   and, when their indices differ, a
    detectable visual change between them;
 6. find no page error, error-level console message, protocol error, or document overflow.
 
@@ -117,7 +118,7 @@ file containment.
 3. **STG3 Match-Surface-Only Input**: The Host MUST supply only the certified Match Surface and contained frames; a Stage MUST NOT require canonical records, Game objects, provider access, or hidden state.
 4. **STG4 Contained Offline Runtime**: Every Stage dependency MUST resolve under `presentation/`, and browser certification MUST reject external network attempts or escaping paths.
 5. **STG5 Sandboxed Host Boundary**: The Host MUST run Stage code in a unique-origin iframe with scripts as its only sandbox capability.
-6. **STG6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities.
+6. **STG6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities; browser certification MUST receive an exact render acknowledgement for every fixture gameplay frame.
 7. **STG7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
 8. **STG8 Visible Frame Projection**: The first and last fixture frames MUST produce nonblank visual output and exact render acknowledgements; distinct frame indices MUST produce detectably different output.
 
