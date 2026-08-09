@@ -1,9 +1,9 @@
 # SPEC-GAME-STAGE: Portable Browser Game Stage Contract
 
 > Status: Final
-> Version: 0.2.0
+> Version: 0.2.1
 > Last Updated: 2026-08-09
-> Implementation: Complete
+> Implementation: Partial (expanded STG6 load-error diagnostics planned)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, viewer hosts, Core maintainers
 
@@ -65,13 +65,15 @@ context. It emits one `rendered` acknowledgement after each successful render co
 ### 4.2 Host To Stage
 
 ```json
-{"type":"agentdeck:stage-load","protocol":"agentdeck-stage/1.1","context":{"schema_version":"1.0","match":{"match_id":"...","game":"...","seed":42},"players":[{"name":"Alpha","model":"mock"}],"frame_count":6}}
+{"type":"agentdeck:stage-load","protocol":"agentdeck-stage/1.1","context":{"schema_version":"1.0","match":{"match_id":"...","game":"...","seed":42},"players":[{"name":"Alpha","model":null}],"frame_count":6}}
 {"type":"agentdeck:stage-render","protocol":"agentdeck-stage/1.1","frame_index":0,"frame":{}}
 ```
 
 The initial context contains exactly its schema version, minimal match identity
 (`match_id`, `game`, and `seed`), certified pre-match Player identities (`name` and
-`model`), and `frame_count`.
+`model`), and `frame_count`. `name` is a string. `model` is a string when the Player
+declares a model and `null` otherwise; a Stage MUST handle either form without treating
+a model-less deterministic fixture as invalid.
 It MUST NOT contain gameplay frames, winner, conclusions, markers, economics, final
 state, or other information produced after match start. For each render command, the
 Host supplies only the exact currently authorized certified frame. The Stage MUST NOT
@@ -128,7 +130,7 @@ file containment.
 3. **STG3 Temporally Bounded Presentation Input**: The Host MUST initially supply only minimal certified match context and MUST subsequently supply only the currently authorized certified frame; a Stage MUST NOT receive the complete Match Surface, future frames, result data, canonical records, Game objects, provider access, or hidden state.
 4. **STG4 Contained Offline Runtime**: Every Stage dependency MUST resolve under `presentation/`, and browser certification MUST reject external network attempts or escaping paths.
 5. **STG5 Sandboxed Host Boundary**: The Host MUST run Stage code in a unique-origin iframe with scripts as its only sandbox capability.
-6. **STG6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities; browser certification MUST receive an exact render acknowledgement for every fixture gameplay frame.
+6. **STG6 Exact And Diagnosable Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities; browser certification MUST receive an exact render acknowledgement for every fixture gameplay frame and MUST surface a valid Stage error immediately while waiting for loaded or rendered state.
 7. **STG7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
 8. **STG8 Visible Frame Projection**: Every fixture gameplay frame MUST produce nonblank visual output and an exact render acknowledgement; when first and last indices differ, their output MUST be detectably different without requiring consecutive frames to differ.
 

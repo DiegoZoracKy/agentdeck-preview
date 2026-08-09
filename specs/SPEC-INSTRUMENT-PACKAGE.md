@@ -1,9 +1,9 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.5.0
+> Version: 0.5.1
 > Last Updated: 2026-08-09
-> Implementation: Complete
+> Implementation: Partial (expanded IP18 load-error diagnostics planned)
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -255,7 +255,7 @@ offline requests, boundary progression, and error-free desktop/mobile probes.
 15. **IP15 Canonical Report**: Equal package content and semantic result MUST produce byte-identical canonical reports after excluding declared volatile artifact locations.
 16. **IP16 Stage Declaration**: A stage_ready claim MUST declare schema 1.1, presentable as a prerequisite, a contained presentation entry, and the supported Game Stage protocol.
 17. **IP17 Stage Isolation**: Stage certification MUST expose only minimal certified match context and the currently authorized certified frame inside a scripts-only sandbox and MUST reject escaping or external network requests.
-18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive an exact protocol acknowledgement and nonblank output for every fixture gameplay frame at desktop and mobile viewports, remain error- and overflow-free, and detect visible progression between distinct first and last frames.
+18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive an exact protocol acknowledgement and nonblank output for every fixture gameplay frame at desktop and mobile viewports, remain error- and overflow-free, detect visible progression between distinct first and last frames, and preserve a valid Stage error as the immediate certification failure rather than replacing it with a timeout.
 19. **IP19 Source-Clean Package**: Inspection, validation, and certification MUST reject transient runtime or tool artifacts before executing package code or hashing them as authored source.
 
 ## 8. Failure Handling
