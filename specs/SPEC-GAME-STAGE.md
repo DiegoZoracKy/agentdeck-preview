@@ -1,9 +1,9 @@
 # SPEC-GAME-STAGE: Portable Browser Game Stage Contract
 
 > Status: Final
-> Version: 0.1.0
+> Version: 0.1.1
 > Last Updated: 2026-08-08
-> Implementation: Planned
+> Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, viewer hosts, Core maintainers
 
@@ -99,7 +99,8 @@ For each viewport, it MUST:
 2. observe `ready` and send the exact Match Surface;
 3. observe `loaded` with the exact match ID and frame count;
 4. render the first and last gameplay frames and observe exact acknowledgements;
-5. find nonblank visual output for both probes;
+5. find nonblank visual output for both probes and, when their indices differ, a
+   detectable visual change between them;
 6. find no page error, error-level console message, protocol error, or document overflow.
 
 Screenshots are diagnostic certification artifacts. Pixel bytes and browser versions
@@ -118,7 +119,7 @@ file containment.
 5. **STG5 Sandboxed Host Boundary**: The Host MUST run Stage code in a unique-origin iframe with scripts as its only sandbox capability.
 6. **STG6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities.
 7. **STG7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
-8. **STG8 Visible Frame Projection**: The first and last fixture frames MUST produce nonblank visual output and exact render acknowledgements.
+8. **STG8 Visible Frame Projection**: The first and last fixture frames MUST produce nonblank visual output and exact render acknowledgements; distinct frame indices MUST produce detectably different output.
 
 ## 8. Failure Handling
 
