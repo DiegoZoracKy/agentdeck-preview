@@ -8,6 +8,7 @@ import ast
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date
@@ -47,6 +48,7 @@ class Contract:
     path: Path
     metadata: Mapping[str, str]
     invariants: tuple[str, ...]
+    invariant_sha256: Mapping[str, str]
     unregistered_invariants: tuple[str, ...]
     links: tuple[str, ...]
 
@@ -116,6 +118,11 @@ def _parse_contract(path: Path) -> Contract:
         )
         raise SpecRegistryError(f"{path.name}: duplicate invariant declarations {duplicates}")
     registered = set(invariants)
+    invariant_sha256 = {
+        match.group(1): _sha256(line.strip().encode("utf-8"))
+        for line in invariant_text.splitlines()
+        if (match := INVARIANT_RE.search(line)) is not None
+    }
     unregistered_invariants = tuple(
         dict.fromkeys(
             invariant
@@ -128,6 +135,7 @@ def _parse_contract(path: Path) -> Contract:
         path=path,
         metadata=metadata,
         invariants=invariants,
+        invariant_sha256=invariant_sha256,
         unregistered_invariants=unregistered_invariants,
         links=links,
     )
@@ -182,7 +190,7 @@ def build_registry(root: Path = ROOT) -> dict[str, Any]:
     hub = root / "specs" / "SPEC.md"
     active_contracts = [contract for contract in contracts if contract.active]
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "invariant_summary": {
             "scope": "active_contracts",
             "registered": sum(len(contract.invariants) for contract in active_contracts),
@@ -199,6 +207,7 @@ def build_registry(root: Path = ROOT) -> dict[str, Any]:
                 "active": contract.active,
                 "implementation": contract.metadata["Implementation"],
                 "invariants": list(contract.invariants),
+                "invariant_sha256": dict(contract.invariant_sha256),
                 "last_updated": contract.metadata["Last Updated"],
                 "path": contract.path.relative_to(root).as_posix(),
                 "review_state": contract.metadata["Review State"],
@@ -344,6 +353,80 @@ def validate_compliance(registry: Mapping[str, Any], root: Path = ROOT) -> None:
                 raise SpecRegistryError(f"{spec_id}: semantic assurance needs review artifact")
 
 
+def validate_new_work_evidence(
+    registry: Mapping[str, Any],
+    previous_registry: Mapping[str, Any],
+    root: Path = ROOT,
+) -> None:
+    """Require direct tests for newly completed or normatively changed invariants."""
+    compliance = _read_json(root / "specs" / "compliance.json")
+    evidence_by_spec = {
+        entry["spec_id"]: {item["invariant_id"] for item in entry.get("evidence", [])}
+        for entry in compliance["contracts"]
+    }
+    previous = {
+        entry["spec_id"]: entry
+        for entry in previous_registry.get("contracts", [])
+        if isinstance(entry, dict) and isinstance(entry.get("spec_id"), str)
+    }
+
+    for current in registry["contracts"]:
+        if not current["active"] or not current["implementation"].startswith("Complete"):
+            continue
+        prior = previous.get(current["spec_id"])
+        current_ids = set(current["invariants"])
+        prior_ids = set(prior.get("invariants", [])) if prior else set()
+        required = current_ids - prior_ids
+
+        current_hashes = current.get("invariant_sha256", {})
+        prior_hashes = prior.get("invariant_sha256", {}) if prior else {}
+        required.update(
+            invariant
+            for invariant in current_ids & prior_ids
+            if invariant in prior_hashes
+            and current_hashes.get(invariant) != prior_hashes.get(invariant)
+        )
+        if prior is None or (
+            not str(prior.get("implementation", "")).startswith("Complete")
+            and current["implementation"].startswith("Complete")
+        ):
+            required = current_ids
+
+        missing = sorted(required - evidence_by_spec.get(current["spec_id"], set()))
+        if missing:
+            raise SpecRegistryError(
+                f"{current['spec_id']}: completed new work lacks direct evidence {missing}"
+            )
+
+
+def _previous_checked_in_registry(root: Path) -> Mapping[str, Any] | None:
+    """Read the nearest Git baseline without making Git part of registry authority."""
+    try:
+        changed = subprocess.run(
+            ["git", "diff", "--quiet", "HEAD", "--", "specs"],
+            cwd=root,
+            check=False,
+            capture_output=True,
+        )
+        reference = "HEAD" if changed.returncode == 1 else "HEAD^"
+        prior = subprocess.run(
+            ["git", "show", f"{reference}:specs/registry.json"],
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+    if prior.returncode != 0:
+        return None
+    try:
+        payload = json.loads(prior.stdout)
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def render_bundle(profile_id: str, root: Path = ROOT) -> bytes:
     registry = build_registry(root)
     profiles = validate_profiles(registry, root)
@@ -391,6 +474,9 @@ def check(root: Path = ROOT) -> None:
         raise SpecRegistryError("specs/registry.json is stale; run spec_registry.py write")
     validate_profiles(registry, root)
     validate_compliance(registry, root)
+    previous_registry = _previous_checked_in_registry(root)
+    if previous_registry is not None:
+        validate_new_work_evidence(registry, previous_registry, root)
 
 
 def _parser() -> argparse.ArgumentParser:

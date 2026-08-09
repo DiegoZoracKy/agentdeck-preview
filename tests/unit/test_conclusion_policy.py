@@ -43,6 +43,17 @@ class TemplateConclusionPlayer(Player):
         return "ATTACK"
 
 
+class GameOwnedConclusionGame(PrivateConclusionGame):
+    explicit_prompt = "GAME_OWNED_CONCLUSION::CONCLUSION_PRIVATE_ORACLE_7B3F"
+
+    def requires_conclusion(self, game_state):
+        return next(iter(game_state["health"]))
+
+    def get_conclusion_prompt(self, player, game_state):
+        del player, game_state
+        return self.explicit_prompt
+
+
 def _run_match(policy: ConclusionPolicy, tmp_path: Path):
     capture = ConclusionCapture()
     run_dir = tmp_path / "runs"
@@ -156,3 +167,27 @@ def test_cv1_default_conclusion_uses_player_visible_terminal_state(
         == "CONCLUSION_PRIVATE_ORACLE_7B3F"
         for path in record_paths
     )
+
+
+def test_cv2_game_owned_explicit_conclusion_is_passed_verbatim(tmp_path: Path) -> None:
+    capture = ConclusionCapture()
+    game = GameOwnedConclusionGame()
+    config = AgentDeckConfig(
+        seed=42,
+        run_dir=str(tmp_path / "runs"),
+        conclusion=ConclusionPolicy(enabled=True, mode="all"),
+    )
+
+    with AgentDeck(game=game, session=config, spectators=[capture]) as deck:
+        deck.play(
+            players=[TemplateConclusionPlayer("Alice"), TemplateConclusionPlayer("Bob")],
+            matches=1,
+        )
+
+    explicit = [
+        event for event in capture.events if event.data["prompt_text"] == game.explicit_prompt
+    ]
+    assert len(explicit) == 1
+    assert explicit[0].data["prompt_blocks"] == [
+        {"key": "conclusion_prompt", "content": game.explicit_prompt, "metadata": {}}
+    ]

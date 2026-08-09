@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.3.1
 > Last Updated: 2026-08-08
-> Implementation: Planned
+> Implementation: Complete (new-work evidence gate)
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 

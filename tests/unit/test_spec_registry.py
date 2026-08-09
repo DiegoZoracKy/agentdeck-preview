@@ -396,3 +396,52 @@ def test_sr14_summary_counts_only_active_contracts(tmp_path: Path) -> None:
     )
     assert old_contract["active"] is False
     assert old_contract["unregistered_invariants"] == ["OLD1"]
+
+
+def test_sr15_complete_new_work_requires_direct_evidence(tmp_path: Path) -> None:
+    """SR15: new Complete invariants need tests without backfilling untouched debt."""
+    root = _repo(tmp_path)
+    _write_spec(root)
+    test_path = root / "tests" / "test_example.py"
+    test_path.write_text(
+        "def test_ex1_direct():\n" '    """EX1: direct evidence."""\n' "    assert True\n",
+        encoding="utf-8",
+    )
+    _write_profiles(root, ["specs/SPEC.md"])
+    (root / "specs" / "compliance.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "contracts": [
+                    {
+                        "spec_id": "SPEC-EXAMPLE",
+                        "status": "partial",
+                        "assurance": "mapped",
+                        "evidence": [],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    current = registry.build_registry(root)
+    previous = json.loads(json.dumps(current))
+    previous["contracts"][0]["invariants"] = []
+    previous["contracts"][0]["invariant_sha256"] = {}
+
+    with pytest.raises(registry.SpecRegistryError, match="lacks direct evidence.*EX1"):
+        registry.validate_new_work_evidence(current, previous, root)
+
+    payload = json.loads((root / "specs" / "compliance.json").read_text(encoding="utf-8"))
+    payload["contracts"][0]["assurance"] = "automated"
+    payload["contracts"][0]["evidence"] = [
+        {"invariant_id": "EX1", "test": "tests/test_example.py::test_ex1_direct"}
+    ]
+    (root / "specs" / "compliance.json").write_text(json.dumps(payload), encoding="utf-8")
+    registry.validate_new_work_evidence(current, previous, root)
+
+    unchanged_previous = json.loads(json.dumps(current))
+    payload["contracts"][0]["assurance"] = "mapped"
+    payload["contracts"][0]["evidence"] = []
+    (root / "specs" / "compliance.json").write_text(json.dumps(payload), encoding="utf-8")
+    registry.validate_new_work_evidence(current, unchanged_previous, root)
