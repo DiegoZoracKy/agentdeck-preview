@@ -190,13 +190,13 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [AgentDeck](SPEC-AGENTDECK.md) | 0.3.1 | Final | Public API facade for the framework |
-| [Console](SPEC-CONSOLE.md) | 0.7.2 | Final | Execution engine for session/match lifecycle |
+| [Console](SPEC-CONSOLE.md) | 0.7.3 | Final | Execution engine for session/match lifecycle |
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract (rules, state, narrative, lifecycle hooks, effective config) |
 | [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.3.0 | Final | External manifest, inspection, certification, and capability tiers |
 | [Authoring Readiness](SPEC-AUTHORING-READINESS.md) | 0.1.0 | Final | Public extension typing, runtime boundary, and blocking security gates |
-| [Player](SPEC-PLAYER.md) | 1.3.4 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
+| [Player](SPEC-PLAYER.md) | 1.3.5 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
 | [Controller](SPEC-CONTROLLER.md) | 1.3.3 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.2 | Final | State formatting for AI consumption |
 | [Spectator](SPEC-SPECTATOR.md) | 2.0.1 | Final | Observation and analysis interface |

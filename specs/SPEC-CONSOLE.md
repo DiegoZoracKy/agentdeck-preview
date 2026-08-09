@@ -1,9 +1,9 @@
 # SPEC-CONSOLE: Execution Engine Contract
 
 > Status: Final
-> Version: 0.7.2
-> Last Updated: 2026-03-31
-> Implementation: Complete
+> Version: 0.7.3
+> Last Updated: 2026-08-08
+> Implementation: Planned
 > Review State: Legacy-approved
 > Audience: Core contributors, engine implementers
 
@@ -42,7 +42,7 @@ Console operates at two architectural layers, both mechanics-agnostic:
 - **Execution Lifecycle**: For every `run` call emit `BATCH_START` / `BATCH_END`, derive base seeds, loop through requested matches (including size-1 runs), and scope execution spectators.
 - **Player Order Management**: Console is the source of fairness by default. Before each match, call `game.get_player_order(players, rng=match_rng, match_context)`. When game returns `None` (default), apply console fairness policy using `AgentDeckConfig.pairing_policy` and `AgentDeckConfig.first_player_policy`. `paired_side_swap` MUST reuse the same match seed for each paired AB/BA run and MUST swap sides only after the base order is chosen. When game returns custom list, validate (same players, no duplicates, correct length) and raise `ValueError` on mismatch; non-default console fairness policies are incompatible with custom game ordering. Record effective order, actual first actor, and selected fairness policy in observability artifacts (MatchResult.metadata, events, logs, recorder). Log player order at DEBUG level (see §6.5 invariants).
 - **Match Orchestration**: Manage match-level lifecycle (handshakes → MATCH_START → `game.run(runtime, players)` → conclusion phase → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
-- **Conclusion Policy**: Apply the session conclusion policy to decide whether the conclusion phase runs and which players conclude. Game hooks may override prompts/state for a single player, but do not gate conclusion execution.
+- **Conclusion Policy**: Apply the session conclusion policy to decide whether the conclusion phase runs and which players conclude. For the default Player template, derive each concluding Player's final state through `game.get_view(canonical_final_state, player.name)` without mutating the canonical `MatchResult`. Game hooks may override prompts/state for a single player, but do not gate conclusion execution.
 - **Handshake Management**: Run handshake build+execute before turn 1, emit `PLAYER_HANDSHAKE_START` using the exact prompt bundle, validate acknowledgements via controller, and abort on rejection.
 - **Runtime Provisioning**: Create a fresh `MatchRuntime` per match exposing recorder, event emitter, RNG forks, parse-failure helper, and validation utilities so mechanics stay decoupled from console internals (see `SPEC-MATCH-RUNTIME.md`).
 - **Parse Failure Handling** (new in v0.5.0): When `player.decide()` raises `ActionParseError`, the console MUST capture the embedded `ParseResult`, emit a `PLAYER_ACTION_PARSE_FAILED` event, record the failure, and invoke the game's parse-failure policy hook. Console interprets the returned `ParseFailurePolicy` (abort, skip turn, forfeit, retry) and applies it deterministically.
@@ -255,29 +255,34 @@ Cleanup session and emit SESSION_END (context manager protocol).
 22. **H5**: `MatchContext.handshake_completed` MUST be `True` only when all players acknowledged successfully and MUST remain `False` otherwise (match aborted).
 23. **H6**: Upon successful handshake, console MUST ensure the handshake exchange remains available to subsequent `player.decide` calls unless a player explicitly resets conversation history.
 
-### 6.6 Event Ordering & Delivery (E)
+### 6.6 Conclusion Visibility (CV)
+
+24. **CV1**: Before invoking a policy-selected Player through its default conclusion template, Console MUST derive that Player's terminal view with `game.get_view(match_result.final_state, player.name)` and pass a distinct `MatchResult` whose `final_state` is the derived view. Console MUST preserve the canonical `MatchResult.final_state` for recording, replay, game hooks, and the caller.
+25. **CV2**: A prompt returned by `game.get_conclusion_prompt(...)` is an explicit Game-owned override. Console MUST pass that prompt verbatim and MUST NOT reinterpret or redact it; Game authors own the visibility of that prompt under `SPEC-GAME`.
+
+### 6.7 Event Ordering & Delivery (E)
 25. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (`MATCH_START` / **TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) / **PLAYER_CONCLUSION** (per policy) / `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.
 26. **E2**: MUST attach session/match identifiers, phase indices, monotonic timestamps, and turn indices to events per `SPEC-OBSERVABILITY.md`.
 27. **E3**: Console MUST emit orchestration lifecycle events (SESSION, BATCH, MATCH_START, MATCH_END, CLEANUP) plus parse-failure events. Turn execution events remain TurnLoop responsibility; domain events remain Game responsibility.
 28. **E4**: `PLAYER_ACTION_PARSE_FAILED` MUST be emitted exactly once per parsing failure before any policy action is applied.
 29. **E5**: Console MUST own the EventBus instance but MUST NOT implement routing logic. All event routing is internal to EventBus.
 
-### 6.7 Match Metadata (M)
+### 6.8 Match Metadata (M)
 30. **M1**: MUST populate `MatchResult.metadata` with game name, player names, duration, turn count, and truncation info.
 31. **M2**: MUST reset conversation managers and player logging hooks before each match to avoid leakage across matches.
 32. **M3**: Console MUST record player order metadata in ALL observability artifacts: MatchResult.metadata["player_names"] (ordered list post-ordering), MatchResult.metadata["player_order"] (0-based indices showing original positions), MATCH_START/END event payload (player_names ordered list), Logger output (ordered player list in match start/end logs), Recorder files (ordered player list). Rationale: Player order is objective data. Some mechanics may use this order directly, while others may select the first acting player at runtime. Console records both ordering and first-player metadata for analysis.
 33. **M4** (Player Ordering): Console MUST call `game.get_player_order(players, rng=match_rng, match_context)` before each match. If game returns `None`, Console MUST apply the configured fairness policy. If game returns custom list, Console MUST validate (same `Player` instances, same length, no duplicates) and raise `ValueError` on mismatch. Console MUST record in `MatchResult.metadata` and events: `player_order` (List[int] of original indices, e.g., [1, 0, 2] means original player 1 is first in ordered list), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int, "ordered_index": int}), and `fairness_policy` (selected pairing / first-player policy metadata). `first_player` MUST reflect the actual first acting player when runtime selection metadata is available; otherwise it MUST fall back to the first player in ordered list. Console MUST log player order at DEBUG level without exposing to INFO/console output.
 
-### 6.8 Spectator & Recorder Integration (P)
+### 6.9 Spectator & Recorder Integration (P)
 33. **P1**: MUST subscribe recorder and all spectator instances prior to emitting `SESSION_START`.
 34. **P2**: MUST propagate execution-level spectators supplied during `run` across the entire run and remove them after `BATCH_END`.
 35. **P3**: MUST tolerate spectators raising exceptions by logging/reporting without destabilizing the console.
 36. **P4** (Logger Injection): MUST inject logger into spectators before EventBus subscription if `spectator.logger is None`. Check `if getattr(spectator, "logger", None) is None` and assign `spectator.logger = self.logger` for both session spectators (during construction) and execution spectators (during `run`). This enables spectators to write to core log streams (info.log, debug.log, console) via `logger.info()`, `logger.debug()`, etc., per SPEC-SPECTATOR §5.5 (LI1-LI5).
 
-### 6.9 Logging & Recording (L)
+### 6.10 Logging & Recording (L)
 37. **L1**: Console MUST tolerate `logger=None` and `recorder=None` in direct-construction scenarios. `AgentDeck` typically supplies both, but Console MUST still preserve lifecycle/event semantics when either dependency is omitted.
 
-### 6.10 Error Handling (H)
+### 6.11 Error Handling (H)
 
 **Defense in Depth Model**: Console provides final validation layer AFTER Player/Controller pipeline:
 - **Controller** (primary): Parses LLM response, extracts action, validates game-specific semantics
@@ -348,7 +353,7 @@ This layered approach prevents silent failures while maintaining separation of c
         final_state, mechanic_events, truncated = game.run(match_runtime, ordered_players)
         ```
      h. Collect metadata (seed, player_names, player_order, player_order_source, first_player, fairness_policy, handshake status, turn count, truncation, duration)
-     i. Execute conclusion phase per policy (emit `PLAYER_CONCLUSION` for selected players)
+     i. Execute conclusion phase per policy: derive a terminal `game.get_view(...)` for each default Player template while preserving canonical state; emit `PLAYER_CONCLUSION` for selected players
      j. Emit `MATCH_END` (with same metadata as MATCH_START for correlation)
   5. Emit `BATCH_END` with accumulated results and seeds_used list, detach execution spectators, return list of `MatchResult`.
 - **Replay**

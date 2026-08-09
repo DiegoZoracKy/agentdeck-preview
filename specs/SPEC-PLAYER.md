@@ -1,9 +1,9 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
 > Status: Final
-> Version: 1.3.4
+> Version: 1.3.5
 > Last Updated: 2026-08-08
-> Implementation: Complete
+> Implementation: Planned
 > Review State: Legacy-approved
 > Audience: Game authors, LLM player implementers, research engineers
 
@@ -54,6 +54,7 @@
   - MUST keep `game_state` immutable, build prompt via `PromptBuilder`, invoke LLM, parse response via `controller.parse()`, and return `ActionResult` with metadata.
 - `conclude(result: MatchResult, *, match_context: MatchContext) -> Optional[str]`
   - OPTIONAL; default implementation records conclusion prompt metadata (using `match_context.conclusion_prompt` when present, otherwise the default conclusion template) and returns `None`.
+  - For default template composition, Console MUST provide a per-Player `MatchResult` copy whose `final_state` is the terminal value returned by `game.get_view(canonical_final_state, player.name)`. The canonical result remains the authority for recording and replay.
   - When using template-driven conclusion composition (`match_context.conclusion_prompt` is absent), players MUST sanitize engine bookkeeping fields from the state rendered into `{game_view}` (at minimum `_turn_count` and `_first_player_idx`).
   - When `match_context.conclusion_prompt` is present, that prompt is treated as explicit caller-owned text and is sent verbatim.
   - When overridden, MUST return a reflection string or `None` and MUST record prompt metadata for conclusion events.
