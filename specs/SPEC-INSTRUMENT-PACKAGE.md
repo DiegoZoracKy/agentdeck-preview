@@ -3,7 +3,7 @@
 > Status: Final
 > Version: 0.4.2
 > Last Updated: 2026-08-08
-> Implementation: Partial (IP1-IP18 complete; IP19 planned)
+> Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 

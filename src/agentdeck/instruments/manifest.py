@@ -18,6 +18,9 @@ SUPPORTED_SCHEMA_VERSIONS = ("1.0", "1.1")
 CAPABILITY_TIERS = ("runnable", "evidence_ready", "presentable", "stage_ready")
 ENTRY_POINT = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$")
 SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+TRANSIENT_DIRECTORIES = frozenset({"__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache"})
+TRANSIENT_FILES = frozenset({".coverage", ".DS_Store"})
+TRANSIENT_SUFFIXES = frozenset({".pyc", ".pyo"})
 
 ROOT_KEYS = {
     "schema_version",
@@ -74,12 +77,36 @@ def _read_manifest(root: Path) -> Tuple[Dict[str, Any], bytes]:
     return payload, raw
 
 
-def _source_files(root: Path) -> Iterable[Path]:
-    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+def _validate_source_tree(root: Path) -> None:
+    paths = sorted(root.rglob("*"), key=lambda item: item.as_posix())
+    for path in paths:
         if path.is_symlink():
             raise InstrumentManifestError(
                 f"Symlinks are not allowed in Instrument Packages: {path}"
             )
+    for path in paths:
+        relative = path.relative_to(root)
+        if path.is_file() and (
+            any(part in TRANSIENT_DIRECTORIES for part in relative.parts[:-1])
+            or path.name in TRANSIENT_FILES
+            or path.suffix in TRANSIENT_SUFFIXES
+        ):
+            raise InstrumentManifestError(
+                "Transient runtime or tool artifact is not allowed in an Instrument "
+                f"Package: {relative.as_posix()}"
+            )
+    for path in paths:
+        relative = path.relative_to(root)
+        if path.is_dir() and path.name in TRANSIENT_DIRECTORIES:
+            raise InstrumentManifestError(
+                "Transient runtime or tool artifact is not allowed in an Instrument "
+                f"Package: {relative.as_posix()}"
+            )
+
+
+def _source_files(root: Path) -> Iterable[Path]:
+    _validate_source_tree(root)
+    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
         if path.is_file():
             yield path
 
@@ -330,6 +357,12 @@ def _report(
     root = _package_root(package_root)
     report = InstrumentReport(operation=operation, package_root=_relative_root(root))
     manifest: Dict[str, Any] = {}
+    try:
+        _validate_source_tree(root)
+        report.checked("IP19", True, "Package contains only portable authored source")
+    except (InstrumentManifestError, OSError, ValueError) as exc:
+        report.checked("IP19", False, str(exc))
+        return report, root, manifest
     try:
         manifest, _ = _read_manifest(root)
         report.schema_version = manifest.get("schema_version")

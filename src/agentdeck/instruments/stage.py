@@ -10,13 +10,21 @@ from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, Iterator, Mapping, Sequence
+from typing import Any, Dict, Iterator, Mapping, Sequence, TypedDict
 from urllib.parse import unquote, urlsplit
 
 from agentdeck.core.artifact_safety import ensure_contained_path, require_json_value
 
 STAGE_PROTOCOL = "agentdeck-stage/1.0"
-STAGE_VIEWPORTS = (
+
+
+class _StageViewport(TypedDict):
+    id: str
+    width: int
+    height: int
+
+
+STAGE_VIEWPORTS: tuple[_StageViewport, ...] = (
     {"id": "desktop", "width": 1280, "height": 720},
     {"id": "mobile", "width": 390, "height": 844},
 )
@@ -106,7 +114,7 @@ def _harness_html(*, surface: Mapping[str, Any], entry_url: str) -> bytes:
 </script></body></html>""".encode("utf-8")
 
 
-def _handler_type(*, presentation_root: Path, harness: bytes):
+def _handler_type(*, presentation_root: Path, harness: bytes) -> type[BaseHTTPRequestHandler]:
     class StageRequestHandler(BaseHTTPRequestHandler):
         def log_message(self, format: str, *args: object) -> None:
             del format, args
@@ -168,7 +176,8 @@ def _serve_stage(*, presentation_root: Path, harness: bytes) -> Iterator[str]:
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        host, port = server.server_address
+        host = str(server.server_address[0])
+        port = int(server.server_address[1])
         yield f"http://{host}:{port}"
     finally:
         server.shutdown()
@@ -297,7 +306,11 @@ def certify_game_stage(
                             timeout=10_000,
                         )
                         page.wait_for_timeout(100)
-                        screenshot = page.locator("#stage").screenshot()
+                        page.evaluate(
+                            "() => new Promise(resolve => requestAnimationFrame(() => "
+                            "requestAnimationFrame(resolve)))"
+                        )
+                        screenshot = page.locator("#stage").screenshot(animations="disabled")
                         fingerprints.append(
                             _visual_fingerprint(screenshot, field=f"{viewport['id']} {label} frame")
                         )

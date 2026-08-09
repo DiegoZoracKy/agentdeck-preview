@@ -186,6 +186,38 @@ def test_ip15_equal_package_and_execution_produce_equal_reports(tmp_path: Path) 
     assert first.canonical_json() == second.canonical_json()
 
 
+def test_ip19_rejects_transient_artifacts_before_package_hash(tmp_path: Path) -> None:
+    """IP19: runtime/tool output is not portable authored package source."""
+    transient_paths = (
+        "number_duel/__pycache__/game.cpython-310.pyc",
+        ".mypy_cache/cache.db",
+        ".pytest_cache/nodeids",
+        ".ruff_cache/content",
+        ".coverage",
+        ".DS_Store",
+        "number_duel/game.pyo",
+    )
+    for index, relative in enumerate(transient_paths):
+        package = _copy_fixture(tmp_path / str(index))
+        artifact = package / relative
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        artifact.write_bytes(b"transient")
+        report = inspect_instrument(package)
+        assert not report.valid
+        assert report.package_sha256 is None
+        assert _check(report, "IP19")["status"] == "failed"
+        assert relative in _check(report, "IP19")["message"]
+
+    portable = _copy_fixture(tmp_path / "portable")
+    browser_asset = portable / "presentation" / "vendor" / "stage.js.map"
+    browser_asset.parent.mkdir(parents=True)
+    browser_asset.write_text("{}", encoding="utf-8")
+    report = inspect_instrument(portable)
+    assert report.valid
+    assert report.package_sha256 is not None
+    assert _check(report, "IP19")["status"] == "passed"
+
+
 def test_cli_emits_canonical_json_and_status(capsys, tmp_path: Path) -> None:
     package = _copy_fixture(tmp_path)
     assert main(["validate", str(package)]) == 0
