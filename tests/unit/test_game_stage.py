@@ -177,10 +177,10 @@ def test_ip16_stage_ready_rejects_superseded_protocol(tmp_path: Path) -> None:
     assert "must be 'agentdeck-stage/1.1'" in _check(report, "IP3")["message"]
 
 
-def test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification(
+def test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_stg9_browser_certification(
     tmp_path: Path,
 ) -> None:
-    """IP17 IP18 STG1 STG3 STG5 STG6 STG7 STG8: certify the full browser boundary."""
+    """IP17 IP18 STG1 STG3 STG5 STG6 STG7 STG8 STG9: certify the browser boundary."""
     output = tmp_path / "output"
     report = certify_instrument(
         _copy_stage_package(tmp_path), trust_mode="trusted-local", output_dir=output
@@ -209,6 +209,10 @@ def test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification(
     )
     assert all(
         viewport["visual_frame_count"] == stage_report["frame_count"]
+        for viewport in stage_report["viewports"]
+    )
+    assert all(
+        viewport["layout_frame_count"] == stage_report["frame_count"]
         for viewport in stage_report["viewports"]
     )
     for viewport in ("desktop", "mobile"):
@@ -289,6 +293,31 @@ def test_ip18_stg7_mobile_document_overflow_is_rejected(tmp_path: Path) -> None:
     assert not report.valid
     assert _check(report, "IP18")["status"] == "failed"
     assert "mobile Game Stage overflows" in _check(report, "IP18")["message"]
+
+
+def test_ip18_stg9_clipped_visible_text_is_rejected(tmp_path: Path) -> None:
+    """IP18 STG9: overflow-hidden cannot conceal clipped operational text."""
+    html = _stage_html(
+        body='<div id="clip"><span id="critical">CRITICAL STATUS</span></div>',
+        style=(
+            "@media (max-width: 700px) {"
+            "#clip { position: fixed; left: 350px; top: 200px; width: 20px; "
+            "height: 30px; overflow: hidden; }"
+            "#critical { display: block; width: 150px; }"
+            "}"
+        ),
+    )
+
+    report = certify_instrument(
+        _copy_stage_package(tmp_path, html=html), trust_mode="trusted-local"
+    )
+
+    assert not report.valid
+    assert _check(report, "IP18")["status"] == "failed"
+    assert (
+        "mobile frame 0 clips visible text in span#critical against viewport"
+        in _check(report, "IP18")["message"]
+    )
 
 
 def test_ip18_stg8_blank_visual_output_is_rejected(tmp_path: Path) -> None:

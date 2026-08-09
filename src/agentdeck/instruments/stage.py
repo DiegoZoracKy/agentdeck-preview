@@ -29,6 +29,53 @@ STAGE_VIEWPORTS: tuple[_StageViewport, ...] = (
     {"id": "mobile", "width": 390, "height": 844},
 )
 
+_VISIBLE_TEXT_CONTAINMENT_PROBE = r"""() => {
+  const documentRect = {
+    left: 0,
+    top: 0,
+    right: document.documentElement.clientWidth,
+    bottom: document.documentElement.clientHeight
+  };
+  const constrained = value => ["hidden", "clip", "auto", "scroll"].includes(value);
+  const outside = (rect, boundary, checkX, checkY) =>
+    (checkX && (rect.left < boundary.left - 1 || rect.right > boundary.right + 1)) ||
+    (checkY && (rect.top < boundary.top - 1 || rect.bottom > boundary.bottom + 1));
+  const label = element => {
+    const id = element.id ? `#${element.id}` : "";
+    const classes = [...element.classList].slice(0, 2).map(name => `.${name}`).join("");
+    return `${element.tagName.toLowerCase()}${id}${classes}`;
+  };
+  const issues = [];
+  for (const element of document.body.querySelectorAll("*")) {
+    const directText = [...element.childNodes]
+      .filter(node => node.nodeType === Node.TEXT_NODE)
+      .map(node => node.textContent || "")
+      .join("")
+      .trim();
+    if (!directText) continue;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    if (style.display === "none" || style.visibility === "hidden" ||
+        Number(style.opacity) === 0 || rect.width <= 1 || rect.height <= 1) continue;
+    if (outside(rect, documentRect, true, true)) {
+      issues.push({element: label(element), boundary: "viewport"});
+      continue;
+    }
+    let ancestor = element.parentElement;
+    while (ancestor && ancestor !== document.body) {
+      const ancestorStyle = getComputedStyle(ancestor);
+      const checkX = constrained(ancestorStyle.overflowX);
+      const checkY = constrained(ancestorStyle.overflowY);
+      if ((checkX || checkY) && outside(rect, ancestor.getBoundingClientRect(), checkX, checkY)) {
+        issues.push({element: label(element), boundary: label(ancestor)});
+        break;
+      }
+      ancestor = ancestor.parentElement;
+    }
+  }
+  return issues.slice(0, 5);
+}"""
+
 
 class StageCertificationError(RuntimeError):
     """Base failure for custom Stage certification."""
@@ -336,6 +383,11 @@ def certify_game_stage(
                         or loaded.get("frame_count") != len(frames)
                     ):
                         raise StageRuntimeError("Game Stage loaded acknowledgement is not exact")
+                    stage_frame = next(
+                        (frame for frame in page.frames if "/stage/" in frame.url), None
+                    )
+                    if stage_frame is None:
+                        raise StageRuntimeError("Game Stage iframe did not load")
 
                     probe_frames = (0, len(frames) - 1)
                     capture_labels: dict[int, list[str]] = {}
@@ -362,11 +414,32 @@ def certify_game_stage(
                             "() => new Promise(resolve => requestAnimationFrame(() => "
                             "requestAnimationFrame(resolve)))"
                         )
+                        frame_dimensions = stage_frame.evaluate("""() => ({
+                          width: document.documentElement.clientWidth,
+                          height: document.documentElement.clientHeight,
+                          scrollWidth: document.documentElement.scrollWidth,
+                          scrollHeight: document.documentElement.scrollHeight
+                        })""")
+                        if (
+                            frame_dimensions["scrollWidth"] > frame_dimensions["width"] + 1
+                            or frame_dimensions["scrollHeight"]
+                            > frame_dimensions["height"] + 1
+                        ):
+                            raise StageRuntimeError(
+                                f"{viewport['id']} Game Stage overflows its viewport"
+                            )
                         screenshot = page.locator("#stage").screenshot(animations="disabled")
                         fingerprint = _visual_fingerprint(
                             screenshot,
                             field=f"{viewport['id']} frame {frame_index}",
                         )
+                        layout_issues = stage_frame.evaluate(_VISIBLE_TEXT_CONTAINMENT_PROBE)
+                        if layout_issues:
+                            issue = layout_issues[0]
+                            raise StageRuntimeError(
+                                f"{viewport['id']} frame {frame_index} clips visible text "
+                                f"in {issue['element']} against {issue['boundary']}"
+                            )
                         for label in capture_labels.get(frame_index, []):
                             boundary_fingerprints[frame_index] = fingerprint
                             frame_results.append({"label": label, "frame_index": frame_index})
@@ -384,11 +457,6 @@ def certify_game_stage(
                             f"{viewport['id']} Game Stage did not visibly change between frames"
                         )
 
-                    stage_frame = next(
-                        (frame for frame in page.frames if "/stage/" in frame.url), None
-                    )
-                    if stage_frame is None:
-                        raise StageRuntimeError("Game Stage iframe did not load")
                     sandbox = page.locator("#stage").get_attribute("sandbox")
                     if sandbox != "allow-scripts":
                         raise StageIsolationError(
@@ -432,6 +500,7 @@ def certify_game_stage(
                             "height": viewport["height"],
                             "rendered_frame_count": len(frames),
                             "visual_frame_count": len(frames),
+                            "layout_frame_count": len(frames),
                             "frames": frame_results,
                         }
                     )
