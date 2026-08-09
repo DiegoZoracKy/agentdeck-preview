@@ -422,8 +422,7 @@ def certify_game_stage(
                         })""")
                         if (
                             frame_dimensions["scrollWidth"] > frame_dimensions["width"] + 1
-                            or frame_dimensions["scrollHeight"]
-                            > frame_dimensions["height"] + 1
+                            or frame_dimensions["scrollHeight"] > frame_dimensions["height"] + 1
                         ):
                             raise StageRuntimeError(
                                 f"{viewport['id']} Game Stage overflows its viewport"
