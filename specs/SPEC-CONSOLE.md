@@ -1,7 +1,7 @@
 # SPEC-CONSOLE: Execution Engine Contract
 
 > Status: Final
-> Version: 0.7.3
+> Version: 0.7.4
 > Last Updated: 2026-08-08
 > Implementation: Complete
 > Review State: Legacy-approved
@@ -257,8 +257,8 @@ Cleanup session and emit SESSION_END (context manager protocol).
 
 ### 6.6 Conclusion Visibility (CV)
 
-24. **CV1**: Before invoking a policy-selected Player through its default conclusion template, Console MUST derive that Player's terminal view with `game.get_view(match_result.final_state, player.name)` and pass a distinct `MatchResult` whose `final_state` is the derived view. Console MUST preserve the canonical `MatchResult.final_state` for recording, replay, game hooks, and the caller.
-25. **CV2**: A prompt returned by `game.get_conclusion_prompt(...)` is an explicit Game-owned override. Console MUST pass that prompt verbatim and MUST NOT reinterpret or redact it; Game authors own the visibility of that prompt under `SPEC-GAME`.
+24. **CV1 Player-Visible Default Conclusion**: Before invoking a policy-selected Player through its default conclusion template, Console MUST derive that Player's terminal view with `game.get_view(match_result.final_state, player.name)` and pass a distinct `MatchResult` whose `final_state` is the derived view. Console MUST preserve the canonical `MatchResult.final_state` for recording, replay, game hooks, and the caller.
+25. **CV2 Game-Owned Explicit Conclusion**: A prompt returned by `game.get_conclusion_prompt(...)` is an explicit Game-owned override. Console MUST pass that prompt verbatim and MUST NOT reinterpret or redact it; Game authors own the visibility of that prompt under `SPEC-GAME`.
 
 ### 6.7 Event Ordering & Delivery (E)
 25. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (`MATCH_START` / **TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) / **PLAYER_CONCLUSION** (per policy) / `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.

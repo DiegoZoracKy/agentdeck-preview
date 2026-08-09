@@ -1,9 +1,9 @@
 # AgentDeck Spec Registry Specification
 
 > Status: Final
-> Version: 0.2.1
+> Version: 0.3.0
 > Last Updated: 2026-08-08
-> Implementation: Complete (Wave C5 exact evidence and active-summary scope)
+> Implementation: Planned
 > Review State: Consensus-approved
 > Audience: Core maintainers, extension authors, automated authoring systems
 
@@ -123,6 +123,11 @@ CI MUST fail when:
 
 CI validates declarations; it MUST NOT upgrade assurance automatically.
 
+A contract whose `Implementation` begins with `Complete` MUST map every registered
+invariant to direct executable evidence, even while legacy unregistered invariants keep
+the contract at `partial`. A `Planned` contract MAY precede its tests so the Phase A
+spec commit remains independently reviewable.
+
 ## 8. Invariants
 
 1. **SR1 Complete Metadata**: Every governed spec declares valid lifecycle, semantic version, update date, implementation state, and review state.
@@ -139,6 +144,7 @@ CI validates declarations; it MUST NOT upgrade assurance automatically.
 12. **SR12 Non-Vacuous Verification**: A contract with zero registered invariants, any unregistered invariant, or mapped-only assurance MUST NOT claim verified.
 13. **SR13 Legacy Gap Visibility**: Invariant-shaped legacy identifiers that are not machine-addressable MUST remain visible in the registry and compliance summary until normalized.
 14. **SR14 Active Summary Scope**: Aggregate invariant totals MUST identify and count only active contracts while inactive contracts remain individually discoverable.
+15. **SR15 Complete Work Has Direct Evidence**: Every registered invariant in a Complete contract MUST map to an existing direct test; legacy unregistered invariants MAY remain visible without blocking incremental evidence for new work.
 
 ## 9. Compatibility
 

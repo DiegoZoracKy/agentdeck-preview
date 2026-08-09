@@ -26,7 +26,9 @@
     ], "spec_id": "SPEC-ARTIFACT-SAFETY", "status": "verified"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-BEHAVIORAL-VARIABLE-DAMAGE", "status": "partial"},
-    {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-CONSOLE", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "CV1", "test": "tests/unit/test_conclusion_policy.py::test_cv1_default_conclusion_uses_player_visible_terminal_state"}
+    ], "spec_id": "SPEC-CONSOLE", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-CONTROLLER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAME-MECHANIC-TURN-BASED", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAME", "status": "partial"},
@@ -90,7 +92,7 @@
       {"invariant_id": "SR12", "test": "tests/unit/test_spec_registry.py::test_sr12_rejects_vacuous_verified_contract"},
       {"invariant_id": "SR13", "test": "tests/unit/test_spec_registry.py::test_sr13_exposes_unregistered_legacy_invariants"},
       {"invariant_id": "SR14", "test": "tests/unit/test_spec_registry.py::test_sr14_summary_counts_only_active_contracts"}
-    ], "spec_id": "SPEC-SPEC-REGISTRY", "status": "verified"},
+    ], "spec_id": "SPEC-SPEC-REGISTRY", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-SPECTATOR", "status": "partial"}
   ],
   "schema_version": 2

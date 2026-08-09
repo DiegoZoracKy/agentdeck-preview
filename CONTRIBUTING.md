@@ -359,6 +359,8 @@ Before marking a spec "Final":
 - [ ] Responsibilities limited to one primary function
 - [ ] Public API documented with signatures and return values
 - [ ] Invariants explicitly enumerated (GB1-GB6 style)
+- [ ] New or modified invariants use the machine-addressable `**GB1 Title**` form and,
+      when implementation becomes Complete, map to a direct test in `specs/compliance.json`
 - [ ] Data flow diagrams/descriptions reference adjacent specs
 - [ ] Error handling lists user-facing messages and internal logging
 - [ ] Examples demonstrate happy path + edge case, runnable with current codebase

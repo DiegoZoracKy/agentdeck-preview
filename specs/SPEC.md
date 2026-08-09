@@ -190,7 +190,7 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [AgentDeck](SPEC-AGENTDECK.md) | 0.3.1 | Final | Public API facade for the framework |
-| [Console](SPEC-CONSOLE.md) | 0.7.3 | Final | Execution engine for session/match lifecycle |
+| [Console](SPEC-CONSOLE.md) | 0.7.4 | Final | Execution engine for session/match lifecycle |
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract (rules, state, narrative, lifecycle hooks, effective config) |
@@ -234,7 +234,7 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.0 | Final | Core spectator projection and contained static artifact sinks |
 | [Artifact Safety](SPEC-ARTIFACT-SAFETY.md) | 0.2.0 | Final | Portable identity, output containment, strict JSON, and executable trust boundary |
-| [Spec Registry](SPEC-SPEC-REGISTRY.md) | 0.2.0 | Final | Deterministic lifecycle, exact evidence locators, and honest compliance evidence |
+| [Spec Registry](SPEC-SPEC-REGISTRY.md) | 0.3.0 | Final | Deterministic lifecycle, exact evidence locators, and honest compliance evidence |
 | [Viewer](SPEC-VIEWER.md) | 0.7.0 | Deprecated | Frozen browser viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
 
 ---
