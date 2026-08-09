@@ -111,14 +111,14 @@ file containment.
 
 ## 7. Invariants
 
-1. **GS1 Distinct Presentation Role**: A Game Stage consumes presentation data for humans and MUST NOT replace the Player Renderer, mutate gameplay, score behavior, or author research facts.
-2. **GS2 Technology-Neutral Bundle**: The contract MUST NOT require a frontend framework or drawing technology; any bundled implementation is valid when it satisfies the protocol and certification behavior.
-3. **GS3 Match-Surface-Only Input**: The Host MUST supply only the certified Match Surface and contained frames; a Stage MUST NOT require canonical records, Game objects, provider access, or hidden state.
-4. **GS4 Contained Offline Runtime**: Every Stage dependency MUST resolve under `presentation/`, and browser certification MUST reject external network attempts or escaping paths.
-5. **GS5 Sandboxed Host Boundary**: The Host MUST run Stage code in a unique-origin iframe with scripts as its only sandbox capability.
-6. **GS6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities.
-7. **GS7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
-8. **GS8 Visible Frame Projection**: The first and last fixture frames MUST produce nonblank visual output and exact render acknowledgements.
+1. **STG1 Distinct Presentation Role**: A Game Stage consumes presentation data for humans and MUST NOT replace the Player Renderer, mutate gameplay, score behavior, or author research facts.
+2. **STG2 Technology-Neutral Bundle**: The contract MUST NOT require a frontend framework or drawing technology; any bundled implementation is valid when it satisfies the protocol and certification behavior.
+3. **STG3 Match-Surface-Only Input**: The Host MUST supply only the certified Match Surface and contained frames; a Stage MUST NOT require canonical records, Game objects, provider access, or hidden state.
+4. **STG4 Contained Offline Runtime**: Every Stage dependency MUST resolve under `presentation/`, and browser certification MUST reject external network attempts or escaping paths.
+5. **STG5 Sandboxed Host Boundary**: The Host MUST run Stage code in a unique-origin iframe with scripts as its only sandbox capability.
+6. **STG6 Exact Host Protocol**: Ready, load, loaded, render, rendered, and error messages MUST use the declared protocol and exact match/frame identities.
+7. **STG7 Responsive Runtime Health**: Desktop and mobile probes MUST complete without page errors, error-level console messages, protocol errors, or document overflow.
+8. **STG8 Visible Frame Projection**: The first and last fixture frames MUST produce nonblank visual output and exact render acknowledgements.
 
 ## 8. Failure Handling
 
