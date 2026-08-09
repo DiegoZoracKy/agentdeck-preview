@@ -1,9 +1,9 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.3.0
+> Version: 0.4.0
 > Last Updated: 2026-08-08
-> Implementation: Complete (Wave C5 honest fixture boundary)
+> Implementation: Planned
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
 
@@ -41,7 +41,7 @@ The structural inspector MUST NOT import any Python module.
 `instrument.yaml` is UTF-8 YAML with this canonical shape:
 
 ```yaml
-schema_version: "1.0"
+schema_version: "1.1"
 instrument:
   id: number-duel
   version: "0.1.0"
@@ -66,16 +66,18 @@ evidence:
 presentation:
   redactor_entry_point: number_duel.presentation:visible_state
   viewer: presentation/index.html
+  viewer_protocol: agentdeck-stage/1.0
   oracle_paths:
     Alpha: [/private/Beta]
     Beta: [/private/Alpha]
 claims:
-  requested: [runnable]
+  requested: [runnable, presentable, stage_ready]
 ```
 
 ### Required fields
 
-- `schema_version`: supported manifest schema string.
+- `schema_version`: supported manifest schema string. `1.0` remains valid for existing
+  packages; `1.1` adds custom Game Stage declarations.
 - `instrument.id`: portable Artifact Identifier.
 - `instrument.version`: semantic `MAJOR.MINOR.PATCH` string.
 - `instrument.title`, `instrument.summary`: non-empty strings.
@@ -111,6 +113,8 @@ manifest config with `Game.describe()["config"]` exactly.
   `visible_state(state, player, game_config) -> dict` without mutation or oracle leakage.
 - `presentation.viewer`: contained static entry file; absence does not block a generic
   Match Surface.
+- `presentation.viewer_protocol`: required with `stage_ready` and currently exactly
+  `agentdeck-stage/1.0`.
 - `presentation.oracle_paths`: optional mapping from fixture Player name to JSON
   Pointers that MUST be absent from that Player's visible state.
 - `presentation.oracle_values`: optional exact strings that MUST be absent from every
@@ -215,8 +219,16 @@ Requires `runnable`. The certifier MUST additionally prove:
 - declared private/oracle fixture values do not appear in player-visible projections;
 - a generic Match Surface can project the full lifecycle using only each acting
   Player's declared visible state;
-- a declared viewer file, when present, is contained and references only contained
-  package assets.
+- a declared viewer entry, when present, is contained; custom browser execution is a
+  separate `stage_ready` claim.
+
+### `stage_ready`
+
+Requires `presentable`, manifest schema `1.1`, a contained `presentation.viewer`, and
+`presentation.viewer_protocol: agentdeck-stage/1.0`. The certifier MUST additionally
+prove the portable browser contract in `SPEC-GAME-STAGE`: sandboxed Match Surface load,
+exact first/last frame acknowledgements, contained offline requests, visible output,
+and error-free desktop/mobile probes.
 
 ## 7. Invariants
 
@@ -235,6 +247,9 @@ Requires `runnable`. The certifier MUST additionally prove:
 13. **IP13 Visibility Boundary**: Presentable certification MUST derive views from the declared visibility function and reject declared oracle fixture leakage.
 14. **IP14 Failure Atomicity**: A failed check MUST NOT overwrite a prior successful report or write outside the certification root.
 15. **IP15 Canonical Report**: Equal package content and semantic result MUST produce byte-identical canonical reports after excluding declared volatile artifact locations.
+16. **IP16 Stage Declaration**: A stage_ready claim MUST declare schema 1.1, presentable as a prerequisite, a contained presentation entry, and the supported Game Stage protocol.
+17. **IP17 Stage Isolation**: Stage certification MUST expose only the certified Match Surface inside a scripts-only sandbox and MUST reject escaping or external network requests.
+18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive exact protocol acknowledgements and nonblank, error-free, overflow-free first/last frame output at desktop and mobile viewports.
 
 ## 8. Failure Handling
 
