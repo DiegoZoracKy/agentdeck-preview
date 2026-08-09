@@ -15,7 +15,7 @@ from urllib.parse import unquote, urlsplit
 
 from agentdeck.core.artifact_safety import ensure_contained_path, require_json_value
 
-STAGE_PROTOCOL = "agentdeck-stage/1.0"
+STAGE_PROTOCOL = "agentdeck-stage/1.1"
 
 
 class _StageViewport(TypedDict):
@@ -42,10 +42,48 @@ class StageRuntimeError(StageCertificationError):
     """Raised when a Stage cannot satisfy the host protocol or visual probe."""
 
 
+def _stage_context(surface: Mapping[str, Any]) -> Dict[str, Any]:
+    match = surface.get("match")
+    if not isinstance(match, Mapping):
+        raise StageRuntimeError("Game Stage Match Surface has no match context")
+    players = surface.get("players")
+    if not isinstance(players, list):
+        raise StageRuntimeError("Game Stage Match Surface has no Player identities")
+    frames = surface.get("frames")
+    if not isinstance(frames, list) or not frames:
+        raise StageRuntimeError("Game Stage Match Surface has no gameplay frames")
+
+    identities = []
+    for player in players:
+        if not isinstance(player, Mapping):
+            raise StageRuntimeError("Game Stage Player identity must be an object")
+        identities.append(
+            {
+                "name": player.get("name"),
+                "model": player.get("model"),
+            }
+        )
+    context = {
+        "schema_version": "1.0",
+        "match": {
+            "match_id": match.get("match_id"),
+            "game": match.get("game"),
+            "seed": match.get("seed"),
+        },
+        "players": identities,
+        "frame_count": len(frames),
+    }
+    require_json_value(context, field="Game Stage initial context")
+    return context
+
+
 def _harness_html(*, surface: Mapping[str, Any], entry_url: str) -> bytes:
     encoded = json.dumps(surface, sort_keys=True, ensure_ascii=True, allow_nan=False).replace(
         "</", "<\\/"
     )
+    initial_context = json.dumps(
+        _stage_context(surface), sort_keys=True, ensure_ascii=True, allow_nan=False
+    ).replace("</", "<\\/")
     return f"""<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <style>html,body,#stage{{width:100%;height:100%;margin:0;overflow:hidden}}#stage{{border:0}}</style>
@@ -53,6 +91,7 @@ def _harness_html(*, surface: Mapping[str, Any], entry_url: str) -> bytes:
 (() => {{
   const protocol = {json.dumps(STAGE_PROTOCOL)};
   const surface = {encoded};
+  const initialContext = {initial_context};
   let stageFrame = null;
   window.__agentdeckProbe = {{state:"booting",last_rendered:null,messages:[],errors:[]}};
   const send = payload => stageFrame.contentWindow.postMessage(payload, "*");
@@ -76,7 +115,7 @@ def _harness_html(*, surface: Mapping[str, Any], entry_url: str) -> bytes:
         return;
       }}
       window.__agentdeckProbe.state = "ready";
-      send({{type:"agentdeck:stage-load",protocol,match_surface:surface}});
+      send({{type:"agentdeck:stage-load",protocol,context:initialContext}});
     }} else if (data.type === "agentdeck:stage-loaded") {{
       if (!exactKeys(data, ["type", "protocol", "match_id", "frame_count"])) {{
         window.__agentdeckProbe.errors.push("invalid loaded acknowledgement");
@@ -298,7 +337,7 @@ def certify_game_stage(
                     for label, frame_index in zip(("first", "last"), probe_frames):
                         capture_labels.setdefault(frame_index, []).append(label)
                     frame_results = []
-                    fingerprints = []
+                    boundary_fingerprints: dict[int, str] = {}
                     for frame_index in range(len(frames)):
                         page.evaluate(
                             "frameIndex => window.__agentdeckRender(frameIndex)", frame_index
@@ -313,19 +352,18 @@ def certify_game_stage(
                         render_errors = page.evaluate("window.__agentdeckProbe.errors")
                         if render_errors:
                             raise StageRuntimeError(f"Game Stage browser error: {render_errors[0]}")
+                        page.wait_for_timeout(100)
+                        page.evaluate(
+                            "() => new Promise(resolve => requestAnimationFrame(() => "
+                            "requestAnimationFrame(resolve)))"
+                        )
+                        screenshot = page.locator("#stage").screenshot(animations="disabled")
+                        fingerprint = _visual_fingerprint(
+                            screenshot,
+                            field=f"{viewport['id']} frame {frame_index}",
+                        )
                         for label in capture_labels.get(frame_index, []):
-                            page.wait_for_timeout(100)
-                            page.evaluate(
-                                "() => new Promise(resolve => requestAnimationFrame(() => "
-                                "requestAnimationFrame(resolve)))"
-                            )
-                            screenshot = page.locator("#stage").screenshot(animations="disabled")
-                            fingerprints.append(
-                                _visual_fingerprint(
-                                    screenshot,
-                                    field=f"{viewport['id']} {label} frame",
-                                )
-                            )
+                            boundary_fingerprints[frame_index] = fingerprint
                             frame_results.append({"label": label, "frame_index": frame_index})
                             if output_root is not None:
                                 relative = f"presentation/stage-{viewport['id']}-{label}.png"
@@ -333,7 +371,10 @@ def certify_game_stage(
                                 target.parent.mkdir(parents=True, exist_ok=True)
                                 target.write_bytes(screenshot)
                                 artifact_names.append(relative)
-                    if probe_frames[0] != probe_frames[1] and len(set(fingerprints)) != 2:
+                    if (
+                        probe_frames[0] != probe_frames[1]
+                        and len(set(boundary_fingerprints.values())) != 2
+                    ):
                         raise StageRuntimeError(
                             f"{viewport['id']} Game Stage did not visibly change between frames"
                         )
@@ -385,6 +426,7 @@ def certify_game_stage(
                             "width": viewport["width"],
                             "height": viewport["height"],
                             "rendered_frame_count": len(frames),
+                            "visual_frame_count": len(frames),
                             "frames": frame_results,
                         }
                     )

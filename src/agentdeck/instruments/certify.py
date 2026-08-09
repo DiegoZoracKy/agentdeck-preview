@@ -596,12 +596,13 @@ def certify_instrument(
                 report.checked(
                     "IP17",
                     True,
-                    "Game Stage ran from contained assets in a scripts-only sandbox without network",
+                    "Game Stage received only bounded context and current frames in a "
+                    "scripts-only sandbox without network",
                 )
                 report.checked(
                     "IP18",
                     True,
-                    "Game Stage rendered exact first and last frames at desktop and mobile viewports",
+                    "Game Stage rendered every frame visibly at desktop and mobile viewports",
                     details={
                         "protocol": stage["protocol"],
                         "sandbox": stage["sandbox"],

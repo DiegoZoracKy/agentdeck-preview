@@ -303,9 +303,9 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
                 raise InstrumentManifestError(
                     "presentation.viewer_protocol requires manifest schema_version '1.1'"
                 )
-            if presentation["viewer_protocol"] != "agentdeck-stage/1.0":
+            if presentation["viewer_protocol"] != "agentdeck-stage/1.1":
                 raise InstrumentManifestError(
-                    "presentation.viewer_protocol must be 'agentdeck-stage/1.0'"
+                    "presentation.viewer_protocol must be 'agentdeck-stage/1.1'"
                 )
         oracle_values = presentation.get("oracle_values", [])
         if not isinstance(oracle_values, list) or any(
@@ -337,9 +337,9 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
             raise InstrumentManifestError("stage_ready requires manifest schema_version '1.1'")
         if presentation is None or "viewer" not in presentation:
             raise InstrumentManifestError("stage_ready requires presentation.viewer")
-        if presentation.get("viewer_protocol") != "agentdeck-stage/1.0":
+        if presentation.get("viewer_protocol") != "agentdeck-stage/1.1":
             raise InstrumentManifestError(
-                "stage_ready requires presentation.viewer_protocol 'agentdeck-stage/1.0'"
+                "stage_ready requires presentation.viewer_protocol 'agentdeck-stage/1.1'"
             )
         viewer = ensure_contained_path(root, root / presentation["viewer"])
         presentation_root = ensure_contained_path(root, root / "presentation")

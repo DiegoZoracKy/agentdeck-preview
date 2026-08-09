@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 
 from agentdeck.instruments import certify_instrument, validate_instrument
+from agentdeck.instruments.stage import _stage_context
 
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "instruments" / "number_duel"
 
@@ -32,9 +33,9 @@ def _stage_html(*, body: str = "", style: str = "", before_ready: str = "") -> s
   <main><h1>NUMBER DUEL</h1><pre id="frame">WAITING FOR MATCH</pre>{body}</main>
   <script>
     (() => {{
-      const protocol = "agentdeck-stage/1.0";
+      const protocol = "agentdeck-stage/1.1";
       const send = payload => parent.postMessage({{protocol, ...payload}}, "*");
-      let surface = null;
+      let context = null;
       const render = (frame, frameIndex) => {{
         document.querySelector("#frame").textContent = JSON.stringify({{
           turn: frame.turn,
@@ -49,19 +50,30 @@ def _stage_html(*, body: str = "", style: str = "", before_ready: str = "") -> s
         if (!message || message.protocol !== protocol) return;
         if (message.type === "agentdeck:stage-load") {{
           const keys = Object.keys(message).sort().join(",");
-          if (keys !== "match_surface,protocol,type") {{
+          if (keys !== "context,protocol,type") {{
             send({{type: "agentdeck:stage-error", message: "unexpected host authority"}});
             return;
           }}
-          surface = message.match_surface;
+          context = message.context;
+          const contextKeys = Object.keys(context).sort().join(",");
+          const matchKeys = Object.keys(context.match).sort().join(",");
+          if (contextKeys !== "frame_count,match,players,schema_version" ||
+              matchKeys !== "game,match_id,seed" ||
+              context.players.some(player => Object.keys(player).sort().join(",") !== "model,name")) {{
+            send({{type: "agentdeck:stage-error", message: "future match data exposed"}});
+            return;
+          }}
           send({{
             type: "agentdeck:stage-loaded",
-            match_id: surface.match.match_id,
-            frame_count: surface.frames.length
+            match_id: context.match.match_id,
+            frame_count: context.frame_count
           }});
         }} else if (message.type === "agentdeck:stage-render") {{
-          if (!surface || JSON.stringify(surface.frames[message.frame_index]) !== JSON.stringify(message.frame)) {{
-            send({{type: "agentdeck:stage-error", message: "frame is not from surface"}});
+          const keys = Object.keys(message).sort().join(",");
+          if (!context || keys !== "frame,frame_index,protocol,type" ||
+              message.frame_index < 0 || message.frame_index >= context.frame_count ||
+              !message.frame || typeof message.frame !== "object") {{
+            send({{type: "agentdeck:stage-error", message: "invalid current frame"}});
             return;
           }}
           render(message.frame, message.frame_index);
@@ -88,7 +100,7 @@ def _copy_stage_package(tmp_path: Path, *, html: str | None = None) -> Path:
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
     manifest["schema_version"] = "1.1"
     manifest["presentation"]["viewer"] = "presentation/index.html"
-    manifest["presentation"]["viewer_protocol"] = "agentdeck-stage/1.0"
+    manifest["presentation"]["viewer_protocol"] = "agentdeck-stage/1.1"
     manifest["claims"]["requested"].append("stage_ready")
     manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
     return package
@@ -96,6 +108,36 @@ def _copy_stage_package(tmp_path: Path, *, html: str | None = None) -> Path:
 
 def _check(report, check_id: str) -> dict:
     return next(check for check in report.to_dict()["checks"] if check["id"] == check_id)
+
+
+def test_ip17_stg3_initial_context_excludes_future_match_data() -> None:
+    """IP17 STG3: initial Stage authority contains only pre-match identity."""
+    surface = {
+        "match": {
+            "match_id": "match-1",
+            "game": "NumberDuel",
+            "seed": 42,
+            "winner": "Alpha",
+            "final_state": {"score": 3},
+        },
+        "players": [
+            {"name": "Alpha", "model": "mock-a", "total_cost": 9.99},
+            {"name": "Beta", "model": "mock-b", "conclusion": "I lost"},
+        ],
+        "frames": [{"phase_index": 0}, {"phase_index": 1}],
+        "conclusions": [{"player": "Alpha", "text": "I won"}],
+        "economics": {"total_cost": 9.99},
+    }
+
+    assert _stage_context(surface) == {
+        "schema_version": "1.0",
+        "match": {"match_id": "match-1", "game": "NumberDuel", "seed": 42},
+        "players": [
+            {"name": "Alpha", "model": "mock-a"},
+            {"name": "Beta", "model": "mock-b"},
+        ],
+        "frame_count": 2,
+    }
 
 
 def test_ip16_stg2_stage_declaration_is_contained_and_technology_neutral(
@@ -119,6 +161,20 @@ def test_ip16_stage_ready_rejects_viewer_outside_presentation(tmp_path: Path) ->
     report = validate_instrument(package)
     assert not report.valid
     assert "must resolve under presentation/" in _check(report, "IP3")["message"]
+
+
+def test_ip16_stage_ready_rejects_superseded_protocol(tmp_path: Path) -> None:
+    """IP16: stage_ready rejects the future-exposing protocol 1.0 contract."""
+    package = _copy_stage_package(tmp_path)
+    manifest_path = package / "instrument.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    manifest["presentation"]["viewer_protocol"] = "agentdeck-stage/1.0"
+    manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+
+    report = validate_instrument(package)
+
+    assert not report.valid
+    assert "must be 'agentdeck-stage/1.1'" in _check(report, "IP3")["message"]
 
 
 def test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification(
@@ -151,6 +207,10 @@ def test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification(
         viewport["rendered_frame_count"] == stage_report["frame_count"]
         for viewport in stage_report["viewports"]
     )
+    assert all(
+        viewport["visual_frame_count"] == stage_report["frame_count"]
+        for viewport in stage_report["viewports"]
+    )
     for viewport in ("desktop", "mobile"):
         for frame in ("first", "last"):
             assert (output / "presentation" / f"stage-{viewport}-{frame}.png").is_file()
@@ -171,7 +231,7 @@ def test_ip17_stg4_external_network_attempt_fails_stage_only(tmp_path: Path) -> 
 def test_ip18_stg6_wrong_protocol_acknowledgement_is_rejected(tmp_path: Path) -> None:
     """IP18 STG6: a Stage using the wrong protocol never receives capability."""
     html = _stage_html().replace(
-        'const protocol = "agentdeck-stage/1.0";',
+        'const protocol = "agentdeck-stage/1.1";',
         'const protocol = "agentdeck-stage/9.9";',
     )
     report = certify_instrument(
@@ -222,6 +282,25 @@ def test_ip18_stg8_blank_visual_output_is_rejected(tmp_path: Path) -> None:
     assert report.awarded_tiers == ["runnable", "evidence_ready", "presentable"]
     assert _check(report, "IP18")["status"] == "failed"
     assert "blank visual output" in _check(report, "IP18")["message"]
+
+
+def test_ip18_stg8_blank_intermediate_frame_is_rejected(tmp_path: Path) -> None:
+    """IP18 STG8: visible boundaries cannot hide a blank intermediate frame."""
+    html = _stage_html().replace(
+        "const render = (frame, frameIndex) => {",
+        "const render = (frame, frameIndex) => {\n"
+        "        document.querySelector('main').style.display = "
+        "frameIndex === 1 ? 'none' : 'block';",
+    )
+    report = certify_instrument(
+        _copy_stage_package(tmp_path, html=html), trust_mode="trusted-local"
+    )
+    assert not report.valid
+    assert report.awarded_tiers == ["runnable", "evidence_ready", "presentable"]
+    assert _check(report, "IP18")["status"] == "failed"
+    assert "mobile frame 1 produced blank visual output" in _check(report, "IP18")["message"] or (
+        "desktop frame 1 produced blank visual output" in _check(report, "IP18")["message"]
+    )
 
 
 def test_ip18_stg8_static_visual_output_is_rejected_for_distinct_frames(
