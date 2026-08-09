@@ -1,8 +1,8 @@
 # SPEC-REPLAY: Replay Engine Contract
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-30
+> Version: 2.0.1
+> Last Updated: 2026-08-09
 > Implementation: Complete (Recorder v2.0 canonical event parity)
 > Review State: Legacy-approved
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors
@@ -138,7 +138,7 @@ Execute replay with spectators.
 ### 6.5 Lifecycle Events (LC)
 12. **LC1**: MUST emit events in exact order: **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per player) → **MATCH_START** → recorded events → **PLAYER_CONCLUSION** (per player when present) → **MATCH_END**. This matches live execution order per SPEC-CONSOLE §6.6 E1.
 13. **LC2**: MUST emit handshake lifecycle events before `MATCH_START` to match live execution ordering. When a valid v2.0 recording contains `PLAYER_HANDSHAKE_COMPLETE|ABORT` without an explicit `PLAYER_HANDSHAKE_START`, ReplayEngine MAY synthesize the missing START event from the recorded lifecycle payload.
-14. **LC3**: MUST emit MATCH_START after handshake phase completes, with rehydrated game/player metadata.
+14. **LC3**: MUST emit MATCH_START after handshake phase completes, with rehydrated game/player metadata. When the recording contains `metadata.player_summaries`, replay MUST prefer those recorded identity and configuration fields over name-only player metadata. Rehydrated MATCH_START metadata MUST omit finalized aggregates, such as `total_cost`, that were not available when the live MATCH_START occurred.
 15. **LC4**: MUST emit MATCH_END after all recorded gameplay/domain events AND any PLAYER_CONCLUSION events, with MatchResult containing winner, final_state, seed.
 16. **LC5**: MUST emit recorded PLAYER_CONCLUSION events before MATCH_END when present.
 

@@ -207,7 +207,7 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Recorder](SPEC-RECORDER.md) | 2.1.0 | Final | Strict match persistence with complete effective configuration snapshots |
-| [ReplayEngine](SPEC-REPLAY.md) | 2.0.0 | Final | Exact replay of canonical event payloads |
+| [ReplayEngine](SPEC-REPLAY.md) | 2.0.1 | Final | Exact replay of canonical event payloads |
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.1 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.3.0 | Final | Per-match infrastructure context and public mechanics gateway |
@@ -233,7 +233,7 @@ All component specifications follow the lean spec format with numbered invariant
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.0 | Final | Core spectator projection and contained static artifact sinks |
+| [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.1 | Final | Core spectator projection and contained static artifact sinks |
 | [Artifact Safety](SPEC-ARTIFACT-SAFETY.md) | 0.2.0 | Final | Portable identity, output containment, strict JSON, and executable trust boundary |
 | [Spec Registry](SPEC-SPEC-REGISTRY.md) | 0.3.1 | Final | Deterministic lifecycle, exact evidence locators, and honest compliance evidence |
 | [Viewer](SPEC-VIEWER.md) | 0.7.0 | Deprecated | Frozen browser viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
