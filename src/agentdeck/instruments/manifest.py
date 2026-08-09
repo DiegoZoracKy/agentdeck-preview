@@ -14,8 +14,8 @@ from agentdeck.core.artifact_safety import ensure_contained_path, require_json_v
 from .models import InstrumentReport
 
 MANIFEST_NAME = "instrument.yaml"
-SUPPORTED_SCHEMA_VERSION = "1.0"
-CAPABILITY_TIERS = ("runnable", "evidence_ready", "presentable")
+SUPPORTED_SCHEMA_VERSIONS = ("1.0", "1.1")
+CAPABILITY_TIERS = ("runnable", "evidence_ready", "presentable", "stage_ready")
 ENTRY_POINT = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$")
 SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 
@@ -35,6 +35,7 @@ EVIDENCE_KEYS = {"scorer_entry_point", "profile"}
 PRESENTATION_KEYS = {
     "redactor_entry_point",
     "viewer",
+    "viewer_protocol",
     "oracle_paths",
     "oracle_values",
 }
@@ -172,9 +173,11 @@ def _matches_schema(value: Any, declaration: Mapping[str, Any], field: str) -> N
 
 def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
     _unknown_keys(manifest, ROOT_KEYS, "manifest")
-    if manifest.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
+    schema_version = manifest.get("schema_version")
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise InstrumentManifestError(
-            f"Unsupported schema_version {manifest.get('schema_version')!r}; expected {SUPPORTED_SCHEMA_VERSION!r}"
+            f"Unsupported schema_version {schema_version!r}; expected one of "
+            f"{SUPPORTED_SCHEMA_VERSIONS!r}"
         )
 
     instrument = _required_mapping(manifest, "instrument")
@@ -268,6 +271,15 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
         )
         if "viewer" in presentation:
             _contained_file(root, presentation["viewer"], "presentation.viewer")
+        if "viewer_protocol" in presentation:
+            if schema_version != "1.1":
+                raise InstrumentManifestError(
+                    "presentation.viewer_protocol requires manifest schema_version '1.1'"
+                )
+            if presentation["viewer_protocol"] != "agentdeck-stage/1.0":
+                raise InstrumentManifestError(
+                    "presentation.viewer_protocol must be 'agentdeck-stage/1.0'"
+                )
         oracle_values = presentation.get("oracle_values", [])
         if not isinstance(oracle_values, list) or any(
             not isinstance(value, str) or not value for value in oracle_values
@@ -291,6 +303,25 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
                 )
     if "presentable" in requested and presentation is None:
         raise InstrumentManifestError("presentable requires a presentation declaration")
+    if "stage_ready" in requested:
+        if "presentable" not in requested:
+            raise InstrumentManifestError("stage_ready requires the presentable tier")
+        if schema_version != "1.1":
+            raise InstrumentManifestError("stage_ready requires manifest schema_version '1.1'")
+        if presentation is None or "viewer" not in presentation:
+            raise InstrumentManifestError("stage_ready requires presentation.viewer")
+        if presentation.get("viewer_protocol") != "agentdeck-stage/1.0":
+            raise InstrumentManifestError(
+                "stage_ready requires presentation.viewer_protocol 'agentdeck-stage/1.0'"
+            )
+        viewer = ensure_contained_path(root, root / presentation["viewer"])
+        presentation_root = ensure_contained_path(root, root / "presentation")
+        try:
+            viewer.relative_to(presentation_root)
+        except ValueError as exc:
+            raise InstrumentManifestError(
+                "stage_ready viewer must resolve under presentation/"
+            ) from exc
 
 
 def _report(

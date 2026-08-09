@@ -26,6 +26,7 @@ from agentdeck.spectators.match_surface import InMemorySink, MatchSurfaceProject
 from .manifest import InstrumentManifestError, load_validated_manifest
 from .models import InstrumentReport
 from .profile import load_behavioral_profile, resolve_json_pointer
+from .stage import StageIsolationError, StageRuntimeError, certify_game_stage
 
 EXECUTABLE_TRUST_MODES = {"trusted-local", "isolated"}
 
@@ -538,6 +539,7 @@ def certify_instrument(
             report.artifacts = ["execution-1", "execution-2"]
 
             requested = manifest["claims"]["requested"]
+            surfaces: List[Dict[str, Any]] = []
             if "evidence_ready" in requested:
                 current_check = "IP12"
                 evidence = _score_evidence(
@@ -569,6 +571,52 @@ def certify_instrument(
                 report.artifacts.append("presentation/match-surfaces.json")
                 if output_dir is not None:
                     _write_json_artifact(output_root, "presentation/match-surfaces.json", surfaces)
+
+            if "stage_ready" in requested:
+                declaration = manifest["presentation"]
+                current_check = "IP16"
+                report.checked(
+                    "IP16",
+                    True,
+                    "Contained Game Stage entry and protocol declaration are complete",
+                )
+                current_check = "IP17"
+                try:
+                    stage = certify_game_stage(
+                        package_root=root,
+                        viewer=declaration["viewer"],
+                        surfaces=surfaces,
+                        output_root=output_root if output_dir is not None else None,
+                    )
+                except StageIsolationError:
+                    raise
+                except StageRuntimeError:
+                    current_check = "IP18"
+                    raise
+                report.checked(
+                    "IP17",
+                    True,
+                    "Game Stage ran from contained assets in a scripts-only sandbox without network",
+                )
+                report.checked(
+                    "IP18",
+                    True,
+                    "Game Stage rendered exact first and last frames at desktop and mobile viewports",
+                    details={
+                        "protocol": stage["protocol"],
+                        "sandbox": stage["sandbox"],
+                        "viewports": stage["viewports"],
+                    },
+                )
+                report.awarded_tiers.append("stage_ready")
+                report.artifacts.append("presentation/stage-certification.json")
+                report.artifacts.extend(stage["artifacts"])
+                if output_dir is not None:
+                    _write_json_artifact(
+                        output_root,
+                        "presentation/stage-certification.json",
+                        stage,
+                    )
         current_check = "IP11"
         report.checked(
             "IP11", True, "Only requested tiers with completed checks were mechanically awarded"

@@ -32,7 +32,16 @@
     ], "spec_id": "SPEC-CONSOLE", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-CONTROLLER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAME-MECHANIC-TURN-BASED", "status": "partial"},
-    {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAME-STAGE", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "STG1", "test": "tests/unit/test_game_stage.py::test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification"},
+      {"invariant_id": "STG2", "test": "tests/unit/test_game_stage.py::test_ip16_stg2_stage_declaration_is_contained_and_technology_neutral"},
+      {"invariant_id": "STG3", "test": "tests/unit/test_game_stage.py::test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification"},
+      {"invariant_id": "STG4", "test": "tests/unit/test_game_stage.py::test_ip17_stg4_external_network_attempt_fails_stage_only"},
+      {"invariant_id": "STG5", "test": "tests/unit/test_game_stage.py::test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification"},
+      {"invariant_id": "STG6", "test": "tests/unit/test_game_stage.py::test_ip18_stg6_wrong_protocol_acknowledgement_is_rejected"},
+      {"invariant_id": "STG7", "test": "tests/unit/test_game_stage.py::test_ip18_stg7_mobile_document_overflow_is_rejected"},
+      {"invariant_id": "STG8", "test": "tests/unit/test_game_stage.py::test_ip18_stg8_blank_visual_output_is_rejected"}
+    ], "spec_id": "SPEC-GAME-STAGE", "status": "verified"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAME", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-GAMEPLAY-EVENT-DATA", "status": "partial"},
     {"assurance": "automated", "evidence": [
@@ -50,8 +59,11 @@
       {"invariant_id": "IP12", "test": "tests/unit/test_golden_instruments.py::test_ip12_rejects_unresolved_record_evidence_pointer"},
       {"invariant_id": "IP13", "test": "tests/unit/test_golden_instruments.py::test_ip13_rejects_declared_oracle_path_leak"},
       {"invariant_id": "IP14", "test": "tests/unit/test_instrument_package.py::test_ip14_failed_certification_preserves_prior_success_report"},
-      {"invariant_id": "IP15", "test": "tests/unit/test_instrument_package.py::test_ip15_equal_package_and_execution_produce_equal_reports"}
-    ], "spec_id": "SPEC-INSTRUMENT-PACKAGE", "status": "partial"},
+      {"invariant_id": "IP15", "test": "tests/unit/test_instrument_package.py::test_ip15_equal_package_and_execution_produce_equal_reports"},
+      {"invariant_id": "IP16", "test": "tests/unit/test_game_stage.py::test_ip16_stg2_stage_declaration_is_contained_and_technology_neutral"},
+      {"invariant_id": "IP17", "test": "tests/unit/test_game_stage.py::test_ip17_stg4_external_network_attempt_fails_stage_only"},
+      {"invariant_id": "IP18", "test": "tests/unit/test_game_stage.py::test_ip17_ip18_stg1_stg3_stg5_stg6_stg7_stg8_browser_certification"}
+    ], "spec_id": "SPEC-INSTRUMENT-PACKAGE", "status": "verified"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-LLM", "status": "partial"},
     {"assurance": "automated", "evidence": [
       {"invariant_id": "MR8", "test": "tests/unit/test_authoring_readiness.py::test_ar4_mr8_stock_mechanics_do_not_access_private_console"}
