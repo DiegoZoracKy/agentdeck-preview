@@ -113,7 +113,9 @@
 - Return: `TurnResult(final_state, mechanic_events, truncated_by_max_turns)`; helpers MAY return a simple tuple with the same structure, but the dataclass defined in `SPEC-GAME-MECHANIC-TURN-BASED.md` is the canonical type.
 - MUST: Use runtime helpers instead of accessing console directly:
   - `runtime.emit_event` for lifecycle/gameplay/custom events
-  - `runtime.record_turn` for prompt/response/action capture
+  - `runtime.record_turn` exactly once for each concrete Player decision that the Game
+    exposes as a gameplay turn, including every participant decision in a simultaneous
+    round; Console derives canonical turn metadata from these recorded gameplay events
   - `runtime.handle_parse_failure` for controller failures
   - `runtime.fork_rng(label)` for deterministic randomness
   - `runtime.validate_state` after setup/update (when implemented)
@@ -427,7 +429,7 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 27. **ME1**: `run(runtime, players)` MUST be the only entry point used by the console. Games MUST treat `runtime` as the exclusive gateway for event emission, recorder writes, RNG usage, parse-failure handling, and state validation.
 28. **ME2**: Games inheriting the stock mechanic classes (e.g., `TurnBasedGame`) MUST NOT override `run()` unless implementing a fundamentally new execution model. Authors creating custom mechanics MUST document behaviour and reference the relevant mechanic spec.
 29. **ME3**: Every successful player decision MUST result in a call to `runtime.record_turn(...)` (even if the action later fails validation). Every action or round MUST emit at least one `GAMEPLAY` event through `runtime.emit_event(...)`.
-30. **ME4**: `run()` MUST return a JSON-serialisable final state and MUST signal truncation via the boolean flag when runtime’s `max_turns` limit or a mechanic-level termination triggers.
+30. **ME4**: `run()` MUST return a JSON-serialisable final state, MUST record each concrete Player decision exactly once through `runtime.record_turn`, and MUST signal truncation via the boolean flag when runtime’s `max_turns` limit or a mechanic-level termination triggers. A custom mechanic MUST NOT manage or synchronize Console-internal turn bookkeeping keys merely to produce match metadata.
 31. **ME5**: `run()` MUST propagate unhandled exceptions; runtime/console attach `match_context` metadata for logging and replay. Mechanics MAY raise domain-specific exceptions, but they MUST include the acting player/turn in the error message for diagnostics.
 
 ### 5.10 Hook Stability (HS) — *New in v0.7.0*

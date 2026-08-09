@@ -485,7 +485,7 @@ Console records ordering metadata and, when available, runtime-selected first-ac
     "seed": int,                        # Per-match seed
     "batch_id": str,                    # Batch identifier
     "truncated_by_max_turns": bool,     # Whether match hit max_turns limit
-    "turns": int,                       # Number of turns executed
+    "turns": int,                       # Number of recorded structural GAMEPLAY events
     # Additional game-specific metadata may be present
 }
 ```
