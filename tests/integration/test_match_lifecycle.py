@@ -5,14 +5,85 @@ Validates complete execution: AgentDeck setup → handshake → match → record
 Uses real components (FixedDamageGame, MockPlayer) per TEST-PLAN §4.1.
 """
 
+import copy
 import json
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import pytest
 
-from agentdeck import AgentDeck, AgentDeckConfig, FixedDamageGame, MockPlayer
+from agentdeck import (
+    ActionResult,
+    AgentDeck,
+    AgentDeckConfig,
+    FixedDamageGame,
+    Game,
+    GameStatus,
+    MockPlayer,
+    RandomGenerator,
+    TurnContext,
+    TurnResult,
+)
 from agentdeck.core.types import Event
+
+
+class SimultaneousDecisionGame(Game):
+    """Minimal custom mechanic that records two decisions without internal counters."""
+
+    @property
+    def instructions(self) -> str:
+        return "Both Players choose once, simultaneously."
+
+    @property
+    def allowed_actions(self) -> list[str]:
+        return ["WAIT"]
+
+    @property
+    def default_handshake_template(self) -> str:
+        return "{game_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"
+
+    def setup(self, players: list[str], seed: int) -> dict[str, Any]:
+        return {"players": list(players), "seed": seed, "resolved": False, "winner": None}
+
+    def update(
+        self,
+        game_state: dict[str, Any],
+        player: str,
+        action: ActionResult,
+        *,
+        rng: RandomGenerator,
+    ) -> dict[str, Any]:
+        raise NotImplementedError
+
+    def status(self, game_state: dict[str, Any]) -> GameStatus:
+        return GameStatus(is_over=game_state["resolved"], winner=game_state["winner"])
+
+    def get_view(self, game_state: dict[str, Any], player: str) -> dict[str, Any]:
+        return {"resolved": game_state["resolved"], "player": player}
+
+    def run(self, runtime, players) -> TurnResult:
+        before = copy.deepcopy(runtime.initial_state)
+        after = copy.deepcopy(before)
+        after["resolved"] = True
+        for index, player in enumerate(players):
+            runtime.record_turn(
+                player=player.name,
+                state_before=before,
+                state_after=after,
+                action=ActionResult(action="WAIT", raw_response="WAIT"),
+                turn_context=TurnContext(
+                    match_id=runtime.match_id,
+                    turn_number=1,
+                    turn_index=index,
+                    player=player.name,
+                    started_at=0.0,
+                    duration=0.0,
+                    rng_seed=runtime.seed,
+                    rng_label=f"simultaneous-{player.name}",
+                ),
+            )
+        return TurnResult(final_state=after, events=[], truncated_by_max_turns=False)
 
 
 @pytest.fixture
@@ -104,6 +175,24 @@ def test_full_match_lifecycle(players, temp_record_dir, tracking_spectator):
     with open(match_recording) as f:
         match_data = json.load(f)
     assert match_data["batch_id"] == batch_id
+
+
+def test_custom_mechanic_turn_metadata_counts_recorded_gameplay_events(players, temp_record_dir):
+    """SPEC-CONSOLE M1: custom mechanics cannot leave turn metadata stale."""
+    config = AgentDeckConfig(run_dir=str(temp_record_dir), seed=42)
+
+    with AgentDeck(game=SimultaneousDecisionGame(), session=config) as deck:
+        results = deck.play(players=players, matches=1)
+        record_path = next(Path(deck.session.record_directory).glob("match_*.json"))
+
+    result = results[0]
+    gameplay_events = [event for event in result.events if event.type == "gameplay"]
+    assert len(gameplay_events) == 2
+    assert result.final_state["_turn_count"] == 1
+    assert result.metadata["turns"] == 2
+
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    assert record["metadata"]["match"]["turns"] == 2
 
 
 def test_spectator_isolation(players, temp_record_dir):

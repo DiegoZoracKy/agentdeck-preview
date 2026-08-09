@@ -118,6 +118,14 @@ def _format_match_outcome(winner: Optional[str]) -> str:
     return f"{winner} won the match."
 
 
+def _count_gameplay_turns(events: List[Event]) -> int:
+    """Return the canonical number of recorded Player decisions in a match."""
+    return sum(
+        event.type == EventType.GAMEPLAY or event.type == EventType.GAMEPLAY.value
+        for event in events
+    )
+
+
 def _player_visible_match_result(game: Game, result: MatchResult, player_name: str) -> MatchResult:
     """Create the terminal result view used by a Player's default conclusion."""
     try:
@@ -385,7 +393,7 @@ class _MatchWorker:
             else:
                 final_state, _, truncated = result
 
-            turn_count = final_state.get("_turn_count", 0)
+            turn_count = _count_gameplay_turns(runtime.events)
             runtime.truncated_by_max_turns = truncated
 
             # Compute status and duration (normal completion)
@@ -2210,8 +2218,8 @@ class Console:
                 # Backward compat: game returned tuple (final_state, events, truncated)
                 final_state, _, truncated = result
 
-            # Count turns from final state
-            turn_count = final_state.get("_turn_count", 0)
+            # Structural gameplay events are the mechanics-neutral source of truth.
+            turn_count = _count_gameplay_turns(runtime.events)
             runtime.truncated_by_max_turns = truncated
         except MatchAbortedError as abort_error:
             match_duration = time.time() - runtime.started_at
