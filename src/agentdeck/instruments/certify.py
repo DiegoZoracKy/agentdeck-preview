@@ -274,7 +274,7 @@ def _run_once(
 def _require_evidence_game_version(
     payloads: Sequence[Mapping[str, Any]],
 ) -> Dict[str, Any]:
-    """Require one exact content-addressed Game closure for evidence-grade output."""
+    """Require one exact content-addressed declared closure for evidence-grade output."""
 
     descriptors: List[Dict[str, Any]] = []
     for index, payload in enumerate(payloads):
@@ -289,7 +289,8 @@ def _require_evidence_game_version(
         ):
             raise AssertionError(
                 "evidence_ready requires content-addressed Game provenance from a "
-                "complete declared implementation closure"
+                "declared implementation closure that includes every Game-defining "
+                "generated module; request only runnable for exploratory execution"
             )
         descriptors.append(copy.deepcopy(descriptor))
 
@@ -647,7 +648,7 @@ def certify_instrument(
                 report.checked(
                     "IP20",
                     True,
-                    "Evidence-ready records identify one complete content-addressed Game closure",
+                    "Evidence-ready records identify one content-addressed declared Game closure",
                     details={
                         "family_id": game_version["family_id"],
                         "implementation_sha256": game_version["implementation_sha256"],

@@ -1,8 +1,8 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.5.1
-> Last Updated: 2026-08-09
+> Version: 0.6.0
+> Last Updated: 2026-08-10
 > Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling

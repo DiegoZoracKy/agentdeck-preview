@@ -69,8 +69,11 @@ be substituted for one another.
   the narrower scope explicitly.
 - When source bytes cannot be resolved, Core records an unresolved descriptor and
   continues execution.
-- `evidence_ready` requires a complete content-addressed declared closure, while
+- `evidence_ready` requires a content-addressed declared closure, while
   `runnable` retains the partial and unresolved fallbacks above.
+- Core proves the identity and integrity of the declared closure. The author remains
+  responsible for declaring every generated module that defines Game mechanics or
+  visibility; Core does not claim to infer closure completeness from an import graph.
 - Equal portable source names and bytes MUST produce the same implementation digest,
   independent of checkout path, file metadata, ordering supplied by the caller, or
   wall-clock time.

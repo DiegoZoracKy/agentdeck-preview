@@ -234,7 +234,8 @@ def test_ip20_strong_provenance_is_required_only_for_evidence_ready(tmp_path: Pa
     assert not evidence_report.valid
     assert evidence_report.awarded_tiers == ["runnable"]
     assert _check(evidence_report, "IP20")["status"] == "failed"
-    assert "complete declared implementation closure" in _check(evidence_report, "IP20")["message"]
+    assert "declared implementation closure" in _check(evidence_report, "IP20")["message"]
+    assert "request only runnable" in _check(evidence_report, "IP20")["message"]
 
     manifest = _manifest(package)
     manifest["claims"]["requested"] = ["runnable"]
