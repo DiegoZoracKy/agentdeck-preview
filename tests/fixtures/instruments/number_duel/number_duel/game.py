@@ -10,6 +10,10 @@ from agentdeck import ActionResult, GameStatus, RandomGenerator, TurnBasedGame
 class NumberDuelGame(TurnBasedGame):
     """First player to reach the configured target wins."""
 
+    GAME_FAMILY_ID = "agentdeck.example.number-duel"
+    GAME_VERSION = "0.1.0"
+    GAME_IMPLEMENTATION_MODULES = ("number_duel.game",)
+
     def __init__(self, target: int = 3) -> None:
         super().__init__()
         if target < 1:

@@ -19,7 +19,8 @@ were used?" before they can reason about comparability or transfer.
 - Recorder persists provenance; it does not decide whether two Games are comparable.
 - Game authors retain full freedom over mechanics, research purpose, and technology.
 - Missing source closure is reported honestly and MUST NOT make an otherwise valid Game
-  unexecutable.
+  unexecutable. A capability tier may still require stronger provenance for the claim it
+  awards without invalidating the Game or its runnable capability.
 - Historical records remain immutable. No published artifact is rewritten to backfill
   provenance that was not captured at execution time.
 
@@ -68,6 +69,8 @@ be substituted for one another.
   the narrower scope explicitly.
 - When source bytes cannot be resolved, Core records an unresolved descriptor and
   continues execution.
+- `evidence_ready` requires a complete content-addressed declared closure, while
+  `runnable` retains the partial and unresolved fallbacks above.
 - Equal portable source names and bytes MUST produce the same implementation digest,
   independent of checkout path, file metadata, ordering supplied by the caller, or
   wall-clock time.

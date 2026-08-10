@@ -271,6 +271,34 @@ def _run_once(
     return payloads, relative_records, summaries
 
 
+def _require_evidence_game_version(
+    payloads: Sequence[Mapping[str, Any]],
+) -> Dict[str, Any]:
+    """Require one exact content-addressed Game closure for evidence-grade output."""
+
+    descriptors: List[Dict[str, Any]] = []
+    for index, payload in enumerate(payloads):
+        descriptor = (payload.get("metadata") or {}).get("game_version")
+        if not isinstance(descriptor, dict):
+            raise AssertionError(f"record {index} lacks structured Game version provenance")
+        if (
+            descriptor.get("assurance") != "content_addressed"
+            or descriptor.get("fingerprint_scope") != "declared_closure"
+            or not descriptor.get("implementation_sha256")
+            or not descriptor.get("sources")
+        ):
+            raise AssertionError(
+                "evidence_ready requires content-addressed Game provenance from a "
+                "complete declared implementation closure"
+            )
+        descriptors.append(copy.deepcopy(descriptor))
+
+    first = descriptors[0]
+    if any(descriptor != first for descriptor in descriptors[1:]):
+        raise AssertionError("evidence_ready records do not share one exact Game version")
+    return first
+
+
 def _score_evidence(
     *,
     root: Path,
@@ -614,6 +642,18 @@ def certify_instrument(
             requested = manifest["claims"]["requested"]
             surfaces: List[Dict[str, Any]] = []
             if "evidence_ready" in requested:
+                current_check = "IP20"
+                game_version = _require_evidence_game_version([*first_payloads, *second_payloads])
+                report.checked(
+                    "IP20",
+                    True,
+                    "Evidence-ready records identify one complete content-addressed Game closure",
+                    details={
+                        "family_id": game_version["family_id"],
+                        "implementation_sha256": game_version["implementation_sha256"],
+                        "source_count": len(game_version["sources"]),
+                    },
+                )
                 current_check = "IP12"
                 evidence = _score_evidence(
                     root=root,

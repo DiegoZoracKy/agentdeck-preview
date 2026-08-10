@@ -218,6 +218,33 @@ def test_ip19_rejects_transient_artifacts_before_package_hash(tmp_path: Path) ->
     assert _check(report, "IP19")["status"] == "passed"
 
 
+def test_ip20_strong_provenance_is_required_only_for_evidence_ready(tmp_path: Path) -> None:
+    """IP20: weak provenance preserves execution but cannot support evidence-grade output."""
+
+    package = _copy_fixture(tmp_path)
+    game = package / "number_duel" / "game.py"
+    game.write_text(
+        game.read_text(encoding="utf-8").replace(
+            '    GAME_IMPLEMENTATION_MODULES = ("number_duel.game",)\n', ""
+        ),
+        encoding="utf-8",
+    )
+
+    evidence_report = certify_instrument(package, trust_mode="trusted-local")
+    assert not evidence_report.valid
+    assert evidence_report.awarded_tiers == ["runnable"]
+    assert _check(evidence_report, "IP20")["status"] == "failed"
+    assert "complete declared implementation closure" in _check(evidence_report, "IP20")["message"]
+
+    manifest = _manifest(package)
+    manifest["claims"]["requested"] = ["runnable"]
+    _write_manifest(package, manifest)
+    runnable_report = certify_instrument(package, trust_mode="trusted-local")
+    assert runnable_report.valid
+    assert runnable_report.awarded_tiers == ["runnable"]
+    assert not any(check["id"] == "IP20" for check in runnable_report.to_dict()["checks"])
+
+
 def test_cli_emits_canonical_json_and_status(capsys, tmp_path: Path) -> None:
     package = _copy_fixture(tmp_path)
     assert main(["validate", str(package)]) == 0

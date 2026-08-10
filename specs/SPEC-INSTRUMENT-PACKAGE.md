@@ -231,6 +231,8 @@ The certifier MUST prove:
 
 Requires `runnable`. The certifier MUST additionally prove:
 
+- every generated Record identifies one exact Game implementation through a complete
+  declared closure with `content_addressed` assurance;
 - scorer resolves to `BehavioralScorer`, supports the generated payloads, and returns
   strict JSON deterministically;
 - every declared metric is present or explicitly marked unsupported;
@@ -277,6 +279,7 @@ offline requests, boundary progression, and error-free desktop/mobile probes.
 17. **IP17 Stage Isolation**: Stage certification MUST expose only minimal certified match context and the currently authorized certified frame inside a scripts-only sandbox and MUST reject escaping or external network requests.
 18. **IP18 Stage Runtime Conformance**: Stage certification MUST receive an exact protocol acknowledgement and nonblank output for every fixture gameplay frame at desktop and mobile viewports, remain error- and overflow-free, detect visible progression between distinct first and last frames, and preserve a valid Stage error as the immediate certification failure rather than replacing it with a timeout.
 19. **IP19 Source-Clean Package**: Inspection, validation, and certification MUST reject transient runtime or tool artifacts before executing package code or hashing them as authored source.
+20. **IP20 Evidence-Grade Game Identity**: `evidence_ready` certification MUST require every generated Record to identify one exact Game implementation with `fingerprint_scope: declared_closure`, non-empty sources, and `assurance: content_addressed`; weaker provenance MUST remain valid for `runnable`.
 
 ## 8. Failure Handling
 
@@ -297,6 +300,9 @@ offline requests, boundary progression, and error-free desktop/mobile probes.
   fabrication, unresolved pointers, oracle leakage, and overstated requested tiers.
 - A direct source-clean test covers Python bytecode and known tool/cache paths while a
   locally bundled browser asset remains valid.
+- A direct evidence-provenance test removes the declared Game closure, observes
+  `runnable`, rejects `evidence_ready`, and then proves runnable-only certification still
+  succeeds.
 
 ## 10. Rationale
 
