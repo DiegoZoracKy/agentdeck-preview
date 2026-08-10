@@ -638,7 +638,7 @@ def certify_instrument(
                     second_payloads=second_payloads,
                 )
                 report.checked(
-                    "IP13", True, "Visible states and Match Surfaces exclude declared oracles"
+                    "IP13", True, "Visible states and Match Surfaces enforce oracle scopes"
                 )
                 report.awarded_tiers.append("presentable")
                 report.artifacts.append("presentation/match-surfaces.json")
