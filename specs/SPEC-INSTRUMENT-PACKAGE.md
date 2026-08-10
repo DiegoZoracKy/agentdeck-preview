@@ -76,6 +76,10 @@ presentation:
   oracle_paths:
     Alpha: [/private/Beta]
     Beta: [/private/Alpha]
+  terminal_oracle_paths:
+    Alpha: [/answer]
+    Beta: [/answer]
+  terminal_oracle_values: ["3"]
 claims:
   requested: [runnable, presentable, stage_ready]
 ```
@@ -125,6 +129,22 @@ manifest config with `Game.describe()["config"]` exactly.
   Pointers that MUST be absent from that Player's visible state.
 - `presentation.oracle_values`: optional exact strings that MUST be absent from every
   serialized visible state and generated Match Surface.
+- `presentation.terminal_oracle_paths`: optional mapping from fixture Player name to
+  JSON Pointers that MUST be absent before terminal resolution and MAY appear only in
+  the last gameplay frame's `state_after` view and that Player's entry in
+  `final_state_views`.
+  Their presence at the terminal boundary is permitted, not required.
+- `presentation.terminal_oracle_values`: optional exact strings that MUST be absent
+  everywhere except inside declared `terminal_oracle_paths` in those terminal views.
+  Declaring a value without at least one terminal oracle path is invalid.
+
+Permanent and terminal oracle declarations are distinct. The same path for the same
+Player or the same exact value MUST NOT appear in both scopes. Permanent oracle paths
+and values remain forbidden from the entire Match Surface, including terminal views.
+Terminal declarations do not authorize disclosure in a gameplay `state_before`, any
+non-final gameplay `state_after`, handshakes, actions, conclusions, metadata, or another
+undeclared field. The last gameplay frame is the final item in the Match Surface
+`frames` sequence after replay completes.
 
 ### Behavioral profile schema
 
@@ -250,7 +270,7 @@ offline requests, boundary progression, and error-free desktop/mobile probes.
 10. **IP10 Strict Evidence**: Manifest, report, state, views, events, records, scorer output, and Match Surface artifacts MUST satisfy strict JSON/YAML scalar rules without coercion.
 11. **IP11 Honest Tiers**: A report MUST award only requested tiers whose own checks and prerequisites pass. Partial success MUST remain explicit.
 12. **IP12 Evidence Resolution**: Evidence-ready metrics MUST identify pointers that resolve into generated immutable records; prose alone is not evidence.
-13. **IP13 Visibility Boundary**: Presentable certification MUST derive views from the declared visibility function and reject declared oracle fixture leakage.
+13. **IP13 Visibility Boundary**: Presentable certification MUST derive views from the declared visibility function, reject permanent oracle fixture leakage, and confine any declared terminal oracle disclosure to its exact terminal paths after the final gameplay action.
 14. **IP14 Failure Atomicity**: A failed check MUST NOT overwrite a prior successful report or write outside the certification root.
 15. **IP15 Canonical Report**: Equal package content and semantic result MUST produce byte-identical canonical reports after excluding declared volatile artifact locations.
 16. **IP16 Stage Declaration**: A stage_ready claim MUST declare schema 1.1, presentable as a prerequisite, a contained presentation entry, and the supported Game Stage protocol.
