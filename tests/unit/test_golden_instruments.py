@@ -35,6 +35,41 @@ def _check(report, check_id: str) -> dict:
     return next(check for check in report.to_dict()["checks"] if check["id"] == check_id)
 
 
+def _declare_terminal_answer(package: Path, *, leak_outside_path: bool = False) -> None:
+    presentation = package / "number_duel" / "presentation.py"
+    caption = '\n        result["caption"] = f"Resolved: {answer}"' if leak_outside_path else ""
+    presentation.write_text(
+        f'''"""Terminal-answer projection used by IP13 tests."""
+
+from typing import Any, Dict, Mapping
+
+
+def visible_state(
+    state: Mapping[str, Any], player: str, game_config: Mapping[str, Any]
+) -> Dict[str, Any]:
+    if player not in state["scores"]:
+        raise ValueError("unknown Player")
+    result = {{
+        "scores": dict(state["scores"]),
+        "turn": state["turn"],
+        "seed": state["seed"],
+    }}
+    if max(state["scores"].values()) >= game_config["target"]:
+        answer = "RÉPONSE"
+        result["answer"] = answer{caption}
+    return result
+''',
+        encoding="utf-8",
+    )
+    manifest = _manifest(package)
+    manifest["presentation"]["terminal_oracle_paths"] = {
+        "Alpha": ["/answer"],
+        "Beta": ["/answer"],
+    }
+    manifest["presentation"]["terminal_oracle_values"] = ["RÉPONSE"]
+    _write_manifest(package, manifest)
+
+
 def test_ip4_fixed_damage_and_external_fixture_use_the_same_certifier(tmp_path: Path) -> None:
     """IP4: official and external instruments receive no name-based certification path."""
     fixed = certify_instrument(
@@ -106,6 +141,50 @@ def test_ip13_presentation_artifact_excludes_opponent_private_state(tmp_path: Pa
             opponent = "Beta" if frame["player"] == "Alpha" else "Alpha"
             assert opponent not in frame["state_before"]["health"]
             assert opponent not in frame["state_after"]["potions"]
+
+
+def test_ip13_allows_declared_oracle_only_after_final_gameplay_action(tmp_path: Path) -> None:
+    """IP13: a terminal oracle may appear only after the last gameplay action."""
+    package = _copy(NUMBER_DUEL, tmp_path)
+    _declare_terminal_answer(package)
+    output = tmp_path / "output"
+    report = certify_instrument(package, trust_mode="trusted-local", output_dir=output)
+    assert report.valid, report.to_dict()
+    surfaces = json.loads(
+        (output / "presentation" / "match-surfaces.json").read_text(encoding="utf-8")
+    )
+    for surface in surfaces:
+        for frame in surface["frames"]:
+            assert "answer" not in frame["state_before"]
+        for frame in surface["frames"][:-1]:
+            assert "answer" not in frame["state_after"]
+        assert surface["frames"][-1]["state_after"]["answer"] == "RÉPONSE"
+        assert all(
+            view["answer"] == "RÉPONSE" for view in surface["match"]["final_state_views"].values()
+        )
+
+
+def test_ip13_rejects_terminal_oracle_before_final_gameplay_action(tmp_path: Path) -> None:
+    """IP13: terminal scope does not permit disclosure in an earlier view."""
+    package = _copy(NUMBER_DUEL, tmp_path)
+    _declare_terminal_answer(package)
+    presentation = package / "number_duel" / "presentation.py"
+    content = presentation.read_text(encoding="utf-8").replace(
+        'if max(state["scores"].values()) >= game_config["target"]:', "if True:"
+    )
+    presentation.write_text(content, encoding="utf-8")
+    report = certify_instrument(package, trust_mode="trusted-local")
+    assert not report.valid
+    assert "oracle path is visible" in _check(report, "IP13")["message"]
+
+
+def test_ip13_rejects_terminal_oracle_value_outside_declared_path(tmp_path: Path) -> None:
+    """IP13: terminal values remain forbidden outside their authorized paths."""
+    package = _copy(NUMBER_DUEL, tmp_path)
+    _declare_terminal_answer(package, leak_outside_path=True)
+    report = certify_instrument(package, trust_mode="trusted-local")
+    assert not report.valid
+    assert "terminal oracle value leaked" in _check(report, "IP13")["message"]
 
 
 def test_ip15_fixed_damage_report_is_canonical(tmp_path: Path) -> None:

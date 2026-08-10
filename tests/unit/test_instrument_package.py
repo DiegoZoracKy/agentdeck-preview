@@ -234,3 +234,26 @@ def test_unknown_manifest_fields_fail_loudly(tmp_path: Path) -> None:
     report = validate_instrument(package)
     assert not report.valid
     assert "unknown fields" in _check(report, "IP3")["message"]
+
+
+def test_ip13_terminal_oracle_values_require_declared_paths(tmp_path: Path) -> None:
+    """IP13: terminal values cannot create an unbounded disclosure scope."""
+    package = _copy_fixture(tmp_path)
+    manifest = _manifest(package)
+    manifest["presentation"]["terminal_oracle_values"] = ["SECRET"]
+    _write_manifest(package, manifest)
+    report = validate_instrument(package)
+    assert not report.valid
+    assert "requires terminal_oracle_paths" in _check(report, "IP3")["message"]
+
+
+def test_ip13_permanent_and_terminal_oracle_scopes_must_not_overlap(tmp_path: Path) -> None:
+    """IP13: one oracle declaration cannot be both permanent and terminal."""
+    package = _copy_fixture(tmp_path)
+    manifest = _manifest(package)
+    manifest["presentation"]["oracle_paths"] = {"Alpha": ["/answer"]}
+    manifest["presentation"]["terminal_oracle_paths"] = {"Alpha": ["/answer"]}
+    _write_manifest(package, manifest)
+    report = validate_instrument(package)
+    assert not report.valid
+    assert "oracle paths must not overlap" in _check(report, "IP3")["message"]

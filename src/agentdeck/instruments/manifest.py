@@ -41,6 +41,8 @@ PRESENTATION_KEYS = {
     "viewer_protocol",
     "oracle_paths",
     "oracle_values",
+    "terminal_oracle_paths",
+    "terminal_oracle_values",
 }
 CLAIMS_KEYS = {"requested"}
 SCHEMA_KEYS = {"type", "default", "enum", "minimum", "maximum", "items"}
@@ -308,25 +310,48 @@ def validate_manifest(root: Path, manifest: Dict[str, Any]) -> None:
                     "presentation.viewer_protocol must be 'agentdeck-stage/1.1'"
                 )
         oracle_values = presentation.get("oracle_values", [])
-        if not isinstance(oracle_values, list) or any(
-            not isinstance(value, str) or not value for value in oracle_values
+        terminal_oracle_values = presentation.get("terminal_oracle_values", [])
+        for field, values in (
+            ("presentation.oracle_values", oracle_values),
+            ("presentation.terminal_oracle_values", terminal_oracle_values),
         ):
-            raise InstrumentManifestError("presentation.oracle_values must be a list of strings")
-        oracle_paths = presentation.get("oracle_paths", {})
-        if not isinstance(oracle_paths, dict):
-            raise InstrumentManifestError("presentation.oracle_paths must be a mapping")
-        for player, pointers in oracle_paths.items():
-            if (
-                not isinstance(player, str)
-                or not player
-                or not isinstance(pointers, list)
-                or any(
-                    not isinstance(pointer, str) or not pointer.startswith("/")
-                    for pointer in pointers
-                )
+            if not isinstance(values, list) or any(
+                not isinstance(value, str) or not value for value in values
             ):
+                raise InstrumentManifestError(f"{field} must be a list of strings")
+        oracle_paths = presentation.get("oracle_paths", {})
+        terminal_oracle_paths = presentation.get("terminal_oracle_paths", {})
+        for field, paths in (
+            ("presentation.oracle_paths", oracle_paths),
+            ("presentation.terminal_oracle_paths", terminal_oracle_paths),
+        ):
+            if not isinstance(paths, dict):
+                raise InstrumentManifestError(f"{field} must be a mapping")
+            for player, pointers in paths.items():
+                if (
+                    not isinstance(player, str)
+                    or not player
+                    or not isinstance(pointers, list)
+                    or any(
+                        not isinstance(pointer, str) or not pointer.startswith("/")
+                        for pointer in pointers
+                    )
+                ):
+                    raise InstrumentManifestError(
+                        f"{field} must map Player names to JSON Pointer lists"
+                    )
+        if terminal_oracle_values and not any(terminal_oracle_paths.values()):
+            raise InstrumentManifestError(
+                "presentation.terminal_oracle_values requires terminal_oracle_paths"
+            )
+        if set(oracle_values) & set(terminal_oracle_values):
+            raise InstrumentManifestError(
+                "presentation permanent and terminal oracle values must not overlap"
+            )
+        for player in set(oracle_paths) | set(terminal_oracle_paths):
+            if set(oracle_paths.get(player, [])) & set(terminal_oracle_paths.get(player, [])):
                 raise InstrumentManifestError(
-                    "presentation.oracle_paths must map Player names to JSON Pointer lists"
+                    "presentation permanent and terminal oracle paths must not overlap"
                 )
     if "presentable" in requested and presentation is None:
         raise InstrumentManifestError("presentable requires a presentation declaration")

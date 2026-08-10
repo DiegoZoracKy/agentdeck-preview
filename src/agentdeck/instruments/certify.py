@@ -350,16 +350,74 @@ def _assert_pointer_absent(document: Any, pointer: str) -> None:
     raise AssertionError(f"declared oracle path is visible: {pointer}")
 
 
+def _remove_pointer(document: Any, pointer: str) -> None:
+    """Remove a contained JSON Pointer value from a copied JSON document."""
+    current = document
+    tokens = [token.replace("~1", "/").replace("~0", "~") for token in pointer[1:].split("/")]
+    for token in tokens[:-1]:
+        if isinstance(current, list):
+            if not token.isdigit() or int(token) >= len(current):
+                return
+            current = current[int(token)]
+        elif isinstance(current, dict):
+            if token not in current:
+                return
+            current = current[token]
+        else:
+            return
+    terminal = tokens[-1]
+    if isinstance(current, list):
+        if terminal.isdigit() and int(terminal) < len(current):
+            current[int(terminal)] = None
+    elif isinstance(current, dict):
+        current.pop(terminal, None)
+
+
+def _contains_text(document: Any, value: str) -> bool:
+    if isinstance(document, str):
+        return value in document
+    if isinstance(document, list):
+        return any(_contains_text(item, value) for item in document)
+    if isinstance(document, Mapping):
+        return any(
+            _contains_text(key, value) or _contains_text(item, value)
+            for key, item in document.items()
+        )
+    return False
+
+
+def _without_terminal_oracles(
+    surface: Mapping[str, Any],
+    terminal_oracle_paths: Mapping[str, Sequence[str]],
+) -> Dict[str, Any]:
+    scrubbed = copy.deepcopy(dict(surface))
+    frames = scrubbed.get("frames", [])
+    if frames:
+        final_frame = frames[-1]
+        player = final_frame.get("player")
+        if isinstance(player, str):
+            for pointer in terminal_oracle_paths.get(player, []):
+                _remove_pointer(final_frame.get("state_after"), pointer)
+    final_views = (scrubbed.get("match") or {}).get("final_state_views", {})
+    for player, view in final_views.items():
+        for pointer in terminal_oracle_paths.get(player, []):
+            _remove_pointer(view, pointer)
+    return scrubbed
+
+
 def _project_surface(
     *,
     payload: Mapping[str, Any],
     redactor: Callable[..., Any],
     config: Mapping[str, Any],
     oracle_paths: Mapping[str, Sequence[str]],
+    terminal_oracle_paths: Mapping[str, Sequence[str]],
 ) -> Dict[str, Any]:
     def redact_document(document: Dict[str, Any]) -> Dict[str, Any]:
         redacted = copy.deepcopy(document)
-        for frame in redacted.get("frames", []):
+        frames = redacted.get("frames", [])
+        final_frame_index = len(frames) - 1
+        for index, frame in enumerate(frames):
             player = frame.get("player")
             if not isinstance(player, str):
                 raise AssertionError("Match Surface frame lacks acting Player")
@@ -367,6 +425,10 @@ def _project_surface(
                 view = _visible_state(redactor, frame[field], player, config)
                 for pointer in oracle_paths.get(player, []):
                     _assert_pointer_absent(view, pointer)
+                terminal_allowed = field == "state_after" and index == final_frame_index
+                if not terminal_allowed:
+                    for pointer in terminal_oracle_paths.get(player, []):
+                        _assert_pointer_absent(view, pointer)
                 frame[field] = view
             frame.pop("state_delta", None)
         match = redacted.get("match") or {}
@@ -413,10 +475,12 @@ def _certify_presentation(
         raise TypeError("presentation.redactor_entry_point must name a callable")
     config = manifest["game"]["config"]
     oracle_paths = declaration.get("oracle_paths", {})
+    terminal_oracle_paths = declaration.get("terminal_oracle_paths", {})
     for payload in first_payloads:
-        for event in payload.get("events", []):
-            if event.get("type") != "gameplay":
-                continue
+        gameplay_events = [
+            event for event in payload.get("events", []) if event.get("type") == "gameplay"
+        ]
+        for index, event in enumerate(gameplay_events):
             data = event.get("data") or {}
             player = data.get("player")
             if not isinstance(player, str):
@@ -425,12 +489,17 @@ def _certify_presentation(
                 view = _visible_state(redactor, data[field], player, config)
                 for pointer in oracle_paths.get(player, []):
                     _assert_pointer_absent(view, pointer)
+                terminal_allowed = field == "state_after" and index == len(gameplay_events) - 1
+                if not terminal_allowed:
+                    for pointer in terminal_oracle_paths.get(player, []):
+                        _assert_pointer_absent(view, pointer)
     first = [
         _project_surface(
             payload=payload,
             redactor=redactor,
             config=config,
             oracle_paths=oracle_paths,
+            terminal_oracle_paths=terminal_oracle_paths,
         )
         for payload in first_payloads
     ]
@@ -440,16 +509,20 @@ def _certify_presentation(
             redactor=redactor,
             config=config,
             oracle_paths=oracle_paths,
+            terminal_oracle_paths=terminal_oracle_paths,
         )
         for payload in second_payloads
     ]
     if _semantic(first) != _semantic(second):
         raise AssertionError("repeated Match Surface projections differ semantically")
     oracle_values = declaration.get("oracle_values", [])
-    serialized = json.dumps(first, sort_keys=True, ensure_ascii=True, allow_nan=False)
     for value in oracle_values:
-        if value in serialized:
+        if _contains_text(first, value):
             raise AssertionError("declared oracle value leaked into Match Surface")
+    scrubbed = [_without_terminal_oracles(surface, terminal_oracle_paths) for surface in first]
+    for value in declaration.get("terminal_oracle_values", []):
+        if _contains_text(scrubbed, value):
+            raise AssertionError("declared terminal oracle value leaked outside its terminal path")
     return first
 
 
