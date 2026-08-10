@@ -9,6 +9,8 @@ Per TEST-PLAN-consensus.md, provides:
 - Temporary directories for recordings
 """
 
+from pathlib import Path
+import shutil
 from unittest.mock import Mock
 
 import pytest
@@ -21,6 +23,24 @@ from agentdeck.core.types import (
     TurnContext,
 )
 from agentdeck.games.examples import FixedDamageGame
+
+FIXTURE_ROOT = Path(__file__).resolve().parent / "fixtures" / "instruments"
+
+
+def clean_instrument_fixture_bytecode(root: Path = FIXTURE_ROOT) -> None:
+    """Remove interpreter output without weakening production package validation."""
+    if not root.exists():
+        return
+    for directory in root.rglob("__pycache__"):
+        if directory.is_dir():
+            shutil.rmtree(directory)
+    for bytecode in root.rglob("*.py[co]"):
+        bytecode.unlink(missing_ok=True)
+
+
+def pytest_sessionstart(session) -> None:  # noqa: ARG001
+    clean_instrument_fixture_bytecode()
+
 
 # ============================================================================
 # MOCK PLAYERS

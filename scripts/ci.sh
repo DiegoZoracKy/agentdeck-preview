@@ -3,7 +3,8 @@ set -euo pipefail
 
 # Run the same checks as GitHub Actions locally.
 
-CI_TMP_ROOT="${AGENTDECK_CI_TMP_ROOT:-/tmp}"
+CI_TMP_ROOT="${AGENTDECK_CI_TMP_ROOT:-$PWD/.tmp/ci}"
+mkdir -p "$CI_TMP_ROOT"
 CI_TMP_DIR="$(mktemp -d "$CI_TMP_ROOT/agentdeck-core-ci.XXXXXX")"
 trap 'rm -rf "$CI_TMP_DIR"' EXIT
 export TMPDIR="$CI_TMP_DIR"
@@ -47,6 +48,8 @@ echo "== Spec registry =="
 $VENV_PYTHON scripts/spec_registry.py check
 
 echo "== External authoring types (strict consumer boundary) =="
+find tests/fixtures/instruments -type d -name __pycache__ -prune -exec rm -rf {} +
+find tests/fixtures/instruments -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
 $VENV_PYTHON -m mypy --strict --follow-imports=silent \
   tests/fixtures/instruments/number_duel/number_duel
 

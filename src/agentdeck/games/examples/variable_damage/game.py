@@ -34,6 +34,9 @@ class VariableDamageGame(TurnBasedGame):
         }
     """
 
+    GAME_FAMILY_ID = "agentdeck.game.variable-damage"
+    GAME_VERSION = "0.1.0"
+    GAME_IMPLEMENTATION_MODULES = ("agentdeck.games.examples.variable_damage.game",)
     SUPPORTED_INFORMATION_LEVELS = {"full", "partial"}
 
     def __init__(

@@ -7,6 +7,10 @@ import json
 import pytest
 
 from agentdeck.core.game_version import describe_game_version
+from agentdeck.games.examples.archivist_choice import ArchivistChoiceGame
+from agentdeck.games.examples.fixed_damage import FixedDamageGame
+from agentdeck.games.examples.hangman import HangmanGame
+from agentdeck.games.examples.variable_damage import VariableDamageGame
 
 
 class VersionedGame:
@@ -75,7 +79,28 @@ def test_GVP5_declared_closure_never_hashes_partial_source():
     assert descriptor["sources"][1]["sha256"] is None
 
 
-@pytest.mark.parametrize("module_name", ["/tmp/private.py", "package/secret", "..relative", "C:\\private\\game.py"])
+@pytest.mark.parametrize(
+    ("game", "family_id"),
+    [
+        (FixedDamageGame(), "agentdeck.game.fixed-damage"),
+        (VariableDamageGame(), "agentdeck.game.variable-damage"),
+        (HangmanGame(), "agentdeck.game.hangman"),
+        (ArchivistChoiceGame(), "agentdeck.game.archivist-choice"),
+    ],
+)
+def test_GVP3_bundled_games_declare_content_addressed_implementation_closures(game, family_id):
+    """GVP3: bundled reference Games model strong portable provenance."""
+    descriptor = describe_game_version(game)
+    assert descriptor["family_id"] == family_id
+    assert descriptor["declared_version"]
+    assert descriptor["fingerprint_scope"] == "declared_closure"
+    assert descriptor["assurance"] == "content_addressed"
+    assert descriptor["implementation_sha256"]
+
+
+@pytest.mark.parametrize(
+    "module_name", ["/tmp/private.py", "package/secret", "..relative", "C:\\private\\game.py"]
+)
 def test_GVP7_rejects_non_portable_declared_module_names(module_name):
     """GVP7: a closure cannot turn host filesystem paths into persisted source names."""
 

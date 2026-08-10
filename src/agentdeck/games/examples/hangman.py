@@ -87,6 +87,10 @@ class HangmanGame(TurnBasedGame):
         }
     """
 
+    GAME_FAMILY_ID = "agentdeck.game.hangman"
+    GAME_VERSION = "1.0.0"
+    GAME_IMPLEMENTATION_MODULES = ("agentdeck.games.examples.hangman",)
+
     def __init__(
         self,
         word_list: List[str] | None = None,

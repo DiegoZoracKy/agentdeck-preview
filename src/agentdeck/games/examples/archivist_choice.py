@@ -18,6 +18,10 @@ class ArchivistChoiceGame(TurnBasedGame):
     reflect policy quality rather than seat order.
     """
 
+    GAME_FAMILY_ID = "agentdeck.game.archivist-choice"
+    GAME_VERSION = "1.0.0"
+    GAME_IMPLEMENTATION_MODULES = ("agentdeck.games.examples.archivist_choice",)
+
     MANUSCRIPTS = [
         {
             "id": "field-journal",

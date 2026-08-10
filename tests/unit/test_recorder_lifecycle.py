@@ -41,7 +41,12 @@ def test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config(
 
     class MockGame:
         def describe(self):
-            return {"name": "MockGame", "module": __name__, "allowed_actions": [], "config": {"limit": 3}}
+            return {
+                "name": "MockGame",
+                "module": __name__,
+                "allowed_actions": [],
+                "config": {"limit": 3},
+            }
 
     class MockPlayer:
         def __init__(self, name):

@@ -51,6 +51,9 @@ class FixedDamageGame(TurnBasedGame):
         }
     """
 
+    GAME_FAMILY_ID = "agentdeck.game.fixed-damage"
+    GAME_VERSION = "1.0.0"
+    GAME_IMPLEMENTATION_MODULES = ("agentdeck.games.examples.fixed_damage.game",)
     SUPPORTED_INFORMATION_LEVELS = {"full", "partial"}
 
     def __init__(

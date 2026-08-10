@@ -11,7 +11,6 @@ from typing import Any, Dict, Iterable, Optional, Tuple
 
 from .artifact_safety import require_json_value
 
-
 _MODULE_NAME = re.compile(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*")
 
 
@@ -69,9 +68,10 @@ def describe_game_version(game: Any) -> Dict[str, Any]:
 
     game_type = game.__class__
     fallback_family = f"{game_type.__module__}:{game_type.__qualname__}"
-    family_id = _explicit_text(
-        getattr(game_type, "GAME_FAMILY_ID", None), field="GAME_FAMILY_ID"
-    ) or fallback_family
+    family_id = (
+        _explicit_text(getattr(game_type, "GAME_FAMILY_ID", None), field="GAME_FAMILY_ID")
+        or fallback_family
+    )
     declared_version = _explicit_text(
         getattr(game_type, "GAME_VERSION", None), field="GAME_VERSION"
     )
@@ -100,7 +100,9 @@ def describe_game_version(game: Any) -> Dict[str, Any]:
                 "sources": [
                     {
                         "name": name,
-                        "sha256": hashlib.sha256(content).hexdigest() if content is not None else None,
+                        "sha256": (
+                            hashlib.sha256(content).hexdigest() if content is not None else None
+                        ),
                     }
                     for name, content in source_values
                 ],
@@ -121,9 +123,7 @@ def describe_game_version(game: Any) -> Dict[str, Any]:
                 "assurance": "unresolved",
             }
         else:
-            digest, sources = _digest_sources(
-                [(f"class:{fallback_family}", class_source)]
-            )
+            digest, sources = _digest_sources([(f"class:{fallback_family}", class_source)])
             descriptor = {
                 "family_id": family_id,
                 "declared_version": declared_version,
