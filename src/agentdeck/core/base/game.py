@@ -31,6 +31,7 @@ import copy
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ..artifact_safety import require_json_value
+from ..game_version import describe_game_version
 from ..types import ActionResult, Event, GameStatus, RandomGenerator
 
 if TYPE_CHECKING:
@@ -370,6 +371,10 @@ class Game(ABC):
         }
         require_json_value(descriptor, field="game.describe()")
         return descriptor
+
+    def describe_version(self) -> Dict[str, Any]:
+        """Return portable implementation provenance without constraining Game design."""
+        return describe_game_version(self)
 
     def on_action_parse_failure(
         self,

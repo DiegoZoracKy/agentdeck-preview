@@ -207,6 +207,7 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [Recorder](SPEC-RECORDER.md) | 2.1.0 | Final | Strict match persistence with complete effective configuration snapshots |
+| [Game Version Provenance](SPEC-GAME-VERSION-PROVENANCE.md) | 0.1.0 | Final | Exact, non-blocking Game implementation identity in new records |
 | [ReplayEngine](SPEC-REPLAY.md) | 2.0.1 | Final | Exact replay of canonical event payloads |
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.1 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |

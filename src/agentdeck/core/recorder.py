@@ -350,6 +350,7 @@ class Recorder:
                 for player in players
             ],  # Per SPEC-RECORDER MC3
             "game_config": self._get_game_config(game),
+            "game_version": self._get_game_version(game),
         }
         match_metadata = {
             key: copy.deepcopy(value)
@@ -904,6 +905,13 @@ class Recorder:
             }
         require_json_value(config, field="game_config")
         return config
+
+    def _get_game_version(self, game) -> Dict[str, Any]:
+        from agentdeck.core.game_version import describe_game_version
+
+        descriptor = describe_game_version(game)
+        require_json_value(descriptor, field="game_version")
+        return descriptor
 
     def _get_configuration(self, game, players) -> Dict[str, Any]:
         configuration = {

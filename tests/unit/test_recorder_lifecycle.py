@@ -34,6 +34,61 @@ def recorder(temp_recorder_dir):
     )
 
 
+def test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config(
+    recorder, temp_recorder_dir
+):
+    """GVP1 GVP2: every new record separates implementation identity from config."""
+
+    class MockGame:
+        def describe(self):
+            return {"name": "MockGame", "module": __name__, "allowed_actions": [], "config": {"limit": 3}}
+
+    class MockPlayer:
+        def __init__(self, name):
+            self.name = name
+
+    game = MockGame()
+    players = [MockPlayer("Alpha"), MockPlayer("Beta")]
+    recorder.on_batch_start(
+        batch_id="batch_gvp",
+        game=game,
+        players=players,
+        matches=1,
+        context={"session_id": "test_session"},
+    )
+    recorder.on_match_start(
+        game=game,
+        players=players,
+        match_id="match_gvp",
+        context={"session_id": "test_session", "batch_id": "batch_gvp"},
+    )
+
+    payload = json.loads((temp_recorder_dir / "match_gvp.json").read_text())
+    assert payload["metadata"]["game_config"]["config"] == {"limit": 3}
+    assert payload["metadata"]["game_version"]["family_id"].endswith("MockGame")
+    assert "config" not in payload["metadata"]["game_version"]
+
+
+def test_GVP8_loading_a_legacy_record_does_not_rewrite_or_backfill_it(temp_recorder_dir):
+    """GVP8: reading historical bytes never fabricates modern Game provenance."""
+    path = temp_recorder_dir / "legacy-match.json"
+    payload = {
+        "schema_version": "2.0",
+        "events": [],
+        "winner": None,
+        "final_state": {},
+        "seed": 1,
+        "metadata": {"game_config": {"name": "LegacyGame"}},
+    }
+    path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+    before = path.read_bytes()
+
+    loaded = Recorder.load_match(path)
+
+    assert path.read_bytes() == before
+    assert "game_version" not in loaded["metadata"]
+
+
 class TestHandshakeEventBuffering:
     """
     Test 2A.1: Validate pre-match event buffering (schema v2.0).

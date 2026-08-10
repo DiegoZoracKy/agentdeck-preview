@@ -92,6 +92,16 @@
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-PROMPT-BUILDER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RECORD-MIGRATION", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RECORDER", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "GVP1", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config"},
+      {"invariant_id": "GVP2", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config"},
+      {"invariant_id": "GVP3", "test": "tests/unit/test_game_version.py::test_GVP3_GVP4_GVP7_declared_closure_is_deterministic_and_portable"},
+      {"invariant_id": "GVP4", "test": "tests/unit/test_game_version.py::test_GVP3_GVP4_GVP7_declared_closure_is_deterministic_and_portable"},
+      {"invariant_id": "GVP5", "test": "tests/unit/test_game_version.py::test_GVP5_declared_closure_never_hashes_partial_source"},
+      {"invariant_id": "GVP6", "test": "tests/unit/test_game_version.py::test_GVP5_GVP6_unresolved_dynamic_source_is_honest_and_non_blocking"},
+      {"invariant_id": "GVP7", "test": "tests/unit/test_game_version.py::test_GVP3_GVP4_GVP7_declared_closure_is_deterministic_and_portable"},
+      {"invariant_id": "GVP8", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP8_loading_a_legacy_record_does_not_rewrite_or_backfill_it"}
+    ], "spec_id": "SPEC-GAME-VERSION-PROVENANCE", "status": "verified"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RENDERER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-REPLAY", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RESEARCH-BEHAVIORAL", "status": "partial"},
