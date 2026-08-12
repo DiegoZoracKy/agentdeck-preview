@@ -1,8 +1,8 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
 > Status: Final
-> Version: 1.3.5
-> Last Updated: 2026-08-08
+> Version: 1.4.0
+> Last Updated: 2026-08-12
 > Implementation: Complete
 > Review State: Legacy-approved
 > Audience: Game authors, LLM player implementers, research engineers
@@ -104,6 +104,12 @@
 21. **LP1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
 22. **LP2**: The model identifier MUST be accessible via the `model` attribute (already provided by `Player.__init__`) for pricing lookups.
 
+### 5.7 Context Selection Audit (CTA)
+23. **CTA1 Declared Policy**: Every provider-backed Player MUST expose one versioned context policy in `describe()`. The default is `full_history`; bounded or empty-history policies MUST be explicit configuration, never an adapter side effect.
+24. **CTA2 Exact Selection**: Before every provider call, the Player MUST retain the ordered provider-neutral messages, a content hash, and the identifiers of available, selected, and omitted historical messages. The current turn MUST remain distinguishable from retained history.
+25. **CTA3 Isolation**: Context selection MUST use only the current Player's conversation manager for the current match. `reset_conversation()` MUST clear both message content and provenance identifiers before another match.
+26. **CTA4 Additive Compatibility**: Records created before this contract MAY lack exact context-selection provenance. Consumers MUST label reconstructed history as reconstructed and MUST NOT promote it to exact provider input.
+
 ## 6. Data Structures
 - **HandshakeContext**: `match_id`, `player_name`, `opponent_names`, `game_name`, `seed`, `handshake_template_id`, optional metadata. Provided by console so players can tailor handshake prompts.
 - **HandshakeResponse** *(returned by `execute_handshake`)*:
@@ -112,6 +118,7 @@
   - `retries` *(int, optional)*: Retry count used by provider.
   - `retry_durations` *(list, optional)*: Backoff delays applied between retries.
   - `attempt_durations` *(list, optional)*: Durations for each attempt.
+  - `provider_call` *(dict, optional)*: Exact context selection plus provider-adapter call provenance when the Player is provider-backed.
 - **PromptBundle** *(from SPEC-PROMPT-BUILDER)*:
   - `text` *(str)*: Fully rendered prompt string sent to the LLM.
   - `blocks` *(list)*: Rendered blocks with placeholder metadata for reproducibility.

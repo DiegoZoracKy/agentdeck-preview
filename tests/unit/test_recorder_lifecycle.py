@@ -74,7 +74,9 @@ def test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config(
     assert "config" not in payload["metadata"]["game_version"]
 
 
-def test_GVP8_loading_a_legacy_record_does_not_rewrite_or_backfill_it(temp_recorder_dir):
+def test_GVP8_RPA2_loading_a_legacy_record_does_not_rewrite_or_backfill_it(
+    temp_recorder_dir,
+):
     """GVP8: reading historical bytes never fabricates modern Game provenance."""
     path = temp_recorder_dir / "legacy-match.json"
     payload = {
@@ -569,7 +571,7 @@ class TestHandshakeMetadata:
         assert match_data["started_at"].startswith("2024-01-")
         assert match_data["ended_at"].startswith("2024-01-")
 
-    def test_gameplay_events_preserve_emission_timestamps_and_turn_durations(
+    def test_RPA1_RPA3_gameplay_preserves_provider_call_attempts_and_timing(
         self, recorder, temp_recorder_dir
     ):
         """
@@ -638,6 +640,31 @@ class TestHandshakeMetadata:
                         "prompt_text": "Turn 1",
                         "response_text": "ACTION: ATTACK",
                         "usage_info": {"call_id": "c111aaaa", "tokens": 10, "cost": 0.0001},
+                        "provider_call": {
+                            "schema_version": "0.1",
+                            "call_id": "c111aaaa",
+                            "context_selection": {
+                                "policy": {"id": "full_history", "version": "1"},
+                                "selected_message_ids": ["handshake-user", "turn-1-user"],
+                                "omitted_message_ids": [],
+                            },
+                            "composed_input": {
+                                "messages": [
+                                    {"role": "user", "content": "Handshake"},
+                                    {"role": "user", "content": "Turn 1"},
+                                ]
+                            },
+                            "sdk_request": {
+                                "method": "openai.responses.create",
+                                "arguments": {"model": "gpt-test", "input": []},
+                            },
+                            "sdk_response": {"response_text": "ACTION: ATTACK"},
+                            "attempts": [
+                                {"attempt": 1, "outcome": "failed"},
+                                {"attempt": 2, "outcome": "completed"},
+                            ],
+                        },
+                        "retries": 1,
                     },
                 },
                 context={
@@ -728,6 +755,13 @@ class TestHandshakeMetadata:
         # call_id should be explicit in interaction payload for request/response correlation.
         assert gameplay_events[0]["data"]["interaction"]["usage_info"]["call_id"] == "c111aaaa"
         assert gameplay_events[1]["data"]["interaction"]["usage_info"]["call_id"] == "c222bbbb"
+        retained_call = gameplay_events[0]["data"]["interaction"]["provider_call"]
+        assert retained_call["call_id"] == "c111aaaa"
+        assert [attempt["outcome"] for attempt in retained_call["attempts"]] == [
+            "failed",
+            "completed",
+        ]
+        assert gameplay_events[0]["data"]["interaction"]["retries"] == 1
 
 
 class TestMatchCostAndIds:

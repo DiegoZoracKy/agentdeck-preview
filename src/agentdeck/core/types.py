@@ -292,6 +292,7 @@ class HandshakeResponse:
     retries: Optional[int] = None
     retry_durations: Optional[List[float]] = None
     attempt_durations: Optional[List[float]] = None
+    provider_call: Optional[Dict[str, Any]] = None
 
 
 @dataclass

@@ -67,6 +67,7 @@ class GPTPlayer(LLMPlayer):
         if instructions:
             api_params["instructions"] = instructions
 
+        self._capture_sdk_request("openai.responses.create", api_params)
         response = self.client.responses.create(**api_params)
         response_text = self._extract_response_text(response)
         usage = getattr(response, "usage", None)
@@ -90,6 +91,9 @@ class GPTPlayer(LLMPlayer):
             "cost": cost,
             "model": self.model,
             "provider_model": getattr(response, "model", self.model),
+            "provider_response_id": getattr(response, "id", None),
+            "service_tier": getattr(response, "service_tier", None),
+            "stop_reason": getattr(response, "status", None),
             # Keep internal naming stable for pricing/spectators.
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,

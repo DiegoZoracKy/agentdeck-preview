@@ -37,6 +37,18 @@ def test_event_factory_turn_matches_canonical_gameplay_shape():
             "controller_format": "ACTION: <MOVE>",
             "usage_info": {"input_tokens": 10, "output_tokens": 4},
             "renderer_output": {"template_id": "default"},
+            "provider_call": {
+                "schema_version": "0.1",
+                "call_id": "call-1",
+                "context_selection": {"policy": {"id": "full_history"}},
+                "sdk_request": {
+                    "method": "openai.responses.create",
+                    "arguments": {"model": "gpt-test"},
+                },
+            },
+            "retries": 1,
+            "retry_durations": [0.25],
+            "attempt_durations": [0.1, 0.2],
         },
     )
 
@@ -71,6 +83,11 @@ def test_event_factory_turn_matches_canonical_gameplay_shape():
     assert event.data["interaction"]["controller_metadata"] == {"parser": "action_only"}
     assert event.data["interaction"]["usage_info"] == {"input_tokens": 10, "output_tokens": 4}
     assert event.data["interaction"]["renderer_output"] == {"template_id": "default"}
+    assert event.data["interaction"]["provider_call"]["call_id"] == "call-1"
+    assert event.data["interaction"]["retries"] == 1
+    assert event.data["interaction"]["retry_durations"] == [0.25]
+    assert event.data["interaction"]["attempt_durations"] == [0.1, 0.2]
+    assert "provider_call" not in event.data["action"]["metadata"]
     assert event.data["state_before"]["health"]["Bob"] == 20
 
 

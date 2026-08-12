@@ -55,6 +55,35 @@ def _gameplay_event() -> Event:
                 "renderer_output": {"template_id": "default"},
                 "controller_format": "ACTION: <MOVE>",
                 "controller_metadata": {"allowed": ["ATTACK", "POTION"]},
+                "provider_call": {
+                    "schema_version": "0.1",
+                    "call_id": "call-audit-1",
+                    "context_selection": {
+                        "policy": {"id": "full_history", "version": "1", "parameters": {}},
+                        "selected_history_messages": 2,
+                        "available_history_messages": 2,
+                        "selected_message_ids": ["handshake-user", "handshake-assistant"],
+                        "omitted_message_ids": [],
+                    },
+                    "composed_input": {
+                        "messages": [
+                            {"role": "user", "content": "Handshake"},
+                            {"role": "assistant", "content": "READY"},
+                            {"role": "user", "content": "Take your turn."},
+                        ],
+                        "current_message_index": 2,
+                        "ordered_messages_sha256": "abc123",
+                    },
+                    "sdk_request": {
+                        "sdk": "openai",
+                        "method": "openai.responses.create",
+                        "arguments": {"model": "gpt-test", "input": []},
+                        "arguments_sha256": "def456",
+                        "assurance": "sent_to_official_sdk",
+                    },
+                    "sdk_response": {"response_text": "ACTION: ATTACK"},
+                    "attempts": [{"attempt": 1, "outcome": "completed"}],
+                },
             },
             "state_before": {"health": {"Alice": 40, "Bob": 20}},
             "state_after": {"health": {"Alice": 40, "Bob": 0}},
@@ -65,7 +94,7 @@ def _gameplay_event() -> Event:
     )
 
 
-def test_match_surface_projector_builds_decision_frame():
+def test_MSP21_MSP22_match_surface_projector_builds_auditable_decision_frame():
     sink = InMemorySink()
     projector = MatchSurfaceProjector(sink=sink)
 
@@ -94,7 +123,10 @@ def test_match_surface_projector_builds_decision_frame():
     frame = document["frames"][0]
     assert frame["phase_index"] == 0
     assert frame["action"]["value"] == "ATTACK"
+    assert frame["turn_context"]["turn_number"] == 1
+    assert frame["turn_context"].get("rng_seed") is None
     assert frame["interaction"]["response_text"] == "REASONING: Finish\nACTION: ATTACK"
+    assert frame["interaction"]["provider_call"]["sdk_request"]["method"] == "openai.responses.create"
     assert frame["state_delta"] == {"health.Bob": {"before": 20, "after": 0}}
     assert frame["economics"]["cost"] == 0.0002
     assert document["economics"]["total_calls"] == 1
@@ -170,7 +202,7 @@ def test_match_surface_marker_provider_isolated():
     assert sink.frames[0]["markers"] == []
 
 
-def test_match_surface_projects_handshake_and_agent_self_report():
+def test_CTA4_MSP23_match_surface_keeps_historical_lifecycle_without_provider_call():
     sink = InMemorySink()
     projector = MatchSurfaceProjector(sink=sink)
     projector.on_match_start(MockGame(), [MockPlayer("Alice")], "match-1")
@@ -205,6 +237,7 @@ def test_match_surface_projects_handshake_and_agent_self_report():
     assert sink.document is not None
     assert sink.document["schema_version"] == "0.2"
     assert [entry["state"] for entry in sink.document["handshakes"]] == ["started", "accepted"]
+    assert all("provider_call" not in entry for entry in sink.document["handshakes"])
     assert sink.document["conclusions"] == [
         {
             "player": "Alice",
@@ -218,6 +251,7 @@ def test_match_surface_projects_handshake_and_agent_self_report():
             "timestamp": 12.0,
         }
     ]
+    assert "provider_call" not in sink.document["conclusions"][0]
 
 
 def test_match_surface_preserves_handshakes_emitted_before_match_start():

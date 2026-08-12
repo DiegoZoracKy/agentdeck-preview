@@ -62,6 +62,7 @@ class ClaudePlayer(LLMPlayer):
         if system_prompt:
             kwargs["system"] = system_prompt
 
+        self._capture_sdk_request("anthropic.messages.create", kwargs)
         response = self.client.messages.create(**kwargs)
 
         response_text = response.content[0].text
@@ -79,6 +80,9 @@ class ClaudePlayer(LLMPlayer):
             "tokens_used": tokens_used,
             "cost": cost,
             "model_used": self.model,
+            "provider_model": getattr(response, "model", None),
+            "provider_response_id": getattr(response, "id", None),
+            "stop_reason": getattr(response, "stop_reason", None),
             "input_tokens": response.usage.input_tokens,
             "output_tokens": response.usage.output_tokens,
             # Add standard keys for LLMPlayer compatibility

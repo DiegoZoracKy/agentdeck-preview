@@ -151,6 +151,21 @@ class GeminiPlayer(LLMPlayer):
             generation_config_dict["system_instruction"] = "\n\n".join(system_parts)
         generation_config = types.GenerateContentConfig.model_validate(generation_config_dict)
 
+        sdk_arguments = {
+            "model": self.model,
+            "contents": [
+                content.model_dump(mode="json", exclude_none=True)
+                if hasattr(content, "model_dump")
+                else str(content)
+                for content in contents
+            ],
+            "config": generation_config.model_dump(mode="json", exclude_none=True),
+        }
+        self._capture_sdk_request(
+            "google.genai.models.generate_content",
+            sdk_arguments,
+            assurance="serialized_sdk_arguments",
+        )
         response = self.client.models.generate_content(
             model=self.model,
             contents=contents,
@@ -184,6 +199,8 @@ class GeminiPlayer(LLMPlayer):
             "tokens_used": total_tokens,
             "cost": cost,
             "model_used": self.model,
+            "provider_model": getattr(response, "model_version", None),
+            "provider_response_id": getattr(response, "response_id", None),
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "estimated": estimated,

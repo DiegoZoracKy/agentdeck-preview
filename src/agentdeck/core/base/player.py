@@ -222,6 +222,7 @@ class Player(ABC):
         retries = getattr(self, "last_retries", None)
         retry_durations = getattr(self, "last_retry_durations", None)
         attempt_durations = getattr(self, "last_attempt_durations", None)
+        provider_call = copy.deepcopy(getattr(self, "last_provider_call", None))
 
         prompt_blocks = self._serialize_prompt_blocks(bundle.blocks)
         self._record_exchange(
@@ -233,6 +234,7 @@ class Player(ABC):
             controller_format=self.controller.get_handshake_format_instructions(),
             renderer_output=None,
             usage_info=usage_info,
+            provider_call=provider_call,
         )
 
         return HandshakeResponse(
@@ -241,6 +243,7 @@ class Player(ABC):
             retries=retries,
             retry_durations=retry_durations,
             attempt_durations=attempt_durations,
+            provider_call=provider_call,
         )
 
     def decide(
@@ -322,6 +325,7 @@ class Player(ABC):
         # Per SPEC-PROMPT-BUILDER §5.3 MC3, preserve PromptBlock.metadata (renderer hints)
         action_result.metadata = action_result.metadata or {}
         usage_info = copy.deepcopy(getattr(self, "last_usage_info", None))
+        provider_call = copy.deepcopy(getattr(self, "last_provider_call", None))
         action_result.metadata.update(
             {
                 "raw_prompt": bundle.text,
@@ -335,6 +339,15 @@ class Player(ABC):
         )
         if usage_info:
             action_result.metadata["usage_info"] = usage_info
+        if provider_call:
+            action_result.metadata["provider_call"] = provider_call
+        action_result.metadata["retries"] = int(getattr(self, "last_retries", 0) or 0)
+        action_result.metadata["retry_durations"] = copy.deepcopy(
+            getattr(self, "last_retry_durations", []) or []
+        )
+        action_result.metadata["attempt_durations"] = copy.deepcopy(
+            getattr(self, "last_attempt_durations", []) or []
+        )
 
         # Preserve in conversation history (CS2)
         # Capture PM1-PM6 metadata for dialogue array
@@ -347,6 +360,7 @@ class Player(ABC):
             controller_format=self.controller.get_format_instructions(),
             renderer_output=action_result.metadata.get("renderer_output"),
             usage_info=usage_info,
+            provider_call=provider_call,
         )
 
         return action_result
@@ -558,6 +572,7 @@ class Player(ABC):
         controller_metadata: Optional[Dict[str, Any]] = None,
         renderer_output: Optional[Dict] = None,
         usage_info: Optional[Dict] = None,
+        provider_call: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Record prompt/response exchange in conversation history with PM1-PM6 metadata.
@@ -583,6 +598,8 @@ class Player(ABC):
             response_metadata["usage_info"] = usage_info
         if controller_metadata is not None:
             response_metadata["controller_metadata"] = controller_metadata
+        if provider_call is not None:
+            response_metadata["provider_call"] = copy.deepcopy(provider_call)
 
         if self.conversation_manager:
             # Delegate to manager (CS2)
@@ -613,6 +630,7 @@ class Player(ABC):
             ),
             "renderer_output": copy.deepcopy(renderer_output) if renderer_output else {},
             "usage_info": copy.deepcopy(usage_info) if usage_info else None,
+            "provider_call": copy.deepcopy(provider_call) if provider_call else None,
         }
 
     def _get_last_exchange(self, phase: str) -> Optional[Dict[str, Any]]:

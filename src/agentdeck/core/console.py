@@ -786,6 +786,10 @@ class _MatchWorker:
                     prompt_blocks=prompt_blocks,
                     renderer_output=None,
                     usage_info=usage_info,
+                    provider_call=response.provider_call,
+                    retries=response.retries,
+                    retry_durations=response.retry_durations,
+                    attempt_durations=response.attempt_durations,
                     reason=result.reason,
                 )
                 raise HandshakeRejectedError(
@@ -814,6 +818,10 @@ class _MatchWorker:
                 prompt_blocks=prompt_blocks,
                 renderer_output=None,
                 usage_info=usage_info,
+                provider_call=response.provider_call,
+                retries=response.retries,
+                retry_durations=response.retry_durations,
+                attempt_durations=response.attempt_durations,
             )
 
         return state
@@ -1144,6 +1152,7 @@ class _MatchWorker:
                 controller_format=prompt_payload.get("controller_format", ""),
                 controller_metadata=controller_metadata,
                 usage_info=prompt_payload.get("usage_info"),
+                provider_call=prompt_payload.get("provider_call"),
             )
 
     def _dispatch_event(
@@ -3091,6 +3100,10 @@ class Console:
                     prompt_blocks=prompt_blocks,
                     renderer_output=None,
                     usage_info=usage_info,
+                    provider_call=response.provider_call,
+                    retries=response.retries,
+                    retry_durations=response.retry_durations,
+                    attempt_durations=response.attempt_durations,
                     reason=result.reason,
                 )
                 raise HandshakeRejectedError(
@@ -3119,6 +3132,10 @@ class Console:
                 prompt_blocks=prompt_blocks,
                 renderer_output=None,
                 usage_info=usage_info,
+                provider_call=response.provider_call,
+                retries=response.retries,
+                retry_durations=response.retry_durations,
+                attempt_durations=response.attempt_durations,
             )
 
         return state
@@ -3206,6 +3223,7 @@ class Console:
                 controller_format=prompt_payload.get("controller_format", ""),
                 controller_metadata=controller_metadata,
                 usage_info=prompt_payload.get("usage_info"),
+                provider_call=prompt_payload.get("provider_call"),
             )
 
     def _safe_status(self, game: Game, state: Dict[str, Any]) -> GameStatus:

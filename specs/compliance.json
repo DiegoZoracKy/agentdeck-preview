@@ -80,19 +80,42 @@
       {"invariant_id": "IP19", "test": "tests/unit/test_instrument_package.py::test_ip19_rejects_transient_artifacts_before_package_hash"}
       ,{"invariant_id": "IP20", "test": "tests/unit/test_instrument_package.py::test_ip20_strong_provenance_is_required_only_for_evidence_ready"}
     ], "spec_id": "SPEC-INSTRUMENT-PACKAGE", "status": "verified"},
-    {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-LLM", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "PCA1", "test": "tests/unit/test_openai_player.py::test_PCA1_PCA2_openai_player_captures_effective_sdk_arguments"},
+      {"invariant_id": "PCA1", "test": "tests/unit/test_llm_player.py::test_PCA1_PCA2_claude_player_captures_effective_sdk_arguments"},
+      {"invariant_id": "PCA1", "test": "tests/unit/test_google_player.py::test_PCA1_PCA2_gemini_player_captures_effective_sdk_arguments"},
+      {"invariant_id": "PCA2", "test": "tests/unit/test_openai_player.py::test_PCA1_PCA2_openai_player_captures_effective_sdk_arguments"},
+      {"invariant_id": "PCA2", "test": "tests/unit/test_llm_player.py::test_PCA1_PCA2_claude_player_captures_effective_sdk_arguments"},
+      {"invariant_id": "PCA2", "test": "tests/unit/test_google_player.py::test_PCA1_PCA2_gemini_player_captures_effective_sdk_arguments"},
+      {"invariant_id": "PCA3", "test": "tests/unit/test_llm_player.py::test_PCA3_retry_history_records_every_attempt_without_hiding_failed_request"},
+      {"invariant_id": "PCA4", "test": "tests/unit/test_llm_player.py::test_CTA2_PCA4_PCA5_provider_call_records_exact_context_and_sdk_arguments"},
+      {"invariant_id": "PCA5", "test": "tests/unit/test_llm_player.py::test_CTA2_PCA4_PCA5_provider_call_records_exact_context_and_sdk_arguments"}
+    ], "spec_id": "SPEC-LLM", "status": "partial"},
     {"assurance": "automated", "evidence": [
       {"invariant_id": "MR8", "test": "tests/unit/test_authoring_readiness.py::test_ar4_mr8_stock_mechanics_do_not_access_private_console"}
     ], "spec_id": "SPEC-MATCH-RUNTIME", "status": "partial"},
-    {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-MATCH-SURFACE-PROJECTION", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "MSP21", "test": "tests/unit/test_match_surface.py::test_MSP21_MSP22_match_surface_projector_builds_auditable_decision_frame"},
+      {"invariant_id": "MSP22", "test": "tests/unit/test_match_surface.py::test_MSP21_MSP22_match_surface_projector_builds_auditable_decision_frame"},
+      {"invariant_id": "MSP23", "test": "tests/unit/test_match_surface.py::test_CTA4_MSP23_match_surface_keeps_historical_lifecycle_without_provider_call"}
+    ], "spec_id": "SPEC-MATCH-SURFACE-PROJECTION", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-MONITOR", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-OBSERVABILITY", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-PARALLEL", "status": "partial"},
-    {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-PLAYER", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "CTA1", "test": "tests/unit/test_llm_player.py::test_CTA1_handshake_plus_recent_policy_declares_selected_and_omitted_history"},
+      {"invariant_id": "CTA2", "test": "tests/unit/test_llm_player.py::test_CTA2_PCA4_PCA5_provider_call_records_exact_context_and_sdk_arguments"},
+      {"invariant_id": "CTA3", "test": "tests/unit/test_llm_player.py::test_CTA3_player_contexts_do_not_cross_leak"},
+      {"invariant_id": "CTA4", "test": "tests/unit/test_match_surface.py::test_CTA4_MSP23_match_surface_keeps_historical_lifecycle_without_provider_call"}
+    ], "spec_id": "SPEC-PLAYER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-PRICING", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-PROMPT-BUILDER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RECORD-MIGRATION", "status": "partial"},
-    {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RECORDER", "status": "partial"},
+    {"assurance": "automated", "evidence": [
+      {"invariant_id": "RPA1", "test": "tests/unit/test_recorder_lifecycle.py::test_RPA1_RPA3_gameplay_preserves_provider_call_attempts_and_timing"},
+      {"invariant_id": "RPA2", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP8_RPA2_loading_a_legacy_record_does_not_rewrite_or_backfill_it"},
+      {"invariant_id": "RPA3", "test": "tests/unit/test_recorder_lifecycle.py::test_RPA1_RPA3_gameplay_preserves_provider_call_attempts_and_timing"}
+    ], "spec_id": "SPEC-RECORDER", "status": "partial"},
     {"assurance": "automated", "evidence": [
       {"invariant_id": "GVP1", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config"},
       {"invariant_id": "GVP2", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP1_GVP2_recorder_keeps_game_version_separate_from_effective_config"},
@@ -101,7 +124,7 @@
       {"invariant_id": "GVP5", "test": "tests/unit/test_game_version.py::test_GVP5_declared_closure_never_hashes_partial_source"},
       {"invariant_id": "GVP6", "test": "tests/unit/test_game_version.py::test_GVP5_GVP6_unresolved_dynamic_source_is_honest_and_non_blocking"},
       {"invariant_id": "GVP7", "test": "tests/unit/test_game_version.py::test_GVP3_GVP4_GVP7_declared_closure_is_deterministic_and_portable"},
-      {"invariant_id": "GVP8", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP8_loading_a_legacy_record_does_not_rewrite_or_backfill_it"}
+      {"invariant_id": "GVP8", "test": "tests/unit/test_recorder_lifecycle.py::test_GVP8_RPA2_loading_a_legacy_record_does_not_rewrite_or_backfill_it"}
     ], "spec_id": "SPEC-GAME-VERSION-PROVENANCE", "status": "verified"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-RENDERER", "status": "partial"},
     {"assurance": "mapped", "evidence": [], "spec_id": "SPEC-REPLAY", "status": "partial"},

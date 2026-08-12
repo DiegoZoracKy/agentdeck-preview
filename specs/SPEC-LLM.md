@@ -1,8 +1,8 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.1.5
-> Last Updated: 2026-08-08
+> Version: 1.2.0
+> Last Updated: 2026-08-12
 > Implementation: Complete
 > Review State: Legacy-approved
 > Audience: LLM integration authors, pricing/ops maintainers, research engineers
@@ -109,6 +109,13 @@
 29. **AR1**: Anthropic-backed players MUST supply `max_tokens` on every request. When callers leave `max_tokens` unset, implementations MUST apply a documented fallback.
 30. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, create scoped Google credentials suitable for Vertex (`cloud-platform`), construct the provider client in Vertex mode, and infer `project_id` from the payload when possible.
 31. **GR2**: Gemini-backed players MUST preserve multi-turn role structure using the provider's native content model rather than flattening history into a labeled transcript. User messages MUST be sent as user-role content, assistant messages MUST be sent as model-role content, and system instructions SHOULD use the provider-native system-instruction field when available.
+
+### 5.9 Provider Call Audit (PCA)
+32. **PCA1 Adapter Boundary**: Immediately before invoking an official provider SDK method, an adapter MUST retain a strict-JSON snapshot of the effective method name and arguments. The snapshot is authoritative for what AgentDeck handed to the SDK; it MUST NOT claim to be an intercepted HTTP request.
+33. **PCA2 Request Transformation**: Provider-neutral composed messages and provider-native SDK arguments MUST remain separate. This preserves visibility into transformations such as OpenAI `instructions` plus `input`, Anthropic `system` plus `messages`, and Google typed contents/config.
+34. **PCA3 Attempt History**: Every attempted provider call MUST retain attempt order, start time, duration, outcome, and the SDK request used by that attempt. A successful retry MUST NOT erase earlier failed attempts.
+35. **PCA4 Provider Response**: Successful calls MUST retain the exact response text plus provider-returned identity, response ID, stop reason, service tier, and token usage when the official SDK exposes them. Missing provider fields MUST remain absent rather than inferred.
+36. **PCA5 JSON Safety**: Provider call provenance persisted into Records MUST contain no SDK clients, credentials, live response objects, or other non-JSON values.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:

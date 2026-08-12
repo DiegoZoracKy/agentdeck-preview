@@ -27,6 +27,10 @@ class EventFactory:
         "duration",
         "turn_number",
         "turn_context",
+        "provider_call",
+        "retries",
+        "retry_durations",
+        "attempt_durations",
     }
 
     def __init__(self, match_id: str):
@@ -75,6 +79,10 @@ class EventFactory:
             "renderer_output": copy.deepcopy(metadata.get("renderer_output")),
             "controller_format": metadata.get("controller_format"),
             "controller_metadata": copy.deepcopy(metadata.get("controller_metadata")),
+            "provider_call": copy.deepcopy(metadata.get("provider_call")),
+            "retries": metadata.get("retries"),
+            "retry_durations": copy.deepcopy(metadata.get("retry_durations")),
+            "attempt_durations": copy.deepcopy(metadata.get("attempt_durations")),
         }
         turn_payload = {
             "match_id": self.match_id,

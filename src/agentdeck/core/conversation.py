@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .types import TurnContext
 
@@ -41,18 +41,47 @@ class ConversationManager:
         self.player_name = player_name
         self._event_bus = event_bus
         self._history: List[Dict[str, str]] = []
+        self._history_entries: List[Dict[str, Any]] = []
+        self._exchange_sequence = 0
 
     # ------------------------------------------------------------------
     # History management
     # ------------------------------------------------------------------
     def reset(self) -> None:
         self._history.clear()
+        self._history_entries.clear()
+        self._exchange_sequence = 0
 
     def history(self) -> List[Dict[str, str]]:
         return list(self._history)
 
-    def append(self, role: str, content: str) -> None:
+    def history_entries(self) -> List[Dict[str, Any]]:
+        """Return provenance-bearing history without changing provider messages."""
+        return [dict(entry) for entry in self._history_entries]
+
+    def append(
+        self,
+        role: str,
+        content: str,
+        *,
+        phase: str = "unknown",
+        exchange_id: Optional[str] = None,
+    ) -> None:
         self._history.append({"role": role, "content": content})
+        if exchange_id is None:
+            resolved_exchange = f"{phase}-{self._exchange_sequence}"
+            self._exchange_sequence += 1
+        else:
+            resolved_exchange = exchange_id
+        self._history_entries.append(
+            {
+                "message_id": f"{resolved_exchange}-{role}",
+                "exchange_id": resolved_exchange,
+                "phase": phase,
+                "role": role,
+                "content": content,
+            }
+        )
 
     def record_turn(
         self,
@@ -81,8 +110,10 @@ class ConversationManager:
             controller_format: Controller type used (PM5)
             renderer_output: Rendered view metadata (PM6)
         """
-        self.append("user", user_message)
-        self.append("assistant", assistant_message)
+        exchange_id = f"{phase}-{self._exchange_sequence}"
+        self._exchange_sequence += 1
+        self.append("user", user_message, phase=phase, exchange_id=exchange_id)
+        self.append("assistant", assistant_message, phase=phase, exchange_id=exchange_id)
 
         # Note: DIALOGUE_TURN events removed in schema v1.3
         # Prompt metadata is now embedded directly in lifecycle events

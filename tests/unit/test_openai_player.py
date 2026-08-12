@@ -56,7 +56,7 @@ def _build_player(monkeypatch, response, **kwargs):
     )
 
 
-def test_openai_player_uses_responses_api_and_system_to_instructions(monkeypatch):
+def test_PCA1_PCA2_openai_player_captures_effective_sdk_arguments(monkeypatch):
     response = _DummyResponse(output_text="ATTACK")
     player = _build_player(monkeypatch, response, top_p=0.9)
 
@@ -74,6 +74,9 @@ def test_openai_player_uses_responses_api_and_system_to_instructions(monkeypatch
     assert kwargs["instructions"] == "Rule A"
     assert kwargs["input"] == [{"role": "user", "content": "Turn: 1"}]
     assert kwargs["top_p"] == 0.9
+    assert player._pending_sdk_request["method"] == "openai.responses.create"
+    assert player._pending_sdk_request["arguments"] == kwargs
+    assert player._pending_sdk_request["assurance"] == "sent_to_official_sdk"
     assert metadata["prompt_tokens"] == 100
     assert metadata["completion_tokens"] == 20
 

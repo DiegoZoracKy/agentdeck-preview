@@ -1,8 +1,8 @@
 # SPEC-MATCH-SURFACE-PROJECTION: Match Surface Projector
 
 > Status: Final
-> Version: 0.4.1
-> Last Updated: 2026-08-09
+> Version: 0.5.0
+> Last Updated: 2026-08-12
 > Implementation: Complete (lifecycle projection in `agentdeck.spectators.match_surface`)
 > Review State: Consensus-approved
 > Audience: Core contributors, spectator authors, artifact pipeline maintainers
@@ -71,6 +71,7 @@ MatchSurfaceFrame = {
     "state_before": {...},
     "state_after": {...},
     "state_delta": {...},
+    "turn_context": {...},
     "action": {
         "value": "ATTACK",
         "reasoning": "...",
@@ -319,6 +320,9 @@ implemented by the v0.2.0 baseline until Phase B/C work lands.
 18. **MSP18 Curation Agents**: Static export MAY import `curation.agents` from a sidecar. These labels MUST carry source provenance and MUST remain separate from record-derived player fields.
 19. **MSP19 Live/Replay Shape**: Given equivalent source metadata and redaction policy, live and replay projection MUST emit equivalent `players[]` shape. Replay MUST preserve recorded Player identity and configuration fields, including `model` when present, without inferring them from display names or leaking finalized aggregates into the reconstructed match start.
 20. **MSP20 Artifact Containment**: `JsonArtifactSink` MUST enforce `SPEC-ARTIFACT-SAFETY` AS1-AS5 for match identifiers and strict JSON output; an invalid source record MUST fail closed without writing outside or partially replacing an artifact.
+21. **MSP21 Provider Audit Preservation**: When canonical lifecycle or gameplay interaction data contains `provider_call`, the projector MUST preserve it verbatim through live and replay projection, subject only to the caller's explicit redaction policy.
+22. **MSP22 Turn Randomness Provenance**: Frames MUST preserve canonical `turn_context`, including per-turn RNG seed/label and timing when recorded, rather than forcing viewers to infer them from state.
+23. **MSP23 Historical Assurance**: A Match Surface without `provider_call` MUST remain valid. Viewers MUST distinguish its exact current-turn prompt/response from any history they reconstruct using neighboring lifecycle and gameplay frames.
 
 ## 7. Data Flow & Interaction
 

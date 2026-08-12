@@ -253,24 +253,33 @@ class MatchSurfaceProjector(Spectator):
         target = self.handshakes if is_handshake else self.conclusions
         data = copy.deepcopy(event.data or {})
         interaction = copy.deepcopy(data.get("interaction") or {})
-        target.append(
-            {
-                "player": data.get("player"),
-                "state": state,
-                "phase": "handshake" if is_handshake else "conclusion",
-                "prompt_text": data.get("prompt_text") or interaction.get("prompt_text"),
-                "prompt_blocks": data.get("prompt_blocks") or interaction.get("prompt_blocks"),
-                "response_text": (
-                    data.get("response_text")
-                    or data.get("normalized_response")
-                    or interaction.get("response_text")
-                ),
-                "controller_metadata": data.get("controller_metadata")
-                or interaction.get("controller_metadata"),
-                "usage_info": data.get("usage_info") or interaction.get("usage_info"),
-                "timestamp": event.timestamp,
-            }
-        )
+        entry = {
+            "player": data.get("player"),
+            "state": state,
+            "phase": "handshake" if is_handshake else "conclusion",
+            "prompt_text": data.get("prompt_text") or interaction.get("prompt_text"),
+            "prompt_blocks": data.get("prompt_blocks") or interaction.get("prompt_blocks"),
+            "response_text": (
+                data.get("response_text")
+                or data.get("normalized_response")
+                or interaction.get("response_text")
+            ),
+            "controller_metadata": data.get("controller_metadata")
+            or interaction.get("controller_metadata"),
+            "usage_info": data.get("usage_info") or interaction.get("usage_info"),
+            "timestamp": event.timestamp,
+        }
+        provider_call = data.get("provider_call") or interaction.get("provider_call")
+        if provider_call is not None:
+            entry.update(
+                {
+                    "provider_call": provider_call,
+                    "retries": data.get("retries"),
+                    "retry_durations": copy.deepcopy(data.get("retry_durations") or []),
+                    "attempt_durations": copy.deepcopy(data.get("attempt_durations") or []),
+                }
+            )
+        target.append(entry)
 
     def _emit_sink(self, method: str, payload: Dict[str, Any]) -> None:
         emitted = copy.deepcopy(payload)
@@ -289,6 +298,7 @@ class MatchSurfaceProjector(Spectator):
             "state_before": copy.deepcopy(data["state_before"]),
             "state_after": copy.deepcopy(data["state_after"]),
             "state_delta": self._state_delta(data["state_before"], data["state_after"]),
+            "turn_context": copy.deepcopy(data["turn_context"]),
             "action": copy.deepcopy(data["action"]),
             "interaction": interaction,
             "economics": {

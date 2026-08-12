@@ -1,8 +1,8 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
 > Status: Final
-> Version: 2.1.0
-> Last Updated: 2026-08-07
+> Version: 2.2.0
+> Last Updated: 2026-08-12
 > Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Core contributors, data analysts, replay implementers
@@ -275,6 +275,9 @@ Recorder v2.0 serializes events in the shape emitted by Core. It MUST NOT reshap
 29. **PM5**: MUST capture `controller_format` (format instructions delivered to the LLM) for every exchange.
 30. **PM6**: MUST capture `controller_metadata` (parser outcomes, validation results, retries, normalization) for every exchange.
 30a. **PM7**: SHOULD capture `call_id` when available to support deterministic request/response correlation in debug logs.
+30b. **RPA1 Provider Call Preservation**: When emitted by a provider-backed Player, lifecycle and canonical gameplay events MUST persist `provider_call` without structural reshaping. This includes context selection, composed messages, SDK request, SDK response metadata, and all attempts.
+30c. **RPA2 Honest Absence**: `provider_call` is additive and optional for historical or non-provider Players. Recorder MUST NOT reconstruct it from logs, templates, or neighboring events.
+30d. **RPA3 Attempt Attribution**: Retry counts and timing arrays MUST remain correlated with `provider_call.attempts`; successful completion MUST NOT remove failed-attempt history.
 
 **Normalized Prompt Payload**:
 

@@ -107,7 +107,7 @@ def test_gemini_player_rejects_invalid_b64_credentials(monkeypatch):
         )
 
 
-def test_gemini_player_passes_generation_config_to_google_sdk(monkeypatch):
+def test_PCA1_PCA2_gemini_player_captures_effective_sdk_arguments(monkeypatch):
     monkeypatch.setenv("VERTEX_PROJECT_ID", "agentdeck-gcp-project")
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS_B64", raising=False)
 
@@ -160,6 +160,9 @@ def test_gemini_player_passes_generation_config_to_google_sdk(monkeypatch):
     assert config.temperature == 1.0
     assert config.thinking_config.thinking_budget == 0
     assert config.system_instruction == "Follow the format exactly."
+    assert player._pending_sdk_request["method"] == "google.genai.models.generate_content"
+    assert player._pending_sdk_request["arguments"]["model"] == "gemini-2.5-flash"
+    assert player._pending_sdk_request["assurance"] == "serialized_sdk_arguments"
     assert metadata["prompt_tokens"] == 12
     assert metadata["completion_tokens"] == 4
     assert metadata["tokens_used"] == 16
