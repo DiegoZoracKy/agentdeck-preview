@@ -126,7 +126,9 @@ def test_MSP21_MSP22_match_surface_projector_builds_auditable_decision_frame():
     assert frame["turn_context"]["turn_number"] == 1
     assert frame["turn_context"].get("rng_seed") is None
     assert frame["interaction"]["response_text"] == "REASONING: Finish\nACTION: ATTACK"
-    assert frame["interaction"]["provider_call"]["sdk_request"]["method"] == "openai.responses.create"
+    assert (
+        frame["interaction"]["provider_call"]["sdk_request"]["method"] == "openai.responses.create"
+    )
     assert frame["state_delta"] == {"health.Bob": {"before": 20, "after": 0}}
     assert frame["economics"]["cost"] == 0.0002
     assert document["economics"]["total_calls"] == 1

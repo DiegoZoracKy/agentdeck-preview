@@ -243,9 +243,7 @@ class LLMPlayer(Player, ABC):
             for index, entry in enumerate(self._local_history)
         ]
 
-    def _select_history_entries(
-        self, entries: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _select_history_entries(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         policy_id = self.context_policy["id"]
         parameters = self.context_policy["parameters"]
         if policy_id == "full_history":
@@ -258,7 +256,9 @@ class LLMPlayer(Player, ABC):
             return recent
         handshake = [entry for entry in entries if entry.get("phase") == "handshake"]
         selected_ids = {entry.get("message_id") for entry in handshake}
-        return handshake + [entry for entry in recent if entry.get("message_id") not in selected_ids]
+        return handshake + [
+            entry for entry in recent if entry.get("message_id") not in selected_ids
+        ]
 
     def _capture_sdk_request(
         self,
@@ -399,7 +399,9 @@ class LLMPlayer(Player, ABC):
                     },
                     "assurance": "returned_by_official_sdk",
                 }
-                sdk_response = {key: value for key, value in sdk_response.items() if value is not None}
+                sdk_response = {
+                    key: value for key, value in sdk_response.items() if value is not None
+                }
                 self.last_provider_call = {
                     "schema_version": "0.1",
                     "call_id": call_id,
@@ -544,9 +546,7 @@ class LLMPlayer(Player, ABC):
         if hasattr(self, "_location"):
             provider_config["location"] = self._location
         if hasattr(self, "_generation_overrides"):
-            provider_config["generation_config"] = copy.deepcopy(
-                self._generation_overrides
-            )
+            provider_config["generation_config"] = copy.deepcopy(self._generation_overrides)
         if provider_config:
             base["provider_config"] = provider_config
         return base
@@ -720,9 +720,7 @@ class LLMPlayer(Player, ABC):
                     else {}
                 ),
                 usage_info=metadata.get("usage_info") if metadata else None,
-                provider_call=(
-                    copy.deepcopy(metadata.get("provider_call")) if metadata else None
-                ),
+                provider_call=(copy.deepcopy(metadata.get("provider_call")) if metadata else None),
             )
 
             return reflection.strip() if reflection else None

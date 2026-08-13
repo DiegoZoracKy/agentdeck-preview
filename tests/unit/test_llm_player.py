@@ -499,13 +499,15 @@ def test_CTA2_PCA4_PCA5_provider_call_records_exact_context_and_sdk_arguments():
     assert call["sdk_response"]["provider_model"] == "dummy-model-2026-08-12"
     assert call["sdk_response"]["response_id"] == "response-123"
     json.dumps(call, allow_nan=False)
-    assert call["attempts"] == [{
-        "attempt": 1,
-        "started_at_unix_ns": call["attempts"][0]["started_at_unix_ns"],
-        "duration_ms": call["attempts"][0]["duration_ms"],
-        "outcome": "completed",
-        "sdk_request": call["sdk_request"],
-    }]
+    assert call["attempts"] == [
+        {
+            "attempt": 1,
+            "started_at_unix_ns": call["attempts"][0]["started_at_unix_ns"],
+            "duration_ms": call["attempts"][0]["duration_ms"],
+            "outcome": "completed",
+            "sdk_request": call["sdk_request"],
+        }
+    ]
 
 
 def test_CTA1_handshake_plus_recent_policy_declares_selected_and_omitted_history():
@@ -535,7 +537,9 @@ def test_CTA1_handshake_plus_recent_policy_declares_selected_and_omitted_history
         "turn-2-assistant",
     ]
     assert selection["omitted_message_ids"] == ["turn-1-user", "turn-1-assistant"]
-    assert [message["content"] for message in player.last_provider_call["composed_input"]["messages"]] == [
+    assert [
+        message["content"] for message in player.last_provider_call["composed_input"]["messages"]
+    ] == [
         "Handshake rules",
         "READY",
         "Turn two view",
@@ -545,12 +549,8 @@ def test_CTA1_handshake_plus_recent_policy_declares_selected_and_omitted_history
 
 
 def test_CTA3_player_contexts_do_not_cross_leak():
-    alice = AuditedDummyLLMPlayer(
-        name="Alice", controller=ActionOnlyController(), api_key="dummy"
-    )
-    bob = AuditedDummyLLMPlayer(
-        name="Bob", controller=ActionOnlyController(), api_key="dummy"
-    )
+    alice = AuditedDummyLLMPlayer(name="Alice", controller=ActionOnlyController(), api_key="dummy")
+    bob = AuditedDummyLLMPlayer(name="Bob", controller=ActionOnlyController(), api_key="dummy")
     alice_manager = ConversationManager(player_name="Alice")
     alice_manager.append("user", "Alice private value: 7", phase="turn")
     bob_manager = ConversationManager(player_name="Bob")
@@ -588,9 +588,7 @@ def test_PCA3_retry_history_records_every_attempt_without_hiding_failed_request(
 
 
 def test_reset_removes_prior_match_context_from_next_provider_call():
-    player = AuditedDummyLLMPlayer(
-        name="Alice", controller=ActionOnlyController(), api_key="dummy"
-    )
+    player = AuditedDummyLLMPlayer(name="Alice", controller=ActionOnlyController(), api_key="dummy")
     manager = ConversationManager(player_name="Alice")
     manager.append("user", "Secret from prior match", phase="turn")
     player.bind_conversation_manager(manager)

@@ -154,9 +154,11 @@ class GeminiPlayer(LLMPlayer):
         sdk_arguments = {
             "model": self.model,
             "contents": [
-                content.model_dump(mode="json", exclude_none=True)
-                if hasattr(content, "model_dump")
-                else str(content)
+                (
+                    content.model_dump(mode="json", exclude_none=True)
+                    if hasattr(content, "model_dump")
+                    else str(content)
+                )
                 for content in contents
             ],
             "config": generation_config.model_dump(mode="json", exclude_none=True),
