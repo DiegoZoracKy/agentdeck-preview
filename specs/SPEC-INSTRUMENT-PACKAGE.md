@@ -1,7 +1,7 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.7.0
+> Version: 0.8.0
 > Last Updated: 2026-08-13
 > Implementation: Complete
 > Review State: Consensus-approved
@@ -170,12 +170,17 @@ calibration:
 `metrics` MUST be non-empty with unique IDs. `output_pointer` MUST resolve in scorer
 output unless `allow_unsupported` is true and the resolved value is `null`.
 `definition` MUST state in ordinary language what enters the metric numerator and
-denominator. A supported metric MUST retain `measurement_provenance` schema `1.0`
-with that exact definition, non-negative `numerator` and `denominator`, and complete
-`eligible_events` and `numerator_events` support sets. Each event reference is the
-strict pair `{match_index, phase_index}` and MUST resolve to one canonical gameplay
-event. Numerator events MUST be a subset of eligible events, support-set cardinalities
-MUST equal the retained counts, and the metric value MUST equal their rate.
+denominator. A supported metric MUST retain `measurement_provenance` schema `2.0`
+with that exact definition, non-negative `numerator` and `denominator`, a declared
+measurement `unit`, and one complete `eligible_units` support set. Each support unit
+MUST have a stable `unit_id`, one match, an optional Player, all canonical gameplay
+event references needed to inspect that unit, and `counted_in_numerator`. Supported
+unit types are `gameplay_turn`, `player_match`, and `match`. A `gameplay_turn` contains
+exactly one event. A `player_match` contains every gameplay event for that Player in
+the match. A `match` contains every gameplay event in the match. The number of units
+MUST equal the denominator, the number marked `counted_in_numerator` MUST equal the
+numerator, and the metric value MUST equal their rate. Event references use the strict
+pair `{match_index, phase_index}` and MUST resolve to canonical gameplay events.
 `record_pointers` MUST be non-empty and every pointer MUST resolve against the ordered
 list of exact generated match payloads. The pointers are evidence anchors; they do not
 authorize a semantic conclusion on their own. Every `calibration.expected` pointer MUST

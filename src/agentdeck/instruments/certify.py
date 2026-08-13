@@ -359,8 +359,8 @@ def _validate_measurement_provenance(
     players: Sequence[Mapping[str, Any]],
 ) -> None:
     provenance = scored.get("measurement_provenance")
-    if not isinstance(provenance, Mapping) or provenance.get("schema_version") != "1.0":
-        raise AssertionError("scorer must emit measurement_provenance schema 1.0")
+    if not isinstance(provenance, Mapping) or provenance.get("schema_version") != "2.0":
+        raise AssertionError("scorer must emit measurement_provenance schema 2.0")
     aggregate = provenance.get("aggregate_metrics")
     per_player = provenance.get("per_player")
     if not isinstance(aggregate, Mapping) or not isinstance(per_player, Mapping):
@@ -373,9 +373,7 @@ def _validate_measurement_provenance(
     roster = {str(player["name"]) for player in players}
     unknown_players = sorted(set(per_player) - roster)
     if unknown_players:
-        raise AssertionError(
-            f"measurement_provenance contains unknown players: {unknown_players}"
-        )
+        raise AssertionError(f"measurement_provenance contains unknown players: {unknown_players}")
 
     gameplay_phases: List[set[int]] = []
     gameplay_players: List[Dict[int, str]] = []
@@ -403,43 +401,127 @@ def _validate_measurement_provenance(
             raise AssertionError(f"measurement definition differs from profile: {metric_id}")
         numerator = entry.get("numerator")
         denominator = entry.get("denominator")
-        if any(isinstance(item, bool) or not isinstance(item, int) or item < 0 for item in (numerator, denominator)):
+        if any(
+            isinstance(item, bool) or not isinstance(item, int) or item < 0
+            for item in (numerator, denominator)
+        ):
             raise AssertionError(f"measurement counts must be non-negative integers: {metric_id}")
         if numerator > denominator:
             raise AssertionError(f"measurement numerator exceeds denominator: {metric_id}")
 
-        def validated_refs(field: str) -> List[tuple[int, int]]:
-            raw = entry.get(field)
-            if not isinstance(raw, list):
-                raise AssertionError(f"measurement {field} must be a list: {metric_id}")
+        unit_type = entry.get("unit")
+        if unit_type not in {"gameplay_turn", "player_match", "match"}:
+            raise AssertionError(f"measurement unit is invalid: {metric_id}")
+        raw_units = entry.get("eligible_units")
+        if not isinstance(raw_units, list):
+            raise AssertionError(f"measurement eligible_units must be a list: {metric_id}")
+        unit_ids: set[str] = set()
+        unit_keys: set[tuple[Any, ...]] = set()
+        counted = 0
+        for raw_unit in raw_units:
+            if not isinstance(raw_unit, Mapping):
+                raise AssertionError(f"measurement support unit is invalid: {metric_id}")
+            required_keys = {"unit_id", "match_index", "events", "counted_in_numerator"}
+            if not required_keys.issubset(raw_unit) or set(raw_unit) - (required_keys | {"player"}):
+                raise AssertionError(f"measurement support unit shape is invalid: {metric_id}")
+            unit_id = raw_unit.get("unit_id")
+            match_index = raw_unit.get("match_index")
+            unit_player = raw_unit.get("player")
+            is_counted = raw_unit.get("counted_in_numerator")
+            if not isinstance(unit_id, str) or not unit_id.strip() or unit_id in unit_ids:
+                raise AssertionError(f"measurement support unit identity is invalid: {metric_id}")
+            if (
+                isinstance(match_index, bool)
+                or not isinstance(match_index, int)
+                or match_index < 0
+                or match_index >= len(payloads)
+                or not isinstance(is_counted, bool)
+            ):
+                raise AssertionError(f"measurement support unit metadata is invalid: {metric_id}")
+            if unit_player is not None and (
+                not isinstance(unit_player, str) or unit_player not in roster
+            ):
+                raise AssertionError(f"measurement support unit Player is invalid: {metric_id}")
+            if player is not None and unit_player != player:
+                raise AssertionError(
+                    f"measurement support unit belongs to another Player: {metric_id}"
+                )
+
+            raw_events = raw_unit.get("events")
+            if not isinstance(raw_events, list) or not raw_events:
+                raise AssertionError(f"measurement support unit events are invalid: {metric_id}")
             refs: List[tuple[int, int]] = []
-            for ref in raw:
+            for ref in raw_events:
                 if not isinstance(ref, Mapping) or set(ref) != {"match_index", "phase_index"}:
                     raise AssertionError(f"measurement event reference is invalid: {metric_id}")
-                match_index = ref.get("match_index")
+                ref_match_index = ref.get("match_index")
                 phase_index = ref.get("phase_index")
                 if (
-                    isinstance(match_index, bool) or not isinstance(match_index, int)
-                    or isinstance(phase_index, bool) or not isinstance(phase_index, int)
-                    or match_index < 0 or match_index >= len(payloads)
+                    ref_match_index != match_index
+                    or isinstance(phase_index, bool)
+                    or not isinstance(phase_index, int)
                     or phase_index not in gameplay_phases[match_index]
                 ):
-                    raise AssertionError(f"measurement event reference does not resolve: {metric_id}")
-                if player is not None and gameplay_players[match_index][phase_index] != player:
-                    raise AssertionError(f"measurement event belongs to another Player: {metric_id}")
+                    raise AssertionError(
+                        f"measurement event reference does not resolve: {metric_id}"
+                    )
+                if (
+                    unit_player is not None
+                    and gameplay_players[match_index][phase_index] != unit_player
+                ):
+                    raise AssertionError(
+                        f"measurement event belongs to another Player: {metric_id}"
+                    )
                 refs.append((match_index, phase_index))
             if len(refs) != len(set(refs)):
-                raise AssertionError(f"measurement event references are not unique: {metric_id}")
-            return refs
+                raise AssertionError(
+                    f"measurement unit event references are not unique: {metric_id}"
+                )
 
-        eligible = validated_refs("eligible_events")
-        contributing = validated_refs("numerator_events")
-        if len(eligible) != denominator or len(contributing) != numerator:
-            raise AssertionError(f"measurement event counts do not match support sets: {metric_id}")
-        if not set(contributing).issubset(eligible):
-            raise AssertionError(f"measurement numerator events are not eligible: {metric_id}")
+            retained_phases = {phase_index for _, phase_index in refs}
+            if unit_type == "gameplay_turn" and len(refs) != 1:
+                raise AssertionError(
+                    f"gameplay_turn measurement unit must contain one event: {metric_id}"
+                )
+            if unit_type == "gameplay_turn":
+                unit_key: tuple[Any, ...] = (unit_type, *refs[0])
+            if unit_type == "player_match":
+                if unit_player is None:
+                    raise AssertionError(
+                        f"player_match measurement unit requires a Player: {metric_id}"
+                    )
+                expected_phases = {
+                    phase_index
+                    for phase_index, acting_player in gameplay_players[match_index].items()
+                    if acting_player == unit_player
+                }
+                if retained_phases != expected_phases:
+                    raise AssertionError(
+                        f"player_match measurement unit is incomplete: {metric_id}"
+                    )
+                unit_key = (unit_type, match_index, unit_player)
+            if unit_type == "match":
+                if unit_player is not None:
+                    raise AssertionError(
+                        f"match measurement unit cannot declare a Player: {metric_id}"
+                    )
+                if retained_phases != gameplay_phases[match_index]:
+                    raise AssertionError(f"match measurement unit is incomplete: {metric_id}")
+                unit_key = (unit_type, match_index)
+            if unit_key in unit_keys:
+                raise AssertionError(f"measurement support unit is duplicated: {metric_id}")
+            unit_ids.add(unit_id)
+            unit_keys.add(unit_key)
+            counted += int(is_counted)
+
+        if len(raw_units) != denominator or counted != numerator:
+            raise AssertionError(f"measurement counts do not match support units: {metric_id}")
         expected = 0.0 if denominator == 0 else numerator / denominator
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or float(value) != expected:
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or float(value) != expected
+        ):
             raise AssertionError(f"measurement value does not match its support sets: {metric_id}")
 
     for metric_id, metric in declared.items():

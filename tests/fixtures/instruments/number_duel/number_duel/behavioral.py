@@ -42,6 +42,7 @@ class NumberDuelBehavioralScorer(BehavioralScorer):
         turns = [
             {
                 "action": ((event.get("data") or {}).get("action") or {}).get("value"),
+                "player": str((event.get("data") or {}).get("player") or ""),
                 "match_index": match_index,
                 "phase_index": _phase_index(event),
             }
@@ -52,14 +53,20 @@ class NumberDuelBehavioralScorer(BehavioralScorer):
         actions = [turn["action"] for turn in turns]
         gain_count = sum(action == "GAIN" for action in actions)
         definition = "Share of recorded gameplay turns whose canonical action was GAIN."
-        eligible_events = [
-            {"match_index": turn["match_index"], "phase_index": turn["phase_index"]}
+        eligible_units = [
+            {
+                "unit_id": f"turn:{turn['match_index']}:{turn['phase_index']}",
+                "match_index": turn["match_index"],
+                "player": turn["player"],
+                "events": [
+                    {
+                        "match_index": turn["match_index"],
+                        "phase_index": turn["phase_index"],
+                    }
+                ],
+                "counted_in_numerator": turn["action"] == "GAIN",
+            }
             for turn in turns
-        ]
-        numerator_events = [
-            {"match_index": turn["match_index"], "phase_index": turn["phase_index"]}
-            for turn in turns
-            if turn["action"] == "GAIN"
         ]
         return {
             "schema_version": 2,
@@ -82,14 +89,14 @@ class NumberDuelBehavioralScorer(BehavioralScorer):
                 "state_metrics": {},
             },
             "measurement_provenance": {
-                "schema_version": "1.0",
+                "schema_version": "2.0",
                 "aggregate_metrics": {
                     "gain_action_rate": {
                         "definition": definition,
                         "numerator": gain_count,
                         "denominator": len(actions),
-                        "eligible_events": eligible_events,
-                        "numerator_events": numerator_events,
+                        "unit": "gameplay_turn",
+                        "eligible_units": eligible_units,
                     }
                 },
                 "per_player": {},

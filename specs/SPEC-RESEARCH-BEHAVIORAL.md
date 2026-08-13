@@ -1,7 +1,7 @@
 # SPEC-RESEARCH-BEHAVIORAL: Behavioral Scoring Contract
 
 > Status: Final
-> Version: 0.3.0
+> Version: 0.4.0
 > Last Updated: 2026-08-13
 > Implementation: Complete (`src/agentdeck/research/behavioral.py`, game-specific scorer modules)
 > Review State: Legacy-approved
@@ -66,7 +66,7 @@ Any scorer MUST return a JSON-serializable mapping with this minimum shape:
     "state_metrics": {}
   },
   "measurement_provenance": {
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "aggregate_metrics": {},
     "per_player": {}
   },
@@ -97,8 +97,11 @@ Required fields:
 
 Evidence-ready package scorers additionally retain `measurement_provenance` for each
 supported declared metric. An entry contains the profile-declared human definition,
-integer numerator and denominator, all eligible event references, and the numerator
-subset. References use `{match_index, phase_index}` so downstream products can resolve
+integer numerator and denominator, the measurement unit, and every eligible support
+unit. Each support unit declares whether it contributed to the numerator and retains
+the complete canonical gameplay-event set required by its unit type. Turn metrics use
+one event per unit; Player-match and match metrics retain every corresponding gameplay
+event. References use `{match_index, phase_index}` so downstream products can resolve
 them to immutable Records without storing Product URLs in Core artifacts.
 
 ### 4.3 Metric Namespaces

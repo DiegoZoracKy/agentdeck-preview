@@ -194,7 +194,7 @@ All component specifications follow the lean spec format with numbered invariant
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
 | [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract (rules, state, narrative, lifecycle hooks, effective config) |
-| [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.7.0 | Final | External manifest, inspection, certification, and capability tiers |
+| [Instrument Package](SPEC-INSTRUMENT-PACKAGE.md) | 0.8.0 | Final | External manifest, inspection, certification, and capability tiers |
 | [Game Stage](SPEC-GAME-STAGE.md) | 0.2.2 | Final | Technology-neutral browser Stage over temporally bounded Match Surface data |
 | [Authoring Readiness](SPEC-AUTHORING-READINESS.md) | 0.1.0 | Final | Public extension typing, runtime boundary, and blocking security gates |
 | [Player](SPEC-PLAYER.md) | 1.4.0 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
@@ -223,7 +223,7 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [Research](SPEC-RESEARCH.md) | 1.2.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
 | [Intervention Comparison](SPEC-RESEARCH-INTERVENTION-COMPARISON.md) | 0.1.0 | Final | Exact cross-run difference artifact for a declared baseline and intervention |
-| [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.3.0 | Final | Global behavioral scorer contract and extension interface for game-specific profiles |
+| [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.4.0 | Final | Global behavioral scorer contract and extension interface for game-specific profiles |
 | [Archivist Choice Behavioral](SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md) | 0.1.0 | Final | Deterministic Archivist Choice score, completion, and post-hoc action-fit profile |
 | [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.7.0 | Final | Experiment package, manifest/results/index contracts |
 | [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.4.0 | Final | Contained session-to-experiment package helper |

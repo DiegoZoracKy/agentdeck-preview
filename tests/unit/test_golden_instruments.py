@@ -124,8 +124,7 @@ def test_ip12_requires_a_human_metric_definition(tmp_path: Path) -> None:
     report = certify_instrument(package, trust_mode="trusted-local")
     assert not report.valid
     assert any(
-        "definition must be non-empty" in check["message"]
-        for check in report.to_dict()["checks"]
+        "definition must be non-empty" in check["message"] for check in report.to_dict()["checks"]
     )
 
 
@@ -134,25 +133,26 @@ def test_ip12_rejects_incomplete_metric_support_sets(tmp_path: Path) -> None:
     scorer_path = package / "number_duel" / "behavioral.py"
     scorer_path.write_text(
         scorer_path.read_text(encoding="utf-8").replace(
-            '"numerator_events": numerator_events,', '"numerator_events": [],'
+            '"eligible_units": eligible_units,', '"eligible_units": eligible_units[:-1],'
         ),
         encoding="utf-8",
     )
     report = certify_instrument(package, trust_mode="trusted-local")
     assert not report.valid
-    assert "event counts do not match support sets" in _check(report, "IP12")["message"]
+    assert "counts do not match support units" in _check(report, "IP12")["message"]
 
 
 def test_ip12_rejects_metric_support_that_does_not_resolve(tmp_path: Path) -> None:
     package = _copy(NUMBER_DUEL, tmp_path)
     scorer_path = package / "number_duel" / "behavioral.py"
-    scorer_path.write_text(
-        scorer_path.read_text(encoding="utf-8").replace(
-            '"eligible_events": eligible_events,',
-            '"eligible_events": [{"match_index": 99, "phase_index": 0} for _ in eligible_events],',
-        ),
-        encoding="utf-8",
+    content = scorer_path.read_text(encoding="utf-8")
+    corrupted = content.replace(
+        '"events": [\n                    {\n                        "match_index": turn["match_index"],',
+        '"events": [\n                    {\n                        "match_index": 99,',
+        1,
     )
+    assert corrupted != content
+    scorer_path.write_text(corrupted, encoding="utf-8")
     report = certify_instrument(package, trust_mode="trusted-local")
     assert not report.valid
     assert "event reference does not resolve" in _check(report, "IP12")["message"]

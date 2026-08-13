@@ -13,8 +13,12 @@ POSITION_DELTA_MIN_SUPPORT_PER_POSITION = 2
 SCARCITY_BUCKETS = (0, 1, 2, 3)
 CRITICAL_POTION_HP_MULTIPLIER = 2
 EVIDENCE_MAX_EXAMPLES = 3
-ALL_ATTACK_DEFINITION = "Share of evaluable Player-matches in which every recorded action was ATTACK."
-UNUSED_POTIONS_LOSS_DEFINITION = "Share of decisive Player losses that ended with at least one unused potion."
+ALL_ATTACK_DEFINITION = (
+    "Share of evaluable Player-matches in which every recorded action was ATTACK."
+)
+UNUSED_POTIONS_LOSS_DEFINITION = (
+    "Share of decisive Player losses that ended with at least one unused potion."
+)
 
 
 NormalizedTurn = Dict[str, Any]
@@ -132,10 +136,8 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
         decisive_losses = Counter()
         losses_with_unused_potions = Counter()
         per_player_turns: DefaultDict[str, List[NormalizedTurn]] = defaultdict(list)
-        all_attack_eligible_refs: DefaultDict[str, List[Dict[str, int]]] = defaultdict(list)
-        all_attack_numerator_refs: DefaultDict[str, List[Dict[str, int]]] = defaultdict(list)
-        unused_loss_eligible_refs: DefaultDict[str, List[Dict[str, int]]] = defaultdict(list)
-        unused_loss_numerator_refs: DefaultDict[str, List[Dict[str, int]]] = defaultdict(list)
+        all_attack_units: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
+        unused_loss_units: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
 
         for match_index, payload in enumerate(match_list):
             if _game_name(payload) != "FixedDamageGame":
@@ -226,16 +228,27 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                     match_turns_by_player.get(player, []),
                     key=lambda item: item["turn_number"],
                 )
-                if player_turns and all(turn["action"] == "ATTACK" for turn in player_turns):
+                all_attack = bool(player_turns) and all(
+                    turn["action"] == "ATTACK" for turn in player_turns
+                )
+                if all_attack:
                     all_attack_matches[player] += 1
                 if player_turns:
-                    support_ref = {
-                        "match_index": match_index,
-                        "phase_index": player_turns[-1]["phase_index"],
-                    }
-                    all_attack_eligible_refs[player].append(support_ref)
-                    if all(turn["action"] == "ATTACK" for turn in player_turns):
-                        all_attack_numerator_refs[player].append(support_ref)
+                    all_attack_units[player].append(
+                        {
+                            "unit_id": f"player-match:{match_index}:{player}",
+                            "match_index": match_index,
+                            "player": player,
+                            "events": [
+                                {
+                                    "match_index": match_index,
+                                    "phase_index": turn["phase_index"],
+                                }
+                                for turn in player_turns
+                            ],
+                            "counted_in_numerator": all_attack,
+                        }
+                    )
 
                 first_potion = next(
                     (turn["own_hp"] for turn in player_turns if turn["action"] == "POTION"),
@@ -249,15 +262,23 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 if winner is not None and winner != player:
                     decisive_losses[player] += 1
                     if player_turns:
-                        support_ref = {
-                            "match_index": match_index,
-                            "phase_index": player_turns[-1]["phase_index"],
-                        }
-                        unused_loss_eligible_refs[player].append(support_ref)
+                        unused_loss_units[player].append(
+                            {
+                                "unit_id": f"decisive-loss:{match_index}:{player}",
+                                "match_index": match_index,
+                                "player": player,
+                                "events": [
+                                    {
+                                        "match_index": match_index,
+                                        "phase_index": turn["phase_index"],
+                                    }
+                                    for turn in player_turns
+                                ],
+                                "counted_in_numerator": int(final_potions.get(player, 0)) > 0,
+                            }
+                        )
                     if int(final_potions.get(player, 0)) > 0:
                         losses_with_unused_potions[player] += 1
-                        if player_turns:
-                            unused_loss_numerator_refs[player].append(support_ref)
 
         turns_total = len(turns)
         # v0.2.0 excludes no gameplay turns once a match is deemed evaluable.
@@ -484,15 +505,15 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                     "definition": ALL_ATTACK_DEFINITION,
                     "numerator": all_attack_matches[player],
                     "denominator": match_support,
-                    "eligible_events": all_attack_eligible_refs[player],
-                    "numerator_events": all_attack_numerator_refs[player],
+                    "unit": "player_match",
+                    "eligible_units": all_attack_units[player],
                 },
                 "unused_potions_on_loss_rate": {
                     "definition": UNUSED_POTIONS_LOSS_DEFINITION,
                     "numerator": losses_with_unused_potions[player],
                     "denominator": decisive_losses[player],
-                    "eligible_events": unused_loss_eligible_refs[player],
-                    "numerator_events": unused_loss_numerator_refs[player],
+                    "unit": "player_match",
+                    "eligible_units": unused_loss_units[player],
                 },
             }
 
@@ -685,28 +706,24 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                 "state_metrics": {},
             },
             "measurement_provenance": {
-                "schema_version": "1.0",
+                "schema_version": "2.0",
                 "aggregate_metrics": {
                     "all_attack_match_rate": {
                         "definition": ALL_ATTACK_DEFINITION,
                         "numerator": all_attack_hits,
                         "denominator": all_attack_support,
-                        "eligible_events": [
-                            ref for player in roster for ref in all_attack_eligible_refs[player]
-                        ],
-                        "numerator_events": [
-                            ref for player in roster for ref in all_attack_numerator_refs[player]
+                        "unit": "player_match",
+                        "eligible_units": [
+                            unit for player in roster for unit in all_attack_units[player]
                         ],
                     },
                     "unused_potions_on_loss_rate": {
                         "definition": UNUSED_POTIONS_LOSS_DEFINITION,
                         "numerator": unused_loss_hits,
                         "denominator": unused_loss_support,
-                        "eligible_events": [
-                            ref for player in roster for ref in unused_loss_eligible_refs[player]
-                        ],
-                        "numerator_events": [
-                            ref for player in roster for ref in unused_loss_numerator_refs[player]
+                        "unit": "player_match",
+                        "eligible_units": [
+                            unit for player in roster for unit in unused_loss_units[player]
                         ],
                     },
                 },
