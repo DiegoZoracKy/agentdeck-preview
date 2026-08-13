@@ -30,6 +30,10 @@ def _safe_rate(numerator: int, denominator: int) -> float:
     return float(numerator) / float(denominator)
 
 
+def _json_pointer_token(value: str) -> str:
+    return value.replace("~", "~0").replace("/", "~1")
+
+
 def _bucket_key(position: str, own_hp: int, own_potions: int) -> str:
     return f"position={position}|hp={own_hp}|potions={own_potions}"
 
@@ -89,7 +93,7 @@ def _game_name(payload: Mapping[str, Any]) -> str:
 class FixedDamageBehavioralScorer(BehavioralScorer):
     game_id = "fixed_damage"
     profile_id = "fixed_damage_behavioral"
-    profile_version = "0.2.0"
+    profile_version = "0.3.0"
 
     def supports(self, *, match_payloads: Iterable[Mapping[str, Any]]) -> bool:
         names = set()
@@ -260,6 +264,8 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                     first_potion_values[player].append(int(first_potion))
 
                 if winner is not None and winner != player:
+                    if player not in final_potions:
+                        raise ValueError(f"FixedDamage final_state.potions is missing {player}")
                     decisive_losses[player] += 1
                     if player_turns:
                         unused_loss_units[player].append(
@@ -273,6 +279,20 @@ class FixedDamageBehavioralScorer(BehavioralScorer):
                                         "phase_index": turn["phase_index"],
                                     }
                                     for turn in player_turns
+                                ],
+                                "record_facts": [
+                                    {
+                                        "match_index": match_index,
+                                        "pointer": "/winner",
+                                        "value": winner,
+                                    },
+                                    {
+                                        "match_index": match_index,
+                                        "pointer": (
+                                            "/final_state/potions/" f"{_json_pointer_token(player)}"
+                                        ),
+                                        "value": int(final_potions[player]),
+                                    },
                                 ],
                                 "counted_in_numerator": int(final_potions.get(player, 0)) > 0,
                             }

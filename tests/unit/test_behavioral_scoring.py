@@ -359,6 +359,23 @@ def test_fixed_damage_behavioral_profile_metrics_with_config() -> None:
     assert alpha["wasted_full_health_potion_rate"]["support_potions"] == 2
     assert alpha["wasted_full_health_potion_rate"]["value"] == 0.0
 
+    unused_loss_support = profile["measurement_provenance"]["per_player"]["Alpha"][
+        "unused_potions_on_loss_rate"
+    ]["eligible_units"]
+    assert unused_loss_support
+    assert unused_loss_support[0]["record_facts"] == [
+        {
+            "match_index": unused_loss_support[0]["match_index"],
+            "pointer": "/winner",
+            "value": "Beta",
+        },
+        {
+            "match_index": unused_loss_support[0]["match_index"],
+            "pointer": "/final_state/potions/Alpha",
+            "value": 2,
+        },
+    ]
+
     assert profile["state_metrics"]["scarcity_action_profile"]["Alpha"]["3"]["potion_count"] == 2
     assert (
         profile["state_metrics"]["action_by_state"]["Alpha"]["position=first|hp=80|potions=3"][

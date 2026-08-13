@@ -336,7 +336,7 @@ def _score_evidence(
         raise AssertionError("scorer profile_id differs from behavioral profile")
     if first.get("profile_version") != profile["profile_version"]:
         raise AssertionError("scorer profile_version differs from behavioral profile")
-    _validate_measurement_provenance(first, profile, first_payloads, players)
+    validate_measurement_provenance(first, profile, first_payloads, players)
     for metric in profile["metrics"]:
         value = resolve_json_pointer(first, metric["output_pointer"])
         if value is None and not metric["allow_unsupported"]:
@@ -352,7 +352,7 @@ def _score_evidence(
     return first
 
 
-def _validate_measurement_provenance(
+def validate_measurement_provenance(
     scored: Mapping[str, Any],
     profile: Mapping[str, Any],
     payloads: Sequence[Mapping[str, Any]],
@@ -422,7 +422,8 @@ def _validate_measurement_provenance(
             if not isinstance(raw_unit, Mapping):
                 raise AssertionError(f"measurement support unit is invalid: {metric_id}")
             required_keys = {"unit_id", "match_index", "events", "counted_in_numerator"}
-            if not required_keys.issubset(raw_unit) or set(raw_unit) - (required_keys | {"player"}):
+            allowed_keys = required_keys | {"player", "record_facts"}
+            if not required_keys.issubset(raw_unit) or set(raw_unit) - allowed_keys:
                 raise AssertionError(f"measurement support unit shape is invalid: {metric_id}")
             unit_id = raw_unit.get("unit_id")
             match_index = raw_unit.get("match_index")
@@ -477,6 +478,35 @@ def _validate_measurement_provenance(
                 raise AssertionError(
                     f"measurement unit event references are not unique: {metric_id}"
                 )
+
+            raw_facts = raw_unit.get("record_facts", [])
+            if not isinstance(raw_facts, list):
+                raise AssertionError(f"measurement record facts are invalid: {metric_id}")
+            fact_pointers: set[str] = set()
+            for fact in raw_facts:
+                if not isinstance(fact, Mapping) or set(fact) != {
+                    "match_index",
+                    "pointer",
+                    "value",
+                }:
+                    raise AssertionError(f"measurement record fact shape is invalid: {metric_id}")
+                fact_match_index = fact.get("match_index")
+                pointer = fact.get("pointer")
+                if (
+                    fact_match_index != match_index
+                    or not isinstance(pointer, str)
+                    or not pointer.startswith("/")
+                    or pointer in fact_pointers
+                ):
+                    raise AssertionError(
+                        f"measurement record fact identity is invalid: {metric_id}"
+                    )
+                actual = resolve_json_pointer(payloads[match_index], pointer)
+                if type(actual) is not type(fact.get("value")) or actual != fact.get("value"):
+                    raise AssertionError(
+                        f"measurement record fact does not match Record: {metric_id}"
+                    )
+                fact_pointers.add(pointer)
 
             retained_phases = {phase_index for _, phase_index in refs}
             if unit_type == "gameplay_turn" and len(refs) != 1:
@@ -553,6 +583,11 @@ def _validate_measurement_provenance(
                         f"per-Player measurement provenance is missing: {player}.{metric_id}"
                     )
                 validate_entry(metric_id, retained[metric_id], value, str(player))
+
+
+# Compatibility for integrations that adopted the private name before this
+# validator became part of the public Instrument API.
+_validate_measurement_provenance = validate_measurement_provenance
 
 
 def _visible_state(

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from agentdeck.instruments.certify import _validate_measurement_provenance
+from agentdeck.instruments.certify import validate_measurement_provenance
 
 
 def test_player_match_unit_requires_every_player_gameplay_event() -> None:
@@ -56,7 +56,7 @@ def test_player_match_unit_requires_every_player_gameplay_event() -> None:
     }
 
     with pytest.raises(AssertionError, match="player_match measurement unit is incomplete"):
-        _validate_measurement_provenance(
+        validate_measurement_provenance(
             scored,
             profile,
             payloads,
@@ -117,7 +117,73 @@ def test_measurement_units_cannot_duplicate_one_semantic_player_match() -> None:
     }
 
     with pytest.raises(AssertionError, match="measurement support unit is duplicated"):
-        _validate_measurement_provenance(
+        validate_measurement_provenance(
+            scored,
+            profile,
+            payloads,
+            [{"name": "Alpha"}, {"name": "Beta"}],
+        )
+
+
+def test_measurement_record_facts_must_match_the_canonical_record() -> None:
+    definition = "Share of decisive losses that ended with an unused potion."
+    profile = {
+        "metrics": [
+            {
+                "id": "unused_potions_on_loss_rate",
+                "definition": definition,
+                "output_pointer": "/aggregate_metrics/unused_potions_on_loss_rate/value",
+            }
+        ]
+    }
+    payloads = [
+        {
+            "winner": "Beta",
+            "final_state": {"potions": {"Alpha": 1, "Beta": 0}},
+            "events": [
+                {
+                    "type": "gameplay",
+                    "data": {"phase_index": 0, "player": "Alpha"},
+                }
+            ],
+        }
+    ]
+    scored = {
+        "aggregate_metrics": {"unused_potions_on_loss_rate": {"value": 1.0}},
+        "per_player": {},
+        "measurement_provenance": {
+            "schema_version": "2.0",
+            "aggregate_metrics": {
+                "unused_potions_on_loss_rate": {
+                    "definition": definition,
+                    "numerator": 1,
+                    "denominator": 1,
+                    "unit": "player_match",
+                    "eligible_units": [
+                        {
+                            "unit_id": "loss:0:Alpha",
+                            "match_index": 0,
+                            "player": "Alpha",
+                            "events": [{"match_index": 0, "phase_index": 0}],
+                            "record_facts": [
+                                {"match_index": 0, "pointer": "/winner", "value": "Beta"},
+                                {
+                                    "match_index": 0,
+                                    "pointer": "/final_state/potions/Alpha",
+                                    "value": 2,
+                                },
+                            ],
+                            "counted_in_numerator": True,
+                        }
+                    ],
+                }
+            },
+            "per_player": {},
+        },
+    }
+
+    with pytest.raises(AssertionError, match="record fact does not match Record"):
+        validate_measurement_provenance(
             scored,
             profile,
             payloads,
