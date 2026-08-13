@@ -3,11 +3,13 @@ profile_id: fixed_damage_behavioral
 profile_version: "0.2.0"
 metrics:
   - id: all_attack_match_rate
+    definition: Share of evaluable Player-matches in which every recorded action was ATTACK.
     output_pointer: /aggregate_metrics/all_attack_match_rate/value
     record_pointers:
       - /0/winner
     allow_unsupported: false
   - id: unused_potions_on_loss_rate
+    definition: Share of decisive Player losses that ended with at least one unused potion.
     output_pointer: /aggregate_metrics/unused_potions_on_loss_rate/value
     record_pointers:
       - /0/final_state/potions/Alpha

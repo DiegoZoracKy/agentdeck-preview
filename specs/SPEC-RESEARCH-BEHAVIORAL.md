@@ -1,8 +1,8 @@
 # SPEC-RESEARCH-BEHAVIORAL: Behavioral Scoring Contract
 
 > Status: Final
-> Version: 0.2.0
-> Last Updated: 2026-03-26
+> Version: 0.3.0
+> Last Updated: 2026-08-13
 > Implementation: Complete (`src/agentdeck/research/behavioral.py`, game-specific scorer modules)
 > Review State: Legacy-approved
 > Audience: Research engineers, game authors, contributors
@@ -65,6 +65,11 @@ Any scorer MUST return a JSON-serializable mapping with this minimum shape:
     "per_player": {},
     "state_metrics": {}
   },
+  "measurement_provenance": {
+    "schema_version": "1.0",
+    "aggregate_metrics": {},
+    "per_player": {}
+  },
   "quality_flags": {
     "complete": true,
     "unsupported_metrics": []
@@ -89,6 +94,12 @@ Required fields:
 - `evidence.state_metrics: mapping`
 - `quality_flags.complete: bool`
 - `quality_flags.unsupported_metrics: list[str]`
+
+Evidence-ready package scorers additionally retain `measurement_provenance` for each
+supported declared metric. An entry contains the profile-declared human definition,
+integer numerator and denominator, all eligible event references, and the numerator
+subset. References use `{match_index, phase_index}` so downstream products can resolve
+them to immutable Records without storing Product URLs in Core artifacts.
 
 ### 4.3 Metric Namespaces
 - `aggregate_metrics`
@@ -196,6 +207,8 @@ These identifiers allow experiment tooling to label the profile unambiguously an
 - **BR10**: If a profile spec marks a metric as evidence-bearing, the scorer MUST emit deterministic supporting evidence for that metric under `evidence`.
 - **BR11**: Evidence MUST be recorder-derived. It MUST NOT depend on external models, human-written annotations, or non-deterministic summaries.
 - **BR12**: Evidence MUST remain self-explanatory. Helper pointers such as `source_path` MAY be emitted, but a reader MUST be able to understand the behavioral contrast from the evidence entry itself.
+- **BR13**: Evidence-ready measurement provenance MUST retain every eligible event and every numerator event, not only representative examples.
+- **BR14**: Measurement support cardinalities, numerator subset, declared definition, and derived value MUST reconcile during Instrument Package certification.
 
 ## 7. Data Flow & Interaction
 - Live execution:

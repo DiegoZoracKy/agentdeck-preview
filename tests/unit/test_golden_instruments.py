@@ -115,6 +115,49 @@ def test_ip12_rejects_calibration_drift(tmp_path: Path) -> None:
     assert "calibration mismatch" in _check(report, "IP12")["message"]
 
 
+def test_ip12_requires_a_human_metric_definition(tmp_path: Path) -> None:
+    package = _copy(NUMBER_DUEL, tmp_path)
+    profile_path = package / "behavioral-profile.yaml"
+    profile = yaml.safe_load(profile_path.read_text(encoding="utf-8"))
+    del profile["metrics"][0]["definition"]
+    profile_path.write_text(yaml.safe_dump(profile, sort_keys=False), encoding="utf-8")
+    report = certify_instrument(package, trust_mode="trusted-local")
+    assert not report.valid
+    assert any(
+        "definition must be non-empty" in check["message"]
+        for check in report.to_dict()["checks"]
+    )
+
+
+def test_ip12_rejects_incomplete_metric_support_sets(tmp_path: Path) -> None:
+    package = _copy(NUMBER_DUEL, tmp_path)
+    scorer_path = package / "number_duel" / "behavioral.py"
+    scorer_path.write_text(
+        scorer_path.read_text(encoding="utf-8").replace(
+            '"numerator_events": numerator_events,', '"numerator_events": [],'
+        ),
+        encoding="utf-8",
+    )
+    report = certify_instrument(package, trust_mode="trusted-local")
+    assert not report.valid
+    assert "event counts do not match support sets" in _check(report, "IP12")["message"]
+
+
+def test_ip12_rejects_metric_support_that_does_not_resolve(tmp_path: Path) -> None:
+    package = _copy(NUMBER_DUEL, tmp_path)
+    scorer_path = package / "number_duel" / "behavioral.py"
+    scorer_path.write_text(
+        scorer_path.read_text(encoding="utf-8").replace(
+            '"eligible_events": eligible_events,',
+            '"eligible_events": [{"match_index": 99, "phase_index": 0} for _ in eligible_events],',
+        ),
+        encoding="utf-8",
+    )
+    report = certify_instrument(package, trust_mode="trusted-local")
+    assert not report.valid
+    assert "event reference does not resolve" in _check(report, "IP12")["message"]
+
+
 def test_ip13_rejects_declared_oracle_path_leak(tmp_path: Path) -> None:
     """IP13: a redactor exposing a declared private path cannot be presentable."""
     package = _copy(FIXED_DAMAGE, tmp_path)

@@ -13,7 +13,7 @@ from agentdeck.core.artifact_safety import require_json_value
 from .manifest import InstrumentManifestError
 
 PROFILE_KEYS = {"schema_version", "profile_id", "profile_version", "metrics", "calibration"}
-METRIC_KEYS = {"id", "output_pointer", "record_pointers", "allow_unsupported"}
+METRIC_KEYS = {"id", "definition", "output_pointer", "record_pointers", "allow_unsupported"}
 CALIBRATION_KEYS = {"expected"}
 METRIC_ID = re.compile(r"^[a-z][a-z0-9_]*$")
 SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
@@ -78,6 +78,9 @@ def load_behavioral_profile(path: Path) -> Dict[str, Any]:
         if metric_id in metric_ids:
             raise InstrumentManifestError(f"duplicate metric id: {metric_id}")
         metric_ids.add(metric_id)
+        definition = metric.get("definition")
+        if not isinstance(definition, str) or not definition.strip():
+            raise InstrumentManifestError(f"metrics[{index}].definition must be non-empty")
         output_pointer = metric.get("output_pointer")
         if not isinstance(output_pointer, str) or not output_pointer.startswith("/"):
             raise InstrumentManifestError(f"metrics[{index}].output_pointer is invalid")

@@ -7,6 +7,13 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 from agentdeck import BehavioralScorer
 
 
+def _phase_index(event: Mapping[str, Any]) -> int:
+    value = (event.get("data") or {}).get("phase_index")
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError("Gameplay event requires a non-negative phase_index")
+    return value
+
+
 class NumberDuelBehavioralScorer(BehavioralScorer):
     """Measure how often participants choose GAIN in generated records."""
 
@@ -32,15 +39,30 @@ class NumberDuelBehavioralScorer(BehavioralScorer):
     ) -> Dict[str, Any]:
         del players, config
         payloads = list(match_payloads)
-        actions = [
-            ((event.get("data") or {}).get("action") or {}).get("value")
-            for payload in payloads
+        turns = [
+            {
+                "action": ((event.get("data") or {}).get("action") or {}).get("value"),
+                "match_index": match_index,
+                "phase_index": _phase_index(event),
+            }
+            for match_index, payload in enumerate(payloads)
             for event in payload.get("events", [])
             if event.get("type") == "gameplay"
         ]
+        actions = [turn["action"] for turn in turns]
         gain_count = sum(action == "GAIN" for action in actions)
+        definition = "Share of recorded gameplay turns whose canonical action was GAIN."
+        eligible_events = [
+            {"match_index": turn["match_index"], "phase_index": turn["phase_index"]}
+            for turn in turns
+        ]
+        numerator_events = [
+            {"match_index": turn["match_index"], "phase_index": turn["phase_index"]}
+            for turn in turns
+            if turn["action"] == "GAIN"
+        ]
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "game_id": self.game_id,
             "profile_id": self.profile_id,
             "profile_version": self.profile_version,
@@ -51,6 +73,26 @@ class NumberDuelBehavioralScorer(BehavioralScorer):
                     "gain_actions": gain_count,
                     "support_turns": len(actions),
                 }
+            },
+            "per_player": {},
+            "state_metrics": {},
+            "evidence": {
+                "aggregate_metrics": {},
+                "per_player": {},
+                "state_metrics": {},
+            },
+            "measurement_provenance": {
+                "schema_version": "1.0",
+                "aggregate_metrics": {
+                    "gain_action_rate": {
+                        "definition": definition,
+                        "numerator": gain_count,
+                        "denominator": len(actions),
+                        "eligible_events": eligible_events,
+                        "numerator_events": numerator_events,
+                    }
+                },
+                "per_player": {},
             },
             "quality_flags": {"complete": bool(actions), "unsupported_metrics": []},
         }

@@ -336,6 +336,7 @@ def _score_evidence(
         raise AssertionError("scorer profile_id differs from behavioral profile")
     if first.get("profile_version") != profile["profile_version"]:
         raise AssertionError("scorer profile_version differs from behavioral profile")
+    _validate_measurement_provenance(first, profile, first_payloads, players)
     for metric in profile["metrics"]:
         value = resolve_json_pointer(first, metric["output_pointer"])
         if value is None and not metric["allow_unsupported"]:
@@ -349,6 +350,127 @@ def _score_evidence(
                 f"calibration mismatch at {pointer}: expected {expected!r}, got {actual!r}"
             )
     return first
+
+
+def _validate_measurement_provenance(
+    scored: Mapping[str, Any],
+    profile: Mapping[str, Any],
+    payloads: Sequence[Mapping[str, Any]],
+    players: Sequence[Mapping[str, Any]],
+) -> None:
+    provenance = scored.get("measurement_provenance")
+    if not isinstance(provenance, Mapping) or provenance.get("schema_version") != "1.0":
+        raise AssertionError("scorer must emit measurement_provenance schema 1.0")
+    aggregate = provenance.get("aggregate_metrics")
+    per_player = provenance.get("per_player")
+    if not isinstance(aggregate, Mapping) or not isinstance(per_player, Mapping):
+        raise AssertionError("measurement_provenance must contain aggregate_metrics and per_player")
+
+    declared = {metric["id"]: metric for metric in profile["metrics"]}
+    unknown = sorted(set(aggregate) - set(declared))
+    if unknown:
+        raise AssertionError(f"measurement_provenance contains undeclared metrics: {unknown}")
+    roster = {str(player["name"]) for player in players}
+    unknown_players = sorted(set(per_player) - roster)
+    if unknown_players:
+        raise AssertionError(
+            f"measurement_provenance contains unknown players: {unknown_players}"
+        )
+
+    gameplay_phases: List[set[int]] = []
+    gameplay_players: List[Dict[int, str]] = []
+    for payload in payloads:
+        phases: set[int] = set()
+        acting: Dict[int, str] = {}
+        for event in payload.get("events", []):
+            if event.get("type") != "gameplay":
+                continue
+            data = event.get("data") or {}
+            phase = data.get("phase_index")
+            if not isinstance(phase, int) or isinstance(phase, bool) or phase < 0:
+                raise AssertionError("gameplay event lacks a canonical non-negative phase_index")
+            phases.add(phase)
+            acting[phase] = str(data.get("player") or "")
+        gameplay_phases.append(phases)
+        gameplay_players.append(acting)
+
+    def validate_entry(metric_id: str, entry: Any, value: Any, player: str | None) -> None:
+        if metric_id not in declared:
+            raise AssertionError(f"measurement_provenance metric is undeclared: {metric_id}")
+        if not isinstance(entry, Mapping):
+            raise AssertionError(f"measurement_provenance entry is invalid: {metric_id}")
+        if entry.get("definition") != declared[metric_id]["definition"]:
+            raise AssertionError(f"measurement definition differs from profile: {metric_id}")
+        numerator = entry.get("numerator")
+        denominator = entry.get("denominator")
+        if any(isinstance(item, bool) or not isinstance(item, int) or item < 0 for item in (numerator, denominator)):
+            raise AssertionError(f"measurement counts must be non-negative integers: {metric_id}")
+        if numerator > denominator:
+            raise AssertionError(f"measurement numerator exceeds denominator: {metric_id}")
+
+        def validated_refs(field: str) -> List[tuple[int, int]]:
+            raw = entry.get(field)
+            if not isinstance(raw, list):
+                raise AssertionError(f"measurement {field} must be a list: {metric_id}")
+            refs: List[tuple[int, int]] = []
+            for ref in raw:
+                if not isinstance(ref, Mapping) or set(ref) != {"match_index", "phase_index"}:
+                    raise AssertionError(f"measurement event reference is invalid: {metric_id}")
+                match_index = ref.get("match_index")
+                phase_index = ref.get("phase_index")
+                if (
+                    isinstance(match_index, bool) or not isinstance(match_index, int)
+                    or isinstance(phase_index, bool) or not isinstance(phase_index, int)
+                    or match_index < 0 or match_index >= len(payloads)
+                    or phase_index not in gameplay_phases[match_index]
+                ):
+                    raise AssertionError(f"measurement event reference does not resolve: {metric_id}")
+                if player is not None and gameplay_players[match_index][phase_index] != player:
+                    raise AssertionError(f"measurement event belongs to another Player: {metric_id}")
+                refs.append((match_index, phase_index))
+            if len(refs) != len(set(refs)):
+                raise AssertionError(f"measurement event references are not unique: {metric_id}")
+            return refs
+
+        eligible = validated_refs("eligible_events")
+        contributing = validated_refs("numerator_events")
+        if len(eligible) != denominator or len(contributing) != numerator:
+            raise AssertionError(f"measurement event counts do not match support sets: {metric_id}")
+        if not set(contributing).issubset(eligible):
+            raise AssertionError(f"measurement numerator events are not eligible: {metric_id}")
+        expected = 0.0 if denominator == 0 else numerator / denominator
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or float(value) != expected:
+            raise AssertionError(f"measurement value does not match its support sets: {metric_id}")
+
+    for metric_id, metric in declared.items():
+        value = resolve_json_pointer(scored, metric["output_pointer"])
+        if value is not None:
+            if metric_id not in aggregate:
+                raise AssertionError(f"aggregate measurement provenance is missing: {metric_id}")
+            validate_entry(metric_id, aggregate[metric_id], value, None)
+
+    scored_per_player = scored.get("per_player") or {}
+    for player, metrics in scored_per_player.items():
+        if not isinstance(metrics, Mapping):
+            continue
+        retained = per_player.get(player)
+        if not isinstance(retained, Mapping):
+            retained = {}
+        unknown_player_metrics = sorted(set(retained) - set(declared))
+        if unknown_player_metrics:
+            raise AssertionError(
+                f"measurement_provenance contains undeclared per-Player metrics: "
+                f"{player}.{unknown_player_metrics}"
+            )
+        for metric_id in set(metrics) & set(declared):
+            metric_value = metrics[metric_id]
+            value = metric_value.get("value") if isinstance(metric_value, Mapping) else metric_value
+            if value is not None:
+                if metric_id not in retained:
+                    raise AssertionError(
+                        f"per-Player measurement provenance is missing: {player}.{metric_id}"
+                    )
+                validate_entry(metric_id, retained[metric_id], value, str(player))
 
 
 def _visible_state(

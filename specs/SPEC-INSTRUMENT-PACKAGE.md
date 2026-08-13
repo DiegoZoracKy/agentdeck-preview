@@ -1,8 +1,8 @@
 # SPEC-INSTRUMENT-PACKAGE: External Instrument Contract
 
 > Status: Final
-> Version: 0.6.0
-> Last Updated: 2026-08-10
+> Version: 0.7.0
+> Last Updated: 2026-08-13
 > Implementation: Complete
 > Review State: Consensus-approved
 > Audience: Instrument authors, Builder authors, Core maintainers, research tooling
@@ -156,6 +156,7 @@ profile_id: number_duel_behavioral
 profile_version: "0.1.0"
 metrics:
   - id: overbid_rate
+    definition: Share of eligible declarations that exceeded the private value.
     output_pointer: /aggregate_metrics/overbid_rate/value
     record_pointers:
       - /0/events/0/data/action/value
@@ -168,6 +169,13 @@ calibration:
 
 `metrics` MUST be non-empty with unique IDs. `output_pointer` MUST resolve in scorer
 output unless `allow_unsupported` is true and the resolved value is `null`.
+`definition` MUST state in ordinary language what enters the metric numerator and
+denominator. A supported metric MUST retain `measurement_provenance` schema `1.0`
+with that exact definition, non-negative `numerator` and `denominator`, and complete
+`eligible_events` and `numerator_events` support sets. Each event reference is the
+strict pair `{match_index, phase_index}` and MUST resolve to one canonical gameplay
+event. Numerator events MUST be a subset of eligible events, support-set cardinalities
+MUST equal the retained counts, and the metric value MUST equal their rate.
 `record_pointers` MUST be non-empty and every pointer MUST resolve against the ordered
 list of exact generated match payloads. The pointers are evidence anchors; they do not
 authorize a semantic conclusion on their own. Every `calibration.expected` pointer MUST
@@ -236,6 +244,8 @@ Requires `runnable`. The certifier MUST additionally prove:
 - scorer resolves to `BehavioralScorer`, supports the generated payloads, and returns
   strict JSON deterministically;
 - every declared metric is present or explicitly marked unsupported;
+- every supported metric has a declared definition and complete event-level
+  measurement provenance whose counts and value reconcile;
 - every profile record pointer resolves into the exact generated records;
 - profile ID/version and calibration expectations match scorer output.
 
@@ -271,7 +281,7 @@ offline requests, boundary progression, and error-free desktop/mobile probes.
 9. **IP9 Replay Parity**: Every runnable certification match MUST replay the same ordered lifecycle and domain event data.
 10. **IP10 Strict Evidence**: Manifest, report, state, views, events, records, scorer output, and Match Surface artifacts MUST satisfy strict JSON/YAML scalar rules without coercion.
 11. **IP11 Honest Tiers**: A report MUST award only requested tiers whose own checks and prerequisites pass. Partial success MUST remain explicit.
-12. **IP12 Evidence Resolution**: Evidence-ready metrics MUST identify pointers that resolve into generated immutable records; prose alone is not evidence.
+12. **IP12 Evidence Resolution**: Evidence-ready metrics MUST identify pointers that resolve into generated immutable records and retain complete, count-reconciled event support sets; prose or a representative example alone is not calculation provenance.
 13. **IP13 Visibility Boundary**: Presentable certification MUST derive views from the declared visibility function, reject permanent oracle fixture leakage, and confine any declared terminal oracle disclosure to its exact terminal paths after the final gameplay action.
 14. **IP14 Failure Atomicity**: A failed check MUST NOT overwrite a prior successful report or write outside the certification root.
 15. **IP15 Canonical Report**: Equal package content and semantic result MUST produce byte-identical canonical reports after excluding declared volatile artifact locations.
