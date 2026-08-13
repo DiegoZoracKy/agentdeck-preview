@@ -368,6 +368,13 @@ class MatchRuntime:
         extras: Optional[Dict[str, Any]] = None,
     ) -> ActionResult:
         """Invoke a Player through the shared decision and parse-failure pipeline."""
+        from .types import TurnContext
+
+        if not isinstance(turn_context, TurnContext):
+            raise TypeError(
+                "MatchRuntime.get_player_action requires the public agentdeck.TurnContext; "
+                f"got {type(turn_context).__name__}"
+            )
         return cast(
             ActionResult,
             self._console.get_player_action(

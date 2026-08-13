@@ -52,6 +52,7 @@
 
 ### update(game_state: Dict[str, Any], player: str, action: ActionResult, *, rng: RandomGenerator) -> Dict[str, Any]
 - Accept: Current `game_state`, acting player name, parsed action, deterministic RNG fork.
+- Parsed value: Read the Player's parsed choice from `action.action`. `action.value` belongs only to serialized Gameplay Event Data and is not an `ActionResult` attribute.
 - Perform: Apply action to evolve game state; may mutate in place or return a new dict.
 - Return: Updated JSON-serialisable dict representing canonical state after the action.
 - Emit: MAY emit domain events via `emit_event` for semantic milestones (card_drawn, bid_placed).
@@ -488,7 +489,7 @@ class CoinFlipGame(Game):
         game_state = dict(game_state)  # copy for clarity
         game_state["round"] += 1
         game_state["coin"] = rng.choice(["heads", "tails"])
-        if action.output == game_state["coin"]:
+        if action.action == game_state["coin"]:
             game_state["winner"] = player
         return game_state
 
@@ -552,8 +553,8 @@ class TutorialGame(Game):
 
     def update(self, game_state, player, action, *, rng):
         game_state = copy.deepcopy(game_state)
-        apply_move(game_state["board"], player, action.output)
-        game_state["last_action"] = {"player": player, "move": action.output}
+        apply_move(game_state["board"], player, action.action)
+        game_state["last_action"] = {"player": player, "move": action.action}
         if should_advance(game_state):
             game_state["phase"] += 1
         return game_state

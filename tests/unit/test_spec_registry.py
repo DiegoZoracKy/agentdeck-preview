@@ -142,6 +142,27 @@ def test_sr7_bundle_is_deterministic_and_ordered(tmp_path: Path) -> None:
     assert first.index(b"CONTRIBUTING.md") < first.index(b"SPEC-EXAMPLE.md")
 
 
+def test_instrument_builder_bundle_exposes_the_exact_public_turn_context() -> None:
+    """Generated mechanics must not receive a stale constructor through authoring context."""
+    root = SCRIPT.parents[1]
+    bundle = registry.render_bundle("instrument-builder", root).decode("utf-8")
+
+    assert "turn_index: int                 # Zero-based constructor field" in bundle
+    assert "player: str                     # Acting player" in bundle
+    assert "phase_index` is the read-only canonical alias" in bundle
+    assert "player_name: str                # Acting player" not in bundle
+
+
+def test_instrument_builder_bundle_uses_the_public_action_result_field() -> None:
+    """Generated Games must not receive the removed ActionResult.output field."""
+    root = SCRIPT.parents[1]
+    bundle = registry.render_bundle("instrument-builder", root).decode("utf-8")
+
+    assert "action.action" in bundle
+    assert "action.output" not in bundle
+    assert "action.value` belongs only to serialized Gameplay Event Data" in bundle
+
+
 def test_sr8_rejects_verified_claim_without_direct_evidence(tmp_path: Path) -> None:
     """SR8: verified automated assurance requires every invariant's direct test."""
     root = _repo(tmp_path)

@@ -123,7 +123,11 @@ class MatchRuntime:
 - Builds the canonical `EventType.GAMEPLAY` payload by delegating to the shared builder defined in `SPEC-GAMEPLAY-EVENT-DATA.md`, then emits it through the runtime’s event bus.
 - Ensures JSON-serialisability and guarantees that Recorder/spectators receive the full action + interaction transcript via events (aligned with `SPEC-RECORDER v2.0.0`).
 - Mechanics MUST call this whenever an LLM player produces a response that leads to an action (even if the action later fails validation or gets skipped).  
-- `TurnContext` contains `turn_number`, `player_name`, `phase_index`, `rng_label`, `started_at`, `duration`, `match_id` (see `SPEC-GAME-MECHANIC-TURN-BASED.md` §4.2). Mechanics supply the context; runtime includes it in the emitted event for downstream consumers.
+- `TurnContext` is the public `agentdeck.TurnContext` with constructor fields `match_id`,
+  `turn_number`, `turn_index`, `player`, `started_at`, `duration`, and optional `rng_seed` /
+  `rng_label`; `phase_index` is its canonical read-only alias of `turn_index` (see
+  `SPEC-GAME-MECHANIC-TURN-BASED.md` §4.4). Mechanics supply this exact type; runtime rejects
+  lookalikes before Player execution and includes the context in emitted downstream events.
 - `state_before` and `state_after` are the canonical state snapshots associated with the action. The parsed decision is serialized as `action.value`; raw model output is serialized once as `interaction.response_text`.
 - `record_turn` MUST NOT hand-build a second gameplay payload shape. One builder owns live, recorded, and replayed `GAMEPLAY` data.
 

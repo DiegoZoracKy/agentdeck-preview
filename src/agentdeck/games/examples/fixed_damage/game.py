@@ -37,7 +37,7 @@ class FixedDamageGame(TurnBasedGame):
         >>> game = FixedDamageGame(max_health=100, attack_damage=20,
         ...                        information_level="full")
         >>> state = game.setup(["Alice", "Bob"])
-        >>> action = ActionResult(action="ATTACK", output="ATTACK", raw_response="I attack!")
+        >>> action = ActionResult(action="ATTACK", raw_response="I attack!")
         >>> new_state = game.update(state, "Alice", action, rng=rng)
         >>> status = game.status(new_state)
         >>> alice_view = game.get_view(new_state, "Alice")
@@ -202,7 +202,7 @@ Information Level: {self.information_level}
 
         Example:
             >>> state = game.setup(["Alice", "Bob"])
-            >>> action = ActionResult(action="ATTACK", output="ATTACK",
+            >>> action = ActionResult(action="ATTACK",
             ...                       raw_response="I attack!")
             >>> new_state = game.update(state, "Alice", action, rng=rng)
             >>> new_state["health"]["Bob"]

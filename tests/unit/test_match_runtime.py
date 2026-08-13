@@ -448,3 +448,21 @@ def test_mr8_public_mechanic_helpers_delegate_without_exposing_console():
         }
     ]
     assert logger.warning_calls == ["fixture warning"]
+
+
+def test_mr8_rejects_lookalike_turn_context_before_player_execution():
+    """Custom mechanics must use the public context that every Player can consume."""
+    runtime, console, _, _ = _make_runtime()
+    player = DummyPlayer("Alice")
+
+    class LookalikeContext:
+        match_id = "match-1"
+        turn_number = 1
+        phase_index = 0
+
+    with pytest.raises(TypeError, match="public agentdeck.TurnContext"):
+        runtime.get_player_action(
+            {"score": 2}, player, turn_context=LookalikeContext()  # type: ignore[arg-type]
+        )
+
+    assert console.player_action_calls == []

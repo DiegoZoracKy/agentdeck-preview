@@ -168,17 +168,21 @@ Returned to `TurnBasedGame.run()` and subsequently to the console. Console wraps
 ### 4.4 `TurnContext`
 
 ```python
-@dataclass(frozen=True)
+@dataclass
 class TurnContext:
-    turn_number: int                # 1-indexed turn/round number
-    player_name: str                # Acting player
     match_id: str                   # From MatchContext
-    phase_index: int                # Zero-based phase counter (used for replay)
-    rng_label: str                  # Label passed to runtime.fork_rng
+    turn_number: int                # 1-indexed turn/round number
+    turn_index: int                 # Zero-based constructor field
+    player: str                     # Acting player
     started_at: float               # Timestamp when turn began
     duration: float                 # Seconds spent executing the turn
+    rng_seed: Optional[int] = None
+    rng_label: Optional[str] = None
 ```
 
+- `phase_index` is the read-only canonical alias of `turn_index`; custom mechanics MUST
+  construct the public `agentdeck.TurnContext` with `turn_index`, not `phase_index`.
 - Built by `TurnLoop` and passed to runtime hooks (`record_turn`, `handle_parse_failure`, `validate_state`).  
-- Mechanics overriding `run()` MUST produce an equivalent structure so recorder/replay remain consistent.  
+- Mechanics overriding `run()` MUST instantiate this public type so Players, Recorder, and
+  replay receive one exact contract; lookalike context objects are invalid.
 - Future fields may be added; consumers must treat unknown attributes defensively.
