@@ -1,6 +1,6 @@
 """AgentDeck - Execution and evidence engine for AI agents in game scenarios."""
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 # Controller implementations
 from .controllers import ActionOnlyController, ReasoningController

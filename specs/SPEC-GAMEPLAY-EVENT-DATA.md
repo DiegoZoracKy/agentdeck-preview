@@ -82,8 +82,10 @@ GameplayEventData = {
 | `metadata` | object | yes | Controller/action metadata that is not LLM I/O. Defaults to `{}`. |
 
 `action.raw_response` MUST NOT be serialized. The raw model output belongs only in `interaction.response_text`.
-For built-in controllers, `action.metadata` identifies `resolution_method`,
-`declared_action`, and `contract_satisfied`; an incidental mention is never a decision.
+For built-in controllers, `resolution_method` and `declared_action` identify how the
+action was attributed, while `contract_satisfied` independently reports whether the
+entire response followed the requested format. An incidental mention is never a
+decision.
 
 ### 4.4 Interaction
 

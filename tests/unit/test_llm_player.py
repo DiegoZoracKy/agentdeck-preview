@@ -217,8 +217,9 @@ def test_llmplayer_decide_preserves_usage_info_in_action_metadata():
     assert action.action == "ATTACK"
     assert action.metadata["usage_info"] == usage_info
     assert action.metadata["raw_prompt"]
-    assert "Respond with: ACTION: <your_action>" in action.metadata["raw_prompt"]
-    assert action.metadata["controller_format"] == "Respond with: ACTION: <your_action>"
+    assert "Respond only" in action.metadata["raw_prompt"]
+    assert "exactly one line" in action.metadata["raw_prompt"]
+    assert "ACTION: <your_action>" in action.metadata["controller_format"]
 
 
 def test_no_history_policy_keeps_current_decision_protocol_explicit():
@@ -253,10 +254,8 @@ def test_no_history_policy_keeps_current_decision_protocol_explicit():
     provider_call = action.metadata["provider_call"]
     assert provider_call["context_selection"]["selected_history_messages"] == 0
     assert len(provider_call["composed_input"]["messages"]) == 1
-    assert (
-        "Respond with: ACTION: <your_action>"
-        in provider_call["composed_input"]["messages"][0]["content"]
-    )
+    assert "Respond only" in provider_call["composed_input"]["messages"][0]["content"]
+    assert "ACTION: <your_action>" in provider_call["composed_input"]["messages"][0]["content"]
 
 
 def test_provider_call_retains_exact_context_selection_sdk_arguments_and_response():
@@ -373,7 +372,8 @@ def test_llmplayer_handshake_uses_game_default_template_and_frontloads_action_fo
     assert bundle.metadata["template_id"] == "game_default_handshake"
     assert "Rules here" in bundle.text
     assert "Gameplay format:" in bundle.text
-    assert "Respond with: ACTION: <action>" in bundle.text
+    assert "Respond only" in bundle.text
+    assert "ACTION: <action>" in bundle.text
     assert "Allowed actions: ATTACK, POTION" in bundle.text
     assert (
         "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."

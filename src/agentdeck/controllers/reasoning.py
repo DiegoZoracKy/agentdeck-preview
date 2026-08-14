@@ -1,4 +1,4 @@
-"""Chain-of-thought reasoning controller for AgentDeck."""
+"""Stated-rationale response controller for AgentDeck."""
 
 from __future__ import annotations
 
@@ -12,11 +12,15 @@ from ..core.types import ParseResult
 # Regex patterns for action extraction (same as ActionOnlyController)
 # Anchor ACTION to line start to avoid matching narration blocks like "Last Action:".
 ACTION_FIELD = re.compile(r"(?im)^\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\b")
+RATIONALE_ACTION_RESPONSE = re.compile(
+    r"^\s*REASONING:\s*(?P<reasoning>.+?)\s*\n" r"\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\s*$",
+    re.DOTALL | re.IGNORECASE,
+)
 
 
 class ReasoningController(Controller):
     """
-    Controller that extracts reasoning alongside the action.
+    Controller that requests and extracts a stated rationale alongside the action.
 
     Parses responses in "REASONING: ... ACTION: ..." format per SPEC-CONTROLLER v1.1.0.
     Returns ParseResult for stateless, deterministic parsing.
@@ -62,16 +66,17 @@ class ReasoningController(Controller):
             # GB5: Return game-specific instructions when bound
             actions = ", ".join(sorted(self._allowed_actions))
             return (
-                "Please respond in the following format:\n"
-                "REASONING: [Your step-by-step thought process]\n"
-                f"ACTION: [Your chosen action]\nAllowed actions: {actions}"
+                f"Allowed actions: {actions}\n\n"
+                "Respond only with exactly these two fields:\n"
+                "REASONING: <your stated rationale>\n"
+                "ACTION: <action>"
             )
         else:
             # GB4: Return sensible defaults when unbound
             return (
-                "Please respond in the following format:\n"
-                "REASONING: [Your step-by-step thought process]\n"
-                "ACTION: [Your chosen action]"
+                "Respond only with exactly these two fields:\n"
+                "REASONING: <your stated rationale>\n"
+                "ACTION: <action>"
             )
 
     def parse(self, response: str) -> ParseResult:
@@ -107,6 +112,7 @@ class ReasoningController(Controller):
         if self._allowed_actions:
             valid, validated_action = self._validate_action(primary_action)
             if valid and validated_action:
+                contract_satisfied = self._satisfies_response_contract(cleaned, validated_action)
                 # Success case
                 return ParseResult(
                     success=True,
@@ -119,7 +125,7 @@ class ReasoningController(Controller):
                         "allowed_actions": list(self._allowed_actions),
                         "resolution_method": "explicit_action_field",
                         "declared_action": validated_action,
-                        "contract_satisfied": True,
+                        "contract_satisfied": contract_satisfied,
                         "reasoning_extracted": reasoning is not None,
                     },
                 )
@@ -147,6 +153,7 @@ class ReasoningController(Controller):
         else:
             # No validation (unbound) - accept any parsed action
             if primary_action:
+                contract_satisfied = self._satisfies_response_contract(cleaned, primary_action)
                 # Success case
                 return ParseResult(
                     success=True,
@@ -158,7 +165,7 @@ class ReasoningController(Controller):
                         "validated": False,
                         "resolution_method": "explicit_action_field",
                         "declared_action": primary_action,
-                        "contract_satisfied": True,
+                        "contract_satisfied": contract_satisfied,
                         "reasoning_extracted": reasoning is not None,
                     },
                 )
@@ -184,6 +191,11 @@ class ReasoningController(Controller):
         if match:
             return match.group("action").strip().upper()
         return None
+
+    def _satisfies_response_contract(self, response: str, action: str) -> bool:
+        """Return whether the entire response follows the requested rationale format."""
+        match = RATIONALE_ACTION_RESPONSE.fullmatch(response)
+        return bool(match and match.group("action").upper() == action.upper())
 
     def _validate_action(self, action: Optional[str]) -> tuple[bool, Optional[str]]:
         """

@@ -9,9 +9,10 @@ from ..core.base.controller import Controller
 from ..core.base.game import Game
 from ..core.types import ParseResult
 
-# Regex patterns for action extraction
+# Regex patterns for action extraction and response-contract compliance.
 # Anchor ACTION to line start to avoid matching narration blocks like "Last Action:".
 ACTION_FIELD = re.compile(r"(?im)^\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\b")
+ACTION_ONLY_RESPONSE = re.compile(r"(?i)^\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\s*$")
 
 
 class ActionOnlyController(Controller):
@@ -80,10 +81,14 @@ class ActionOnlyController(Controller):
         if self._allowed_actions:
             # GB5: Return game-specific instructions when bound
             actions = ", ".join(sorted(self._allowed_actions))
-            return f"Respond with: ACTION: <action>\nAllowed actions: {actions}"
+            return (
+                f"Allowed actions: {actions}\n\n"
+                "Respond only with exactly one line:\n"
+                "ACTION: <action>"
+            )
         else:
             # GB4: Return sensible defaults when unbound
-            return "Respond with: ACTION: <your_action>"
+            return "Respond only with exactly one line:\nACTION: <your_action>"
 
     def parse(self, response: str) -> ParseResult:
         """
@@ -118,6 +123,7 @@ class ActionOnlyController(Controller):
             # GB6: Validation requires binding (already bound, so proceed)
             valid, validated_action = self._validate_action(primary_action)
             if valid and validated_action:
+                contract_satisfied = self._satisfies_response_contract(cleaned, validated_action)
                 # AP2: Success case
                 return ParseResult(
                     success=True,
@@ -130,7 +136,7 @@ class ActionOnlyController(Controller):
                         "allowed_actions": list(self._allowed_actions),
                         "resolution_method": "explicit_action_field",
                         "declared_action": validated_action,
-                        "contract_satisfied": True,
+                        "contract_satisfied": contract_satisfied,
                     },
                 )
             else:
@@ -156,6 +162,7 @@ class ActionOnlyController(Controller):
         else:
             # No validation (unbound) - accept any parsed action
             if primary_action:
+                contract_satisfied = self._satisfies_response_contract(cleaned, primary_action)
                 # AP2: Success case
                 return ParseResult(
                     success=True,
@@ -167,7 +174,7 @@ class ActionOnlyController(Controller):
                         "validated": False,
                         "resolution_method": "explicit_action_field",
                         "declared_action": primary_action,
-                        "contract_satisfied": True,
+                        "contract_satisfied": contract_satisfied,
                     },
                 )
             else:
@@ -191,6 +198,11 @@ class ActionOnlyController(Controller):
         if match:
             return match.group("action").strip().upper()
         return None
+
+    def _satisfies_response_contract(self, response: str, action: str) -> bool:
+        """Return whether the entire response follows the requested action-only format."""
+        match = ACTION_ONLY_RESPONSE.fullmatch(response)
+        return bool(match and match.group("action").upper() == action.upper())
 
     def _validate_action(self, action: Optional[str]) -> tuple[bool, Optional[str]]:
         """

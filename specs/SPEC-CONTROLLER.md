@@ -1,7 +1,7 @@
 # SPEC-CONTROLLER: Unified Controller Contract
 
 > Status: Final
-> Version: 1.4.0
+> Version: 1.5.0
 > Last Updated: 2026-08-14
 > Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
 > Audience: Player authors, controller implementers, validation tooling
@@ -22,8 +22,10 @@
 
 ## 3. Responsibilities
 - **Handshake validation**: Default implementation accepts only `OK`. Override `validate_handshake()` for custom validation. Report acceptance/rejection with reasons.
-- **Turn action parsing**: Abstract `parse()` method converts LLM responses into actions/reasoning. Validate against allowed sets. **Fail explicitly on parsing errors** (v1.2.0: no fallbacks).
+- **Turn action parsing**: Abstract `parse()` method converts LLM responses into actions and optional stated rationale. Validate against allowed sets. **Fail explicitly on parsing errors** (v1.2.0: no fallbacks).
 - **Explicit action resolution** (built-ins): Controllers require a line-anchored `ACTION: <value>` declaration. Mentions in reasoning or narration are not decisions and MUST fail closed.
+- **Requested response treatment**: Built-in format instructions distinguish action-only responses from stated-rationale responses without claiming to control unobservable internal reasoning.
+- **Independent compliance and resolution**: A response MAY violate the requested whole-response format while still containing a resolvable explicit action. The raw response and both outcomes MUST remain distinguishable.
 - **Conclusion parsing** (optional): Default passthrough implementation. Override `parse_conclusion()` for structured reflection parsing.
 - **Format instructions**: Provide instructions for all phases via `get_handshake_format_instructions()` and `get_format_instructions()`.
 - **Metadata enrichment**: Attach candidates, reasoning, allowed sets, and validation context for recorder/spectators.
@@ -105,10 +107,10 @@ class Controller(ABC):
         Return turn action format instructions (injected via {controller_format} placeholder).
 
         SHOULD return game-specific instructions when bound (GB5):
-        - "Respond with: ACTION: <action>\nAllowed: ATTACK, DEFEND, POTION"
+        - "Allowed: ATTACK, DEFEND, POTION\n\nRespond only with exactly one line:\nACTION: <action>"
 
         MUST return sensible defaults when unbound (GB4):
-        - "Respond with: ACTION: <action>"
+        - "Respond only with exactly one line:\nACTION: <action>"
 
         Returns:
             Deterministic formatting guidance string
@@ -207,8 +209,8 @@ class ActionOnlyController(Controller):
 # ReasoningController - Parses "REASONING:\nACTION:" format
 class ReasoningController(Controller):
     """
-    Parses REASONING: <thinking>\nACTION: <value> format.
-    Extracts reasoning text + action, validates action.
+    Parses REASONING: <stated rationale>\nACTION: <value> format.
+    Extracts stated rationale + action, validates action.
     Inherits default handshake validation.
     """
 ```
@@ -226,11 +228,14 @@ class ReasoningController(Controller):
 6. **FI1**: `get_format_instructions()` MUST align with parsing expectations (e.g., mention `ACTION:` prefix if parser requires it).
 7. **FI2**: Format instructions MUST be deterministic text (no randomness/state).
 8. **FI3**: `get_handshake_format_instructions()` MUST return instructions matching `validate_handshake()` expectations.
+8a. **FI4**: `ActionOnlyController.get_format_instructions()` MUST unambiguously request that the entire response contain only one action declaration.
+8b. **FI5**: `ReasoningController.get_format_instructions()` MUST use equally explicit language to request a stated rationale followed by one action declaration. It MUST NOT claim to activate or expose internal model reasoning.
 
 ### 5.3 Action Parsing (AP)
 9. **AP1**: `parse()` MUST populate `ParseResult.raw_response` with trimmed input for observability.
 10. **AP2**: On success, `ParseResult.success=True`, `ParseResult.action` contains normalised action; `error` MUST be `None`.
 11. **AP3**: On failure, `ParseResult.success=False`, `ParseResult.error` SHOULD explain the failure, and `normalized_action` SHOULD be `None`.
+11a. **AP4**: `ParseResult.success` reports action resolution. `metadata.contract_satisfied` reports compliance with the entire requested response format. A response with extra text MAY have `success=True` and `contract_satisfied=False`; callers MUST NOT conflate these properties.
 
 ### 5.4 Validation & Error Propagation (VF) — **v1.2.0 Semantics**
 12. **VF1**: Controllers with allowed sets MUST honour `casefold` semantics and include the allowed set in metadata.
@@ -244,7 +249,7 @@ class ReasoningController(Controller):
 
 15a. **EDA1**: Built-in turn controllers MUST accept an action only from a line-anchored `ACTION: <value>` field.
 15b. **EDA2**: Action names appearing only in reasoning, examples, copied state, or incidental prose MUST NOT be applied.
-15c. **EDA3**: Successful parse metadata MUST set `resolution_method=explicit_action_field`, `declared_action`, and `contract_satisfied=true`.
+15c. **EDA3**: Successful parse metadata MUST set `resolution_method=explicit_action_field` and `declared_action`. `contract_satisfied` MUST be evaluated independently according to AP4.
 15d. **EDA4**: Missing declarations MUST fail with `action=None`, `resolution_method=unresolved`, and `contract_satisfied=false`.
 
 ### 5.5 Metadata Integrity (MI)
@@ -331,9 +336,9 @@ class ActionOnlyController(Controller):
         """Game-specific instructions when bound, generic when unbound (GB4, GB5)."""
         if self._allowed_actions:
             actions_list = ", ".join(sorted(self._allowed_actions))
-            return f"Respond in the format:\nACTION: <your_action>\n\nAllowed actions: {actions_list}"
+            return f"Allowed actions: {actions_list}\n\nRespond only with exactly one line:\nACTION: <your_action>"
         else:
-            return "Respond in the format:\nACTION: <your_action>"
+            return "Respond only with exactly one line:\nACTION: <your_action>"
 
     def parse(self, response: str) -> ParseResult:
         """Parse ACTION: <value> from response (AP1-AP3, VF1-VF4)."""
@@ -426,7 +431,7 @@ from agentdeck import Controller, Game, ParseResult
 
 class ReasoningController(Controller):
     """
-    Parses REASONING: <thinking>\nACTION: <value> format.
+    Parses REASONING: <stated rationale>\nACTION: <value> format.
     Inherits default handshake validation.
     """
 
@@ -440,11 +445,11 @@ class ReasoningController(Controller):
         actions_note = ""
         if self._allowed_actions:
             actions_list = ", ".join(sorted(self._allowed_actions))
-            actions_note = f"\n\nAllowed actions: {actions_list}"
+            actions_note = f"Allowed actions: {actions_list}\n\n"
 
-        return f"""Respond in the format:
-REASONING: <your strategic thinking>
-ACTION: <your_action>{actions_note}"""
+        return f"""{actions_note}Respond only with exactly these two fields:
+REASONING: <your stated rationale>
+ACTION: <your_action>"""
 
     def parse(self, response: str) -> ParseResult:
         raw = response.strip()
@@ -623,6 +628,15 @@ def test_controller_raises_on_failure():
 - **Format instructions via placeholders**: `get_handshake_format_instructions()` and `get_format_instructions()` enable template injection, keeping prompts in sync with controller expectations.
 
 ## 12. Version History
+
+### v1.5.0 (Final - 2026-08-14): Explicit Response Treatments
+
+**Changes**:
+- `ActionOnlyController` now unambiguously requests an action-only response.
+- `ReasoningController` now requests a stated rationale with equivalent imperative force and no longer describes the response as internal chain-of-thought.
+- Action resolution remains tolerant of explicit `ACTION:` fields, while `metadata.contract_satisfied` separately reports whole-response compliance.
+
+**Reproducibility note**: This version ships with AgentDeck 0.4.0 and changes provider input for both built-in turn controllers. Runs created with AgentDeck 0.3.x preserve their literal `controller_format` in canonical Records, but rerunning them with current code is not prompt-equivalent. Use the historical tagged revision when exact study reproduction is required.
 
 ### v1.3.0 (Draft - 2025-11-17): Unified Single-Controller Architecture
 

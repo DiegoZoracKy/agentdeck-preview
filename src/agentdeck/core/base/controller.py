@@ -77,8 +77,8 @@ class Controller(ABC):
         ...     def get_format_instructions(self) -> str:
         ...         if self._allowed_actions:
         ...             actions = ', '.join(sorted(self._allowed_actions))
-        ...             return f"Respond with: ACTION: <action>\\nAllowed: {actions}"
-        ...         return "Respond with: ACTION: <your_action>"
+        ...             return f"Allowed: {actions}\\n\\nRespond only with exactly one line:\\nACTION: <action>"
+        ...         return "Respond only with exactly one line:\\nACTION: <your_action>"
         ...
         ...     def parse(self, response: str) -> ParseResult:
         ...         # Extract "ACTION: <value>" from response
@@ -246,14 +246,14 @@ class Controller(ABC):
 
         Example (before binding):
             >>> def get_format_instructions(self) -> str:
-            ...     return "Respond with: ACTION: <your_action>"
+            ...     return "Respond only with exactly one line:\\nACTION: <your_action>"
 
         Example (after binding):
             >>> def get_format_instructions(self) -> str:
             ...     if self._allowed_actions:
             ...         actions = ', '.join(sorted(self._allowed_actions))
-            ...         return f"Respond with: ACTION: <action>\\nAllowed: {actions}"
-            ...     return "Respond with: ACTION: <your_action>"
+            ...         return f"Allowed: {actions}\\n\\nRespond only with exactly one line:\\nACTION: <action>"
+            ...     return "Respond only with exactly one line:\\nACTION: <your_action>"
 
         Usage: PromptBuilder inserts this into turn templates via {controller_format}
                placeholder.

@@ -96,14 +96,19 @@ def test_GB4_GB5_format_instructions_before_and_after_binding():
 
     # Before binding: generic instructions
     instructions_before = controller.get_format_instructions()
+    assert "Respond only" in instructions_before
+    assert "exactly one line" in instructions_before
+    assert "ACTION:" in instructions_before
     assert "Allowed actions:" not in instructions_before
-    assert "ACTION:" in instructions_before  # Still mentions format
 
     # After binding: game-specific instructions
     game = MockGame(allowed_actions=["ATTACK", "DEFEND", "POTION"])
     controller.bind_game(game)
 
     instructions_after = controller.get_format_instructions()
+    assert "Respond only" in instructions_after
+    assert "exactly one line" in instructions_after
+    assert "ACTION:" in instructions_after
     assert "Allowed actions: ATTACK, DEFEND, POTION" in instructions_after
 
 
@@ -390,6 +395,35 @@ ACTION: ATTACK"""
     assert parse_result.action == "ATTACK"
     assert parse_result.reasoning == "I should attack because opponent is low on health."
     assert parse_result.raw_response == response.strip()
+    assert parse_result.metadata["contract_satisfied"] is True
+
+
+def test_action_only_resolves_action_without_hiding_response_noncompliance():
+    """Extra rationale is preserved and resolved without claiming action-only compliance."""
+    controller = ActionOnlyController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK"]))
+
+    parse_result = controller.parse("Because it is optimal.\nACTION: ATTACK")
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+    assert parse_result.raw_response == "Because it is optimal.\nACTION: ATTACK"
+    assert parse_result.metadata["resolution_method"] == "explicit_action_field"
+    assert parse_result.metadata["contract_satisfied"] is False
+
+
+def test_reasoning_controller_resolves_action_without_claiming_rationale_compliance():
+    """A bare action remains resolvable but does not satisfy the requested rationale format."""
+    controller = ReasoningController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK"]))
+
+    parse_result = controller.parse("ACTION: ATTACK")
+
+    assert parse_result.success is True
+    assert parse_result.action == "ATTACK"
+    assert parse_result.reasoning is None
+    assert parse_result.metadata["reasoning_extracted"] is False
+    assert parse_result.metadata["contract_satisfied"] is False
 
 
 def test_reasoning_controller_validates_allowed_actions():
@@ -518,12 +552,27 @@ def test_FI1_format_instructions_align_with_parsing():
 
     instructions = controller.get_format_instructions()
 
-    # Instructions must mention the ACTION: format
+    # Instructions must unambiguously request an action-only response.
+    assert "Respond only" in instructions
+    assert "exactly one line" in instructions
     assert "ACTION:" in instructions
 
     # Instructions must list allowed actions (after binding)
     assert "ATTACK" in instructions
     assert "DEFEND" in instructions
+
+
+def test_reasoning_format_instructions_request_rationale_with_equal_force():
+    controller = ReasoningController()
+    controller.bind_game(MockGame(allowed_actions=["ATTACK", "DEFEND"]))
+
+    instructions = controller.get_format_instructions()
+
+    assert "Respond only" in instructions
+    assert "exactly these two fields" in instructions
+    assert "REASONING:" in instructions
+    assert "ACTION:" in instructions
+    assert "Allowed actions: ATTACK, DEFEND" in instructions
 
 
 def test_FI2_format_instructions_deterministic():
