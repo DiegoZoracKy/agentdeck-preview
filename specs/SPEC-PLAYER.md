@@ -1,10 +1,10 @@
 # SPEC-PLAYER: Three-Phase Player Contract
 
 > Status: Final
-> Version: 1.3.3
-> Last Updated: 2026-03-17
+> Version: 1.4.0
+> Last Updated: 2026-08-14
 > Implementation: ✅ Implemented
-> Audience: Game authors, LLM player implementers, research engineers
+> Audience: Game authors, LLM player implementers, execution operators
 
 ## 1. Purpose
 - Define the contract every player must satisfy across the three lifecycle phases: **handshake**, **turn decisions**, and **conclusion**.
@@ -26,13 +26,13 @@
 - **Metadata capture**: Attach prompt blocks, usage info (tokens, cost, latency), retry metrics, lifecycle phase, and controller metadata to the returned results.
 
 ## 4. Public API
-- `Player(name, *, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, model="gpt-4", **config)`
+- `Player(name, *, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, model="unspecified", **config)`
   - **v1.3.0 change**: Handshake is split into build + execute steps so Console can emit `PLAYER_HANDSHAKE_START` before the LLM call.
   - **v1.2.0 change**: Single `controller` parameter (required) replaces `handshake_controller` plus a separate turn controller. Controller handles all lifecycle phases per SPEC-CONTROLLER.
   - Defaults: `renderer` defaults to `TextRenderer()`.
   - Default templates:
     - `handshake_template`: `"You are playing {game_name}.\n\n{game_instructions}\n\n{player_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"` (front-loads all instructions)
-    - `turn_template`: `"{game_view}"` (minimal - just current state)
+    - `turn_template`: `"{game_view}\n\n{controller_format}"` (current state plus the decision protocol)
     - `conclusion_template`: `"=== Match Concluded ===\n\n{outcome}\n\nFinal state:\n{game_view}"` (shows outcome and final view)
   - Template parameters accept:
     - **Literal strings**: Inline template content (e.g., `"You are playing {game_name}..."`)
@@ -102,6 +102,13 @@
 21. **LP1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
 22. **LP2**: The model identifier MUST be accessible via the `model` attribute (already provided by `Player.__init__`) for pricing lookups.
 
+### 5.7 Context Selection Audit (CTA)
+
+23. **CTA1 Declared Policy**: Every provider-backed Player MUST expose one versioned context policy in `describe()`. The default is `full_history`; bounded and empty-history policies are explicit configuration.
+24. **CTA2 Exact Selection**: Before each provider call, the Player MUST retain the ordered provider-neutral messages, a content hash, and identifiers for available, selected, and omitted history. The current turn remains distinguishable from retained history.
+25. **CTA3 Isolation**: Selection uses only the current Player's current-match conversation. `reset_conversation()` clears content and provenance identifiers.
+26. **CTA4 Additive Compatibility**: Consumers MUST label history reconstructed from older Records as reconstructed, never exact provider input.
+
 ## 6. Data Structures
 - **HandshakeContext**: `match_id`, `player_name`, `opponent_names`, `game_name`, `seed`, `handshake_template_id`, optional metadata. Provided by console so players can tailor handshake prompts.
 - **HandshakeResponse** *(returned by `execute_handshake`)*:
@@ -110,6 +117,7 @@
   - `retries` *(int, optional)*: Retry count used by provider.
   - `retry_durations` *(list, optional)*: Backoff delays applied between retries.
   - `attempt_durations` *(list, optional)*: Durations for each attempt.
+  - `provider_call` *(dict, optional)*: Exact context selection and provider-adapter call provenance for provider-backed Players.
 - **PromptBundle** *(from SPEC-PROMPT-BUILDER)*:
   - `text` *(str)*: Fully rendered prompt string sent to the LLM.
   - `blocks` *(list)*: Rendered blocks with placeholder metadata for reproducibility.
@@ -386,9 +394,10 @@ def test_conversation_reset():
     - Includes: `{game_name}`, `{game_instructions}`, `{player_instructions}` (optional), `{controller_format}`, `{handshake_controller_format}`.
     - Researchers can pass `player_instructions` via handshake metadata without reconfiguring templates.
     - When `player_instructions` not provided, placeholder renders as empty string (no template change needed).
-  - Default `turn_template` is minimal: just `{game_view}` (current state only).
-    - LLM remembers game name, rules, and action format from handshake via conversation history.
-    - Achieves maximum token efficiency (63% savings vs repeating instructions every turn).
+  - Default `turn_template` includes `{game_view}` plus `{controller_format}`.
+    - Game rules remain front-loaded in the handshake for token efficiency.
+    - The decision protocol is repeated so memory-policy experiments do not silently
+      alter the response contract.
   - Default `conclusion_template` provides closure: shows outcome and final state.
     - Gives players context for post-match reflection (if implemented).
     - Researchers can customize to prompt for specific analysis (e.g., "Reflect on your strategy:", "What would you change?").

@@ -1,20 +1,38 @@
 # AgentDeck 🎮
 
-**The game console for AI agents.**
+**The execution and evidence engine for AI agents.**
 
-A research platform for analyzing AI agent behavior through game scenarios.
+Run agents inside explicit game worlds, record what happened, and replay every decision.
 
-[Why Games?](#-why-games) · [Replay](#-run-record-replay) · [Quick Start](#-quick-start) · [Research](research/README.md) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Specs](specs/SPEC.md) · [AI-First](#spec-driven-and-ai-first-by-design)
+[Why Games?](#-why-games) · [Replay](#-run-record-replay) · [Quick Start](#-quick-start) · [Boundary](#-scope-boundary) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Specs](specs/SPEC.md) · [AI-First](#spec-driven-and-ai-first-by-design)
 
 ---
 
 ## 🎯 Purpose & Vision
 
-AgentDeck helps you turn a behavioral question into a concrete study: define a game or reuse an existing one, run seeded matches across models and controllers, replay every decision, and export artifacts you can validate and compare.
+AgentDeck provides the execution substrate for behavioral investigations: define a game or reuse an existing one, run seeded matches across models and controllers, record the canonical event stream, and replay every decision.
 
 It is useful when static prompt-response evaluation is not enough. By putting agents inside structured games, AgentDeck makes state, incentives, and resource tradeoffs explicit so behavior is easier to observe, compare, replay, and explain.
 
 ![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
+
+## Scope Boundary
+
+AgentDeck owns **execution truth**: game state transitions, provider interactions,
+resolved actions, lifecycle events, runtime configuration, costs, recordings, and
+replay. It is intentionally obsessive about making a Record describe what happened.
+
+AgentDeck does not own research meaning. Corpus selection, pooling, metrics,
+statistical inference, behavioral findings, and claims belong to downstream systems
+operating on canonical Records. Historical research workflows remain reproducible at
+the [`agentic-edge-research`](https://github.com/agentdeck/agentdeck-core/tree/agentic-edge-research)
+tag; they are not part of the current package API.
+
+New Records preserve the effective Game and Player configuration, a scoped Game
+implementation fingerprint, exact retained conversation selection, provider-native SDK
+arguments and response metadata, retries, stop reasons, costs, and state transitions.
+Built-in Controllers apply only actions explicitly declared in an `ACTION:` field;
+mentions inside reasoning or narration fail closed and remain visible as parse failures.
 
 ---
 
@@ -63,7 +81,7 @@ Study artifacts are mirrored on Hugging Face:
 > **Install**: `pip install agentdeck-ai` (import as `agentdeck`)
 >
 > **AI-first prompt**: Ask Claude, Codex, or your coding agent:
-> “Learn AgentDeck from the README, create a tiny tic-tac-toe game, run a few matches, then analyze the recorded behavior.”
+> “Learn AgentDeck from the README, create a tiny tic-tac-toe game, run a few matches, then inspect and replay the Records.”
 
 ### Installation
 
@@ -78,9 +96,6 @@ pip install agentdeck-ai[anthropic]   # Anthropic SDK
 pip install agentdeck-ai[google]      # Google Gen AI SDK (Vertex mode)
 pip install agentdeck-ai[providers]   # All provider SDKs
 
-# With research stack (statistics/plotting)
-pip install agentdeck-ai[research]
-
 # Development install
 pip install agentdeck-ai[dev]
 ```
@@ -92,7 +107,7 @@ cd agentdeck
 pip install -e ".[dev]"
 ```
 
-### Your First Experiment
+### Your First Run
 ```python
 from agentdeck import (
     ActionOnlyController,
@@ -129,7 +144,7 @@ players = [
 
 # Models must be provided explicitly for every provider-backed player.
 
-# 3. Run experiment
+# 3. Run matches
 with AgentDeck(game=game) as deck:
     results = deck.play(
         players=players,
@@ -137,7 +152,7 @@ with AgentDeck(game=game) as deck:
         seed=42,  # Reproducible!
     )
 
-# 4. Analyze results
+# 4. Inspect the factual outcome summary
 print(f"Win rates: {results.win_rates}")
 ```
 
@@ -175,11 +190,6 @@ For the full ladder, see [examples/README.md](examples/README.md).
 ### Walkthroughs & Docs
 - Build your first game + replay tour: `examples/first_game_walkthrough.py`
 - Examples index: [examples/README.md](examples/README.md)
-- End-to-end study workflow: [docs/how-to-run-a-study.md](docs/how-to-run-a-study.md)
-- Package-owned behavioral scoring: keep `scripts/behavioral_scorer.py` in
-  your research package and run `agentdeck-research-score` after export to
-  populate the targeted `results.json.behavioral_profile` (`artifacts/<cell>/results.json`
-  for matrix studies, top-level `results.json` for direct packages)
 
 ### Artifacts (Recordings + Logs)
 
@@ -215,25 +225,6 @@ with AgentDeck(game=game, session=config) as deck:
 > see [`examples/test_parallel_execution.py`](examples/test_parallel_execution.py).
 
 ---
-
-## 🔬 Research Program
-
-This repo ships release-facing benchmark packages, arc summaries, and a cross-game synthesis layer alongside the engine.
-
-Start here:
-- **[The Agentic Edge](research/2026-04-27-agentic-edge-strategy-stack/README.md)** - Flagship study: strategy-stack effects, FixedDamage tier inversion, VariableDamage caveats, and public replay artifacts
-- **[How To Run A Study](docs/how-to-run-a-study.md)** - Supported end-to-end workflow for creating, running, exporting, and validating a study
-
-Supporting arcs:
-- **[FixedDamage Arc 1](research/2026-03-23-fixed-damage-arc-1/README.md)** - Deterministic flagship arc: diagnosis, intervention ladder, and final carry-forward stack
-- **[VariableDamage Arc 1](research/2026-03-26-variable-damage-arc-1/README.md)** - Uncertainty arc: risk-band metrics, transfer failures, and premium ceiling check
-- **[Cross-Game Comparison 1](research/2026-03-26-cross-game-comparison-1/README.md)** - What transferred, what broke, and why the metrics had to evolve
-
-Deeper references:
-- **[Research Guide](research/README.md)** - How experiment packages are organized
-- **[Research Index](research/INDEX.md)** - Registry of experiments and status
-- **[Research Schema](research/SCHEMA.md)** - Contract for manifests, results, and validation
-- **[Research Templates](research/_templates/)** - Boilerplate for new experiment packages
 
 ## ⚙️ Architecture
 
@@ -280,9 +271,8 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 - `TextRenderer` - human-readable text format
 - Custom renderers can provide JSON, images, etc.
 
-**Spectators** observe and analyze matches
+**Spectators** observe matches without affecting execution
 - `MatchReporter` - turn-by-turn reporting
-- `MatchCurator` - sidecar metadata for replay viewer curation
 - `ProgressDisplay` - real-time progress with ETA
 - `TokenUsageTracker` - cost tracking per player/model
 - `StatsTracker` - win rates and performance metrics
@@ -332,7 +322,7 @@ with AgentDeck(game=game) as deck:
 
 **Replay Parity Guarantee**: Replay emits identical event stream as live execution, including complete three-phase lifecycle (handshake → gameplay → conclusion).
 
-### 3. Reproducible Experiments
+### 3. Reproducible Execution
 Seeding makes **game-level randomness** reproducible (player ordering, RNG) and guarantees recording/replay parity.
 However, **LLM outputs are not guaranteed to be deterministic across runs**, even with a fixed seed.
 
@@ -356,7 +346,7 @@ Players go through structured interaction phases:
 2. **Turn** (Gameplay): Player makes decisions each turn
 3. **Conclusion** (Optional): Player reflects on match outcome
 
-This provides rich data for analyzing AI behavior patterns.
+This provides rich canonical data for downstream behavioral analysis.
 
 ---
 
@@ -376,17 +366,17 @@ This provides rich data for analyzing AI behavior patterns.
 2. **Observable**: Every decision is captured and analyzable
 3. **Reproducible**: Everything we control is reproducible (seeding + recordings + replay parity)
 4. **Composable**: Mix and match components freely
-5. **Research-First**: Built by researchers, for researchers
+5. **Execution Truth**: Record facts faithfully and leave research meaning downstream
 
 ---
 
 ## Spec-Driven and AI-First by Design
 
-AgentDeck is human-led and AI-written: a codebase built with AI agents, designed for humans and AI agents, and validated through tests, replayable experiments, research artifacts, and blind QA rounds performed by autonomous agents.
+AgentDeck is human-led and AI-written: a codebase built with AI agents, designed for humans and AI agents, and validated through tests, replayable execution, historical artifacts, and blind QA rounds performed by autonomous agents.
 
-Specs are the source of truth. They define intent, contracts, boundaries, and expected behavior. Code, tests, docs, examples, and research workflows derive from that specification layer and are validated through execution.
+Specs are the source of truth. They define intent, contracts, boundaries, and expected behavior. Code, tests, docs, and examples derive from that specification layer and are validated through execution.
 
-AgentDeck is therefore designed to be legible to both humans and AI agents, treating AI agents as first-class users, contributors, evaluators, and research operators.
+AgentDeck is therefore designed to be legible to both humans and AI agents, treating AI agents as first-class users, contributors, evaluators, and execution operators.
 
 ---
 
@@ -396,4 +386,4 @@ MIT License (see [LICENSE](LICENSE)).
 
 ---
 
-**Built with ❤️ for AI researchers**
+**Built for people and agents who need execution they can inspect.**

@@ -27,8 +27,11 @@ Critical invariants:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import copy
+import json
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from ..game_version import describe_game_version
 from ..types import ActionResult, Event, GameStatus, RandomGenerator
 
 if TYPE_CHECKING:
@@ -345,6 +348,33 @@ class Game(ABC):
             ...             raise ValueError(f"Invalid health for {player}: {hp}")
         """
         pass  # Default: no validation
+
+    def describe(self) -> Dict[str, Any]:
+        """Return the effective, JSON-serializable Game configuration."""
+        config: Dict[str, Any] = {}
+        excluded = {"event_factory", "event_emitter"}
+        for name, value in vars(self).items():
+            if name.startswith("_") or name in excluded or callable(value):
+                continue
+            candidate = copy.deepcopy(value)
+            try:
+                json.dumps(candidate, allow_nan=False)
+            except (TypeError, ValueError):
+                continue
+            config[name] = candidate
+
+        descriptor = {
+            "name": self.__class__.__name__,
+            "module": self.__class__.__module__,
+            "allowed_actions": list(self.allowed_actions),
+            "config": config,
+        }
+        json.dumps(descriptor, allow_nan=False)
+        return descriptor
+
+    def describe_version(self) -> Dict[str, Any]:
+        """Return portable implementation identity with an explicit assurance scope."""
+        return describe_game_version(self)
 
     def on_action_parse_failure(
         self,

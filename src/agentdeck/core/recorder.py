@@ -342,10 +342,8 @@ class Recorder:
                 player.get_summary() if hasattr(player, "get_summary") else {"name": player.name}
                 for player in players
             ],  # Per SPEC-RECORDER MC3
-            "game_config": {
-                "name": game.__class__.__name__,
-                "module": game.__class__.__module__,
-            },
+            "game_config": self._get_game_config(game),
+            "game_version": self._get_game_version(game),
         }
         match_metadata = {
             key: copy.deepcopy(value)
@@ -690,7 +688,7 @@ class Recorder:
                 ),  # Per SPEC-RECORDER batch provenance
             }
 
-            # Include player_costs and cost from match metadata for post-hoc analysis (SPEC-RESEARCH MA1, MA3)
+            # Preserve per-player and aggregate cost facts in the batch summary.
             if "player_costs" in match_metadata:
                 match_ref["player_costs"] = match_metadata["player_costs"]
             if "cost" in match_metadata:
@@ -835,9 +833,12 @@ class Recorder:
 
     def _get_git_info(self) -> Optional[Dict[str, Any]]:
         try:
-            subprocess.run(
-                ["git", "rev-parse", "--git-dir"], capture_output=True, check=True, text=True
-            )
+            repository_root = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                capture_output=True,
+                check=True,
+                text=True,
+            ).stdout.strip()
             commit_hash = subprocess.run(
                 ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
             ).stdout.strip()
@@ -845,13 +846,19 @@ class Recorder:
                 ["git", "branch", "--show-current"], capture_output=True, text=True, check=True
             ).stdout.strip()
             status = subprocess.run(
-                ["git", "status", "--porcelain", "--untracked-files=no"],
+                ["git", "status", "--porcelain", "--untracked-files=normal"],
                 capture_output=True,
                 text=True,
                 check=True,
             )
             dirty = bool(status.stdout.strip())
-            return {"commit": commit_hash, "branch": branch, "dirty": dirty}
+            return {
+                "commit": commit_hash,
+                "branch": branch,
+                "dirty": dirty,
+                "scope": "process_working_directory_repository",
+                "repository": Path(repository_root).name,
+            }
         except (subprocess.CalledProcessError, FileNotFoundError):
             # Git not available or not a git repository
             return None
@@ -859,40 +866,41 @@ class Recorder:
     def _get_player_configs(self, players) -> Dict[str, Dict[str, Any]]:
         configs: Dict[str, Dict[str, Any]] = {}
         for player in players:
-            config = {
-                "type": player.__class__.__name__,
-                "module": player.__class__.__module__,
-            }
-            if hasattr(player, "model"):
-                config["model"] = player.model
-            if hasattr(player, "temperature"):
-                config["temperature"] = player.temperature
-            if hasattr(player, "max_tokens"):
-                config["max_tokens"] = player.max_tokens
-            if hasattr(player, "api_key"):
-                key = str(getattr(player, "api_key", ""))
-                if key and len(key) > 8:
-                    config["api_key_prefix"] = f"***{key[-4:]}"
+            if hasattr(player, "describe"):
+                config = copy.deepcopy(player.describe())
+            else:
+                config = {
+                    "name": player.name,
+                    "type": player.__class__.__name__,
+                    "module": player.__class__.__module__,
+                }
             configs[player.name] = config
         return configs
+
+    def _get_game_config(self, game) -> Dict[str, Any]:
+        if hasattr(game, "describe"):
+            return copy.deepcopy(game.describe())
+        return {
+            "name": game.__class__.__name__,
+            "module": game.__class__.__module__,
+            "allowed_actions": list(getattr(game, "allowed_actions", [])),
+            "config": {},
+        }
+
+    def _get_game_version(self, game) -> Dict[str, Any]:
+        if hasattr(game, "describe_version"):
+            return copy.deepcopy(game.describe_version())
+        from .game_version import describe_game_version
+
+        return describe_game_version(game)
 
     def _get_configuration(self, game, players) -> Dict[str, Any]:
         configuration = {
             "agentdeck_version": self._get_agentdeck_version(),
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-            "timestamp": datetime.now().isoformat(),
-            "game": {
-                "name": game.__class__.__name__,
-                "module": game.__class__.__module__,
-            },
-            "players": [
-                {
-                    "name": player.name,
-                    "type": player.__class__.__name__,
-                    "module": player.__class__.__module__,
-                }
-                for player in players
-            ],
+            "game": self._get_game_config(game),
+            "game_version": self._get_game_version(game),
+            "players": list(self._get_player_configs(players).values()),
         }
         return configuration
 

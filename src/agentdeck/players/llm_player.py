@@ -1,6 +1,8 @@
 """Base LLM player class for AgentDeck."""
 
 import copy
+import hashlib
+import json
 import os
 import time
 import uuid
@@ -30,6 +32,7 @@ class LLMPlayer(Player, ABC):
         model: Optional[str] = None,
         temperature: float = 1.0,
         max_tokens: Optional[int] = None,
+        context_policy: Optional[Dict[str, Any] | str] = None,
         controller: Controller,
         renderer: Optional[Renderer] = None,
         handshake_template: Optional[Any] = None,
@@ -93,6 +96,7 @@ class LLMPlayer(Player, ABC):
         self.temperature = self.config.get("temperature", 1.0)
         self.max_tokens = self.config.get("max_tokens", None)
         self.prompt = self.config.get("prompt", None)
+        self.context_policy = self._normalize_context_policy(context_policy)
 
         # Tracking
         self.total_tokens = 0
@@ -100,6 +104,8 @@ class LLMPlayer(Player, ABC):
         self.response_times = []
 
         self._local_history: List[Dict[str, str]] = []
+        self.last_provider_call: Optional[Dict[str, Any]] = None
+        self._pending_sdk_request: Optional[Dict[str, Any]] = None
 
         # Provider-specific config
         self.config = kwargs
@@ -132,6 +138,7 @@ class LLMPlayer(Player, ABC):
             model=self.model,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
+            context_policy=copy.deepcopy(self.context_policy),
             controller=controller,
             renderer=renderer,
             handshake_template=handshake_template,
@@ -181,21 +188,104 @@ class LLMPlayer(Player, ABC):
         """Return the provider-effective max_tokens value for logging/observability."""
         return self.max_tokens
 
+    @staticmethod
+    def _normalize_context_policy(value: Optional[Dict[str, Any] | str]) -> Dict[str, Any]:
+        """Normalize the explicit policy used to select retained conversation history."""
+        if value is None:
+            return {"id": "full_history", "version": "1", "parameters": {}}
+        if isinstance(value, str):
+            value = {"id": value, "version": "1", "parameters": {}}
+        if not isinstance(value, dict):
+            raise TypeError("context_policy must be a string or dictionary")
+
+        policy_id = str(value.get("id") or "").strip()
+        supported = {
+            "full_history",
+            "no_history",
+            "last_n_messages",
+            "handshake_plus_recent",
+        }
+        if policy_id not in supported:
+            raise ValueError(f"Unsupported context policy: {policy_id or '<empty>'}")
+
+        parameters = copy.deepcopy(value.get("parameters") or {})
+        if not isinstance(parameters, dict):
+            raise TypeError("context_policy.parameters must be a dictionary")
+        if policy_id in {"last_n_messages", "handshake_plus_recent"}:
+            count = parameters.get("recent_count", parameters.get("count", 0))
+            if not isinstance(count, int) or count < 0:
+                raise ValueError("bounded context policies require a non-negative message count")
+            parameters["recent_count"] = count
+
+        return {
+            "id": policy_id,
+            "version": str(value.get("version") or "1"),
+            "parameters": parameters,
+        }
+
+    @staticmethod
+    def _sha256_json(value: Any) -> str:
+        payload = json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        return hashlib.sha256(payload).hexdigest()
+
+    def _history_entries_source(self) -> List[Dict[str, Any]]:
+        if self.conversation_manager and hasattr(self.conversation_manager, "history_entries"):
+            return self.conversation_manager.history_entries()
+        return [
+            {
+                "message_id": f"legacy-{index}",
+                "exchange_id": f"legacy-{index // 2}",
+                "phase": "unknown",
+                "role": entry.get("role", "user"),
+                "content": entry.get("content", ""),
+            }
+            for index, entry in enumerate(self._local_history)
+        ]
+
+    def _select_history_entries(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        policy_id = self.context_policy["id"]
+        parameters = self.context_policy["parameters"]
+        if policy_id == "full_history":
+            return list(entries)
+        if policy_id == "no_history":
+            return []
+
+        count = parameters.get("recent_count", 0)
+        recent = list(entries[-count:]) if count else []
+        if policy_id == "last_n_messages":
+            return recent
+
+        handshake = [entry for entry in entries if entry.get("phase") == "handshake"]
+        handshake_ids = {entry.get("message_id") for entry in handshake}
+        return handshake + [
+            entry for entry in recent if entry.get("message_id") not in handshake_ids
+        ]
+
+    def _capture_sdk_request(
+        self,
+        method: str,
+        arguments: Dict[str, Any],
+        *,
+        assurance: str = "sent_to_official_sdk",
+    ) -> None:
+        """Capture the exact serializable arguments supplied to the official SDK."""
+        snapshot = copy.deepcopy(arguments)
+        self._pending_sdk_request = {
+            "sdk": getattr(self, "PROVIDER", "unknown"),
+            "method": method,
+            "arguments": snapshot,
+            "arguments_sha256": self._sha256_json(snapshot),
+            "assurance": assurance,
+        }
+
     def _invoke_model(self, bundle, turn_context):
         user_prompt = bundle.text
-
-        messages = []
-        if self.prompt:
-            messages.append({"role": "system", "content": self.prompt})
-
-        for entry in self._history_source():
-            messages.append(entry)
-
-        current_user_message = {"role": "user", "content": user_prompt}
-        messages.append(current_user_message)
-
-        self.last_full_prompt = messages
-
         phase = getattr(self, "_active_phase", None)
         match_id = getattr(self, "_active_match_id", None)
         turn_number = getattr(self, "_active_turn_number", None)
@@ -206,6 +296,38 @@ class LLMPlayer(Player, ABC):
         if phase is None:
             phase = "unknown"
         call_id = uuid.uuid4().hex[:8]
+
+        history_entries = self._history_entries_source()
+        selected_entries = self._select_history_entries(history_entries)
+        messages: List[Dict[str, str]] = []
+        if self.prompt:
+            messages.append({"role": "system", "content": self.prompt})
+        messages.extend(
+            {"role": str(entry["role"]), "content": str(entry["content"])}
+            for entry in selected_entries
+        )
+        messages.append({"role": "user", "content": user_prompt})
+        self.last_full_prompt = copy.deepcopy(messages)
+
+        selected_ids = [str(entry["message_id"]) for entry in selected_entries]
+        selected_id_set = set(selected_ids)
+        context_selection = {
+            "policy": copy.deepcopy(self.context_policy),
+            "available_message_ids": [str(entry["message_id"]) for entry in history_entries],
+            "selected_message_ids": selected_ids,
+            "omitted_message_ids": [
+                str(entry["message_id"])
+                for entry in history_entries
+                if str(entry["message_id"]) not in selected_id_set
+            ],
+            "selected_history_messages": len(selected_entries),
+            "available_history_messages": len(history_entries),
+        }
+        composed_input = {
+            "messages": copy.deepcopy(messages),
+            "ordered_messages_sha256": self._sha256_json(messages),
+            "current_message_index": len(messages) - 1,
+        }
 
         logger = getattr(self, "logger", None)
         if logger:
@@ -223,13 +345,25 @@ class LLMPlayer(Player, ABC):
 
         retry_durations: List[float] = []
         attempt_durations: List[float] = []
+        attempts: List[Dict[str, Any]] = []
 
         for attempt in range(self.max_retries):
             start_time = time.time()
+            started_at = time.time_ns()
+            self._pending_sdk_request = None
             try:
                 response_text, metadata = self._make_api_call(messages)
                 response_time = time.time() - start_time
                 attempt_durations.append(response_time)
+                attempts.append(
+                    {
+                        "attempt": attempt + 1,
+                        "started_at_unix_ns": started_at,
+                        "duration_ms": round(response_time * 1000, 1),
+                        "outcome": "completed",
+                        "sdk_request": copy.deepcopy(self._pending_sdk_request),
+                    }
+                )
 
                 self.response_times.append(response_time)
                 self.total_tokens += metadata.get("tokens_used", 0)
@@ -256,6 +390,38 @@ class LLMPlayer(Player, ABC):
                 # MA4: Propagate estimated flag when present
                 if metadata.get("estimated"):
                     self.last_usage_info["estimated"] = True
+
+                sdk_response = {
+                    "response_text": response_text,
+                    "response_id": metadata.get("provider_response_id"),
+                    "provider_model": metadata.get("provider_model"),
+                    "stop_reason": metadata.get("stop_reason"),
+                    "stop_sequence": metadata.get("stop_sequence"),
+                    "response_complete": metadata.get("response_complete"),
+                    "service_tier": metadata.get("service_tier"),
+                    "usage": {
+                        "input_tokens": metadata.get("prompt_tokens", 0),
+                        "output_tokens": metadata.get("completion_tokens", 0),
+                        "total_tokens": metadata.get("tokens_used", 0),
+                    },
+                    "assurance": "returned_by_official_sdk",
+                }
+                sdk_response = {
+                    key: value for key, value in sdk_response.items() if value is not None
+                }
+                self.last_provider_call = {
+                    "schema_version": "0.1",
+                    "call_id": call_id,
+                    "player": self.name,
+                    "phase": phase,
+                    "match_id": match_id,
+                    "turn_number": turn_number,
+                    "context_selection": context_selection,
+                    "composed_input": composed_input,
+                    "sdk_request": copy.deepcopy(self._pending_sdk_request),
+                    "sdk_response": sdk_response,
+                    "attempts": copy.deepcopy(attempts),
+                }
 
                 if logger:
                     logger.api_response(
@@ -293,12 +459,38 @@ class LLMPlayer(Player, ABC):
                     "retries": attempt,
                     "retry_durations": retry_durations,
                     "attempt_durations": attempt_durations,
-                    "extras": {"messages": messages},
+                    "provider_call": copy.deepcopy(self.last_provider_call),
                 }
             except Exception as exc:
                 response_time = time.time() - start_time
                 attempt_durations.append(response_time)
+                attempts.append(
+                    {
+                        "attempt": attempt + 1,
+                        "started_at_unix_ns": started_at,
+                        "duration_ms": round(response_time * 1000, 1),
+                        "outcome": "failed",
+                        "sdk_request": copy.deepcopy(self._pending_sdk_request),
+                        "error": {
+                            "type": exc.__class__.__name__,
+                            "message": str(exc)[:500],
+                        },
+                    }
+                )
                 if attempt == self.max_retries - 1:
+                    self.last_provider_call = {
+                        "schema_version": "0.1",
+                        "call_id": call_id,
+                        "player": self.name,
+                        "phase": phase,
+                        "match_id": match_id,
+                        "turn_number": turn_number,
+                        "context_selection": context_selection,
+                        "composed_input": composed_input,
+                        "sdk_request": copy.deepcopy(self._pending_sdk_request),
+                        "sdk_response": None,
+                        "attempts": copy.deepcopy(attempts),
+                    }
                     # RE3: Include provider identifier in error message
                     provider = getattr(self, "PROVIDER", "unknown")
                     raise RuntimeError(
@@ -345,14 +537,25 @@ class LLMPlayer(Player, ABC):
         base = super().describe()
         base.update(
             {
+                "provider": getattr(self, "PROVIDER", self.__class__.__module__),
                 "temperature": self.temperature,
                 "max_tokens": self.max_tokens,
                 "retry_policy": {
                     "max_retries": self.max_retries,
                     "retry_delay": self.retry_delay,
                 },
+                "context_policy": copy.deepcopy(self.context_policy),
             }
         )
+        provider_config: Dict[str, Any] = {}
+        if hasattr(self, "_project_id"):
+            provider_config["project_id"] = self._project_id
+        if hasattr(self, "_location"):
+            provider_config["location"] = self._location
+        if hasattr(self, "_generation_overrides"):
+            provider_config["generation_config"] = copy.deepcopy(self._generation_overrides)
+        if provider_config:
+            base["provider_config"] = provider_config
         return base
 
     def get_stats(self) -> Dict[str, Any]:
@@ -443,6 +646,7 @@ class LLMPlayer(Player, ABC):
                     controller_metadata=controller_metadata,
                     renderer_output={},
                     usage_info=usage_info,
+                    provider_call=copy.deepcopy(self.last_provider_call),
                 )
 
             return reflection.strip() if reflection else None
@@ -523,6 +727,7 @@ class LLMPlayer(Player, ABC):
                     else {}
                 ),
                 usage_info=metadata.get("usage_info") if metadata else None,
+                provider_call=(copy.deepcopy(metadata.get("provider_call")) if metadata else None),
             )
 
             return reflection.strip() if reflection else None

@@ -16,16 +16,16 @@
 | **Separation of concerns** | `SPEC.md` §3.2 | Capture clear contracts between components. Specs should highlight boundaries, not implementation tricks. |
 | **Compose, don't integrate** | `SPEC.md` §3.2 | Document how components plug together (inputs/outputs). Specs are the wiring diagrams for modularity. |
 | **Reproducibility & determinism** | `SPEC.md` §2.4 | Whenever randomness or stateful behavior appears, explicitly state determinism expectations & seed flow. |
-| **Research-first framing** | `SPEC.md` §1 | Specs should speak in terms of researcher value and workflows. Start from the user story, then drill into engineering detail. |
+| **Execution-truth framing** | `SPEC.md` §1.4 | Specs must preserve execution facts without absorbing downstream research meaning. Start from the caller story, then drill into engineering detail. |
 
-### Research Platform Focus
+### Execution Substrate Focus
 
-AgentDeck is a research platform for studying AI behavior. Specs must support:
+AgentDeck is an execution and evidence engine for AI agents. Specs must support:
 
-- **Rapid Experimentation**: Can researchers use this component in <5 lines of code? Are defaults sensible for 80% of use cases?
-- **Reproducibility**: Does the component preserve deterministic behavior (seed propagation)? Are all decisions recorded for analysis?
-- **Flexibility**: Can researchers customize the component? Does it support different input formats (text/image/JSON)?
-- **Data Collection**: Does the component emit relevant events? Are decisions, timings, and reasoning captured?
+- **Rapid Execution**: Can callers use this component in <5 lines of code? Are defaults sensible for 80% of use cases?
+- **Controlled Reproducibility**: Does the component preserve framework determinism and seed propagation?
+- **Flexibility**: Can callers customize the component? Does it support different input formats (text/image/JSON)?
+- **Execution Truth**: Does the component emit and retain the facts required to explain what happened?
 - **Interoperability**: Does it plug into existing components without custom glue code?
 
 **LLM Integration**: Specs covering the player pipeline (Player, LLM integrations, Controllers) must address:
@@ -39,7 +39,7 @@ AgentDeck is a research platform for studying AI behavior. Specs must support:
 ## 2. Spec Writing Workflow
 
 1. **Start with the user flow**
-   - What is the researcher trying to accomplish when they touch this component?
+   - What is the caller trying to accomplish when they touch this component?
    - Where are they coming from? Where do they go next?
 
 2. **Align on scope**
@@ -51,7 +51,7 @@ AgentDeck is a research platform for studying AI behavior. Specs must support:
    - Keep language user-facing first, engineering second.
    - Populate the header metadata (Status, Version, Last Updated, Implementation, Review State, Audience).
    - Keep the spec header contract-only. Do not add rolling `Changes in v...` blocks inside specs; version history belongs in git/audit notes, not in the source-of-truth contract.
-   - In §1 Purpose, name the primary audience (researcher, contributor, game author, etc.).
+   - In §1 Purpose, name the primary audience (caller, contributor, game author, etc.).
    - Use §4 Data Structures when the component exposes reusable schemas (contexts, payloads, results); omit if not applicable.
 
 4. **Cross-reference philosophy**  
@@ -198,7 +198,7 @@ Before marking a spec "Final", ensure:
 
 **Content & Completeness**:
 - [ ] **Metadata**: Status, Review State, Audience fields populated.
-- [ ] **Purpose**: Framed as researcher problem/goal, names primary audience.
+- [ ] **Purpose**: Framed as a caller problem/goal, names primary audience.
 - [ ] **Responsibilities**: Limited to one primary function.
 - [ ] **Public API**: Documented with signatures and returned values.
 - [ ] **Invariants**: Explicit guarantees enumerated (determinism, ordering, schema, etc.).
@@ -244,7 +244,7 @@ Before marking a spec "Final", ensure:
 ### 4.3 Voice & Tense
 - **Active voice**: "The Console emits events" (not "Events are emitted")
 - **Present tense**: "The EventBus routes events" (not "will route")
-- **User-facing first**: Start with researcher perspective, then implementation details
+- **User-facing first**: Start with caller perspective, then implementation details
 - **Concise**: Prefer bullets over prose and arrow summaries over nested explanations (see §2c).
 
 ### 4.4 Public API Documentation Format

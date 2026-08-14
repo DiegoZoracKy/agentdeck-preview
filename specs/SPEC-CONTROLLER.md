@@ -1,8 +1,8 @@
 # SPEC-CONTROLLER: Unified Controller Contract
 
 > Status: Final
-> Version: 1.3.2
-> Last Updated: 2026-03-17
+> Version: 1.4.0
+> Last Updated: 2026-08-14
 > Implementation: ✅ Complete (src/agentdeck/core/base/controller.py)
 > Audience: Player authors, controller implementers, validation tooling
 
@@ -23,7 +23,7 @@
 ## 3. Responsibilities
 - **Handshake validation**: Default implementation accepts only `OK`. Override `validate_handshake()` for custom validation. Report acceptance/rejection with reasons.
 - **Turn action parsing**: Abstract `parse()` method converts LLM responses into actions/reasoning. Validate against allowed sets. **Fail explicitly on parsing errors** (v1.2.0: no fallbacks).
-- **Bound action resolution** (built-ins): When `bind_game()` is active, controllers SHOULD deterministically prefer actions present in `game.allowed_actions` (from explicit `ACTION:`, extracted candidates, or clear mentions) before failing.
+- **Explicit action resolution** (built-ins): Controllers require a line-anchored `ACTION: <value>` declaration. Mentions in reasoning or narration are not decisions and MUST fail closed.
 - **Conclusion parsing** (optional): Default passthrough implementation. Override `parse_conclusion()` for structured reflection parsing.
 - **Format instructions**: Provide instructions for all phases via `get_handshake_format_instructions()` and `get_format_instructions()`.
 - **Metadata enrichment**: Attach candidates, reasoning, allowed sets, and validation context for recorder/spectators.
@@ -236,9 +236,16 @@ class ReasoningController(Controller):
 12. **VF1**: Controllers with allowed sets MUST honour `casefold` semantics and include the allowed set in metadata.
 13. **VF2** (v1.2.0): `to_action_result()` MUST raise `ActionParseError` when `success=False`. The exception MUST expose the originating `ParseResult` via `error.parse_result`.
 14. **VF3** (v1.2.0): Controllers MUST NOT return fallback actions. When parsing fails, `ParseResult.action` MUST be `None`, and the raised `ActionParseError` MUST be propagated to Console.
-15. **VF4** (v1.2.0): `ParseResult.metadata` SHOULD contain diagnostic fields (candidates, reasoning flags, allowed actions, etc.) so downstream systems can analyse the failure.
+15. **VF4** (v1.2.0): `ParseResult.metadata` SHOULD contain diagnostic fields (reasoning flags, allowed actions, resolution method, declared action, and contract status) so consumers can audit the parser outcome.
 
-**Rationale for v1.2.0 semantics**: Research evaluation requires observing when/how LLMs fail to follow instructions. Fallback mechanisms hide failures and prevent assessment of controller effectiveness and model instruction-following capability.
+**Rationale**: A well-formed Record must distinguish an action explicitly declared by the Player from an action inferred by infrastructure. Fallback mechanisms erase that distinction.
+
+### 5.4.1 Explicit Decision Attribution (EDA)
+
+15a. **EDA1**: Built-in turn controllers MUST accept an action only from a line-anchored `ACTION: <value>` field.
+15b. **EDA2**: Action names appearing only in reasoning, examples, copied state, or incidental prose MUST NOT be applied.
+15c. **EDA3**: Successful parse metadata MUST set `resolution_method=explicit_action_field`, `declared_action`, and `contract_satisfied=true`.
+15d. **EDA4**: Missing declarations MUST fail with `action=None`, `resolution_method=unresolved`, and `contract_satisfied=false`.
 
 ### 5.5 Metadata Integrity (MI)
 16. **MI1**: `ParseResult.metadata` and `HandshakeResult.metadata` MUST be JSON-serialisable.

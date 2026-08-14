@@ -130,10 +130,8 @@ def test_GB3_validation_uses_bound_actions(response, expected_action):
     assert result.action == expected_action
 
 
-def test_action_only_prefers_allowed_candidate_when_non_action_token_trails():
-    """
-    Bound parser should prioritize allowed action candidates over unrelated uppercase tokens.
-    """
+def test_action_only_rejects_incidental_allowed_mentions():
+    """Narration must never be promoted into a player decision."""
     controller = ActionOnlyController()
     controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
 
@@ -141,17 +139,14 @@ def test_action_only_prefers_allowed_candidate_when_non_action_token_trails():
         "I choose to ATTACK.\n\nCurrent state:\n- You: 100 HP\n- Opponent: 80 HP"
     )
 
-    assert parse_result.success is True
-    assert parse_result.action == "ATTACK"
-    assert "HP" in parse_result.metadata["candidates"]
-    assert parse_result.metadata["resolution_strategy"] in {
-        "single_allowed_candidate",
-        "intent_pattern",
-    }
+    assert parse_result.success is False
+    assert parse_result.action is None
+    assert parse_result.metadata["resolution_method"] == "unresolved"
+    assert parse_result.metadata["contract_satisfied"] is False
 
 
-def test_action_only_does_not_parse_last_action_label_as_action_field():
-    """`Last Action:` from game-state text must not be interpreted as ACTION directive."""
+def test_action_only_rejects_last_action_and_intent_mentions_without_field():
+    """Neither state narration nor intent prose is an explicit action declaration."""
     controller = ActionOnlyController()
     controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
 
@@ -159,23 +154,19 @@ def test_action_only_does_not_parse_last_action_label_as_action_field():
         "Last Action:\n  You: None\n  Opponent: ATTACK\n\nI will ATTACK now."
     )
 
-    assert parse_result.success is True
-    assert parse_result.action == "ATTACK"
+    assert parse_result.success is False
+    assert parse_result.action is None
 
 
-def test_action_only_recovers_action_from_lowercase_allowed_mention():
-    """Bound parser should recover lowercase allowed actions from free-form text."""
+def test_action_only_rejects_lowercase_allowed_mention():
+    """Free-form action mentions do not satisfy the response contract."""
     controller = ActionOnlyController()
     controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
 
     parse_result = controller.parse("It's your turn now; please attack to finish the match.")
 
-    assert parse_result.success is True
-    assert parse_result.action == "ATTACK"
-    assert parse_result.metadata["resolution_strategy"] in {
-        "single_allowed_mention",
-        "intent_pattern",
-    }
+    assert parse_result.success is False
+    assert parse_result.action is None
 
 
 def test_action_only_is_game_agnostic_for_allowed_actions():
@@ -183,11 +174,13 @@ def test_action_only_is_game_agnostic_for_allowed_actions():
     controller = ActionOnlyController()
     controller.bind_game(MockGame(allowed_actions=["CAST_SPELL", "GUARD"]))
 
-    parse_result = controller.parse("I will cast_spell now.")
+    parse_result = controller.parse("ACTION: cast_spell")
 
     assert parse_result.success is True
     assert parse_result.action == "CAST_SPELL"
     assert "CAST_SPELL" in parse_result.metadata["allowed_actions"]
+    assert parse_result.metadata["resolution_method"] == "explicit_action_field"
+    assert parse_result.metadata["declared_action"] == "CAST_SPELL"
 
 
 # ============================================================================
@@ -328,7 +321,7 @@ def test_VF1_casefold_validation():
     assert result.action == "ATTACK"
 
 
-def test_VF2_fallback_metadata():
+def test_VF2_parse_failure_metadata():
     """
     SPEC-CONTROLLER VF2: to_action_result() raises ActionParseError on parse failure.
 
@@ -353,7 +346,7 @@ def test_VF2_fallback_metadata():
     assert exc_info.value.parse_result.error is not None
 
 
-def test_VF3_fallback_never_none():
+def test_VF3_parse_failure_never_loses_result():
     """
     SPEC-CONTROLLER VF3: ActionParseError MUST include ParseResult.
 
@@ -431,10 +424,8 @@ def test_reasoning_controller_casefold_validation():
     assert parse_result.action == "ATTACK"
 
 
-def test_reasoning_controller_prefers_allowed_candidate_when_non_action_token_trails():
-    """
-    Reasoning parser should not forfeit when response includes ATTACK plus noisy uppercase tokens.
-    """
+def test_reasoning_controller_rejects_incidental_allowed_mentions():
+    """Reasoning prose must not be promoted into a player decision."""
     controller = ReasoningController()
     controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
 
@@ -442,17 +433,13 @@ def test_reasoning_controller_prefers_allowed_candidate_when_non_action_token_tr
         "It's my turn. I will ATTACK.\n\nHealth:\n- You: 100 HP\n- Opponent: 80 HP"
     )
 
-    assert parse_result.success is True
-    assert parse_result.action == "ATTACK"
-    assert "HP" in parse_result.metadata["candidates"]
-    assert parse_result.metadata["resolution_strategy"] in {
-        "single_allowed_candidate",
-        "intent_pattern",
-    }
+    assert parse_result.success is False
+    assert parse_result.action is None
+    assert parse_result.metadata["contract_satisfied"] is False
 
 
-def test_reasoning_controller_does_not_parse_last_action_label_as_action_field():
-    """`Last Action:` block should not override intended action in free-form responses."""
+def test_reasoning_controller_rejects_last_action_and_intent_mentions_without_field():
+    """`Last Action:` and free-form intent are not an explicit action declaration."""
     controller = ReasoningController()
     controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
 
@@ -460,23 +447,19 @@ def test_reasoning_controller_does_not_parse_last_action_label_as_action_field()
         "Last Action:\n  You: None\n  Opponent: ATTACK\n\nI will use ATTACK."
     )
 
-    assert parse_result.success is True
-    assert parse_result.action == "ATTACK"
+    assert parse_result.success is False
+    assert parse_result.action is None
 
 
-def test_reasoning_controller_recovers_action_from_lowercase_allowed_mention():
-    """Reasoning parser should recover lowercase action mentions when uppercase tokens are absent."""
+def test_reasoning_controller_rejects_lowercase_allowed_mention():
+    """Free-form reasoning without an ACTION field fails closed."""
     controller = ReasoningController()
     controller.bind_game(MockGame(allowed_actions=["ATTACK", "POTION"]))
 
     parse_result = controller.parse("It's your turn! You can attack one more time.")
 
-    assert parse_result.success is True
-    assert parse_result.action == "ATTACK"
-    assert parse_result.metadata["resolution_strategy"] in {
-        "single_allowed_mention",
-        "intent_pattern",
-    }
+    assert parse_result.success is False
+    assert parse_result.action is None
 
 
 def test_reasoning_controller_is_game_agnostic_for_allowed_actions():
@@ -484,7 +467,7 @@ def test_reasoning_controller_is_game_agnostic_for_allowed_actions():
     controller = ReasoningController()
     controller.bind_game(MockGame(allowed_actions=["CAST_SPELL", "GUARD"]))
 
-    parse_result = controller.parse("For this turn, I'll cast_spell to gain advantage.")
+    parse_result = controller.parse("REASONING: This creates an advantage.\nACTION: cast_spell")
 
     assert parse_result.success is True
     assert parse_result.action == "CAST_SPELL"
@@ -612,7 +595,7 @@ def test_AP3_parse_failure():
     assert result.success is False
     assert result.action is None
     assert result.error is not None
-    assert "No action token found" in result.error  # Error explains what was missing
+    assert "No ACTION: field found" in result.error
 
 
 # ============================================================================

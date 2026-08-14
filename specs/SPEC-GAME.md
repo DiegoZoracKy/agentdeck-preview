@@ -1,8 +1,8 @@
-# SPEC-GAME: Game Author Contract v0.7.1
+# SPEC-GAME: Game Author Contract v0.8.0
 
 > Status: Final
-> Version: 0.7.1
-> Last Updated: 2026-03-17
+> Version: 0.8.0
+> Last Updated: 2026-08-14
 > Base Version: 0.6.0 (Final)
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Review State: Consensus-approved
@@ -78,6 +78,16 @@
 - Raise: MUST raise `ValueError` with descriptive message when invariants break.
 - MUST NOT: Mutate the provided `game_state`.
 - Default: No-op; games opt in for stronger integrity checks.
+
+### describe() -> Dict[str, Any]
+- Role: Return the effective JSON Game configuration used by execution.
+- Return: Name, module, allowed actions, and serializable public instance configuration.
+- MUST: Exclude runtime bindings and non-JSON values.
+
+### describe_version() -> Dict[str, Any]
+- Role: Return portable implementation identity with explicit fingerprint scope.
+- Return: Descriptor defined by `SPEC-GAME-VERSION-PROVENANCE`.
+- MUST NOT: Claim full implementation coverage when only class source is available.
 
 ### get_events(game_state: Dict[str, Any], player: str, action: ActionResult) -> List[Event]
 - Role: Optional hook to publish additional observability events besides structural gameplay events.
@@ -435,6 +445,12 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 42. **TC1**: `HandshakeResult.metadata` MUST always be a dict (never None), enabling safe access without defensive checks.
 43. **TC2**: Games receiving `HandshakeResult` MAY assume `metadata` field exists and is dict-like.
 44. **TC3**: Controllers producing `HandshakeResult` MUST populate `metadata` field (empty dict if no metadata).
+
+### 5.13 Execution Identity (EI) — *New in v0.8.0*
+
+45. **EI1**: `describe()` MUST expose effective Game configuration independently from implementation identity.
+46. **EI2**: `describe_version()` MUST expose content identity and assurance scope according to `SPEC-GAME-VERSION-PROVENANCE`.
+47. **EI3**: Missing source bytes MUST be represented as unresolved and MUST NOT prevent otherwise valid execution.
 
 ## 6. Data Flow & Interaction
 - **Session init**: Facade → Console (game, players, seed) → game.setup(players, seed) → canonical `game_state`.

@@ -33,7 +33,7 @@ class MockPlayer(Player):
 
     Returns predictable responses based on phase:
     - Handshake: "OK"
-    - Turn: "ATTACK"
+    - Turn: "ACTION: ATTACK"
     - Conclusion: "Good game!"
     """
 
@@ -41,6 +41,7 @@ class MockPlayer(Player):
         """Initialize mock player with default controller."""
         from agentdeck.controllers import ActionOnlyController
 
+        kwargs.setdefault("model", "mock")
         super().__init__(name=name, controller=ActionOnlyController(), **kwargs)
 
     def get_response(self, prompt: str) -> str:
@@ -51,7 +52,7 @@ class MockPlayer(Player):
         elif "conclude" in prompt.lower() or "game over" in prompt.lower():
             return "Good game!"
         else:
-            return "ATTACK"
+            return "ACTION: ATTACK"
 
     def conclude(self, result, *, match_context):
         """Return deterministic conclusion and record prompt metadata."""

@@ -1,8 +1,8 @@
 # SPEC-GAMEPLAY-EVENT-DATA: Canonical Gameplay Payload
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-31
+> Version: 2.1.0
+> Last Updated: 2026-08-14
 > Implementation: ✅ Implemented in `EventFactory.turn`, `MatchRuntime.record_turn`, `Recorder`, `ReplayEngine`, and parity tests
 > Review State: consensus-approved
 > Audience: Core contributors, spectator authors, recorder/replay implementers, research tooling maintainers
@@ -52,6 +52,10 @@ GameplayEventData = {
         "renderer_output": {...},
         "controller_format": "...",
         "controller_metadata": {...},
+        "provider_call": {...},
+        "retries": 0,
+        "retry_durations": [],
+        "attempt_durations": [0.42],
     },
 }
 ```
@@ -78,6 +82,8 @@ GameplayEventData = {
 | `metadata` | object | yes | Controller/action metadata that is not LLM I/O. Defaults to `{}`. |
 
 `action.raw_response` MUST NOT be serialized. The raw model output belongs only in `interaction.response_text`.
+For built-in controllers, `action.metadata` identifies `resolution_method`,
+`declared_action`, and `contract_satisfied`; an incidental mention is never a decision.
 
 ### 4.4 Interaction
 
@@ -90,6 +96,10 @@ GameplayEventData = {
 | `renderer_output` | object or null | yes | Renderer metadata used to construct the prompt. |
 | `controller_format` | str or null | yes | Format instruction shown to the model. |
 | `controller_metadata` | object or null | yes | Parse/validation metadata from the controller. |
+| `provider_call` | object or null | yes | Exact context selection, composed messages, SDK request/response, and attempts when provider-backed. |
+| `retries` | int or null | yes | Retry count for the decision call. |
+| `retry_durations` | list or null | yes | Applied retry delays. |
+| `attempt_durations` | list or null | yes | Durations of all provider attempts. |
 
 Implementations MAY include additive JSON-safe keys under `interaction` when a player/provider exposes them, but they MUST NOT duplicate the required keys elsewhere in the gameplay payload.
 
@@ -122,6 +132,8 @@ This spec does not define a standalone public class. It constrains the payload e
 6. **GP6 Spectator Parity**: A spectator attached to `.play()`, `.replay(match=...)`, and `.replay(path=...)` for the same match MUST observe equivalent `GAMEPLAY` event data.
 7. **GP7 Marker Exclusion**: Presentation markers, behavioral scores, and research findings MUST NOT be stored in `GameplayEventData`. They belong in projection/scoring layers with explicit provenance.
 8. **GP8 JSON Safety**: Every value in the serialized payload MUST be JSON-safe after recorder serialization.
+9. **GP9 Decision Attribution**: A successful built-in Controller action MUST identify an explicit declaration in `action.metadata`; runtime MUST NOT infer a decision from narration.
+10. **GP10 Provider Call Fidelity**: Provider-call provenance emitted by Player MUST survive live, Record, replay, and Match Surface projection without reconstruction.
 
 ## 7. Data Flow & Interaction
 

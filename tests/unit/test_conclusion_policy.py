@@ -74,7 +74,7 @@ def test_conclusion_policy_default_conclude_records_prompt(tmp_path: Path):
             prompt_lower = prompt.lower()
             if "ready to begin" in prompt_lower or "respond 'ok'" in prompt_lower:
                 return "OK"
-            return "ATTACK"
+            return "ACTION: ATTACK"
 
     run_dir = tmp_path / "runs"
     config = AgentDeckConfig(

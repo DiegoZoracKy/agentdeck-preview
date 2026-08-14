@@ -754,6 +754,10 @@ class _MatchWorker:
                     prompt_blocks=prompt_blocks,
                     renderer_output=None,
                     usage_info=usage_info,
+                    provider_call=response.provider_call,
+                    retries=response.retries,
+                    retry_durations=response.retry_durations,
+                    attempt_durations=response.attempt_durations,
                     reason=result.reason,
                 )
                 raise HandshakeRejectedError(
@@ -782,6 +786,10 @@ class _MatchWorker:
                 prompt_blocks=prompt_blocks,
                 renderer_output=None,
                 usage_info=usage_info,
+                provider_call=response.provider_call,
+                retries=response.retries,
+                retry_durations=response.retry_durations,
+                attempt_durations=response.attempt_durations,
             )
 
         return state
@@ -831,6 +839,16 @@ class _MatchWorker:
                         "_skip_turn": True,
                         "parse_error": parse_error.parse_result.error,
                         "policy": "skip_turn",
+                        "raw_prompt": parse_error.parse_result.prompt_text,
+                        "prompt_blocks": parse_error.parse_result.prompt_blocks,
+                        "renderer_output": parse_error.parse_result.renderer_output,
+                        "controller_format": parse_error.parse_result.controller_format,
+                        "controller_metadata": parse_error.parse_result.metadata,
+                        "usage_info": parse_error.parse_result.usage_info,
+                        "provider_call": parse_error.parse_result.provider_call,
+                        "retries": parse_error.parse_result.retries,
+                        "retry_durations": parse_error.parse_result.retry_durations,
+                        "attempt_durations": parse_error.parse_result.attempt_durations,
                     }
                 )
                 return ActionResult(
@@ -960,9 +978,17 @@ class _MatchWorker:
             },
             raw_response=parse_result.raw_response,
             policy_outcome=policy.value,
-            prompt_text=getattr(parse_result, "prompt_text", ""),
-            prompt_blocks=getattr(parse_result, "prompt_blocks", []),
+            prompt_text=parse_result.prompt_text,
+            prompt_blocks=parse_result.prompt_blocks,
             response_text=parse_result.raw_response,
+            renderer_output=parse_result.renderer_output,
+            controller_format=parse_result.controller_format,
+            controller_metadata=parse_result.metadata,
+            usage_info=parse_result.usage_info,
+            provider_call=parse_result.provider_call,
+            retries=parse_result.retries,
+            retry_durations=parse_result.retry_durations,
+            attempt_durations=parse_result.attempt_durations,
         )
 
         if self.logger:
@@ -1111,6 +1137,7 @@ class _MatchWorker:
                 controller_format=prompt_payload.get("controller_format", ""),
                 controller_metadata=controller_metadata,
                 usage_info=prompt_payload.get("usage_info"),
+                provider_call=prompt_payload.get("provider_call"),
             )
 
     def _dispatch_event(
@@ -2467,10 +2494,17 @@ class Console:
             raw_response=parse_result.raw_response,
             policy_outcome=policy.value,  # Include policy chosen by game
             # PM1-PM6: Prompt metadata (schema v1.3)
-            prompt_text=getattr(parse_result, "prompt_text", ""),  # PM1: Full prompt text
-            prompt_blocks=getattr(parse_result, "prompt_blocks", []),  # PM2: PromptBuilder blocks
+            prompt_text=parse_result.prompt_text,  # PM1: Full prompt text
+            prompt_blocks=parse_result.prompt_blocks,  # PM2: PromptBuilder blocks
             response_text=parse_result.raw_response,  # PM3: LLM response (use raw_response)
-            # PM4-PM6 are optional and currently not available in parse context
+            renderer_output=parse_result.renderer_output,
+            controller_format=parse_result.controller_format,
+            controller_metadata=parse_result.metadata,
+            usage_info=parse_result.usage_info,
+            provider_call=parse_result.provider_call,
+            retries=parse_result.retries,
+            retry_durations=parse_result.retry_durations,
+            attempt_durations=parse_result.attempt_durations,
         )
 
         # Step 3: Recorder handles via on_player_action_parse_failed() subscription
@@ -2534,6 +2568,16 @@ class Console:
                         "_skip_turn": True,
                         "parse_error": parse_error.parse_result.error,
                         "policy": "skip_turn",
+                        "raw_prompt": parse_error.parse_result.prompt_text,
+                        "prompt_blocks": parse_error.parse_result.prompt_blocks,
+                        "renderer_output": parse_error.parse_result.renderer_output,
+                        "controller_format": parse_error.parse_result.controller_format,
+                        "controller_metadata": parse_error.parse_result.metadata,
+                        "usage_info": parse_error.parse_result.usage_info,
+                        "provider_call": parse_error.parse_result.provider_call,
+                        "retries": parse_error.parse_result.retries,
+                        "retry_durations": parse_error.parse_result.retry_durations,
+                        "attempt_durations": parse_error.parse_result.attempt_durations,
                     }
                 )
                 return ActionResult(
@@ -3058,6 +3102,10 @@ class Console:
                     prompt_blocks=prompt_blocks,
                     renderer_output=None,
                     usage_info=usage_info,
+                    provider_call=response.provider_call,
+                    retries=response.retries,
+                    retry_durations=response.retry_durations,
+                    attempt_durations=response.attempt_durations,
                     reason=result.reason,
                 )
                 raise HandshakeRejectedError(
@@ -3086,6 +3134,10 @@ class Console:
                 prompt_blocks=prompt_blocks,
                 renderer_output=None,
                 usage_info=usage_info,
+                provider_call=response.provider_call,
+                retries=response.retries,
+                retry_durations=response.retry_durations,
+                attempt_durations=response.attempt_durations,
             )
 
         return state
@@ -3170,6 +3222,7 @@ class Console:
                 controller_format=prompt_payload.get("controller_format", ""),
                 controller_metadata=controller_metadata,
                 usage_info=prompt_payload.get("usage_info"),
+                provider_call=prompt_payload.get("provider_call"),
             )
 
     def _safe_status(self, game: Game, state: Dict[str, Any]) -> GameStatus:

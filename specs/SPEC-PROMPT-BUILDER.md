@@ -1,8 +1,8 @@
 # SPEC-PROMPT-BUILDER: Template-Driven Prompt Composition
 
 > Status: Final
-> Version: 0.4.1
-> Last Updated: 2026-03-17
+> Version: 0.5.0
+> Last Updated: 2026-08-14
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Researchers, player implementers, prompt engineers
 
@@ -41,7 +41,7 @@ Create PromptBuilder instance with phase-specific templates.
   - Raises `FileNotFoundError` if path doesn't exist, `UnicodeDecodeError` if not valid UTF-8
 - Missing template for a phase → use minimal default (when template not provided):
   - handshake: `"You are playing {game_name}.\n\n{game_instructions}\n\n{player_instructions}\n\n{controller_format}\n\n{handshake_controller_format}"`
-  - turn: `"{game_view}"`
+  - turn: `"{game_view}\n\n{controller_format}"`
   - conclusion: `"=== Match Concluded ===\n\n{outcome}\n\nFinal state:\n{game_view}"`
 - If `conclusion_template=None` is provided explicitly, PromptBuilder stores `None` for the conclusion template and callers SHOULD skip prompt composition for conclusion (use minimal prompt metadata instead).
   - Calling `compose(phase=CONCLUSION, ...)` when the conclusion template is disabled MUST raise a `ValueError`.

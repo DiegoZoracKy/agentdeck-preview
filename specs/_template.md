@@ -5,10 +5,10 @@
 > Last Updated: YYYY-MM-DD
 > Implementation: ⬜ Not Started
 > Review State: {draft|consensus-approved}
-> Audience: {Primary readers (researchers, game authors, contributors, etc.)}
+> Audience: {Primary readers (callers, game authors, contributors, etc.)}
 
 ## 1. Purpose
-- Who relies on this component (researchers, game authors, contributors)?
+- Who relies on this component (callers, game authors, contributors)?
 - What user problem does it solve?
 - Why does it exist within AgentDeck’s architecture?
 
@@ -18,7 +18,7 @@
 
 ## 3. Responsibilities
 - Enumerate the single responsibility (per Unix rule) for this component.
-- Detail key sub-responsibilities in concise bullets, written for the primary user (researcher, contributor, etc.).
+- Detail key sub-responsibilities in concise bullets, written for the primary user (caller, contributor, etc.).
 
 ## 4. Data Structures (optional)
 - Capture canonical data contracts (context objects, results, payload schemas).

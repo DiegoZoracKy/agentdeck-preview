@@ -151,6 +151,23 @@ class GeminiPlayer(LLMPlayer):
             generation_config_dict["system_instruction"] = "\n\n".join(system_parts)
         generation_config = types.GenerateContentConfig.model_validate(generation_config_dict)
 
+        sdk_arguments = {
+            "model": self.model,
+            "contents": [
+                (
+                    content.model_dump(mode="json", exclude_none=True)
+                    if hasattr(content, "model_dump")
+                    else str(content)
+                )
+                for content in contents
+            ],
+            "config": generation_config.model_dump(mode="json", exclude_none=True),
+        }
+        self._capture_sdk_request(
+            "google.genai.models.generate_content",
+            sdk_arguments,
+            assurance="serialized_sdk_arguments",
+        )
         response = self.client.models.generate_content(
             model=self.model,
             contents=contents,
@@ -180,10 +197,19 @@ class GeminiPlayer(LLMPlayer):
             completion_tokens=completion_tokens,
         )
 
+        candidates = getattr(response, "candidates", None) or []
+        finish_reason = getattr(candidates[0], "finish_reason", None) if candidates else None
+        if finish_reason is not None:
+            finish_reason = getattr(finish_reason, "name", None) or str(finish_reason)
+
         metadata = {
             "tokens_used": total_tokens,
             "cost": cost,
             "model_used": self.model,
+            "provider_model": getattr(response, "model_version", None),
+            "provider_response_id": getattr(response, "response_id", None),
+            "stop_reason": finish_reason,
+            "response_complete": None if finish_reason is None else finish_reason == "STOP",
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "estimated": estimated,

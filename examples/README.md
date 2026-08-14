@@ -13,11 +13,10 @@ If you are new to the repo, run these in order:
 5. `spectator_example.py`
 6. `replay_minimal.py`
 7. `test_parallel_execution.py`
-8. `replay_curate_match.py`
 
 These examples form the intended onboarding ladder: no-provider install check,
 custom game authoring, a non-combat benchmark-style game, minimal LLM experiment,
-spectators, replay, parallel execution, then replay-driven viewer curation.
+spectators, replay, and parallel execution.
 
 ## Quick Start Examples
 
@@ -171,25 +170,7 @@ python examples/replay_minimal.py --recording agentdeck_runs/session_XXX/records
 
 ---
 
-### 8. Match Curation (`replay_curate_match.py`)
-
-**Purpose**: Generate viewer-ready sidecar metadata from an existing match
-record.
-
-**What You'll Learn**:
-- Replay-driven post-analysis with `MatchCurator`
-- Writing `*.meta.json` next to a match file
-- How viewer subtitles, synopses, highlight markers, and optional highlight
-  kinds can be derived from the same replay artifact
-
-**Usage**:
-```bash
-python examples/replay_curate_match.py viewer/matches/fixed-damage-01-flashlite-ao-collapse-vs-flash-ao.json
-```
-
----
-
-## Research-Oriented Examples
+## Scenario Examples
 
 These are useful once you already know the basics:
 
@@ -211,8 +192,6 @@ examples:
 - `test_minimal_setup.py`
 - `test_prompt_builder_ux_full.py`
 - `test_prompt_builder_ux_minimal.py`
-- `test_research_compare_models.py`
-- `test_research_gpt_compare.py`
 - `run_auction_replay.py`
 
 ---
@@ -367,7 +346,7 @@ game = FixedDamageGame(
 deck.play(players, matches=3, seed=42)
 ```
 
-### 2. Statistical Analysis (50-100 matches)
+### 2. Batch Outcome Summary (50-100 matches)
 ```python
 stats = StatsTracker()
 deck = AgentDeck(game=game, spectators=[stats])

@@ -75,7 +75,7 @@ class Player(ABC):
         handshake_template: Optional[str | Path] = None,
         turn_template: Optional[str | Path] = None,
         conclusion_template: Optional[str | Path] | object = _DEFAULT_TEMPLATE,
-        model: str = "gpt-4",
+        model: str = "unspecified",
         **config,
     ):
         """
@@ -89,7 +89,8 @@ class Player(ABC):
             turn_template: Template for turn phase (string or Path)
             conclusion_template: Template for conclusion phase (string or Path).
                 Use None to disable conclusion composition explicitly.
-            model: LLM model identifier (e.g., "gpt-4", "claude-3-opus")
+            model: Runtime model identifier. Provider-backed Players require an
+                explicit model; local/custom Players default to "unspecified".
             **config: Model parameters (temperature, max_tokens, etc.)
 
         Template parameters accept:
@@ -222,6 +223,7 @@ class Player(ABC):
         retries = getattr(self, "last_retries", None)
         retry_durations = getattr(self, "last_retry_durations", None)
         attempt_durations = getattr(self, "last_attempt_durations", None)
+        provider_call = copy.deepcopy(getattr(self, "last_provider_call", None))
 
         prompt_blocks = self._serialize_prompt_blocks(bundle.blocks)
         self._record_exchange(
@@ -233,6 +235,7 @@ class Player(ABC):
             controller_format=self.controller.get_handshake_format_instructions(),
             renderer_output=None,
             usage_info=usage_info,
+            provider_call=provider_call,
         )
 
         return HandshakeResponse(
@@ -241,6 +244,7 @@ class Player(ABC):
             retries=retries,
             retry_durations=retry_durations,
             attempt_durations=attempt_durations,
+            provider_call=provider_call,
         )
 
     def decide(
@@ -314,6 +318,27 @@ class Player(ABC):
         # Per SPEC-CONTROLLER v1.3.0, controllers return ParseResult
         parse_result = self.controller.parse(raw_response)
 
+        # Attach the complete call context before conversion so parse failures retain
+        # the same execution truth as successful decisions.
+        prompt_blocks = self._serialize_prompt_blocks(bundle.blocks)
+        usage_info = copy.deepcopy(getattr(self, "last_usage_info", None))
+        provider_call = copy.deepcopy(getattr(self, "last_provider_call", None))
+        parse_result.prompt_text = bundle.text
+        parse_result.prompt_blocks = copy.deepcopy(prompt_blocks)
+        parse_result.renderer_output = copy.deepcopy(
+            render_result.metadata if render_result.metadata else {}
+        )
+        parse_result.controller_format = self.controller.get_format_instructions()
+        parse_result.usage_info = usage_info
+        parse_result.provider_call = provider_call
+        parse_result.retries = int(getattr(self, "last_retries", 0) or 0)
+        parse_result.retry_durations = copy.deepcopy(
+            getattr(self, "last_retry_durations", []) or []
+        )
+        parse_result.attempt_durations = copy.deepcopy(
+            getattr(self, "last_attempt_durations", []) or []
+        )
+
         # Convert ParseResult to ActionResult (raises ActionParseError if parsing failed)
         # Per SPEC-CONTROLLER v1.2.0 §5.4 (VF2-VF3): No fallback, failures must surface
         action_result = parse_result.to_action_result()
@@ -321,20 +346,29 @@ class Player(ABC):
         # Attach metadata (DS2)
         # Per SPEC-PROMPT-BUILDER §5.3 MC3, preserve PromptBlock.metadata (renderer hints)
         action_result.metadata = action_result.metadata or {}
-        usage_info = copy.deepcopy(getattr(self, "last_usage_info", None))
         action_result.metadata.update(
             {
                 "raw_prompt": bundle.text,
-                "prompt_blocks": self._serialize_prompt_blocks(bundle.blocks),
+                "prompt_blocks": prompt_blocks,
                 "prompt_length": len(bundle.text),
                 "raw_response": raw_response,
                 "turn_number": turn_context.turn_number,
                 "renderer_output": render_result.metadata if render_result.metadata else {},
+                "controller_format": self.controller.get_format_instructions(),
                 "template_id": bundle.metadata.get("template_id", "unknown"),
             }
         )
         if usage_info:
             action_result.metadata["usage_info"] = usage_info
+        if provider_call:
+            action_result.metadata["provider_call"] = provider_call
+        action_result.metadata["retries"] = int(getattr(self, "last_retries", 0) or 0)
+        action_result.metadata["retry_durations"] = copy.deepcopy(
+            getattr(self, "last_retry_durations", []) or []
+        )
+        action_result.metadata["attempt_durations"] = copy.deepcopy(
+            getattr(self, "last_attempt_durations", []) or []
+        )
 
         # Preserve in conversation history (CS2)
         # Capture PM1-PM6 metadata for dialogue array
@@ -347,6 +381,7 @@ class Player(ABC):
             controller_format=self.controller.get_format_instructions(),
             renderer_output=action_result.metadata.get("renderer_output"),
             usage_info=usage_info,
+            provider_call=provider_call,
         )
 
         return action_result
@@ -558,6 +593,7 @@ class Player(ABC):
         controller_metadata: Optional[Dict[str, Any]] = None,
         renderer_output: Optional[Dict] = None,
         usage_info: Optional[Dict] = None,
+        provider_call: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Record prompt/response exchange in conversation history with PM1-PM6 metadata.
@@ -583,6 +619,8 @@ class Player(ABC):
             response_metadata["usage_info"] = usage_info
         if controller_metadata is not None:
             response_metadata["controller_metadata"] = controller_metadata
+        if provider_call is not None:
+            response_metadata["provider_call"] = copy.deepcopy(provider_call)
 
         if self.conversation_manager:
             # Delegate to manager (CS2)
@@ -613,6 +651,7 @@ class Player(ABC):
             ),
             "renderer_output": copy.deepcopy(renderer_output) if renderer_output else {},
             "usage_info": copy.deepcopy(usage_info) if usage_info else None,
+            "provider_call": copy.deepcopy(provider_call) if provider_call else None,
         }
 
     def _get_last_exchange(self, phase: str) -> Optional[Dict[str, Any]]:
@@ -635,20 +674,26 @@ class Player(ABC):
 
         Example:
             info = player.describe()
-            print(info["model"])  # "gpt-4"
+            print(info["model"])  # "unspecified" unless explicitly configured
             print(info["controller"])  # {"name": "ActionOnlyController", ...}
         """
+        effective_config = copy.deepcopy(self.config)
+        for attribute in ("temperature", "max_tokens", "max_retries", "retry_delay"):
+            if hasattr(self, attribute):
+                effective_config[attribute] = copy.deepcopy(getattr(self, attribute))
+
         return {
             "name": self.name,
             "type": self.__class__.__name__,
+            "module": self.__class__.__module__,
             "model": self.model,
-            "config": dict(self.config),
+            "config": effective_config,
             "controller": self._describe_component(self.controller),
             "renderer": self._describe_component(self.renderer),
             "templates": {
-                "handshake": self._truncate_template(self.prompt_builder._handshake_template),
-                "turn": self._truncate_template(self.prompt_builder._turn_template),
-                "conclusion": self._truncate_template(self.prompt_builder._conclusion_template),
+                "handshake": self.prompt_builder._handshake_template,
+                "turn": self.prompt_builder._turn_template,
+                "conclusion": self.prompt_builder._conclusion_template,
             },
         }
 

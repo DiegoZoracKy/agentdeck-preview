@@ -24,6 +24,7 @@ class MockPlayer(Player):
 
             controller = ActionOnlyController()
 
+        kwargs.setdefault("model", "mock")
         super().__init__(name, controller=controller, **kwargs)
         self.actions = actions or ["ATTACK"]
         self.action_index = 0
@@ -51,8 +52,8 @@ class MockPlayer(Player):
 
             return json.dumps({"action": action, "reasoning": "Test reasoning"})
 
-        # Default: just return the action
-        return action
+        # Keep mock responses on the same explicit contract required from providers.
+        return f"ACTION: {action}"
 
     def conclude(self, result, *, match_context):
         """

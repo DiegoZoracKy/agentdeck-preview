@@ -37,6 +37,22 @@ def test_event_factory_turn_matches_canonical_gameplay_shape():
             "controller_format": "ACTION: <MOVE>",
             "usage_info": {"input_tokens": 10, "output_tokens": 4},
             "renderer_output": {"template_id": "default"},
+            "resolution_method": "explicit_action_field",
+            "declared_action": "ATTACK",
+            "contract_satisfied": True,
+            "provider_call": {
+                "call_id": "call-1",
+                "messages": [{"role": "user", "content": "Take your turn."}],
+                "sdk_request": {
+                    "method": "openai.responses.create",
+                    "arguments": {"model": "gpt-4o-mini"},
+                },
+                "response_complete": True,
+                "stop_reason": "completed",
+            },
+            "retries": 0,
+            "retry_durations": [],
+            "attempt_durations": [0.25],
         },
     )
 
@@ -60,7 +76,11 @@ def test_event_factory_turn_matches_canonical_gameplay_shape():
     assert event.data["action"] == {
         "value": "ATTACK",
         "reasoning": "Finish the match.",
-        "metadata": {},
+        "metadata": {
+            "resolution_method": "explicit_action_field",
+            "declared_action": "ATTACK",
+            "contract_satisfied": True,
+        },
     }
     assert "raw_response" not in event.data["action"]
     assert event.data["interaction"]["prompt_text"] == "Take your turn."
@@ -71,6 +91,10 @@ def test_event_factory_turn_matches_canonical_gameplay_shape():
     assert event.data["interaction"]["controller_metadata"] == {"parser": "action_only"}
     assert event.data["interaction"]["usage_info"] == {"input_tokens": 10, "output_tokens": 4}
     assert event.data["interaction"]["renderer_output"] == {"template_id": "default"}
+    assert event.data["interaction"]["provider_call"]["call_id"] == "call-1"
+    assert event.data["interaction"]["provider_call"]["response_complete"] is True
+    assert event.data["interaction"]["retries"] == 0
+    assert event.data["interaction"]["attempt_durations"] == [0.25]
     assert event.data["state_before"]["health"]["Bob"] == 20
 
 

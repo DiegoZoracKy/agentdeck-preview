@@ -4,7 +4,7 @@
 > Version: 0.1.0
 > Last Updated: 2026-03-26
 > Implementation: ✅ Complete (`src/agentdeck/games/examples/variable_damage/game.py`)
-> Audience: game authors, researchers, renderer authors, behavioral-scorer authors
+> Audience: game authors, renderer authors, and execution-system contributors
 
 ## 1. Purpose
 - Provide a small stochastic combat game that preserves the simplicity of FixedDamage while introducing controlled uncertainty.
@@ -13,7 +13,7 @@
 
 ## 2. Scope & Philosophy Alignment
 - Follows `SPEC.md` separation principles: the game owns rules, state, visibility, RNG consumption, and terminal conditions; players and controllers remain generic.
-- Follows `CONTRIBUTING.md` spec-first workflow: this spec locks the game contract before any behavioral scorer or research package is added.
+- Follows `CONTRIBUTING.md` spec-first workflow: this spec locks the Game contract before downstream use.
 - Preserves the FixedDamage mental model where possible:
   - same actions
   - same turn loop
@@ -23,7 +23,7 @@
   - `ATTACK` damage is sampled from a configured inclusive integer range
 - Non-goals:
   - prompt strategy design
-  - behavioral metric design
+  - downstream metric design
   - experiment package design
   - non-uniform damage distributions in `v0.1.0`
 
@@ -188,7 +188,7 @@ RNG contract:
 - Match start: Turn-based mechanic -> `setup(players, seed)` -> canonical initial state
 - Turn execution: Mechanic -> `get_view()` -> player/controller -> `update(..., rng=turn_rng)` -> new canonical state
 - Replay: Recorder -> canonical state transitions + seeded event order -> deterministic re-read of realized damage
-- Research: Exporter/behavioral scorer -> recorder events + HP deltas -> risk-band analysis without explicit `last_damage` view fields
+- Downstream analysis can derive risk-band measurements from recorder events and HP deltas without explicit `last_damage` view fields.
 
 ## 8. Error Handling & Edge Cases
 - Unsupported `information_level` values MUST raise `ValueError` at construction time.

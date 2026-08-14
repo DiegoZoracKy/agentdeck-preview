@@ -1,8 +1,8 @@
 # SPEC-MATCH-SURFACE-PROJECTION: Match Surface Projector
 
 > Status: Final
-> Version: 0.3.0
-> Last Updated: 2026-07-02
+> Version: 0.4.0
+> Last Updated: 2026-08-14
 > Implementation: ✅ Lifecycle projection implemented in `agentdeck.spectators.match_surface`
 > Review State: consensus-approved
 > Audience: Core contributors, spectator authors, artifact pipeline maintainers
@@ -113,7 +113,7 @@ The projector MAY attach mechanical markers from explicit marker providers. It M
 
 ### 4.4 Static Curation Metadata
 
-Static artifact export MAY import a `MatchCurator` sidecar for the same record.
+Static artifact export MAY import an external curation sidecar for the same record.
 
 ```python
 MatchSurfaceCuration = {
@@ -294,7 +294,7 @@ class MatchSurfaceSink(Protocol):
 7. **MSP7 Redaction Mechanism**: Core provides a redaction-capable projection/sink mechanism. Redaction rules are owned by the caller and MUST apply before every externally emitted `start`, `frame`, or `finish` payload.
 8. **MSP8 Sink Isolation**: Sink failures MUST be isolated like spectator failures: logged and surfaced without corrupting playback or game execution.
 9. **MSP9 Source Provenance**: Static artifact export MUST propagate record-level `migration_provenance` into `MatchSurfaceDocument.source.provenance` when present.
-10. **MSP10 Curation Import**: Static artifact export MAY import `MatchCurator` sidecars. Imported subtitle/synopsis MUST remain presentation metadata, imported highlights MUST become upstream markers, and sidecar transcripts MUST NOT be embedded.
+10. **MSP10 Curation Import**: Static artifact export MAY import external curation sidecars. Imported subtitle/synopsis MUST remain presentation metadata, imported highlights MUST become upstream markers, and sidecar transcripts MUST NOT be embedded.
 
 ### 6.1 Lifecycle Projection Invariants
 
@@ -316,6 +316,7 @@ implemented by the v0.2.0 baseline until Phase B/C work lands.
 17. **MSP17 Redaction Safety**: Redactors MAY remove any player `stack` or `economics` field before public export. Views MUST handle missing fields as absence.
 18. **MSP18 Curation Agents**: Static export MAY import `curation.agents` from a sidecar. These labels MUST carry source provenance and MUST remain separate from record-derived player fields.
 19. **MSP19 Live/Replay Shape**: Given equivalent source metadata and redaction policy, live and replay projection MUST emit equivalent `players[]` shape.
+20. **MSP20 Execution Audit Projection**: Frames MUST preserve canonical `turn_context` and the unmodified `interaction.provider_call` when present. Lifecycle projections MUST preserve provider-call and retry provenance without reconstructing absent data.
 
 ## 7. Data Flow & Interaction
 

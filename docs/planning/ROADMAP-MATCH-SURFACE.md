@@ -137,8 +137,7 @@ Required validation:
 pytest tests/integration/test_lifecycle_parity.py
 pytest tests/unit/test_event_factory.py tests/unit/test_match_runtime.py
 pytest tests/unit/test_recorder_lifecycle.py tests/unit/test_replay_lifecycle.py
-pytest tests/unit/test_match_curator.py tests/unit/test_spectator_contracts.py
-pytest tests/unit/test_behavioral_scoring.py tests/unit/test_variable_damage_behavioral_scoring.py tests/unit/test_research_*.py
+pytest tests/unit/test_match_surface.py tests/unit/test_spectator_contracts.py
 pytest tests/
 ./scripts/ci.sh
 ```
@@ -149,7 +148,7 @@ Additional checks:
 - Verify one-shot conversion preserves all semantic fields required by current analysis tooling.
 - Verify no checked-in runtime path accepts retired gameplay shapes as compatibility input.
 - Verify generated Match Surface JSON is deterministic for identical input records.
-- Verify behavioral and research scorer outputs remain stable after dual-shape cleanup.
+- Verify factual Match Surface output remains stable after dual-shape cleanup.
 
 ## 8. Static Artifact Completeness
 
@@ -168,7 +167,7 @@ Core deliverables:
 1. Propagate record provenance into `MatchSurfaceDocument.source.provenance`.
    - Derived records already carry `migration_provenance`.
    - Static export must preserve that relationship in the surface artifact.
-2. Import optional `MatchCurator` sidecars during static export.
+2. Import optional external curation sidecars during static export.
    - `subtitle` and `synopsis` become surface curation metadata.
    - `highlights` become upstream markers with deterministic provenance.
    - `transcript` remains sidecar-only and is not embedded in the surface artifact.

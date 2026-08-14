@@ -93,7 +93,7 @@ class PromptBuilder:
         "{controller_format}\n\n"
         "{handshake_controller_format}"
     )
-    DEFAULT_TURN = "{game_view}"
+    DEFAULT_TURN = "{game_view}\n\n{controller_format}"
     DEFAULT_CONCLUSION = "=== Match Concluded ===\n\n" "{outcome}\n\n" "Final state:\n{game_view}"
 
     def __init__(

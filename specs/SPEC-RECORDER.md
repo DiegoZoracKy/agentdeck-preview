@@ -1,9 +1,9 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (canonical event persistence)
+> Version: 2.2.0
+> Last Updated: 2026-08-14
+> Implementation: Complete
 > Audience: Core contributors, data analysts, replay implementers
 
 ## 1. Purpose
@@ -16,7 +16,7 @@
 - Follows `SPEC.md` §2.4 reproducibility mandates: every match captures seed, configuration, environment, and game settings (including `information_level`, `allowed_actions`) for exact replay.
 - Aligns with `SPEC-OBSERVABILITY.md`: Recorder is a session-scoped spectator receiving all events (lifecycle, gameplay, domain).
 - Mirrors `SPEC.md` §3.1 simplicity: JSON payloads with progressive flushing avoid complex storage backends.
-- Non-goals: Replay logic (`SPEC-REPLAY.md`), data analysis (`SPEC-RESEARCH.md`), or custom storage backends (future extension).
+- Non-goals: Replay logic (`SPEC-REPLAY.md`), downstream analysis, or custom storage backends (future extension).
 
 ## 3. Responsibilities
 - **Event Capture**: Subscribe to batch, match, gameplay, lifecycle, and domain events that are relevant to persisted match artifacts, and serialize them into match recordings.
@@ -228,11 +228,11 @@ Load match JSON from disk and normalize structure.
 10a. **MC1a**: Match payload MUST include top-level `batch_id` equal to `metadata.batch_id`.
 10b. **MC1b**: Match payload MUST expose top-level `started_at`, `ended_at`, and `duration_seconds` aligned with metadata and batch match refs for completed matches.
 10c. **MC1c**: `player_order` MUST be stored as the list of original input indices in effective play order (for example, `[1, 0]` means original player 1 is first, original player 0 is second). `first_player` captures the actual first actor for the recorded match and MUST include both the original `index` and the in-order `ordered_index`.
-11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, `git_info` (commit, branch, dirty status).
-12. **MC3**: MUST capture player configurations: `name`, `type`, `module`, `model`, `temperature`, `max_tokens`, masked `api_key_prefix`, template sources (inline vs file paths) and persist them in recording metadata via `player_summaries` for each player.
+11. **MC2**: MUST capture environment metadata: `agentdeck_version`, `python_version`, and scoped `git_info` for the process working-directory repository. Dirty status includes tracked and untracked files and MUST NOT be presented as Game identity.
+12. **MC3**: MUST capture complete effective Player descriptors through `player_configs`, including type/module, model/provider, generation config, retry and context policies, Controller, Renderer, and lifecycle templates. Credentials and API-key fragments MUST NOT be recorded.
 12a. **MC3a**: `player_summaries[].total_cost` MUST reflect finalized per-match player costs after `on_match_end()` when `metadata.match.player_costs` is available.
 12b. **MC3b**: `Recorder.on_match_start()` MUST receive `context["batch_id"]`; missing batch context is invalid for the current schema.
-13. **MC4**: MUST capture game configuration: `name`, `module`, `information_level` (when present), `allowed_actions` (when game exposes property).
+13. **MC4**: MUST capture the effective Game descriptor separately from `metadata.game_version`, which identifies implementation bytes and assurance scope.
 14. **MC5**: MUST capture batch context: `session_id`, `matches_planned`, `matches_completed`, `seeds_used` (list of all per-match seeds), and batch-level `fairness_policy` when supplied by Console.
 
 ### 6.5 Seed & Reproducibility (SR)
@@ -268,6 +268,9 @@ Recorder v2.0 serializes events in the shape emitted by Core. It MUST NOT reshap
 29. **PM5**: MUST capture `controller_format` (format instructions delivered to the LLM) for every exchange.
 30. **PM6**: MUST capture `controller_metadata` (parser outcomes, validation results, retries, normalization) for every exchange.
 30a. **PM7**: SHOULD capture `call_id` when available to support deterministic request/response correlation in debug logs.
+30b. **RPA1 Provider Call Preservation**: Provider-backed lifecycle and gameplay events MUST persist `provider_call` without structural reshaping, including context selection, composed messages, SDK request, SDK response, and all attempts.
+30c. **RPA2 Honest Absence**: `provider_call` is optional for historical and non-provider Players. Recorder MUST NOT reconstruct it from logs, templates, or neighboring events.
+30d. **RPA3 Attempt Attribution**: Retry counts and timings remain correlated with `provider_call.attempts`; successful completion MUST NOT erase failed attempts.
 
 **Normalized Prompt Payload**:
 

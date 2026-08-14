@@ -292,6 +292,7 @@ class HandshakeResponse:
     retries: Optional[int] = None
     retry_durations: Optional[List[float]] = None
     attempt_durations: Optional[List[float]] = None
+    provider_call: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -496,6 +497,15 @@ class ParseResult:
     error: Optional[str] = None
     normalized_action: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+    prompt_text: Optional[str] = None
+    prompt_blocks: List[Dict[str, Any]] = field(default_factory=list)
+    renderer_output: Dict[str, Any] = field(default_factory=dict)
+    controller_format: Optional[str] = None
+    usage_info: Optional[Dict[str, Any]] = None
+    provider_call: Optional[Dict[str, Any]] = None
+    retries: Optional[int] = None
+    retry_durations: List[float] = field(default_factory=list)
+    attempt_durations: List[float] = field(default_factory=list)
 
     def to_action_result(self) -> ActionResult:
         """

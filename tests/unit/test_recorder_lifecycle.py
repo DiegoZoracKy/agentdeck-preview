@@ -1245,18 +1245,20 @@ class TestRecorderLowPriorityFindings:
         assert batch_data["schema_type"] == "batch"
         assert batch_data["schema_version"] == "1.0"
 
-    def test_git_dirty_uses_tracked_changes_only(self, recorder, monkeypatch):
-        """git_info.dirty must ignore untracked files to avoid false positives."""
+    def test_git_dirty_includes_untracked_files_and_names_its_scope(self, recorder, monkeypatch):
+        """A new untracked Game must never be described as coming from a clean worktree."""
 
         def fake_run(cmd, capture_output, check, text):  # noqa: ANN001
-            if cmd == ["git", "rev-parse", "--git-dir"]:
-                return subprocess.CompletedProcess(cmd, 0, stdout=".git\n", stderr="")
+            if cmd == ["git", "rev-parse", "--show-toplevel"]:
+                return subprocess.CompletedProcess(
+                    cmd, 0, stdout="/workspace/agentdeck-core\n", stderr=""
+                )
             if cmd == ["git", "rev-parse", "HEAD"]:
                 return subprocess.CompletedProcess(cmd, 0, stdout="deadbeef\n", stderr="")
             if cmd == ["git", "branch", "--show-current"]:
                 return subprocess.CompletedProcess(cmd, 0, stdout="main\n", stderr="")
-            if cmd == ["git", "status", "--porcelain", "--untracked-files=no"]:
-                return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+            if cmd == ["git", "status", "--porcelain", "--untracked-files=normal"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="?? game.py\n", stderr="")
             raise AssertionError(f"Unexpected git command: {cmd}")
 
         monkeypatch.setattr("agentdeck.core.recorder.subprocess.run", fake_run)
@@ -1266,4 +1268,6 @@ class TestRecorderLowPriorityFindings:
         assert git_info is not None
         assert git_info["commit"] == "deadbeef"
         assert git_info["branch"] == "main"
-        assert git_info["dirty"] is False
+        assert git_info["dirty"] is True
+        assert git_info["scope"] == "process_working_directory_repository"
+        assert git_info["repository"] == "agentdeck-core"

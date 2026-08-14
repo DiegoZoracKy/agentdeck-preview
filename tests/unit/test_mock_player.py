@@ -17,7 +17,17 @@ def test_mock_player_cycles_through_actions() -> None:
     second = player.get_response("Turn 2 prompt")
     third = player.get_response("Turn 3 prompt")
 
-    assert [first, second, third] == ["ATTACK", "POTION", "ATTACK"]
+    assert [first, second, third] == [
+        "ACTION: ATTACK",
+        "ACTION: POTION",
+        "ACTION: ATTACK",
+    ]
+
+
+def test_mock_player_default_model_is_honest() -> None:
+    player = MockPlayer(name="Tester")
+
+    assert player.get_summary()["model"] == "mock"
 
 
 def test_mock_player_summary_retains_model_provenance() -> None:

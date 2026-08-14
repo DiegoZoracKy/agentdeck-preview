@@ -26,8 +26,8 @@ python -m build --sdist --wheel
 Before publishing, compare against the package that users can actually install:
 
 ```bash
-PREVIOUS=0.1.2
-CANDIDATE=0.2.0
+PREVIOUS=0.2.0
+CANDIDATE=0.3.0
 WORKDIR=/tmp/agentdeck-release-diff
 export PREVIOUS CANDIDATE WORKDIR
 
@@ -72,6 +72,6 @@ out explicitly in the release notes and choose at least a minor version.
 
 - AgentDeck positioning: the game console for AI agents.
 - Agentic Edge flagship study package and replay viewer.
-- Research export/reporting polish.
+- Removal of the legacy Research APIs and the `agentic-edge-research` tag for historical reproduction.
 - Package-size cleanup: viewer assets remain in the repo, not in the PyPI
   package.

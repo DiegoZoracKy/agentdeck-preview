@@ -18,15 +18,18 @@
 
 ## Project Overview
 
-AgentDeck is a **research platform for studying AI behavior through game scenarios**. Think of it as a "game console" where:
+AgentDeck is an **execution and evidence engine for AI agents in game scenarios**. Think of it as a "game console" where:
 
 - **Games** define rules and environments
 - **Players** are AI agents making decisions
 - **Controllers** parse AI responses into game actions
 - **Renderers** format game state for AI consumption
-- **Spectators** observe and analyze matches without interfering
+- **Spectators** observe matches without interfering
 
-**Target Audience**: AI researchers, developers building experiments, game authors creating scenarios
+**Target Audience**: AI-agent developers, game authors, and systems that need inspectable execution Records
+
+AgentDeck owns execution truth. Research questions, corpus selection, measurements,
+statistical inference, and claims belong to downstream systems.
 
 **For complete architectural principles**, see [SPEC.md](specs/SPEC.md) §3.
 
@@ -38,7 +41,7 @@ tests/              # Unit + integration tests
 examples/           # Runnable examples
 specs/              # Specifications (source of truth)
 docs/               # Documentation + diagrams
-research/           # Reproducible experiment packages
+research/           # Frozen historical study artifacts
 scripts/            # CI/dev utilities
 ```
 
@@ -49,7 +52,7 @@ Game file location convention:
 - Keep runnable demos, walkthroughs, and one-off harnesses in `examples/`.
 - Add coverage under `tests/`.
 - Only place a game directly under `examples/` when it is intentionally example-only and not meant to ship as part of the importable library surface.
-- For repo-local research games that should remain importable but not become core built-ins, prefer `src/agentdeck/games/examples/<slug>/`.
+- For repo-local example games that should remain importable but not become core built-ins, prefer `src/agentdeck/games/examples/<slug>/`.
 
 ---
 
@@ -86,14 +89,14 @@ AgentDeck marries modern software engineering best practices with the timeless U
 - **Fail Fast & Noisily**: When a component must fail, do so as early and loudly as possible
   > *Unix Rule of Repair*: When you must fail, fail noisily and as soon as possible
 
-### Research Platform Focus
+### Execution Substrate Focus
 
 AgentDeck supports:
 
-- **Rapid Experimentation**: Can researchers use this in <5 lines of code?
-- **Reproducibility**: Deterministic behavior via seeded RNG
+- **Rapid Execution**: Can callers run a Game in <5 lines of code?
+- **Controlled Reproducibility**: Deterministic framework behavior via seeded RNG
 - **Flexibility**: Support different input formats (text/image/JSON)
-- **Data Collection**: Comprehensive event emission and recording
+- **Execution Truth**: Comprehensive event emission and canonical recording
 - **Interoperability**: Components plug together without glue code
 
 ---
@@ -336,7 +339,7 @@ Expect to trim 10-15% from first draft without losing guarantees.
 
 - **Active voice**: "The Console emits events" (not "Events are emitted")
 - **Present tense**: "The EventBus routes events" (not "will route")
-- **User-facing first**: Start with researcher perspective, then implementation
+- **User-facing first**: Start with caller perspective, then implementation
 - **Concise**: Prefer bullets over prose, arrows over nested explanations
 
 ### Clean Spec Principle
@@ -355,7 +358,7 @@ Review history belongs in:
 Before marking a spec "Final":
 
 **Content & Completeness:**
-- [ ] Purpose framed as researcher problem/goal, names primary audience
+- [ ] Purpose framed as a caller problem/goal, names primary audience
 - [ ] Responsibilities limited to one primary function
 - [ ] Public API documented with signatures and return values
 - [ ] Invariants explicitly enumerated (GB1-GB6 style)
@@ -380,7 +383,7 @@ Before marking a spec "Final":
 
 **Philosophy Alignment:**
 - [ ] Maps to SPEC.md §3 principles explicitly
-- [ ] Research-first framing evident
+- [ ] Execution-truth boundary is explicit
 - [ ] Supports determinism/reproducibility requirements
 
 **For complete specification guidelines**, see [specs/GUIDELINES.md](specs/GUIDELINES.md).
@@ -758,4 +761,4 @@ Planning docs are **temporal artifacts** that become outdated. Relying on them f
 
 **Remember**: Specs first, code second. No exceptions.
 
-The spec-driven approach ensures quality, enables AI collaboration, and prevents costly rework. Following this process makes AgentDeck a better research platform for everyone.
+The spec-driven approach ensures quality, enables AI collaboration, and prevents costly rework. Following this process makes AgentDeck a better execution substrate for everyone.

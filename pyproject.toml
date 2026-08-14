@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agentdeck-ai"
 dynamic = ["version"]
-description = "The game console for AI agents: behavioral research through game scenarios"
-keywords = ["behavioral research", "agent evaluation", "game simulation", "llm"]
+description = "The execution and evidence engine for AI agents in game scenarios"
+keywords = ["agent execution", "agent evaluation", "game simulation", "llm"]
 readme = "README.md"
 authors = [
     {name = "Diego ZoracKy"}
@@ -37,11 +37,6 @@ dev = [
     "black>=23.0",
     "pylint>=2.17",
     "mypy>=1.8",
-    # Research stack (for dev/test tooling)
-    "numpy>=1.24.0",
-    "scipy>=1.10.0",
-    "statsmodels>=0.14.0",
-    "matplotlib>=3.7.0",
     # Provider SDKs (used in mocks and integration tests)
     "openai>=2.24.0",
     "anthropic>=0.84.0",
@@ -61,20 +56,10 @@ providers = [
     "anthropic>=0.84.0",
     "google-genai>=1.65.0",
 ]
-research = [
-    "numpy>=1.24.0",
-    "scipy>=1.10.0",
-    "statsmodels>=0.14.0",
-    "matplotlib>=3.7.0",
-]
 all = [
     "openai>=2.24.0",
     "anthropic>=0.84.0",
     "google-genai>=1.65.0",
-    "numpy>=1.24.0",
-    "scipy>=1.10.0",
-    "statsmodels>=0.14.0",
-    "matplotlib>=3.7.0",
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "black>=23.0",
@@ -87,13 +72,6 @@ Homepage = "https://github.com/agentdeck/agentdeck-core"
 Documentation = "https://github.com/agentdeck/agentdeck-core/blob/main/docs/README.md"
 Repository = "https://github.com/agentdeck/agentdeck-core.git"
 Issues = "https://github.com/agentdeck/agentdeck-core/issues"
-
-[project.scripts]
-agentdeck-research-export = "agentdeck.research.export:main"
-agentdeck-research-index = "agentdeck.research.index:main"
-agentdeck-research-package = "agentdeck.research.packager:main"
-agentdeck-research-validate = "agentdeck.research.validate:main"
-agentdeck-research-score = "agentdeck.research.score:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

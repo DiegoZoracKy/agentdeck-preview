@@ -1,18 +1,18 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (canonical GameplayEventData v2 + Match Surface projector)
+> Version: 2.1.0
+> Last Updated: 2026-08-13
+> Implementation: Complete
 > Audience: Spectator authors, analytics engineers, observability contributors
 
 ## 1. Purpose
 - Define the observer interface for monitoring live and replayed matches via event handlers.
 - Guarantee read-only, fault-isolated spectators that compose via duck-typed `on_<event>` methods.
-- Specify scope semantics (session vs execution), context access patterns, and error handling for production analytics.
+- Specify scope semantics (session vs execution), context access patterns, and error handling for production observability.
 
 ## 2. Scope & Philosophy Alignment
-- Upholds `SPEC.md` §3.2 separation: spectators observe, never mutate. Framework owns execution, spectators own analysis.
+- Upholds `SPEC.md` §3.2 separation: spectators observe, never mutate. Framework owns execution; downstream systems own research meaning.
 - Reinforces `SPEC-OBSERVABILITY.md`: spectators consume Event objects with EventContext envelopes for consistent metadata access.
 - Aligns with `SPEC.md` §1.2: enable custom spectators in <20 lines while scaling to production dashboards and analytics pipelines.
 - **Clean-slate design**: assumes the modern event system (`SPEC-OBSERVABILITY.md` §3) with three-phase player lifecycle and no legacy dialogue callback dependency.
@@ -24,7 +24,7 @@
 - **Read-only analysis**: Inspect event payloads/context without mutating shared state or returning values to the engine.
 - **Scope awareness**: Respect session vs execution attachment semantics (session spectators persistent; execution spectators per `play`/`replay` call).
 - **Context access**: Use `event.context` or `context` parameter to access `session_id`, `batch_id`, `match_id`, `phase_index`, timestamps.
-- **Stateful analysis**: Maintain internal state across events (cumulative stats, win rates, turn-by-turn logs) with explicit resets as needed.
+- **Stateful observation**: Maintain factual state across events (counts, costs, turn-by-turn logs) with explicit resets as needed.
 - **Logging/reporting**: Optionally use the injected `logger` for structured output; avoid stdout unless explicitly desired.
 
 ## 4. Public API
@@ -50,23 +50,10 @@
 
 ### MatchReporter (Auto-Attached by Default)
 
-- **Purpose**: Provide structured lifecycle reporting (handshake prompts/results, turn-by-turn actions, state deltas, reflections, and match summary) so researchers can inspect a match without needing custom spectators.
+- **Purpose**: Provide structured lifecycle reporting (handshake prompts/results, turn-by-turn actions, state deltas, reflections, and match summary) so callers can inspect a match without needing custom spectators.
 - **Default Behavior**: When callers omit the `spectators` parameter, Console auto-attaches `MatchReporter` (see SPEC-CONSOLE §5 "Default Session Spectators"). Output flows through the session logger at INFO level, appearing in the console and `info.log`.
-- **Opt-Out**: Researchers silence the reporting by supplying their own spectator list. Passing `spectators=[]` yields a quiet run; passing `spectators=[CustomSpectator(...)]` entirely replaces the default reporter.
-- **Usage**: MatchReporter remains available for explicit attachment (`spectators=[MatchReporter()]`) when researchers want to enrich output or use it alongside other observers.
-
-### MatchCurator (Replay / Artifact Metadata Generation)
-
-- **Purpose**: Generate viewer-ready curation metadata for a recorded match without changing the underlying match JSON.
-- **Scope**: `MatchCurator` consumes live or replayed match events, assembles a full match snapshot, and MAY write a `*.meta.json` sidecar adjacent to a recording or to an explicit output path.
-- **Canonical input**: v2 implementations consume `GameplayEventData` and MUST NOT normalize old flat-action/nested-prompt gameplay shapes.
-- **Output contract**: The sidecar is the portable artifact. It contains:
-  - `subtitle`: short lesson-oriented summary for the picker
-  - `synopsis`: compact narrative summary naming the decisive event
-  - `highlights`: ordered list of key moments (`turn` + short `label`, plus optional `kind`)
-  - `transcript` (optional): richer turn-by-turn commentary kept out of the runtime manifest
-- **Generation strategy**: The curation strategy is pluggable. Implementations MAY use deterministic heuristics, an injected callable, or provider-backed analysis. The stable contract is the sidecar payload, not the generation mechanism.
-- **Usage**: MatchCurator is intended for replay-driven post-analysis (`ReplayEngine(...).replay(spectators=[MatchCurator(...)])`) and curated showcase pipelines.
+- **Opt-Out**: Callers silence the reporting by supplying their own spectator list. Passing `spectators=[]` yields a quiet run; passing `spectators=[CustomSpectator(...)]` entirely replaces the default reporter.
+- **Usage**: MatchReporter remains available for explicit attachment (`spectators=[MatchReporter()]`) when callers want to enrich output or use it alongside other observers.
 
 ### MatchSurfaceProjector (Core / Viewer Projection)
 
@@ -74,31 +61,6 @@
 - **Scope**: `MatchSurfaceProjector` is a read-only spectator over canonical Core events. It projects decisions, state deltas, interaction metadata, economics, and optional marker provenance into sink output.
 - **Contract**: Defined in `SPEC-MATCH-SURFACE-PROJECTION.md`.
 - **Boundary**: It does not run game logic, parse recorder files directly, or compute research findings.
-
-### Reserved Spectator Names
-
-- **MatchNarrator**: Reserved for a future prose-forward spectator that turns match events into actual narrative commentary rather than structured lifecycle logs.
-- **MatchCaster**: Reserved for a future broadcast-oriented role that may span live commentary, post-match analysis, or broader spectator/broadcast surfaces.
-
-### Research Spectators (`SPEC-RESEARCH.md`)
-
-**StatisticalAnalysisSpectator**
-- **Purpose**: Auto-run post-hoc statistical analysis when batch completes.
-- **Implementation**: Thin wrapper that calls `StatisticalAnalysis.from_session()` on `on_batch_end()`.
-- **Usage**: `spectators=[StatisticalAnalysisSpectator(print_on_complete=True, save_report=True)]`
-- **Output**: Automatically prints win rates, confidence intervals, p-values, effect sizes, and cross-player comparisons.
-
-**PerformanceTrackerSpectator**
-- **Purpose**: Auto-run performance analysis (duration, throughput, speedup) when batch completes.
-- **Implementation**: Thin wrapper that calls `PerformanceAnalysis.from_session()` on `on_batch_end()`.
-- **Usage**: `spectators=[PerformanceTrackerSpectator(baseline_duration=300.0)]`
-
-**CostAnalysisSpectator**
-- **Purpose**: Auto-run cost analysis (total cost, cost per match, cost efficiency) when batch completes.
-- **Implementation**: Thin wrapper that calls `CostAnalysis.from_session()` on `on_batch_end()`.
-- **Usage**: `spectators=[CostAnalysisSpectator(baseline_cost=0.04)]`
-
-**Note**: These spectators require recordings to exist. They read from `agentdeck_runs/session_id/` after matches complete. All analysis logic lives in `agentdeck.research` module; spectators are convenience wrappers only.
 
 ## 6. Invariants & Guarantees
 ### 6.1 Handler Contract (HC)
@@ -118,35 +80,23 @@
 10. **EI2**: Spectators SHOULD avoid raising in `on_session_end`/`on_batch_end` to prevent cleanup noise. Log warnings instead.
 11. **EI3**: Spectators MUST NOT attempt to modify player/game state or call console methods that affect execution (read-only contract).
 
-### 5.4 Logging & Output (LO)
+### 6.4 Logging & Output (LO)
 12. **LO1**: When logger supplied, spectators SHOULD use `logger` instead of `print` for structured logging.
 13. **LO2**: Spectators writing to disk or network MUST handle failures gracefully and surface informative errors.
 
-### 5.5 Logger Injection (LI)
+### 6.5 Logger Injection (LI)
 14. **LI1**: Console and ReplayEngine MUST inject logger into spectators if spectator has no logger (late-binding pattern). Check `if getattr(spectator, "logger", None) is None` before subscription.
 15. **LI2**: Injected logger MUST be the same `AgentDeckLogger` instance used by Console/ReplayEngine (shared logging context).
 16. **LI3**: Spectators MAY receive logger via constructor (`__init__(logger=logger)`), bypassing late-binding injection.
 17. **LI4**: Logger injection MUST occur for BOTH session spectators (attached at Console construction) AND execution spectators (attached during `play`/`replay` call).
 18. **LI5**: When spectator uses logger, it WRITES to core log streams (info.log, debug.log, console) via `logger.info()`, `logger.debug()`, etc.
 
-### 5.6 Context Access (CA)
+### 6.6 Context Access (CA)
 19. **CA1**: EventContext MUST include `session_id` (except early construction events before session initialization).
 20. **CA2**: EventContext MUST include `match_id` during match execution (between `MATCH_START` and `MATCH_END`).
 21. **CA3**: EventContext MUST include `phase_index` during GAMEPLAY events and domain events emitted during gameplay. Player lifecycle events (handshake, conclusion) MAY omit `phase_index` per SPEC-OBSERVABILITY §4.1.
 
-### 5.7 MatchCurator Artifact Contract (CU)
-22. **CU1**: `MatchCurator` MUST treat the recorded match artifact as the source of truth. It MUST NOT mutate gameplay events, final state, or match result payloads.
-23. **CU2**: When `MatchCurator` writes a sidecar, the JSON payload MUST contain `subtitle` (string), `synopsis` (string), and `highlights` (array). It MAY contain `transcript` (array).
-24. **CU3**: Each highlight entry MUST contain:
-    - `turn` as a positive integer using the human-facing 1-based turn number
-    - `label` as a non-empty string no longer than 50 characters
-    - `kind` MAY be present. When present, it MUST be one of: `mistake`, `smart_move`, `surprise`, `turning_point`
-25. **CU4**: `synopsis` SHOULD stay compact (1-2 sentences) and MUST name the decisive moment or behavioral lesson explicitly.
-26. **CU5**: `transcript`, when present, MUST remain in the sidecar only. It MUST NOT be required for manifest promotion or baseline viewer playback.
-27. **CU6**: `MatchCurator` MUST support deterministic non-LLM generation paths so curated metadata can be produced in offline or provider-free environments.
-28. **CU7**: Sidecar writes MUST be explicit. If no output target is configured, `MatchCurator` MAY return metadata in memory but MUST NOT silently write files to arbitrary locations.
-
-## 6. Data Flow & Interaction
+## 7. Data Flow & Interaction
 - **Registration**: AgentDeck/Console attaches session spectators during construction; execution spectators added per `play`/`replay` call.
 - **Logger injection**: Console/ReplayEngine injects logger into spectators before EventBus subscription if `spectator.logger is None` (late-binding pattern per LI1-LI4).
 - **Event dispatch**: EventBus inspects spectators for `on_<event>` methods; calls them with event payloads and context copies.
@@ -157,14 +107,14 @@
 - **Context usage**: Spectators call `context_from(context)` to access typed fields (`session_id`, `batch_id`, `match_id`, `phase_index`, timestamps).
 - **Replay**: ReplayEngine reuses the same spectator API, ensuring replayed events trigger identical handlers.
 
-## 7. Error Handling & Edge Cases
+## 8. Error Handling & Edge Cases
 - Spectators MUST handle missing context fields (e.g., `match_id` absent on session events) without crashing.
 - For replay, event payloads may include `ActionResult` objects; spectators should treat them as immutable.
 - Spectators should anticipate duplicate events if attached to both session and execution scope (avoid double-counting by referencing `batch_id` / `match_id`).
 - When long-running analysis is required, spectators should queue work asynchronously rather than blocking the main loop.
 - Spectators SHOULD use defensive copies when storing event data (e.g., `copy.deepcopy(event.data)`).
 
-## 8. Examples
+## 9. Examples
 
 ### Example 1: Simple Win Rate Tracker (Session Scope)
 ```python
@@ -531,7 +481,7 @@ with AgentDeck(spectators=[tracker]) as deck:
 # Total                │          │          │          │ $0.0324
 ```
 
-## 9. Testing Strategy
+## 10. Testing Strategy
 | Focus | Invariants | Verification |
 |-------|------------|--------------|
 | Handler signatures | HC1-HC4 | Attach spectator with mocked handlers; ensure events invoke correct methods without mutation. Verify duck-typing (missing handlers don't crash). |
@@ -804,7 +754,7 @@ def test_logger_writes_to_core_streams():
     assert len(spectator_logs) > 0
 ```
 
-## 10. Open Questions / Future Work
+## 11. Open Questions / Future Work
 
 ### Async Handler Support
 - Should spectators support **async event handlers** for external API calls (e.g., `async def on_match_end`)?
@@ -838,7 +788,7 @@ def test_logger_writes_to_core_streams():
 - Should spectators support **streaming output** (e.g., WebSocket push for live dashboards)?
 - How to handle backpressure when spectators can't keep up with event rate?
 
-## 11. Design Rationale
+## 12. Design Rationale
 - **Duck-typed handlers** keep the API flexible while preserving familiar naming (`on_<event>`), enabling minimal boilerplate (implement only needed handlers).
 - **SpectatorContext helper** centralises context parsing, avoiding repetitive guard code for missing fields.
 - **Late-binding logger injection** (LI1-LI4) enables structured logging pipelines without forcing dependencies on spectators. Console/ReplayEngine inject logger after spectator construction but before first event, allowing spectators to write to core log streams (info.log, debug.log, console) without explicit configuration.
@@ -846,7 +796,7 @@ def test_logger_writes_to_core_streams():
 - **Scope separation** (session vs execution) enables both persistent and ad-hoc observation patterns.
 - **Error isolation** ensures spectator failures don't crash matches (critical for production analytics).
 
-## 12. References
+## 13. References
 
 ### Specifications
 - [SPEC.md](./SPEC.md) §1.2 (Ease of use), §2.4 (Observability)

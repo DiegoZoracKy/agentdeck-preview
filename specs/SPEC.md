@@ -1,8 +1,8 @@
 # AgentDeck Implementation Specification
 
-**Version**: 2.2 (Match Surface Preparation)
+**Version**: 2.3 (Execution Evidence Boundary)
 **Status**: Active
-**Last Updated**: 2026-05-30
+**Last Updated**: 2026-08-13
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -11,7 +11,7 @@
 
 ## 1. Purpose & Vision
 
-AgentDeck is a **research platform for studying AI behavior through game scenarios**. It enables researchers to run controlled experiments where AI agents interact in well-defined environments, providing comprehensive data collection for analysis of prompting strategies, decision-making patterns, and model capabilities.
+AgentDeck is the **execution and evidence engine for AI agents in game scenarios**. It runs agents inside explicit state machines and produces canonical Records that downstream systems can inspect, replay, and analyze.
 
 ### 1.1 Why Games?
 
@@ -36,19 +36,28 @@ AgentDeck is architected like a video game console to keep experiments modular a
 - 👁️ **Spectator** – The audience watching the live stream (stats, narration, cost tracking)
 - 📹 **Recorder** – The "DVR" capturing every event for perfect replay and analysis
 
-By separating these concerns, AgentDeck ensures your research is **reproducible, observable, and easy to modify**.
+By separating these concerns, AgentDeck keeps execution **composable, observable, and inspectable**.
 
 ### 1.3 Core Capabilities
-- Rapid experimentation (games in ~15 lines, experiments in ~3 lines)
+- Rapid execution (games in ~15 lines, runs in ~3 lines)
 - Comprehensive data collection (every decision, timing, reasoning captured)
-- Flexible observation (spectators can analyze live or replay)
-- Reproducible research (deterministic experiments via seeded randomness)
+- Flexible observation (spectators work identically for live and replay)
+- Controlled reproducibility (framework randomness via seeded execution)
 
 **Success Criteria:**
-1. Researchers can create a working game in <20 lines of code
+1. Callers can create a working game in <20 lines of code
 2. Running 100 matches takes <5 lines of code
 3. All match data is automatically persisted
-4. Experiments are fully reproducible via seed parameter
+4. Framework-controlled randomness is reproducible via seed parameter
+
+### 1.4 Scope Boundary
+
+AgentDeck owns facts about a provider call, turn, match, batch, and runtime. It
+MUST preserve execution facts without assigning behavioral meaning to them.
+
+Research questions, corpus selection, pooling, estimands, statistical inference,
+behavioral findings, and publication artifacts are downstream responsibilities.
+AgentDeck MUST NOT reconstruct those meanings or ship a research workflow.
 
 ---
 
@@ -136,9 +145,9 @@ Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.3.2:
 
 ### 2.4 Reproducibility Architecture
 
-**Critical for Research**: AgentDeck ensures full reproducibility through deterministic seeding:
+**Critical for Evidence**: AgentDeck controls framework randomness through deterministic seeding:
 
-1. **AgentDeck configuration seed**: Provided by researchers via facade and passed to the console to control session randomness
+1. **AgentDeck configuration seed**: Provided by callers via facade and passed to the console to control session randomness
 2. **Match-level seed**: Optional override for specific match control
 3. **Random state management**: Deterministic `RandomGenerator` helper cascades per match/turn
 4. **LLM determinism**: When supported by models (e.g., temperature=0)
@@ -169,10 +178,10 @@ deck = AgentDeck(game=MyGame(), session=config)
 - **Controllers** provide format instructions AND parsing
 - **Spectators** observe without interfering
 
-### 3.3 Research Flexibility
+### 3.3 Evidence Flexibility
 - Each player can have different renderer/controller
 - Spectators work identically for live and replay
-- All data automatically recorded for analysis
+- Canonical execution data automatically recorded for downstream analysis
 
 ### 3.4 Event-Driven Observation
 - Spectators subscribe to events via EventBus
@@ -192,44 +201,33 @@ All component specifications follow the lean spec format with numbered invariant
 | [AgentDeck](SPEC-AGENTDECK.md) | 0.3.1 | Final | Public API facade for the framework |
 | [Console](SPEC-CONSOLE.md) | 0.7.2 | Final | Execution engine for session/match lifecycle |
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
-| [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.0.0 | Final | Canonical `GAMEPLAY` payload shared by live play, recording, and replay |
-| [Game](SPEC-GAME.md) | 0.7.1 | Final | Game author contract (rules, state, narrative, lifecycle hooks) |
-| [Player](SPEC-PLAYER.md) | 1.3.2 | Final | Three-phase player lifecycle (handshake/turn/conclusion) |
-| [Controller](SPEC-CONTROLLER.md) | 1.3.1 | Final | Handshake, gameplay parsing, and conclusion parsing contract |
+| [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.1.0 | Final | Canonical decision attribution and provider-call payload shared by live, Record, and replay |
+| [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract plus effective configuration and implementation identity |
+| [Player](SPEC-PLAYER.md) | 1.4.0 | Final | Three-phase lifecycle with explicit context-selection provenance |
+| [Controller](SPEC-CONTROLLER.md) | 1.4.0 | Final | Strict explicit action declaration and lifecycle parsing contract |
 | [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
-| [Spectator](SPEC-SPECTATOR.md) | 2.0.0 | Final | Observation and analysis interface |
+| [Spectator](SPEC-SPECTATOR.md) | 2.1.0 | Final | Read-only execution observation interface |
 
 ### 4.2 Infrastructure Components
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Recorder](SPEC-RECORDER.md) | 2.0.0 | Final | Match persistence with canonical event payloads |
+| [Recorder](SPEC-RECORDER.md) | 2.2.0 | Final | Canonical Records with complete execution and provider-call provenance |
+| [Game Version Provenance](SPEC-GAME-VERSION-PROVENANCE.md) | 0.1.0 | Final | Portable, scoped Game implementation identity |
 | [ReplayEngine](SPEC-REPLAY.md) | 2.0.0 | Final | Exact replay of canonical event payloads |
-| [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.4.0 | Final | Template-driven prompt composition |
+| [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.5.0 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.1.0 | Final | Per-match infrastructure context (`runtime`) |
 | [Pricing](SPEC-PRICING.md) | 1.0.1 | Final | Cost tracking system for LLM usage |
-| [LLM](SPEC-LLM.md) | 1.1.4 | Final | LLM provider integration contract |
+| [LLM](SPEC-LLM.md) | 1.2.0 | Final | LLM provider integration and exact SDK-call audit contract |
 | [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
 | [Monitor](SPEC-MONITOR.md) | 1.0.0 | Final | Console-level observation and progress reporting |
 
-### 4.3 Research Tools
+### 4.3 Viewer Surface
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Research](SPEC-RESEARCH.md) | 1.1.0 | Final | Statistical analysis, model comparison, and post-hoc analysis from recordings |
-| [Intervention Comparison](SPEC-RESEARCH-INTERVENTION-COMPARISON.md) | 0.1.0 | Final | Exact cross-run difference artifact for a declared baseline and intervention |
-| [Research Behavioral](SPEC-RESEARCH-BEHAVIORAL.md) | 0.2.0 | Final | Global behavioral scorer contract and extension interface for game-specific profiles |
-| [Archivist Choice Behavioral](SPEC-BEHAVIORAL-ARCHIVIST-CHOICE-v0.1.0.md) | 0.1.0 | Final | Deterministic Archivist Choice score, completion, and post-hoc action-fit profile |
-| [Research Experiment](SPEC-RESEARCH-EXPERIMENT.md) | 1.6.0 | Final | Experiment package, manifest/results/index contracts |
-| [Research Packager](SPEC-RESEARCH-PACKAGER.md) | 0.3.0 | Final | Session-to-experiment package helper |
-| [Research Packager Context](SPEC-RESEARCH-PACKAGER-CONTEXT-v0.1.0.md) | 0.1.0 | Final | Optional confirmed world configuration for package behavioral export |
-
-### 4.4 Viewer Surface
-
-| Component | Version | Status | Description |
-|-----------|---------|--------|-------------|
-| [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.1.0 | Final | Core spectator projection and static artifact sinks for viewer surfaces |
+| [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.0 | Final | Factual projection including turn context and provider-call provenance |
 | [Viewer](SPEC-VIEWER.md) | 0.6.0 | Legacy / Frozen | Offline browser replay viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
 
 ---
@@ -283,13 +281,12 @@ agentdeck/
 │       │   └── base/…                 # Game/player/controller/spectator bases
 │       ├── games/
 │       │   ├── __init__.py
-│       │   └── examples/              # Sample games with bundled viewers
-│       │       └── fixed_damage/      # Game package (game.py + viewers/)
+│       │   └── examples/              # Importable sample games
+│       │       └── fixed_damage/      # Example Game package
 │       ├── players/                   # Mock player, LLM integrations
 │       ├── controllers/               # ActionOnly, Reasoning controllers
 │       ├── renderers/                 # Text renderer, helpers
-│       ├── spectators/                # Stats tracker, logger
-│       └── research/                  # Analysis utilities
+│       └── spectators/                # Reporting, stats, cost, projections
 ├── tests/                             # Pytest suite
 └── specs/                             # Component specifications
     ├── SPEC.md                        # This file (navigation hub)
@@ -306,10 +303,7 @@ agentdeck/
     ├── SPEC-GAME-MECHANIC-TURN-BASED.md
     ├── SPEC-PRICING.md
     ├── SPEC-OBSERVABILITY.md
-    ├── SPEC-LLM.md
-    ├── SPEC-RESEARCH.md
-    ├── SPEC-RESEARCH-BEHAVIORAL.md
-    └── SPEC-RESEARCH-EXPERIMENT.md
+    └── SPEC-LLM.md
 ```
 
 ---
@@ -319,7 +313,7 @@ agentdeck/
 For detailed authoring guidelines, design patterns, and architectural decisions, see:
 - [GUIDELINES.md](GUIDELINES.md) - Spec authoring best practices
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guide, design principles, and workflow
-- [research/README.md](../research/README.md) - Research experiment patterns
+- Historical Agentic Edge workflow: Git tag `agentic-edge-research`
 
 ---
 
@@ -348,15 +342,6 @@ from agentdeck import (
     MockPlayer, TextRenderer, ActionOnlyController
 )
 
-# Research module for statistical rigor (Kaggle-inspired)
-from agentdeck.research import (
-    compare_models,          # The 80% use case - rigorous model comparison
-    progressive_comparison,  # Early stopping to save API costs
-    parameter_sweep,         # Hyperparameter optimization
-    EloLeague,              # ELO rating system for ongoing competitions
-    Benchmark,              # Standardized benchmarks with exact reproducibility
-    statistical_significance # P-values, confidence intervals, effect sizes
-)
 ```
 
 ---

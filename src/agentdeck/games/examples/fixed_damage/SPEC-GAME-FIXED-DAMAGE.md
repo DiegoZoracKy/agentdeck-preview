@@ -8,7 +8,7 @@
 
 ## 1. Purpose
 - Provide a small deterministic combat game that makes agent behavior easy to observe, compare, and replay.
-- Serve as a bundled reference game for tutorials, tests, and release-facing behavioral experiments.
+- Serve as a bundled reference game for tutorials, tests, and execution examples.
 - Keep the ruleset simple enough that policy quality, visibility choices, and prompt-contract effects can be studied without hidden mechanics.
 
 ## 2. Scope & Philosophy Alignment

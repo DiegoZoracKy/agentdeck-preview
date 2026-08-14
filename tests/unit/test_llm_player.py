@@ -10,6 +10,7 @@ import pytest
 from agentdeck.controllers.action_only import ActionOnlyController
 from agentdeck.core.conversation import ConversationManager
 from agentdeck.core.types import (
+    ActionParseError,
     HandshakeContext,
     MatchContext,
     MatchResult,
@@ -40,6 +41,41 @@ class DummyLLMPlayer(LLMPlayer):
     def _invoke_model(self, bundle, turn_context):
         self.last_bundle = bundle
         return "Well played!", {}
+
+
+class AuditLLMPlayer(LLMPlayer):
+    """Provider double that exercises the real LLMPlayer audit path."""
+
+    PROVIDER = "audit"
+    default_model = "audit-model"
+    api_key_env_var = "AUDIT_API_KEY"
+
+    def _get_api_key_from_env(self):
+        return "dummy"
+
+    def _initialize_client(self):
+        self.test_response = "ACTION: ATTACK"
+        self.test_stop_reason = "completed"
+        self.test_response_complete = True
+
+    def _make_api_call(self, messages):
+        arguments = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+        }
+        self._capture_sdk_request("audit.responses.create", arguments)
+        return self.test_response, {
+            "tokens_used": 12,
+            "prompt_tokens": 10,
+            "completion_tokens": 2,
+            "cost": 0.001,
+            "model": self.model,
+            "provider_model": "audit-model-2026-08-14",
+            "provider_response_id": "response-1",
+            "stop_reason": self.test_stop_reason,
+            "response_complete": self.test_response_complete,
+        }
 
 
 def _make_match_result(winner: str = "Alice"):
@@ -181,6 +217,130 @@ def test_llmplayer_decide_preserves_usage_info_in_action_metadata():
     assert action.action == "ATTACK"
     assert action.metadata["usage_info"] == usage_info
     assert action.metadata["raw_prompt"]
+    assert "Respond with: ACTION: <your_action>" in action.metadata["raw_prompt"]
+    assert action.metadata["controller_format"] == "Respond with: ACTION: <your_action>"
+
+
+def test_no_history_policy_keeps_current_decision_protocol_explicit():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy="no_history",
+    )
+    manager = ConversationManager(player_name="Alice")
+    manager.record_turn(
+        user_message="handshake prompt",
+        assistant_message="OK",
+        turn_context=None,
+        prompt_metadata=[],
+        response_metadata={},
+        phase="handshake",
+    )
+    player.bind_conversation_manager(manager)
+
+    action = player.decide(
+        game_state={"health": {"Alice": 100, "Bob": 100}},
+        turn_context=TurnContext(
+            match_id="match-1",
+            turn_number=1,
+            turn_index=0,
+            player="Alice",
+            started_at=0.0,
+            duration=0.0,
+        ),
+    )
+
+    provider_call = action.metadata["provider_call"]
+    assert provider_call["context_selection"]["selected_history_messages"] == 0
+    assert len(provider_call["composed_input"]["messages"]) == 1
+    assert (
+        "Respond with: ACTION: <your_action>"
+        in provider_call["composed_input"]["messages"][0]["content"]
+    )
+
+
+def test_provider_call_retains_exact_context_selection_sdk_arguments_and_response():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy={"id": "last_n_messages", "parameters": {"recent_count": 2}},
+    )
+    manager = ConversationManager(player_name="Alice")
+    manager.record_turn(
+        user_message="handshake prompt",
+        assistant_message="OK",
+        turn_context=None,
+        prompt_metadata=[],
+        response_metadata={},
+        phase="handshake",
+    )
+    manager.record_turn(
+        user_message="earlier turn",
+        assistant_message="ACTION: DEFEND",
+        turn_context=None,
+        prompt_metadata=[],
+        response_metadata={},
+        phase="turn",
+    )
+    player.bind_conversation_manager(manager)
+
+    action = player.decide(
+        game_state={"health": {"Alice": 100, "Bob": 100}},
+        turn_context=TurnContext(
+            match_id="match-1",
+            turn_number=2,
+            turn_index=1,
+            player="Alice",
+            started_at=0.0,
+            duration=0.0,
+        ),
+    )
+
+    provider_call = action.metadata["provider_call"]
+    selection = provider_call["context_selection"]
+    assert selection["available_history_messages"] == 4
+    assert selection["selected_history_messages"] == 2
+    assert selection["omitted_message_ids"] == [
+        "handshake-0-user",
+        "handshake-0-assistant",
+    ]
+    assert provider_call["composed_input"]["messages"][-1]["role"] == "user"
+    assert (
+        provider_call["sdk_request"]["arguments"]["messages"]
+        == provider_call["composed_input"]["messages"]
+    )
+    assert provider_call["sdk_response"]["provider_model"] == "audit-model-2026-08-14"
+    assert provider_call["sdk_response"]["response_complete"] is True
+    assert provider_call["attempts"][0]["outcome"] == "completed"
+
+
+def test_parse_failure_retains_prompt_provider_call_and_truncation_truth():
+    controller = ActionOnlyController()
+    controller.bind_game(FixedDamageGame())
+    player = AuditLLMPlayer(name="Alice", controller=controller)
+    player.test_response = "I considered ATTACK but need to check"
+    player.test_stop_reason = "max_tokens"
+    player.test_response_complete = False
+
+    with pytest.raises(ActionParseError) as captured:
+        player.decide(
+            game_state={"health": {"Alice": 100, "Bob": 100}},
+            turn_context=TurnContext(
+                match_id="match-1",
+                turn_number=1,
+                turn_index=0,
+                player="Alice",
+                started_at=0.0,
+                duration=0.0,
+            ),
+        )
+
+    parse_result = captured.value.parse_result
+    assert parse_result.action is None
+    assert parse_result.metadata["contract_satisfied"] is False
+    assert parse_result.prompt_text
+    assert parse_result.provider_call["sdk_response"]["stop_reason"] == "max_tokens"
+    assert parse_result.provider_call["sdk_response"]["response_complete"] is False
 
 
 def test_llmplayer_handshake_uses_game_default_template_and_frontloads_action_format():

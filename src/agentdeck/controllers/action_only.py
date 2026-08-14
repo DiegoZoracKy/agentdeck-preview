@@ -1,15 +1,9 @@
-"""
-Simple action-only controller for AgentDeck.
-
-Implements ActionOnlyController per SPEC-CONTROLLER v1.1.0 §4.
-Parses responses like "ACTION: ATTACK" or detects uppercase tokens.
-Returns ParseResult for stateless, deterministic parsing.
-"""
+"""Strict action-only controller for AgentDeck."""
 
 from __future__ import annotations
 
 import re
-from typing import List, Optional, Set
+from typing import Optional, Set
 
 from ..core.base.controller import Controller
 from ..core.base.game import Game
@@ -18,14 +12,13 @@ from ..core.types import ParseResult
 # Regex patterns for action extraction
 # Anchor ACTION to line start to avoid matching narration blocks like "Last Action:".
 ACTION_FIELD = re.compile(r"(?im)^\s*ACTION:\s*(?P<action>[A-Za-z0-9_\-]+)\b")
-UPPER_WORDS = re.compile(r"\b([A-Z][A-Z0-9_\-]+)\b")
 
 
 class ActionOnlyController(Controller):
     """
     Simple action extraction controller with game binding and validation.
 
-    Parses responses in "ACTION: <value>" format or detects uppercase tokens.
+    Parses responses only in the explicit ``ACTION: <value>`` format.
     Validates against game.allowed_actions when bound (per GB1-GB6).
 
     Example usage:
@@ -39,13 +32,12 @@ class ActionOnlyController(Controller):
         'ATTACK'
         >>> parse_result.metadata['validated']
         True
-        >>> # Caller converts to ActionResult with fallback semantics
-        >>> action_result = parse_result.to_action_result(fallback="UNKNOWN")
+        >>> action_result = parse_result.to_action_result()
 
     Parsing returns ParseResult:
         - success=True, action=<normalized>: Valid action extracted and validated
         - success=False, action=None, error=<reason>: Parsing or validation failed
-        - Caller applies fallback via to_action_result(fallback)
+        - Failed parses remain failures; callers must not infer an action
 
     Implements:
         - DS1-DS2: Determinism & stateless parsing
@@ -58,7 +50,7 @@ class ActionOnlyController(Controller):
         """
         Initialize ActionOnlyController.
 
-        Note: Fallback semantics are now handled by caller via ParseResult.to_action_result(fallback).
+        Parse failures are surfaced through ``ActionParseError``.
         """
         self._allowed_actions: Optional[Set[str]] = None  # Set during bind_game()
 
@@ -104,10 +96,9 @@ class ActionOnlyController(Controller):
             ParseResult with success indicator, action, and metadata
 
         Parsing strategy:
-            1. Look for "ACTION: <value>" field (preferred)
-            2. Fallback to detecting uppercase tokens (e.g., "ATTACK")
-            3. Validate against allowed_actions if bound
-            4. Return success=True/False based on extraction and validation
+            1. Require a line-anchored "ACTION: <value>" field
+            2. Validate against allowed_actions if bound
+            3. Return success=True/False without inferring intent from narration
 
         Requirements (DS1-DS2, AP1-AP3, VF1):
             - DS1: Deterministic and side-effect free for given input
@@ -120,26 +111,12 @@ class ActionOnlyController(Controller):
         # AP1: Trim and preserve raw response
         cleaned = response.strip()
 
-        # Extract primary action and candidates
-        primary_action, candidates = self._extract_action(cleaned)
+        primary_action = self._extract_action(cleaned)
 
         # Validate against allowed actions if bound
         if self._allowed_actions:
             # GB6: Validation requires binding (already bound, so proceed)
             valid, validated_action = self._validate_action(primary_action)
-            resolution_strategy = "primary"
-            allowed_candidates: List[str] = []
-
-            if not valid:
-                validated_action, resolution_strategy, allowed_candidates = (
-                    self._resolve_bound_action(
-                        response=cleaned,
-                        primary_action=primary_action,
-                        candidates=candidates,
-                    )
-                )
-                valid = validated_action is not None
-
             if valid and validated_action:
                 # AP2: Success case
                 return ParseResult(
@@ -151,9 +128,9 @@ class ActionOnlyController(Controller):
                     metadata={
                         "validated": True,
                         "allowed_actions": list(self._allowed_actions),
-                        "candidates": candidates,
-                        "allowed_candidates": allowed_candidates,
-                        "resolution_strategy": resolution_strategy,
+                        "resolution_method": "explicit_action_field",
+                        "declared_action": validated_action,
+                        "contract_satisfied": True,
                     },
                 )
             else:
@@ -161,7 +138,7 @@ class ActionOnlyController(Controller):
                 error_msg = (
                     f"Parsed action '{primary_action}' not in allowed set {sorted(self._allowed_actions)}"
                     if primary_action
-                    else "No action token found"
+                    else "No ACTION: field found"
                 )
                 return ParseResult(
                     success=False,
@@ -171,9 +148,9 @@ class ActionOnlyController(Controller):
                     error=error_msg,
                     metadata={
                         "allowed_actions": list(self._allowed_actions),
-                        "candidates": candidates,
-                        "allowed_candidates": allowed_candidates,
-                        "resolution_strategy": resolution_strategy,
+                        "resolution_method": "unresolved",
+                        "declared_action": primary_action,
+                        "contract_satisfied": False,
                     },
                 )
         else:
@@ -186,7 +163,12 @@ class ActionOnlyController(Controller):
                     raw_response=cleaned,
                     reasoning=None,
                     error=None,
-                    metadata={"validated": False, "candidates": candidates},
+                    metadata={
+                        "validated": False,
+                        "resolution_method": "explicit_action_field",
+                        "declared_action": primary_action,
+                        "contract_satisfied": True,
+                    },
                 )
             else:
                 # AP3: Failure case - no action found
@@ -195,106 +177,19 @@ class ActionOnlyController(Controller):
                     action=None,
                     raw_response=cleaned,
                     reasoning=None,
-                    error="No action token found",
-                    metadata={"candidates": candidates},
+                    error="No ACTION: field found",
+                    metadata={
+                        "resolution_method": "unresolved",
+                        "declared_action": None,
+                        "contract_satisfied": False,
+                    },
                 )
 
-    def _extract_action(self, response: str) -> tuple[Optional[str], List[str]]:
-        """
-        Detect the most likely action token and supporting candidates.
-
-        Args:
-            response: Cleaned response string
-
-        Returns:
-            (primary_action, all_candidates)
-
-        Strategy:
-            1. Check for "ACTION: <value>" field first (most explicit)
-            2. Fallback to detecting uppercase words (ATTACK, DEFEND, etc.)
-            3. Return None if no candidates found
-        """
-        candidates: List[str] = []
-
-        # Strategy 1: Look for "ACTION: <value>" field
+    def _extract_action(self, response: str) -> Optional[str]:
+        """Extract only an explicit, line-anchored action declaration."""
         match = ACTION_FIELD.search(response)
         if match:
-            primary = match.group("action").strip().upper()
-            candidates.append(primary)
-            return primary, candidates
-
-        # Strategy 2: Look for uppercase tokens
-        for token in UPPER_WORDS.findall(response):
-            normalized = token.upper()
-            if normalized not in candidates:
-                candidates.append(normalized)
-
-        # Return last candidate as primary (most likely to be action)
-        primary = candidates[-1] if candidates else None
-        return primary, candidates
-
-    def _resolve_bound_action(
-        self,
-        *,
-        response: str,
-        primary_action: Optional[str],
-        candidates: List[str],
-    ) -> tuple[Optional[str], str, List[str]]:
-        """
-        Resolve action when initial primary token is invalid.
-
-        Strategy:
-            1. Keep only tokens present in allowed_actions.
-            2. If exactly one valid candidate exists, use it.
-            3. If multiple valid candidates exist, try first-person intent extraction.
-            4. Fallback to first valid candidate (deterministic).
-        """
-        if self._allowed_actions is None:
-            return None, "unbound", []
-
-        allowed_candidates = [
-            token.upper() for token in candidates if token.upper() in self._allowed_actions
-        ]
-        if not allowed_candidates:
-            mentioned_actions = self._find_allowed_action_mentions(response)
-            if not mentioned_actions:
-                return None, "no_allowed_candidate", []
-            if len(mentioned_actions) == 1:
-                return mentioned_actions[0], "single_allowed_mention", []
-
-            intent_action = self._extract_intent_action(response, mentioned_actions)
-            if intent_action:
-                return intent_action, "intent_pattern", []
-
-            return mentioned_actions[0], "first_allowed_mention", []
-
-        if len(allowed_candidates) == 1:
-            return allowed_candidates[0], "single_allowed_candidate", allowed_candidates
-
-        intent_action = self._extract_intent_action(response, allowed_candidates)
-        if intent_action:
-            return intent_action, "intent_pattern", allowed_candidates
-
-        return allowed_candidates[0], "first_allowed_candidate", allowed_candidates
-
-    def _extract_intent_action(self, response: str, allowed_candidates: List[str]) -> Optional[str]:
-        """Try to infer player intent from first-person phrasing."""
-        if not allowed_candidates:
-            return None
-
-        actions_pattern = "|".join(
-            re.escape(token) for token in sorted(set(allowed_candidates), key=len, reverse=True)
-        )
-        patterns = [
-            rf"\bI(?:'ll| will| choose| chose| pick| picked| use| used| am going to)?\b[^\n]{{0,120}}\b({actions_pattern})\b",
-            rf"\b(?:my|the)\s+action(?:\s+is)?\s*[:\-]?\s*({actions_pattern})\b",
-        ]
-
-        for pattern in patterns:
-            match = re.search(pattern, response, re.IGNORECASE)
-            if match:
-                return match.group(1).upper()
-
+            return match.group("action").strip().upper()
         return None
 
     def _validate_action(self, action: Optional[str]) -> tuple[bool, Optional[str]]:
@@ -321,15 +216,3 @@ class ActionOnlyController(Controller):
         is_valid = candidate in self._allowed_actions
 
         return is_valid, candidate if is_valid else None
-
-    def _find_allowed_action_mentions(self, response: str) -> List[str]:
-        """Find allowed actions mentioned in response text, case-insensitively."""
-        if self._allowed_actions is None:
-            return []
-
-        mentioned: List[str] = []
-        for action in sorted(self._allowed_actions):
-            pattern = rf"\b{re.escape(action)}\b"
-            if re.search(pattern, response, re.IGNORECASE):
-                mentioned.append(action)
-        return mentioned

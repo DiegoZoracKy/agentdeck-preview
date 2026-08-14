@@ -1,6 +1,6 @@
-"""AgentDeck - Research platform for studying AI behavior through game scenarios."""
+"""AgentDeck - Execution and evidence engine for AI agents in game scenarios."""
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 # Controller implementations
 from .controllers import ActionOnlyController, ReasoningController
@@ -53,12 +53,10 @@ from .renderers import TextRenderer
 
 # Spectator implementations
 from .spectators import (
-    MatchCurator,
     MatchReporter,
     ProgressDisplay,
     StatsTracker,
     TokenUsageTracker,
-    curate_match_file,
 )
 
 __all__ = [
@@ -108,9 +106,7 @@ __all__ = [
     "StatsTracker",
     "ProgressDisplay",
     "TokenUsageTracker",
-    "MatchCurator",
     "MatchReporter",
-    "curate_match_file",
     # Games
     "ArchivistChoiceGame",
     "FixedDamageGame",

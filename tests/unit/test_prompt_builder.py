@@ -547,7 +547,7 @@ def test_default_templates():
         render_result=RenderResult(text="Game view", metadata=None),
         controller_format="FORMAT",
     )
-    assert bundle_turn.text == "Game view"
+    assert bundle_turn.text == "Game view\n\nFORMAT"
     assert "\\n" not in bundle_turn.text
 
     # Conclusion default
