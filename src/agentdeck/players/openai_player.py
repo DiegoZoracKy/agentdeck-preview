@@ -60,10 +60,11 @@ class GPTPlayer(LLMPlayer):
         api_params = {
             "model": self.model,
             "input": input_messages,
-            "temperature": self.temperature,
             "store": False,
             **config,
         }
+        if self.temperature is not None:
+            api_params["temperature"] = self.temperature
         if instructions:
             api_params["instructions"] = instructions
 

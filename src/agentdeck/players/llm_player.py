@@ -30,7 +30,7 @@ class LLMPlayer(Player, ABC):
         *,
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        temperature: float = 1.0,
+        temperature: Optional[float] = 1.0,
         max_tokens: Optional[int] = None,
         context_policy: Optional[Dict[str, Any] | str] = None,
         controller: Controller,
@@ -49,7 +49,8 @@ class LLMPlayer(Player, ABC):
             name: Player identifier
             api_key: API key (if not provided, reads from environment)
             model: Model to use (if not provided, uses default_model)
-            temperature: Response randomness (0-2, default 1.0)
+            temperature: Response randomness (0-2, default 1.0), or None to
+                leave the setting to a supporting provider
             max_tokens: Maximum response length (None for no limit)
             controller: Unified controller for all phases (required, game-specific)
             renderer: State formatter (optional, uses TextRenderer if None)

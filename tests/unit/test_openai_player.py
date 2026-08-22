@@ -98,6 +98,30 @@ def test_openai_player_joins_multiple_system_messages(monkeypatch):
     ]
 
 
+def test_openai_player_omits_unset_temperature_and_records_that_configuration(
+    monkeypatch,
+):
+    response = _DummyResponse(output_text="ATTACK", model="gpt-5")
+    player = _build_player(monkeypatch, response, temperature=None)
+
+    player._make_api_call([{"role": "user", "content": "Turn"}])
+
+    kwargs = player.client.responses.last_kwargs
+    assert "temperature" not in kwargs
+    assert "temperature" not in player._pending_sdk_request["arguments"]
+    assert player.temperature is None
+    assert player.describe()["temperature"] is None
+
+
+def test_openai_player_preserves_explicit_numeric_temperature(monkeypatch):
+    response = _DummyResponse(output_text="ATTACK")
+    player = _build_player(monkeypatch, response, temperature=0.25)
+
+    player._make_api_call([{"role": "user", "content": "Turn"}])
+
+    assert player.client.responses.last_kwargs["temperature"] == 0.25
+
+
 def test_openai_player_remaps_token_limit_aliases(monkeypatch):
     response = _DummyResponse(output_text="ATTACK")
     player = _build_player(monkeypatch, response, max_completion_tokens=321)
