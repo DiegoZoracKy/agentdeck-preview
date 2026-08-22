@@ -32,8 +32,9 @@
   - `conclusion_template=None` disables conclusion prompt composition; player SHOULD still record minimal conclusion prompt metadata for observability.
   - `kwargs` forwarded to provider (top_p, penalties, optional `prompt`, etc.).
   - `temperature=None` explicitly leaves temperature unset. Provider adapters
-    MUST omit the native request field rather than send JSON `null`; Player
-    configuration and Records preserve the observed `None` value.
+    that support this option MUST omit the native request field rather than
+    send JSON `null`; Player configuration and Records preserve the observed
+    `None` value. OR6 currently requires this behavior for OpenAI.
   - Defaults: PromptBuilder handshake/turn defaults and `TextRenderer`. Controller parameter is required.
 - Subclass responsibilities:
   - `_initialize_client() -> None`: Setup provider SDK; raise informative errors if missing.
