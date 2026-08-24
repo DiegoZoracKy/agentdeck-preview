@@ -10,13 +10,18 @@ If you are new to the repo, run these in order:
 2. `first_game_walkthrough.py`
 3. `archivist_choice_demo.py`
 4. `minimal_experiment.py`
-5. `spectator_example.py`
-6. `replay_minimal.py`
-7. `test_parallel_execution.py`
+5. `prepared_assembly.py`
+6. `spectator_example.py`
+7. `replay_minimal.py`
+8. `test_parallel_execution.py`
 
 These examples form the intended onboarding ladder: no-provider install check,
 custom game authoring, a non-combat benchmark-style game, minimal LLM experiment,
 spectators, replay, and parallel execution.
+
+`prepared_assembly.py` is the approval-boundary example: it declares complete
+per-Player behavior, prepares a content-addressed composition without creating
+Players, and executes only the accepted identity.
 
 ## Quick Start Examples
 

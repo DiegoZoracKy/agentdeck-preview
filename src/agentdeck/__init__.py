@@ -7,6 +7,16 @@ from .controllers import ActionOnlyController, ReasoningController
 
 # Core imports
 from .core.agentdeck import AgentDeck
+from .core.assembly import (
+    Assembly,
+    AssemblyArtifact,
+    AssemblyExecution,
+    AssemblyRun,
+    PlayerFactory,
+    PreparedAssembly,
+    execute_prepared_assembly,
+    prepare_assembly,
+)
 
 # Base classes for extension
 from .core.base import Controller, Game, Player, Renderer, Spectator
@@ -62,6 +72,14 @@ from .spectators import (
 __all__ = [
     # Main
     "AgentDeck",
+    "Assembly",
+    "AssemblyRun",
+    "AssemblyArtifact",
+    "AssemblyExecution",
+    "PlayerFactory",
+    "PreparedAssembly",
+    "prepare_assembly",
+    "execute_prepared_assembly",
     "AgentDeckConfig",
     "ConclusionPolicy",
     "SessionContext",

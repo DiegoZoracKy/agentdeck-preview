@@ -183,9 +183,22 @@ print(f"Win rates: {results.win_rates}")
 1. `examples/mock_demo.py` — verify the install with a zero-provider run
 2. `examples/first_game_walkthrough.py` — build a tiny game and replay it
 3. `examples/minimal_experiment.py` — run the smallest real provider-backed experiment
-4. `examples/spectator_example.py` and `examples/replay_minimal.py` — add monitoring and replay workflows
+4. `examples/prepared_assembly.py` — seal a complete composition before execution
+5. `examples/spectator_example.py` and `examples/replay_minimal.py` — add monitoring and replay workflows
 
 For the full ladder, see [examples/README.md](examples/README.md).
+
+### Prepare, Inspect, Then Execute an Exact Composition
+
+For approval or remote-host boundaries, define one entrypoint whose
+`create_assembly()` returns a complete `Assembly`. `prepare_assembly()` loads
+and content-addresses that composition without creating Players or calling a
+provider. After an external authority accepts the returned identity,
+`execute_prepared_assembly()` reloads it, rejects any change before Player
+construction, and executes every declared run through `AgentDeck.play`.
+
+See [`examples/prepared_assembly.py`](examples/prepared_assembly.py) and
+[`SPEC-ASSEMBLY`](specs/SPEC-ASSEMBLY.md).
 
 ### Walkthroughs & Docs
 - Build your first game + replay tour: `examples/first_game_walkthrough.py`
