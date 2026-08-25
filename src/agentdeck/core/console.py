@@ -2660,11 +2660,10 @@ class Console:
             else:
                 raise ValueError(f"Unknown ParseFailurePolicy: {policy}")
 
-        except Exception as exc:  # pragma: no cover - defensive
-            raise RuntimeError(
-                f"Player {player.name} failed during decide() in match {turn_context.match_id} "
-                f"turn {turn_context.turn_number}"
-            ) from exc
+        except Exception:
+            # SPEC-CONSOLE S5: keep sequential execution aligned with the worker
+            # path by preserving the actionable provider/gameplay exception.
+            raise
 
         if not isinstance(action_result, ActionResult):
             raise TypeError(

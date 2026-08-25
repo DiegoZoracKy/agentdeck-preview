@@ -164,6 +164,32 @@ class MockPlayer(Player):
         return f"{result.winner} won the match."
 
 
+def test_sequential_console_preserves_non_parse_decide_failure():
+    """SPEC-CONSOLE S5 keeps actionable provider failures unchanged."""
+
+    class ProviderFailingPlayer(MockPlayer):
+        def decide(self, observation, **kwargs):
+            raise RuntimeError("provider rejected sampling option")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = AgentDeckConfig(
+            run_dir=tmpdir,
+            seed=42,
+            concurrency=1,
+        )
+        console = Console(config=config, recorder=Recorder())
+
+        with pytest.raises(RuntimeError) as captured:
+            console.run(
+                MockGame(),
+                [ProviderFailingPlayer(name="Alice"), MockPlayer(name="Bob", fail_on_turn=999)],
+                matches=1,
+                seed=42,
+            )
+
+        assert str(captured.value) == "provider rejected sampling option"
+
+
 def test_parse_failure_abort_and_record():
     """
     Test that parse failure triggers ABORT_MATCH policy and records partial match.
