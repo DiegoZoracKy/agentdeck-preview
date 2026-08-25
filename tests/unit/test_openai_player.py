@@ -198,3 +198,24 @@ def test_openai_player_raises_when_no_text_output(monkeypatch):
 
     with pytest.raises(RuntimeError, match="returned no text output"):
         player._make_api_call([{"role": "user", "content": "Turn"}])
+
+
+def test_openai_player_reports_bounded_incomplete_response_diagnostic(monkeypatch):
+    response = _DummyResponse(output_text=None, output=[])
+    response.status = "incomplete"
+    response.incomplete_details = types.SimpleNamespace(reason="max_output_tokens")
+    response.max_output_tokens = 384
+    response.usage.output_tokens = 384
+    response.usage.output_tokens_details = types.SimpleNamespace(reasoning_tokens=384)
+    player = _build_player(monkeypatch, response)
+
+    with pytest.raises(RuntimeError) as captured:
+        player._make_api_call([{"role": "user", "content": "Turn"}])
+
+    diagnostic = str(captured.value)
+    assert "status=incomplete" in diagnostic
+    assert "incomplete_reason=max_output_tokens" in diagnostic
+    assert "output_tokens=384" in diagnostic
+    assert "reasoning_tokens=384" in diagnostic
+    assert "max_output_tokens=384" in diagnostic
+    assert "Raw response" not in diagnostic

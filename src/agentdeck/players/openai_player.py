@@ -181,6 +181,24 @@ class GPTPlayer(LLMPlayer):
         if joined:
             return joined
 
+        status = getattr(response, "status", None) or "unknown"
+        incomplete_details = getattr(response, "incomplete_details", None)
+        incomplete_reason = getattr(incomplete_details, "reason", None)
+        usage = getattr(response, "usage", None)
+        output_tokens = getattr(usage, "output_tokens", None)
+        output_details = getattr(usage, "output_tokens_details", None)
+        reasoning_tokens = getattr(output_details, "reasoning_tokens", None)
+        max_output_tokens = getattr(response, "max_output_tokens", None)
+        details = [f"status={status}"]
+        if incomplete_reason is not None:
+            details.append(f"incomplete_reason={incomplete_reason}")
+        if output_tokens is not None:
+            details.append(f"output_tokens={output_tokens}")
+        if reasoning_tokens is not None:
+            details.append(f"reasoning_tokens={reasoning_tokens}")
+        if max_output_tokens is not None:
+            details.append(f"max_output_tokens={max_output_tokens}")
         raise RuntimeError(
-            "OpenAI Responses API returned no text output. " f"Raw response: {response!r}"
+            "OpenAI Responses API returned no text output "
+            f"({', '.join(details)})."
         )

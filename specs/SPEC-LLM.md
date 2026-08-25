@@ -1,7 +1,7 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.3.0
+> Version: 1.3.1
 > Last Updated: 2026-08-24
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: LLM integration authors, pricing/ops maintainers, execution operators
@@ -107,7 +107,7 @@
 23. **CL2**: LLM players MUST pass correlation metadata (`call_id`, `match_id`, `turn_number`, `phase`) to `api_request`, `api_response`, and `api_call` logger hooks so debug logs can be deterministically joined per call in concurrent runs.
 
 ### 5.8 OpenAI Responses API Contract (OR)
-24. **OR1**: OpenAI-backed players MUST invoke `client.responses.create(...)` for model calls and MUST extract reply text from `response.output_text`; when `output_text` is empty, implementations MUST fallback to parsing text blocks under `response.output` and fail noisily if no text exists.
+24. **OR1**: OpenAI-backed players MUST invoke `client.responses.create(...)` for model calls and MUST extract reply text from `response.output_text`; when `output_text` is empty, implementations MUST fallback to parsing text blocks under `response.output` and fail noisily if no text exists. That failure MUST report bounded actionable status, incompleteness, and token-limit metadata when available, and MUST NOT embed the raw provider response.
 25. **OR2**: OpenAI-backed players MUST map prompt arrays to Responses API shape as follows: all `system` messages are joined into top-level `instructions`, while non-system messages are sent in top-level `input`.
 26. **OR3**: OpenAI-backed players MUST normalize token-limit aliases (`max_tokens`, `max_completion_tokens`, `max_output_tokens`) to `max_output_tokens` before request dispatch, and MUST reject conflicting alias values with a clear `ValueError`.
 27. **OR4**: OpenAI-backed players MUST map usage fields `usage.input_tokens` / `usage.output_tokens` into internal metadata keys `prompt_tokens` / `completion_tokens` to keep pricing and spectator contracts stable.
