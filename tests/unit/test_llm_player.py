@@ -258,6 +258,40 @@ def test_no_history_policy_keeps_current_decision_protocol_explicit():
     assert "ACTION: <your_action>" in provider_call["composed_input"]["messages"][0]["content"]
 
 
+def test_zero_max_retries_still_makes_one_provider_attempt():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy="no_history",
+        max_retries=0,
+    )
+
+    action = player.decide(
+        game_state={"health": {"Alice": 100, "Bob": 100}},
+        turn_context=TurnContext(
+            match_id="match-1",
+            turn_number=1,
+            turn_index=0,
+            player="Alice",
+            started_at=0.0,
+            duration=0.0,
+        ),
+    )
+
+    assert action.action == "ATTACK"
+    assert action.metadata["retries"] == 0
+    assert len(action.metadata["provider_call"]["attempts"]) == 1
+
+
+def test_negative_max_retries_fails_during_player_construction():
+    with pytest.raises(ValueError, match="non-negative integer"):
+        AuditLLMPlayer(
+            name="Alice",
+            controller=ActionOnlyController(),
+            max_retries=-1,
+        )
+
+
 def test_provider_call_retains_exact_context_selection_sdk_arguments_and_response():
     player = AuditLLMPlayer(
         name="Alice",

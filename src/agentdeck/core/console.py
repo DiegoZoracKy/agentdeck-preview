@@ -927,11 +927,10 @@ class _MatchWorker:
                     )
             else:
                 raise RuntimeError(f"Unknown ParseFailurePolicy: {policy}")
-        except Exception as exc:
-            raise RuntimeError(
-                f"Player {player.name} failed during decide() in match {turn_context.match_id} "
-                f"turn {turn_context.turn_number}"
-            ) from exc
+        except Exception:
+            # SPEC-CONSOLE S5: provider/gameplay failures retain their actionable
+            # type and message; lifecycle cleanup adds context without replacing them.
+            raise
 
         if not isinstance(action_result, ActionResult):
             raise TypeError(

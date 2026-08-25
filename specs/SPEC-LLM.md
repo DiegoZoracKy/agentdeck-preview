@@ -1,8 +1,8 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.2.1
-> Last Updated: 2026-08-22
+> Version: 1.3.0
+> Last Updated: 2026-08-24
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: LLM integration authors, pricing/ops maintainers, execution operators
 
@@ -35,6 +35,9 @@
     that support this option MUST omit the native request field rather than
     send JSON `null`; Player configuration and Records preserve the observed
     `None` value. OR6 currently requires this behavior for OpenAI.
+  - `max_retries` is the number of retries after the initial provider attempt.
+    It MUST be a non-negative integer. `max_retries=0` therefore makes exactly
+    one provider attempt and performs no retry.
   - Defaults: PromptBuilder handshake/turn defaults and `TextRenderer`. Controller parameter is required.
 - Subclass responsibilities:
   - `_initialize_client() -> None`: Setup provider SDK; raise informative errors if missing.
@@ -72,9 +75,9 @@
 3. **CC3**: MUST call `_initialize_client` during construction; failures MUST raise actionable `ImportError`/`ValueError`.
 
 ### 5.2 Request Execution (RE)
-4. **RE1**: `_invoke_model` MUST maintain retry loop up to `max_retries`, applying exponential backoff (`retry_delay * 2**attempt`).
+4. **RE1**: `_invoke_model` MUST make one initial provider attempt and then up to `max_retries` additional attempts, applying exponential backoff (`retry_delay * 2**attempt`) before each retry. `max_retries=0` MUST still make the initial attempt.
 5. **RE2**: MUST log request/response metadata via logger when attached (phase included).
-6. **RE3**: MUST propagate final failure as `RuntimeError` with provider/model context when retries exhausted.
+6. **RE3**: MUST propagate final failure as `RuntimeError` with provider/model context and the total number of attempts (`1 + max_retries`) when retries are exhausted.
 
 ### 5.3 Metadata & Accounting (MA)
 7. **MA1**: MUST populate `usage_info` with tokens, prompt/completion tokens (when available), cost, latency_ms, model, provider identifiers.

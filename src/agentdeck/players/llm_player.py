@@ -57,7 +57,7 @@ class LLMPlayer(Player, ABC):
             handshake_template: Template for handshake phase
             turn_template: Template for turn phase
             conclusion_template: Template for conclusion phase (use None to disable)
-            max_retries: Number of API call retries
+            max_retries: Number of retries after the initial API call
             retry_delay: Delay between retries in seconds
             **kwargs: Additional provider-specific parameters
         """
@@ -68,6 +68,10 @@ class LLMPlayer(Player, ABC):
                 f"{self.__class__.__name__} requires an explicit model name. "
                 f"Pass model= when constructing the player (no built-in default)."
             )
+        if isinstance(max_retries, bool) or not isinstance(max_retries, int):
+            raise TypeError("max_retries must be a non-negative integer")
+        if max_retries < 0:
+            raise ValueError("max_retries must be a non-negative integer")
 
         super().__init__(
             name,
@@ -348,7 +352,8 @@ class LLMPlayer(Player, ABC):
         attempt_durations: List[float] = []
         attempts: List[Dict[str, Any]] = []
 
-        for attempt in range(self.max_retries):
+        total_attempts = self.max_retries + 1
+        for attempt in range(total_attempts):
             start_time = time.time()
             started_at = time.time_ns()
             self._pending_sdk_request = None
@@ -478,7 +483,7 @@ class LLMPlayer(Player, ABC):
                         },
                     }
                 )
-                if attempt == self.max_retries - 1:
+                if attempt == total_attempts - 1:
                     self.last_provider_call = {
                         "schema_version": "0.1",
                         "call_id": call_id,
@@ -496,7 +501,7 @@ class LLMPlayer(Player, ABC):
                     provider = getattr(self, "PROVIDER", "unknown")
                     raise RuntimeError(
                         f"Failed to get response from {provider}/{self.model} "
-                        f"after {self.max_retries} attempts: {exc}"
+                        f"after {total_attempts} attempts: {exc}"
                     ) from exc
                 delay = self.retry_delay * (2**attempt)
                 retry_durations.append(delay)
@@ -508,7 +513,10 @@ class LLMPlayer(Player, ABC):
 
         # RE3: Include provider identifier in error message
         provider = getattr(self, "PROVIDER", "unknown")
-        raise RuntimeError(f"Failed to get response from {provider}/{self.model}")
+        raise RuntimeError(
+            f"Failed to get response from {provider}/{self.model} "
+            f"after {total_attempts} attempts"
+        )
 
     def reset_conversation(self):
         """Reset conversation history for a new match."""
