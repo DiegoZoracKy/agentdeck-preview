@@ -32,6 +32,7 @@ class LLMPlayer(Player, ABC):
         model: Optional[str] = None,
         temperature: Optional[float] = 1.0,
         max_tokens: Optional[int] = None,
+        prompt: Optional[str] = None,
         context_policy: Optional[Dict[str, Any] | str] = None,
         controller: Controller,
         renderer: Optional[Renderer] = None,
@@ -52,6 +53,7 @@ class LLMPlayer(Player, ABC):
             temperature: Response randomness (0-2, default 1.0), or None to
                 leave the setting to a supporting provider
             max_tokens: Maximum response length (None for no limit)
+            prompt: Optional provider-neutral system instruction
             controller: Unified controller for all phases (required, game-specific)
             renderer: State formatter (optional, uses TextRenderer if None)
             handshake_template: Template for handshake phase
@@ -72,6 +74,8 @@ class LLMPlayer(Player, ABC):
             raise TypeError("max_retries must be a non-negative integer")
         if max_retries < 0:
             raise ValueError("max_retries must be a non-negative integer")
+        if prompt is not None and not isinstance(prompt, str):
+            raise TypeError("prompt must be a string or None")
 
         super().__init__(
             name,
@@ -100,7 +104,7 @@ class LLMPlayer(Player, ABC):
         # as properties for easier access in LLMPlayer methods
         self.temperature = self.config.get("temperature", 1.0)
         self.max_tokens = self.config.get("max_tokens", None)
-        self.prompt = self.config.get("prompt", None)
+        self.prompt = prompt
         self.context_policy = self._normalize_context_policy(context_policy)
 
         # Tracking
@@ -143,6 +147,7 @@ class LLMPlayer(Player, ABC):
             model=self.model,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
+            prompt=self.prompt,
             context_policy=copy.deepcopy(self.context_policy),
             controller=controller,
             renderer=renderer,
@@ -154,8 +159,7 @@ class LLMPlayer(Player, ABC):
             **copy.deepcopy(self.config),
         )
 
-        # Preserve optional system prompt and aggregate metrics
-        clone.prompt = self.prompt
+        # Preserve aggregate metrics
         clone.total_tokens = self.total_tokens
         clone.total_cost = self.total_cost
         clone.response_times = copy.deepcopy(self.response_times)

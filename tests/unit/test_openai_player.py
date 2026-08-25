@@ -5,6 +5,7 @@ import types
 import pytest
 
 from agentdeck.controllers.action_only import ActionOnlyController
+from agentdeck.core.types import PromptBundle
 from agentdeck.players.openai_player import GPTPlayer
 
 
@@ -96,6 +97,22 @@ def test_openai_player_joins_multiple_system_messages(monkeypatch):
         {"role": "assistant", "content": "Prev"},
         {"role": "user", "content": "Now"},
     ]
+
+
+def test_openai_player_prompt_is_system_instruction_not_sdk_config(monkeypatch):
+    response = _DummyResponse(output_text="ATTACK", model="gpt-5")
+    player = _build_player(
+        monkeypatch,
+        response,
+        prompt="Classify the current case.",
+    )
+
+    player._invoke_model(PromptBundle(text="Case text", blocks=[]), None)
+
+    kwargs = player.client.responses.last_kwargs
+    assert kwargs["instructions"] == "Classify the current case."
+    assert "prompt" not in kwargs
+    assert "prompt" not in player.config
 
 
 def test_openai_player_omits_unset_temperature_and_records_that_configuration(

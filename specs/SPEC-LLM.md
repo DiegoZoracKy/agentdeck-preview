@@ -1,7 +1,7 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.3.1
+> Version: 1.3.2
 > Last Updated: 2026-08-24
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: LLM integration authors, pricing/ops maintainers, execution operators
@@ -27,7 +27,7 @@
 - **Prompt hygiene**: For template-driven conclusion prompts, sanitize engine bookkeeping keys from rendered final-state views before LLM invocation.
 
 ## 4. Public API
-- `LLMPlayer(name, *, api_key=None, model=None, temperature=1.0, max_tokens=None, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, max_retries=3, retry_delay=1.0, **kwargs)`
+- `LLMPlayer(name, *, api_key=None, model=None, temperature=1.0, max_tokens=None, prompt=None, controller, renderer=None, handshake_template=None, turn_template=None, conclusion_template=None, max_retries=3, retry_delay=1.0, **kwargs)`
   - **Note**: Single `controller` parameter per SPEC-PLAYER v1.2.0 / SPEC-CONTROLLER v1.3.0.
   - `conclusion_template=None` disables conclusion prompt composition; player SHOULD still record minimal conclusion prompt metadata for observability.
   - `kwargs` forwarded to provider (top_p, penalties, optional `prompt`, etc.).
@@ -35,6 +35,9 @@
     that support this option MUST omit the native request field rather than
     send JSON `null`; Player configuration and Records preserve the observed
     `None` value. OR6 currently requires this behavior for OpenAI.
+  - `prompt` is a provider-neutral system instruction owned by the Player. It
+    MUST NOT be retained in provider-specific `config` or forwarded as a native
+    SDK option.
   - `max_retries` is the number of retries after the initial provider attempt.
     It MUST be a non-negative integer. `max_retries=0` therefore makes exactly
     one provider attempt and performs no retry.
