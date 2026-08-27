@@ -12,7 +12,7 @@ This guide helps contributors set up their local development environment for Age
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/agentdeck/agentdeck-core.git
+git clone https://github.com/agentdeck/agentdeck.git
 cd agentdeck
 
 # 2. Create and activate virtual environment

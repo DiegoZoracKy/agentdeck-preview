@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agentdeck-ai"
 dynamic = ["version"]
-description = "The execution and evidence engine for AI agents in game scenarios"
+description = "The game console and execution engine for AI agents in game scenarios"
 keywords = ["agent execution", "agent evaluation", "game simulation", "llm"]
 readme = "README.md"
 authors = [
@@ -68,13 +68,17 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/agentdeck/agentdeck-core"
-Documentation = "https://github.com/agentdeck/agentdeck-core/blob/main/docs/README.md"
-Repository = "https://github.com/agentdeck/agentdeck-core.git"
-Issues = "https://github.com/agentdeck/agentdeck-core/issues"
+Homepage = "https://github.com/agentdeck/agentdeck"
+Documentation = "https://github.com/agentdeck/agentdeck/blob/main/docs/README.md"
+Repository = "https://github.com/agentdeck/agentdeck.git"
+Issues = "https://github.com/agentdeck/agentdeck/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = [
+    "agentdeck.research*",
+    "agentdeck.instruments*",
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "agentdeck.__version__"}

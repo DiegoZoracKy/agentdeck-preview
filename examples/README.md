@@ -420,6 +420,6 @@ JSON includes `project_id`, AgentDeck can infer the Vertex project automatically
 
 ## Questions?
 
-- GitHub Issues: https://github.com/agentdeck/agentdeck-core/issues
+- GitHub Issues: https://github.com/agentdeck/agentdeck/issues
 - Documentation: See `docs/` directory
 - Examples: This directory (`examples/`)

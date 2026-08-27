@@ -146,7 +146,8 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
    - Check pragmatic implementability and edge cases
 3. **Incorporate feedback** - Refine specs based on reviews
    - Update draft in `specs/drafts/`
-4. **Consensus gate** - **Required approvers must approve before Phase B**
+4. **Maintainer gate** - **A maintainer must approve before Phase B**
+   - AgentDeck is currently maintainer-led while the contributor model evolves
    - Once approved, move spec from `drafts/` to `specs/`
    - Update version in main spec file (or create new file for major versions)
 
@@ -160,7 +161,7 @@ Phase A: Specification → Phase B: Implementation → Phase C: Testing & Valida
 - [ ] All invariants documented (e.g., GB1-GB6)
 - [ ] All success criteria defined
 - [ ] All edge cases addressed
-- [ ] Required approvers confirm requirements are met
+- [ ] A maintainer confirms requirements are met
 - [ ] Technical soundness confirmed
 - [ ] Implementability confirmed
 
@@ -713,7 +714,7 @@ Contributor: "SPEC-PRICING draft ready for review."
 
 - **Documentation**: Read [SPEC.md](specs/SPEC.md) and component specs in `specs/`
 - **Examples**: Check `examples/` directory for working code
-- **Questions**: Ask in team discussions or GitHub issues
+- **Questions**: Ask in GitHub issues or Discussions when enabled
 
 ---
 

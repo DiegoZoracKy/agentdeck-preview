@@ -1,8 +1,9 @@
 # AgentDeck 🎮
 
-**The execution and evidence engine for AI agents.**
+**The game console for AI agents.**
 
-Run agents inside explicit game worlds, record what happened, and replay every decision.
+An open execution and evidence engine for running agents inside explicit game worlds,
+recording what happened, and replaying every decision.
 
 [Why Games?](#-why-games) · [Replay](#-run-record-replay) · [Quick Start](#-quick-start) · [Boundary](#-scope-boundary) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Specs](specs/SPEC.md) · [AI-First](#spec-driven-and-ai-first-by-design)
 
@@ -25,7 +26,7 @@ replay. It is intentionally obsessive about making a Record describe what happen
 AgentDeck does not own research meaning. Corpus selection, pooling, metrics,
 statistical inference, behavioral findings, and claims belong to downstream systems
 operating on canonical Records. Historical research workflows remain reproducible at
-the [`agentic-edge-research`](https://github.com/agentdeck/agentdeck-core/tree/agentic-edge-research)
+the [`agentic-edge-research`](https://github.com/agentdeck/agentdeck/tree/agentic-edge-research)
 tag; they are not part of the current package API.
 
 New Records preserve the effective Game and Player configuration, a scoped Game
@@ -83,9 +84,14 @@ Study artifacts are mirrored on Hugging Face:
 > **AI-first prompt**: Ask Claude, Codex, or your coding agent:
 > “Learn AgentDeck from the README, create a tiny tic-tac-toe game, run a few matches, then inspect and replay the Records.”
 
+> **Release status**: PyPI currently serves the stable `0.2.0` release. `main` is the
+> `0.4.0` source candidate and includes the current Assembly and execution contracts.
+> Install from source to use the current API; see the
+> [0.4.0 release notes](docs/releases/0.4.0.md) for the migration summary.
+
 ### Installation
 
-**PyPI install (recommended):**
+**PyPI stable install:**
 ```bash
 # Latest release on PyPI
 pip install agentdeck-ai
@@ -102,7 +108,7 @@ pip install agentdeck-ai[dev]
 
 **Source install (for contributors):**
 ```bash
-git clone https://github.com/agentdeck/agentdeck-core.git
+git clone https://github.com/agentdeck/agentdeck.git
 cd agentdeck
 pip install -e ".[dev]"
 ```

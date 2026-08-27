@@ -14,11 +14,20 @@ not a product roadmap.
 - Build the candidate artifacts and compare the candidate `sdist` against the
   latest published `sdist` on PyPI. Choose the version number from that diff,
   not from the size of the final release commit.
+- Build release artifacts from a clean clone or disposable worktree. Setuptools
+  can retain removed packages from local ignored source and `build/` directories;
+  artifacts built in a long-lived development worktree are not release candidates.
 - Run the local checks:
 
 ```bash
 ./scripts/ci.sh
-python -m build --sdist --wheel
+
+RELEASE_ROOT="$(mktemp -d /tmp/agentdeck-release.XXXXXX)"
+git clone --local . "$RELEASE_ROOT/source"
+(
+  cd "$RELEASE_ROOT/source"
+  python -m build --sdist --wheel --outdir "$RELEASE_ROOT/dist"
+)
 ```
 
 ### Published Package Diff Gate
@@ -27,7 +36,7 @@ Before publishing, compare against the package that users can actually install:
 
 ```bash
 PREVIOUS=0.2.0
-CANDIDATE=0.3.0
+CANDIDATE=0.4.0
 WORKDIR=/tmp/agentdeck-release-diff
 export PREVIOUS CANDIDATE WORKDIR
 
@@ -50,7 +59,7 @@ with urllib.request.urlopen(sdist["url"], timeout=30) as r:
 PY
 
 tar -xzf "$WORKDIR/agentdeck_ai-$PREVIOUS.tar.gz" -C "$WORKDIR/previous" --strip-components=1
-tar -xzf "dist/agentdeck_ai-$CANDIDATE.tar.gz" -C "$WORKDIR/candidate" --strip-components=1
+tar -xzf "$RELEASE_ROOT/dist/agentdeck_ai-$CANDIDATE.tar.gz" -C "$WORKDIR/candidate" --strip-components=1
 diff -ru "$WORKDIR/previous/src/agentdeck" "$WORKDIR/candidate/src/agentdeck" | less
 ```
 

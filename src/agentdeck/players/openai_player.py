@@ -198,7 +198,4 @@ class GPTPlayer(LLMPlayer):
             details.append(f"reasoning_tokens={reasoning_tokens}")
         if max_output_tokens is not None:
             details.append(f"max_output_tokens={max_output_tokens}")
-        raise RuntimeError(
-            "OpenAI Responses API returned no text output "
-            f"({', '.join(details)})."
-        )
+        raise RuntimeError(f"OpenAI Responses API returned no text output ({', '.join(details)}).")
