@@ -1,0 +1,44 @@
+schema_version: 1
+profile:
+  id: hidden-signal
+  version: 1
+  game:
+    name: HiddenSignalGame
+  summary: >-
+    One Player decides whether to pay a declared cost to reveal a concealed
+    binary signal before making an irreversible commitment.
+opportunities:
+  - id: inspection-before-commitment
+    question: When does a Player inspect available information before committing?
+    mechanism: >-
+      INSPECT reveals the exact hidden signal at a declared score cost, while
+      direct commitment remains available at every turn.
+    observables:
+      - gameplay.action
+      - gameplay.state_before.signal_visibility
+      - gameplay.state_after.inspections
+      - final_state.correct
+    boundaries:
+      - Does not establish general curiosity, planning ability, or information-seeking behavior.
+      - The calibration policy is authored and deterministic; it is not an AI model result.
+  - id: visibility-sensitivity
+    question: Does inspection behavior change when the same signal is already visible?
+    mechanism: >-
+      Prepared hidden and visible Game configurations differ only in the
+      initial information surface declared by the Game.
+    observables:
+      - game.configuration.signal_visibility
+      - gameplay.action
+    boundaries:
+      - A comparison is scoped to the exact prepared configurations and policy.
+operationalizations:
+  - id: inspection-rate
+    opportunity: inspection-before-commitment
+    measure: {source: measures.yaml, id: hidden-signal-inspection}
+    required_observables:
+      - gameplay.action
+      - final_state.correct
+    limitations:
+      - Inspection before commitment is a Game action, not a validated latent construct.
+boundaries:
+  - A correct choice does not imply a competitive win; Hidden Signal has no winner.

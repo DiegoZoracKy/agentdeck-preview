@@ -1,0 +1,84 @@
+schema_version: 1
+reference:
+  id: last-potion
+  revision: 2
+  title: Last Potion
+  summary: >-
+    A small combat world for observing when an AI spends a scarce recovery
+    resource under deterministic and stochastic damage.
+study:
+  path: ../../2026-04-27-agentic-edge-strategy-stack
+  id: 2026-04-27-agentic-edge-strategy-stack
+  plan_sha256: 24e9123ad27a329318ab7270384060d1f2c1d5d6e4694c051dfa3ea3d2308bd2
+profiles:
+  - id: fixed-damage
+    path: ../../2026-04-27-agentic-edge-strategy-stack/fixed-damage-research-profile.yaml
+    profile_sha256: 2dafabe7ca7ab50c00ebee3d7ce32d8ac9bd4a61f82e2f056123594e2d316510
+  - id: variable-damage
+    path: ../../2026-04-27-agentic-edge-strategy-stack/variable-damage-research-profile.yaml
+    profile_sha256: 89eda508fd12ce1306952adf3a43032cb3e050aeec604c1cfb21c5465f6bb13c
+games:
+  - id: fixed-damage
+    assembly_run: p0_fd_bot_smoke
+    family_id: agentdeck.games.examples.fixed_damage.game:FixedDamageGame
+    implementation_sha256: fc7edb9673adf97294889b6d8f6871f730d96b5e55bb4ecbe7e47cdeea964e2b
+  - id: variable-damage
+    assembly_run: p0_vd_bot_smoke
+    family_id: agentdeck.games.examples.variable_damage.game:VariableDamageGame
+    implementation_sha256: a84ec52c336935058134f042d61bdc92dc76332b395f7d8daaf23f5bf0c033af
+measures:
+  - id: agentic-edge-outcomes
+    measure_sha256: d2e6fe7f3a301ed8a9f7c04d68e8ffca881868499f5dc1391fa348c4cb427279
+  - id: combat-behavior
+    measure_sha256: 5f4760548a81467bf1751716e42fa9e5bc2bdc0eacbf12a33b370787e59a4b1a
+stage:
+  viewer: ../../../viewer/index.html
+  renderer: ../../../viewer/renderers/fixed_damage/retro_jrpg_scene/renderer.js
+canonical_run:
+  record: ../../../viewer/matches/study-fd-03-s3-policy-flashlite-hp-vs-gpt4omini.json
+  sidecar: ../../../viewer/matches/study-fd-03-s3-policy-flashlite-hp-vs-gpt4omini.meta.json
+  record_sha256: 2241e6b034a561fa3b22ddf65f8f273d81c8a636bab290af366fcec326ae68c6
+  match_id: match_2d1955c8
+moment:
+  event_index: 24
+  turn: 20
+  player: FlashLite-S3-HP
+  action: POTION
+  statement: FlashLite-S3-HP used its final POTION at 20 HP in this Run.
+pattern:
+  evidence_file: evidence/combat-behavior.json
+  measure_id: combat-behavior
+  metric: critical-potion-response-rate
+  dimensions:
+    cell: p2-fd-frontier-s3
+    player: FlashLite-S3-HP
+  expected:
+    value: 0.5608465608465608
+    unit: proportion
+    support:
+      count: 189
+      unit: turns
+    corpus:
+      origin_kind: imported
+      record_count: 432
+      expected_record_count: 432
+      complete: true
+  statement: >-
+    Across the identified p2-fd-frontier-s3 corpus, FlashLite-S3-HP chose
+    POTION in 56.1% of 189 critical-state decision turns.
+finding:
+  id: fixed-damage-critical-recovery
+  claim: >-
+    In the declared FixedDamage Cell, the HP-grounded FlashLite Player used
+    recovery frequently when acting at critical health.
+  author:
+    name: AgentDeck acceptance authors
+    kind: human
+  limitations:
+    - Critical health is a Game-local threshold declared by the Measure.
+    - The result applies to the identified Cell, Players, prompts, provider snapshots, and schedule.
+    - This does not establish general risk preference or privileged access to hidden reasoning.
+frozen_source:
+  repository: hf://datasets/agentdeck/agentic-edge-strategy-stack-study
+  revision: f7ac119f69da08261269bc5cf85fb65741e8ae88
+  mutation: none

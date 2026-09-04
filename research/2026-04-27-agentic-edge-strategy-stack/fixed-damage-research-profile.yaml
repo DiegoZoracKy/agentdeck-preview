@@ -1,0 +1,37 @@
+schema_version: 1
+profile:
+  id: fixed-damage
+  version: 1
+  game:
+    name: FixedDamageGame
+  summary: >-
+    Repeated resource decisions under explicit health state, deterministic damage,
+    and consequential recovery trade-offs.
+opportunities:
+  - id: strategy-stack-effect
+    question: Does a declared strategy scaffold change sequential decisions and outcomes?
+    mechanism: >-
+      ATTACK and a scarce POTION repeatedly compete while the exact one-hit damage
+      threshold remains stable.
+    observables: [action, health-before, potions-before, winner, position]
+    boundaries:
+      - Does not establish a general intelligence or reasoning advantage.
+      - Stated reasoning is model testimony, not hidden chain-of-thought access.
+  - id: recovery-policy
+    question: When does a Player spend its scarce recovery resource?
+    mechanism: >-
+      POTION timing can be related exactly to visible HP, inventory, prior actions,
+      and the known fixed-damage threshold.
+    observables: [action, health-before, potions-before, final-potions]
+    boundaries:
+      - Does not establish general risk preference outside this Game.
+operationalizations:
+  - id: combat-behavior
+    opportunity: recovery-policy
+    measure: {source: measures.yaml, id: combat-behavior}
+    required_observables: [action, health-before, potions-before, final-potions]
+    limitations:
+      - Threshold meanings are Game-specific and must not be generalized automatically.
+boundaries:
+  - Competitive outcomes may contain seat effects even under paired side swaps.
+

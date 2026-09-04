@@ -15,9 +15,9 @@
 
 metadata:
   # Canonical timestamp for this pricing snapshot.
-  updated_at: "2026-02-13"
+  updated_at: "2026-09-02"
   # Backward-compatible alias kept for existing tooling.
-  last_updated: "2026-02-13"
+  last_updated: "2026-09-02"
   sources:
     - "https://openai.com/api/pricing"
     - "https://platform.claude.com/docs/en/about-claude/pricing"
@@ -282,14 +282,27 @@ openai:
 # ============================================================================
 anthropic:
   _pricing_modifiers:
-    updated_at: "2026-02-13"
+    updated_at: "2026-09-02"
     prompt_caching_multipliers:
       write_5m: 1.25
       write_1h: 2.0
       read: 0.1
     batch_discount_multiplier: 0.5
 
-  # --- Claude 4.6 Series (Latest) ---
+  # --- Claude 5 Series (Latest) ---
+  claude-opus-5:
+    input_cost_per_million: 5.00
+    output_cost_per_million: 25.00
+    last_updated: "2026-09-02"
+    tier: "standard"
+
+  claude-sonnet-5:
+    input_cost_per_million: 2.00
+    output_cost_per_million: 10.00
+    last_updated: "2026-09-02"
+    tier: "standard"
+
+  # --- Claude 4.6 Series ---
   claude-opus-4.6-latest: &claude_opus_46
     input_cost_per_million: 5.00
     output_cost_per_million: 25.00

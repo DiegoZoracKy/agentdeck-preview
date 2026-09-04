@@ -74,6 +74,8 @@ class GeminiPlayer(LLMPlayer):
             project=self._project_id,
             location=self._location,
             credentials=credentials,
+            # One transport attempt; LLMPlayer owns the declared retry budget.
+            http_options={"retry_options": {"attempts": 1}},
         )
 
     @classmethod
@@ -166,7 +168,6 @@ class GeminiPlayer(LLMPlayer):
         self._capture_sdk_request(
             "google.genai.models.generate_content",
             sdk_arguments,
-            assurance="serialized_sdk_arguments",
         )
         response = self.client.models.generate_content(
             model=self.model,
@@ -178,9 +179,18 @@ class GeminiPlayer(LLMPlayer):
 
         usage = getattr(response, "usage_metadata", None)
         if usage:
-            prompt_tokens = getattr(usage, "prompt_token_count", 0)
-            completion_tokens = getattr(usage, "candidates_token_count", 0)
-            total_tokens = getattr(usage, "total_token_count", prompt_tokens + completion_tokens)
+            provider_prompt_tokens = getattr(usage, "prompt_token_count", 0) or 0
+            tool_prompt_tokens = getattr(usage, "tool_use_prompt_token_count", 0) or 0
+            candidate_tokens = getattr(usage, "candidates_token_count", 0) or 0
+            thoughts_tokens = getattr(usage, "thoughts_token_count", None)
+            prompt_tokens = provider_prompt_tokens + tool_prompt_tokens
+            completion_tokens = candidate_tokens + (thoughts_tokens or 0)
+            provider_total_tokens = getattr(usage, "total_token_count", None)
+            total_tokens = (
+                provider_total_tokens
+                if provider_total_tokens is not None
+                else prompt_tokens + completion_tokens
+            )
             estimated = False
         else:
             # Fallback estimate: 1 token ≈ 4 characters
@@ -188,6 +198,7 @@ class GeminiPlayer(LLMPlayer):
             prompt_tokens = len(serialized_prompt) // 4
             completion_tokens = len(response_text) // 4
             total_tokens = prompt_tokens + completion_tokens
+            thoughts_tokens = None
             estimated = True
 
         cost = calculate_cost(
@@ -219,5 +230,11 @@ class GeminiPlayer(LLMPlayer):
                 self._SERVICE_ACCOUNT_B64_ENV_VAR if self._service_account_info else "adc"
             ),
         }
+        if thoughts_tokens is not None:
+            metadata["reasoning_usage"] = {
+                "tokens": thoughts_tokens,
+                "kind": "thinking",
+                "source": "google.generate_content.usage_metadata.thoughts_token_count",
+            }
 
         return response_text, metadata

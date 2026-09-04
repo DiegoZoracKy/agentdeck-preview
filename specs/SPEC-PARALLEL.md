@@ -1,8 +1,8 @@
 # SPEC-PARALLEL: Console Parallel Match Execution
 
 > Status: Final
-> Version: 1.0.0
-> Last Updated: 2026-03-17
+> Version: 1.1.0
+> Last Updated: 2026-09-04
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Contributors, Research Engineers, Observability Maintainers
 
@@ -52,7 +52,7 @@
 - **Session integrity:** console emits a single `SESSION_START`/`BATCH_START`/`MATCH_*` sequence even when matches execute in parallel.  
 - **Player order hook (v1.0 limitation):** the current implementation conservatively treats any game override of `get_player_order` as incompatible with parallel execution. Console MUST detect overrides of the base implementation and fall back to sequential execution with a warning.  
 - **Isolation:** each worker runs on deep-copied game and player instances with dedicated RNG; no mutable state is shared across matches.  
-- **Failure propagation:** first worker failure emits `BATCH_END` with partial results + error payload, and raises to caller. Best-effort cancellation of remaining workers is attempted but not guaranteed; results from failed matches are not counted.  
+- **Failure propagation:** first worker failure emits `BATCH_END` with partial results + error payload, and raises to caller. Best-effort cancellation of queued workers is attempted but not guaranteed. Already dispatched workers MUST be drained; their available events, terminal Records and known usage MUST be preserved in match-index order. Failed matches are not counted as successful results. ABORT_MATCH remains batch-terminal exactly as in serial execution (SPEC-CONSOLE PF4); it does not stop preservation of already dispatched work.
 - **Cloning failure:** if deep-copy fails for game or any player, console raises `ParallelExecutionError` before launching workers.
 - **Metric propagation:** console MUST synchronise aggregate player metrics (token usage, cost, latency samples) from worker clones back to the original player instances after each match so researchers observe consolidated statistics.
 - **Recorder compatibility:** recorder output (`agentdeck_runs/session_id/records/…`) MUST match sequential execution for identical seeds, except for wall-clock timestamps and aggregate durations.
@@ -76,7 +76,7 @@
     2. Ensure <ClassName> avoids non-serializable state (database handles, sockets, thread locks).
     3. (Future) Implement custom cloning support when available.
   ```
-- **Worker exception:** cancel outstanding futures, emit `BATCH_END` with `error`, rethrow root exception.  
+- **Worker exception:** cancel queued futures, preserve started-worker artifacts (including execution-error Records), emit `BATCH_END` with `error`, and rethrow the original exception type/message. No failed or cancelled slot is implicitly retried.
 - **Parallel-incompatible game:** when the game overrides `get_player_order`, log a warning and execute batch sequentially (effective concurrency=1) without raising.  
 - **Spectator exceptions:** no change—EventBus still isolates them.  
 - **Low match counts (< concurrency):** scheduler clamps worker count to number of matches; events replay once per completed match.  

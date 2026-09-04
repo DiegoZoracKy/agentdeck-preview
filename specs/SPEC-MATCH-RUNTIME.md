@@ -1,9 +1,9 @@
 # SPEC-MATCH-RUNTIME: Match Infrastructure Context
 
 > Status: Final
-> Version: 1.1.0
-> Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (GameplayEventData v2 delegation)
+> Version: 1.1.1
+> Last Updated: 2026-09-02
+> Implementation: ✅ Complete
 > Audience: Core contributors, mechanic authors, researchers extending execution loops
 
 ## 1. Purpose
@@ -107,6 +107,9 @@ class MatchRuntime:
 - Invokes the shared parse-failure policy pipeline (events, recorder, logging, `game.on_action_parse_failure`).  
 - Returns a `ParseFailurePolicy` enum so the mechanic can decide whether to retry, skip, forfeit, or abort.  
 - Mechanics MUST use the runtime helper rather than reaching into console internals themselves. Runtime may delegate to an internal console helper as part of that implementation.
+- The internal helper boundary MUST accept the runtime's exact Game context in
+  both sequential and parallel worker execution. Adapter signature drift MUST
+  NOT replace a controller parse failure with an infrastructure failure.
 
 ### 4.5 `fork_rng`
 - Returns a deterministic RNG fork (child of match RNG) tagged by label for debugging.  
@@ -130,6 +133,8 @@ class MatchRuntime:
 1. **Runtime Isolation (MR1)**: One runtime per match. No shared mutable state across matches or workers.
 2. **Recorder Consistency (MR2)**: `record_turn` emits `GAMEPLAY` events in execution order so Recorder captures an ordered transcript directly from the event stream.
 3. **Parse Failure Integrity (MR3)**: `handle_parse_failure` MUST emit `PLAYER_ACTION_PARSE_FAILED`, log warning, update recorder, and return a policy outcome.
+   This contract is identical for isolated `_MatchWorker` execution; invalid
+   model output remains a recorded parse failure rather than a worker crash.
 4. **RNG Traceability (MR4)**: Every RNG fork label is recorded in debug logs so researchers can trace randomness sources.
 
 > **Note**: Event ordering (lifecycle ordering, mechanic metadata injection) and exception-safety bindings are handled by mechanics (e.g., TurnLoop) rather than enforced by MatchRuntime. Backward compatibility is a versioning policy, not a runtime invariant.

@@ -1,8 +1,8 @@
-# SPEC-GAME: Game Author Contract v0.8.0
+# SPEC-GAME: Game Author Contract v0.10.0
 
 > Status: Final
-> Version: 0.8.0
-> Last Updated: 2026-08-14
+> Version: 0.10.0
+> Last Updated: 2026-09-03
 > Base Version: 0.6.0 (Final)
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Review State: Consensus-approved
@@ -213,6 +213,7 @@ class ParseFailurePolicy(Enum):
 Games SHOULD use these canonical outcomes when deciding how to handle controller parsing failures.
 
 ### on_action_parse_failure(self, player_name: str, error: ActionParseError, turn_context: TurnContext) -> ParseFailurePolicy *(new in v0.6.0)*
+- A single-player Game MUST explicitly override this policy hook; inherited FORFEIT requires an opponent. Use ABORT_MATCH when an invalid response should stop the batch after preserving its Record.
 - Accept: failing `player_name`, structured `ActionParseError` (with embedded `ParseResult`), and immutable `TurnContext` snapshot.
 - Default implementation: return `ParseFailurePolicy.FORFEIT` so the opponent wins and the match continues.
 - Games MAY override to implement domain-specific policies (skip turn, forfeit, retry once).
@@ -319,7 +320,7 @@ prompt player → `parse_conclusion()` → `on_conclusion_received()` → emit P
 MATCH_END.
 
 ### on_handshake_complete(game_state, player, handshake_result) -> Dict[str, Any] *(new in v0.7.0)*
-- **Role**: Process handshake metadata after successful validation, before MATCH_START.
+- **Role**: Process handshake metadata after successful validation and MATCH_START, before gameplay.
 - Accept: Initial `game_state` (from `setup`), player name, `HandshakeResult` from controller.
 - Perform: Extract and store metadata (e.g., persona, initial strategy) into state.
 - Return: Updated JSON-serializable dict.
@@ -435,7 +436,7 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 36. **HS5**: Every new hook MUST include regression test proving FixedDamageGame produces identical results.
 
 ### 5.11 Lifecycle Hooks (LH) — *New in v0.7.0*
-37. **LH1**: `on_handshake_complete()` MUST be called after successful handshake validation, before MATCH_START event.
+37. **LH1**: `on_handshake_complete()` MUST be called after successful handshake validation and after MATCH_START, before any turn or `game.run()` delegation.
 38. **LH2**: `on_match_forfeited()` MUST be called after forfeit decision, before MATCH_END event, with emitter still bound.
 39. **LH3**: `requires_conclusion()` MUST be called after `status.is_over == True` and only when the Console conclusion policy is enabled.
 40. **LH4**: Game-specific conclusion handling (prompt + `on_conclusion_received`) MUST only execute if `requires_conclusion()` returns a player included in the policy-selected conclusion set.
@@ -455,7 +456,7 @@ def on_handshake_complete(self, game_state, player, handshake_result):
 ## 6. Data Flow & Interaction
 - **Session init**: Facade → Console (game, players, seed) → game.setup(players, seed) → canonical `game_state`.
 - **Player ordering**: Console.run() → **game.get_player_order(players, rng=match_rng, match_context)** → returns None or custom list → Console applies configured fairness policy or validates custom order → records `player_order`, `player_order_source`, `first_player`, and fairness metadata.
-- **Handshake phase** *(updated in v0.7.0)*: Console._run_handshake() → Player.build_handshake_bundle() → PLAYER_HANDSHAKE_START → Player.execute_handshake() → Controller.validate_handshake() → **game.on_handshake_complete(state, player, handshake_result)** → updated state → PLAYER_HANDSHAKE_COMPLETE event → repeat for each player → MATCH_START.
+- **Handshake phase** *(updated in v0.9.0)*: provider-free `game.setup()` → MATCH_START opens the canonical recording envelope → Console._run_handshake() → Player.build_handshake_bundle() → PLAYER_HANDSHAKE_START → Player.execute_handshake() → Controller.validate_handshake() → on success, **game.on_handshake_complete(state, player, handshake_result)** and PLAYER_HANDSHAKE_COMPLETE; on rejection, PLAYER_HANDSHAKE_ABORT → canonical incomplete MATCH_END with no `game.run()`.
 - **Match execution**: Console._play_match() → constructs `MatchRuntime` → **game.run(runtime, ordered_players)** → mechanic helper (TurnLoop, etc.) → (final_state, events, truncated).
 - **Turn sequencing**: TurnLoop._execute_turn() → **game.get_current_player(game_state, players)** → identify acting player → proceed with turn.
 - **View generation**: Console → game.get_view(game_state, player) → Renderer.format(view) → Player.decide().

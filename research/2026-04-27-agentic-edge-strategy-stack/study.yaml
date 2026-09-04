@@ -1,0 +1,170 @@
+schema_version: 1
+study:
+  id: 2026-04-27-agentic-edge-strategy-stack
+  title: "The Agentic Edge: Strategy Stack Effects on LLM Agency"
+  question: >-
+    Can strategy stacks change LLM agent behavior enough to overcome model-tier
+    differences in sequential decision environments?
+  intent: confirmatory
+  hypotheses:
+    - id: h1
+      statement: Strategy scaffolding changes behavior within the same model.
+    - id: h2
+      statement: >-
+        A scaffolded lower-tier model can overcome an unscaffolded higher-tier
+        model in FixedDamage.
+    - id: h3
+      statement: The strategy effect transfers imperfectly to stochastic VariableDamage.
+execution_groups:
+  - id: p0
+    phase: p0
+    entrypoint: assembly_p0.py
+    artifacts: &assembly_artifacts
+      - assembly_common.py
+      - matrix.yaml
+      - manifest.yaml
+      - prompts/handshake_default.txt
+      - prompts/turn_action_only.txt
+      - prompts/turn_fixed_full_stack.txt
+      - prompts/turn_reasoning.txt
+      - prompts/turn_variable_full_stack.txt
+  - id: p1
+    phase: p1
+    entrypoint: assembly_p1.py
+    artifacts: *assembly_artifacts
+  - id: p2
+    phase: p2
+    entrypoint: assembly_p2.py
+    artifacts: *assembly_artifacts
+  - id: p3
+    phase: p3
+    entrypoint: assembly_p3.py
+    artifacts: *assembly_artifacts
+phases:
+  - {id: p0, kind: preflight}
+  - {id: p1, kind: pilot}
+  - {id: p2, kind: study}
+  - {id: p3, kind: supplemental}
+conditions:
+  - {id: attack-bot-s0-ao, description: "attack_bot under S0_AO."}
+  - {id: potion80-bot-s0-ao, description: "potion80_bot under S0_AO."}
+  - {id: flashlite-s0-ao, description: "flashlite under S0_AO."}
+  - {id: gpt4omini-s0-ao, description: "gpt4omini under S0_AO."}
+  - {id: flashlite-s1-rc, description: "flashlite under S1_RC."}
+  - {id: flashlite-s3-fixed-full, description: "flashlite under S3_FIXED_FULL."}
+  - {id: flashlite-s3-variable-full, description: "flashlite under S3_VARIABLE_FULL."}
+cells:
+  - id: p0-fd-bot-smoke
+    execution_group: p0
+    assembly_run: p0_fd_bot_smoke
+    assignments:
+      - {condition: attack-bot-s0-ao, target: {scope: player, name: AttackBot-AO}}
+      - {condition: potion80-bot-s0-ao, target: {scope: player, name: Potion80Bot-AO}}
+  - id: p0-vd-bot-smoke
+    execution_group: p0
+    assembly_run: p0_vd_bot_smoke
+    assignments:
+      - {condition: attack-bot-s0-ao, target: {scope: player, name: AttackBot-AO}}
+      - {condition: potion80-bot-s0-ao, target: {scope: player, name: Potion80Bot-AO}}
+  - id: p1-fd-tier-gap-s0
+    execution_group: p1
+    assembly_run: p1_fd_tier_gap_s0
+    assignments:
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p1-fd-controller-effect-s1
+    execution_group: p1
+    assembly_run: p1_fd_controller_effect_s1
+    assignments:
+      - {condition: flashlite-s1-rc, target: {scope: player, name: FlashLite-S1-RC}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p1-fd-full-stack-effect-s3
+    execution_group: p1
+    assembly_run: p1_fd_full_stack_effect_s3
+    assignments:
+      - {condition: flashlite-s3-fixed-full, target: {scope: player, name: FlashLite-S3-HP}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p1-fd-frontier-s3
+    execution_group: p1
+    assembly_run: p1_fd_frontier_s3
+    assignments:
+      - {condition: flashlite-s3-fixed-full, target: {scope: player, name: FlashLite-S3-HP}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p1-vd-tier-gap-s0
+    execution_group: p1
+    assembly_run: p1_vd_tier_gap_s0
+    assignments:
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p1-vd-controller-effect-s1
+    execution_group: p1
+    assembly_run: p1_vd_controller_effect_s1
+    assignments:
+      - {condition: flashlite-s1-rc, target: {scope: player, name: FlashLite-S1-RC}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p1-vd-full-stack-effect-s3
+    execution_group: p1
+    assembly_run: p1_vd_full_stack_effect_s3
+    assignments:
+      - {condition: flashlite-s3-variable-full, target: {scope: player, name: FlashLite-S3-RISK}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p1-vd-frontier-s3
+    execution_group: p1
+    assembly_run: p1_vd_frontier_s3
+    assignments:
+      - {condition: flashlite-s3-variable-full, target: {scope: player, name: FlashLite-S3-RISK}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p2-fd-tier-gap-s0
+    execution_group: p2
+    assembly_run: p2_fd_tier_gap_s0
+    assignments:
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p2-fd-controller-effect-s1
+    execution_group: p2
+    assembly_run: p2_fd_controller_effect_s1
+    assignments:
+      - {condition: flashlite-s1-rc, target: {scope: player, name: FlashLite-S1-RC}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p2-fd-full-stack-effect-s3
+    execution_group: p2
+    assembly_run: p2_fd_full_stack_effect_s3
+    assignments:
+      - {condition: flashlite-s3-fixed-full, target: {scope: player, name: FlashLite-S3-HP}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p2-fd-frontier-s3
+    execution_group: p2
+    assembly_run: p2_fd_frontier_s3
+    assignments:
+      - {condition: flashlite-s3-fixed-full, target: {scope: player, name: FlashLite-S3-HP}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p2-vd-tier-gap-s0
+    execution_group: p2
+    assembly_run: p2_vd_tier_gap_s0
+    assignments:
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p2-vd-controller-effect-s1
+    execution_group: p2
+    assembly_run: p2_vd_controller_effect_s1
+    assignments:
+      - {condition: flashlite-s1-rc, target: {scope: player, name: FlashLite-S1-RC}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p2-vd-full-stack-effect-s3
+    execution_group: p2
+    assembly_run: p2_vd_full_stack_effect_s3
+    assignments:
+      - {condition: flashlite-s3-variable-full, target: {scope: player, name: FlashLite-S3-RISK}}
+      - {condition: flashlite-s0-ao, target: {scope: player, name: FlashLite-S0-AO}}
+  - id: p2-vd-frontier-s3
+    execution_group: p2
+    assembly_run: p2_vd_frontier_s3
+    assignments:
+      - {condition: flashlite-s3-variable-full, target: {scope: player, name: FlashLite-S3-RISK}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}
+  - id: p3-fd-frontier-s1
+    execution_group: p3
+    assembly_run: p3_fd_frontier_s1
+    assignments:
+      - {condition: flashlite-s1-rc, target: {scope: player, name: FlashLite-S1-RC}}
+      - {condition: gpt4omini-s0-ao, target: {scope: player, name: GPT4oMini-S0-AO}}

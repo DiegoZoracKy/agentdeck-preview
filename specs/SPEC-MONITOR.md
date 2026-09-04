@@ -1,15 +1,16 @@
 # SPEC-MONITOR: Console Observation Contract
 
 > Status: Final
-> Version: 1.0.0
-> Last Updated: 2026-02-03
+> Version: 1.1.0
+> Last Updated: 2026-09-01
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Monitor authors, system observability engineers, core contributors
 
 ## 1. Purpose
 - Define the observer interface for monitoring console/system-level events (progress, worker status, execution health) independent of match narrative.
 - Establish a two-tier observation system: **Spectators** (match events) and **Monitors** (console events).
-- Enable researchers to track execution progress during parallel batch runs without modifying existing spectator semantics.
+- Enable callers to track execution progress and a bounded live turn projection
+  during batch runs without modifying existing spectator or Record semantics.
 - Preserve the gaming console analogy: spectators watch matches (fans in arena), monitors watch system (production crew/scoreboard).
 
 ## 2. Scope & Philosophy Alignment
@@ -18,7 +19,10 @@
 - **Research-first (SPEC §1):** Addresses "silent execution" problem during long parallel batches where researchers lack visibility into completion status.
 - **Clean slate design:** Two distinct event pipelines (match EventBus vs console EventBus) with clear boundaries; no legacy compatibility burden.
 - **Composition over inheritance:** Both Spectators and Monitors share base event handler patterns (`on_<event>`) but observe different event buses.
-- Non-goals: match narrative (SPEC-SPECTATOR), recording (SPEC-RECORDER), gameplay events (SPEC-OBSERVABILITY).
+- Non-goals: replay-order match narrative (SPEC-SPECTATOR), recording
+  (SPEC-RECORDER), or a second gameplay event bus. The console tier MAY expose a
+  bounded worker-turn projection for live operational feedback; that projection
+  is not a replay or execution authority.
 
 ## 3. Responsibilities
 
@@ -53,6 +57,11 @@
 |-------|----------|--------------|----------|
 | **Spectators** | Match reporting (handshakes, turns, conclusions) | Buffered, replayed in order (preserves determinism) | MatchReporter, StatsTracker, TokenUsageTracker |
 | **Monitors** | Console/system events (progress, workers, execution health) | Live, immediate (enables real-time feedback) | ProgressMonitor, custom console monitors |
+
+`CONSOLE_WORKER_TURN` is a deliberately bounded exception to pure system
+metadata. It carries only the current Match slot, Player, action value, public
+state snapshots, and turn context needed for live progress. It MUST NOT carry
+prompt text, provider response text, usage secrets, or private reasoning.
 
 ### 3.2 Monitor Base Class
 - Provides duck-typed `on_console_*` event handlers (similar to Spectator's `on_*` handlers).
@@ -123,6 +132,10 @@ class Monitor:
         """Called when a parallel worker begins executing a match."""
         pass
 
+    def on_console_worker_turn(self, event: Event) -> None:
+        """Called when any worker emits one completed gameplay turn."""
+        pass
+
     def on_console_worker_complete(self, event: Event) -> None:
         """Called when a parallel worker completes successfully."""
         pass
@@ -145,6 +158,7 @@ class EventType(str, Enum):
     CONSOLE_BATCH_START = "console_batch_start"
     CONSOLE_BATCH_PROGRESS = "console_batch_progress"
     CONSOLE_WORKER_START = "console_worker_start"
+    CONSOLE_WORKER_TURN = "console_worker_turn"
     CONSOLE_WORKER_COMPLETE = "console_worker_complete"
     CONSOLE_WORKER_FAILED = "console_worker_failed"
     CONSOLE_BATCH_COMPLETE = "console_batch_complete"
@@ -178,6 +192,20 @@ class EventType(str, Enum):
     "match_index": int,
     "seed": Optional[int],
     "started_at": float
+}
+
+# CONSOLE_WORKER_TURN
+{
+    "worker_id": int,
+    "match_index": int,
+    "match_id": str,
+    "seed": Optional[int],
+    "turn_number": int,
+    "phase_index": int,
+    "player": str,
+    "action": str,
+    "state_before": Dict[str, Any],
+    "state_after": Dict[str, Any]
 }
 
 # CONSOLE_WORKER_COMPLETE
@@ -396,23 +424,29 @@ class ProgressMonitor(Monitor):
 9. **EM4**: Console MUST emit `CONSOLE_BATCH_COMPLETE` after last match completes.
 10. **EM5**: Console MUST emit `CONSOLE_WORKER_*` events only during parallel execution (`concurrency > 1`).
 11. **EM6**: Console MUST emit `CONSOLE_BATCH_PROGRESS` at least once per completed match.
+12. **EM7**: Console MUST emit one `CONSOLE_WORKER_TURN` immediately after each
+    completed gameplay turn in sequential and parallel execution. This turn
+    event is the only `CONSOLE_WORKER_*` event permitted in sequential mode.
 
 ### 6.3 Event Isolation (EI)
-12. **EI1**: Monitors MUST NOT receive match events (MATCH_START, GAMEPLAY, TURN_START, etc.).
-13. **EI2**: Spectators MUST NOT receive console events (CONSOLE_BATCH_START, CONSOLE_WORKER_*, etc.).
-14. **EI3**: Monitor exceptions MUST NOT crash batch execution (isolated via EventBus error handling).
-15. **EI4**: Monitor failures MUST be logged via AgentDeckLogger without propagating to caller.
+13. **EI1**: Monitors MUST NOT receive events from the match EventBus. The
+    bounded console worker-turn projection is a distinct console event.
+14. **EI2**: Spectators MUST NOT receive console events (CONSOLE_BATCH_START, CONSOLE_WORKER_*, etc.).
+15. **EI3**: Monitor exceptions MUST NOT crash batch execution (isolated via EventBus error handling).
+16. **EI4**: Monitor failures MUST be logged via AgentDeckLogger without propagating to caller.
+17. **EI5**: `CONSOLE_WORKER_TURN` MUST exclude prompt text, provider response
+    text, provider-call payloads, usage details, and private reasoning.
 
 ### 6.4 Progress Reporting Accuracy (PA)
-16. **PA1**: ProgressMonitor MUST display accurate completed/total counts at all times.
-17. **PA2**: ProgressMonitor MUST calculate ETA based on average match duration (not available until first match completes).
-18. **PA3**: ProgressMonitor MUST update progress atomically (no race conditions during parallel execution).
-19. **PA4**: ProgressMonitor MUST handle worker failures gracefully (increment failed count, continue reporting).
+18. **PA1**: ProgressMonitor MUST display accurate completed/total counts at all times.
+19. **PA2**: ProgressMonitor MUST calculate ETA based on average match duration (not available until first match completes).
+20. **PA3**: ProgressMonitor MUST update progress atomically (no race conditions during parallel execution).
+21. **PA4**: ProgressMonitor MUST handle worker failures gracefully (increment failed count, continue reporting).
 
 ### 6.5 Backward Compatibility (BC)
-20. **BC1**: Existing code without `monitors` field MUST work unchanged (default behavior applies).
-21. **BC2**: Sequential execution (`concurrency=1`) MUST NOT show progress output unless monitors explicitly provided.
-22. **BC3**: Spectator behavior MUST remain unchanged (match EventBus unaffected by console EventBus).
+22. **BC1**: Existing code without `monitors` field MUST work unchanged (default behavior applies).
+23. **BC2**: Sequential execution (`concurrency=1`) MUST NOT show progress output unless monitors explicitly provided.
+24. **BC3**: Spectator behavior MUST remain unchanged (match EventBus unaffected by console EventBus).
 
 ## 7. Data Flow & Interaction
 
@@ -433,7 +467,8 @@ class ProgressMonitor(Monitor):
 1. Console.run() emits CONSOLE_BATCH_START → monitors
 2. For each match (via ThreadPoolExecutor):
      a. Console emits CONSOLE_WORKER_START → monitors
-     b. Worker executes match (on separate thread)
+     b. Worker executes match (on separate thread) and emits bounded
+        CONSOLE_WORKER_TURN projections → monitors
      c. Worker completes:
           - Console emits CONSOLE_WORKER_COMPLETE → monitors
           - Console emits CONSOLE_BATCH_PROGRESS → monitors
@@ -446,7 +481,8 @@ class ProgressMonitor(Monitor):
 ```
 1. Console.run() emits CONSOLE_BATCH_START → monitors (if any)
 2. For each match (synchronous loop):
-     a. Console executes match (no worker)
+     a. Console executes match and emits bounded CONSOLE_WORKER_TURN
+        projections → explicit monitors
      b. Console emits match events to match EventBus → spectators
      c. Console emits CONSOLE_BATCH_PROGRESS → monitors (if any)
 3. Console emits CONSOLE_BATCH_COMPLETE → monitors (if any)
@@ -596,8 +632,8 @@ results = deck.play(players, matches=10)
 | Focus | Invariants | Verification Goal |
 |-------|------------|-------------------|
 | Monitor lifecycle | ML1-ML5 | Verify console EventBus created, default monitor attached when concurrency>1, logger injected |
-| Event emission | EM1-EM6 | Capture console events, verify timing/content, ensure isolation from match EventBus |
-| Event isolation | EI1-EI4 | Verify monitors don't receive match events, spectators don't receive console events, exceptions isolated |
+| Event emission | EM1-EM7 | Capture console events, verify timing/content, and observe live turns in sequential and parallel runs |
+| Event isolation | EI1-EI5 | Verify monitors don't receive match-bus events, turn projections exclude interaction secrets, spectators don't receive console events, and exceptions remain isolated |
 | Progress accuracy | PA1-PA4 | Verify counts accurate, ETA calculation correct, atomic updates, failure handling |
 | Backward compat | BC1-BC3 | Run existing code without monitors field, verify spectators unchanged, sequential execution silent |
 | Default behavior | ML2-ML4 | Test concurrency=1 (no monitor), concurrency>1 (auto-attach), explicit monitors=[] (opt-out) |

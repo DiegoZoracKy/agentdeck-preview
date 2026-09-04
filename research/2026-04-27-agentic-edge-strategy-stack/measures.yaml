@@ -1,0 +1,18 @@
+schema_version: 1
+measures:
+  - id: agentic-edge-outcomes
+    implementation:
+      entrypoint: measures.py:outcome_measure
+      artifacts: []
+    parameters: {}
+    material_distributions: []
+  - id: combat-behavior
+    implementation:
+      entrypoint: measures.py:combat_behavior_measure
+      artifacts: []
+    parameters:
+      fixed_critical_hp: 40
+      variable_max_attack_damage: 25
+      potion_heal: 30
+    material_distributions: []
+

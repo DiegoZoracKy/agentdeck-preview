@@ -1,5 +1,9 @@
 # Scripts
 
+> **Historical template:** the `agentdeck-research-*` commands below belong to
+> the `0.2` workflow preserved at the `agentic-edge-research` tag. They are not
+> available from the current `0.4` source candidate.
+
 Place experiment-specific runners and helpers here.
 
 Default expectation:

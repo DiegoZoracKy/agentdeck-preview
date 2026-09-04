@@ -25,3 +25,8 @@ def test_viewer_contracts():
 def test_viewer_smoke_check():
     """SPEC-VIEWER: shipped sample record and bundled renderers pass the smoke check."""
     _run_node("scripts/viewer_smoke_check.js")
+
+
+def test_hidden_signal_reference_stage():
+    """The current Match Surface reference remains factual, pinned, and watchable."""
+    _run_node("tests/viewer/hidden_signal_stage.js")

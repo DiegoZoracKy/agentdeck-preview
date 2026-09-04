@@ -160,6 +160,57 @@ def test_gemini_player_passes_generation_config_to_google_sdk(monkeypatch):
     assert config.temperature == 1.0
     assert config.thinking_config.thinking_budget == 0
     assert config.system_instruction == "Follow the format exactly."
+    assert player._pending_sdk_request["method"] == "google.genai.models.generate_content"
+    assert player._pending_sdk_request["assurance"] == "sent_to_official_sdk"
+    assert player._pending_sdk_request["arguments"]["model"] == "gemini-2.5-flash"
     assert metadata["prompt_tokens"] == 12
     assert metadata["completion_tokens"] == 4
     assert metadata["tokens_used"] == 16
+
+
+def test_gemini_player_prices_candidates_and_thoughts_as_output(monkeypatch):
+    monkeypatch.setenv("VERTEX_PROJECT_ID", "agentdeck-gcp-project")
+    monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS_B64", raising=False)
+
+    captured = {}
+
+    class DummyUsage:
+        prompt_token_count = 12
+        candidates_token_count = 4
+        thoughts_token_count = 6
+        total_token_count = 22
+
+    class DummyResponse:
+        text = "ACTION: ATTACK"
+        usage_metadata = DummyUsage()
+
+    class DummyModels:
+        def generate_content(self, **kwargs):
+            return DummyResponse()
+
+    def fake_init_client(self):
+        self.client = type("DummyClient", (), {"models": DummyModels()})()
+
+    def fake_calculate_cost(**kwargs):
+        captured["pricing"] = kwargs
+        return 0.123
+
+    monkeypatch.setattr(GeminiPlayer, "_initialize_client", fake_init_client)
+    monkeypatch.setattr("agentdeck.players.google_player.calculate_cost", fake_calculate_cost)
+    player = GeminiPlayer(
+        name="Gemini",
+        model="gemini-2.5-flash",
+        controller=ActionOnlyController(),
+    )
+
+    _, metadata = player._make_api_call([{"role": "user", "content": "Turn"}])
+
+    assert captured["pricing"]["prompt_tokens"] == 12
+    assert captured["pricing"]["completion_tokens"] == 10
+    assert metadata["completion_tokens"] == 10
+    assert metadata["tokens_used"] == 22
+    assert metadata["reasoning_usage"] == {
+        "tokens": 6,
+        "kind": "thinking",
+        "source": "google.generate_content.usage_metadata.thoughts_token_count",
+    }

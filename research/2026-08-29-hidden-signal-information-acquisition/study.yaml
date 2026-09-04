@@ -1,0 +1,36 @@
+schema_version: 1
+study:
+  id: 2026-08-29-hidden-signal-information-acquisition
+  title: Hidden Signal information acquisition acceptance Study
+  question: >-
+    Does the declared calibration policy inspect before committing when the
+    signal is hidden, while committing directly when the signal is visible?
+  intent: exploratory
+  hypotheses:
+    - id: h1
+      statement: The policy inspects before every hidden-signal commitment.
+    - id: h2
+      statement: The policy makes no inspection when the signal is already visible.
+execution_groups:
+  - id: current
+    phase: study
+    entrypoint: assembly.py
+    artifacts: []
+phases:
+  - {id: study, kind: study}
+conditions:
+  - id: hidden-signal
+    description: The exact prepared Game conceals the signal until inspection.
+  - id: visible-signal
+    description: The exact prepared Game exposes the signal before commitment.
+cells:
+  - id: hidden-condition
+    execution_group: current
+    assembly_run: hidden_signal
+    assignments:
+      - {condition: hidden-signal, target: {scope: run}}
+  - id: visible-condition
+    execution_group: current
+    assembly_run: visible_signal
+    assignments:
+      - {condition: visible-signal, target: {scope: run}}

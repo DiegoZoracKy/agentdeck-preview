@@ -9,6 +9,10 @@ import pytest
 
 from agentdeck.controllers.action_only import ActionOnlyController
 from agentdeck.core.conversation import ConversationManager
+from agentdeck.core.provider_call_journal import (
+    MemoryProviderCallJournal,
+    ProviderCallCustodyError,
+)
 from agentdeck.core.types import (
     ActionParseError,
     HandshakeContext,
@@ -76,6 +80,11 @@ class AuditLLMPlayer(LLMPlayer):
             "stop_reason": self.test_stop_reason,
             "response_complete": self.test_response_complete,
         }
+
+
+class RejectResponseJournal(MemoryProviderCallJournal):
+    def commit_response(self, **kwargs):
+        raise ProviderCallCustodyError("response custody unavailable")
 
 
 def _make_match_result(winner: str = "Alice"):
@@ -347,6 +356,58 @@ def test_provider_call_retains_exact_context_selection_sdk_arguments_and_respons
     assert provider_call["attempts"][0]["outcome"] == "completed"
 
 
+def test_llmplayer_propagates_reasoning_usage_and_content_block_audit():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy="no_history",
+    )
+
+    def _make_api_call(messages):
+        player._capture_sdk_request(
+            "audit.responses.create",
+            {"model": player.model, "messages": messages},
+        )
+        return "ACTION: ATTACK", {
+            "tokens_used": 12,
+            "prompt_tokens": 10,
+            "completion_tokens": 2,
+            "cost": 0.001,
+            "model": player.model,
+            "reasoning_usage": {
+                "tokens": 1,
+                "kind": "reasoning",
+                "source": "audit.usage.reasoning_tokens",
+            },
+            "provider_content_blocks": [{"type": "text", "text": "ACTION: ATTACK"}],
+        }
+
+    player._make_api_call = _make_api_call  # type: ignore[method-assign]
+
+    action = player.decide(
+        game_state={"health": {"Alice": 100, "Bob": 100}},
+        turn_context=TurnContext(
+            match_id="match-1",
+            turn_number=1,
+            turn_index=0,
+            player="Alice",
+            started_at=0.0,
+            duration=0.0,
+        ),
+    )
+
+    expected = {
+        "tokens": 1,
+        "kind": "reasoning",
+        "source": "audit.usage.reasoning_tokens",
+    }
+    assert action.metadata["usage_info"]["reasoning_usage"] == expected
+    assert action.metadata["provider_call"]["sdk_response"]["usage"]["reasoning_usage"] == expected
+    assert action.metadata["provider_call"]["sdk_response"]["content_blocks"] == [
+        {"type": "text", "text": "ACTION: ATTACK"}
+    ]
+
+
 def test_parse_failure_retains_prompt_provider_call_and_truncation_truth():
     controller = ActionOnlyController()
     controller.bind_game(FixedDamageGame())
@@ -590,6 +651,184 @@ def test_claude_player_preserves_explicit_max_tokens(monkeypatch):
     assert player._effective_max_tokens_for_request() == 1234
 
 
+def test_claude_player_projects_text_blocks_and_preserves_thinking_usage(monkeypatch):
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+        output_tokens_details = type("Details", (), {"thinking_tokens": 12})()
+
+    class _DummyBlock:
+        def __init__(self, block_type, **values):
+            self.type = block_type
+            for key, value in values.items():
+                setattr(self, key, value)
+
+    class _DummyResponse:
+        content = [
+            _DummyBlock("thinking", thinking="Private provider-exposed thought"),
+            _DummyBlock("text", text="ACTION:"),
+            _DummyBlock("text", text="ATTACK"),
+        ]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def create(self, **kwargs):
+            return _DummyResponse()
+
+    def _fake_init_client(self):
+        self.client = type("DummyClient", (), {"messages": _DummyMessagesAPI()})()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-sonnet-5",
+        max_tokens=128,
+    )
+
+    response_text, metadata = player._make_api_call([{"role": "user", "content": "test"}])
+
+    assert response_text == "ACTION:\nATTACK"
+    assert metadata["completion_tokens"] == 20
+    assert metadata["reasoning_usage"] == {
+        "tokens": 12,
+        "kind": "thinking",
+        "source": "anthropic.messages.usage.output_tokens_details.thinking_tokens",
+    }
+    assert metadata["provider_content_blocks"] == [
+        {"type": "thinking", "thinking": "Private provider-exposed thought"},
+        {"type": "text", "text": "ACTION:"},
+        {"type": "text", "text": "ATTACK"},
+    ]
+
+
+def test_claude_player_keeps_missing_thinking_usage_absent(monkeypatch):
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyResponse:
+        content = [type("TextBlock", (), {"type": "text", "text": "ACTION: ATTACK"})()]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def create(self, **kwargs):
+            return _DummyResponse()
+
+    def _fake_init_client(self):
+        self.client = type("DummyClient", (), {"messages": _DummyMessagesAPI()})()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-sonnet-5",
+    )
+
+    _, metadata = player._make_api_call([{"role": "user", "content": "test"}])
+
+    assert "reasoning_usage" not in metadata
+
+
+def test_claude_player_omits_unset_temperature(monkeypatch):
+    """Provider-default temperature must not become a native request field."""
+
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyContent:
+        text = "ACTION: ATTACK"
+
+    class _DummyResponse:
+        content = [_DummyContent()]
+        usage = _DummyUsage()
+
+    class _DummyMessagesAPI:
+        def __init__(self):
+            self.last_kwargs = None
+
+        def create(self, **kwargs):
+            self.last_kwargs = kwargs
+            return _DummyResponse()
+
+    class _DummyClient:
+        def __init__(self):
+            self.messages = _DummyMessagesAPI()
+
+    def _fake_init_client(self):
+        self.client = _DummyClient()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-haiku-4-5-20251001",
+        temperature=None,
+        max_tokens=256,
+    )
+
+    player._make_api_call([{"role": "user", "content": "test"}])
+
+    assert "temperature" not in player.client.messages.last_kwargs
+    assert "temperature" not in player._pending_sdk_request["arguments"]
+    assert player.temperature is None
+
+
+def test_claude_player_preserves_temperature_with_current_sdk_shape(monkeypatch):
+    """A removed generated parameter must use the SDK's explicit escape hatch."""
+
+    class _DummyUsage:
+        input_tokens = 10
+        output_tokens = 20
+
+    class _DummyContent:
+        text = "ACTION: ATTACK"
+
+    class _DummyResponse:
+        content = [_DummyContent()]
+        usage = _DummyUsage()
+
+    class _CurrentMessagesAPI:
+        def __init__(self):
+            self.last_kwargs = None
+
+        def create(self, *, model, messages, max_tokens, extra_body=None):
+            self.last_kwargs = {
+                "model": model,
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "extra_body": extra_body,
+            }
+            return _DummyResponse()
+
+    class _DummyClient:
+        def __init__(self):
+            self.messages = _CurrentMessagesAPI()
+
+    def _fake_init_client(self):
+        self.client = _DummyClient()
+
+    monkeypatch.setattr(ClaudePlayer, "_initialize_client", _fake_init_client)
+    player = ClaudePlayer(
+        name="Bob",
+        controller=ActionOnlyController(),
+        api_key="dummy",
+        model="claude-haiku-4-5-20251001",
+        temperature=0.7,
+        max_tokens=128,
+    )
+
+    player._make_api_call([{"role": "user", "content": "test"}])
+
+    assert player.client.messages.last_kwargs["extra_body"] == {"temperature": 0.7}
+    assert player._pending_sdk_request["arguments"]["extra_body"] == {"temperature": 0.7}
+    assert "temperature" not in player.client.messages.last_kwargs
+
+
 def test_reset_conversation_clears_conversation_manager():
     """reset_conversation should clear both local and bound conversation history."""
     player = DummyLLMPlayer(
@@ -608,3 +847,86 @@ def test_reset_conversation_clears_conversation_manager():
 
     assert player._local_history == []
     assert manager.history() == []
+
+
+def test_provider_response_is_committed_before_returning_to_downstream_code():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy="no_history",
+        max_retries=0,
+    )
+    journal = MemoryProviderCallJournal()
+    player.bind_provider_call_journal(journal)
+
+    response = player.get_response("Return one action")
+
+    assert response == "ACTION: ATTACK"
+    entry = journal.entries()[0]
+    assert entry["state"] == "response_committed"
+    assert entry["result"]["provider_call"]["sdk_response"]["response_text"] == response
+    assert entry["result"]["usage_info"]["tokens"] == 12
+
+
+def test_response_custody_failure_does_not_create_an_undeclared_retry():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy="no_history",
+        max_retries=3,
+    )
+    journal = RejectResponseJournal()
+    player.bind_provider_call_journal(journal)
+    calls = 0
+    make_api_call = player._make_api_call
+
+    def counted_call(messages):
+        nonlocal calls
+        calls += 1
+        return make_api_call(messages)
+
+    player._make_api_call = counted_call
+
+    with pytest.raises(ProviderCallCustodyError, match="custody unavailable"):
+        player.get_response("Return one action")
+
+    assert calls == 1
+    assert player.total_tokens == 0
+    assert player.total_cost == 0
+    assert journal.entries()[0]["state"] == "dispatch_started"
+
+
+def test_configured_retry_preserves_each_provider_attempt_separately():
+    player = AuditLLMPlayer(
+        name="Alice",
+        controller=ActionOnlyController(),
+        context_policy="no_history",
+        max_retries=1,
+        retry_delay=0,
+    )
+    journal = MemoryProviderCallJournal()
+    player.bind_provider_call_journal(journal)
+    make_api_call = player._make_api_call
+    calls = 0
+
+    def flaky_call(messages):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            player._capture_sdk_request(
+                "audit.responses.create",
+                {"model": player.model, "messages": messages},
+            )
+            raise ConnectionError("connection closed after dispatch")
+        return make_api_call(messages)
+
+    player._make_api_call = flaky_call
+
+    assert player.get_response("Return one action") == "ACTION: ATTACK"
+
+    entries = journal.entries()
+    assert [entry["attempt_index"] for entry in entries] == [1, 2]
+    assert {entry["call_id"] for entry in entries} == {entries[0]["call_id"]}
+    assert entries[0]["state"] == "attempt_failed"
+    assert entries[0]["provider_outcome"] == "unknown"
+    assert entries[1]["state"] == "response_committed"

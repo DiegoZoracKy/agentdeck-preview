@@ -117,6 +117,15 @@ per-cell artifacts, and P0/P1/P2/P3 raw recordings. See
 `recordings/README.md` for the storage layout and checksum pointers. The Space
 contains only the five curated viewer matches, not the full raw recording set.
 
+## Current Architecture Reproduction
+
+The package now includes a current `Study`, exact Assembly bindings, two Game
+Research Profiles, explicit outcome/behavior Measures, and a read-only frozen
+artifact reproducer. It regenerates Evidence and authored Findings from the 432
+P2/P3 Matches and checks 99 derived values against the historical artifacts.
+
+See [`reproduction.md`](reproduction.md) for the command and assurance boundary.
+
 ## Code References
 
 The live runs and artifact generation used the execution freeze recorded in
@@ -184,30 +193,21 @@ python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.p
 python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P1
 ```
 
-## Export
+## Historical Export and Current Status
 
-```bash
-agentdeck-research-export \
-  --experiment-dir research/2026-04-27-agentic-edge-strategy-stack \
-  --phase P1 \
-  --no-generated-at
+The generated results in this package were produced by the `0.2` Research
+workflow preserved at the
+[`agentic-edge-research`](https://github.com/agentdeck/agentdeck/tree/agentic-edge-research)
+tag. Its `agentdeck-research-*` commands and repository wrappers are historical;
+they are not active APIs in the current `0.4` source candidate.
 
-agentdeck-research-export \
-  --experiment-dir research/2026-04-27-agentic-edge-strategy-stack \
-  --package \
-  --no-generated-at
+Current `main` materializes this package as a normal Study and regenerates the
+complete imported RecordCorpus, Measure, Evidence, Finding, and report chain.
+The current reproducer also verifies the frozen checksum manifest and every
+source Record before adapting local copies to Recorder 2.0. This end-to-end path
+is the canonical acceptance case for the
+[Research Arc](../../docs/research-arc.md).
 
-agentdeck-research-validate --research-dir research --write-index
-```
-
-`agentdeck-research-score` is not required for the built-in FixedDamage and
-VariableDamage profiles during normal export. Add a package-local
-`scripts/behavioral_scorer.py` only if the pilot justifies custom composite
-metrics.
-
-In an uninstalled development checkout, use the repo-local wrappers instead:
-
-```bash
-python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --list-cells
-python3 scripts/research_validate.py --research-dir research
-```
+See [`reproduction.md`](reproduction.md) for the exact historical environment,
+public artifact revisions, supported current inspection commands, and the
+distinction between replay, reproduction, replication, and extension.

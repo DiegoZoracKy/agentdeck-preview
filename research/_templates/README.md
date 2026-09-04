@@ -1,5 +1,9 @@
 # Experiment Title
 
+> **Historical template:** retained to explain `0.2` Study packages. Do not copy
+> this template for new work on current `main`; the redesigned Study Package
+> contract is not yet approved or implemented.
+
 **Status**: see `manifest.yaml`  
 **Research Question**: see `manifest.yaml`  
 **Experiment ID**: use folder name (must match `manifest.yaml.experiment_id`; process-created folders use `research_...`)

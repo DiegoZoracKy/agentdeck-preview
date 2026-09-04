@@ -1,0 +1,168 @@
+schema_version: 1
+study:
+  id: reserve-courier-guided-v1
+  title: Reserve Courier guided product journey
+  question: Does misleading advice change reserve-feasible planning, and does stated
+    rationale change that observation?
+  intent: exploratory
+  hypotheses:
+  - id: h1
+    statement: Misleading dispatcher advice increases infeasible outcomes.
+  - id: h2
+    statement: Stated rationale reduces the advice effect.
+execution_groups:
+- id: calibration
+  phase: calibration
+  entrypoint: assembly_calibration.py
+  artifacts:
+  - assembly_common.py
+  - courier_game.py
+  - components.py
+  - SPEC-RESERVE-COURIER.md
+- id: extensions
+  phase: extensions
+  entrypoint: assembly_extensions.py
+  artifacts:
+  - assembly_common.py
+  - courier_game.py
+  - components.py
+  - SPEC-RESERVE-COURIER.md
+- id: smoke
+  phase: smoke
+  entrypoint: assembly_smoke.py
+  artifacts:
+  - assembly_common.py
+  - courier_game.py
+  - components.py
+  - SPEC-RESERVE-COURIER.md
+phases:
+- id: calibration
+  kind: pilot
+- id: extensions
+  kind: pilot
+- id: smoke
+  kind: pilot
+conditions:
+- id: no-advice
+  description: No dispatcher suggestion.
+- id: misleading-advice
+  description: Non-authoritative EXPRESS suggestion.
+- id: action-only
+  description: Explicit action only.
+- id: stated-rationale
+  description: Brief stated rationale; no hidden-reasoning claim.
+- id: extension
+  description: JSON, no history, conclusion and serial concurrency varied together
+    for QA.
+cells:
+- id: calibration-optimal
+  execution_group: calibration
+  assembly_run: calibration-optimal
+- id: calibration-greedy
+  execution_group: calibration
+  assembly_run: calibration-greedy
+- id: calibration-conservative
+  execution_group: calibration
+  assembly_run: calibration-conservative
+- id: extension-json
+  execution_group: extensions
+  assembly_run: extension-json
+  assignments:
+  - condition: extension
+    target:
+      scope: run
+- id: extension-rationale
+  execution_group: extensions
+  assembly_run: extension-rationale
+  assignments:
+  - condition: extension
+    target:
+      scope: run
+- id: nano-none-action
+  execution_group: smoke
+  assembly_run: nano-none-action
+  assignments:
+  - condition: no-advice
+    target:
+      scope: run
+  - condition: action-only
+    target:
+      scope: player
+      name: Courier
+- id: nano-none-rationale
+  execution_group: smoke
+  assembly_run: nano-none-rationale
+  assignments:
+  - condition: no-advice
+    target:
+      scope: run
+  - condition: stated-rationale
+    target:
+      scope: player
+      name: Courier
+- id: nano-misleading-action
+  execution_group: smoke
+  assembly_run: nano-misleading-action
+  assignments:
+  - condition: misleading-advice
+    target:
+      scope: run
+  - condition: action-only
+    target:
+      scope: player
+      name: Courier
+- id: nano-misleading-rationale
+  execution_group: smoke
+  assembly_run: nano-misleading-rationale
+  assignments:
+  - condition: misleading-advice
+    target:
+      scope: run
+  - condition: stated-rationale
+    target:
+      scope: player
+      name: Courier
+- id: mini-none-action
+  execution_group: smoke
+  assembly_run: mini-none-action
+  assignments:
+  - condition: no-advice
+    target:
+      scope: run
+  - condition: action-only
+    target:
+      scope: player
+      name: Courier
+- id: mini-none-rationale
+  execution_group: smoke
+  assembly_run: mini-none-rationale
+  assignments:
+  - condition: no-advice
+    target:
+      scope: run
+  - condition: stated-rationale
+    target:
+      scope: player
+      name: Courier
+- id: mini-misleading-action
+  execution_group: smoke
+  assembly_run: mini-misleading-action
+  assignments:
+  - condition: misleading-advice
+    target:
+      scope: run
+  - condition: action-only
+    target:
+      scope: player
+      name: Courier
+- id: mini-misleading-rationale
+  execution_group: smoke
+  assembly_run: mini-misleading-rationale
+  assignments:
+  - condition: misleading-advice
+    target:
+      scope: run
+  - condition: stated-rationale
+    target:
+      scope: player
+      name: Courier

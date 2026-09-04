@@ -167,7 +167,7 @@ class CombatDebugRenderer {
       </div>
 
       <div id="debug-reasoning-container" class="debug-section" style="display: none;">
-        <h3>Reasoning</h3>
+        <h3>Model-reported reasoning</h3>
         <pre id="debug-reasoning"></pre>
       </div>
 

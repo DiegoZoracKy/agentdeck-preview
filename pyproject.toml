@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agentdeck-ai"
 dynamic = ["version"]
-description = "The game console and execution engine for AI agents in game scenarios"
-keywords = ["agent execution", "agent evaluation", "game simulation", "llm"]
+description = "The open game console and Research system for investigating AI behavior"
+keywords = ["agent execution", "ai behavior", "game simulation", "research", "llm"]
 readme = "README.md"
 authors = [
     {name = "Diego ZoracKy"}
@@ -27,6 +27,9 @@ dependencies = [
     # Config/utilities
     "pyyaml>=6.0",
 ]
+
+[project.scripts]
+agentdeck = "agentdeck.cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -76,7 +79,6 @@ Issues = "https://github.com/agentdeck/agentdeck/issues"
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = [
-    "agentdeck.research*",
     "agentdeck.instruments*",
 ]
 
@@ -91,7 +93,7 @@ agentdeck = [
 
 [tool.black]
 line-length = 100
-target-version = ['py310', 'py311']
+target-version = ['py310']
 
 [tool.pylint.messages_control]
 max-line-length = 100
@@ -150,13 +152,3 @@ check_untyped_defs = false
 ignore_missing_imports = true
 # Note: Strict type checking (disallow_untyped_defs=true) remains a v0.1.x goal.
 # Currently disabled while existing type debt is resolved incrementally.
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-addopts = [
-    "--verbose",
-    "--cov=agentdeck",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-]

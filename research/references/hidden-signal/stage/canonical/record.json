@@ -1,0 +1,549 @@
+{
+  "schema_version": "2.0",
+  "schema_type": "match",
+  "match_id": "match_5a5b5059",
+  "game": "HiddenSignalGame",
+  "players": [
+    "SignalPolicy"
+  ],
+  "winner": null,
+  "final_state": {
+    "player": "SignalPolicy",
+    "signal": "BLUE",
+    "revealed_signal": "BLUE",
+    "signal_visibility": "hidden",
+    "inspections": 1,
+    "inspection_cost_total": 1,
+    "choice": "BLUE",
+    "correct": true,
+    "score": 1,
+    "done": true,
+    "turn": 3,
+    "_turn_count": 2,
+    "_first_player_idx": 0
+  },
+  "seed": 20260829,
+  "events": [
+    {
+      "type": "player_handshake_start",
+      "data": {
+        "player": "SignalPolicy",
+        "match_id": "match_5a5b5059",
+        "prompt_text": "Hidden Signal\n\nThe signal starts concealed. INSPECT reveals it once.\n\nActions:\n- INSPECT: reveal the signal at a cost of 1 point(s)\n- CHOOSE_RED: commit to RED\n- CHOOSE_BLUE: commit to BLUE\n\nA correct commitment earns 2 point(s) and ends the run.\nThere is no opponent, ranking, or winner.\n\nWhen gameplay begins, use this response format:\nAllowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Hidden Signal\n\nThe signal starts concealed. INSPECT reveals it once.\n\nActions:\n- INSPECT: reveal the signal at a cost of 1 point(s)\n- CHOOSE_RED: commit to RED\n- CHOOSE_BLUE: commit to BLUE\n\nA correct commitment earns 2 point(s) and ends the run.\nThere is no opponent, ranking, or winner.",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Allowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin."
+      },
+      "timestamp": 1787977398.5250468,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260829_012318_46bec5",
+        "batch_id": "batch_13a33130",
+        "match_id": "match_5a5b5059",
+        "phase_index": null,
+        "timestamp": 1787977398.5250468,
+        "monotonic_time": 554662.279285584
+      }
+    },
+    {
+      "type": "player_handshake_complete",
+      "data": {
+        "player": "SignalPolicy",
+        "accepted": true,
+        "normalized_response": "OK",
+        "response_text": "OK",
+        "controller_metadata": {
+          "allowed": [
+            "OK"
+          ],
+          "player": "SignalPolicy"
+        },
+        "controller_format": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_text": "Hidden Signal\n\nThe signal starts concealed. INSPECT reveals it once.\n\nActions:\n- INSPECT: reveal the signal at a cost of 1 point(s)\n- CHOOSE_RED: commit to RED\n- CHOOSE_BLUE: commit to BLUE\n\nA correct commitment earns 2 point(s) and ends the run.\nThere is no opponent, ranking, or winner.\n\nWhen gameplay begins, use this response format:\nAllowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>\n\nReply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+        "prompt_blocks": [
+          {
+            "key": "game_instructions",
+            "content": "Hidden Signal\n\nThe signal starts concealed. INSPECT reveals it once.\n\nActions:\n- INSPECT: reveal the signal at a cost of 1 point(s)\n- CHOOSE_RED: commit to RED\n- CHOOSE_BLUE: commit to BLUE\n\nA correct commitment earns 2 point(s) and ends the run.\nThere is no opponent, ranking, or winner.",
+            "metadata": {}
+          },
+          {
+            "key": "controller_format",
+            "content": "Allowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+            "metadata": {}
+          },
+          {
+            "key": "handshake_controller_format",
+            "content": "Reply with exactly 'OK' and nothing else if you understand and are ready to begin.",
+            "metadata": {}
+          }
+        ],
+        "renderer_output": null,
+        "usage_info": null,
+        "provider_call": null,
+        "retries": null,
+        "retry_durations": null,
+        "attempt_durations": null
+      },
+      "timestamp": 1787977398.5252724,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260829_012318_46bec5",
+        "batch_id": "batch_13a33130",
+        "match_id": "match_5a5b5059",
+        "phase_index": null,
+        "timestamp": 1787977398.5252724,
+        "monotonic_time": 554662.279511014
+      }
+    },
+    {
+      "type": "log",
+      "data": {
+        "message": "First player selected: SignalPolicy (index 0)",
+        "level": "debug",
+        "log_context": {}
+      },
+      "timestamp": 1787977398.5444307,
+      "duration": 0.1,
+      "context": {
+        "session_id": "session_20260829_012318_46bec5",
+        "batch_id": "batch_13a33130",
+        "match_id": "match_5a5b5059",
+        "phase_index": null,
+        "timestamp": 1787977398.5444307,
+        "monotonic_time": 554662.298669723
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "match_id": "match_5a5b5059",
+        "mechanic": "turn_based",
+        "phase_index": 0,
+        "player": "SignalPolicy",
+        "action": {
+          "value": "INSPECT",
+          "reasoning": null,
+          "metadata": {
+            "validated": true,
+            "allowed_actions": [
+              "CHOOSE_BLUE",
+              "INSPECT",
+              "CHOOSE_RED"
+            ],
+            "resolution_method": "explicit_action_field",
+            "declared_action": "INSPECT",
+            "contract_satisfied": true,
+            "parser_success": true
+          }
+        },
+        "interaction": {
+          "prompt_text": "=== Current Game State ===\nYou are: SignalPolicy\nTurn: 1\n\nPlayer: SignalPolicy\n\nSignal: HIDDEN\n\nSignal Visibility: hidden\n\nInspection Available: True\n\nInspections: 0\n\nInspection Cost Total: 0\n\nChoice: None\n\nCorrect: None\n\nScore: 0\n\nDone: False\n\nAllowed Actions:\n  - INSPECT\n  - CHOOSE_RED\n  - CHOOSE_BLUE\n\n=========================\n\nAllowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: SignalPolicy\nTurn: 1\n\nPlayer: SignalPolicy\n\nSignal: HIDDEN\n\nSignal Visibility: hidden\n\nInspection Available: True\n\nInspections: 0\n\nInspection Cost Total: 0\n\nChoice: None\n\nCorrect: None\n\nScore: 0\n\nDone: False\n\nAllowed Actions:\n  - INSPECT\n  - CHOOSE_RED\n  - CHOOSE_BLUE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "SignalPolicy",
+                "sections": [
+                  "turn",
+                  "player",
+                  "signal",
+                  "signal_visibility",
+                  "inspection_available",
+                  "inspections",
+                  "inspection_cost_total",
+                  "choice",
+                  "correct",
+                  "score",
+                  "done",
+                  "allowed_actions"
+                ],
+                "turn_number": 1
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Allowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: INSPECT",
+          "usage_info": null,
+          "renderer_output": {
+            "format": "text",
+            "player": "SignalPolicy",
+            "sections": [
+              "turn",
+              "player",
+              "signal",
+              "signal_visibility",
+              "inspection_available",
+              "inspections",
+              "inspection_cost_total",
+              "choice",
+              "correct",
+              "score",
+              "done",
+              "allowed_actions"
+            ],
+            "turn_number": 1
+          },
+          "controller_format": "Allowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+          "controller_metadata": null,
+          "provider_call": null,
+          "retries": 0,
+          "retry_durations": [],
+          "attempt_durations": []
+        },
+        "state_before": {
+          "player": "SignalPolicy",
+          "signal": "BLUE",
+          "revealed_signal": null,
+          "signal_visibility": "hidden",
+          "inspections": 0,
+          "inspection_cost_total": 0,
+          "choice": null,
+          "correct": null,
+          "score": 0,
+          "done": false,
+          "turn": 1
+        },
+        "state_after": {
+          "player": "SignalPolicy",
+          "signal": "BLUE",
+          "revealed_signal": "BLUE",
+          "signal_visibility": "hidden",
+          "inspections": 1,
+          "inspection_cost_total": 1,
+          "choice": null,
+          "correct": null,
+          "score": -1,
+          "done": false,
+          "turn": 2
+        },
+        "turn_context": {
+          "match_id": "match_5a5b5059",
+          "turn_number": 1,
+          "phase_index": 0,
+          "player": "SignalPolicy",
+          "started_at": 1787977398.5452435,
+          "duration": 0.00020551681518554688,
+          "ended_at": 1787977398.545449,
+          "rng_seed": 2814180946,
+          "rng_label": "turn-1-SignalPolicy"
+        }
+      },
+      "timestamp": 1787977398.5455844,
+      "duration": 0.00020551681518554688,
+      "context": {
+        "session_id": "session_20260829_012318_46bec5",
+        "batch_id": "batch_13a33130",
+        "match_id": "match_5a5b5059",
+        "phase_index": 0,
+        "timestamp": 1787977398.5455844,
+        "monotonic_time": 554662.299823414
+      }
+    },
+    {
+      "type": "gameplay",
+      "data": {
+        "match_id": "match_5a5b5059",
+        "mechanic": "turn_based",
+        "phase_index": 1,
+        "player": "SignalPolicy",
+        "action": {
+          "value": "CHOOSE_BLUE",
+          "reasoning": null,
+          "metadata": {
+            "validated": true,
+            "allowed_actions": [
+              "CHOOSE_BLUE",
+              "INSPECT",
+              "CHOOSE_RED"
+            ],
+            "resolution_method": "explicit_action_field",
+            "declared_action": "CHOOSE_BLUE",
+            "contract_satisfied": true,
+            "parser_success": true
+          }
+        },
+        "interaction": {
+          "prompt_text": "=== Current Game State ===\nYou are: SignalPolicy\nTurn: 2\n\nPlayer: SignalPolicy\n\nSignal: BLUE\n\nSignal Visibility: hidden\n\nInspection Available: False\n\nInspections: 1\n\nInspection Cost Total: 1\n\nChoice: None\n\nCorrect: None\n\nScore: -1\n\nDone: False\n\nAllowed Actions:\n  - INSPECT\n  - CHOOSE_RED\n  - CHOOSE_BLUE\n\n=========================\n\nAllowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+          "prompt_blocks": [
+            {
+              "key": "game_view",
+              "content": "=== Current Game State ===\nYou are: SignalPolicy\nTurn: 2\n\nPlayer: SignalPolicy\n\nSignal: BLUE\n\nSignal Visibility: hidden\n\nInspection Available: False\n\nInspections: 1\n\nInspection Cost Total: 1\n\nChoice: None\n\nCorrect: None\n\nScore: -1\n\nDone: False\n\nAllowed Actions:\n  - INSPECT\n  - CHOOSE_RED\n  - CHOOSE_BLUE\n\n=========================",
+              "metadata": {
+                "format": "text",
+                "player": "SignalPolicy",
+                "sections": [
+                  "turn",
+                  "player",
+                  "signal",
+                  "signal_visibility",
+                  "inspection_available",
+                  "inspections",
+                  "inspection_cost_total",
+                  "choice",
+                  "correct",
+                  "score",
+                  "done",
+                  "allowed_actions"
+                ],
+                "turn_number": 2
+              }
+            },
+            {
+              "key": "controller_format",
+              "content": "Allowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+              "metadata": {}
+            }
+          ],
+          "response_text": "ACTION: CHOOSE_BLUE",
+          "usage_info": null,
+          "renderer_output": {
+            "format": "text",
+            "player": "SignalPolicy",
+            "sections": [
+              "turn",
+              "player",
+              "signal",
+              "signal_visibility",
+              "inspection_available",
+              "inspections",
+              "inspection_cost_total",
+              "choice",
+              "correct",
+              "score",
+              "done",
+              "allowed_actions"
+            ],
+            "turn_number": 2
+          },
+          "controller_format": "Allowed actions: CHOOSE_BLUE, CHOOSE_RED, INSPECT\n\nRespond only with exactly one line:\nACTION: <action>",
+          "controller_metadata": null,
+          "provider_call": null,
+          "retries": 0,
+          "retry_durations": [],
+          "attempt_durations": []
+        },
+        "state_before": {
+          "player": "SignalPolicy",
+          "signal": "BLUE",
+          "revealed_signal": "BLUE",
+          "signal_visibility": "hidden",
+          "inspections": 1,
+          "inspection_cost_total": 1,
+          "choice": null,
+          "correct": null,
+          "score": -1,
+          "done": false,
+          "turn": 2
+        },
+        "state_after": {
+          "player": "SignalPolicy",
+          "signal": "BLUE",
+          "revealed_signal": "BLUE",
+          "signal_visibility": "hidden",
+          "inspections": 1,
+          "inspection_cost_total": 1,
+          "choice": "BLUE",
+          "correct": true,
+          "score": 1,
+          "done": true,
+          "turn": 3
+        },
+        "turn_context": {
+          "match_id": "match_5a5b5059",
+          "turn_number": 2,
+          "phase_index": 1,
+          "player": "SignalPolicy",
+          "started_at": 1787977398.5468383,
+          "duration": 0.00017118453979492188,
+          "ended_at": 1787977398.5470095,
+          "rng_seed": 1150530539,
+          "rng_label": "turn-2-SignalPolicy"
+        }
+      },
+      "timestamp": 1787977398.5471356,
+      "duration": 0.00017118453979492188,
+      "context": {
+        "session_id": "session_20260829_012318_46bec5",
+        "batch_id": "batch_13a33130",
+        "match_id": "match_5a5b5059",
+        "phase_index": 1,
+        "timestamp": 1787977398.5471356,
+        "monotonic_time": 554662.301374431
+      }
+    }
+  ],
+  "metadata": {
+    "started_at": "2026-08-29T04:23:18.524841+00:00",
+    "session_id": "session_20260829_012318_46bec5",
+    "batch_id": "batch_13a33130",
+    "context": {
+      "session_id": "session_20260829_012318_46bec5",
+      "batch_id": "batch_13a33130",
+      "match_index": 0,
+      "total_matches_in_batch": 20,
+      "end": {
+        "session_id": "session_20260829_012318_46bec5",
+        "batch_id": "batch_13a33130",
+        "match_id": "match_5a5b5059",
+        "timestamp": 1787977398.548756,
+        "monotonic_time": 554662.302994851
+      }
+    },
+    "environment": {
+      "agentdeck_version": "0.4.0",
+      "python_version": "3.10.12",
+      "git_info": {
+        "commit": "dba16759b567ebaf16f699bd88a79b4ef2b5e208",
+        "branch": "codex/miningames-acceptance-suite",
+        "dirty": true,
+        "scope": "process_working_directory_repository",
+        "repository": "agentdeck-core"
+      }
+    },
+    "player_configs": {
+      "SignalPolicy": {
+        "name": "SignalPolicy",
+        "type": "HiddenSignalCalibrationBot",
+        "module": "agentdeck_assembly_4c027b49f42acf181e7f0944",
+        "model": "hidden-signal-calibration-policy",
+        "config": {},
+        "controller": {
+          "type": "ActionOnlyController",
+          "module": "agentdeck.controllers.action_only"
+        },
+        "renderer": {
+          "name": "TextRenderer",
+          "version": "1.0.0",
+          "metadata": {
+            "show_empty": false,
+            "style": "generic"
+          }
+        },
+        "templates": {
+          "handshake": "You are playing {game_name}.\n\n{game_instructions}\n\n{player_instructions}\n\n{controller_format}\n\n{handshake_controller_format}",
+          "turn": "{game_view}\n\n{controller_format}",
+          "conclusion": null
+        }
+      }
+    },
+    "player_summaries": [
+      {
+        "name": "SignalPolicy",
+        "type": "HiddenSignalCalibrationBot",
+        "model": "hidden-signal-calibration-policy",
+        "controller": "ActionOnlyController",
+        "renderer": "TextRenderer",
+        "total_cost": 0.0
+      }
+    ],
+    "game_config": {
+      "name": "HiddenSignalGame",
+      "module": "agentdeck.games.examples.hidden_signal.game",
+      "allowed_actions": [
+        "INSPECT",
+        "CHOOSE_RED",
+        "CHOOSE_BLUE"
+      ],
+      "config": {
+        "signal_visibility": "hidden",
+        "inspection_cost": 1,
+        "correct_reward": 2
+      }
+    },
+    "game_version": {
+      "family_id": "agentdeck.games.examples.hidden_signal.game:HiddenSignalGame",
+      "declared_version": null,
+      "implementation_sha256": "ee92011e284b8e56ed7c6bdacaaf3d1cb2a3c71ddd0d6affccda0f2979508d65",
+      "fingerprint_scope": "class_source",
+      "sources": [
+        {
+          "name": "class:agentdeck.games.examples.hidden_signal.game:HiddenSignalGame",
+          "sha256": "10bb2c55a77934571659c944e520526b6b7875a89f5eb3eeb39dfb7fa2d64daf"
+        }
+      ],
+      "assurance": "class_source_only"
+    },
+    "match": {
+      "seed": 20260829,
+      "player_order": [
+        0
+      ],
+      "player_order_source": "console",
+      "first_player": {
+        "name": "SignalPolicy",
+        "index": 0,
+        "ordered_index": 0
+      },
+      "fairness_policy": {
+        "pairing_policy": "none",
+        "first_player_policy": "random",
+        "effective_player_order": [
+          0
+        ],
+        "effective_first_player": {
+          "name": "SignalPolicy",
+          "index": 0,
+          "ordered_index": 0
+        }
+      },
+      "game": "HiddenSignalGame",
+      "players": [
+        "SignalPolicy"
+      ],
+      "player_names": [
+        "SignalPolicy"
+      ],
+      "duration": 0.023627042770385742,
+      "duration_seconds": 0.023627042770385742,
+      "started_at": "2026-08-29T04:23:18.524841+00:00",
+      "ended_at": "2026-08-29T04:23:18.548468+00:00",
+      "handshake_completed": true,
+      "batch_id": "batch_13a33130",
+      "truncated_by_max_turns": false,
+      "turns": 2,
+      "player_costs": {
+        "SignalPolicy": 0.0
+      },
+      "cost": 0.0,
+      "schema_version": "2.0"
+    },
+    "session": {
+      "session_id": "session_20260829_012318_46bec5",
+      "started_at": 1787977398.5045452,
+      "seed": 20260829
+    },
+    "ended_at": "2026-08-29T04:23:18.548468+00:00",
+    "duration_seconds": 0.023627042770385742,
+    "players": [
+      "SignalPolicy"
+    ],
+    "game": "HiddenSignalGame",
+    "match_id": "match_5a5b5059",
+    "seed": 20260829
+  },
+  "batch_id": "batch_13a33130",
+  "started_at": "2026-08-29T04:23:18.524841+00:00",
+  "ended_at": "2026-08-29T04:23:18.548468+00:00",
+  "duration_seconds": 0.023627042770385742
+}

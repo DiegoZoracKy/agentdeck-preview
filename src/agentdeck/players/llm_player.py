@@ -12,8 +12,12 @@ from typing import Any, Dict, List, Optional, Tuple
 from ..core.base.controller import Controller
 from ..core.base.player import Player
 from ..core.prompt_builder import _DEFAULT_TEMPLATE
+from ..core.provider_call_journal import (
+    MemoryProviderCallJournal,
+    ProviderCallCustodyError,
+)
 from ..core.base.renderer import Renderer
-from ..core.types import LifecyclePhase, RenderResult
+from ..core.types import LifecyclePhase, PlayerResponseUnavailableError, RenderResult
 
 
 class LLMPlayer(Player, ABC):
@@ -115,6 +119,9 @@ class LLMPlayer(Player, ABC):
         self._local_history: List[Dict[str, str]] = []
         self.last_provider_call: Optional[Dict[str, Any]] = None
         self._pending_sdk_request: Optional[Dict[str, Any]] = None
+        self._active_provider_call_id: Optional[str] = None
+        self._active_provider_attempt_index: Optional[int] = None
+        self.provider_call_journal = MemoryProviderCallJournal()
 
         # Provider-specific config
         self.config = kwargs
@@ -292,6 +299,14 @@ class LLMPlayer(Player, ABC):
             "arguments_sha256": self._sha256_json(snapshot),
             "assurance": assurance,
         }
+        call_id = self._active_provider_call_id
+        attempt_index = self._active_provider_attempt_index
+        if call_id is not None and attempt_index is not None:
+            self.provider_call_journal.mark_dispatch_started(
+                call_id=call_id,
+                attempt_index=attempt_index,
+                sdk_request=self._pending_sdk_request,
+            )
 
     def _invoke_model(self, bundle, turn_context):
         user_prompt = bundle.text
@@ -358,10 +373,26 @@ class LLMPlayer(Player, ABC):
 
         total_attempts = self.max_retries + 1
         for attempt in range(total_attempts):
+            attempt_index = attempt + 1
             start_time = time.time()
             started_at = time.time_ns()
             self._pending_sdk_request = None
+            self._active_provider_call_id = call_id
+            self._active_provider_attempt_index = attempt_index
             try:
+                self.provider_call_journal.begin_attempt(
+                    call_id=call_id,
+                    attempt_index=attempt_index,
+                    intent={
+                        "player": self.name,
+                        "provider": getattr(self, "PROVIDER", "unknown"),
+                        "model": self.model,
+                        "phase": phase,
+                        "match_id": match_id,
+                        "turn_number": turn_number,
+                        "composed_input_sha256": composed_input["ordered_messages_sha256"],
+                    },
+                )
                 response_text, metadata = self._make_api_call(messages)
                 response_time = time.time() - start_time
                 attempt_durations.append(response_time)
@@ -375,31 +406,27 @@ class LLMPlayer(Player, ABC):
                     }
                 )
 
-                self.response_times.append(response_time)
-                self.total_tokens += metadata.get("tokens_used", 0)
-                self.total_cost += metadata.get("cost", 0.0)
-
-                self.last_response = response_text
-
                 # MA1: Include provider identifier in usage_info
                 provider = getattr(self, "PROVIDER", "unknown")
-                self.last_usage_info = {
+                usage_info = {
                     "tokens": metadata.get("tokens_used", 0),
-                    "total_tokens": self.total_tokens,
+                    "total_tokens": self.total_tokens + metadata.get("tokens_used", 0),
                     "prompt_tokens": metadata.get("prompt_tokens", 0),
                     "completion_tokens": metadata.get("completion_tokens", 0),
                     "cost": metadata.get("cost", 0.0),
-                    "total_cost": self.total_cost,
+                    "total_cost": self.total_cost + metadata.get("cost", 0.0),
                     "latency_ms": round(response_time * 1000, 1),
                     "model": metadata.get("model", self.model),
                     "provider": provider,
                     "call_id": call_id,
                 }
                 if "provider_model" in metadata:
-                    self.last_usage_info["provider_model"] = metadata["provider_model"]
+                    usage_info["provider_model"] = metadata["provider_model"]
+                if "reasoning_usage" in metadata:
+                    usage_info["reasoning_usage"] = copy.deepcopy(metadata["reasoning_usage"])
                 # MA4: Propagate estimated flag when present
                 if metadata.get("estimated"):
-                    self.last_usage_info["estimated"] = True
+                    usage_info["estimated"] = True
 
                 sdk_response = {
                     "response_text": response_text,
@@ -414,12 +441,17 @@ class LLMPlayer(Player, ABC):
                         "output_tokens": metadata.get("completion_tokens", 0),
                         "total_tokens": metadata.get("tokens_used", 0),
                     },
+                    "content_blocks": copy.deepcopy(metadata.get("provider_content_blocks")),
                     "assurance": "returned_by_official_sdk",
                 }
+                if "reasoning_usage" in metadata:
+                    sdk_response["usage"]["reasoning_usage"] = copy.deepcopy(
+                        metadata["reasoning_usage"]
+                    )
                 sdk_response = {
                     key: value for key, value in sdk_response.items() if value is not None
                 }
-                self.last_provider_call = {
+                provider_call = {
                     "schema_version": "0.1",
                     "call_id": call_id,
                     "player": self.name,
@@ -431,7 +463,22 @@ class LLMPlayer(Player, ABC):
                     "sdk_request": copy.deepcopy(self._pending_sdk_request),
                     "sdk_response": sdk_response,
                     "attempts": copy.deepcopy(attempts),
+                    "custody": self.provider_call_journal.describe(),
                 }
+
+                self.provider_call_journal.commit_response(
+                    call_id=call_id,
+                    attempt_index=attempt_index,
+                    provider_call=provider_call,
+                    usage_info=usage_info,
+                )
+
+                self.response_times.append(response_time)
+                self.total_tokens += metadata.get("tokens_used", 0)
+                self.total_cost += metadata.get("cost", 0.0)
+                self.last_response = response_text
+                self.last_usage_info = usage_info
+                self.last_provider_call = provider_call
 
                 if logger:
                     logger.api_response(
@@ -471,6 +518,8 @@ class LLMPlayer(Player, ABC):
                     "attempt_durations": attempt_durations,
                     "provider_call": copy.deepcopy(self.last_provider_call),
                 }
+            except ProviderCallCustodyError:
+                raise
             except Exception as exc:
                 response_time = time.time() - start_time
                 attempt_durations.append(response_time)
@@ -487,6 +536,14 @@ class LLMPlayer(Player, ABC):
                         },
                     }
                 )
+                self.provider_call_journal.commit_error(
+                    call_id=call_id,
+                    attempt_index=attempt_index,
+                    error={
+                        "type": exc.__class__.__name__,
+                        "message": str(exc)[:500],
+                    },
+                )
                 if attempt == total_attempts - 1:
                     self.last_provider_call = {
                         "schema_version": "0.1",
@@ -500,12 +557,24 @@ class LLMPlayer(Player, ABC):
                         "sdk_request": copy.deepcopy(self._pending_sdk_request),
                         "sdk_response": None,
                         "attempts": copy.deepcopy(attempts),
+                        "custody": self.provider_call_journal.describe(),
                     }
-                    # RE3: Include provider identifier in error message
+                    self.last_usage_info = None
+                    self.last_retries = attempt
+                    self.last_retry_durations = list(retry_durations)
+                    self.last_attempt_durations = list(attempt_durations)
                     provider = getattr(self, "PROVIDER", "unknown")
-                    raise RuntimeError(
-                        f"Failed to get response from {provider}/{self.model} "
-                        f"after {total_attempts} attempts: {exc}"
+                    raise PlayerResponseUnavailableError(
+                        player_name=self.name,
+                        provider=provider,
+                        model=self.model,
+                        call_id=call_id,
+                        provider_call=self.last_provider_call,
+                        retries=attempt,
+                        retry_durations=retry_durations,
+                        attempt_durations=attempt_durations,
+                        cause_type=exc.__class__.__name__,
+                        cause_message=str(exc)[:500],
                     ) from exc
                 delay = self.retry_delay * (2**attempt)
                 retry_durations.append(delay)
@@ -514,6 +583,9 @@ class LLMPlayer(Player, ABC):
                         player=self.name, attempt=attempt + 1, error=str(exc), backoff=delay
                     )
                 time.sleep(delay)
+            finally:
+                self._active_provider_call_id = None
+                self._active_provider_attempt_index = None
 
         # RE3: Include provider identifier in error message
         provider = getattr(self, "PROVIDER", "unknown")

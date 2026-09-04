@@ -41,7 +41,8 @@ class GPTPlayer(LLMPlayer):
                 'Install it via the optional extra: pip install "agentdeck-ai[openai]"'
             ) from exc
 
-        self.client = OpenAI(api_key=self.api_key)
+        # LLMPlayer owns retries so every attempt crosses provider-call custody.
+        self.client = OpenAI(api_key=self.api_key, max_retries=0)
 
     def _make_api_call(self, messages: List[Dict[str, str]]) -> Tuple[str, Dict]:
         """Make API call to OpenAI Responses API."""
@@ -78,6 +79,8 @@ class GPTPlayer(LLMPlayer):
         tokens_used = (
             total_tokens if total_tokens is not None else prompt_tokens + completion_tokens
         )
+        output_details = getattr(usage, "output_tokens_details", None)
+        reasoning_tokens = getattr(output_details, "reasoning_tokens", None)
 
         # Use the pricing utility to calculate cost
         cost = calculate_cost(
@@ -106,6 +109,12 @@ class GPTPlayer(LLMPlayer):
             "input_tokens": prompt_tokens,
             "output_tokens": completion_tokens,
         }
+        if reasoning_tokens is not None:
+            metadata["reasoning_usage"] = {
+                "tokens": reasoning_tokens,
+                "kind": "reasoning",
+                "source": ("openai.responses.usage.output_tokens_details.reasoning_tokens"),
+            }
 
         return response_text, metadata
 

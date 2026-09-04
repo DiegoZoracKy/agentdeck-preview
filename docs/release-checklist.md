@@ -3,9 +3,31 @@
 This checklist tracks public package releases. It is operational release prep,
 not a product roadmap.
 
+## Workbench Source Promotion
+
+- Freeze the approved private Workbench checkpoint and audit its public content.
+- Prepare one consolidated commit on the current public `main`, with its real
+  creation timestamp. Preserve existing public history and keep intermediate
+  Workbench commits out of the public commit's ancestry.
+- Record the private checkpoint, public base, candidate commit, public tree and
+  any content exclusions in the private promotion audit. Validate the exact
+  public candidate from a clean checkout before pushing it.
+- After the authorized public sync and successful public CI, create an immutable
+  annotated tag `public-sync/YYYY-MM-DD.N` on the source Workbench checkpoint.
+  Use the sync completion date in `America/Sao_Paulo` and a daily sequence number.
+  Record both full commit hashes, the public tree, previous promotion, scope and
+  audit/CI references in its private annotation.
+- Push that exact tag only to the private `work` remote. Use explicit refs for
+  all promotion pushes; never use `--tags`, `--follow-tags` or `--mirror` to the
+  public remote. A Workbench tag would expose its private commit ancestry.
+- Keep public version tags separate: they point to approved public commits.
+  A private sync tag does not constitute a package release.
+
+Keep the detailed mapping and subsequent-sync audit in the private Workbench.
+
 ## Before Tagging
 
-- Push the current launch commits and wait for CI to pass.
+- Push the approved consolidated public candidate and wait for CI to pass.
 - Confirm the README, package metadata, and PyPI long description contain no
   stale beta/team/contact wording.
 - Confirm the package author is `Diego ZoracKy`.
@@ -81,6 +103,8 @@ out explicitly in the release notes and choose at least a minor version.
 
 - AgentDeck positioning: the game console for AI agents.
 - Agentic Edge flagship study package and replay viewer.
-- Removal of the legacy Research APIs and the `agentic-edge-research` tag for historical reproduction.
+- Replacement of the legacy Research APIs by Study, RecordCorpus, Measure,
+  Evidence, and Finding; the `agentic-edge-research` tag remains available for
+  historical reproduction.
 - Package-size cleanup: viewer assets remain in the repo, not in the PyPI
   package.

@@ -1,5 +1,12 @@
 # Research Experiment Schema
 
+> **Historical `0.2` contract:** this schema documents the Research package
+> format used by the archived Studies in this repository. It is not the active
+> `0.4` package contract, and the `agentdeck-research-*` commands referenced
+> below are available only from the `agentic-edge-research` tag. Do not use this
+> file as the template for new Studies while `SPEC-RESEARCH` and its child specs
+> remain in draft.
+
 This schema defines the standard, objective artifacts for research experiments.
 Every experiment folder should follow the same structure and use these fields.
 

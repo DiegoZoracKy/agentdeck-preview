@@ -1,158 +1,111 @@
-# Research Directory
+# AgentDeck Research
 
-This directory hosts standardized, objective experiment results for AgentDeck.
-Each experiment follows the Experiment Package layout defined in `SCHEMA.md`.
+See [historical artifact provenance](PROVENANCE.md) for the treatment of original
+host metadata, frozen Records and explicitly derived acceptance artifacts.
 
-Core framework documentation remains in the repository root (`README.md`,
-`CONTRIBUTING.md`, and `specs/`). This `research/` area is intentionally
-experiment-specific.
+AgentDeck uses Games as behavioral instruments: define an explicit situation,
+place AI Players inside it, preserve what happened, and determine what the
+resulting Records support.
 
-This repo now ships both the **research contract/tooling** and a
-committed set of release-facing benchmark packages, including arc summaries and
-cross-game synthesis.
-
-Preferred commands use the installed `agentdeck-research-*` entry points. If
-those are not yet available in your shell, use the equivalent `python scripts/...`
-wrapper from the repo root.
-
-For matrix packages, the shared template and runner use `player_registry` and
-per-cell `player_ref` keys. Older drafts that still say `model_registry` /
-`model_ref` should be updated.
-
-For package-owned games, keep a package-local behavioral scorer at
-`scripts/behavioral_scorer.py` and run `agentdeck-research-score` after export
-to populate the targeted `results.json.behavioral_profile`. For matrix studies,
-that target is the cell artifact under `artifacts/<cell>/results.json`; for
-direct/non-matrix studies, it is the top-level package `results.json`. Package
-export does not apply package-local scorers automatically.
+This directory contains AgentDeck's public Research history and flagship Study
+artifacts. Research is a first-class project axis. The active `0.4` source
+candidate now closes the redesigned public path from Study preparation and
+selected execution through exact Record corpora, deterministic Measures,
+immutable Evidence, and authored Findings.
 
 ## Start Here
-- `../docs/how-to-run-a-study.md` - supported end-to-end study workflow
-- `2026-03-23-fixed-damage-arc-1/README.md` - FixedDamage arc summary
-- `2026-03-26-variable-damage-arc-1/README.md` - VariableDamage arc summary
-- `2026-03-26-cross-game-comparison-1/README.md` - cross-game findings
-- `SCHEMA.md` - manifest/results schema and required fields
-- `INDEX.md` - registry of experiments with status and topline results
-- `_templates/` - boilerplate files for new experiments
 
-## Experiment Package (Required)
+- [The Agentic Edge](2026-04-27-agentic-edge-strategy-stack/README.md) — flagship
+  completed Study, results, limitations, reproduction metadata, and public
+  artifacts.
+- [Research Arc](../docs/research-arc.md) — architecture and end-to-end guidance
+  for Study, Measure, Evidence, and Finding.
+- [Hugging Face dataset](https://huggingface.co/datasets/agentdeck/agentic-edge-strategy-stack-study)
+  — canonical raw and processed The Agentic Edge artifacts.
+- [Curated replay viewer](https://huggingface.co/spaces/agentdeck/agentic-edge-viewer)
+  — five selected Match replays.
+- [Research index](INDEX.md) — historical Study/package registry.
 
-```
-research/<experiment-id>/
-├── README.md          # Experiment card (short summary)
-├── manifest.yaml      # Repro metadata (required)
-├── matrix.yaml        # Benchmark grid definition (optional)
-├── results.json       # Objective results (generated)
-├── results.csv        # Match-level results (generated)
-├── analysis.md        # Interpretation (optional)
-├── artifacts/         # Plots/tables (optional)
-├── notes/             # Human run notes (optional)
-├── recordings/        # External pointers only (no raw JSON)
-└── scripts/           # Experiment scripts (optional)
-```
+## Current Source Status
 
-## Creating a New Experiment
+The former `agentdeck.research` modules and these commands are not part of the
+active `0.4` source candidate:
 
-1) Copy templates:
-```
-cp -R research/_templates research/YYYY-MM-DD-your-experiment
-```
-
-2) Fill out `manifest.yaml` and `README.md`.
-   - If applicable, define benchmark cells/phases in `matrix.yaml`.
-   - If `matrix.yaml` exists, use it as source of truth for sampling + cells.
-   - For matrix packages, use `player_registry` plus per-cell `player_ref`.
-   - Keep the `AUTO_FACTS` marker blocks in `README.md` and `analysis.md`.
-
-3) Run experiments (recordings should be stored externally).
-
-4) Export results:
-```
-agentdeck-research-export \
-  --recordings-dir recordings \
-  --output-dir research/YYYY-MM-DD-your-experiment
-```
-
-Repeat `--recordings-dir` to aggregate multiple checkpoint/session directories
-into one export. Add `--no-generated-at` when you need deterministic diffs.
-
-For matrix-based benchmark packages, use the shared matrix workflow:
-
-```
-agentdeck-research-export \
-  --experiment-dir research/YYYY-MM-DD-your-experiment \
-  --phase P1 \
-  --no-generated-at
-
-agentdeck-research-export \
-  --experiment-dir research/YYYY-MM-DD-your-experiment \
-  --package \
-  --no-generated-at
-```
-
-Top-level package export refreshes `results.json` / `results.csv` and also
-hydrates the `AUTO_FACTS` blocks in `README.md` and `analysis.md`.
-
-If the package includes `scripts/behavioral_scorer.py`, follow export with:
-
-```
-# direct / non-matrix package
-agentdeck-research-score \
-  --experiment-dir research/YYYY-MM-DD-your-experiment
-
-# matrix package
-agentdeck-research-score \
-  --experiment-dir research/YYYY-MM-DD-your-experiment \
-  --cell p1_c01_example
-```
-
-5) Update the index:
-```
+```text
+agentdeck-research-export
+agentdeck-research-score
+agentdeck-research-package
 agentdeck-research-index
+agentdeck-research-validate
 ```
 
-## Create Package From Session
+Documentation or packages that mention them describe the historical `0.2`
+workflow. The exact implementation remains available at the
+[`agentic-edge-research`](https://github.com/agentdeck/agentdeck/tree/agentic-edge-research)
+tag. Do not treat those commands as current `main` APIs.
 
-If you already have a completed session under `agentdeck_runs/`, promote it to a
-research package in one step:
-```
-agentdeck-research-package \
-  --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
-  --question "Your research question here"
-```
+The active Study surface supports inspection, explicit execution, derivation,
+and authored reporting:
 
-For checkpoint aggregation across multiple compatible sessions:
-```
-agentdeck-research-package \
-  --session-ids session_A session_B \
-  --question "Your research question here"
-```
-
-For benchmark grids, opt in to matrix scaffold generation:
-```
-agentdeck-research-package \
-  --session-id session_YYYYMMDD_HHMMSS_xxxxxx \
-  --question "Your research question here" \
-  --include-matrix
+```bash
+agentdeck study inspect research/2026-04-27-agentic-edge-strategy-stack
+agentdeck study validate research/2026-04-27-agentic-edge-strategy-stack
+agentdeck study run ...
+agentdeck study analyze ...
+agentdeck study report ...
 ```
 
-## Validation
+The package-local `scripts/reproduce_current.py` reads the frozen Hugging Face
+revision without mutating it, adapts copied Recorder v1.3 Records locally, and
+reproduces the 432-Match historical Evidence/Findings through the current
+contracts. `P0` also remains a zero-provider live acceptance path.
 
-Validate manifests and the index before committing research changes:
+## Epistemic Boundary
+
+```text
+Game / Question
+  -> Study
+  -> Prepared Assembly
+  -> Runs
+  -> canonical Records
+  -> deterministic Measures
+  -> Evidence
+  -> authored Findings
 ```
-agentdeck-research-validate --research-dir research
+
+- **Record:** what happened during execution.
+- **Measure:** what was deterministically extracted from identified Records.
+- **Evidence:** what those measurements support under an explicit method and
+  Study scope.
+- **Finding:** what an author interprets that Evidence to mean.
+
+Research never mutates canonical Records. Every stochastic or intelligent
+operation that can affect Evidence must itself terminate in Records before
+deterministic measurement begins.
+
+## Historical Archive
+
+Packages under `research/` record the sequence of Studies, pilots, negative
+results, interventions, and synthesis that led to The Agentic Edge. Their
+manifests, matrices, reports, notes, and scripts are historical artifacts; they
+are not all current package templates.
+
+The historical layout commonly used:
+
+```text
+research/<study-id>/
+|-- README.md
+|-- manifest.yaml
+|-- matrix.yaml
+|-- results.json
+|-- results.csv
+|-- analysis.md or analysis/
+|-- artifacts/
+|-- notes/
+|-- recordings/
+`-- scripts/
 ```
 
-Completed packages with recorded matches must have real values inside the
-`AUTO_FACTS` blocks. Placeholder `TBD` values will cause validation to fail.
-
-To regenerate the index if out of date:
-```
-agentdeck-research-validate --research-dir research --write-index
-```
-
-## Recordings Policy
-
-Raw match recordings should not be committed to this repo. Store them in
-external storage (S3, Hugging Face, etc.) and link them from
-`research/<experiment-id>/recordings/README.md`.
+Do not copy historical `_templates/` as current Study contracts. Raw Match
+recordings remain external artifacts; repository
+packages store durable pointers, checksums, and human-readable context.

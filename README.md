@@ -2,32 +2,52 @@
 
 **The game console for AI agents.**
 
-An open execution and evidence engine for running agents inside explicit game worlds,
-recording what happened, and replaying every decision.
+An open system for putting AI agents inside explicit game worlds, observing what
+they do, and producing traceable knowledge about their behavior.
 
-[Why Games?](#-why-games) · [Replay](#-run-record-replay) · [Quick Start](#-quick-start) · [Boundary](#-scope-boundary) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Specs](specs/SPEC.md) · [AI-First](#spec-driven-and-ai-first-by-design)
+[Why Games?](#-why-games) · [Replay](#-run-record-replay) · [Quick Start](#-quick-start) · [Research Arc](docs/research-arc.md) · [Research Artifacts](research/README.md) · [Current Boundary](#current-04-scope-boundary) · [Docs](docs/README.md) · [Examples](examples/README.md) · [Specs](specs/SPEC.md) · [AI-First](#spec-driven-and-ai-first-by-design)
 
 ---
 
 ## 🎯 Purpose & Vision
 
-AgentDeck provides the execution substrate for behavioral investigations: define a game or reuse an existing one, run seeded matches across models and controllers, record the canonical event stream, and replay every decision.
+AgentDeck turns behavioral questions into explicit, inspectable situations:
+define a Game or reuse an existing one, compose its Players, run controlled
+Matches, preserve the canonical event stream, and determine what the resulting
+Records support.
 
 It is useful when static prompt-response evaluation is not enough. By putting agents inside structured games, AgentDeck makes state, incentives, and resource tradeoffs explicit so behavior is easier to observe, compare, replay, and explain.
 
 ![AgentDeck Overview](docs/images/agentdeck-whiteboard-overview.png)
 
-## Scope Boundary
+## Current 0.4 Scope Boundary
 
 AgentDeck owns **execution truth**: game state transitions, provider interactions,
 resolved actions, lifecycle events, runtime configuration, costs, recordings, and
 replay. It is intentionally obsessive about making a Record describe what happened.
 
-AgentDeck does not own research meaning. Corpus selection, pooling, metrics,
-statistical inference, behavioral findings, and claims belong to downstream systems
-operating on canonical Records. Historical research workflows remain reproducible at
-the [`agentic-edge-research`](https://github.com/agentdeck/agentdeck/tree/agentic-edge-research)
-tag; they are not part of the current package API.
+The current `0.4` source candidate ships this execution kernel plus the redesigned
+Research path: Study preparation and selected execution, exact Record corpora,
+deterministic Measures, immutable Evidence, and authored Findings with granular
+citations.
+Historical Research remains public under [`research/`](research/README.md), and
+the former implementation remains reproducible at the
+[`agentic-edge-research`](https://github.com/agentdeck/agentdeck/tree/agentic-edge-research)
+tag. Historical `agentdeck-research-*` commands are not part of the current API.
+
+The current command surface is one coherent journey:
+
+```text
+agentdeck study inspect
+agentdeck study validate
+agentdeck study run
+agentdeck study analyze
+agentdeck study report
+```
+
+The architectural boundary remains strict as Research returns: canonical Records
+state what happened; deterministic Measures and Evidence are derived separately;
+Findings remain explicit authored interpretations.
 
 New Records preserve the effective Game and Player configuration, a scoped Game
 implementation fingerprint, exact retained conversation selection, provider-native SDK
@@ -75,6 +95,10 @@ Study artifacts are mirrored on Hugging Face:
 [dataset + recordings](https://huggingface.co/datasets/agentdeck/agentic-edge-strategy-stack-study) ·
 [curated replay viewer](https://agentdeck-agentic-edge-viewer.static.hf.space/)
 
+The current architecture reproduces the 432 primary/supplemental Matches from
+the pinned public dataset through Study → corpus → Measures → Evidence →
+Findings. See the [reproduction guide](research/2026-04-27-agentic-edge-strategy-stack/reproduction.md).
+
 ---
 
 ## 🚀 Quick Start
@@ -85,7 +109,7 @@ Study artifacts are mirrored on Hugging Face:
 > “Learn AgentDeck from the README, create a tiny tic-tac-toe game, run a few matches, then inspect and replay the Records.”
 
 > **Release status**: PyPI currently serves the stable `0.2.0` release. `main` is the
-> `0.4.0` source candidate and includes the current Assembly and execution contracts.
+> `0.4.0` source candidate and includes the current execution and Research contracts.
 > Install from source to use the current API; see the
 > [0.4.0 release notes](docs/releases/0.4.0.md) for the migration summary.
 
@@ -259,7 +283,7 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 ├─────────────┬───────────────────────┤
 │    Game     │     EventBus          │  ← Game logic + Events
 ├─────────────┼───────────────────────┤
-│   Players   │     Spectators        │  ← AI agents + Observers
+│   Players   │     Spectators        │  ← Configured actors + Observers
 └─────────────┴───────────────────────┘
 ```
 
@@ -276,17 +300,18 @@ AgentDeck follows a **gaming console metaphor** with clean separation of concern
 - Examples: [FixedDamageGame](src/agentdeck/games/examples/fixed_damage/) and
   [ArchivistChoiceGame](src/agentdeck/games/examples/archivist_choice.py)
 
-**Players** are AI agents making decisions
+**Players** are configured actors making decisions
 - Three-phase lifecycle: Handshake → Turn → Conclusion
-- Built-in: `GPTPlayer`, `ClaudePlayer`, `GeminiPlayer`, `MockPlayer`
+- Built-in: `GPTPlayer`, `ClaudePlayer`, `GeminiPlayer`, `HumanPlayer`, `MockPlayer`
+- `HumanPlayer` provides synchronous local play with the same Controller, Record, and replay path
 - Composable prompt templates via `PromptBuilder`
 
-**Controllers** parse AI responses into actions
+**Controllers** parse Player responses into actions
 - `ActionOnlyController` - extracts single action token
 - `ReasoningController` - extracts reasoning + action
 - Handshake validation is built into the base `Controller` (default accepts exactly `OK`)
 
-**Renderers** format game state for AI consumption
+**Renderers** format game state for Player consumption
 - `TextRenderer` - human-readable text format
 - Custom renderers can provide JSON, images, etc.
 
@@ -385,7 +410,7 @@ This provides rich canonical data for downstream behavioral analysis.
 2. **Observable**: Every decision is captured and analyzable
 3. **Reproducible**: Everything we control is reproducible (seeding + recordings + replay parity)
 4. **Composable**: Mix and match components freely
-5. **Execution Truth**: Record facts faithfully and leave research meaning downstream
+5. **Execution Truth**: Keep recorded facts, deterministic derivations, and authored interpretation explicitly separate
 
 ---
 

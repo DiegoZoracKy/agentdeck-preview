@@ -547,6 +547,89 @@ class TestTokenUsageTracker:
         assert "Alice" in summary["per_player"]
         assert "gpt-4" in summary["per_model"]
 
+    def test_reasoning_usage_summary_is_coverage_aware_by_provider_model(self):
+        tracker = TokenUsageTracker()
+        events = [
+            make_event(
+                "gameplay",
+                {
+                    "player": "Alice",
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                    "interaction": {
+                        "usage_info": {
+                            "prompt_tokens": 20,
+                            "completion_tokens": 10,
+                            "tokens": 30,
+                            "provider": "anthropic",
+                            "model": "claude-sonnet-5",
+                            "call_id": "call-1",
+                            "reasoning_usage": {
+                                "tokens": 7,
+                                "kind": "thinking",
+                                "source": (
+                                    "anthropic.messages.usage.output_tokens_details."
+                                    "thinking_tokens"
+                                ),
+                            },
+                        }
+                    },
+                },
+            ),
+            make_event(
+                "gameplay",
+                {
+                    "player": "Alice",
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                    "interaction": {
+                        "usage_info": {
+                            "prompt_tokens": 18,
+                            "completion_tokens": 4,
+                            "tokens": 22,
+                            "provider": "anthropic",
+                            "model": "claude-sonnet-5",
+                            "call_id": "call-2",
+                        }
+                    },
+                },
+            ),
+        ]
+
+        for event in events:
+            tracker.on_gameplay(event)
+
+        reasoning = tracker.get_summary()["reasoning_usage"]
+        group = reasoning["by_provider_model"]["anthropic/claude-sonnet-5"]
+        assert reasoning["reported_tokens"] == 7
+        assert reasoning["reported_calls"] == 1
+        assert reasoning["total_calls"] == 2
+        assert reasoning["coverage_complete"] is False
+        assert group["reported_calls"] == 1
+        assert group["total_calls"] == 2
+        assert group["coverage_complete"] is False
+
+    def test_reasoning_usage_is_absent_when_no_call_reports_it(self):
+        tracker = TokenUsageTracker()
+        tracker.on_gameplay(
+            make_event(
+                "gameplay",
+                {
+                    "player": "Alice",
+                    "action": {"value": "ATTACK", "reasoning": None, "metadata": {}},
+                    "interaction": {
+                        "usage_info": {
+                            "prompt_tokens": 8,
+                            "completion_tokens": 2,
+                            "tokens": 10,
+                            "provider": "openai",
+                            "model": "gpt-4o-mini",
+                        }
+                    },
+                },
+            )
+        )
+
+        assert "reasoning_usage" not in tracker.get_summary()
+
     def test_get_average_cost_per_match(self):
         """get_average_cost_per_match() calculates correctly."""
         tracker = TokenUsageTracker()

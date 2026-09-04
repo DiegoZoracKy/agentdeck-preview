@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from agentdeck.core.recorder import Recorder
+from agentdeck.core.recorder import APIUsageTracker, Recorder
 from agentdeck.core.types import Event, EventType, MatchResult
 
 
@@ -727,6 +727,72 @@ class TestMatchCostAndIds:
             "total_latency_ms": 0.0,
             "models_used": {"gpt-4o-mini": 3},
         }
+
+    def test_api_usage_summary_discloses_partial_reasoning_coverage(self):
+        tracker = APIUsageTracker()
+        tracker.record(
+            {
+                "tokens": 30,
+                "prompt_tokens": 20,
+                "completion_tokens": 10,
+                "provider": "openai",
+                "model": "gpt-5",
+                "provider_model": "gpt-5-2026-08-01",
+                "reasoning_usage": {
+                    "tokens": 6,
+                    "kind": "reasoning",
+                    "source": "openai.responses.usage.output_tokens_details.reasoning_tokens",
+                },
+            }
+        )
+        tracker.record(
+            {
+                "tokens": 25,
+                "prompt_tokens": 20,
+                "completion_tokens": 5,
+                "provider": "openai",
+                "model": "gpt-5",
+                "provider_model": "gpt-5-2026-08-01",
+            }
+        )
+        tracker.record(
+            {
+                "tokens": 18,
+                "prompt_tokens": 12,
+                "completion_tokens": 6,
+                "provider": "google",
+                "model": "gemini-2.5-flash",
+                "reasoning_usage": {
+                    "tokens": 0,
+                    "kind": "thinking",
+                    "source": "google.generate_content.usage_metadata.thoughts_token_count",
+                },
+            }
+        )
+
+        reasoning = tracker.summary()["reasoning_usage"]
+
+        assert reasoning["reported_tokens"] == 6
+        assert reasoning["reported_calls"] == 2
+        assert reasoning["total_calls"] == 3
+        assert reasoning["coverage_complete"] is False
+        assert reasoning["by_provider_model"]["openai/gpt-5-2026-08-01"]["reported_calls"] == 1
+        assert reasoning["by_provider_model"]["openai/gpt-5-2026-08-01"]["total_calls"] == 2
+        assert reasoning["by_provider_model"]["google/gemini-2.5-flash"]["reported_calls"] == 1
+
+    def test_recorder_normalization_does_not_infer_missing_reasoning_usage(self):
+        normalized = Recorder._normalize_usage_payload(
+            {
+                "tokens": 10,
+                "prompt_tokens": 8,
+                "completion_tokens": 2,
+                "provider": "anthropic",
+                "model": "claude-sonnet-5",
+            }
+        )
+
+        assert normalized is not None
+        assert "reasoning_usage" not in normalized
 
     def test_updates_player_summaries_costs_and_exposes_batch_id(self, recorder, temp_recorder_dir):
         class MockGame:

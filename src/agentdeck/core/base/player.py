@@ -1,8 +1,8 @@
 """
-Player abstract base class for AgentDeck v1.3.0.
+Player abstract base class for AgentDeck v1.5.0.
 
-Implements the three-phase player lifecycle per SPEC-PLAYER v1.3.0:
-- Handshake: Build prompt + execute LLM acknowledgement (mandatory)
+Implements the three-phase player lifecycle per SPEC-PLAYER v1.5.0:
+- Handshake: Build prompt + obtain acknowledgement (mandatory)
 - Turn: Repeated decision phase (action selection)
 - Conclusion: Optional post-match reflection phase
 
@@ -42,9 +42,9 @@ if TYPE_CHECKING:
 
 class Player(ABC):
     """
-    Abstract base for AI players with three-phase lifecycle.
+    Participant-side execution contract with a three-phase lifecycle.
 
-    Per SPEC-PLAYER v1.3.0, players execute three lifecycle phases:
+    Per SPEC-PLAYER v1.5.0, players execute three lifecycle phases:
     1. Handshake: Acknowledge match conditions (mandatory, called once)
     2. Turn: Make decisions each turn (repeated until match ends)
     3. Conclusion: Optional reflection after match completes
@@ -57,7 +57,7 @@ class Player(ABC):
     - CI1-CI2: Component integrity (pluggable controllers, introspection)
 
     Subclasses must implement:
-        get_response(prompt: str) -> str: LLM provider transport
+        get_response(prompt: str) -> str: obtain the raw interaction response
 
     Example:
         class GPTPlayer(Player):
@@ -75,7 +75,7 @@ class Player(ABC):
         handshake_template: Optional[str | Path] = None,
         turn_template: Optional[str | Path] = None,
         conclusion_template: Optional[str | Path] | object = _DEFAULT_TEMPLATE,
-        model: str = "unspecified",
+        model: Optional[str] = None,
         **config,
     ):
         """
@@ -89,9 +89,9 @@ class Player(ABC):
             turn_template: Template for turn phase (string or Path)
             conclusion_template: Template for conclusion phase (string or Path).
                 Use None to disable conclusion composition explicitly.
-            model: Runtime model identifier. Provider-backed Players require an
-                explicit model; local/custom Players default to "unspecified".
-            **config: Model parameters (temperature, max_tokens, etc.)
+            model: Optional runtime model identifier. Provider-backed Players
+                require an explicit model; provider-free Players omit it.
+            **config: Player configuration (model parameters when provider-backed)
 
         Template parameters accept:
             - Literal strings: Inline template content
@@ -139,6 +139,9 @@ class Player(ABC):
         # Logging
         self.logger: Optional[AgentDeckLogger] = None
 
+        # Provider-backed subclasses receive this execution-scoped binding from Console.
+        self.provider_call_journal = None
+
     # ------------------------------------------------------------------
     # Cloning support for parallel execution (SPEC-PARALLEL v1.0.0)
     # ------------------------------------------------------------------
@@ -150,13 +153,17 @@ class Player(ABC):
         maintain non-serializable state (network clients, thread locks, etc.)
         should override this method to construct a fresh instance.
         """
-        cloned: Player = copy.deepcopy(self)
+        journal = getattr(self, "provider_call_journal", None)
+        memo = {id(journal): None} if journal is not None else None
+        cloned: Player = copy.deepcopy(self, memo)
 
         # Clear runtime bindings that will be re-established by Console._prepare_players
         if hasattr(cloned, "conversation_manager"):
             cloned.conversation_manager = None
         if hasattr(cloned, "logger"):
             cloned.logger = None
+        if hasattr(cloned, "provider_call_journal"):
+            cloned.provider_call_journal = None
 
         return cloned
 
@@ -166,10 +173,10 @@ class Player(ABC):
 
     def build_handshake_bundle(self, context: HandshakeContext) -> PromptBundle:
         """
-        Build the handshake prompt bundle without invoking the LLM.
+        Build the handshake prompt bundle without obtaining a response.
 
         Per SPEC-PLAYER §5.1 HS1-HS3, Console must emit PLAYER_HANDSHAKE_START
-        before the LLM call using the exact prompt bundle returned here.
+        before response acquisition using the exact prompt bundle returned here.
         """
         empty_render = RenderResult(text="", metadata={})
 
@@ -204,7 +211,7 @@ class Player(ABC):
         self, bundle: PromptBundle, context: HandshakeContext
     ) -> HandshakeResponse:
         """
-        Execute the handshake LLM call and record the exchange.
+        Obtain the handshake response and record the exchange.
 
         Returns:
             HandshakeResponse containing raw response and optional usage metadata.
@@ -258,7 +265,7 @@ class Player(ABC):
         Execute turn phase (repeated until match ends).
 
         Per SPEC-PLAYER §5.2-5.3, must keep game_state immutable, build prompt
-        via PromptBuilder, invoke LLM, parse via action controller, and return
+        via PromptBuilder, obtain a response, parse via action controller, and return
         ActionResult with complete metadata.
 
         Args:
@@ -270,7 +277,7 @@ class Player(ABC):
             ActionResult with parsed action and metadata (DS2)
 
         Raises:
-            RuntimeError: If LLM provider fails after retries
+            RuntimeError: If the response source fails
 
         Example:
             result = player.decide(
@@ -303,7 +310,7 @@ class Player(ABC):
             extras=extras or {},  # Console/researcher-provided placeholders
         )
 
-        # Invoke LLM
+        # Obtain the raw Player response.
         self._active_phase = "turn"
         self._active_match_id = turn_context.match_id
         self._active_turn_number = turn_context.turn_number
@@ -331,13 +338,16 @@ class Player(ABC):
         parse_result.controller_format = self.controller.get_format_instructions()
         parse_result.usage_info = usage_info
         parse_result.provider_call = provider_call
-        parse_result.retries = int(getattr(self, "last_retries", 0) or 0)
-        parse_result.retry_durations = copy.deepcopy(
-            getattr(self, "last_retry_durations", []) or []
-        )
-        parse_result.attempt_durations = copy.deepcopy(
-            getattr(self, "last_attempt_durations", []) or []
-        )
+        if hasattr(self, "last_retries"):
+            parse_result.retries = int(getattr(self, "last_retries") or 0)
+        if hasattr(self, "last_retry_durations"):
+            parse_result.retry_durations = copy.deepcopy(
+                getattr(self, "last_retry_durations") or []
+            )
+        if hasattr(self, "last_attempt_durations"):
+            parse_result.attempt_durations = copy.deepcopy(
+                getattr(self, "last_attempt_durations") or []
+            )
 
         # Convert ParseResult to ActionResult (raises ActionParseError if parsing failed)
         # Per SPEC-CONTROLLER v1.2.0 §5.4 (VF2-VF3): No fallback, failures must surface
@@ -362,13 +372,16 @@ class Player(ABC):
             action_result.metadata["usage_info"] = usage_info
         if provider_call:
             action_result.metadata["provider_call"] = provider_call
-        action_result.metadata["retries"] = int(getattr(self, "last_retries", 0) or 0)
-        action_result.metadata["retry_durations"] = copy.deepcopy(
-            getattr(self, "last_retry_durations", []) or []
-        )
-        action_result.metadata["attempt_durations"] = copy.deepcopy(
-            getattr(self, "last_attempt_durations", []) or []
-        )
+        if hasattr(self, "last_retries"):
+            action_result.metadata["retries"] = int(getattr(self, "last_retries") or 0)
+        if hasattr(self, "last_retry_durations"):
+            action_result.metadata["retry_durations"] = copy.deepcopy(
+                getattr(self, "last_retry_durations") or []
+            )
+        if hasattr(self, "last_attempt_durations"):
+            action_result.metadata["attempt_durations"] = copy.deepcopy(
+                getattr(self, "last_attempt_durations") or []
+            )
 
         # Preserve in conversation history (CS2)
         # Capture PM1-PM6 metadata for dialogue array
@@ -508,19 +521,19 @@ class Player(ABC):
     @abstractmethod
     def get_response(self, prompt: str) -> str:
         """
-        Get raw response from LLM provider.
+        Obtain the raw response for the current interaction.
 
-        Subclasses MUST implement this to integrate with specific LLM APIs
-        (OpenAI, Anthropic, Google, etc.).
+        Provider-backed subclasses use an LLM API. Provider-free subclasses may
+        use another response source while preserving the same lifecycle.
 
         Args:
-            prompt: Complete prompt text to send to LLM
+            prompt: Complete prompt text to present for response
 
         Returns:
-            Raw response string from LLM
+            Exact raw response string
 
         Raises:
-            RuntimeError: If provider fails after retries
+            RuntimeError: If the response source fails
 
         Example:
             def get_response(self, prompt: str) -> str:
@@ -552,6 +565,11 @@ class Player(ABC):
             player.bind_conversation_manager(manager)
         """
         self.conversation_manager = manager
+
+    def bind_provider_call_journal(self, journal: Any) -> None:
+        """Bind execution-scoped provider-call custody for provider-backed Players."""
+
+        self.provider_call_journal = journal
 
     def reset_conversation(self) -> None:
         """
@@ -604,15 +622,15 @@ class Player(ABC):
         Prompt metadata is captured directly in lifecycle events by Recorder.
 
         Args:
-            prompt: Prompt sent to LLM (PM1: prompt_text)
-            response: Response from LLM (PM3: response_text)
+            prompt: Prompt presented for response (PM1: prompt_text)
+            response: Raw Player response (PM3: response_text)
             phase: Lifecycle phase (handshake/turn/conclusion)
             turn_context: Optional turn metadata
             prompt_blocks: Structured prompt components from PromptBuilder (PM2)
             controller_format: Controller type used (PM5)
             controller_metadata: Parsed controller metadata (PM6)
             renderer_output: Rendered view metadata (PM6)
-            usage_info: LLM usage metadata - tokens, cost, model (PM4)
+            usage_info: Optional provider usage metadata - tokens, cost, model (PM4)
         """
         response_metadata: Dict[str, Any] = {}
         if usage_info:
@@ -666,15 +684,15 @@ class Player(ABC):
         """
         Return player configuration for debugging/observability.
 
-        Per SPEC-PLAYER §5.5 CI2, MUST expose controller name, renderer,
-        model, temperature, and prompt strategy.
+        Per SPEC-PLAYER §5.5 CI2, MUST expose controller name, renderer, and
+        prompt strategy. Provider-specific fields appear only when applicable.
 
         Returns:
             Dictionary with player configuration
 
         Example:
             info = player.describe()
-            print(info["model"])  # "unspecified" unless explicitly configured
+            print(info.get("model"))  # Present only for model-backed Players
             print(info["controller"])  # {"name": "ActionOnlyController", ...}
         """
         effective_config = copy.deepcopy(self.config)
@@ -682,11 +700,10 @@ class Player(ABC):
             if hasattr(self, attribute):
                 effective_config[attribute] = copy.deepcopy(getattr(self, attribute))
 
-        return {
+        description = {
             "name": self.name,
             "type": self.__class__.__name__,
             "module": self.__class__.__module__,
-            "model": self.model,
             "config": effective_config,
             "controller": self._describe_component(self.controller),
             "renderer": self._describe_component(self.renderer),
@@ -696,6 +713,9 @@ class Player(ABC):
                 "conclusion": self.prompt_builder._conclusion_template,
             },
         }
+        if self.model is not None:
+            description["model"] = self.model
+        return description
 
     def get_summary(self) -> Dict[str, Any]:
         """
@@ -708,13 +728,15 @@ class Player(ABC):
             summary = player.get_summary()
             logger.info(f"Player: {summary}")
         """
-        return {
+        summary = {
             "name": self.name,
             "type": self.__class__.__name__,
-            "model": self.model,
             "controller": self.controller.__class__.__name__,
             "renderer": self.renderer.__class__.__name__,
         }
+        if self.model is not None:
+            summary["model"] = self.model
+        return summary
 
     def _describe_component(self, component: Any) -> Dict[str, Any]:
         """Describe a component (controller/renderer) for introspection."""

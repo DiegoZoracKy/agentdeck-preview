@@ -1,0 +1,40 @@
+schema_version: 1
+reference:
+  id: hidden-signal
+  revision: 2
+  title: Hidden Signal
+  summary: Inspect a concealed signal at a cost, or commit directly.
+study:
+  path: ../../2026-08-29-hidden-signal-information-acquisition
+  id: 2026-08-29-hidden-signal-information-acquisition
+  plan_sha256: a8c6c95f715a4080071870f09841408544cdf0ef43a359db6035ebeca87b2c00
+profile:
+  path: ../../2026-08-29-hidden-signal-information-acquisition/research-profile.yaml
+  id: hidden-signal
+  profile_sha256: 9dc54c4e81475a129c6bc4f4cb74a018b1cafbd167c831752c7a5fcfbd383a3d
+game:
+  assembly_run: hidden_signal
+  family_id: agentdeck.games.examples.hidden_signal.game:HiddenSignalGame
+  implementation_sha256: ee92011e284b8e56ed7c6bdacaaf3d1cb2a3c71ddd0d6affccda0f2979508d65
+measure:
+  path: ../../2026-08-29-hidden-signal-information-acquisition/measures.yaml
+  id: hidden-signal-inspection
+  measure_sha256: 5cd86c8b3a3abb444e0076d8b014b28fa31fc376714ac7645310870d8a7514ea
+stage:
+  index: stage/index.html
+  script: stage/stage.js
+  styles: stage/styles.css
+canonical_run:
+  record: stage/canonical/record.json
+  record_sha256: ee5e8d74e774edfa3a691f2d79db7a653658949fb13300708a13827a297eee0e
+  match_surface: stage/canonical/match-surface.json
+  match_surface_sha256: 75fb254a1f00072f3a7c3b2123f57b887d4c096c415e629c0ef48a1b0b6a19d7
+  match_id: match_5a5b5059
+moment:
+  event_index: 3
+  action: INSPECT
+pattern:
+  metric: inspection-before-commit-rate
+  expected:
+    hidden-condition: 1.0
+    visible-condition: 0.0

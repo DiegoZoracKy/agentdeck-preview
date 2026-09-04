@@ -20,6 +20,7 @@ from typing import Any, List, Optional
 import pytest
 
 from agentdeck import AgentDeck, AgentDeckConfig
+from agentdeck.core import Console
 from agentdeck.core.types import RandomGenerator
 from agentdeck.games.examples import FixedDamageGame
 
@@ -479,6 +480,21 @@ def test_metadata_first_player_matches_runtime_selection_parallel(mock_player_pa
 
         assert metadata["first_player"]["name"] == expected_name
         assert metadata["first_player"]["index"] == expected_index
+
+
+def test_missing_runtime_first_player_uses_prepared_order_fallback(mock_player_pair):
+    """SPEC-CONSOLE M5: custom mechanics need not publish selection metadata."""
+    console = Console(config=AgentDeckConfig(seed=42), spectators=[])
+    fallback = {"name": "Alice", "index": 0, "ordered_index": 0}
+
+    resolved = console._resolve_first_player_metadata(
+        fallback,
+        list(mock_player_pair),
+        [0, 1],
+        selected_first_player=None,
+    )
+
+    assert resolved == fallback
 
 
 # ============================================================================

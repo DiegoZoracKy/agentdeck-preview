@@ -13,6 +13,7 @@ All types are designed for JSON serialization and replay compatibility.
 
 from __future__ import annotations
 
+import copy
 import random
 import time
 from dataclasses import dataclass, field
@@ -34,7 +35,7 @@ class EventType(Enum):
     - Domain events: Custom game-specific events (emitted as strings, not enum)
 
     Event ordering per SPEC-CONSOLE §6.6 E1:
-    SESSION_START → BATCH_START → PLAYER_HANDSHAKE_* → MATCH_START →
+    SESSION_START → BATCH_START → MATCH_START → PLAYER_HANDSHAKE_* →
     GAMEPLAY → PLAYER_CONCLUSION → MATCH_END → BATCH_END → SESSION_END
     """
 
@@ -66,6 +67,7 @@ class EventType(Enum):
     CONSOLE_BATCH_START = "console_batch_start"
     CONSOLE_BATCH_PROGRESS = "console_batch_progress"
     CONSOLE_WORKER_START = "console_worker_start"
+    CONSOLE_WORKER_TURN = "console_worker_turn"
     CONSOLE_WORKER_COMPLETE = "console_worker_complete"
     CONSOLE_WORKER_FAILED = "console_worker_failed"
     CONSOLE_BATCH_COMPLETE = "console_batch_complete"
@@ -196,7 +198,7 @@ class SpectatorContext:
 
 
 # ============================================================================
-# Player Interaction Types (SPEC-PLAYER v1.3.0, SPEC-CONTROLLER v1.3.0)
+# Player Interaction Types (SPEC-PLAYER v1.5.0, SPEC-CONTROLLER v1.3.0)
 # ============================================================================
 
 
@@ -205,7 +207,7 @@ class HandshakeContext:
     """
     Context provided to Player.build_handshake_bundle() and execute_handshake().
 
-    Per SPEC-PLAYER v1.3.0 §6, console provides this context so players can
+    Per SPEC-PLAYER v1.5.0 §6, console provides this context so players can
     tailor handshake prompts with match-specific information.
 
     Fields:
@@ -250,7 +252,7 @@ class HandshakeResult:
     Fields:
         accepted: True if player acknowledged, False if rejected
         normalized_response: Cleaned/parsed response text
-        raw_response: Original LLM output (for prompt metadata)
+        raw_response: Original Player response (for prompt metadata)
         reason: Optional explanation for acceptance/rejection
         metadata: Controller-specific parsing metadata
 
@@ -276,12 +278,12 @@ class HandshakeResponse:
     """
     Raw handshake response returned by Player.execute_handshake().
 
-    Per SPEC-PLAYER v1.3.0, this response is unvalidated. Console is
+    Per SPEC-PLAYER v1.5.0, this response is unvalidated. Console is
     responsible for controller validation and lifecycle events.
 
     Fields:
-        response_text: Raw LLM response
-        usage_info: Optional usage metadata (tokens, cost, latency)
+        response_text: Raw Player response
+        usage_info: Optional provider usage metadata (tokens, cost, latency)
         retries: Optional retry count used by provider
         retry_durations: Optional list of backoff delays (seconds)
         attempt_durations: Optional list of attempt durations (seconds)
@@ -307,7 +309,7 @@ class ActionResult:
         action: Parsed action string (e.g., "ATTACK", "BID:100")
         reasoning: Optional reasoning extracted by controller
         metadata: Controller-specific metadata (validation, retries, etc.)
-        raw_response: Original LLM response (for prompt metadata)
+        raw_response: Original Player response (for prompt metadata)
 
     Example:
         result = ActionResult(
@@ -329,7 +331,7 @@ class MatchContext:
     """
     Console-managed context for match execution.
 
-    Per SPEC-PLAYER v1.3.0 §6, this extends basic match metadata with
+    Per SPEC-PLAYER v1.5.0 §6, this extends basic match metadata with
     lifecycle tracking (handshake_completed) and RNG information.
 
     Per SPEC-CONSOLE §3 M4, includes previous_match_result for batch-local
@@ -369,7 +371,7 @@ class MatchContext:
 
 class ActionParseError(Exception):
     """
-    Structured exception raised when action controller fails to parse LLM response.
+    Structured exception raised when an action Controller cannot parse a Player response.
 
     Per SPEC-CONTROLLER v1.2.0 §5.7 (APF), this exception carries the originating
     ParseResult to preserve full diagnostic context (candidates, reasoning, metadata)
@@ -389,8 +391,42 @@ class ActionParseError(Exception):
 
     def __init__(self, parse_result: "ParseResult"):
         self.parse_result = parse_result
-        error_msg = parse_result.error or "Failed to parse action from LLM response"
+        error_msg = parse_result.error or "Failed to parse action from Player response"
         super().__init__(f"Action parsing failed: {error_msg}")
+
+
+class PlayerResponseUnavailableError(RuntimeError):
+    """A declared provider call exhausted its attempts without a response."""
+
+    def __init__(
+        self,
+        *,
+        player_name: str,
+        provider: str,
+        model: str,
+        call_id: str,
+        provider_call: Dict[str, Any],
+        retries: int,
+        retry_durations: List[float],
+        attempt_durations: List[float],
+        cause_type: str,
+        cause_message: str,
+    ) -> None:
+        self.player_name = player_name
+        self.provider = provider
+        self.model = model
+        self.call_id = call_id
+        self.provider_call = copy.deepcopy(provider_call)
+        self.retries = retries
+        self.retry_durations = list(retry_durations)
+        self.attempt_durations = list(attempt_durations)
+        self.cause_type = cause_type
+        self.cause_message = cause_message
+        attempts = retries + 1
+        super().__init__(
+            f"No response became available from {provider}/{model} for "
+            f"Player {player_name} after {attempts} attempts: {cause_message}"
+        )
 
 
 class MatchAbortedError(Exception):
@@ -793,6 +829,11 @@ class RenderResult:
     text: str
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        from ._immutable import freeze_metadata
+
+        object.__setattr__(self, "metadata", freeze_metadata(self.metadata))
+
 
 # ============================================================================
 # Prompt Composition Types (SPEC-PROMPT-BUILDER v0.4.0)
@@ -891,11 +932,11 @@ class PromptBundle:
     Complete prompt composition result with metadata.
 
     Per SPEC-PROMPT-BUILDER v0.4.0 §6, PromptBuilder.compose() returns this
-    bundle containing both the text to send to the LLM and metadata for
+    bundle containing both the Player-facing text and metadata for
     recorder/debugging.
 
     Fields:
-        text: Final rendered prompt string (send to LLM)
+        text: Final rendered Player-facing prompt string
         blocks: Ordered list of blocks rendered (observability)
         metadata: Required bundle metadata (template_id, phase, turn_number, blocks_rendered)
 
@@ -907,7 +948,7 @@ class PromptBundle:
 
     Example:
         bundle = builder.compose(phase=LifecyclePhase.TURN, ...)
-        prompt_text = bundle.text  # Send to LLM
+        prompt_text = bundle.text  # Present to the Player's response source
         template_used = bundle.metadata["template_id"]
         blocks_included = bundle.metadata["blocks_rendered"]
     """

@@ -1,5 +1,9 @@
 # FixedDamage RC Replication — Flash-Lite RC vs GPT-4o-mini RC
 
+> **Historical Study package:** results and commands below document the `0.2`
+> Research workflow. Historical `agentdeck-research-*` commands are available
+> only from the `agentic-edge-research` tag, not current `main`.
+
 **Status**: see `manifest.yaml`  
 **Research Question**: see `manifest.yaml`  
 **Experiment ID**: 2026-04-08-fixed-damage-rc-replication-1

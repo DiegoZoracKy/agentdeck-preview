@@ -1,8 +1,8 @@
 # AgentDeck Implementation Specification
 
-**Version**: 2.3 (Execution Evidence Boundary)
+**Version**: 2.7 (Execution Failure Fidelity + Research Traceability)
 **Status**: Active
-**Last Updated**: 2026-08-13
+**Last Updated**: 2026-09-04
 **Purpose**: Navigation hub for AgentDeck architecture and component specifications
 
 > This document provides high-level orientation for AgentDeck's design philosophy, architecture, and navigation to detailed component specifications. For implementation details, consult the component specs linked below.
@@ -11,7 +11,10 @@
 
 ## 1. Purpose & Vision
 
-AgentDeck is the **execution and evidence engine for AI agents in game scenarios**. It runs agents inside explicit state machines and produces canonical Records that downstream systems can inspect, replay, and analyze.
+AgentDeck is an **open system for investigating AI behavior through game
+scenarios**. It runs agents inside explicit state machines, preserves canonical
+Records, and builds traceable Research artifacts strictly downstream from those
+execution facts.
 
 ### 1.1 Why Games?
 
@@ -30,9 +33,9 @@ AgentDeck is architected like a video game console to keep experiments modular a
 
 - 🎮 **Console (AgentDeck)** – The engine that orchestrates sessions, manages seeding, and enforces rules
 - 💾 **Game (Cartridge)** – Pure logic defining rules and state transitions; swap games without changing agents
-- 🤖 **Player** – The AI agent (GPT-4, Claude, Gemini) that "holds the controller"
-- 🕹️ **Controller** – Translates the AI's text response into valid game actions
-- 📺 **Renderer** – "Draws" the game state into text the AI can understand
+- 🤖 **Player** – The participant-side execution contract; commonly an AI agent, optionally a local human
+- 🕹️ **Controller** – Translates a Player's text response into valid game actions
+- 📺 **Renderer** – "Draws" game state into the Player-facing view
 - 👁️ **Spectator** – The audience watching the live stream (stats, narration, cost tracking)
 - 📹 **Recorder** – The "DVR" capturing every event for perfect replay and analysis
 
@@ -52,12 +55,15 @@ By separating these concerns, AgentDeck keeps execution **composable, observable
 
 ### 1.4 Scope Boundary
 
-AgentDeck owns facts about a provider call, turn, match, batch, and runtime. It
-MUST preserve execution facts without assigning behavioral meaning to them.
+AgentDeck's execution kernel owns facts about a provider call, turn, match,
+batch, and runtime. It MUST preserve execution facts without assigning
+behavioral meaning to them.
 
-Research questions, corpus selection, pooling, estimands, statistical inference,
-behavioral findings, and publication artifacts are downstream responsibilities.
-AgentDeck MUST NOT reconstruct those meanings or ship a research workflow.
+AgentDeck's Research layer closes the user journey above that kernel: Study
+intent and execution authority remain distinct; deterministic Measures consume
+identified Record corpora; Evidence binds derivations to exact inputs; Findings
+remain explicit authored interpretations. Research MUST NOT mutate Records or
+cause the execution kernel to import Research meaning.
 
 ---
 
@@ -106,10 +112,10 @@ The system uses an event-driven architecture where:
 ```
 session_start
   └── batch_start
-      ├── player_handshake_start         # per player, before gameplay (mandatory)
-      ├── player_handshake_complete      # per player, on acceptance
-      ├── player_handshake_abort         # per player, on rejection
       └── match_start
+          ├── player_handshake_start     # per player, before gameplay (mandatory)
+          ├── player_handshake_complete  # per player, on acceptance
+          ├── player_handshake_abort     # on rejection or unavailability
           ├── gameplay                   # canonical GameplayEventData payload
           ├── player_action_parse_failed # optional, emitted before policy handling
           ├── <custom domain events>     # snake_case strings from games
@@ -119,11 +125,11 @@ session_start
   └── session_end
 ```
 
-**Critical ordering** (per [SPEC-CONSOLE](SPEC-CONSOLE.md) §6.6 E1): Handshake events MUST precede MATCH_START. Conclusion events occur after final gameplay turn but before MATCH_END.
+**Critical ordering** (per [SPEC-CONSOLE](SPEC-CONSOLE.md) §6.6 E1): MATCH_START MUST precede handshake events so incomplete handshakes retain a canonical Record. Conclusion events occur after final gameplay turn but before MATCH_END.
 
 ### 2.3 Three-Phase Player Lifecycle
 
-Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.3.2:
+Per [SPEC-PLAYER](SPEC-PLAYER.md) v1.5.0:
 
 1. **Handshake Phase** (Mandatory, before gameplay):
    - Console → Player.build_handshake_bundle() → PromptBundle
@@ -181,7 +187,8 @@ deck = AgentDeck(game=MyGame(), session=config)
 ### 3.3 Evidence Flexibility
 - Each player can have different renderer/controller
 - Spectators work identically for live and replay
-- Canonical execution data automatically recorded for downstream analysis
+- Canonical execution data automatically recorded for deterministic Measures
+  and independently inspectable downstream analysis
 
 ### 3.4 Event-Driven Observation
 - Spectators subscribe to events via EventBus
@@ -199,28 +206,29 @@ All component specifications follow the lean spec format with numbered invariant
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
 | [AgentDeck](SPEC-AGENTDECK.md) | 0.3.1 | Final | Public API facade for the framework |
-| [Console](SPEC-CONSOLE.md) | 0.7.2 | Final | Execution engine for session/match lifecycle |
+| [Console](SPEC-CONSOLE.md) | 0.12.0 | Final | Execution engine for session/match lifecycle |
 | [Observability / EventBus](SPEC-OBSERVABILITY.md) | 2.0.0 | Final | Event distribution, emission responsibilities, and spectator routing |
 | [Gameplay Event Data](SPEC-GAMEPLAY-EVENT-DATA.md) | 2.1.0 | Final | Canonical decision attribution and provider-call payload shared by live, Record, and replay |
-| [Game](SPEC-GAME.md) | 0.8.0 | Final | Game author contract plus effective configuration and implementation identity |
-| [Player](SPEC-PLAYER.md) | 1.4.0 | Final | Three-phase lifecycle with explicit context-selection provenance |
+| [Game](SPEC-GAME.md) | 0.10.0 | Final | Game author contract plus effective configuration and implementation identity |
+| [Player](SPEC-PLAYER.md) | 1.5.0 | Final | Provider-neutral three-phase lifecycle with explicit interaction provenance |
 | [Controller](SPEC-CONTROLLER.md) | 1.4.0 | Final | Strict explicit action declaration and lifecycle parsing contract |
-| [Renderer](SPEC-RENDERER.md) | 0.3.0 | Final | State formatting for AI consumption |
+| [Renderer](SPEC-RENDERER.md) | 0.4.0 | Final | State formatting for AI consumption |
 | [Spectator](SPEC-SPECTATOR.md) | 2.1.0 | Final | Read-only execution observation interface |
 
 ### 4.2 Infrastructure Components
 
 | Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| [Recorder](SPEC-RECORDER.md) | 2.2.0 | Final | Canonical Records with complete execution and provider-call provenance |
+| [Recorder](SPEC-RECORDER.md) | 2.6.0 | Final | Canonical Records with complete execution and provider-call provenance |
 | [Game Version Provenance](SPEC-GAME-VERSION-PROVENANCE.md) | 0.1.0 | Final | Portable, scoped Game implementation identity |
 | [ReplayEngine](SPEC-REPLAY.md) | 2.0.0 | Final | Exact replay of canonical event payloads |
 | [PromptBuilder](SPEC-PROMPT-BUILDER.md) | 0.5.0 | Final | Template-driven prompt composition |
 | [Turn-Based Mechanic](SPEC-GAME-MECHANIC-TURN-BASED.md) | 2.0.0 | Final | TurnBasedGame + TurnLoop helper using MatchRuntime |
 | [MatchRuntime](SPEC-MATCH-RUNTIME.md) | 1.1.0 | Final | Per-match infrastructure context (`runtime`) |
 | [Pricing](SPEC-PRICING.md) | 1.0.1 | Final | Cost tracking system for LLM usage |
-| [LLM](SPEC-LLM.md) | 1.2.0 | Final | LLM provider integration and exact SDK-call audit contract |
-| [Parallel](SPEC-PARALLEL.md) | 1.0.0 | Final | Worker-based concurrent match execution |
+| [LLM](SPEC-LLM.md) | 1.5.0 | Final | LLM provider integration and exact SDK-call audit contract |
+| [Provider Call Custody](SPEC-PROVIDER-CALL-CUSTODY.md) | 0.1.0 | Final | Volatile or durable provider-call custody before downstream interpretation |
+| [Parallel](SPEC-PARALLEL.md) | 1.1.0 | Final | Worker-based concurrent match execution |
 | [Monitor](SPEC-MONITOR.md) | 1.0.0 | Final | Console-level observation and progress reporting |
 
 ### 4.3 Viewer Surface
@@ -229,6 +237,19 @@ All component specifications follow the lean spec format with numbered invariant
 |-----------|---------|--------|-------------|
 | [Match Surface Projection](SPEC-MATCH-SURFACE-PROJECTION.md) | 0.4.0 | Final | Factual projection including turn context and provider-call provenance |
 | [Viewer](SPEC-VIEWER.md) | 0.6.0 | Legacy / Frozen | Offline browser replay viewer for Recorder v1.3 artifacts; not kept compatible with Recorder v2.0 |
+
+### 4.4 Research Contracts
+
+| Component | Version | Status | Description |
+|-----------|---------|--------|-------------|
+| [Research Constitution](SPEC-RESEARCH.md) | 0.1.0 | Final | Execution-truth and Research-traceability boundaries |
+| [Study](SPEC-STUDY.md) | 0.2.0 | Final / Implemented | Question, phases, Cells, semantic Conditions, and exact Assembly binding |
+| [Study Package](SPEC-STUDY-PACKAGE.md) | 0.2.0 | Final / Implemented | Portable source plus immutable execution and derivation outputs |
+| [Study CLI](SPEC-STUDY-CLI.md) | 0.3.0 | Final / Implemented | Explicit inspect, validate, run, analyze, and report authority |
+| [Game Research Profile](SPEC-GAME-RESEARCH-PROFILE.md) | 0.1.0 | Final / Implemented | Game affordances, Research Opportunities, operationalizations, and explicit boundaries |
+| [Measure](SPEC-MEASURE.md) | 0.1.0 | Final / Implemented | Deterministic transformation of an identified Record corpus |
+| [Evidence](SPEC-EVIDENCE.md) | 0.1.0 | Final / Implemented | Traceable binding of corpus, Measure, scope, assumptions, and derived values |
+| [Finding](SPEC-FINDING.md) | 0.1.0 | Final / Implemented | Authored interpretation with granular Evidence-result citations |
 
 ---
 
@@ -283,7 +304,7 @@ agentdeck/
 │       │   ├── __init__.py
 │       │   └── examples/              # Importable sample games
 │       │       └── fixed_damage/      # Example Game package
-│       ├── players/                   # Mock player, LLM integrations
+│       ├── players/                   # Human, Mock, and LLM-backed Players
 │       ├── controllers/               # ActionOnly, Reasoning controllers
 │       ├── renderers/                 # Text renderer, helpers
 │       └── spectators/                # Reporting, stats, cost, projections
@@ -333,10 +354,13 @@ from agentdeck import (
     ActionResult, GameStatus, MatchResult, MatchResults,
     Event, LogLevel,
 
-    # LLM Players (CORE COMPONENTS!)
+    # Provider-backed Players
     GPTPlayer,           # OpenAI integration (MANDATORY)
     ClaudePlayer,        # Anthropic integration (CORE)
     GeminiPlayer,        # Google integration (CORE)
+
+    # Human-controlled Player
+    HumanPlayer,
 
     # Built-in implementations
     MockPlayer, TextRenderer, ActionOnlyController

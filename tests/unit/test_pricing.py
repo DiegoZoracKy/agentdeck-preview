@@ -104,6 +104,18 @@ def test_get_model_pricing_uses_provider_default():
     assert output_cost == expected["output_cost_per_million"]
 
 
+@pytest.mark.parametrize(
+    ("model", "expected"),
+    [
+        ("claude-sonnet-5", (2.0, 10.0)),
+        ("claude-opus-5", (5.0, 25.0)),
+    ],
+)
+def test_current_claude_5_models_have_explicit_pricing(model, expected):
+    """Current Claude IDs must never settle through missing-pricing fallback."""
+    assert pricing.get_model_pricing("anthropic", model) == expected
+
+
 def test_calculate_cost_returns_zero_and_warns_for_unknown_provider(caplog):
     """calculate_cost should preserve the zero-cost fallback on missing pricing."""
     with caplog.at_level(logging.WARNING):

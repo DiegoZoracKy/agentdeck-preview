@@ -1,9 +1,9 @@
 # SPEC-AGENTDECK: AgentDeck Facade Contract
 
 > Status: Final
-> Version: 0.3.1
-> Last Updated: 2026-03-31
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Version: 0.4.0
+> Last Updated: 2026-09-03
+> Implementation: In Progress
 > Audience: Researchers, framework contributors
 
 ## 1. Purpose
@@ -34,6 +34,7 @@
 class SessionConfig:
     seed: Optional[int] = None
     run_dir: str = "agentdeck_runs"
+    provider_call_custody: str = "volatile"
     max_turns: int = 1000
     log_level: Optional[LogLevel] = LogLevel.INFO
     log_file_levels: Optional[List[LogLevel]] = None
@@ -115,11 +116,14 @@ class MatchResults:
 **Guarantees**: `MatchResult` MUST capture per-match seed, events, and metadata. `MatchResults` MUST retain all matches and expose helper accessors (`single`, `win_rates`, `summary`) for downstream analysis.
 
 ## 5. Public API
-- `AgentDeck(game=None, spectators=None, recorder=None, session=None)`
+- `AgentDeck(game=None, spectators=None, recorder=None, session=None, provider_call_journal=None)`
   - `game`: Optional default game used when `play()` omits `game`.
   - `spectators`: Session-wide spectators for every execution.
   - `recorder`: Recorder instance (console default when `None`).
   - `session`: `AgentDeckConfig` for seeding/logging/limits (set seed here, not on the facade).
+  - `provider_call_journal`: Optional execution-host implementation matching
+    `session.provider_call_custody`; when omitted, the facade selects the built-in
+    memory or filesystem implementation for the declared mode.
   - Guarantees:
     - MUST construct the default console and pass the resolved session context into it.
     - MUST obtain the console's session handle and only return once the console signals readiness (including `SESSION_START` emission).

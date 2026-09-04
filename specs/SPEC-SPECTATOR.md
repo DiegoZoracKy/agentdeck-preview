@@ -1,8 +1,8 @@
 # SPEC-SPECTATOR: Observer Contract
 
 > Status: Final
-> Version: 2.1.0
-> Last Updated: 2026-08-13
+> Version: 2.2.0
+> Last Updated: 2026-09-03
 > Implementation: Complete
 > Audience: Spectator authors, analytics engineers, observability contributors
 
@@ -101,9 +101,9 @@
 - **Logger injection**: Console/ReplayEngine injects logger into spectators before EventBus subscription if `spectator.logger is None` (late-binding pattern per LI1-LI4).
 - **Event dispatch**: EventBus inspects spectators for `on_<event>` methods; calls them with event payloads and context copies.
 - **Event ordering**:
-  - **Session scope**: SESSION_START → BATCH_START → PLAYER_HANDSHAKE_* → MATCH_START → GAMEPLAY → PLAYER_CONCLUSION (optional) → MATCH_END → BATCH_END → SESSION_END
-  - **Execution scope**: BATCH_START → PLAYER_HANDSHAKE_* → MATCH_START → GAMEPLAY → PLAYER_CONCLUSION (optional) → MATCH_END → BATCH_END
-  - Per SPEC-CONSOLE §6.6 E1, handshake events precede MATCH_START to ensure players acknowledge before match begins
+  - **Session scope**: SESSION_START → BATCH_START → MATCH_START → PLAYER_HANDSHAKE_* → GAMEPLAY → PLAYER_CONCLUSION (optional) → MATCH_END → BATCH_END → SESSION_END
+  - **Execution scope**: BATCH_START → MATCH_START → PLAYER_HANDSHAKE_* → GAMEPLAY → PLAYER_CONCLUSION (optional) → MATCH_END → BATCH_END
+  - Per SPEC-CONSOLE §6.6 E1, MATCH_START opens the canonical recording envelope before the first handshake call; a rejection proceeds directly from PLAYER_HANDSHAKE_ABORT to MATCH_END without gameplay.
 - **Context usage**: Spectators call `context_from(context)` to access typed fields (`session_id`, `batch_id`, `match_id`, `phase_index`, timestamps).
 - **Replay**: ReplayEngine reuses the same spectator API, ensuring replayed events trigger identical handlers.
 

@@ -110,42 +110,24 @@ class ReplayEngine:
         try:
             last_event: Optional[Event] = None
 
-            handshake_types = {
-                EventType.PLAYER_HANDSHAKE_START.value,
-                EventType.PLAYER_HANDSHAKE_COMPLETE.value,
-                EventType.PLAYER_HANDSHAKE_ABORT.value,
-            }
             self._build_handshake_prompt_cache()
             start_index = 0
             total_events = len(self.events)
-            while start_index < total_events:
-                event = self.events[start_index]
-                event_type = event.type.value if isinstance(event.type, EventType) else event.type
-                if event_type not in handshake_types:
-                    break
-                delay = self.scheduler.compute_delay(last_event, event)
-                if delay > 0:
-                    time.sleep(delay)
-
-                self._emit_recorded_event(event)
-                last_event = event
-                start_index += 1
-
             emitted_match_start = False
-            if start_index < total_events:
-                next_event = self.events[start_index]
-                next_type = (
-                    next_event.type.value
-                    if isinstance(next_event.type, EventType)
-                    else next_event.type
+            if total_events:
+                first_event = self.events[0]
+                first_type = (
+                    first_event.type.value
+                    if isinstance(first_event.type, EventType)
+                    else first_event.type
                 )
-                if next_type == EventType.MATCH_START.value:
-                    delay = self.scheduler.compute_delay(last_event, next_event)
+                if first_type == EventType.MATCH_START.value:
+                    delay = self.scheduler.compute_delay(last_event, first_event)
                     if delay > 0:
                         time.sleep(delay)
-                    self._emit_recorded_event(next_event)
-                    last_event = next_event
-                    start_index += 1
+                    self._emit_recorded_event(first_event)
+                    last_event = first_event
+                    start_index = 1
                     emitted_match_start = True
 
             if not emitted_match_start:

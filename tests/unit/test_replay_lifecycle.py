@@ -204,20 +204,22 @@ def sample_recording_with_conclusions():
 
 class TestHandshakeReplay:
     """
-    Test 2B.1: Validate PLAYER_HANDSHAKE_COMPLETE events emitted before MATCH_START.
+    Test 2B.1: Validate MATCH_START opens the canonical handshake envelope.
 
-    Per SPEC-REPLAY LC2: MUST emit handshake events from dialogue array before MATCH_START.
+    Per SPEC-REPLAY LC2: MUST emit MATCH_START before handshake events from the
+    canonical event stream.
     """
 
-    def test_emits_handshake_before_match_start(self, sample_recording_with_handshakes):
+    def test_emits_match_start_before_handshake(self, sample_recording_with_handshakes):
         """
         Verify handshake events emitted in correct order.
 
         Event order must be (per SPEC-REPLAY LC1/LC2):
-        1. PLAYER_HANDSHAKE_START (Player-1)
-        2. PLAYER_HANDSHAKE_COMPLETE (Player-1)
-        3. PLAYER_HANDSHAKE_START (Player-2)
-        4. PLAYER_HANDSHAKE_COMPLETE (Player-2)
+        1. MATCH_START
+        2. PLAYER_HANDSHAKE_START (Player-1)
+        3. PLAYER_HANDSHAKE_COMPLETE (Player-1)
+        4. PLAYER_HANDSHAKE_START (Player-2)
+        5. PLAYER_HANDSHAKE_COMPLETE (Player-2)
         5. MATCH_START
         6. ... gameplay events ...
         7. MATCH_END
@@ -243,11 +245,11 @@ class TestHandshakeReplay:
         assert len(handshake_start_indices) == 2, "Should have 2 handshake START events"
         assert len(handshake_complete_indices) == 2, "Should have 2 handshake COMPLETE events"
 
-        # Verify all handshake events before MATCH_START
+        # Verify MATCH_START opens the canonical envelope before handshake events.
         all_handshake_indices = handshake_start_indices + handshake_complete_indices
         assert all(
-            idx < match_start_idx for idx in all_handshake_indices
-        ), "All handshake events must precede MATCH_START"
+            match_start_idx < idx for idx in all_handshake_indices
+        ), "MATCH_START must precede all handshake events"
 
         # Verify START precedes COMPLETE for each player
         for start_idx, complete_idx in zip(handshake_start_indices, handshake_complete_indices):
@@ -359,7 +361,7 @@ class TestHandshakeReplay:
         assert handshake_start_count == 1, "Recorded START events must not be duplicated"
         match_start_index = event_types.index(EventType.MATCH_START)
         start_index = event_types.index(EventType.PLAYER_HANDSHAKE_START)
-        assert start_index < match_start_index, "MATCH_START must follow all handshake events"
+        assert match_start_index < start_index, "MATCH_START must precede handshake events"
 
     def test_backfills_handshake_start_prompt_from_complete(self):
         """

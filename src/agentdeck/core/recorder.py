@@ -43,6 +43,9 @@ class APIUsageTracker:
     total_cost: float = 0.0
     total_latency_ms: float = 0.0
     models_used: Dict[str, int] = field(default_factory=dict)
+    reasoning_reported_tokens: int = 0
+    reasoning_reported_calls: int = 0
+    reasoning_by_provider_model: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
     def record(self, usage: Dict[str, Any]) -> None:
         self.total_calls += 1
@@ -54,10 +57,37 @@ class APIUsageTracker:
         model = usage.get("model", "unknown")
         self.models_used[model] = self.models_used.get(model, 0) + 1
 
+        provider = str(usage.get("provider") or "unknown")
+        provider_model = str(usage.get("provider_model") or model)
+        group_key = f"{provider}/{provider_model}"
+        group = self.reasoning_by_provider_model.setdefault(
+            group_key,
+            {
+                "provider": provider,
+                "model": provider_model,
+                "reported_tokens": 0,
+                "reported_calls": 0,
+                "total_calls": 0,
+                "kinds": set(),
+                "sources": set(),
+            },
+        )
+        group["total_calls"] += 1
+
+        reasoning_usage = usage.get("reasoning_usage")
+        if isinstance(reasoning_usage, dict):
+            tokens = reasoning_usage["tokens"]
+            self.reasoning_reported_tokens += tokens
+            self.reasoning_reported_calls += 1
+            group["reported_tokens"] += tokens
+            group["reported_calls"] += 1
+            group["kinds"].add(reasoning_usage["kind"])
+            group["sources"].add(reasoning_usage["source"])
+
     def summary(self) -> Dict[str, Any]:
         if self.total_calls == 0:
             return {}
-        return {
+        result = {
             "total_calls": self.total_calls,
             "total_tokens": self.total_tokens,
             "total_prompt_tokens": self.total_prompt_tokens,
@@ -69,6 +99,27 @@ class APIUsageTracker:
             "total_latency_ms": round(self.total_latency_ms, 1),
             "models_used": dict(self.models_used),
         }
+        if self.reasoning_reported_calls:
+            result["reasoning_usage"] = {
+                "reported_tokens": self.reasoning_reported_tokens,
+                "reported_calls": self.reasoning_reported_calls,
+                "total_calls": self.total_calls,
+                "coverage_complete": self.reasoning_reported_calls == self.total_calls,
+                "by_provider_model": {
+                    key: {
+                        "provider": group["provider"],
+                        "model": group["model"],
+                        "reported_tokens": group["reported_tokens"],
+                        "reported_calls": group["reported_calls"],
+                        "total_calls": group["total_calls"],
+                        "coverage_complete": group["reported_calls"] == group["total_calls"],
+                        "kinds": sorted(group["kinds"]),
+                        "sources": sorted(group["sources"]),
+                    }
+                    for key, group in sorted(self.reasoning_by_provider_model.items())
+                },
+            }
+        return result
 
 
 @dataclass
@@ -216,17 +267,42 @@ class Recorder:
             total_tokens = prompt_tokens + completion_tokens
 
         cost = payload.get("cost", 0.0) or 0.0
-        if not any([prompt_tokens, completion_tokens, total_tokens, cost]):
+        reasoning_usage = Recorder._normalize_reasoning_usage(payload.get("reasoning_usage"))
+        if (
+            not any([prompt_tokens, completion_tokens, total_tokens, cost])
+            and reasoning_usage is None
+        ):
             return None
 
-        return {
+        normalized = {
             "tokens": total_tokens,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "cost": cost,
             "latency_ms": payload.get("latency_ms", 0.0) or 0.0,
             "model": payload.get("model") or payload.get("provider_model") or "unknown",
+            "provider": payload.get("provider") or "unknown",
+            "provider_model": payload.get("provider_model"),
         }
+        if reasoning_usage is not None:
+            normalized["reasoning_usage"] = reasoning_usage
+        return normalized
+
+    @staticmethod
+    def _normalize_reasoning_usage(payload: Any) -> Optional[Dict[str, Any]]:
+        """Validate the optional provider-reported reasoning/thinking breakdown."""
+        if not isinstance(payload, dict):
+            return None
+        tokens = payload.get("tokens")
+        kind = payload.get("kind")
+        source = payload.get("source")
+        if isinstance(tokens, bool) or not isinstance(tokens, int) or tokens < 0:
+            return None
+        if not isinstance(kind, str) or not kind:
+            return None
+        if not isinstance(source, str) or not source:
+            return None
+        return {"tokens": tokens, "kind": kind, "source": source}
 
     def _extract_usage_payload(self, data: Any) -> Optional[Dict[str, Any]]:
         """Extract usage metadata from canonical event payloads."""
@@ -489,8 +565,9 @@ class Recorder:
         """
         Record PLAYER_HANDSHAKE_START event with prompt metadata.
 
-        Handshake start events arrive before MATCH_START, so they are buffered
-        until the match recording is created.
+        Current live execution opens the Match before handshake, so this event
+        is normally flushed immediately. Buffering remains for historical or
+        explicitly supplied streams that still deliver it before MATCH_START.
         """
         event_data = self._serialize_event(event)
         if event.context:
@@ -888,6 +965,9 @@ class Recorder:
         }
 
     def _get_game_version(self, game) -> Dict[str, Any]:
+        prepared = getattr(game, "_agentdeck_prepared_game_version", None)
+        if prepared is not None:
+            return copy.deepcopy(prepared)
         if hasattr(game, "describe_version"):
             return copy.deepcopy(game.describe_version())
         from .game_version import describe_game_version

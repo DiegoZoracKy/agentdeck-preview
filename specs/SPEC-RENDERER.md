@@ -1,8 +1,8 @@
 # SPEC-RENDERER: Game View Formatting Contract
 
 > Status: Final
-> Version: 0.3.2
-> Last Updated: 2026-03-17
+> Version: 0.4.0
+> Last Updated: 2026-09-04
 > Implementation: ✅ Complete (Phase 6-8 compliance verified)
 > Audience: Renderer implementers, player authors, observability contributors
 
@@ -38,7 +38,7 @@ class RenderResult:
 ```
 - `text`: Primary rendered output passed to PromptBuilder.
 - `metadata`: JSON-serialisable dict describing sections, formatting hints, token estimates, etc.
-- MUST: Remain immutable once instantiated so recorder hashes remain stable.
+- MUST: Own an immutable metadata snapshot once instantiated, including nested mappings and sequences, so recorder hashes remain stable. Mutating the constructor input or a value returned to a caller MUST NOT alter the RenderResult. Metadata MUST remain JSON-serializable and support ordinary read access and copying; callers must create a new RenderResult to change metadata.
 - MUST: Be re-exported as `agentdeck.RenderResult`. Extension authors MUST NOT
   need to import `agentdeck.core.types` to implement the public `Renderer`
   contract.

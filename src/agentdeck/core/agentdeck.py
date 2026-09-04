@@ -10,6 +10,12 @@ from typing import Any, Dict, List, Optional, Union
 from .base import Game, Player, Spectator
 from .console import Console
 from .logging import create_logger
+from .provider_call_journal import (
+    ProviderCallJournal,
+    create_provider_call_journal,
+    validate_provider_call_journal,
+)
+from ..monitors.base import Monitor
 from .recorder import Recorder
 from .replay import ReplayEngine
 from .session import AgentDeckConfig, SessionContext
@@ -25,6 +31,8 @@ class AgentDeck:
         spectators: Optional[List[Spectator]] = None,
         recorder: Optional[Recorder] = None,
         session: Optional[AgentDeckConfig] = None,
+        runtime_monitors: Optional[List[Monitor]] = None,
+        provider_call_journal: Optional[ProviderCallJournal] = None,
     ) -> None:
         """Construct a new :class:`AgentDeck` instance.
 
@@ -34,6 +42,10 @@ class AgentDeck:
             recorder: Optional pre-configured recorder. When omitted a default recorder is
                 created automatically using the session's recording directory.
             session: Configuration describing seed, logging, and persistence preferences.
+            runtime_monitors: Additive execution-host observers. These do not
+                become authored session configuration.
+            provider_call_journal: Runtime custody backend matching the declared
+                session provider_call_custody policy.
         """
         self.default_game = game
         self.total_matches = 0
@@ -49,6 +61,17 @@ class AgentDeck:
 
         self.logger = create_logger(self.session)
 
+        if provider_call_journal is None:
+            provider_call_journal = create_provider_call_journal(
+                config.provider_call_custody,
+                directory=self.session.provider_call_directory,
+            )
+        validate_provider_call_journal(
+            provider_call_journal,
+            required_mode=config.provider_call_custody,
+        )
+        self.provider_call_journal = provider_call_journal
+
         # Prepare recorder
         if recorder is None:
             recorder = Recorder(session=self.session)
@@ -63,6 +86,8 @@ class AgentDeck:
             spectators=spectators,  # Don't convert None to [] - let Console handle auto-attachment
             session=self.session,
             logger=self.logger,
+            runtime_monitors=runtime_monitors,
+            provider_call_journal=provider_call_journal,
         )
 
         if self.logger:

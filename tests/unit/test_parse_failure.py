@@ -788,6 +788,33 @@ def test_parse_failure_retry_once_exhausted():
 
 def test_parse_failure_event_recorded_in_parallel_for_forfeit_policy():
     """Parse-failure events must remain observable in parallel worker execution."""
+
+    class ParallelParseFailureGame(TurnBasedGame):
+        """Minimal Game that does not opt out of the parallel worker path."""
+
+        allowed_actions = ["ATTACK", "DEFEND"]
+        instructions = "Choose ATTACK or DEFEND each turn."
+
+        @property
+        def default_handshake_template(self):
+            return "Ready to play? (Reply OK)"
+
+        def setup(self, player_names, seed=None):
+            return {"turn": 1, "players": {name: {"hp": 10} for name in player_names}}
+
+        def get_view(self, state, player_name):
+            return {"your_hp": state["players"][player_name]["hp"], "turn": state["turn"]}
+
+        def update(self, state, player_name, action, rng=None):
+            state["turn"] += 1
+            return state
+
+        def status(self, state):
+            return GameStatus(is_over=False, winner=None)
+
+        def on_action_parse_failure(self, player_name, error, turn_context):
+            return ParseFailurePolicy.FORFEIT
+
     with tempfile.TemporaryDirectory() as tmpdir:
         config = AgentDeckConfig(
             run_dir=str(tmpdir),
@@ -796,7 +823,7 @@ def test_parse_failure_event_recorded_in_parallel_for_forfeit_policy():
         )
 
         console = Console(config=config, recorder=Recorder())
-        game = MockGame(parse_failure_policy=ParseFailurePolicy.FORFEIT)
+        game = ParallelParseFailureGame()
         players = [
             MockPlayer(name="Alice", fail_on_turn=1),
             MockPlayer(name="Bob", fail_on_turn=1),

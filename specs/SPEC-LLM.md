@@ -1,9 +1,9 @@
 # SPEC-LLM: Provider Integration Contract
 
 > Status: Final
-> Version: 1.3.2
-> Last Updated: 2026-08-24
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Version: 1.6.0
+> Last Updated: 2026-09-03
+> Implementation: Complete
 > Audience: LLM integration authors, pricing/ops maintainers, execution operators
 
 ## 1. Purpose
@@ -21,7 +21,8 @@
 ## 3. Responsibilities
 - **Credential & client setup**: Resolve API keys (constructor arg > env var) and initialise provider SDK clients in `_initialize_client`.
 - **Request execution**: Build provider-specific payloads, invoke models with retry/backoff, and surface errors after exhausting retries for handshake, turn, and conclusion calls.
-- **Usage & cost tracking**: Aggregate per-call metadata (tokens, cost, latency) and maintain running totals for reporting.
+- **Provider-call custody**: Route every provider attempt through the execution's declared `SPEC-PROVIDER-CALL-CUSTODY` boundary before downstream interpretation.
+- **Usage & cost tracking**: Preserve provider billing quantities separately from optional provider-reported reasoning/thinking usage, aggregate per-call metadata (tokens, cost, latency), and maintain running totals for reporting.
 - **Metadata injection**: Supply `usage_info`, retry metrics, and provider extras to `HandshakeResult` / `ActionResult` metadata.
 - **Conversation management**: Maintain local history when no `ConversationManager` is bound and preserve handshake exchanges in history.
 - **Prompt hygiene**: For template-driven conclusion prompts, sanitize engine bookkeeping keys from rendered final-state views before LLM invocation.
@@ -80,13 +81,17 @@
 ### 5.2 Request Execution (RE)
 4. **RE1**: `_invoke_model` MUST make one initial provider attempt and then up to `max_retries` additional attempts, applying exponential backoff (`retry_delay * 2**attempt`) before each retry. `max_retries=0` MUST still make the initial attempt.
 5. **RE2**: MUST log request/response metadata via logger when attached (phase included).
-6. **RE3**: MUST propagate final failure as `RuntimeError` with provider/model context and the total number of attempts (`1 + max_retries`) when retries are exhausted.
+6. **RE3**: When retries are exhausted without a committed response, MUST raise `PlayerResponseUnavailableError` (a `RuntimeError` subtype) with Player/provider/model/call identity, attempt history, retry timing, and the bounded provider-call payload. It MUST NOT fabricate response text or usage.
+6a. **RE4**: A custody failure remains execution-critical and MUST NOT be converted into response unavailability. Other code/configuration failures outside the identified provider-attempt loop propagate normally.
 
 ### 5.3 Metadata & Accounting (MA)
-7. **MA1**: MUST populate `usage_info` with tokens, prompt/completion tokens (when available), cost, latency_ms, model, provider identifiers.
+7. **MA1**: MUST populate `usage_info` with tokens, prompt/completion tokens (when available), cost, latency_ms, model, and provider identifiers. `completion_tokens` is the provider-specific quantity priced at the output rate; it is not guaranteed to mean visible text tokens.
 8. **MA2**: MUST accumulate `total_tokens`, `total_cost`, and latency samples across calls. `get_stats()` MUST expose `total_tokens`, `total_cost`, `avg_response_time`, and `model`.
 9. **MA3**: MUST attach retry counters (`retries`, `retry_durations`, `attempt_durations`) to metadata for recorder.
 10. **MA4**: SHOULD flag estimated metrics (`estimated=True`) when providers return approximations.
+10a. **MA5 Provider-reported reasoning usage**: When the provider returns a separate reasoning/thinking token count, `usage_info` MUST preserve it as `reasoning_usage = {tokens, kind, source}`. `kind` preserves provider terminology (`reasoning` or `thinking`) and `source` identifies the native SDK field. A returned zero is reported coverage; an absent field remains absent and MUST NOT be inferred.
+10b. **MA6 Interpretation boundary**: Reasoning/thinking token counts are provider-specific operational facts. Aggregates MUST disclose call coverage and provider/model grouping; consumers MUST NOT present cross-provider token sums as a behaviorally comparable reasoning measure.
+10c. **MA7 Observation does not alter treatment**: Adapters MUST NOT enable reasoning, thinking, summaries, or traces solely to improve observability. Provider-exposed reasoning content is preserved only when returned under the declared request configuration.
 
 ### 5.4 Conversation & History (CH)
 11. **CH1**: When `ConversationManager` is bound, MUST delegate history logging (handshake, turns, conclusion) to the manager.
@@ -96,7 +101,7 @@
 
 ### 5.5 Pricing Integration (PI)
 15. **PI1**: Every LLMPlayer subclass MUST define a class-level `PROVIDER` constant identifying the provider (e.g., `"openai"`, `"anthropic"`, `"google"`) for cost calculation (SPEC-PRICING § 7.2 P1).
-16. **PI2**: MUST use `calculate_cost(provider, model, prompt_tokens, completion_tokens)` to derive USD cost.
+16. **PI2**: MUST use `calculate_cost(provider, model, prompt_tokens, completion_tokens)` to derive USD cost, where adapters have already normalized `prompt_tokens` and `completion_tokens` to the quantities billed at the provider's input and output rates (SPEC-PRICING §7.1).
 17. **PI3**: MUST log warning and default cost to `$0.00` when pricing info unavailable.
 
 ### 5.6 Prompt Metadata Capture (PM)
@@ -113,20 +118,35 @@
 24. **OR1**: OpenAI-backed players MUST invoke `client.responses.create(...)` for model calls and MUST extract reply text from `response.output_text`; when `output_text` is empty, implementations MUST fallback to parsing text blocks under `response.output` and fail noisily if no text exists. That failure MUST report bounded actionable status, incompleteness, and token-limit metadata when available, and MUST NOT embed the raw provider response.
 25. **OR2**: OpenAI-backed players MUST map prompt arrays to Responses API shape as follows: all `system` messages are joined into top-level `instructions`, while non-system messages are sent in top-level `input`.
 26. **OR3**: OpenAI-backed players MUST normalize token-limit aliases (`max_tokens`, `max_completion_tokens`, `max_output_tokens`) to `max_output_tokens` before request dispatch, and MUST reject conflicting alias values with a clear `ValueError`.
-27. **OR4**: OpenAI-backed players MUST map usage fields `usage.input_tokens` / `usage.output_tokens` into internal metadata keys `prompt_tokens` / `completion_tokens` to keep pricing and spectator contracts stable.
+27. **OR4**: OpenAI-backed players MUST map usage fields `usage.input_tokens` / `usage.output_tokens` into internal metadata keys `prompt_tokens` / `completion_tokens`. `usage.output_tokens` remains the inclusive priced output quantity. When returned, `usage.output_tokens_details.reasoning_tokens` MUST be preserved as `reasoning_usage` with its native source.
 28. **OR5**: Until explicit server-history mode is introduced, OpenAI-backed players MUST send `store=False` on Responses API calls so match reproducibility remains grounded in local conversation history.
 29. **OR6**: When an OpenAI-backed Player has `temperature=None`, the adapter MUST omit `temperature` from the Responses API request. This represents a provider-default, not a measured zero. Explicit numeric temperatures remain unchanged.
 30. **AR1**: Anthropic-backed players MUST supply `max_tokens` on every request. When callers leave `max_tokens` unset, implementations MUST apply a documented fallback.
-31. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, create scoped Google credentials suitable for Vertex (`cloud-platform`), construct the provider client in Vertex mode, and infer `project_id` from the payload when possible.
-32. **GR2**: Gemini-backed players MUST preserve multi-turn role structure using the provider's native content model rather than flattening history into a labeled transcript. User messages MUST be sent as user-role content, assistant messages MUST be sent as model-role content, and system instructions SHOULD use the provider-native system-instruction field when available.
+31. **AR2**: When an Anthropic-backed Player has `temperature=None`, the adapter MUST omit `temperature` from the native request and provider-call audit. This represents a provider-default, not a measured zero.
+32. **AR3**: When an Anthropic-backed Player has an explicit numeric
+    `temperature`, the adapter MUST preserve it in the effective provider
+    request. SDK generations that expose a native `temperature` parameter MUST
+    receive it there. SDK generations that removed the generated parameter but
+    still allow older models to receive it MUST carry it through
+    `extra_body`. The provider-call audit MUST preserve the exact SDK argument
+    shape used. The adapter MUST NOT silently drop the declared value.
+32a. **AR4 Anthropic content projection**: Anthropic-backed players MUST derive Controller response text deterministically from returned `text` content blocks in provider order. Thinking blocks MUST NOT be treated as answer text. Returned content-block types and provider-exposed readable thinking content MUST remain available in bounded provider-call metadata; opaque signatures/state are not required unless a declared interaction needs them for faithful continuity.
+32b. **AR5 Anthropic usage**: `usage.output_tokens` remains the inclusive priced output quantity. When returned, `usage.output_tokens_details.thinking_tokens` MUST be preserved as `reasoning_usage` with `kind="thinking"` and its native source.
+33. **GR1**: Gemini-backed players MAY authenticate via Vertex ADC or `GOOGLE_APPLICATION_CREDENTIALS_B64`. When base64 credentials are supplied, implementations MUST decode the JSON payload, create scoped Google credentials suitable for Vertex (`cloud-platform`), construct the provider client in Vertex mode, and infer `project_id` from the payload when possible.
+34. **GR2**: Gemini-backed players MUST preserve multi-turn role structure using the provider's native content model rather than flattening history into a labeled transcript. User messages MUST be sent as user-role content, assistant messages MUST be sent as model-role content, and system instructions SHOULD use the provider-native system-instruction field when available.
+34a. **GR3 Gemini billing quantity**: When usage metadata is available, Gemini-backed players MUST include both response candidate tokens and thinking tokens in the quantity passed as `completion_tokens` for output-rate pricing. Provider-reported `total_token_count` remains the authoritative overall token count when present.
+34b. **GR4 Gemini reasoning usage**: When returned, `usage_metadata.thoughts_token_count` MUST be preserved as `reasoning_usage` with `kind="thinking"` and its native source. Absence remains unknown for observability even when billing can be calculated from other provider counters.
 
 ### 5.9 Provider Call Audit (PCA)
 
-33. **PCA1 Adapter Boundary**: Immediately before invoking an official provider SDK, an adapter MUST retain a strict-JSON snapshot of the effective method and arguments. This proves what AgentDeck handed to the SDK; it does not claim to intercept HTTP traffic.
-34. **PCA2 Request Transformation**: Provider-neutral composed messages and provider-native SDK arguments MUST remain separate so adapter transformations are inspectable.
-35. **PCA3 Attempt History**: Every attempted call MUST retain attempt order, start time, duration, outcome, and SDK request. A successful retry MUST NOT erase failed attempts.
-36. **PCA4 Provider Response**: Successful calls MUST retain exact response text plus provider-returned model, response ID, stop reason, completion status, service tier, and token usage when exposed by the SDK. Missing values remain absent, never inferred.
-37. **PCA5 JSON Safety**: Persisted call provenance MUST contain no credentials, SDK clients, live response objects, or other non-JSON values.
+35. **PCA1 Adapter Boundary**: Immediately before invoking an official provider SDK, an adapter MUST retain a strict-JSON snapshot of the effective method and arguments. This proves what AgentDeck handed to the SDK; it does not claim to intercept HTTP traffic.
+36. **PCA2 Request Transformation**: Provider-neutral composed messages and provider-native SDK arguments MUST remain separate so adapter transformations are inspectable.
+37. **PCA3 Attempt History**: Every attempted call MUST retain attempt order, start time, duration, outcome, and SDK request. A successful retry MUST NOT erase failed attempts.
+38. **PCA4 Provider Response**: Successful calls MUST retain exact Controller response text plus provider-returned model, response ID, stop reason, completion status, service tier, token usage, optional reasoning/thinking usage, and bounded content-block metadata when exposed by the SDK. The Controller response text is a projection of the provider response, not a claim that the raw SDK object is retained. Missing values remain absent, never inferred.
+39. **PCA5 JSON Safety**: Persisted call provenance MUST contain no credentials, SDK clients, live response objects, or other non-JSON values.
+40. **PCA6 Attempt custody**: Every SDK attempt MUST receive a stable positive attempt index under its logical `call_id`. Intent and dispatch start MUST cross the declared custody boundary before SDK invocation, and a returned canonical provider-call payload MUST cross it before Controller use.
+41. **PCA7 Custody failure**: A durable custody failure MUST propagate immediately as a provider-call custody error. It MUST NOT consume retry budget, fall back to volatile memory, or cause another provider attempt.
+42. **PCA8 Exhausted attempt custody**: When every configured attempt fails before a response is committed, the terminal unavailable exception MUST retain the logical call identity and every failed attempt already held by the declared custody journal. Missing response usage and cost remain unavailable, not zero-filled.
 
 ## 6. Data Flow & Interaction
 - Player lifecycle calls `_invoke_model` for each phase:
@@ -140,7 +160,7 @@
 - MUST raise informative `ImportError` if provider SDK missing.
 - MUST raise `ValueError` for missing API key/model.
 - MUST catch provider exceptions inside retry loop, log retry attempt, and backoff before retrying.
-- MUST ensure handshake failures propagate so console can enforce policy.
+- MUST surface exhausted provider attempts as typed response unavailability so Console can preserve an incomplete lifecycle outcome without confusing it with Controller rejection or a programming error.
 - SHOULD support provider-specific quirks (e.g., OpenAI Responses API instructions/input mapping and max_output_tokens, Anthropic role mapping, Gemini token estimates and structured role mapping) while keeping metadata shape consistent.
 
 ## 8. Examples
@@ -267,6 +287,8 @@ for i, msg in enumerate(history):
 | Pricing integration | PI1-PI3 | Verify PROVIDER constant defined; mock `calculate_cost` success/failure; verify cost recorded and warnings emitted.
 | Prompt metadata | PM1-PM4 | Verify response_text, usage_info, phase captured in metadata; assert JSON-serializable.
 | Optional OpenAI temperature | OR6 | Set `temperature=None`; assert the SDK request and provider-call audit omit the field while Player introspection preserves `None`.
+| Optional Anthropic temperature | AR2 | Set `temperature=None`; assert the native request and provider-call audit omit the field while Player introspection preserves `None`.
+| Anthropic SDK temperature compatibility | AR3 | Exercise SDK method shapes with and without the generated native parameter; assert explicit temperature remains exact in either `temperature` or `extra_body` and in provider-call audit.
 
 ### Concrete Test Examples
 
@@ -464,7 +486,7 @@ def test_provider_constant_defined():
 - How to extend metadata capture for non-text input tokens and costs?
 
 ### Provider-Specific Optimizations
-- Should players expose **provider-specific features** (e.g., Anthropic's prompt caching, OpenAI's reasoning tokens)?
+- Should players expose **provider-specific features** beyond the usage and response facts already returned by declared calls (e.g., Anthropic prompt caching or provider-managed history)?
 - How to balance standardization vs provider-specific performance gains?
 
 ### Cost Budget Enforcement

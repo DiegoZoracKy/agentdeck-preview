@@ -1,9 +1,9 @@
 # SPEC-CONSOLE: Execution Engine Contract
 
 > Status: Final
-> Version: 0.7.2
-> Last Updated: 2026-03-31
-> Implementation: ✅ Complete (Phase 6-8 compliance verified)
+> Version: 0.12.0
+> Last Updated: 2026-09-04
+> Implementation: Complete
 > Audience: Core contributors, engine implementers
 
 ## 1. Purpose
@@ -40,9 +40,10 @@ Console operates at two architectural layers, both mechanics-agnostic:
 - **Session Lifecycle**: Resolve the session seed, prepare directories, create `SessionState`, bind recorder/spectators, emit `SESSION_START` / `SESSION_END`, stamp `finished_at`, and guarantee idempotent cleanup.
 - **Execution Lifecycle**: For every `run` call emit `BATCH_START` / `BATCH_END`, derive base seeds, loop through requested matches (including size-1 runs), and scope execution spectators.
 - **Player Order Management**: Console is the source of fairness by default. Before each match, call `game.get_player_order(players, rng=match_rng, match_context)`. When game returns `None` (default), apply console fairness policy using `AgentDeckConfig.pairing_policy` and `AgentDeckConfig.first_player_policy`. `paired_side_swap` MUST reuse the same match seed for each paired AB/BA run and MUST swap sides only after the base order is chosen. When game returns custom list, validate (same players, no duplicates, correct length) and raise `ValueError` on mismatch; non-default console fairness policies are incompatible with custom game ordering. Record effective order, actual first actor, and selected fairness policy in observability artifacts (MatchResult.metadata, events, logs, recorder). Log player order at DEBUG level (see §6.5 invariants).
-- **Match Orchestration**: Manage match-level lifecycle (handshakes → MATCH_START → `game.run(runtime, players)` → conclusion phase → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
+- **Match Orchestration**: Manage match-level lifecycle (MATCH_START → handshakes → `game.run(runtime, players)` → conclusion phase → MATCH_END), reset per-match state, and package outcomes into `MatchResult` objects with complete reproducibility metadata.
 - **Conclusion Policy**: Apply the session conclusion policy to decide whether the conclusion phase runs and which players conclude. Game hooks may override prompts/state for a single player, but do not gate conclusion execution.
 - **Handshake Management**: Run handshake build+execute before turn 1, emit `PLAYER_HANDSHAKE_START` using the exact prompt bundle, validate acknowledgements via controller, and abort on rejection.
+- **Unavailable-Match Progression**: Preserve an unavailable Match as canonical execution truth, then apply the declared session policy to either continue later independent slots or stop the batch before another Match starts. The policy does not add a probe call or reinterpret the unavailable Match.
 - **Runtime Provisioning**: Create a fresh `MatchRuntime` per match exposing recorder, event emitter, RNG forks, parse-failure helper, and validation utilities so mechanics stay decoupled from console internals (see `SPEC-MATCH-RUNTIME.md`).
 - **Parse Failure Handling** (new in v0.5.0): When `player.decide()` raises `ActionParseError`, the console MUST capture the embedded `ParseResult`, emit a `PLAYER_ACTION_PARSE_FAILED` event, record the failure, and invoke the game's parse-failure policy hook. Console interprets the returned `ParseFailurePolicy` (abort, skip turn, forfeit, retry) and applies it deterministically.
 - **Deterministic Randomness**: Maintain session-level RNG state, derive per-match RNGs deterministically, and persist seeds in ALL observability artifacts (events, logs, recorder, MatchResult). Pairing policies that promise side-swap parity MUST also preserve pair-level seed reuse.
@@ -113,12 +114,12 @@ class MatchContext:
 
 ## 5. Public API
 
-### Console(*, config: Optional[SessionConfig] = None, session: Optional[SessionContext] = None, seed: Optional[int] = None, recorder: Optional[Recorder] = None, spectators: Optional[List[Spectator]] = None, logger: Optional[AgentDeckLogger] = None, session_factory: Optional[Callable[[SessionConfig, SessionContext, int], SessionState]] = None) -> None
+### Console(*, config: Optional[SessionConfig] = None, session: Optional[SessionContext] = None, seed: Optional[int] = None, recorder: Optional[Recorder] = None, spectators: Optional[List[Spectator]] = None, logger: Optional[AgentDeckLogger] = None, provider_call_journal: Optional[ProviderCallJournal] = None, session_factory: Optional[Callable[[SessionConfig, SessionContext, int], SessionState]] = None) -> None
 
 Create Console instance and initialize session lifecycle.
 
 **Contract**:
-- Accept: SessionConfig for paths/logging/defaults or a pre-built `SessionContext`, optional seed override (precedence: seed param > session/config.seed > entropy), optional recorder, spectators list, optional logger, optional session factory for testing
+- Accept: SessionConfig for paths/logging/defaults or a pre-built `SessionContext`, optional seed override (precedence: seed param > session/config.seed > entropy), optional recorder, spectators list, optional logger, optional provider-call journal matching declared custody, optional session factory for testing
 - Perform: Reuse or create `SessionContext`, create SessionState via session_factory or default, resolve seed precedence, instantiate EventBus, subscribe recorder/spectators
 - Emit: `SESSION_START` (synchronously during construction, before returning)
 - Raise: ValueError if directories cannot be created, TypeError if components have invalid types
@@ -144,8 +145,9 @@ Execute batch of matches and return results.
   3. For each match index:
      - Derive match seed deterministically and build per-match execution context.
      - Resolve effective player order via `game.get_player_order`, falling back to configured console fairness policy when the game returns `None`.
-     - Execute handshakes before `MATCH_START` (build prompt → emit `PLAYER_HANDSHAKE_START` → execute LLM call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`).
-     - Emit `MATCH_START` after successful handshake completion.
+     - Complete provider-free setup and emit `MATCH_START` before the first handshake call, opening the canonical Match recording envelope.
+     - Execute handshakes inside that envelope (build prompt → emit `PLAYER_HANDSHAKE_START` → execute Player call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`).
+     - On rejection, emit terminal `MATCH_END` with a canonical incomplete `MatchResult`; do not call `game.run()` or run conclusions.
      - Create `MatchRuntime(console=self, game=game, match_id=..., session_id=..., batch_id=..., seed=..., max_turns=..., recorder=..., logger=..., rng=match_rng, previous_match_result=..., events_list=...)` and call `game.run(runtime, ordered_players)`.
      - Emit `MATCH_END`, store `MatchResult` (final state, metadata, runtime events).
   4. Emit `BATCH_END` (include `seeds_used`, duration, `matches_completed`), detach execution spectators.
@@ -247,15 +249,20 @@ Cleanup session and emit SESSION_END (context manager protocol).
 17. **T4**: When seed is derived (not explicitly provided), MUST log the derivation method: "Generated session seed: {seed} from system entropy" or "Match {match_index} seed: {seed} (derived from base seed {base_seed})".
 
 ### 6.5 Handshake Lifecycle (H)
-18. **H1**: Console MUST run handshake before the first turn of every match using the two-step Player API (`build_handshake_bundle` → `execute_handshake`) and MUST abort (`HandshakeRejectedError`) on the first rejection.
+18. **H1**: Console MUST run handshake before the first turn of every match using the two-step Player API (`build_handshake_bundle` → `execute_handshake`) and MUST stop on the first rejection. `HandshakeRejectedError` MAY be used as an internal control signal, but the public execution outcome MUST be a canonical incomplete `MatchResult`, not a lost pre-Record exception.
 19. **H2**: Console MUST emit `PLAYER_HANDSHAKE_START` before the LLM call, using the exact `PromptBundle` returned by `build_handshake_bundle` (prompt_text + prompt_blocks) and the controller handshake format.
 20. **H3**: Console MUST call `execute_handshake` with the exact bundle returned by `build_handshake_bundle` and then validate via `controller.validate_handshake(raw, context)`.
 21. **H4**: Console MUST emit `PLAYER_HANDSHAKE_COMPLETE` or `PLAYER_HANDSHAKE_ABORT` for every player with `accepted`, `normalized_response`, `response_text`, `controller_metadata`, and prompt metadata (prompt_text, prompt_blocks, controller_format, renderer_output, usage_info when available).
 22. **H5**: `MatchContext.handshake_completed` MUST be `True` only when all players acknowledged successfully and MUST remain `False` otherwise (match aborted).
 23. **H6**: Upon successful handshake, console MUST ensure the handshake exchange remains available to subsequent `player.decide` calls unless a player explicitly resets conversation history.
+24. **H7**: Console MUST emit `MATCH_START` after provider-free setup succeeds and before any handshake Player call. A handshake rejection MUST emit `PLAYER_HANDSHAKE_ABORT` followed by `MATCH_END`, MUST NOT call `game.run()` or any conclusion, and MUST preserve the exact prompt, raw response, usage, provider-call provenance, validation reason, initial state, and incurred cost in the canonical incomplete Match.
+25. **H8**: A handshake-rejected Match MUST use `metadata["outcome"] = "aborted"`, `metadata["abort_reason"] = "handshake_rejected"`, identify `failing_player` and `handshake_rejection_reason`, report `turns = 0` and `handshake_completed = False`, and remain a resolved batch slot rather than terminating later independent slots.
+26. **H9**: When `execute_handshake()` raises typed `PlayerResponseUnavailableError`, Console MUST emit `PLAYER_HANDSHAKE_ABORT` with no fabricated response, preserve the prompt, logical provider call and all attempts, then emit `MATCH_END` with `metadata["outcome"] = "unavailable"`, `abort_reason = "provider_response_unavailable"`, `turns = 0`, and `handshake_completed = False`. It MUST NOT call the Controller, `game.run()`, or conclusions; the unavailable Match remains a resolved batch slot and later independent slots continue. Unknown provider outcome or cost MUST remain explicitly unavailable.
+27. **H10**: `AgentDeckConfig.unavailable_match_policy` MUST accept only `"continue"` (default) or `"stop_batch"`. `"continue"` preserves H9. With `"stop_batch"`, Console MUST first finish and preserve the unavailable Match, then raise a typed `BatchStoppedError` before starting another Match. The stopped batch MUST emit `BATCH_END` with all completed results and an error; callers MUST be able to recover the canonical partial Records. This policy MUST NOT create an additional provider call, remove the unavailable Match from the corpus, or convert it into a Game action.
+28. **H11**: `unavailable_match_policy="stop_batch"` requires `concurrency=1`. AgentDeck MUST reject an incompatible configuration before execution because already-started parallel Matches cannot satisfy the no-further-slot guarantee.
 
 ### 6.6 Event Ordering & Delivery (E)
-25. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (`MATCH_START` / **TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) / **PLAYER_CONCLUSION** (per policy) / `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.
+26. **E1**: MUST emit lifecycle events in order: `SESSION_START` → (`BATCH_START` → (`MATCH_START` → (`PLAYER_HANDSHAKE_*`)* → (**TurnLoop execution** (+ optional `PLAYER_ACTION_PARSE_FAILED`) → optional `PLAYER_CONCLUSION` | terminal handshake rejection) → `MATCH_END`)+ → `BATCH_END`)* → `SESSION_END`.
 26. **E2**: MUST attach session/match identifiers, phase indices, monotonic timestamps, and turn indices to events per `SPEC-OBSERVABILITY.md`.
 27. **E3**: Console MUST emit orchestration lifecycle events (SESSION, BATCH, MATCH_START, MATCH_END, CLEANUP) plus parse-failure events. Turn execution events remain TurnLoop responsibility; domain events remain Game responsibility.
 28. **E4**: `PLAYER_ACTION_PARSE_FAILED` MUST be emitted exactly once per parsing failure before any policy action is applied.
@@ -266,6 +273,11 @@ Cleanup session and emit SESSION_END (context manager protocol).
 31. **M2**: MUST reset conversation managers and player logging hooks before each match to avoid leakage across matches.
 32. **M3**: Console MUST record player order metadata in ALL observability artifacts: MatchResult.metadata["player_names"] (ordered list post-ordering), MatchResult.metadata["player_order"] (0-based indices showing original positions), MATCH_START/END event payload (player_names ordered list), Logger output (ordered player list in match start/end logs), Recorder files (ordered player list). Rationale: Player order is objective data. Some mechanics may use this order directly, while others may select the first acting player at runtime. Console records both ordering and first-player metadata for analysis.
 33. **M4** (Player Ordering): Console MUST call `game.get_player_order(players, rng=match_rng, match_context)` before each match. If game returns `None`, Console MUST apply the configured fairness policy. If game returns custom list, Console MUST validate (same `Player` instances, same length, no duplicates) and raise `ValueError` on mismatch. Console MUST record in `MatchResult.metadata` and events: `player_order` (List[int] of original indices, e.g., [1, 0, 2] means original player 1 is first in ordered list), `player_order_source` (Literal["console", "game"]), `first_player` (Dict with {"name": str, "index": int, "ordered_index": int}), and `fairness_policy` (selected pairing / first-player policy metadata). `first_player` MUST reflect the actual first acting player when runtime selection metadata is available; otherwise it MUST fall back to the first player in ordered list. Console MUST log player order at DEBUG level without exposing to INFO/console output.
+34. **M5** (First-player fallback): Console and isolated workers MUST
+initialize first-player selection state before any match. A custom mechanic that
+does not publish a runtime-selected first actor MUST resolve to the prepared
+ordered-player fallback; missing optional selection metadata MUST NOT fail match
+finalization.
 
 ### 6.8 Spectator & Recorder Integration (P)
 33. **P1**: MUST subscribe recorder and all spectator instances prior to emitting `SESSION_START`.
@@ -275,6 +287,7 @@ Cleanup session and emit SESSION_END (context manager protocol).
 
 ### 6.9 Logging & Recording (L)
 37. **L1**: Console MUST tolerate `logger=None` and `recorder=None` in direct-construction scenarios. `AgentDeck` typically supplies both, but Console MUST still preserve lifecycle/event semantics when either dependency is omitted.
+38. **L2**: Console MUST bind one execution-scoped provider-call journal to provider-backed Players before lifecycle calls. Journal failure is execution-critical and MUST NOT be isolated like Spectator or Recorder failure.
 
 ### 6.10 Error Handling (H)
 
@@ -298,7 +311,7 @@ This layered approach prevents silent failures while maintaining separation of c
     - `SKIP_TURN`: consume the failing player's turn and continue.
     - `FORFEIT`: declare the failing player the loser and end match (default outcome when a game does not override `on_action_parse_failure`).
     - `RETRY_ONCE`: re-issue the prompt one additional time (Console MUST ensure a single retry per failure to preserve determinism).
-33. **PF4**: If `ABORT_MATCH` is returned (default), Console MUST emit `MATCH_END`, call `Recorder.on_match_end()` with failure metadata (e.g., `match.metadata["outcome"] = "aborted"`), and only then raise `MatchTerminationError` (or propagate a descriptive exception) so recordings persist the partial match.
+33. **PF4**: If `ABORT_MATCH` is returned, Console MUST emit `MATCH_END`, call `Recorder.on_match_end()` with failure metadata (e.g., `match.metadata["outcome"] = "aborted"`), and only then raise `MatchTerminationError` (or propagate a descriptive exception) so recordings persist the partial match. This applies to serial and parallel execution; already dispatched parallel work MUST be drained and preserved before raising, without retrying any slot.
 34. **PF5**: Console MUST document the chosen policy in logs and in the failure event payload (`policy_outcome` field) for observability, explicitly noting when the default FORFEIT outcome was applied.
 35. **PF6**: Policy outcomes MUST be deterministic and dependent solely on current game state, the failing player, and the provided ParseResult metadata.
 36. **PF7**: Console MUST NOT provide a global fallback configuration flag; all graceful degradation MUST be implemented via the game policy hook or custom controllers.
@@ -313,6 +326,13 @@ This layered approach prevents silent failures while maintaining separation of c
 43. **PE2**: Workers MUST capture dual event streams: sanitised snapshots for recorder parity and replay payloads containing original Player/Game objects. Console MUST replay the latter strictly in match-index order so spectators observe the same payloads as sequential execution.
 44. **PE3**: After each worker completes (sequential or parallel path), Console MUST synchronise aggregate player metrics (e.g., `total_cost`, `total_tokens`, latency samples) from cloned players back to the original instances.
 45. **PE4**: Console MUST fall back to sequential execution when the game overrides `get_player_order` in a way that may depend on `previous_match_result`, logging a diagnostic message to aid researchers.
+
+### Execution preparation and failure preservation
+
+- **EP1**: Before invoking a Player response source, Console MUST validate that the effective Game, Player, Controller and Renderer descriptions are JSON-serializable mappings. A descriptor failure MUST name its component and propagate; optional Spectator exception isolation is unchanged.
+- **EP2**: A single-player Game MUST explicitly implement its parse-failure policy instead of inheriting Game's FORFEIT default. Console MUST reject that incompatible inherited policy before Player interaction. No policy is inferred from the Game score or winner field.
+- **EP3**: If a worker fails after MATCH_START, Console MUST preserve its already emitted events and last observed state in a terminal Record marked `outcome=execution_error`, with original exception type/message. It MUST NOT infer a Game action, winner, or response that was not observed. Failure before MATCH_START has no invented Match Record.
+- **EP4**: Unexpected failures MUST propagate with their original type and message after all available worker artifacts are recorded and aggregate usage is reconciled. Cancellation cannot claim to undo dispatched provider calls. A failed slot is not a successful result.
 
 ## 7. Data Flow & Interaction
 - **Initialization**
@@ -331,9 +351,9 @@ This layered approach prevents silent failures while maintaining separation of c
         - If returns `List[Player]`: Validate (same players, correct length, no duplicates), raise `ValueError` on failure
         - Record `player_order` (original indices), `player_order_source` ("console" or "game"), `first_player` (name + original index + ordered_index), and `fairness_policy`
         - Log at DEBUG level: "Player order determined: [names] (source: console/game)"
-     d. Execute handshake phase with ordered players (build prompt → emit `PLAYER_HANDSHAKE_START` with prompt_text/prompt_blocks + controller_format → execute LLM call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`, update `MatchContext.handshake_completed`)
-     e. Reset player conversations/logging
-     f. Emit `MATCH_START` (with seed, ordered player_names, player_order, player_order_source, first_player, fairness_policy)
+     d. Reset player conversations/logging and complete provider-free `game.setup()`.
+     e. Emit `MATCH_START` (with seed, ordered player_names, player_order, player_order_source, first_player, fairness_policy), opening the canonical recording envelope before a Player call.
+     f. Execute handshake phase with ordered players (build prompt → emit `PLAYER_HANDSHAKE_START` with prompt_text/prompt_blocks + controller_format → execute Player call → validate → emit `PLAYER_HANDSHAKE_COMPLETE|ABORT`, update `MatchContext.handshake_completed`). On rejection, construct the canonical incomplete Match, emit `MATCH_END`, and continue with the next independent slot without calling `game.run()`.
      g. **Create MatchRuntime & delegate to mechanic**:
         ```python
         match_runtime = MatchRuntime(

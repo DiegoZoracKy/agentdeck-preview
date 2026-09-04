@@ -1,6 +1,8 @@
 """Anthropic Claude player for AgentDeck."""
 
-from typing import Dict, List, Tuple
+import inspect
+
+from typing import Any, Dict, List, Tuple
 
 from ..utils.pricing import calculate_cost
 from .llm_player import LLMPlayer
@@ -25,7 +27,8 @@ class ClaudePlayer(LLMPlayer):
                 'Install it via the optional extra: pip install "agentdeck-ai[anthropic]"'
             ) from exc
 
-        self.client = Anthropic(api_key=self.api_key)
+        # LLMPlayer owns retries so every attempt crosses provider-call custody.
+        self.client = Anthropic(api_key=self.api_key, max_retries=0)
 
     def _effective_max_tokens_for_request(self) -> int | None:
         """Anthropic requires an explicit max_tokens on every request."""
@@ -55,17 +58,30 @@ class ClaudePlayer(LLMPlayer):
         kwargs = {
             "model": self.model,
             "messages": claude_messages,
-            "temperature": self.temperature,
             "max_tokens": max_tokens,
             **self.config,
         }
+        if self.temperature is not None:
+            parameters = inspect.signature(self.client.messages.create).parameters
+            supports_native_temperature = "temperature" in parameters or any(
+                parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in parameters.values()
+            )
+            if supports_native_temperature:
+                kwargs["temperature"] = self.temperature
+            else:
+                extra_body = dict(kwargs.get("extra_body") or {})
+                configured = extra_body.get("temperature")
+                if configured is not None and configured != self.temperature:
+                    raise ValueError("Anthropic temperature conflicts with extra_body.temperature")
+                extra_body["temperature"] = self.temperature
+                kwargs["extra_body"] = extra_body
         if system_prompt:
             kwargs["system"] = system_prompt
 
         self._capture_sdk_request("anthropic.messages.create", kwargs)
         response = self.client.messages.create(**kwargs)
 
-        response_text = response.content[0].text
+        response_text, content_blocks = self._project_response_content(response.content)
 
         # Calculate cost using YAML pricing
         tokens_used = response.usage.input_tokens + response.usage.output_tokens
@@ -77,6 +93,8 @@ class ClaudePlayer(LLMPlayer):
         )
 
         stop_reason = getattr(response, "stop_reason", None)
+        output_details = getattr(response.usage, "output_tokens_details", None)
+        thinking_tokens = getattr(output_details, "thinking_tokens", None)
         metadata = {
             "tokens_used": tokens_used,
             "cost": cost,
@@ -91,6 +109,40 @@ class ClaudePlayer(LLMPlayer):
             # Add standard keys for LLMPlayer compatibility
             "prompt_tokens": response.usage.input_tokens,
             "completion_tokens": response.usage.output_tokens,
+            "provider_content_blocks": content_blocks,
         }
+        if thinking_tokens is not None:
+            metadata["reasoning_usage"] = {
+                "tokens": thinking_tokens,
+                "kind": "thinking",
+                "source": ("anthropic.messages.usage.output_tokens_details.thinking_tokens"),
+            }
 
         return response_text, metadata
+
+    @staticmethod
+    def _project_response_content(content: Any) -> Tuple[str, List[Dict[str, Any]]]:
+        """Project provider content blocks into Controller text and bounded audit data."""
+        text_parts: List[str] = []
+        captured_blocks: List[Dict[str, Any]] = []
+
+        for block in content or []:
+            block_type = getattr(block, "type", None)
+            if block_type is None and isinstance(getattr(block, "text", None), str):
+                block_type = "text"
+            block_type = str(block_type or "unknown")
+            captured: Dict[str, Any] = {"type": block_type}
+
+            if block_type == "text":
+                value = getattr(block, "text", None)
+                if isinstance(value, str):
+                    captured["text"] = value
+                    text_parts.append(value)
+            elif block_type == "thinking":
+                value = getattr(block, "thinking", None)
+                if isinstance(value, str):
+                    captured["thinking"] = value
+
+            captured_blocks.append(captured)
+
+        return "\n".join(text_parts), captured_blocks

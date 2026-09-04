@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import copy
+import json
 import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
+
+from ..monitors.base import Monitor
 
 from .base import Game, Player, Spectator
 from .conversation import ConversationManager
@@ -16,6 +19,11 @@ from .event_bus import EventBus
 from .game_event_emitter import GameEventEmitter
 from .logging import AgentDeckLogger
 from .match_runtime import MatchRuntime
+from .provider_call_journal import (
+    ProviderCallJournal,
+    create_provider_call_journal,
+    validate_provider_call_journal,
+)
 from .recorder import Recorder
 from .session import AgentDeckConfig, ConclusionPolicy, SessionContext
 from .types import (
@@ -25,6 +33,7 @@ from .types import (
     GameStatus,
     HandshakeContext,
     MatchArtifact,
+    PlayerResponseUnavailableError,
 )
 from .types import MatchContext as PlayerMatchContext
 from .types import (
@@ -33,11 +42,59 @@ from .types import (
     TurnContext,
 )
 
-__all__ = ["Console", "SessionState", "HandshakeRejectedError"]
+__all__ = ["BatchStoppedError", "Console", "SessionState", "HandshakeRejectedError"]
+
+
+class BatchStoppedError(RuntimeError):
+    """Declared batch policy stopped progression after a canonical Match."""
+
+    def __init__(
+        self,
+        *,
+        outcome: str,
+        match_id: str,
+        completed_matches: int,
+        planned_matches: int,
+    ) -> None:
+        self.outcome = outcome
+        self.match_id = match_id
+        self.completed_matches = completed_matches
+        self.planned_matches = planned_matches
+        super().__init__(
+            "Batch stopped after canonical Match "
+            f"{match_id!r} ended with outcome {outcome!r} "
+            f"({completed_matches}/{planned_matches} slots resolved)"
+        )
 
 
 class HandshakeRejectedError(RuntimeError):
-    """Raised when a player rejects the handshake phase."""
+    """Internal signal carrying one rejected handshake into Match finalization."""
+
+    def __init__(
+        self,
+        *,
+        player_name: str,
+        reason: Optional[str],
+        abort_state: Dict[str, Any],
+    ) -> None:
+        self.player_name = player_name
+        self.reason = reason or "Handshake rejected"
+        self.abort_state = copy.deepcopy(abort_state)
+        super().__init__(f"Player {player_name} rejected handshake: {self.reason}")
+
+
+class HandshakeUnavailableError(RuntimeError):
+    """Internal signal carrying response unavailability into Match finalization."""
+
+    def __init__(
+        self,
+        *,
+        error: PlayerResponseUnavailableError,
+        abort_state: Dict[str, Any],
+    ) -> None:
+        self.error = error
+        self.abort_state = copy.deepcopy(abort_state)
+        super().__init__(str(error))
 
 
 class ParallelExecutionError(RuntimeError):
@@ -102,6 +159,21 @@ class MatchExecutionContext:
     events: List[Event] = field(default_factory=list)
     handshake_completed: bool = False
     truncated_by_max_turns: bool = False
+
+
+@dataclass
+class _ExecutionSnapshot:
+    """Observed match context retained only to finalize unexpected failures."""
+
+    game: Game
+    players: List[Player]
+    runtime: MatchExecutionContext
+    batch: BatchContext
+    player_order: List[int]
+    order_source: str
+    first_player: Dict[str, Any]
+    cost_baseline: Dict[str, float]
+    initial_state: Dict[str, Any] = field(default_factory=dict)
 
 
 def _entropy_seed() -> int:
@@ -237,6 +309,8 @@ class _MatchWorker:
                 cloned_player.conversation_manager = None
             if hasattr(cloned_player, "logger"):
                 cloned_player.logger = None
+            if hasattr(cloned_player, "provider_call_journal"):
+                cloned_player.provider_call_journal = None
 
             self.players.append(cloned_player)
 
@@ -252,8 +326,40 @@ class _MatchWorker:
         self._retry_budget: Dict[str, bool] = {}
         self._current_phase_index: Optional[int] = None
         self._active_runtime_events: Optional[List[Event]] = None
+        self._execution_snapshot: Optional[_ExecutionSnapshot] = None
+        self.error_artifact: Optional[MatchArtifact] = None
+        self.batch_terminal_error: Optional[Exception] = None
+        self.metric_baselines = {
+            player.name: {
+                "total_cost": getattr(player, "total_cost", 0),
+                "total_tokens": getattr(player, "total_tokens", 0),
+                "response_times": len(getattr(player, "response_times", [])),
+            }
+            for player in self.players
+        }
 
     def run(self) -> MatchArtifact:
+        """Preserve already observed Match facts before an exception escapes."""
+        try:
+            return self._run_match()
+        except Exception as exc:
+            snapshot = self._execution_snapshot
+            if snapshot is not None:
+                result = self.console._execution_error_result(snapshot, exc)
+                if result is not None:
+                    self._dispatch_event(
+                        EventType.MATCH_END, events=snapshot.runtime.events, result=result
+                    )
+                    result.events = list(snapshot.runtime.events)
+                    self.error_artifact = MatchArtifact(
+                        self.match_index,
+                        result,
+                        list(snapshot.runtime.events),
+                        list(self.replay_events),
+                    )
+            raise
+
+    def _run_match(self) -> MatchArtifact:
         """
         Execute match with isolated state and return artifact.
 
@@ -296,6 +402,16 @@ class _MatchWorker:
         )
 
         player_names = [player.name for player in ordered_players]
+        self._execution_snapshot = _ExecutionSnapshot(
+            self.game,
+            ordered_players,
+            runtime,
+            self.batch_ctx,
+            player_order,
+            player_order_source,
+            first_player,
+            cost_baseline,
+        )
 
         # Update isolated event bus context
         self.event_bus.update_context(
@@ -312,7 +428,7 @@ class _MatchWorker:
         self.game.bind_event_factory(temp_factory)
         self.game.bind_event_emitter(temp_emitter)
         try:
-            # Pre-compute initial state (per SPEC-GAME v0.7.0 data flow)
+            # Complete provider-free setup before opening the canonical Match envelope.
             setup_rng = infra_runtime.fork_rng("setup")
             state = self.game.setup(player_names, seed=setup_rng.seed)
             if not isinstance(state, dict):
@@ -321,33 +437,89 @@ class _MatchWorker:
                 )
             state.setdefault("_turn_count", 1)
             state["_first_player_idx"] = 0
+            self._execution_snapshot.initial_state = copy.deepcopy(state)
             infra_runtime.validate_state(state)
 
-            state = self._run_handshake(ordered_players, runtime, infra_runtime, state)
+            self._dispatch_event(
+                EventType.MATCH_START,
+                events=runtime.events,
+                game=self.game,
+                players=ordered_players,
+                match_id=runtime.match_id,
+                seed=runtime.seed,
+                player_names=player_names,
+                player_order=player_order,
+                player_order_source=player_order_source,
+                first_player=first_player,
+                fairness_policy=self.console._build_fairness_policy_metadata(
+                    match_index=self.match_index,
+                    player_order=player_order,
+                    first_player=first_player,
+                ),
+            )
+
+            try:
+                state = self._run_handshake(ordered_players, runtime, infra_runtime, state)
+            except HandshakeRejectedError as rejection:
+                match_result = self.console._build_handshake_rejected_result(
+                    game=self.game,
+                    ordered_players=ordered_players,
+                    player_names=player_names,
+                    player_order=player_order,
+                    player_order_source=player_order_source,
+                    first_player=first_player,
+                    cost_baseline=cost_baseline,
+                    runtime=runtime,
+                    batch_ctx=self.batch_ctx,
+                    rejection=rejection,
+                )
+                self._dispatch_event(
+                    EventType.MATCH_END,
+                    events=runtime.events,
+                    result=match_result,
+                )
+                match_result.events = list(runtime.events)
+                self.event_bus.clear_context("match_id", "phase_index")
+                return MatchArtifact(
+                    match_index=self.match_index,
+                    result=match_result,
+                    events=list(runtime.events),
+                    replay_events=list(self.replay_events),
+                )
+            except HandshakeUnavailableError as unavailability:
+                match_result = self.console._build_handshake_unavailable_result(
+                    game=self.game,
+                    ordered_players=ordered_players,
+                    player_names=player_names,
+                    player_order=player_order,
+                    player_order_source=player_order_source,
+                    first_player=first_player,
+                    cost_baseline=cost_baseline,
+                    runtime=runtime,
+                    batch_ctx=self.batch_ctx,
+                    unavailability=unavailability,
+                )
+                self._dispatch_event(
+                    EventType.MATCH_END,
+                    events=runtime.events,
+                    result=match_result,
+                )
+                match_result.events = list(runtime.events)
+                self.event_bus.clear_context("match_id", "phase_index")
+                return MatchArtifact(
+                    match_index=self.match_index,
+                    result=match_result,
+                    events=list(runtime.events),
+                    replay_events=list(self.replay_events),
+                )
+
+            self._execution_snapshot.initial_state = copy.deepcopy(state)
             infra_runtime.initial_state = state
             infra_runtime.validate_state(state)
         finally:
             self.game.bind_event_factory(None)
             self.game.bind_event_emitter(None)
             temp_emitter.clear_phase_index()
-
-        self._dispatch_event(
-            EventType.MATCH_START,
-            events=runtime.events,
-            game=self.game,
-            players=ordered_players,
-            match_id=runtime.match_id,
-            seed=runtime.seed,
-            player_names=player_names,
-            player_order=player_order,
-            player_order_source=player_order_source,
-            first_player=first_player,
-            fairness_policy=self.console._build_fairness_policy_metadata(
-                match_index=self.match_index,
-                player_order=player_order,
-                first_player=first_player,
-            ),
-        )
 
         from .types import MatchAbortedError, MatchForfeitedError
 
@@ -415,6 +587,7 @@ class _MatchWorker:
             match_result.events = list(runtime.events)
 
         except MatchAbortedError as abort_error:
+            self.batch_terminal_error = abort_error
             # PF4: Match aborted due to parse failure - emit MATCH_END with aborted metadata
             match_duration = time.time() - runtime.started_at
 
@@ -677,6 +850,8 @@ class _MatchWorker:
             # Inject logger (use parent console's logger)
             if hasattr(player, "logger"):
                 player.logger = self.console.logger
+            if hasattr(player, "bind_provider_call_journal"):
+                player.bind_provider_call_journal(self.console.provider_call_journal)
 
     def _run_handshake(
         self,
@@ -730,7 +905,35 @@ class _MatchWorker:
                 controller_format=controller_format,
             )
 
-            response = player.execute_handshake(bundle, context)
+            try:
+                response = player.execute_handshake(bundle, context)
+            except PlayerResponseUnavailableError as unavailable:
+                self._dispatch_event(
+                    EventType.PLAYER_HANDSHAKE_ABORT,
+                    events=runtime.events,
+                    player=player.name,
+                    accepted=False,
+                    normalized_response=None,
+                    response_text=None,
+                    controller_metadata={
+                        "response_available": False,
+                        "failure_kind": "provider_response_unavailable",
+                    },
+                    controller_format=controller_format,
+                    prompt_text=bundle.text,
+                    prompt_blocks=prompt_blocks,
+                    renderer_output=None,
+                    usage_info=None,
+                    provider_call=unavailable.provider_call,
+                    retries=unavailable.retries,
+                    retry_durations=unavailable.retry_durations,
+                    attempt_durations=unavailable.attempt_durations,
+                    reason=str(unavailable),
+                )
+                raise HandshakeUnavailableError(
+                    error=unavailable,
+                    abort_state=state,
+                ) from unavailable
             response_text = response.response_text
             usage_info = response.usage_info
 
@@ -761,7 +964,9 @@ class _MatchWorker:
                     reason=result.reason,
                 )
                 raise HandshakeRejectedError(
-                    f"Player {player.name} rejected handshake: {result.reason}"
+                    player_name=player.name,
+                    reason=result.reason,
+                    abort_state=state,
                 )
 
             try:
@@ -949,9 +1154,15 @@ class _MatchWorker:
         player: Player,
         error: "ActionParseError",
         turn_context: TurnContext,
+        game: Optional[Game] = None,
     ) -> "ParseFailurePolicy":
         """
         Handle parse failures on the worker event bus to preserve replay fidelity.
+
+        ``MatchRuntime`` supplies the exact Game context as part of its stable
+        helper contract. Workers already own an isolated Game clone; accepting
+        the explicit value keeps the adapter signature aligned while retaining
+        that isolated instance as the defensive default.
         """
         from .types import ActionParseError
 
@@ -959,7 +1170,8 @@ class _MatchWorker:
             raise TypeError(f"Expected ActionParseError, got {type(error).__name__}")
 
         parse_result = error.parse_result
-        policy = self.game.on_action_parse_failure(player.name, error, turn_context)
+        effective_game = game if game is not None else self.game
+        policy = effective_game.on_action_parse_failure(player.name, error, turn_context)
 
         self._dispatch_event(
             EventType.PLAYER_ACTION_PARSE_FAILED,
@@ -1168,6 +1380,25 @@ class _MatchWorker:
         # Emit to spectators on isolated bus
         emitted_event = self.event_bus.emit(event_type, **event_payload)
 
+        if event_type == EventType.GAMEPLAY:
+            turn_context = event_payload.get("turn_context") or {}
+            action = event_payload.get("action") or {}
+            self.console._emit_console_event(
+                EventType.CONSOLE_WORKER_TURN,
+                {
+                    "worker_id": self.match_index,
+                    "match_index": self.match_index,
+                    "match_id": str(event_payload.get("match_id") or ""),
+                    "seed": self.seed,
+                    "turn_number": int(turn_context.get("turn_number") or 0),
+                    "phase_index": int(event_payload.get("phase_index") or 0),
+                    "player": str(event_payload.get("player") or ""),
+                    "action": str(action.get("value") or ""),
+                    "state_before": copy.deepcopy(event_payload.get("state_before") or {}),
+                    "state_after": copy.deepcopy(event_payload.get("state_after") or {}),
+                },
+            )
+
         # Capture replay-ready event with the original emission context (including timestamps).
         event_context = dict(emitted_event.context or {})
         self.replay_events.append((event_type, event_payload, event_context))
@@ -1225,6 +1456,8 @@ class Console:
         recorder: Optional[Recorder] = None,
         spectators: Optional[List[Spectator]] = None,
         logger: Optional[AgentDeckLogger] = None,
+        runtime_monitors: Optional[List[Monitor]] = None,
+        provider_call_journal: Optional[ProviderCallJournal] = None,
         session_factory: Optional[
             Callable[[AgentDeckConfig, SessionContext, int], SessionState]
         ] = None,
@@ -1239,6 +1472,10 @@ class Console:
             recorder: Recorder instance to capture match dialogue (optional).
             spectators: Spectators that observe every batch/match (optional).
             logger: Structured logger instance (optional).
+            runtime_monitors: Additive execution-host observers that do not
+                alter authored session policy or prepared identity.
+            provider_call_journal: Provider-attempt custody matching the declared
+                session policy.
             session_factory: Custom factory producing SessionState from config.
         """
         if session is not None:
@@ -1262,6 +1499,16 @@ class Console:
         self.logger = logger
         self.recorder = recorder
         self.max_turns = base_config.max_turns
+        if provider_call_journal is None:
+            provider_call_journal = create_provider_call_journal(
+                base_config.provider_call_custody,
+                directory=session.provider_call_directory,
+            )
+        validate_provider_call_journal(
+            provider_call_journal,
+            required_mode=base_config.provider_call_custody,
+        )
+        self.provider_call_journal = provider_call_journal
 
         # Match EventBus (buffered, replayed in order)
         self.event_bus = EventBus(session_id=self.session_state.session_id)
@@ -1283,7 +1530,13 @@ class Console:
         self._current_batch_id: Optional[str] = None
         self._current_match_id: Optional[str] = None
         self._current_phase_index: Optional[int] = None
+        # Optional mechanic-owned selection metadata. Custom mechanics may not
+        # publish a first actor; in that case metadata resolution falls back to
+        # the prepared ordered-player identity (SPEC-CONSOLE M5).
+        self.first_player_info: Optional[Dict[str, Any]] = None
         self._match_counter: int = 0
+        self._current_match_index: Optional[int] = None
+        self._current_match_seed: Optional[int] = None
         self._rng = RandomGenerator(self.session_state.seed)
         self.game: Optional[Game] = None
         self.players: List[Player] = []
@@ -1301,6 +1554,7 @@ class Console:
 
         # Setup monitors for console EventBus - SPEC-MONITOR v1.0.0 §6.1 ML2-ML5
         self._setup_monitors(base_config)
+        self._setup_runtime_monitors(runtime_monitors or [])
 
         # Emit SESSION_START immediately
         self._emit_session_start()
@@ -1331,6 +1585,8 @@ class Console:
             raise ValueError("matches must be >= 1")
         if batch_id is not None and not batch_id.strip():
             raise ValueError("batch_id cannot be empty")
+
+        self._validate_execution_components(game, players)
 
         batch_id = batch_id or self._next_batch_id()
         base_seed = seed if seed is not None else self.session_state.seed
@@ -1426,6 +1682,21 @@ class Console:
                             "estimated_remaining": eta,
                         },
                     )
+
+                    if (
+                        result.metadata.get("outcome") == "unavailable"
+                        and self.session_state.config.unavailable_match_policy == "stop_batch"
+                    ):
+                        raise BatchStoppedError(
+                            outcome="unavailable",
+                            match_id=next(
+                                str(event.context["match_id"])
+                                for event in reversed(result.events)
+                                if event.context.get("match_id")
+                            ),
+                            completed_matches=completed,
+                            planned_matches=matches,
+                        )
 
                 # Emit CONSOLE_BATCH_COMPLETE - SPEC-MONITOR v1.0.0 §6.2 EM4
                 total_duration = time.time() - batch_start_time
@@ -1573,11 +1844,22 @@ class Console:
                 previous_match_result=previous_match_result,
             )
 
-            # Execute match and get artifact
-            artifact = worker.run()
+            # Execute match and preserve any partial facts before propagating failure.
+            try:
+                artifact = worker.run()
+            except Exception:
+                if worker.error_artifact is not None:
+                    self._replay_events(worker.error_artifact.replay_events)
+                self._sync_player_metrics(players, worker.players, worker.metric_baselines)
+                raise
 
             # Replay events to main event bus (preserves spectator ordering)
             self._replay_events(artifact.replay_events)
+
+            # A terminal policy error is persisted but is not a completed slot.
+            self._sync_player_metrics(players, worker.players, worker.metric_baselines)
+            if worker.batch_terminal_error is not None:
+                raise worker.batch_terminal_error
 
             # Store result
             batch_ctx.match_results.append(artifact.result)
@@ -1586,42 +1868,6 @@ class Console:
             # Track metrics
             duration = artifact.result.metadata.get("duration", 0)
             match_durations.append(duration)
-
-            # Sync clone metrics back to original players
-            self._sync_player_metrics(players, worker.players)
-
-            # PF4: Check if match was aborted and raise to stop batch
-            # Worker emitted MATCH_END and returned artifact, now we raise to halt execution
-            from .types import (
-                ActionParseError,
-                MatchAbortedError,
-                ParseFailurePolicy,
-                ParseResult,
-                TurnContext,
-            )
-
-            if artifact.result.metadata.get("outcome") == "aborted":
-                # Reconstruct MatchAbortedError from metadata to propagate abort
-                parse_error_data = artifact.result.metadata.get("parse_error", {})
-                parse_result = ParseResult(
-                    success=parse_error_data.get("success", False),
-                    action=None,
-                    raw_response=parse_error_data.get("raw_response", ""),
-                    reasoning=parse_error_data.get("reasoning"),
-                    error=parse_error_data.get("error", "Unknown parse error"),
-                    metadata=parse_error_data.get("metadata", {}),
-                )
-                abort_ctx_data = artifact.result.metadata.get("abort_turn_context")
-                abort_turn_context = TurnContext(**abort_ctx_data) if abort_ctx_data else None
-                abort_error = MatchAbortedError(
-                    player_name=artifact.result.metadata.get("failing_player", "unknown"),
-                    parse_error=ActionParseError(parse_result),
-                    turn_context=abort_turn_context,
-                    policy=ParseFailurePolicy.ABORT_MATCH,
-                )
-                # Preserve abort state for callers
-                abort_error.abort_state = copy.deepcopy(artifact.result.final_state)
-                raise abort_error
 
             # Emit CONSOLE_BATCH_PROGRESS - SPEC-MONITOR v1.0.0 §6.2 EM6
             # (Even in sequential mode, allows monitors to track progress if attached)
@@ -1738,7 +1984,6 @@ class Console:
         failed_count = 0
         match_durations = []
         failure_exc: Optional[Exception] = None
-        failure_worker: Optional[_MatchWorker] = None
 
         with ThreadPoolExecutor(max_workers=concurrency) as executor:
             # Submit all workers
@@ -1748,9 +1993,13 @@ class Console:
             for future in as_completed(future_to_worker):
                 worker = future_to_worker[future]
 
+                if future.cancelled():
+                    continue
                 try:
                     artifact = future.result()
                     artifacts[artifact.match_index] = (artifact, worker)
+                    if worker.batch_terminal_error is not None:
+                        raise worker.batch_terminal_error
 
                     # Track metrics
                     duration = artifact.result.metadata.get("duration", 0)
@@ -1797,8 +2046,10 @@ class Console:
                 except Exception as exc:
                     # Worker failed
                     failed_count += 1
-                    failure_exc = exc
-                    failure_worker = worker
+                    if failure_exc is None:
+                        failure_exc = exc
+                    if worker.error_artifact is not None:
+                        artifacts[worker.match_index] = (worker.error_artifact, worker)
 
                     # Emit CONSOLE_WORKER_FAILED - SPEC-MONITOR v1.0.0 §6.2 EM5
                     self._emit_console_event(
@@ -1817,13 +2068,8 @@ class Console:
                         if pending_future is future:
                             continue
                         pending_future.cancel()
-                    try:
-                        executor.shutdown(cancel_futures=True)
-                    except TypeError:
-                        executor.shutdown()
-
-                    # Stop collecting further results after first failure
-                    break
+                    # Do not stop collecting: running workers may already have
+                    # paid responses or terminal facts that must become Records.
 
         # Replay events in match_index order (preserves spectator observation semantics)
         seeds_used: List[Optional[int]] = []
@@ -1833,20 +2079,18 @@ class Console:
             artifact, worker = item
 
             self._replay_events(artifact.replay_events)
-            batch_ctx.match_results.append(artifact.result)
-            seeds_used.append(artifact.result.seed)
+            if (
+                artifact.result.metadata.get("outcome") != "execution_error"
+                and worker.batch_terminal_error is None
+            ):
+                batch_ctx.match_results.append(artifact.result)
+                seeds_used.append(artifact.result.seed)
 
             # Sync clone metrics back to original players
-            self._sync_player_metrics(players, worker.players)
+            self._sync_player_metrics(players, worker.players, worker.metric_baselines)
 
-            # Note: Aborted matches (outcome="aborted") are already handled gracefully.
-            # The match is recorded with full metadata, and the batch continues.
-            # No need to re-raise MatchAbortedError - parse failures are policy-driven now.
-
-        if failure_exc is not None and failure_worker is not None:
-            raise RuntimeError(
-                f"Match {failure_worker.match_index} failed during parallel execution"
-            ) from failure_exc
+        if failure_exc is not None:
+            raise failure_exc
 
         # Emit CONSOLE_BATCH_COMPLETE - SPEC-MONITOR v1.0.0 §6.2 EM4
         total_duration = time.time() - batch_start_time
@@ -1903,7 +2147,89 @@ class Console:
             self.event_bus._base_context.clear()
             self.event_bus._base_context.update(saved_context)
 
-    def _sync_player_metrics(self, originals: List[Player], clones: List[Player]) -> None:
+    @staticmethod
+    def _validate_execution_components(game: Game, players: List[Player]) -> None:
+        """Fail before response acquisition when the Record cannot describe a run."""
+        components = [("Game", game)]
+        for player in players:
+            components.extend(
+                [
+                    (f"Player {player.name!r}", player),
+                    (f"Controller for {player.name!r}", player.controller),
+                    (f"Renderer for {player.name!r}", player.renderer),
+                ]
+            )
+        for label, component in components:
+            try:
+                describe = getattr(component, "describe", None)
+                description = (
+                    describe()
+                    if callable(describe)
+                    else {"name": type(component).__name__, "module": type(component).__module__}
+                )
+                if not isinstance(description, dict):
+                    raise TypeError("describe() must return a dict")
+                json.dumps(description, allow_nan=False)
+            except Exception as exc:
+                raise ValueError(f"{label} descriptor is not JSON-serializable: {exc}") from exc
+        policy = getattr(game.on_action_parse_failure, "__func__", game.on_action_parse_failure)
+        if len(players) == 1 and policy is Game.on_action_parse_failure:
+            raise ValueError(
+                "A single-player Game must override on_action_parse_failure; "
+                "the inherited FORFEIT policy requires an opponent. "
+                "Choose an explicit policy such as ParseFailurePolicy.ABORT_MATCH."
+            )
+
+    def _execution_error_result(
+        self, snapshot: _ExecutionSnapshot, error: Exception
+    ) -> Optional[MatchResult]:
+        """Finalize only a started, unfinished Match using observed state and usage."""
+        runtime = snapshot.runtime
+        event_types = {event.type for event in runtime.events}
+        if (
+            EventType.MATCH_START.value not in event_types
+            or EventType.MATCH_END.value in event_types
+        ):
+            return None
+        gameplay = [event for event in runtime.events if event.type == EventType.GAMEPLAY.value]
+        state = gameplay[-1].data["state_after"] if gameplay else snapshot.initial_state
+        player_costs, known_cost = self._compute_cost_deltas(
+            snapshot.players, snapshot.cost_baseline
+        )
+        metadata = self._build_match_metadata(
+            snapshot.game,
+            [player.name for player in snapshot.players],
+            snapshot.player_order,
+            snapshot.order_source,
+            snapshot.first_player,
+            time.time() - runtime.started_at,
+            runtime,
+            False,
+            len(gameplay),
+            player_costs,
+            known_cost,
+            snapshot.batch,
+        )
+        metadata.update(
+            outcome="execution_error",
+            error_type=type(error).__name__,
+            error_message=str(error),
+            state_observation="last_observed",
+        )
+        if isinstance(error, PlayerResponseUnavailableError):
+            metadata["cost"] = None
+            metadata["known_cost_usd"] = known_cost
+        return MatchResult(
+            winner=None,
+            final_state=copy.deepcopy(state),
+            events=list(runtime.events),
+            seed=runtime.seed,
+            metadata=metadata,
+        )
+
+    def _sync_player_metrics(
+        self, originals: List[Player], clones: List[Player], baselines: Dict[str, Dict[str, Any]]
+    ) -> None:
         """Propagate aggregate metrics (e.g., total_cost) from clones back to originals."""
         original_map = {player.name: player for player in originals}
 
@@ -1914,10 +2240,12 @@ class Console:
 
             for attr in ("total_cost", "total_tokens"):
                 if hasattr(clone, attr) and hasattr(original, attr):
-                    setattr(original, attr, getattr(clone, attr))
+                    delta = getattr(clone, attr) - baselines[clone.name][attr]
+                    setattr(original, attr, getattr(original, attr) + delta)
 
             if hasattr(clone, "response_times") and hasattr(original, "response_times"):
-                setattr(original, "response_times", copy.deepcopy(getattr(clone, "response_times")))
+                start = baselines[clone.name]["response_times"]
+                original.response_times.extend(copy.deepcopy(clone.response_times[start:]))
 
     def _determine_player_order_and_baseline(
         self,
@@ -1983,7 +2311,9 @@ class Console:
 
         # Track per-player API cost baseline prior to handshake/turns
         cost_baseline = {
-            player.name: float(getattr(player, "total_cost", 0.0)) for player in ordered_players
+            player.name: float(getattr(player, "total_cost"))
+            for player in ordered_players
+            if hasattr(player, "total_cost")
         }
 
         # Log at DEBUG level (M4)
@@ -2010,8 +2340,10 @@ class Console:
         player_costs: Dict[str, float] = {}
         total_match_cost = 0.0
         for player in ordered_players:
-            before_cost = cost_baseline.get(player.name, 0.0)
-            after_cost = float(getattr(player, "total_cost", 0.0))
+            if player.name not in cost_baseline:
+                continue
+            before_cost = cost_baseline[player.name]
+            after_cost = float(getattr(player, "total_cost"))
             delta = after_cost - before_cost
             if delta < 0:
                 delta = 0.0
@@ -2072,6 +2404,120 @@ class Console:
             "schema_version": Recorder.SCHEMA_VERSION,
         }
 
+    def _build_handshake_rejected_result(
+        self,
+        *,
+        game: Game,
+        ordered_players: List[Player],
+        player_names: List[str],
+        player_order: List[int],
+        player_order_source: str,
+        first_player: Dict[str, Any],
+        cost_baseline: Dict[str, float],
+        runtime: MatchExecutionContext,
+        batch_ctx: BatchContext,
+        rejection: HandshakeRejectedError,
+    ) -> MatchResult:
+        """Create the canonical incomplete Match for a rejected handshake."""
+        match_duration = time.time() - runtime.started_at
+        metadata = self._build_match_metadata(
+            game,
+            player_names,
+            player_order,
+            player_order_source,
+            first_player,
+            match_duration,
+            runtime,
+            False,
+            0,
+            {},
+            0.0,
+            batch_ctx,
+        )
+        player_costs, total_match_cost = self._compute_cost_deltas(ordered_players, cost_baseline)
+        metadata.update(
+            {
+                "outcome": "aborted",
+                "abort_reason": "handshake_rejected",
+                "failing_player": rejection.player_name,
+                "handshake_rejection_reason": rejection.reason,
+                "handshake_completed": False,
+                "turns": 0,
+                "player_costs": player_costs,
+                "cost": total_match_cost,
+            }
+        )
+        return MatchResult(
+            winner=None,
+            final_state=copy.deepcopy(rejection.abort_state),
+            events=list(runtime.events),
+            seed=runtime.seed,
+            metadata=metadata,
+        )
+
+    def _build_handshake_unavailable_result(
+        self,
+        *,
+        game: Game,
+        ordered_players: List[Player],
+        player_names: List[str],
+        player_order: List[int],
+        player_order_source: str,
+        first_player: Dict[str, Any],
+        cost_baseline: Dict[str, float],
+        runtime: MatchExecutionContext,
+        batch_ctx: BatchContext,
+        unavailability: HandshakeUnavailableError,
+    ) -> MatchResult:
+        """Create the canonical incomplete Match for exhausted provider attempts."""
+        match_duration = time.time() - runtime.started_at
+        metadata = self._build_match_metadata(
+            game,
+            player_names,
+            player_order,
+            player_order_source,
+            first_player,
+            match_duration,
+            runtime,
+            False,
+            0,
+            {},
+            0.0,
+            batch_ctx,
+        )
+        player_costs, known_cost = self._compute_cost_deltas(ordered_players, cost_baseline)
+        provider_call = unavailability.error.provider_call
+        dispatch_started = any(
+            isinstance(attempt, dict) and attempt.get("sdk_request") is not None
+            for attempt in provider_call.get("attempts", [])
+        )
+        metadata.update(
+            {
+                "outcome": "unavailable",
+                "abort_reason": "provider_response_unavailable",
+                "failing_player": unavailability.error.player_name,
+                "handshake_completed": False,
+                "turns": 0,
+                "provider_call_id": unavailability.error.call_id,
+                "provider": unavailability.error.provider,
+                "provider_model": unavailability.error.model,
+                "provider_error_type": unavailability.error.cause_type,
+                "provider_error": unavailability.error.cause_message,
+                "response_available": False,
+                "player_costs": player_costs,
+                "known_cost_usd": known_cost,
+                "cost_status": "unavailable" if dispatch_started else "known",
+                "cost": None if dispatch_started else known_cost,
+            }
+        )
+        return MatchResult(
+            winner=None,
+            final_state=copy.deepcopy(unavailability.abort_state),
+            events=list(runtime.events),
+            seed=runtime.seed,
+            metadata=metadata,
+        )
+
     def _resolve_first_player_metadata(
         self,
         fallback_first_player: Dict[str, Any],
@@ -2128,6 +2574,46 @@ class Console:
         seed: Optional[int],
         previous_match_result: Optional[MatchResult] = None,
     ) -> MatchResult:
+        """Execute one match and finalize any observed failure before raising."""
+        self._execution_snapshot = None
+        try:
+            return self._play_match(
+                game,
+                players,
+                batch_ctx,
+                match_index=match_index,
+                seed=seed,
+                previous_match_result=previous_match_result,
+            )
+        except Exception as exc:
+            snapshot = self._execution_snapshot
+            if snapshot is not None:
+                result = self._execution_error_result(snapshot, exc)
+                if result is not None:
+                    self._dispatch_event(
+                        EventType.MATCH_END, events=snapshot.runtime.events, result=result
+                    )
+            raise
+        finally:
+            self.event_bus.clear_context("match_id", "phase_index")
+            self._current_match_id = None
+            self._current_match_index = None
+            self._current_match_seed = None
+            self._current_phase_index = None
+            self._execution_snapshot = None
+            self.game = None
+            self.players = []
+
+    def _play_match(
+        self,
+        game: Game,
+        players: List[Player],
+        batch_ctx: BatchContext,
+        *,
+        match_index: int,
+        seed: Optional[int],
+        previous_match_result: Optional[MatchResult] = None,
+    ) -> MatchResult:
         """Execute a single match."""
         runtime = self._create_match_runtime(seed)
         self.first_player_info = None
@@ -2144,10 +2630,22 @@ class Console:
         )
 
         player_names = [player.name for player in ordered_players]
+        self._execution_snapshot = _ExecutionSnapshot(
+            game,
+            ordered_players,
+            runtime,
+            batch_ctx,
+            player_order,
+            player_order_source,
+            first_player,
+            cost_baseline,
+        )
 
         self.game = game
         self.players = list(ordered_players)
         self._current_match_id = runtime.match_id
+        self._current_match_index = match_index
+        self._current_match_seed = runtime.seed
         self.event_bus.update_context(match_id=runtime.match_id, phase_index=None)
 
         self._prepare_players(ordered_players)
@@ -2167,33 +2665,91 @@ class Console:
                 )
             state.setdefault("_turn_count", 1)
             state["_first_player_idx"] = 0
+            self._execution_snapshot.initial_state = copy.deepcopy(state)
             infra_runtime.validate_state(state)
 
-            state = self._run_handshake(game, ordered_players, runtime, infra_runtime, state)
+            self._dispatch_event(
+                EventType.MATCH_START,
+                events=runtime.events,
+                game=game,  # Recorder expects game object
+                players=ordered_players,  # Recorder expects player objects (ordered)
+                match_id=runtime.match_id,
+                seed=runtime.seed,  # Per SPEC-OBSERVABILITY §9.1
+                player_names=player_names,  # Ordered list post-ordering
+                player_order=player_order,  # Original indices
+                player_order_source=player_order_source,  # "console" or "game"
+                first_player=first_player,  # {"name": str, "index": int}
+                fairness_policy=self._build_fairness_policy_metadata(
+                    match_index=match_index,
+                    player_order=player_order,
+                    first_player=first_player,
+                ),
+            )
+
+            try:
+                state = self._run_handshake(game, ordered_players, runtime, infra_runtime, state)
+            except HandshakeRejectedError as rejection:
+                match_result = self._build_handshake_rejected_result(
+                    game=game,
+                    ordered_players=ordered_players,
+                    player_names=player_names,
+                    player_order=player_order,
+                    player_order_source=player_order_source,
+                    first_player=first_player,
+                    cost_baseline=cost_baseline,
+                    runtime=runtime,
+                    batch_ctx=batch_ctx,
+                    rejection=rejection,
+                )
+                self._dispatch_event(
+                    EventType.MATCH_END,
+                    events=runtime.events,
+                    result=match_result,
+                )
+                match_result.events = list(runtime.events)
+                self.event_bus.clear_context("match_id", "phase_index")
+                self._current_match_id = None
+                self._current_match_index = None
+                self._current_match_seed = None
+                self._current_phase_index = None
+                self.game = None
+                self.players = []
+                return match_result
+            except HandshakeUnavailableError as unavailability:
+                match_result = self._build_handshake_unavailable_result(
+                    game=game,
+                    ordered_players=ordered_players,
+                    player_names=player_names,
+                    player_order=player_order,
+                    player_order_source=player_order_source,
+                    first_player=first_player,
+                    cost_baseline=cost_baseline,
+                    runtime=runtime,
+                    batch_ctx=batch_ctx,
+                    unavailability=unavailability,
+                )
+                self._dispatch_event(
+                    EventType.MATCH_END,
+                    events=runtime.events,
+                    result=match_result,
+                )
+                match_result.events = list(runtime.events)
+                self.event_bus.clear_context("match_id", "phase_index")
+                self._current_match_id = None
+                self._current_match_index = None
+                self._current_match_seed = None
+                self._current_phase_index = None
+                self.game = None
+                self.players = []
+                return match_result
+
+            self._execution_snapshot.initial_state = copy.deepcopy(state)
             infra_runtime.initial_state = state
             infra_runtime.validate_state(state)
         finally:
             game.bind_event_factory(None)
             game.bind_event_emitter(None)
             temp_emitter.clear_phase_index()
-
-        self._dispatch_event(
-            EventType.MATCH_START,
-            events=runtime.events,
-            game=game,  # Recorder expects game object
-            players=ordered_players,  # Recorder expects player objects (ordered)
-            match_id=runtime.match_id,
-            seed=runtime.seed,  # Per SPEC-OBSERVABILITY §9.1
-            player_names=player_names,  # Ordered list post-ordering
-            player_order=player_order,  # Original indices
-            player_order_source=player_order_source,  # "console" or "game"
-            first_player=first_player,  # {"name": str, "index": int}
-            fairness_policy=self._build_fairness_policy_metadata(
-                match_index=match_index,
-                player_order=player_order,
-                first_player=first_player,
-            ),
-        )
 
         from .types import MatchAbortedError, MatchForfeitedError
 
@@ -2291,6 +2847,8 @@ class Console:
             abort_error.abort_state = copy.deepcopy(abort_state)
             self.event_bus.clear_context("match_id", "phase_index")
             self._current_match_id = None
+            self._current_match_index = None
+            self._current_match_seed = None
             self._current_phase_index = None
             self.game = None
             self.players = []
@@ -2376,6 +2934,8 @@ class Console:
             # Clear console context and return normally (match completed with winner)
             self.event_bus.clear_context("match_id", "phase_index")
             self._current_match_id = None
+            self._current_match_index = None
+            self._current_match_seed = None
             self._current_phase_index = None
             self.game = None
             self.players = []
@@ -2434,6 +2994,8 @@ class Console:
 
         self.event_bus.clear_context("match_id", "phase_index")
         self._current_match_id = None
+        self._current_match_index = None
+        self._current_match_seed = None
         self._current_phase_index = None
         self.game = None
         self.players = []
@@ -2809,6 +3371,14 @@ class Console:
                 monitor.logger = self.logger
             self.console_bus.subscribe(monitor)
 
+    def _setup_runtime_monitors(self, monitors: List[Monitor]) -> None:
+        """Attach execution-host observers without changing authored policy."""
+
+        for monitor in monitors:
+            if getattr(monitor, "logger", None) is None:
+                monitor.logger = self.logger
+            self.console_bus.subscribe(monitor)
+
     def _default_session_factory(
         self,
         config: AgentDeckConfig,
@@ -3025,6 +3595,8 @@ class Console:
                 player.bind_conversation_manager(conversation)
             if hasattr(player, "logger"):
                 player.logger = self.logger
+            if hasattr(player, "bind_provider_call_journal"):
+                player.bind_provider_call_journal(self.provider_call_journal)
 
     def _run_handshake(
         self,
@@ -3076,7 +3648,35 @@ class Console:
                 controller_format=controller_format,
             )
 
-            response = player.execute_handshake(bundle, context)
+            try:
+                response = player.execute_handshake(bundle, context)
+            except PlayerResponseUnavailableError as unavailable:
+                self._dispatch_event(
+                    EventType.PLAYER_HANDSHAKE_ABORT,
+                    events=runtime.events,
+                    player=player.name,
+                    accepted=False,
+                    normalized_response=None,
+                    response_text=None,
+                    controller_metadata={
+                        "response_available": False,
+                        "failure_kind": "provider_response_unavailable",
+                    },
+                    controller_format=controller_format,
+                    prompt_text=bundle.text,
+                    prompt_blocks=prompt_blocks,
+                    renderer_output=None,
+                    usage_info=None,
+                    provider_call=unavailable.provider_call,
+                    retries=unavailable.retries,
+                    retry_durations=unavailable.retry_durations,
+                    attempt_durations=unavailable.attempt_durations,
+                    reason=str(unavailable),
+                )
+                raise HandshakeUnavailableError(
+                    error=unavailable,
+                    abort_state=state,
+                ) from unavailable
             response_text = response.response_text
             usage_info = response.usage_info
 
@@ -3107,7 +3707,9 @@ class Console:
                     reason=result.reason,
                 )
                 raise HandshakeRejectedError(
-                    f"Player {player.name} rejected handshake: {result.reason}"
+                    player_name=player.name,
+                    reason=result.reason,
+                    abort_state=state,
                 )
 
             try:
@@ -3255,6 +3857,24 @@ class Console:
                 event_payload[key] = copy.deepcopy(value)
 
         self.event_bus.emit(event_type, **event_payload)
+        if event_type == EventType.GAMEPLAY and self._current_match_index is not None:
+            turn_context = event_payload.get("turn_context") or {}
+            action = event_payload.get("action") or {}
+            self._emit_console_event(
+                EventType.CONSOLE_WORKER_TURN,
+                {
+                    "worker_id": self._current_match_index,
+                    "match_index": self._current_match_index,
+                    "match_id": str(event_payload.get("match_id") or ""),
+                    "seed": self._current_match_seed,
+                    "turn_number": int(turn_context.get("turn_number") or 0),
+                    "phase_index": int(event_payload.get("phase_index") or 0),
+                    "player": str(event_payload.get("player") or ""),
+                    "action": str(action.get("value") or ""),
+                    "state_before": copy.deepcopy(event_payload.get("state_before") or {}),
+                    "state_after": copy.deepcopy(event_payload.get("state_after") or {}),
+                },
+            )
         if events is not None:
             snapshot = self._make_event_snapshot(event_type, payload)
             events.append(snapshot)

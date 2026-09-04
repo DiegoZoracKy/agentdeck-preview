@@ -4,6 +4,48 @@ This package has completed P0, P1, P2, and P3. The official study aggregate
 includes P2 and the targeted P3 FixedDamage S1 ladder-completion cell. P0
 remains preflight-only and P1 remains pilot-only.
 
+> **Workflow status:** The current architecture reproduces the frozen Study
+> end-to-end through Study, imported RecordCorpus, deterministic Measures,
+> Evidence, and authored Findings. The `agentdeck-research-*` commands and
+> `scripts/research_*.py` wrappers shown later document the exact historical
+> `0.2` artifact workflow and run only from the
+> [`agentic-edge-research`](https://github.com/agentdeck/agentdeck/tree/agentic-edge-research)
+> tag. They remain a historical transcript, not current-package instructions.
+
+## Current End-to-End Reproduction
+
+From the repository root, choose external cache and output directories:
+
+```bash
+python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/reproduce_current.py \
+  --cache-dir /tmp/agentdeck-agentic-edge-cache \
+  --output-root /tmp/agentdeck-agentic-edge-reproduction
+```
+
+The command:
+
+1. reads only the pinned public dataset revision
+   `f7ac119f69da08261269bc5cf85fb65741e8ae88`;
+2. verifies the frozen `checksums.sha256` identity and all 540 historical
+   Recorder v1.3 Record bytes, including files reused from a local cache;
+3. adapts those copies non-destructively to Recorder v2.0 and writes a migration
+   receipt mapping every `source_sha256` to its `adapted_sha256`;
+4. binds the 432 P2/P3 Records to the current 19-Cell Study;
+5. runs `agentic-edge-outcomes` and `combat-behavior` Measures;
+6. checks 99 outcome/statistical values against the frozen generated artifacts;
+7. persists Evidence and three authored Findings with exact result citations.
+
+The Hugging Face dataset and Space remain frozen and are never written. Reuse a
+previous download with `--source-dir`; present source files are not downloaded
+again, but they are always checksum-verified before use.
+
+This workflow reproduces derived values. The local Recorder migration receipt
+includes host path and migration time, so derived artifact hashes are identities
+of that local adaptation run rather than promises of byte-identical hashes across
+machines.
+
+## Historical 0.2 Transcript
+
 ## Environment
 
 Run commands from the repository root.
@@ -61,7 +103,7 @@ python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.p
 python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P0
 ```
 
-After `P0`, export and validate the preflight cells:
+In the historical tagged environment, export and validate the preflight cells:
 
 ```bash
 agentdeck-research-export \
@@ -86,7 +128,8 @@ budget envelope pass.
 python3 research/2026-04-27-agentic-edge-strategy-stack/scripts/run_experiment.py --phase P1
 ```
 
-Export each cell, then refresh package-level artifacts:
+In the historical tagged environment, export each cell, then refresh
+package-level artifacts:
 
 ```bash
 agentdeck-research-export \
@@ -129,7 +172,7 @@ phase_model:
   study_phases: [P2, P3]
 ```
 
-Export and validate:
+In the historical tagged environment, export and validate:
 
 ```bash
 python3 scripts/research_export.py \
@@ -221,10 +264,10 @@ upload_manifest.json
 The Space contains only the five curated study replay examples. The dataset is
 the canonical raw and processed artifact store.
 
-## Development Checkout Fallbacks
+## Historical Tagged-Checkout Commands
 
-If the package has not been installed and the `agentdeck-research-*` console
-scripts are unavailable, use the repo-local wrappers:
+From the `agentic-edge-research` tag, the repository wrappers equivalent to the
+historical console scripts are:
 
 ```bash
 python3 scripts/research_export.py --experiment-dir research/2026-04-27-agentic-edge-strategy-stack --list-cells

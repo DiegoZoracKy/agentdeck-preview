@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hidden Signal · AgentDeck Stage</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">AgentDeck acceptance reference</p>
+          <h1>Hidden Signal</h1>
+          <p class="lede">Inspect a concealed signal at a cost, or commit directly.</p>
+        </div>
+        <div class="status-card">
+          <span id="epistemic-label" class="epistemic">ONE RUN · N=1</span>
+          <span id="match-id" class="mono">Loading exact Run…</span>
+        </div>
+      </header>
+
+      <section class="stage" aria-label="Hidden Signal replay">
+        <div class="signal-field">
+          <div id="signal-orb" class="signal-orb is-hidden" aria-live="polite">
+            <span id="signal-value">?</span>
+          </div>
+          <p id="signal-caption" class="signal-caption">Signal concealed</p>
+        </div>
+
+        <div class="decision-panel">
+          <div class="turn-line">
+            <span id="turn-label">Before turn 1</span>
+            <span id="action-label" class="action">Waiting</span>
+          </div>
+          <div class="metric-grid">
+            <article><span>Inspection cost</span><strong id="cost-value">0</strong></article>
+            <article><span>Score</span><strong id="score-value">0</strong></article>
+            <article><span>Committed</span><strong id="choice-value">No</strong></article>
+            <article><span>Correct</span><strong id="correct-value">—</strong></article>
+          </div>
+          <p id="moment-copy" class="moment-copy"></p>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Replay controls">
+        <button id="previous" type="button">← Previous</button>
+        <div id="steps" class="steps" aria-label="Replay position"></div>
+        <button id="next" type="button">Next →</button>
+      </section>
+
+      <details class="layer">
+        <summary>Inspect the truth layer</summary>
+        <div class="layer-grid">
+          <div><span>Record</span><code id="record-sha"></code></div>
+          <div><span>Match Surface</span><code id="surface-sha"></code></div>
+          <div><span>Exact source</span><code id="source-pointer"></code></div>
+          <div><span>Player</span><code id="player-name"></code></div>
+        </div>
+        <p>
+          The Stage renders a deterministic Match Surface derived from the bundled
+          canonical Record. It does not infer a Pattern or Finding from one Run.
+        </p>
+        <a id="record-link" href="canonical/record.json" download>Download canonical Record</a>
+      </details>
+    </main>
+    <script src="stage.js"></script>
+  </body>
+</html>

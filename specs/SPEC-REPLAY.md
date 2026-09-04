@@ -1,15 +1,15 @@
 # SPEC-REPLAY: Replay Engine Contract
 
 > Status: Final
-> Version: 2.0.0
-> Last Updated: 2026-05-30
-> Implementation: ⬜ Planned (Recorder v2.0 canonical event parity)
+> Version: 2.1.0
+> Last Updated: 2026-09-03
+> Implementation: Complete
 > Audience: Data analysts, debugging tool authors, visualization developers, core contributors
 
 ## 1. Purpose
 - Make replay the **canonical way** to re-run recorded matches for analysis, debugging, and demonstration without re-executing live games.
 - Guarantee **event parity** (live == replay): same event types, same payloads, same prompt metadata, same timing relationships, same ordering.
-- Enable data-driven iteration via faithful reconstruction of three-phase lifecycle (handshake → turns → conclusion) with complete prompt metadata.
+- Enable data-driven iteration via faithful reconstruction of the Match lifecycle (MATCH_START → handshake → turns → conclusion → MATCH_END) with complete prompt metadata.
 
 ## 2. Scope & Philosophy Alignment
 - Grounded in `SPEC.md` §2.4: reproducibility requires perfect replay parity for research validity.
@@ -23,7 +23,7 @@
 - **Artifact Ingestion**: Load Recorder v2.0 artifacts and hydrate deterministic event timelines including the three-phase lifecycle.
 - **Prompt / Interaction Replay**: Consume Recorder's canonical `events` stream and emit payloads exactly as persisted so prompt and interaction metadata survive round-trip without shape changes.
 - **Context Reconstruction**: Rebuild EventContext from stored metadata (session_id, batch_id, match_id, phase_index, timestamp) without recomputation.
-- **Event Emission**: Emit PLAYER_HANDSHAKE_* → MATCH_START → recorded events → PLAYER_CONCLUSION (when present) → MATCH_END through EventBus for spectator consumption (matches live execution order per SPEC-CONSOLE §6.6 E1).
+- **Event Emission**: Emit MATCH_START → recorded PLAYER_HANDSHAKE_* / gameplay / conclusion events → MATCH_END through EventBus for spectator consumption (matches live execution order per SPEC-CONSOLE §6.6 E1).
 - **Playback Control**: Support speed multiplier (2.0 = 2x speed, 0.5 = half speed, 0.0 = instant) via ReplayScheduler for time-based delays.
 - **Spectator Binding**: Subscribe spectators to isolated EventBus before replay, unsubscribe after (same semantics as live execution).
 - **State Preservation**: Re-emit recorded `state_before` / `state_after` payloads without recomputation.
@@ -107,7 +107,7 @@ Execute replay with spectators.
 **Contract**:
 - Accept: List of spectator instances, optional numeric speed override (overrides scheduler's default speed)
 - Perform: Subscribe spectators to EventBus, emit lifecycle and recorded events with computed delays, unsubscribe spectators
-- Emit: Event sequence per LC1-LC5 (PLAYER_HANDSHAKE_* → MATCH_START → recorded events → PLAYER_CONCLUSION → MATCH_END)
+- Emit: Event sequence per LC1-LC5 (MATCH_START → recorded PLAYER_HANDSHAKE_* / gameplay / conclusion events → MATCH_END)
 - MUST: Catch and log spectator exceptions per SPEC-SPECTATOR §5.3 EI1 (error isolation), continue replay with remaining spectators
 - MUST: Respect speed multiplier for delays (0.0 = instant, 2.0 = 2x speed)
 - MUST: Replay events in exact recorded order
@@ -135,9 +135,9 @@ Execute replay with spectators.
 11. **CR2**: MUST preserve phase_index from recorded events as read-only (do not recompute from turn_number or other fields).
 
 ### 6.5 Lifecycle Events (LC)
-12. **LC1**: MUST emit events in exact order: **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per player) → **MATCH_START** → recorded events → **PLAYER_CONCLUSION** (per player when present) → **MATCH_END**. This matches live execution order per SPEC-CONSOLE §6.6 E1.
-13. **LC2**: MUST emit handshake lifecycle events before `MATCH_START` to match live execution ordering. When a valid v2.0 recording contains `PLAYER_HANDSHAKE_COMPLETE|ABORT` without an explicit `PLAYER_HANDSHAKE_START`, ReplayEngine MAY synthesize the missing START event from the recorded lifecycle payload.
-14. **LC3**: MUST emit MATCH_START after handshake phase completes, with rehydrated game/player metadata.
+12. **LC1**: MUST emit events in exact order: **MATCH_START** → **PLAYER_HANDSHAKE_START** → **PLAYER_HANDSHAKE_COMPLETE|ABORT** (per observed player) → recorded gameplay/domain events → **PLAYER_CONCLUSION** (per player when present) → **MATCH_END**. This matches live execution order per SPEC-CONSOLE §6.6 E1, including handshake-rejected incomplete Matches with no gameplay.
+13. **LC2**: MUST emit handshake lifecycle events after `MATCH_START` and in recorded order. When a valid v2.0 recording contains `PLAYER_HANDSHAKE_COMPLETE|ABORT` without an explicit `PLAYER_HANDSHAKE_START`, ReplayEngine MAY synthesize the missing START event from the recorded lifecycle payload.
+14. **LC3**: MUST emit MATCH_START first with rehydrated game/player metadata, before replaying the canonical event stream.
 15. **LC4**: MUST emit MATCH_END after all recorded gameplay/domain events AND any PLAYER_CONCLUSION events, with MatchResult containing winner, final_state, seed.
 16. **LC5**: MUST emit recorded PLAYER_CONCLUSION events before MATCH_END when present.
 
@@ -167,16 +167,15 @@ Execute replay with spectators.
 
 ### Replay Execution
 1. Subscribe spectators to EventBus.
-2. Emit recorded handshake events before `MATCH_START`, synthesizing missing `PLAYER_HANDSHAKE_START` events only when required to restore the live lifecycle ordering.
-3. Emit `MATCH_START` with reconstructed game/player metadata after handshake phase completes.
-4. For each remaining recorded event in chronological order (including `PLAYER_CONCLUSION` when present):
+2. Emit `MATCH_START` with reconstructed game/player metadata.
+3. For each recorded event in chronological order (including handshake and `PLAYER_CONCLUSION` events), synthesizing a missing `PLAYER_HANDSHAKE_START` only when required by the current lifecycle contract:
    - Compute delay from timestamps via scheduler.
    - Sleep delay (unless speed == 0.0).
    - Rehydrate EventContext (match_id, session_id, phase_index, timestamp).
    - Emit event through EventBus (spectators receive).
    - Catch and log any spectator exceptions (error isolation per SPEC-SPECTATOR §5.3 EI1).
-6. Emit MATCH_END with MatchResult (winner, final_state, seed).
-7. Unsubscribe spectators from EventBus.
+5. Emit MATCH_END with MatchResult (winner, final_state, seed).
+6. Unsubscribe spectators from EventBus.
 
 **Key Principle**: Replay uses recorded phase metadata (turn_number when present in `turn_context`, phase_index, timestamps)—no on-the-fly recomputation. The recorded event payload is the **canonical source** for all prompt and interaction metadata.
 

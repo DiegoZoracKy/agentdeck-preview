@@ -39,11 +39,16 @@ class AgentDeckConfig:
 
     seed: Optional[int] = None
     run_dir: str = "agentdeck_runs"  # Base directory for all session runs
+    provider_call_custody: str = "volatile"
     max_turns: int = 1000
     log_level: Optional[LogLevel] = LogLevel.INFO
     log_file_levels: Optional[List[LogLevel]] = None
     log_format: str = "simple"
     concurrency: int = 1  # Number of parallel workers (1 = sequential)
+    unavailable_match_policy: str = field(
+        default="continue",
+        metadata={"prepared_identity_omit_default": True},
+    )  # one of: continue, stop_batch
     monitors: Optional[List["Monitor"]] = None  # Console-level observers (progress, hardware, etc.)
     pairing_policy: str = "none"  # one of: none, paired_side_swap
     first_player_policy: str = "random"  # one of: random, fixed, alternating
@@ -57,8 +62,25 @@ class AgentDeckConfig:
                 f"concurrency must be >= 1, got {self.concurrency}. "
                 f"Use concurrency=1 for sequential execution."
             )
+        valid_unavailable_match_policies = {"continue", "stop_batch"}
+        if self.unavailable_match_policy not in valid_unavailable_match_policies:
+            raise ValueError(
+                "unavailable_match_policy must be one of "
+                f"{sorted(valid_unavailable_match_policies)}, got "
+                f"'{self.unavailable_match_policy}'"
+            )
+        if self.unavailable_match_policy == "stop_batch" and self.concurrency != 1:
+            raise ValueError(
+                "unavailable_match_policy='stop_batch' requires concurrency=1 "
+                "so no later Match has already started"
+            )
         if self.max_turns < 1:
             raise ValueError(f"max_turns must be >= 1, got {self.max_turns}.")
+        if self.provider_call_custody not in {"volatile", "durable"}:
+            raise ValueError(
+                "provider_call_custody must be 'volatile' or 'durable', got "
+                f"{self.provider_call_custody!r}"
+            )
         valid_pairing_policies = {"none", "paired_side_swap"}
         if self.pairing_policy not in valid_pairing_policies:
             raise ValueError(
@@ -144,6 +166,12 @@ class SessionContext:
         """Create log and recording directories if they do not exist."""
         Path(self.log_directory).mkdir(parents=True, exist_ok=True)
         Path(self.record_directory).mkdir(parents=True, exist_ok=True)
+
+    @property
+    def provider_call_directory(self) -> str:
+        """Return the execution-host path for durable provider-call custody."""
+
+        return str(Path(self.record_directory).parent / "provider_calls")
 
     def metadata(self) -> Dict[str, Optional[int]]:
         """Provide a lightweight metadata snapshot for recordings/logs."""

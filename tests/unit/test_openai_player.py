@@ -10,10 +10,18 @@ from agentdeck.players.openai_player import GPTPlayer
 
 
 class _DummyUsage:
-    def __init__(self, input_tokens=100, output_tokens=20, total_tokens=120):
+    def __init__(
+        self,
+        input_tokens=100,
+        output_tokens=20,
+        total_tokens=120,
+        reasoning_tokens=None,
+    ):
         self.input_tokens = input_tokens
         self.output_tokens = output_tokens
         self.total_tokens = total_tokens
+        if reasoning_tokens is not None:
+            self.output_tokens_details = types.SimpleNamespace(reasoning_tokens=reasoning_tokens)
 
 
 class _DummyResponsesAPI:
@@ -197,6 +205,36 @@ def test_openai_player_maps_usage_input_output_tokens(monkeypatch):
     assert metadata["input_tokens"] == 123
     assert metadata["output_tokens"] == 45
     assert metadata["provider_model"] == "gpt-4o-mini-2026-01-01"
+
+
+def test_openai_player_preserves_provider_reported_reasoning_usage(monkeypatch):
+    response = _DummyResponse(
+        output_text="ATTACK",
+        usage=_DummyUsage(
+            input_tokens=123,
+            output_tokens=45,
+            total_tokens=168,
+            reasoning_tokens=32,
+        ),
+    )
+    player = _build_player(monkeypatch, response)
+
+    _, metadata = player._make_api_call([{"role": "user", "content": "Turn"}])
+
+    assert metadata["completion_tokens"] == 45
+    assert metadata["reasoning_usage"] == {
+        "tokens": 32,
+        "kind": "reasoning",
+        "source": "openai.responses.usage.output_tokens_details.reasoning_tokens",
+    }
+
+
+def test_openai_player_keeps_missing_reasoning_usage_absent(monkeypatch):
+    player = _build_player(monkeypatch, _DummyResponse(output_text="ATTACK"))
+
+    _, metadata = player._make_api_call([{"role": "user", "content": "Turn"}])
+
+    assert "reasoning_usage" not in metadata
 
 
 def test_openai_player_extracts_text_from_output_fallback(monkeypatch):

@@ -7,17 +7,21 @@ This directory contains practical examples demonstrating AgentDeck usage pattern
 If you are new to the repo, run these in order:
 
 1. `mock_demo.py`
-2. `first_game_walkthrough.py`
-3. `archivist_choice_demo.py`
-4. `minimal_experiment.py`
-5. `prepared_assembly.py`
-6. `spectator_example.py`
-7. `replay_minimal.py`
-8. `test_parallel_execution.py`
+2. `human_hangman.py` or `human_fixed_damage.py`
+3. `first_game_walkthrough.py`
+4. `archivist_choice_demo.py`
+5. `minimal_experiment.py`
+6. `prepared_assembly.py`
+7. `spectator_example.py`
+8. `replay_minimal.py`
+9. `test_parallel_execution.py`
 
 These examples form the intended onboarding ladder: no-provider install check,
-custom game authoring, a non-combat benchmark-style game, minimal LLM experiment,
-spectators, replay, and parallel execution.
+local human play, custom game authoring, a non-combat benchmark-style game,
+minimal LLM experiment, spectators, replay, and parallel execution.
+
+The human examples are provider-free and synchronous. They deliberately use
+the same handshake, Controller, canonical Record, and replay contracts as model-backed Players.
 
 `prepared_assembly.py` is the approval-boundary example: it declares complete
 per-Player behavior, prepares a content-addressed composition without creating
@@ -41,7 +45,29 @@ python examples/mock_demo.py
 
 ---
 
-### 2. Build Your First Game (`first_game_walkthrough.py`)
+### 2. Human-Controlled Play (`human_hangman.py`, `human_fixed_damage.py`)
+
+**Purpose**: Put a local person into an existing Game without a provider or a
+human-specific Game path.
+
+**What You'll Learn**:
+- `HumanPlayer` reads one exact response from the terminal per interaction
+- Human responses pass through the same `ActionOnlyController`
+- Records and replay preserve the interaction without fabricated model, token, or pricing metadata
+- Interactive execution is serialized with `concurrency=1`
+
+**Usage**:
+```bash
+python examples/human_hangman.py
+python examples/human_fixed_damage.py
+```
+
+Respond `OK` during the handshake. During gameplay, follow the displayed
+`ACTION: <action>` contract exactly.
+
+---
+
+### 3. Build Your First Game (`first_game_walkthrough.py`)
 
 **Purpose**: Author a tiny turn-based game, run it with deterministic mock players, and replay the recording.
 
@@ -57,7 +83,7 @@ python examples/first_game_walkthrough.py
 
 ---
 
-### 3. Non-Combat Benchmark (`archivist_choice_demo.py`)
+### 4. Non-Combat Benchmark (`archivist_choice_demo.py`)
 
 **Purpose**: Show a maintained non-combat game where agents triage manuscripts instead of fighting.
 
@@ -73,7 +99,7 @@ python examples/archivist_choice_demo.py
 
 ---
 
-### 4. Minimal Configuration (`minimal_experiment.py`)
+### 5. Minimal Configuration (`minimal_experiment.py`)
 
 **Purpose**: Demonstrate the simplest possible setup for running LLM agent experiments.
 
@@ -101,7 +127,7 @@ Runs a single match by default so you can validate credentials, recordings, and 
 
 ---
 
-### 5. Spectator Monitoring (`spectator_example.py`)
+### 6. Spectator Monitoring (`spectator_example.py`)
 
 **Purpose**: Show how to use spectators for experiment monitoring and analysis.
 
@@ -123,7 +149,7 @@ python examples/spectator_example.py
 
 ---
 
-### 6. Parallel Execution (`test_parallel_execution.py`)
+### 7. Parallel Execution (`test_parallel_execution.py`)
 
 **Purpose**: Demonstrate parallel match execution with configurable concurrency.
 
@@ -148,7 +174,7 @@ python examples/test_parallel_execution.py
 
 ---
 
-### 7. Replay Engine (`replay_minimal.py`)
+### 8. Replay Engine (`replay_minimal.py`)
 
 **Purpose**: Replay a previously recorded match with full lifecycle observation.
 

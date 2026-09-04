@@ -18,18 +18,25 @@
 
 ## Project Overview
 
-AgentDeck is an **execution and evidence engine for AI agents in game scenarios**. Think of it as a "game console" where:
+AgentDeck is an **open execution and research system for AI agents in game
+scenarios**. Think of it as a "game console" where:
 
 - **Games** define rules and environments
-- **Players** are AI agents making decisions
-- **Controllers** parse AI responses into game actions
-- **Renderers** format game state for AI consumption
+- **Players** are configured actors making decisions (primarily AI agents; local human control is also supported)
+- **Controllers** parse Player responses into game actions
+- **Renderers** format game state for Player consumption
 - **Spectators** observe matches without interfering
 
-**Target Audience**: AI-agent developers, game authors, and systems that need inspectable execution Records
+**Target Audience**: people investigating AI behavior, AI-agent developers,
+Game authors, and systems that need inspectable execution Records and traceable
+Research artifacts
 
-AgentDeck owns execution truth. Research questions, corpus selection, measurements,
-statistical inference, and claims belong to downstream systems.
+AgentDeck's execution kernel owns execution truth. Its Research layer operates
+strictly downstream from immutable Records: Game Research Profiles explain
+Research affordances without controlling execution; Studies preserve intent and
+design; Measures derive deterministic values; Evidence binds those values to
+exact inputs; and Findings remain explicit authored interpretations. The
+execution kernel never imports or infers Research meaning.
 
 **For complete architectural principles**, see [SPEC.md](specs/SPEC.md) §3.
 
@@ -307,7 +314,8 @@ Use this structure (see `specs/_template.md`):
 
 #### Lean Writing
 
-**Core principle**: Capture every contract in the fewest lines.
+**Core principle**: Capture the smallest coherent semantic contract that solves
+the caller's problem. Brevity is useful, but line count is not a quality target.
 
 **Techniques:**
 - **Contract bullets**: `seed: Session seed (overrides session.seed)`
@@ -315,12 +323,9 @@ Use this structure (see `specs/_template.md`):
 - **Focused examples**: 3-4 snippets covering distinct workflows, no overlap
 - **Minimal rationale**: Record only non-obvious decisions
 
-**Length targets:**
-- Orchestrator/facade specs: ~250 lines
-- Core component specs: ~200 lines
-- Utility specs: ~150 lines
-
-Expect to trim 10-15% from first draft without losing guarantees.
+Review semantic weight instead of length. Remove duplicate authority,
+speculative lifecycle, false assurance, and acceptance-case leakage; retain all
+invariants needed to make the contract honest and testable.
 
 #### Modal Verbs (RFC 2119 Style)
 
@@ -380,7 +385,8 @@ Before marking a spec "Final":
 - [ ] Data flow uses single-line arrow summaries where practical
 - [ ] Example count is focused (3-4 snippets, no redundancy)
 - [ ] Design rationale lists only non-obvious decisions
-- [ ] Spec length aligns with targets
+- [ ] Length is justified by semantic risk and user-visible guarantees, not by
+      a numeric target
 
 **Philosophy Alignment:**
 - [ ] Maps to SPEC.md §3 principles explicitly
@@ -442,19 +448,22 @@ class MyGame(Game):
 
 ### Adding a Player Type
 
-Players represent AI agents making decisions.
+Players represent something or someone making decisions through the common
+prompt → raw response → Controller → action lifecycle.
 
 **Requirements:**
-- Extend `LLMPlayer` for API-based models
-- Use `src/agentdeck/config/pricing.yaml` for cost tracking
-- Include retry logic with exponential backoff
-- Follow **SPEC-PLAYER v1.0.0** three-phase lifecycle
+- Extend `LLMPlayer` for API-based models; extend `Player` only when the response source is not an LLM provider
+- Provider-backed Players use `src/agentdeck/config/pricing.yaml` for cost tracking and implement bounded retry policy
+- Provider-free Players MUST omit inapplicable model, provider, token, and pricing metadata rather than fabricating zero values
+- Follow the current **SPEC-PLAYER** three-phase lifecycle
 - Support handshake, turn, and conclusion phases
+- Keep transport and response acquisition behind `Player`; never add human/provider branches to Games or bypass the Controller
 
 **Key methods:**
-- `handshake()` - Pre-match acknowledgment
+- `build_handshake_bundle()` / `execute_handshake()` - Pre-match acknowledgment
 - `decide()` - Turn-by-turn decisions
 - `conclude()` - Post-match reflection
+- `get_response()` - Obtain the exact raw response for the current interaction
 
 ### Adding a Controller
 
@@ -487,10 +496,10 @@ Spectators observe matches without interfering.
 
 ### Adding a Renderer
 
-Renderers format game state for AI consumption.
+Renderers format game state for Player consumption.
 
 **Requirements:**
-- Transform state into view for LLM
+- Transform state into the declared Player-facing view
 - Support different modalities (text/JSON/image)
 - NO format instructions (that's Controller's job)
 - Follow renderer contract in SPEC.md
@@ -693,8 +702,9 @@ Contributor: "SPEC-PRICING draft ready for review."
 ### For Players:
 - [ ] Extends `LLMPlayer` or `Player`
 - [ ] Implements three phases (handshake, decide, conclude)
-- [ ] Includes retry logic
-- [ ] Follows SPEC-PLAYER v1.0.0
+- [ ] Includes retry logic when provider-backed; does not fabricate provider metadata when provider-free
+- [ ] Keeps every raw response on the normal Controller and Record path
+- [ ] Follows the current SPEC-PLAYER
 
 ### For Controllers:
 - [ ] Extends `HandshakeController` or `ActionController`

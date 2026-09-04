@@ -3,6 +3,13 @@
 from .archivist_choice import ArchivistChoiceGame
 from .fixed_damage import FixedDamageGame
 from .hangman import HangmanGame
+from .hidden_signal import HiddenSignalGame
 from .variable_damage import VariableDamageGame
 
-__all__ = ["ArchivistChoiceGame", "FixedDamageGame", "HangmanGame", "VariableDamageGame"]
+__all__ = [
+    "ArchivistChoiceGame",
+    "FixedDamageGame",
+    "HangmanGame",
+    "HiddenSignalGame",
+    "VariableDamageGame",
+]

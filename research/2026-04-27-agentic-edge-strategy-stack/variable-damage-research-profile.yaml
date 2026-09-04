@@ -1,0 +1,36 @@
+schema_version: 1
+profile:
+  id: variable-damage
+  version: 1
+  game:
+    name: VariableDamageGame
+  summary: >-
+    Repeated resource decisions under stochastic damage, explicit own state, and
+    consequential uncertainty about the next attack.
+opportunities:
+  - id: transfer-under-uncertainty
+    question: Does a strategy effect observed under fixed damage transfer to stochastic damage?
+    mechanism: >-
+      The same ATTACK/POTION action space is preserved while the damage transition
+      becomes a seeded random variable.
+    observables: [action, health-before, potions-before, damage, winner, position]
+    boundaries:
+      - A cross-Game contrast also changes transition dynamics and risk bands.
+      - High seat effects can confound an aggregate win-rate comparison.
+  - id: risk-sensitive-recovery
+    question: Does POTION use change across lethal, danger, and safe HP bands?
+    mechanism: >-
+      The attack range and recovery amount define explicit Game-local risk bands.
+    observables: [action, health-before, potions-before]
+    boundaries:
+      - Game-local risk bands do not establish general risk aversion.
+operationalizations:
+  - id: combat-behavior
+    opportunity: risk-sensitive-recovery
+    measure: {source: measures.yaml, id: combat-behavior}
+    required_observables: [action, health-before, potions-before]
+    limitations:
+      - Risk bands depend on the declared attack range and recovery configuration.
+boundaries:
+  - Seeded stochasticity is reproducible but does not remove sampling uncertainty.
+

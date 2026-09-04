@@ -109,6 +109,14 @@ class Monitor:
             - started_at: float
         """
 
+    def on_console_worker_turn(self, event: Event) -> None:
+        """Observe one completed worker gameplay turn as a bounded live projection.
+
+        The payload contains Match identity, Player, action value, public state
+        snapshots, and turn context. It deliberately excludes prompts, provider
+        responses, usage details, and reasoning.
+        """
+
     def on_console_worker_complete(self, event: Event) -> None:
         """
         Called when a parallel worker completes successfully.

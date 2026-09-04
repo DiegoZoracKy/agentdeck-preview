@@ -286,11 +286,11 @@ def test_live_vs_replay_event_parity(temp_recording_dir):
                 start_idx < complete_idx
             ), f"{name}: PLAYER_HANDSHAKE_START must precede COMPLETE (LC1)"
 
-        # LC2: All handshake events before MATCH_START
+        # LC2: MATCH_START opens the canonical envelope before handshakes.
         all_handshake_indices = handshake_start_indices + handshake_complete_indices
         assert all(
-            idx < match_start_idx for idx in all_handshake_indices
-        ), f"{name}: All handshake events must precede MATCH_START (LC2)"
+            match_start_idx < idx for idx in all_handshake_indices
+        ), f"{name}: MATCH_START must precede all handshake events (LC2)"
 
     # LC5: Verify conclusions are emitted BEFORE MATCH_END
     replay_event_types = path_replay_event_types

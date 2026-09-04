@@ -1,8 +1,8 @@
 # SPEC-RECORDER: Match Recording & Persistence Contract
 
 > Status: Final
-> Version: 2.2.0
-> Last Updated: 2026-08-14
+> Version: 2.6.0
+> Last Updated: 2026-09-03
 > Implementation: Complete
 > Audience: Core contributors, data analysts, replay implementers
 
@@ -78,9 +78,12 @@ class APIUsageTracker:
     total_cost: float = 0.0
     total_latency_ms: float = 0.0
     models_used: Dict[str, int] = field(default_factory=dict)
+    reasoning_reported_tokens: int = 0
+    reasoning_reported_calls: int = 0
+    reasoning_by_provider_model: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 ```
 
-**Guarantees**: Extracts `usage_info` from `ActionResult.metadata` during `on_gameplay()` and accumulates per-match totals.
+**Guarantees**: Extracts `usage_info` from `ActionResult.metadata` during `on_gameplay()` and accumulates per-match totals. Optional provider-reported reasoning/thinking usage is aggregated with explicit reported-call coverage and provider/model grouping; missing breakdowns remain missing rather than zero-filled.
 
 ### RecorderCollector (Protocol)
 
@@ -145,6 +148,7 @@ Late-binding helper for attaching session context after construction.
 
 #### on_player_handshake_start(event: Event)
 - Serializes `PLAYER_HANDSHAKE_START` lifecycle event into the `events` array (or pre-match buffer when match has not started).
+- Current Console execution opens the Match with `MATCH_START` before handshake, so live handshake events MUST normally be appended to and flushed with the active Match. The pre-match buffer remains only as a compatibility path for explicitly supplied historical event streams.
 - MUST persist prompt metadata payload (`prompt_text`, `prompt_blocks`, `controller_format`) so handshake lifecycle is fully auditable.
 - MUST flush progressively when match recording is active.
 
@@ -184,7 +188,7 @@ Late-binding helper for attaching session context after construction.
 
 #### on_match_end(result: MatchResult, context=None)
 - Finalizes match recording with `winner`, `final_state`, `seed`, `ended_at` timestamp.
-- MUST persist any failure metadata supplied by console (e.g., `metadata["outcome"] = "aborted"`, `policy_outcome`).
+- MUST persist any failure metadata supplied by console (e.g., `metadata["outcome"] = "aborted"`, `policy_outcome`). An unexpected execution failure after MATCH_START uses `outcome=execution_error`, preserves observed state/events and original error type/message, and invents no winner or unobserved action. Progressive worker observations may be replayed to the Recorder after the worker terminates; every available started-worker artifact MUST be replayed even when another worker fails.
 - Invokes collector `on_match_end()` hooks and merges results into `collector_data`.
 - Appends match reference to current batch (if batch active).
 - **MUST perform final atomic flush** before clearing `current_match`.
@@ -248,6 +252,9 @@ Load match JSON from disk and normalize structure.
 22. **UC4**: MUST invoke collector hooks (`on_match_start`, `on_gameplay`, `on_match_end`) in registration order when collectors configured.
 23. **UC5**: MUST namespace collector outputs by class name (dedupe via suffix) to avoid collisions in `collector_data`.
 24. **UC6**: MUST tolerate collector errors without destabilizing recording (errors logged but not propagated).
+24a. **UC7**: When `usage_info.reasoning_usage` is present, Recorder MUST preserve `{tokens, kind, source}` and aggregate provider-reported tokens, reported calls, total calls, and coverage completeness.
+24b. **UC8**: Reasoning/thinking usage aggregation MUST expose provider/model groups. Cross-provider totals MAY support resource accounting but MUST NOT be presented as a behaviorally comparable reasoning measure.
+24c. **UC9**: Calls without a provider-reported reasoning/thinking field still count toward total coverage. Missing is not normalized to zero; a reported zero counts as reported coverage.
 
 ### 6.7 Prompt / Interaction Metadata Capture (PM)
 
@@ -323,7 +330,8 @@ For `GAMEPLAY`, Recorder stores prompt and response metadata under the canonical
 
 ### Batch Execution
 - `BATCH_START` → Create `BatchRecording`, capture batch metadata (session, game config, player configs, git info).
-- `MATCH_START` → Create `MatchRecording`, capture game settings (`information_level`, `allowed_actions`), player template sources, flush initial stub.
+- `MATCH_START` → Create `MatchRecording` before the first handshake Player call, capture game settings (`information_level`, `allowed_actions`), player template sources, and flush the initial stub.
+- Handshake complete/abort → append exact prompt, response when one exists, validation or unavailability reason, usage when known, and provider-call attempt facts to the active Match and flush immediately. A rejection or typed provider-response unavailability is finalized by the following terminal `MATCH_END` as an incomplete canonical Match; absent response/usage/cost remains absent or explicitly unavailable, never invented as empty/zero truth.
 - Gameplay events → Append to `current_match.events`, extract API usage, invoke collectors, flush progressively.
 - `MATCH_END` → Finalize `MatchRecording`, invoke collectors, flush, append match ref to batch.
 - `BATCH_END` → Calculate batch statistics, write batch summary file with `seeds_used` list.
@@ -507,7 +515,16 @@ deck = AgentDeck(recorder=recorder, session=config)
           "controller_format": "Respond with one of: ATTACK, POTION",
           "controller_metadata": {"validated": true, "candidates": ["ATTACK", "POTION"]},
           "renderer_output": {"sections": ["game_view"], "total_length": 150},
-          "usage_info": {"tokens": 150, "cost": 0.002, "latency_ms": 1234}
+          "usage_info": {
+            "tokens": 150,
+            "cost": 0.002,
+            "latency_ms": 1234,
+            "reasoning_usage": {
+              "tokens": 32,
+              "kind": "reasoning",
+              "source": "openai.responses.usage.output_tokens_details.reasoning_tokens"
+            }
+          }
         }
       }
     },
@@ -572,7 +589,25 @@ deck = AgentDeck(recorder=recorder, session=config)
     "total_completion_tokens": 250,
     "total_cost": 0.015,
     "average_latency_ms": 1234.5,
-    "models_used": {"gpt-4": 5}
+    "models_used": {"gpt-4": 5},
+    "reasoning_usage": {
+      "reported_tokens": 128,
+      "reported_calls": 4,
+      "total_calls": 5,
+      "coverage_complete": false,
+      "by_provider_model": {
+        "openai/gpt-4": {
+          "provider": "openai",
+          "model": "gpt-4",
+          "reported_tokens": 128,
+          "reported_calls": 4,
+          "total_calls": 5,
+          "coverage_complete": false,
+          "kinds": ["reasoning"],
+          "sources": ["openai.responses.usage.output_tokens_details.reasoning_tokens"]
+        }
+      }
+    }
   },
   "collector_data": {
     "ReasoningQualityCollector": {

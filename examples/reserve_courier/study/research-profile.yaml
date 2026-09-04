@@ -1,0 +1,35 @@
+schema_version: 1
+profile:
+  id: reserve-courier
+  version: 1
+  game:
+    name: ReserveCourierGame
+  summary: Single-player three-step resource planning with complete public state and
+    optional non-authoritative advice.
+opportunities:
+- id: reserve-planning
+  question: Does the agent preserve feasibility and choose the optimal reward schedule?
+  mechanism: One EXPRESS is feasible; spending on more EXPRESS deliveries loses terminal
+    score.
+  observables:
+  - final_state.viable
+  - final_state.score
+  - gameplay.action
+  - gameplay.interaction
+  boundaries:
+  - Not a measure of general AI safety or hidden internal reasoning.
+  - Small exploratory model sample; seeded worlds do not make provider inference deterministic.
+operationalizations:
+- id: planning-observations
+  opportunity: reserve-planning
+  measure:
+    source: measures.yaml
+    id: courier-behavior
+  required_observables:
+  - final_state
+  - events
+  limitations:
+  - Technical failures remain missing behavioral observations with explicit denominators.
+boundaries:
+- Calibration bots are authored policies, not AI evidence.
+- No winner/ranking semantics; score is the Game outcome.

@@ -50,6 +50,9 @@ class TokenUsageTracker(Spectator):
         self.model_usage: Dict[str, Dict[str, Any]] = defaultdict(
             lambda: {"calls": 0, "tokens": 0, "cost": 0.0}
         )
+        self.reasoning_reported_tokens: int = 0
+        self.reasoning_reported_calls: int = 0
+        self.reasoning_by_provider_model: Dict[str, Dict[str, Any]] = {}
         self._seen_call_ids: set[str] = set()
 
     def on_batch_start(
@@ -70,6 +73,9 @@ class TokenUsageTracker(Spectator):
         self.player_tokens.clear()
         self.player_costs.clear()
         self.model_usage.clear()
+        self.reasoning_reported_tokens = 0
+        self.reasoning_reported_calls = 0
+        self.reasoning_by_provider_model.clear()
         self._seen_call_ids.clear()
 
     def _normalize_usage(self, usage: Any) -> Optional[Dict[str, Any]]:
@@ -86,17 +92,38 @@ class TokenUsageTracker(Spectator):
             total = prompt_tokens + completion_tokens
 
         cost = usage.get("cost", 0.0) or 0.0
-        if not any([prompt_tokens, completion_tokens, total, cost]):
+        reasoning_usage = self._normalize_reasoning_usage(usage.get("reasoning_usage"))
+        if not any([prompt_tokens, completion_tokens, total, cost]) and reasoning_usage is None:
             return None
 
-        return {
+        normalized = {
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "total_tokens": total,
             "cost": cost,
             "model": usage.get("model") or usage.get("provider_model") or "unknown",
+            "provider": usage.get("provider") or "unknown",
+            "provider_model": usage.get("provider_model"),
             "call_id": usage.get("call_id"),
         }
+        if reasoning_usage is not None:
+            normalized["reasoning_usage"] = reasoning_usage
+        return normalized
+
+    @staticmethod
+    def _normalize_reasoning_usage(usage: Any) -> Optional[Dict[str, Any]]:
+        if not isinstance(usage, dict):
+            return None
+        tokens = usage.get("tokens")
+        kind = usage.get("kind")
+        source = usage.get("source")
+        if isinstance(tokens, bool) or not isinstance(tokens, int) or tokens < 0:
+            return None
+        if not isinstance(kind, str) or not kind:
+            return None
+        if not isinstance(source, str) or not source:
+            return None
+        return {"tokens": tokens, "kind": kind, "source": source}
 
     def _extract_usage(self, event_type: str, data: Any) -> Optional[Dict[str, Any]]:
         """Extract usage from canonical lifecycle or gameplay event payloads."""
@@ -158,6 +185,32 @@ class TokenUsageTracker(Spectator):
             self.model_usage[model]["calls"] += 1
             self.model_usage[model]["tokens"] += total
             self.model_usage[model]["cost"] += cost
+
+            provider = str(usage["provider"])
+            provider_model = str(usage.get("provider_model") or model)
+            group_key = f"{provider}/{provider_model}"
+            group = self.reasoning_by_provider_model.setdefault(
+                group_key,
+                {
+                    "provider": provider,
+                    "model": provider_model,
+                    "reported_tokens": 0,
+                    "reported_calls": 0,
+                    "total_calls": 0,
+                    "kinds": set(),
+                    "sources": set(),
+                },
+            )
+            group["total_calls"] += 1
+            reasoning_usage = usage.get("reasoning_usage")
+            if isinstance(reasoning_usage, dict):
+                tokens = reasoning_usage["tokens"]
+                self.reasoning_reported_tokens += tokens
+                self.reasoning_reported_calls += 1
+                group["reported_tokens"] += tokens
+                group["reported_calls"] += 1
+                group["kinds"].add(reasoning_usage["kind"])
+                group["sources"].add(reasoning_usage["source"])
         except Exception:
             # Per EI1: Silently handle errors, don't crash execution
             pass
@@ -233,7 +286,7 @@ class TokenUsageTracker(Spectator):
         Returns:
             Dictionary with total, per-player, and per-model usage stats.
         """
-        return {
+        summary = {
             "total": {
                 "calls": self.total_calls,
                 "prompt_tokens": self.total_prompt_tokens,
@@ -260,6 +313,27 @@ class TokenUsageTracker(Spectator):
                 for model, stats in self.model_usage.items()
             },
         }
+        if self.reasoning_reported_calls:
+            summary["reasoning_usage"] = {
+                "reported_tokens": self.reasoning_reported_tokens,
+                "reported_calls": self.reasoning_reported_calls,
+                "total_calls": self.total_calls,
+                "coverage_complete": self.reasoning_reported_calls == self.total_calls,
+                "by_provider_model": {
+                    key: {
+                        "provider": group["provider"],
+                        "model": group["model"],
+                        "reported_tokens": group["reported_tokens"],
+                        "reported_calls": group["reported_calls"],
+                        "total_calls": group["total_calls"],
+                        "coverage_complete": group["reported_calls"] == group["total_calls"],
+                        "kinds": sorted(group["kinds"]),
+                        "sources": sorted(group["sources"]),
+                    }
+                    for key, group in sorted(self.reasoning_by_provider_model.items())
+                },
+            }
+        return summary
 
     def get_average_cost_per_match(self, num_matches: int) -> float:
         """Calculate average cost per match."""

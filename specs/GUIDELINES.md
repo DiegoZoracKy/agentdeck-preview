@@ -20,7 +20,8 @@
 
 ### Execution Substrate Focus
 
-AgentDeck is an execution and evidence engine for AI agents. Specs must support:
+AgentDeck is an open execution and Research system for AI agents. Specs must
+support:
 
 - **Rapid Execution**: Can callers use this component in <5 lines of code? Are defaults sensible for 80% of use cases?
 - **Controlled Reproducibility**: Does the component preserve framework determinism and seed propagation?
@@ -83,7 +84,10 @@ AgentDeck is an execution and evidence engine for AI agents. Specs must support:
 
 ## 2c. Lean Specification Writing
 
-**Core principle**: capture every contract in the fewest lines. If a sentence does not clarify a guarantee, remove it.
+**Core principle**: capture the smallest coherent semantic contract that solves
+the caller's problem. Brevity is useful, but line count is not a quality target.
+A longer spec with one authority and clear epistemic boundaries is simpler than
+a shorter spec that hides ambiguity or duplicate meaning.
 
 ### Lean techniques
 
@@ -93,12 +97,22 @@ AgentDeck is an execution and evidence engine for AI agents. Specs must support:
 - **Focused examples**: 3–4 snippets covering distinct workflows (minimal, common, replay/advanced). Delete overlapping examples.
 - **Minimal rationale**: Record only non-obvious decisions (e.g., “Always-present seed”). Skip statements the API already implies (e.g., “Facade pattern”).
 
-### Targets
+### Semantic complexity review
 
-- Orchestrator/facade specs ~250 lines.  
-- Core component specs (Player, Recorder, etc.) ~200 lines.  
-- Utility specs (LLM adapters, helpers) ~150 lines.  
-- Expect a lean pass to trim 10–15% from the first draft without losing guarantees.
+Do not approve or reject a spec based on length. Instead, challenge whether it:
+
+- introduces a second authority for data already owned by another contract;
+- couples identities that must evolve independently;
+- adds a primitive used only by one acceptance case;
+- freezes future policy that the current user journey does not require;
+- promises an assurance the implementation cannot mechanically verify;
+- mixes execution facts, deterministic derivation, and authored interpretation;
+- creates lifecycle state without a distinct user-visible outcome;
+- anticipates a framework instead of completing one narrow end-to-end journey.
+
+A lean pass removes duplicated semantics, speculative abstractions, false
+assurances, and redundant examples. It does not trim necessary invariants to
+meet an arbitrary size target.
 
 ---
 
@@ -223,7 +237,10 @@ Before marking a spec "Final", ensure:
 - [ ] Data flow uses single-line arrow summaries where practical.
 - [ ] Example count is focused (3–4 snippets, no redundant overlap).
 - [ ] Design rationale lists only non-obvious decisions.
-- [ ] Spec length aligns with targets (~250 lines for orchestrators, ~200 for components, ~150 for utilities).
+- [ ] Every primitive and identity has one responsibility and one authority.
+- [ ] No assurance exceeds what can be mechanically verified.
+- [ ] Length is justified by semantic risk and user-visible guarantees, not by a
+      numeric target.
 
 ---
 
