@@ -14,7 +14,7 @@ root README and the component specifications.
 - [Viewer README](../viewer/README.md) - browser replay viewer usage
 - [Security Policy](../SECURITY.md) - vulnerability reporting process
 - [Release Checklist](release-checklist.md) - operational checklist for the next package release
-- [Release Notes](releases/0.4.0.md) - current source-candidate release notes
+- [Release Notes](releases/0.4.0.md) - version 0.4.0 changes, migration and validation
 
 The docs are intentionally layered. Component-level behavior belongs in
 `specs/`; Research remains downstream from the execution kernel while still

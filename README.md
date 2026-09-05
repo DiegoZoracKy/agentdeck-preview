@@ -108,17 +108,16 @@ Findings. See the [reproduction guide](research/2026-04-27-agentic-edge-strategy
 > **AI-first prompt**: Ask Claude, Codex, or your coding agent:
 > “Learn AgentDeck from the README, create a tiny tic-tac-toe game, run a few matches, then inspect and replay the Records.”
 
-> **Release status**: PyPI currently serves the stable `0.2.0` release. `main` is the
-> `0.4.0` source candidate and includes the current execution and Research contracts.
-> Install from source to use the current API; see the
-> [0.4.0 release notes](docs/releases/0.4.0.md) for the migration summary.
+> **Version**: This documentation describes `agentdeck-ai==0.4.0`, including the
+> current execution and Research contracts. Upgrading from `0.2.0` requires
+> migration; see the [0.4.0 release notes](docs/releases/0.4.0.md).
 
 ### Installation
 
 **PyPI stable install:**
 ```bash
-# Latest release on PyPI
-pip install agentdeck-ai
+# Install the version documented here
+pip install agentdeck-ai==0.4.0
 
 # With provider SDKs
 pip install agentdeck-ai[openai]      # OpenAI SDK
